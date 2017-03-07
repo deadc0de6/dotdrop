@@ -1,0 +1,3 @@
+Jinja2; python_version == '3.6'
+docopt; python_version == '3.6'
+PyYAML; python_version == '3.6'
