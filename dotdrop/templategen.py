@@ -43,7 +43,13 @@ class Templategen:
 
     def _handle_text_file(self, src, profile):
         l = len(self.base) + 1
-        template = self.env.get_template(src[l:])
+        try:
+            template = self.env.get_template(src[l:])
+            content = template.render(profile=profile)
+        except UnicodeDecodeError:
+            data = self._read_bad_encoded_text(src)
+            template = self.env.from_string(data)
+
         content = template.render(profile=profile)
         content = content.encode('UTF-8')
         return content
@@ -54,3 +60,8 @@ class Templategen:
             src = os.path.join(self.base, src)
         with open(src, 'rb') as f:
             return f.read()
+
+    def _read_bad_encoded_text(self, path):
+        with open(path, 'rb') as f:
+            data = f.read()
+        return data.decode('utf-8', 'replace')

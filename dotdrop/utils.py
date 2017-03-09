@@ -18,7 +18,7 @@ def run(cmd, log=False, raw=True):
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if raw:
         return p.stdout.readlines()
-    return ''.join([x.decode("utf-8") for x in p.stdout.readlines()])
+    return ''.join([x.decode('utf-8', 'replace') for x in p.stdout.readlines()])
 
 
 def diff(src, dst, log=False, raw=True):
