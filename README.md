@@ -10,7 +10,7 @@ different versions on different setups.
 
 For example you can have a set of dotfiles for your home laptop and
 a different set for your office desktop. Those sets may overlap and different
-versions of the same dotfile can be deploy on different predefined *profiles*.
+versions of the same dotfile can be deployed on different predefined *profiles*.
 Another use case is when you have a main set of dotfiles for your
 everyday's host and a sub-set you only need to deploy to temporary
 hosts (cloud, etc) that may be using
