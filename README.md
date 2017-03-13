@@ -58,6 +58,7 @@ have inspired me for dotdrop:
 * [https://github.com/EvanPurkhiser/dots](https://github.com/EvanPurkhiser/dots)
 * [https://github.com/jaagr/dots](https://github.com/jaagr/dots)
 * [https://github.com/anishathalye/dotbot](https://github.com/anishathalye/dotbot)
+* [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
 
 # Installation
 
