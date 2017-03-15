@@ -25,17 +25,15 @@ class Installer:
         self.log = Logger()
 
     def install(self, templater, profile, src, dst):
+        '''Install the dotfile for profile "profile"'''
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
         if os.path.isdir(src):
             return self._handle_dir(templater, profile, src, dst)
         return self._handle_file(templater, profile, src, dst)
 
-    def _preparesub(self):
-        if not os.path.exists(self.sub):
-            os.makedirs(self.sub)
-
     def _handle_file(self, templater, profile, src, dst):
+        '''Install a file using templater for "profile"'''
         content = templater.generate(src, profile)
         if content is None:
             self.log.err('generate from template \"%s\"' % (src))
@@ -55,6 +53,7 @@ class Installer:
         return []
 
     def _handle_dir(self, templater, profile, src, dst):
+        '''Install a folder using templater for "profile"'''
         ret = []
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
@@ -69,13 +68,14 @@ class Installer:
         return ret
 
     def _fake_diff(self, dst, content):
+        '''Fake diff by comparing file content with "content"'''
         cur = ''
         with open(dst, 'br') as f:
             cur = f.read()
         return cur == content
 
     def _write(self, dst, content, rights):
-        """ write file """
+        '''Write file'''
         if self.dry:
             self.log.dry('would install %s' % (dst))
             return 0
@@ -97,6 +97,7 @@ class Installer:
         return 0
 
     def _create_dirs(self, folder):
+        '''mkdir -p "folder"'''
         if not self.create and not os.path.exists(folder):
             return False
         if os.path.exists(folder):
@@ -105,6 +106,7 @@ class Installer:
         return os.path.exists(folder)
 
     def _backup(self, path):
+        '''Backup the file'''
         if self.dry:
             return
         dst = path.rstrip(os.sep) + self.BACKUP_SUFFIX
@@ -112,6 +114,7 @@ class Installer:
         os.rename(path, dst)
 
     def _install_to_temp(self, templater, profile, src, dst, tmpfolder):
+        '''Install a dotfile to a tempfolder for comparing'''
         sub = dst
         if dst[0] == os.sep:
             sub = dst[1:]
@@ -119,6 +122,8 @@ class Installer:
         return self.install(templater, profile, src, tmpdst), tmpdst
 
     def compare(self, templater, tmpfolder, profile, src, dst):
+        '''Compare temporary generated dotfile with local one'''
+        ret = False
         drysaved = self.dry
         self.dry = False
         diffsaved = self.diff
@@ -128,13 +133,17 @@ class Installer:
         if not os.path.exists(dst):
             self.log.warn('\"%s\" does not exist on local' % (dst))
         else:
-            ret, tmpdst = self._install_to_temp(
-                templater, profile, src, dst, tmpfolder)
+            ret, tmpdst = self._install_to_temp(templater,
+                                                profile,
+                                                src, dst,
+                                                tmpfolder)
             if ret:
                 diff = utils.diff(tmpdst, dst, log=False, raw=False)
                 if diff == '':
                     self.log.raw('same file')
+                    ret = True
                 else:
                     self.log.emph(diff)
         self.dry = drysaved
         self.diff = diffsaved
+        return ret
