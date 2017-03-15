@@ -16,7 +16,7 @@ from tests.helpers import *
 
 class TestImport(unittest.TestCase):
 
-    CONFIG_BACKUP = True
+    CONFIG_BACKUP = False
     CONFIG_CREATE = True
     CONFIG_DOTPATH = 'dotfiles'
     CONFIG_NAME = 'config.yaml'

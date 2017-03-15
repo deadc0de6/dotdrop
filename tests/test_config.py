@@ -16,7 +16,7 @@ from tests.helpers import *
 
 class TestConfig(unittest.TestCase):
 
-    CONFIG_BACKUP = True
+    CONFIG_BACKUP = False
     CONFIG_CREATE = True
     CONFIG_DOTPATH = 'dotfiles'
     TMPSUFFIX = '.dotdrop'
