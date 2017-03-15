@@ -52,7 +52,6 @@ class TestCompare(unittest.TestCase):
         # setup some folders
         fold_config = os.path.join(os.path.expanduser('~'), '.config')
         create_dir(fold_config)
-        self.addCleanup(clean, fold_config)
         fold_subcfg = os.path.join(os.path.expanduser('~'), '.config',
                                    get_string(5))
         create_dir(fold_subcfg)
