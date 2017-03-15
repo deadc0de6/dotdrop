@@ -49,7 +49,8 @@ def create_random_file(folder, content=None):
 
 def create_dir(path):
     '''Create a folder'''
-    os.mkdir(path)
+    if not os.path.exists(path):
+        os.mkdir(path)
     return path
 
 
