@@ -7,5 +7,9 @@ python:
   - "nightly"
 install:
   - "pip install pep8"
+  - "pip install coveralls"
   - "pip install -r requirements.txt"
-script: ./tests.sh
+script:
+  ./tests.sh
+after_success:
+  coveralls

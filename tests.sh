@@ -7,4 +7,4 @@ set -ev
 
 pep8 dotdrop/
 pep8 tests/
-PYTHONPATH=dotdrop nosetests -w tests
+PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
