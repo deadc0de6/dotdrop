@@ -10,6 +10,8 @@ import string
 import random
 import tempfile
 
+from dotdrop.config import Cfg
+
 TMPSUFFIX = '.dotdrop'
 
 
@@ -49,6 +51,17 @@ def create_dir(path):
     '''Create a folder'''
     os.mkdir(path)
     return path
+
+
+def load_config(confpath, dotpath, profile):
+    '''Load the config file from path'''
+    conf = Cfg(confpath, dotpath)
+    opts = conf.get_configs()
+    opts['dry'] = False
+    opts['profile'] = profile
+    opts['safe'] = True
+    opts['installdiff'] = True
+    return conf, opts
 
 
 def create_fake_config(folder, configname='config.yaml',

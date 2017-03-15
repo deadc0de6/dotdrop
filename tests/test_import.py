@@ -9,7 +9,6 @@ import unittest
 import os
 import yaml
 
-from dotdrop.config import Cfg
 from dotdrop.dotdrop import importer
 
 from tests.helpers import *
@@ -21,17 +20,6 @@ class TestImport(unittest.TestCase):
     CONFIG_CREATE = True
     CONFIG_DOTPATH = 'dotfiles'
     CONFIG_NAME = 'config.yaml'
-
-    def load_config(self, confpath, profile):
-        '''Load the config file from path'''
-        conf = Cfg(confpath, self.CONFIG_DOTPATH)
-        self.assertTrue(conf is not None)
-        opts = conf.get_configs()
-        opts['dry'] = False
-        opts['profile'] = profile
-        opts['safe'] = True
-        opts['installdiff'] = True
-        return conf, opts
 
     def load_yaml(self, path):
         '''Load yaml to dict'''
@@ -82,7 +70,7 @@ class TestImport(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = self.load_config(confpath, profile)
+        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
 
         # create some random dotfiles
         dotfile1, content1 = create_random_file(src)
@@ -100,28 +88,43 @@ class TestImport(unittest.TestCase):
         dotfile4, content3 = create_random_file(homeconf)
         self.addCleanup(clean, dotfile4)
 
+        # fake a folder containing dotfiles
+        dotfile5 = get_tempfolder()
+        self.assertTrue(os.path.exists(dotfile5))
+        self.addCleanup(clean, dotfile5)
+        sub1, _ = create_random_file(dotfile5)
+        sub2, _ = create_random_file(dotfile5)
+
         # import the dotfiles
-        importer(opts, conf, [dotfile1, dotfile2, dotfile3])
+        importer(opts, conf, [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5])
 
         # reload the config
-        conf, opts = self.load_config(confpath, profile)
+        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
 
         # test dotfiles in config class
         self.assertTrue(profile in conf.get_profiles())
         self.assert_file(dotfile1, conf, profile)
         self.assert_file(dotfile2, conf, profile)
         self.assert_file(dotfile3, conf, profile)
+        self.assert_file(dotfile4, conf, profile)
+        self.assert_file(dotfile5, conf, profile)
 
         # test dotfiles in yaml file
         y = self.load_yaml(confpath)
         self.assert_in_yaml(dotfile1, y)
         self.assert_in_yaml(dotfile2, y)
         self.assert_in_yaml(dotfile3, y)
+        self.assert_in_yaml(dotfile4, y)
+        self.assert_in_yaml(dotfile5, y)
 
         # test dotfiles on filesystem
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile1)))
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile2)))
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile3)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile4)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5, sub1)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5, sub2)))
 
 
 def main():
