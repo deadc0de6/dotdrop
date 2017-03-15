@@ -123,7 +123,7 @@ class Installer:
 
     def compare(self, templater, tmpfolder, profile, src, dst):
         '''Compare temporary generated dotfile with local one'''
-        ret = False
+        retval = False
         drysaved = self.dry
         self.dry = False
         diffsaved = self.diff
@@ -141,9 +141,9 @@ class Installer:
                 diff = utils.diff(tmpdst, dst, log=False, raw=False)
                 if diff == '':
                     self.log.raw('same file')
-                    ret = True
+                    retval = True
                 else:
                     self.log.emph(diff)
         self.dry = drysaved
         self.diff = diffsaved
-        return ret
+        return retval
