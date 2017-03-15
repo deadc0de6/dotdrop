@@ -102,7 +102,10 @@ def importer(opts, conf, paths):
             key = 'd_%s' % (key)
         else:
             key = 'f_%s' % (key)
-        src = dst.lstrip(home).lstrip('.')
+        src = dst
+        if dst.startswith(home):
+            src = dst[len(home):]
+        src = src.lstrip('.' + os.sep)
         dotfile = Dotfile(key, dst, src)
         srcf = os.path.join(CUR, opts['dotpath'], src)
         if os.path.exists(srcf):
