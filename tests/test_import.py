@@ -96,7 +96,8 @@ class TestImport(unittest.TestCase):
         sub2, _ = create_random_file(dotfile5)
 
         # import the dotfiles
-        importer(opts, conf, [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5])
+        dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
+        importer(opts, conf, dfiles)
 
         # reload the config
         conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
@@ -123,8 +124,10 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile3)))
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile4)))
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5, sub1)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5, sub2)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath,
+                                                    dotfile5, sub1)))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath,
+                                                    dotfile5, sub2)))
 
 
 def main():
