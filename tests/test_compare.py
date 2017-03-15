@@ -40,8 +40,11 @@ class TestCompare(unittest.TestCase):
             results[path] = diffval
         return results
 
-    def edit_content(self, path, newcontent):
-        with open(path, 'w') as f:
+    def edit_content(self, path, newcontent, binary=False):
+        mode = 'w'
+        if binary:
+            mode = 'wb'
+        with open(path, mode) as f:
             f.write(newcontent)
 
     def test_compare(self):
@@ -74,6 +77,8 @@ class TestCompare(unittest.TestCase):
         self.addCleanup(clean, d2)
         d3, c3 = create_random_file(fold_tmp)
         self.addCleanup(clean, d3)
+        d4, c4 = create_random_file(fold_tmp, binary=True)
+        self.addCleanup(clean, d4)
 
         # create the config file
         profile = get_string(5)
@@ -84,27 +89,33 @@ class TestCompare(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
-        dfiles = [d1, d2, d3]
+        dfiles = [d1, d2, d3, d4]
 
         # import the files
         importer(opts, conf, dfiles)
         conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
 
         # compare the files
-        expected = {d1: True, d2: True, d3: True}
+        expected = {d1: True, d2: True, d3: True, d4: True}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify file
         self.edit_content(d1, get_string(20))
-        expected = {d1: False, d2: True, d3: True}
+        expected = {d1: False, d2: True, d3: True, d4: True}
+        results = self.compare(opts, conf, tmp, len(dfiles))
+        self.assertTrue(results == expected)
+
+        # modify binary file
+        self.edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
+        expected = {d1: False, d2: True, d3: True, d4: False}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify all files
         self.edit_content(d2, get_string(20))
         self.edit_content(d3, get_string(21))
-        expected = {d1: False, d2: False, d3: False}
+        expected = {d1: False, d2: False, d3: False, d4: False}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
