@@ -35,7 +35,6 @@ class TestCompare(unittest.TestCase):
         for dotfile in dotfiles:
             diffval = inst.compare(t, tmp, opts['profile'],
                                    dotfile.src, dotfile.dst)
-            print("diffval: ", diffval)
             path = os.path.expanduser(dotfile.dst)
             results[path] = diffval
         return results
