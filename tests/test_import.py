@@ -90,6 +90,7 @@ class TestImport(unittest.TestCase):
         dotfile2, content2 = create_random_file(os.path.expanduser('~'))
         self.addCleanup(clean, dotfile2)
         homeconf = os.path.join(os.path.expanduser('~'), '.config')
+        os.mkdir(homeconf)
         dotconfig = os.path.join(homeconf, get_string(5))
         create_dir(dotconfig)
         self.addCleanup(clean, dotconfig)
