@@ -8,9 +8,12 @@ represents a dotfile in dotdrop
 class Dotfile:
 
     def __init__(self, key, dst, src):
-        self.key = key # key of dotfile in the config
-        self.dst = dst # where to install this dotfile
-        self.src = src # stored dotfile in dotdrop
+        # key of dotfile in the config
+        self.key = key
+        # where to install this dotfile
+        self.dst = dst
+        # stored dotfile in dotdrop
+        self.src = src
 
     def __str__(self):
         string = 'key:%s, src: %s, dst: %s' % (self.key,
