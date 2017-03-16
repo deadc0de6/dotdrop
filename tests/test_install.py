@@ -10,6 +10,7 @@ import filecmp
 from tests.helpers import *
 from dotdrop.dotfile import Dotfile
 from dotdrop.dotdrop import install
+from dotdrop.installer import Installer
 
 
 class TestInstall(unittest.TestCase):
@@ -33,7 +34,7 @@ exec bspwm
         '''Create a fake config file'''
         with open(path, 'w') as f:
             f.write('config:\n')
-            f.write('  backup: false\n')
+            f.write('  backup: true\n')
             f.write('  create: true\n')
             f.write('  dotpath: %s\n' % (dotpath))
             f.write('dotfiles:\n')
@@ -70,21 +71,33 @@ exec bspwm
         dst3 = os.path.join(dst, get_string(6))
         d3 = Dotfile(get_string(5), dst3, os.path.basename(f3))
 
+        # to test backup
+        f4, c4 = create_random_file(tmp)
+        dst4 = os.path.join(dst, get_string(6))
+        d4 = Dotfile(get_string(6), dst4, os.path.basename(f4))
+        with open(dst4, 'w') as f:
+            f.write(get_string(16))
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3], profile, tmp)
+        self.fake_config(confpath, [d1, d2, d3, d4], profile, tmp)
         conf = Cfg(confpath, tmp)
         self.assertTrue(conf is not None)
 
         # install them
         conf, opts = load_config(confpath, tmp, profile)
+        opts['safe'] = False
         install(opts, conf)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(dst1))
         self.assertTrue(os.path.exists(dst2))
         self.assertTrue(os.path.exists(dst3))
+
+        # make sure backup is there
+        b = dst4 + Installer.BACKUP_SUFFIX
+        self.assertTrue(os.path.exists(b))
 
         self.assertTrue(filecmp.cmp(f1, dst1, shallow=True))
         f2content = open(dst2, 'r').read()
