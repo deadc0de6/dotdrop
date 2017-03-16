@@ -27,6 +27,8 @@ Features:
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles in dotdrop
 
+Check the [blog post](https://deadc0de.re/articles/dotfiles.html) for more.
+
 Quick start:
 ```
 mkdir dotfiles && cd dotfiles
