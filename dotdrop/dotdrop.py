@@ -92,6 +92,9 @@ def importer(opts, conf, paths):
     home = os.path.expanduser('~')
     cnt = 0
     for path in paths:
+        if not os.path.exists(path):
+            LOG.err('\"%s\" does not exist, ignored !' % (path))
+            continue
         dst = path.rstrip(os.sep)
         key = dst.split(os.sep)[-1]
         if key == 'config':
@@ -109,7 +112,7 @@ def importer(opts, conf, paths):
         dotfile = Dotfile(key, dst, src)
         srcf = os.path.join(CUR, opts['dotpath'], src)
         if os.path.exists(srcf):
-            LOG.err('\"%s\" already exists !' % (srcf))
+            LOG.err('\"%s\" already exists, ignored !' % (srcf))
             continue
         conf.new(dotfile, opts['profile'])
         cmd = ['mkdir', '-p', '%s' % (os.path.dirname(srcf))]
