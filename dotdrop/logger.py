@@ -38,17 +38,17 @@ class Logger:
     def err(self, string, end='\n'):
         cs = self._color(self.RED)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[ERR]%s %s%s' % (cs, string, end, ce))
+        sys.stderr.write('%s[ERR] %s %s%s' % (cs, string, end, ce))
 
     def warn(self, string, end='\n'):
         cs = self._color(self.YELLOW)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[WARN]%s %s%s' % (cs, string, end, ce))
+        sys.stderr.write('%s[WARN] %s %s%s' % (cs, string, end, ce))
 
     def dry(self, string, end='\n'):
         cs = self._color(self.GREEN)
         ce = self._color(self.RESET)
-        sys.stdout.write('%s[DRY]%s %s%s' % (cs, string, end, ce))
+        sys.stdout.write('%s[DRY] %s %s%s' % (cs, string, end, ce))
 
     def raw(self, string, end='\n'):
         sys.stdout.write('%s%s' % (string, end))
