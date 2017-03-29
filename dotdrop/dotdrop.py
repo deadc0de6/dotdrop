@@ -15,7 +15,7 @@ from installer import Installer
 from dotfile import Dotfile
 from config import Cfg
 
-VERSION = '0.1'
+VERSION = '0.2'
 DEF_DOTFILES = 'dotfiles'
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
