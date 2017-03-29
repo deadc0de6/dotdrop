@@ -8,7 +8,7 @@ conf="config.yaml"
 # copy dotdrop entry point
 cat dotdrop/dotdrop.sh | sed 's#${cur}/dotdrop/dotdrop.py#${cur}/dotdrop/dotdrop/dotdrop.py#g' > dotdrop.sh
 chmod +x dotdrop.sh
-mkdir $fold
+mkdir -p $fold
 
 if [ ! -e ${conf} ]; then
   # init config file
