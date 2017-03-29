@@ -6,9 +6,13 @@ args="$@"
 cur=`dirname $(readlink -f $0)`
 opwd=`pwd`
 bin="${cur}/dotdrop/dotdrop.py"
-
-# run dotdrop
 cfg="${cur}/config.yaml"
+
+# pivot
 cd ${cur}
+# init the submodule
+git submodule update --init --recursive
+# launch dotdrop
 python3 ${bin} --cfg=${cfg} $args
+# pivot back
 cd ${opwd}
