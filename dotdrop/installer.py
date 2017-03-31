@@ -79,10 +79,10 @@ class Installer:
         if self.dry:
             self.log.dry('would install %s' % (dst))
             return 0
-        if os.path.exists(dst) and self.safe:
+        if os.path.exists(dst):
             if self.diff and self._fake_diff(dst, content):
                 return 1
-            if not self.log.ask('Overwrite \"%s\"' % (dst)):
+            if self.safe and not self.log.ask('Overwrite \"%s\"' % (dst)):
                 self.log.warn('ignoring \"%s\", already present' % (dst))
                 return 1
         if self.backup and os.path.exists(dst):
