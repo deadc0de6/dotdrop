@@ -76,9 +76,9 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 ./dotdrop/bootstrap.sh
 ```
 
-Then install the requirements (on Ubuntu/Debian, use *pip3* instead of *pip*):
+Then install the requirements:
 ```
-sudo pip install -r dotdrop/requirements.txt
+sudo pip3 install -r dotdrop/requirements.txt
 ```
 
 Finally import your dotfiles as described [below](#usage).
