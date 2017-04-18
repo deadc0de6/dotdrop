@@ -70,7 +70,7 @@ class TestImport(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
+        conf, opts = load_config(confpath, profile)
 
         # create some random dotfiles
         dotfile1, content1 = create_random_file(src)
@@ -100,7 +100,7 @@ class TestImport(unittest.TestCase):
         importer(opts, conf, dfiles)
 
         # reload the config
-        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
+        conf, opts = load_config(confpath, profile)
 
         # test dotfiles in config class
         self.assertTrue(profile in conf.get_profiles())
@@ -132,6 +132,7 @@ class TestImport(unittest.TestCase):
 
 def main():
     unittest.main()
+
 
 if __name__ == '__main__':
     main()

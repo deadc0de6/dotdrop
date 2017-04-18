@@ -16,7 +16,6 @@ from dotfile import Dotfile
 from config import Cfg
 
 VERSION = '0.2'
-DEF_DOTFILES = 'dotfiles'
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 HOSTNAME = os.uname()[1]
@@ -146,10 +145,11 @@ def header():
     LOG.log(BANNER)
     LOG.log("")
 
+
 if __name__ == '__main__':
     ret = True
     args = docopt(USAGE, version=VERSION)
-    conf = Cfg(args['--cfg'], DEF_DOTFILES)
+    conf = Cfg(args['--cfg'])
 
     opts = conf.get_configs()
     opts['dry'] = args['--dry']

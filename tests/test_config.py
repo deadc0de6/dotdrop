@@ -33,7 +33,7 @@ class TestConfig(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        conf = Cfg(confpath, self.CONFIG_DOTPATH)
+        conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
         opts = conf.get_configs()
@@ -48,6 +48,7 @@ class TestConfig(unittest.TestCase):
 
 def main():
     unittest.main()
+
 
 if __name__ == '__main__':
     main()

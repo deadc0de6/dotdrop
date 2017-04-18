@@ -60,9 +60,9 @@ def create_dir(path):
     return path
 
 
-def load_config(confpath, dotpath, profile):
+def load_config(confpath, profile):
     '''Load the config file from path'''
-    conf = Cfg(confpath, dotpath)
+    conf = Cfg(confpath)
     opts = conf.get_configs()
     opts['dry'] = False
     opts['profile'] = profile

@@ -95,12 +95,12 @@ class TestCompare(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
+        conf, opts = load_config(confpath, profile)
         dfiles = [d1, d2, d3, d4, d5]
 
         # import the files
         importer(opts, conf, dfiles)
-        conf, opts = load_config(confpath, self.CONFIG_DOTPATH, profile)
+        conf, opts = load_config(confpath, profile)
 
         # compare the files
         expected = {d1: True, d2: True, d3: True, d4: True, d5: True}
@@ -136,6 +136,7 @@ class TestCompare(unittest.TestCase):
 
 def main():
     unittest.main()
+
 
 if __name__ == '__main__':
     main()

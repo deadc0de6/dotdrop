@@ -15,18 +15,16 @@ class Cfg:
     key_config = 'config'
     key_profiles = 'profiles'
     key_dotfiles = 'dotfiles'
+    key_dotpath = 'dotpath'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
 
-    def __init__(self, cfgpath, dotpath):
+    def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist')
         self.cfgpath = cfgpath
         self.log = Logger()
-        relconf = dotpath
-        if not relconf.startswith(os.sep):
-            relconf = os.path.join(os.path.dirname(cfgpath), dotpath)
-        self.configs = {'dotpath': relconf}
+        self.configs = {}
         self.dotfiles = {}
         self.profiles = {}
         self.prodots = {}
@@ -73,12 +71,18 @@ class Cfg:
                 self.prodots[k] = self.dotfiles.values()
             else:
                 self.prodots[k].extend([self.dotfiles[dot] for dot in v])
-        # make sure we have a correct dotpath
-        if not self.configs['dotpath'].startswith(os.sep):
-            relconf = os.path.join(os.path.dirname(
-                self.cfgpath), self.configs['dotpath'])
-            self.configs['dotpath'] = relconf
+        # make sure we have an absolute dotpath
+        self.curdotpath = self.configs[self.key_dotpath]
+        self.configs[self.key_dotpath] = self._get_abs_dotpath(self.curdotpath)
         return True
+
+    def _get_abs_dotpath(self, dotpath):
+        """ transform dotpath to an absolute path """
+        if not dotpath.startswith(os.sep):
+            absconf = os.path.join(os.path.dirname(
+                self.cfgpath), dotpath)
+            return absconf
+        return dotpath
 
     def new(self, dotfile, profile):
         """ import new dotfile """
@@ -124,11 +128,22 @@ class Cfg:
 
     def dump(self):
         """ dump config file """
-        return yaml.dump(self.content, default_flow_style=False, indent=2)
+        # temporary reset dotpath
+        tmp = self.configs[self.key_dotpath]
+        self.configs[self.key_dotpath] = self.curdotpath
+        ret = yaml.dump(self.content, default_flow_style=False, indent=2)
+        # restore dotpath
+        self.configs[self.key_dotpath] = tmp
+        return ret
 
     def save(self):
         """ save config file to path """
+        # temporary reset dotpath
+        tmp = self.configs[self.key_dotpath]
+        self.configs[self.key_dotpath] = self.curdotpath
         with open(self.cfgpath, 'w') as f:
             ret = yaml.dump(self.content, f,
                             default_flow_style=False, indent=2)
+        # restore dotpath
+        self.configs[self.key_dotpath] = tmp
         return ret

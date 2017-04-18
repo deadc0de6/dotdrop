@@ -82,11 +82,11 @@ exec bspwm
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
         self.fake_config(confpath, [d1, d2, d3, d4], profile, tmp)
-        conf = Cfg(confpath, tmp)
+        conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
         # install them
-        conf, opts = load_config(confpath, tmp, profile)
+        conf, opts = load_config(confpath, profile)
         opts['safe'] = False
         install(opts, conf)
 
@@ -107,6 +107,7 @@ exec bspwm
 
 def main():
     unittest.main()
+
 
 if __name__ == '__main__':
     main()
