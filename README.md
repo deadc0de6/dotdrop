@@ -177,11 +177,12 @@ the following entries:
   * `dotpath`: path to the folder containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
 * **dotfiles** entry: a list of dotfiles in the form
-
+  * When `link` is true, dotdrop will create a link instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
 ```
   <dotfile-key-name>:
     dst: <where-this-file-is-deployed>
     src: <filename-within-the-dotpath>
+    link: <true|false>  # Optional
 ```
 
 * **profiles** entry: a list of profiles with a sublist

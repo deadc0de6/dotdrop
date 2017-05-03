@@ -66,7 +66,10 @@ def install(opts, conf):
                      diff=opts['installdiff'])
     installed = []
     for dotfile in dotfiles:
-        r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
+        if hasattr(dotfile, "link") and dotfile.link:
+            r = inst.link(dotfile.src, dotfile.dst)
+        else:
+            r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
         installed.extend(r)
     LOG.log('\n%u dotfile(s) installed.' % (len(installed)))
     return True

@@ -62,8 +62,8 @@ class Cfg:
             for k, v in self.content[self.key_dotfiles].items():
                 src = v[self.key_dotfiles_src]
                 dst = v[self.key_dotfiles_dst]
-                link = v[self.key_dotfiles_link] if self.key_dotfiles_link in v
-                       else False
+                link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
+                    in v else False
                 self.dotfiles[k] = Dotfile(k, dst, src, link)
         # contains a list of dotfiles defined for each profile
         for k, v in self.profiles.items():
