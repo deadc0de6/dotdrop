@@ -18,6 +18,7 @@ class Cfg:
     key_dotpath = 'dotpath'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
+    key_dotfiles_link = 'link'
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -61,7 +62,9 @@ class Cfg:
             for k, v in self.content[self.key_dotfiles].items():
                 src = v[self.key_dotfiles_src]
                 dst = v[self.key_dotfiles_dst]
-                self.dotfiles[k] = Dotfile(k, dst, src)
+                link = v[self.key_dotfiles_link] if self.key_dotfiles_link in v
+                       else False
+                self.dotfiles[k] = Dotfile(k, dst, src, link)
         # contains a list of dotfiles defined for each profile
         for k, v in self.profiles.items():
             self.prodots[k] = []
@@ -115,8 +118,7 @@ class Cfg:
         """ returns a list of dotfiles for a specific profile """
         if profile not in self.prodots:
             return []
-        tmp = sorted(self.prodots[profile], key=lambda x: x.key, reverse=True)
-        return tmp
+        return sorted(self.prodots[profile], key=lambda x: x.key, reverse=True)
 
     def get_profiles(self):
         """ returns all defined profiles """
