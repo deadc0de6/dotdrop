@@ -34,7 +34,8 @@ Usage:
     [(-f | --force)] [--nodiff] [--dry]
   dotdrop.py compare [--profile=<profile>] [--cfg=<path>]
   dotdrop.py list [--cfg=<path>]
-  dotdrop.py import [(-l | --link)] [--cfg=<path>] [--profile=<profile>] [--dry] <paths>...
+  dotdrop.py import [--profile=<profile>] [--cfg=<path>]
+    [(-l | --link)] [--dry] <paths>...
   dotdrop.py (-h | --help)
   dotdrop.py (-v | --version)
 
@@ -43,7 +44,7 @@ Options:
   --cfg=<path>            Path to the config [default: %s/config.yaml].
   --dry                   Dry run.
   --nodiff                Do not diff when installing [default: False].
-  -l --link               Import the file and add a link to it [default: False].
+  -l --link               Import and link [default: False].
   -f --force              Do not warn if exists [default: False].
   -v --version            Show version.
   -h --help               Show this screen.

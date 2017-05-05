@@ -41,11 +41,11 @@ class Installer:
                 self.log.sub('ignoring "%s", link exists' % dst)
                 return []
             if self.dry:
-                self.log.dry('would remove %s and link it to %s'\
+                self.log.dry('would remove %s and link it to %s'
                              % (dst, src))
                 return []
             if self.safe and \
-                not self.log.ask('Remove "%s" for link creation?' % dst):
+                    not self.log.ask('Remove "%s" for link creation?' % dst):
                 self.log.warn('ignoring "%s", link was not created' % dst)
                 return []
             try:
