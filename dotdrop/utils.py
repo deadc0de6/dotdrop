@@ -37,10 +37,10 @@ def get_tmpdir():
 def remove(path):
     ''' Remove a file / directory / symlink '''
     if not os.path.exists(path):
-        raise Exception("ERROR in remove: File not found: {}".format(path))
+        raise OSError("File not found: %s" % path)
     if os.path.islink(path) or os.path.isfile(path):
         os.unlink(path)
     elif os.path.isdir(path):
         rmtree(path)
     else:
-        raise Exception("Unsupported file type for deletion: {}".format(path))
+        raise OSError("Unsupported file type for deletion: %s" % path)

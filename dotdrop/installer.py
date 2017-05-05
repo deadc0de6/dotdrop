@@ -38,20 +38,23 @@ class Installer:
         dst = os.path.join(self.base, os.path.expanduser(dst))
         if os.path.exists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                self.log.sub('ignoring "{}", link exists'.format(dst))
+                self.log.sub('ignoring "%s", link exists' % dst)
                 return []
             if self.dry:
-                self.log.dry('would remove {} and link it to {}'
-                             .format(dst, src))
+                self.log.dry('would remove %s and link it to %s'\
+                             % (dst, src))
                 return []
-            if self.safe and not self.log.ask('Remove "{}" for link creation?'
-                                              .format(dst)):
-                self.log.warn('ignoring "{}", link was not created'
-                              .format(dst))
+            if self.safe and \
+                not self.log.ask('Remove "%s" for link creation?' % dst):
+                self.log.warn('ignoring "%s", link was not created' % dst)
                 return []
-            utils.remove(dst)
+            try:
+                utils.remove(dst)
+            except OSError:
+                self.log.err('something went wrong with %s' % src)
+                return []
         if self.dry:
-            self.log.dry('would link {} to {}'.format(dst, src))
+            self.log.dry('would link %s to %s' % (dst, src))
             return []
         os.symlink(src, dst)
         self.log.sub('linked %s to %s' % (dst, src))
