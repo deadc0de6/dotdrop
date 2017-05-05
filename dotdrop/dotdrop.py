@@ -34,7 +34,7 @@ Usage:
     [(-f | --force)] [--nodiff] [--dry]
   dotdrop.py compare [--profile=<profile>] [--cfg=<path>]
   dotdrop.py list [--cfg=<path>]
-  dotdrop.py import [--cfg=<path>] [--profile=<profile>] [--dry] <paths>...
+  dotdrop.py import [(-l | --link)] [--cfg=<path>] [--profile=<profile>] [--dry] <paths>...
   dotdrop.py (-h | --help)
   dotdrop.py (-v | --version)
 
@@ -43,6 +43,7 @@ Options:
   --cfg=<path>            Path to the config [default: %s/config.yaml].
   --dry                   Dry run.
   --nodiff                Do not diff when installing [default: False].
+  -l --link               Import the file and add a link to it [default: False].
   -f --force              Do not warn if exists [default: False].
   -v --version            Show version.
   -h --help               Show this screen.
@@ -101,8 +102,7 @@ def importer(opts, conf, paths):
         key = dst.split(os.sep)[-1]
         if key == 'config':
             key = '_'.join(dst.split(os.sep)[-2:])
-        key = key.lstrip('.')
-        key = key.lower()
+        key = key.lstrip('.').lower()
         if os.path.isdir(dst):
             key = 'd_%s' % (key)
         else:
@@ -116,17 +116,22 @@ def importer(opts, conf, paths):
         if os.path.exists(srcf):
             LOG.err('\"%s\" already exists, ignored !' % (srcf))
             continue
-        conf.new(dotfile, opts['profile'])
+        conf.new(dotfile, opts['profile'], opts['link'])
         cmd = ['mkdir', '-p', '%s' % (os.path.dirname(srcf))]
         if opts['dry']:
             LOG.dry('would run: %s' % (' '.join(cmd)))
         else:
             utils.run(cmd, raw=False, log=False)
-        cmd = ['cp', '-r', '%s' % (dst), '%s' % (srcf)]
+        if opts['link']:
+            cmd = ['mv', '%s' % (dst), '%s' % (srcf)]
+        else:
+            cmd = ['cp', '-r', '%s' % (dst), '%s' % (srcf)]
         if opts['dry']:
             LOG.dry('would run: %s' % (' '.join(cmd)))
         else:
             utils.run(cmd, raw=False, log=False)
+            if opts['link']:
+                os.symlink(srcf, dst)
         LOG.sub('\"%s\" imported' % (path))
         cnt += 1
     if opts['dry']:
@@ -159,6 +164,7 @@ if __name__ == '__main__':
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
+    opts['link'] = args['--link']
 
     header()
 

@@ -87,7 +87,7 @@ class Cfg:
             return absconf
         return dotpath
 
-    def new(self, dotfile, profile):
+    def new(self, dotfile, profile, link=False):
         """ import new dotfile """
         dots = self.content[self.key_dotfiles]
         if dots is None:
@@ -103,6 +103,8 @@ class Cfg:
             self.key_dotfiles_dst: dotfile.dst,
             self.key_dotfiles_src: dotfile.src
         }
+        if link:
+            dots[dotfile.key][self.key_dotfiles_link] = True
         profiles = self.profiles
         if profile in profiles and profiles[profile] != [self.key_all]:
             if self.content[self.key_profiles][profile] is None:
