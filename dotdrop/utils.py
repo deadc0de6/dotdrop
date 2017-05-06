@@ -6,7 +6,10 @@ utilities
 
 import subprocess
 import tempfile
+import os
 from logger import Logger
+from shutil import rmtree
+
 
 LOG = Logger()
 
@@ -29,3 +32,15 @@ def diff(src, dst, log=False, raw=True):
 
 def get_tmpdir():
     return tempfile.mkdtemp(prefix='dotdrop-')
+
+
+def remove(path):
+    ''' Remove a file / directory / symlink '''
+    if not os.path.exists(path):
+        raise OSError("File not found: %s" % path)
+    if os.path.islink(path) or os.path.isfile(path):
+        os.unlink(path)
+    elif os.path.isdir(path):
+        rmtree(path)
+    else:
+        raise OSError("Unsupported file type for deletion: %s" % path)

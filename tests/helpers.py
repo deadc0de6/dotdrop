@@ -68,6 +68,7 @@ def load_config(confpath, profile):
     opts['profile'] = profile
     opts['safe'] = True
     opts['installdiff'] = True
+    opts['link'] = False
     return conf, opts
 
 

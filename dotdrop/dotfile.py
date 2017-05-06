@@ -7,15 +7,16 @@ represents a dotfile in dotdrop
 
 class Dotfile:
 
-    def __init__(self, key, dst, src):
+    def __init__(self, key, dst, src, link=False):
         # key of dotfile in the config
         self.key = key
         # where to install this dotfile
         self.dst = dst
         # stored dotfile in dotdrop
         self.src = src
+        # should be a link
+        self.link = link
 
     def __str__(self):
-        string = 'key:%s, src: %s, dst: %s' % (self.key,
-                                               self.src, self.dst)
-        return string
+        return 'key:%s, src: %s, dst: %s, link: %s' % (self.key, self.src,
+                                                       self.dst, self.link)

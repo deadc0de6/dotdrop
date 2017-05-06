@@ -32,6 +32,35 @@ class Installer:
             return self._handle_dir(templater, profile, src, dst)
         return self._handle_file(templater, profile, src, dst)
 
+    def link(self, src, dst):
+        '''Sets src as the link target of dst'''
+        src = os.path.join(self.base, os.path.expanduser(src))
+        dst = os.path.join(self.base, os.path.expanduser(dst))
+        if os.path.exists(dst):
+            if os.path.realpath(dst) == os.path.realpath(src):
+                self.log.sub('ignoring "%s", link exists' % dst)
+                return []
+            if self.dry:
+                self.log.dry('would remove %s and link it to %s'
+                             % (dst, src))
+                return []
+            if self.safe and \
+                    not self.log.ask('Remove "%s" for link creation?' % dst):
+                self.log.warn('ignoring "%s", link was not created' % dst)
+                return []
+            try:
+                utils.remove(dst)
+            except OSError:
+                self.log.err('something went wrong with %s' % src)
+                return []
+        if self.dry:
+            self.log.dry('would link %s to %s' % (dst, src))
+            return []
+        os.symlink(src, dst)
+        self.log.sub('linked %s to %s' % (dst, src))
+        # Follows original developer's behavior
+        return [(src, dst)]
+
     def _handle_file(self, templater, profile, src, dst):
         '''Install a file using templater for "profile"'''
         content = templater.generate(src, profile)
@@ -47,7 +76,7 @@ class Installer:
             self.log.sub('ignoring \"%s\", same content' % (dst))
             return []
         if ret == 0:
-            if not self.quiet:
+            if not self.quiet and not self.dry:
                 self.log.sub('copied %s to %s' % (src, dst))
             return [(src, dst)]
         return []

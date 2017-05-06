@@ -42,6 +42,7 @@ exec bspwm
                 f.write('  %s:\n' % (d.key))
                 f.write('    dst: %s\n' % (d.dst))
                 f.write('    src: %s\n' % (d.src))
+                f.write('    link: %s\n' % str(d.link).lower())
             f.write('profiles:\n')
             f.write('  %s:\n' % (profile))
             for d in dotfiles:
@@ -78,10 +79,15 @@ exec bspwm
         with open(dst4, 'w') as f:
             f.write(get_string(16))
 
+        # to test link
+        f5, c5 = create_random_file(tmp)
+        dst5 = os.path.join(dst, get_string(6))
+        d5 = Dotfile(get_string(6), dst5, os.path.basename(f5), link=True)
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4], profile, tmp)
+        self.fake_config(confpath, [d1, d2, d3, d4, d5], profile, tmp)
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
@@ -94,6 +100,11 @@ exec bspwm
         self.assertTrue(os.path.exists(dst1))
         self.assertTrue(os.path.exists(dst2))
         self.assertTrue(os.path.exists(dst3))
+        self.assertTrue(os.path.exists(dst5))
+
+        # check if 'dst5' is a link whose target is 'f5'
+        self.assertTrue(os.path.islink(dst5))
+        self.assertTrue(os.path.realpath(dst5) == os.path.realpath(f5))
 
         # make sure backup is there
         b = dst4 + Installer.BACKUP_SUFFIX
