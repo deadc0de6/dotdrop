@@ -51,10 +51,13 @@ exec bspwm
 
     def test_install(self):
         '''Test the install function'''
+
+        # dotpath location
         tmp = get_tempfolder()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
+        # where dotfiles will be installed
         dst = get_tempfolder()
         self.assertTrue(os.path.exists(dst))
         self.addCleanup(clean, dst)
@@ -84,10 +87,36 @@ exec bspwm
         dst5 = os.path.join(dst, get_string(6))
         d5 = Dotfile(get_string(6), dst5, os.path.basename(f5), link=True)
 
+        # create the dotfile folders in dotdrop
+        dir1 = create_dir(os.path.join(tmp, get_string(6)))
+        self.assertTrue(os.path.exists(dir1))
+        self.addCleanup(clean, dir1)
+        dst6 = os.path.join(dst, get_string(6))
+        # fill with files
+        sub1, _ = create_random_file(dir1)
+        self.assertTrue(os.path.exists(sub1))
+        sub2, _ = create_random_file(dir1)
+        self.assertTrue(os.path.exists(sub2))
+        # make up the dotfile
+        d6 = Dotfile(get_string(6), dst6, os.path.basename(dir1))
+
+        # to test symlink folders
+        dir2 = create_dir(os.path.join(tmp, get_string(6)))
+        self.assertTrue(os.path.exists(dir2))
+        self.addCleanup(clean, dir2)
+        dst7 = os.path.join(dst, get_string(6))
+        # fill with files
+        sub3, _ = create_random_file(dir2)
+        self.assertTrue(os.path.exists(sub3))
+        sub4, _ = create_random_file(dir2)
+        self.assertTrue(os.path.exists(sub4))
+        # make up the dotfile
+        d7 = Dotfile(get_string(6), dst7, os.path.basename(dir2), link=True)
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4, d5], profile, tmp)
+        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7], profile, tmp)
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
@@ -101,10 +130,16 @@ exec bspwm
         self.assertTrue(os.path.exists(dst2))
         self.assertTrue(os.path.exists(dst3))
         self.assertTrue(os.path.exists(dst5))
+        self.assertTrue(os.path.exists(dst6))
+        self.assertTrue(os.path.exists(dst7))
 
         # check if 'dst5' is a link whose target is 'f5'
         self.assertTrue(os.path.islink(dst5))
         self.assertTrue(os.path.realpath(dst5) == os.path.realpath(f5))
+
+        # check if 'dst7' is a link whose target is 'dir2'
+        self.assertTrue(os.path.islink(dst7))
+        self.assertTrue(os.path.realpath(dst7) == os.path.realpath(dir2))
 
         # make sure backup is there
         b = dst4 + Installer.BACKUP_SUFFIX
