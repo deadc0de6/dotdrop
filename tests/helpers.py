@@ -75,7 +75,7 @@ def load_config(confpath, profile):
 
 
 def get_path_strip_version(path):
-    '''Strip a file path for conf tests'''
+    '''Return the path of a file as stored in yaml config'''
     strip = path
     home = os.path.expanduser('~')
     if strip.startswith(home):
@@ -85,6 +85,7 @@ def get_path_strip_version(path):
 
 def get_dotfile_from_yaml(dic, path):
     '''Return the dotfile from the yaml dictionary'''
+    # path is not the file in dotpath but on the FS
     dotfiles = dic['dotfiles']
     src = get_path_strip_version(path)
     return [d for d in dotfiles.values() if d['src'] == src][0]
