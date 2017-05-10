@@ -19,7 +19,9 @@ def clean(path):
     '''Delete file or folder.'''
     if not os.path.exists(path):
         return
-    if os.path.isdir(path):
+    if os.path.islink(path):
+        os.remove(path)
+    elif os.path.isdir(path):
         shutil.rmtree(path)
     else:
         os.remove(path)
@@ -70,6 +72,22 @@ def load_config(confpath, profile):
     opts['installdiff'] = True
     opts['link'] = False
     return conf, opts
+
+
+def get_path_strip_version(path):
+    '''Strip a file path for conf tests'''
+    strip = path
+    home = os.path.expanduser('~')
+    if strip.startswith(home):
+        strip = strip[len(home):]
+    return strip.lstrip('.' + os.sep)
+
+
+def get_dotfile_from_yaml(dic, path):
+    '''Return the dotfile from the yaml dictionary'''
+    dotfiles = dic['dotfiles']
+    src = get_path_strip_version(path)
+    return [d for d in dotfiles.values() if d['src'] == src][0]
 
 
 def create_fake_config(folder, configname='config.yaml',

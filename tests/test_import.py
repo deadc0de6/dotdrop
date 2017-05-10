@@ -10,6 +10,7 @@ import os
 import yaml
 
 from dotdrop.dotdrop import importer
+from dotdrop.config import Cfg
 
 from tests.helpers import *
 
@@ -29,28 +30,20 @@ class TestImport(unittest.TestCase):
             content = yaml.load(f)
         return content
 
-    def get_path_strip_version(self, path):
-        '''Strip a file path for conf tests'''
-        self.assertTrue(os.path.exists(path))
-        strip = path
-        home = os.path.expanduser('~')
-        if strip.startswith(home):
-            strip = strip[len(home):]
-        strip = strip.lstrip('.' + os.sep)
-        return strip
-
     def assert_file(self, path, conf, profile):
         '''Make sure "path" has been inserted in "conf" for "profile"'''
-        strip = self.get_path_strip_version(path)
+        strip = get_path_strip_version(path)
         self.assertTrue(strip in [x.src for x in conf.get_dotfiles(profile)])
         dsts = [os.path.expanduser(x.dst) for x in conf.get_dotfiles(profile)]
         self.assertTrue(path in dsts)
 
-    def assert_in_yaml(self, path, dic):
+    def assert_in_yaml(self, path, dic, link=False):
         '''Make sure "path" is in the "dic" representing the yaml file'''
-        strip = self.get_path_strip_version(path)
+        strip = get_path_strip_version(path)
         self.assertTrue(strip in [x['src'] for x in dic['dotfiles'].values()])
         dsts = [os.path.expanduser(x['dst']) for x in dic['dotfiles'].values()]
+        if link:
+            self.assertTrue(get_dotfile_from_yaml(dic, path)['link'])
         self.assertTrue(path in dsts)
 
     def test_import(self):
@@ -95,9 +88,28 @@ class TestImport(unittest.TestCase):
         sub1, _ = create_random_file(dotfile5)
         sub2, _ = create_random_file(dotfile5)
 
+        # fake a file for symlink
+        # TODO
+        dotfile6, content6 = create_random_file(dotconfig)
+        self.addCleanup(clean, dotfile6)
+
+        # fake a folder for symlink
+        # TODO
+        dotfile7 = get_tempfolder()
+        self.assertTrue(os.path.exists(dotfile7))
+        self.addCleanup(clean, dotfile7)
+        sub1, _ = create_random_file(dotfile7)
+        sub2, _ = create_random_file(dotfile7)
+
         # import the dotfiles
         dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
         importer(opts, conf, dfiles)
+        # import symlink
+        # TODO
+        opts[Cfg.key_dotfiles_link] = True
+        sfiles = [dotfile6, dotfile7]
+        importer(opts, conf, sfiles)
+        opts[Cfg.key_dotfiles_link] = False
 
         # reload the config
         conf, opts = load_config(confpath, profile)
@@ -109,6 +121,8 @@ class TestImport(unittest.TestCase):
         self.assert_file(dotfile3, conf, profile)
         self.assert_file(dotfile4, conf, profile)
         self.assert_file(dotfile5, conf, profile)
+        self.assert_file(dotfile6, conf, profile)
+        self.assert_file(dotfile7, conf, profile)
 
         # test dotfiles in yaml file
         y = self.load_yaml(confpath)
@@ -117,6 +131,8 @@ class TestImport(unittest.TestCase):
         self.assert_in_yaml(dotfile3, y)
         self.assert_in_yaml(dotfile4, y)
         self.assert_in_yaml(dotfile5, y)
+        self.assert_in_yaml(dotfile6, y, link=True)
+        self.assert_in_yaml(dotfile7, y, link=True)
 
         # test dotfiles on filesystem
         self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile1)))
@@ -128,6 +144,12 @@ class TestImport(unittest.TestCase):
                                                     dotfile5, sub1)))
         self.assertTrue(os.path.exists(os.path.join(dotfilespath,
                                                     dotfile5, sub2)))
+
+        # test symlink on filesystem
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile6)))
+        self.assertTrue(os.path.islink(dotfile6))
+        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile7)))
+        self.assertTrue(os.path.islink(dotfile7))
 
 
 def main():
