@@ -85,6 +85,7 @@ exec bspwm
         # to test link
         f5, c5 = create_random_file(tmp)
         dst5 = os.path.join(dst, get_string(6))
+        self.addCleanup(clean, dst5)
         d5 = Dotfile(get_string(6), dst5, os.path.basename(f5), link=True)
 
         # create the dotfile folders in dotdrop
