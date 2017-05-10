@@ -48,10 +48,12 @@ class TestImport(unittest.TestCase):
 
     def test_import(self):
         '''Test the import function'''
+        # on filesystem
         src = get_tempfolder()
         self.assertTrue(os.path.exists(src))
         self.addCleanup(clean, src)
 
+        # in dotdrop
         dotfilespath = get_tempfolder()
         self.assertTrue(os.path.exists(dotfilespath))
         self.addCleanup(clean, dotfilespath)
@@ -89,23 +91,20 @@ class TestImport(unittest.TestCase):
         sub2, _ = create_random_file(dotfile5)
 
         # fake a file for symlink
-        # TODO
         dotfile6, content6 = create_random_file(dotconfig)
         self.addCleanup(clean, dotfile6)
 
         # fake a folder for symlink
-        # TODO
         dotfile7 = get_tempfolder()
         self.assertTrue(os.path.exists(dotfile7))
         self.addCleanup(clean, dotfile7)
-        sub1, _ = create_random_file(dotfile7)
-        sub2, _ = create_random_file(dotfile7)
+        sub3, _ = create_random_file(dotfile7)
+        sub4, _ = create_random_file(dotfile7)
 
         # import the dotfiles
         dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
         importer(opts, conf, dfiles)
         # import symlink
-        # TODO
         opts[Cfg.key_dotfiles_link] = True
         sfiles = [dotfile6, dotfile7]
         importer(opts, conf, sfiles)
@@ -134,22 +133,61 @@ class TestImport(unittest.TestCase):
         self.assert_in_yaml(dotfile6, y, link=True)
         self.assert_in_yaml(dotfile7, y, link=True)
 
-        # test dotfiles on filesystem
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile1)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile2)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile3)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile4)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile5)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath,
-                                                    dotfile5, sub1)))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath,
-                                                    dotfile5, sub2)))
+        # test have been imported in dotdrop dotpath folder
+        indt1 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile1))
+        self.assertTrue(os.path.exists(indt1))
+        indt2 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile2))
+        self.assertTrue(os.path.exists(indt2))
+        indt3 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile3))
+        self.assertTrue(os.path.exists(indt3))
+        indt4 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile4))
+        self.assertTrue(os.path.exists(indt4))
+        indt5 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile5))
+        self.assertTrue(os.path.exists(indt5))
+        s1 = os.path.join(dotfilespath,
+                          self.CONFIG_DOTPATH,
+                          get_path_strip_version(dotfile6),
+                          sub1)
+        self.assertTrue(os.path.exists(s1))
+        s2 = os.path.join(dotfilespath,
+                          self.CONFIG_DOTPATH,
+                          get_path_strip_version(dotfile6),
+                          sub2)
+        self.assertTrue(os.path.exists(s2))
+        indt6 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile6))
+        self.assertTrue(os.path.exists(indt6))
+        indt7 = os.path.join(dotfilespath,
+                             self.CONFIG_DOTPATH,
+                             get_path_strip_version(dotfile7))
+        self.assertTrue(os.path.exists(indt7))
+        s3 = os.path.join(dotfilespath,
+                          self.CONFIG_DOTPATH,
+                          get_path_strip_version(dotfile7),
+                          sub3)
+        self.assertTrue(os.path.exists(s3))
+        s4 = os.path.join(dotfilespath,
+                          self.CONFIG_DOTPATH,
+                          get_path_strip_version(dotfile7),
+                          sub4)
+        self.assertTrue(os.path.exists(s4))
 
         # test symlink on filesystem
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile6)))
         self.assertTrue(os.path.islink(dotfile6))
-        self.assertTrue(os.path.exists(os.path.join(dotfilespath, dotfile7)))
+        self.assertTrue(os.path.realpath(dotfile6) == indt6)
         self.assertTrue(os.path.islink(dotfile7))
+        self.assertTrue(os.path.realpath(dotfile7) == indt7)
 
 
 def main():
