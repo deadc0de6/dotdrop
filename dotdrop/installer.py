@@ -67,6 +67,9 @@ class Installer:
         if content is None:
             self.log.err('generate from template \"%s\"' % (src))
             return []
+        if not os.path.exists(src):
+            self.log.err('installing %s to %s' % (src, dst))
+            return []
         st = os.stat(src)
         ret = self._write(dst, content, st.st_mode)
         if ret < 0:

@@ -32,6 +32,8 @@ class Templategen:
                                comment_end_string=COMMENT_END)
 
     def generate(self, src, profile):
+        if not os.path.exists(src):
+            return ''
         return self._handle_file(src, profile)
 
     def _handle_file(self, src, profile):
