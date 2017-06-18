@@ -83,6 +83,9 @@ sudo pip3 install -r dotdrop/requirements.txt
 
 Finally import your dotfiles as described [below](#usage).
 
+For MacOS users, make sure to install `realpath` through homebrew
+(part of *coreutils*).
+
 # Usage
 
 If starting fresh, the import function of dotdrop
