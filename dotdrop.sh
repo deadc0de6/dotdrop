@@ -5,7 +5,7 @@
 # check for readlink/realpath presence
 # https://github.com/deadc0de6/dotdrop/issues/6
 rl="readlink -f"
-${rl} >/dev/null 2>&1
+${rl} ${0} >/dev/null 2>&1
 if [ "$?" != "0" ]; then
   rl="realpath"
   hash ${rl}
