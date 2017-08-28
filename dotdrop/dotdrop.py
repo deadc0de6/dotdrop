@@ -32,7 +32,7 @@ USAGE = """
 Usage:
   dotdrop.py install [--profile=<profile>] [--cfg=<path>]
     [(-f | --force)] [--nodiff] [--dry]
-  dotdrop.py compare [--profile=<profile>] [--cfg=<path>] [--files=<file key>]
+  dotdrop.py compare [--profile=<profile>] [--cfg=<path>] [--files=<filelist>]
   dotdrop.py list [--cfg=<path>]
   dotdrop.py import [--profile=<profile>] [--cfg=<path>]
     [(-l | --link)] [--dry] <paths>...
@@ -42,6 +42,7 @@ Usage:
 Options:
   --profile=<profiles>    Specify the profile to use [default: %s].
   --cfg=<path>            Path to the config [default: %s/config.yaml].
+  --files=<filelist>      Comma separated list of file to compare.
   --dry                   Dry run.
   --nodiff                Do not diff when installing [default: False].
   -l --link               Import and link [default: False].
@@ -77,7 +78,7 @@ def install(opts, conf):
     return True
 
 
-def compare(opts, conf, tmp, focus=""):
+def compare(opts, conf, tmp, focus=None):
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         LOG.err('no dotfiles defined for this profile (\"%s\")' %
@@ -87,32 +88,20 @@ def compare(opts, conf, tmp, focus=""):
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'], quiet=True)
 
-    # Selected files or directory must be comma separated without whitespace.
-    # We will also make sure that the given arguments match the dotfile keys
-    #   in the config file. If a key is not found, terminate the script and
-    #   let the user know.
-    if focus is not None:
-        focus = focus.replace(" ", "")
-        selected = focus.split(",")
-        for selection in selected:
-            exist = False
-            for dotfile in dotfiles:
-                if selection == dotfile.key:
-                    exist = True
-                    break
-            if not exist:
-                LOG.log('One of the keys is not found. Please double check ' \
-                        'your arguments.')
-                sys.exit(0)
-    else:
+    # compare only specific files
+    selected = dotfiles
+    if focus:
         selected = []
-        for dotfile in dotfiles:
-            selected.append(dotfile.key)
+        for selection in focus.replace(' ', '').split(','):
+            df = next((x for x in dotfiles if x.dst == selection), None)
+            if df:
+                selected.append(df)
+            else:
+                LOG.err('no dotfile matches \"%s\"' % (selection))
 
-    for dotfile in dotfiles:
-        if dotfile.key in selected:
-            LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
-            inst.compare(t, tmp, opts['profile'], dotfile.src, dotfile.dst)
+    for dotfile in selected:
+        LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
+        inst.compare(t, tmp, opts['profile'], dotfile.src, dotfile.dst)
     return len(dotfiles) > 0
 
 
@@ -183,7 +172,6 @@ if __name__ == '__main__':
     ret = True
     args = docopt(USAGE, version=VERSION)
     conf = Cfg(args['--cfg'])
-    focus = args['--files']
 
     opts = conf.get_configs()
     opts['dry'] = args['--dry']
@@ -204,7 +192,7 @@ if __name__ == '__main__':
 
         elif args['compare']:
             tmp = utils.get_tmpdir()
-            if compare(opts, conf, tmp, focus):
+            if compare(opts, conf, tmp, args['--files']):
                 LOG.log('generated temporary files available under %s' % (tmp))
             else:
                 os.rmdir(tmp)
