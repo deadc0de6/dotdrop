@@ -101,7 +101,7 @@ def compare(opts, conf, tmp, focus=""):
                     exist = True
                     break
             if not exist:
-                LOG.log('One of the keys is not found. Please double check ' \
+                LOG.log('One of the keys is not found. Please double check '
                         'your arguments.')
                 sys.exit(0)
     else:
