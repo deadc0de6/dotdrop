@@ -32,7 +32,7 @@ USAGE = """
 Usage:
   dotdrop.py install [--profile=<profile>] [--cfg=<path>]
     [(-f | --force)] [--nodiff] [--dry]
-  dotdrop.py compare [--profile=<profile>] [--cfg=<path>]
+  dotdrop.py compare [--profile=<profile>] [--cfg=<path>] [--files=<filelist>]
   dotdrop.py list [--cfg=<path>]
   dotdrop.py import [--profile=<profile>] [--cfg=<path>]
     [(-l | --link)] [--dry] <paths>...
@@ -42,6 +42,7 @@ Usage:
 Options:
   --profile=<profiles>    Specify the profile to use [default: %s].
   --cfg=<path>            Path to the config [default: %s/config.yaml].
+  --files=<filelist>      Comma separated list of file to compare.
   --dry                   Dry run.
   --nodiff                Do not diff when installing [default: False].
   -l --link               Import and link [default: False].
@@ -77,7 +78,7 @@ def install(opts, conf):
     return True
 
 
-def compare(opts, conf, tmp):
+def compare(opts, conf, tmp, focus=None):
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         LOG.err('no dotfiles defined for this profile (\"%s\")' %
@@ -86,7 +87,19 @@ def compare(opts, conf, tmp):
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'], quiet=True)
-    for dotfile in dotfiles:
+
+    # compare only specific files
+    selected = dotfiles
+    if focus:
+        selected = []
+        for selection in focus.replace(' ', '').split(','):
+            df = next((x for x in dotfiles if x.dst == selection), None)
+            if df:
+                selected.append(df)
+            else:
+                LOG.err('no dotfile matches \"%s\"' % (selection))
+
+    for dotfile in selected:
         LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
         inst.compare(t, tmp, opts['profile'], dotfile.src, dotfile.dst)
     return len(dotfiles) > 0
@@ -179,7 +192,7 @@ if __name__ == '__main__':
 
         elif args['compare']:
             tmp = utils.get_tmpdir()
-            if compare(opts, conf, tmp):
+            if compare(opts, conf, tmp, args['--files']):
                 LOG.log('generated temporary files available under %s' % (tmp))
             else:
                 os.rmdir(tmp)
