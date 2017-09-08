@@ -15,7 +15,7 @@ from installer import Installer
 from dotfile import Dotfile
 from config import Cfg
 
-VERSION = '0.3'
+VERSION = '0.4'
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 HOSTNAME = os.uname()[1]
