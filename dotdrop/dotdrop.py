@@ -33,6 +33,7 @@ Usage:
   dotdrop.py install [-fndvc <path>] [--profile=<profile>]
   dotdrop.py compare [-vc <path>] [--profile=<profile>] [--files=<files>]
   dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
+  dotdrop.py listfiles [-c <path>] [--profile=<profile>]
   dotdrop.py list [-c <path>]
   dotdrop.py --help
   dotdrop.py --version
@@ -172,6 +173,18 @@ def list_profiles(conf):
     LOG.log('')
 
 
+def list_files(opts, conf):
+    if not opts['profile'] in conf.get_profiles():
+        LOG.warn('unknown profile \"%s\"' % (opts['profile']))
+        return
+    LOG.log('Dotfile(s) for profile \"%s\":' % (opts['profile']))
+    for dotfile in conf.get_dotfiles(opts['profile']):
+        LOG.log('%s (file: \"%s\", link: %s)' % (dotfile.key, dotfile.src,
+                                                 str(dotfile.link)))
+        LOG.sub('%s' % (dotfile.dst))
+    LOG.log('')
+
+
 def header():
     LOG.log(BANNER)
     LOG.log("")
@@ -195,12 +208,19 @@ if __name__ == '__main__':
     try:
 
         if args['list']:
+            # list existing profiles
             list_profiles(conf)
 
+        elif args['listfiles']:
+            # list files for selected profile
+            list_files(opts, conf)
+
         elif args['install']:
+            # install the dotfiles stored in dotdrop
             ret = install(opts, conf)
 
         elif args['compare']:
+            # compare local dotfiles with dotfiles stored in dotdrop
             tmp = utils.get_tmpdir()
             if compare(opts, conf, tmp, args['--files']):
                 LOG.raw('\ntemporary files available under %s' % (tmp))
@@ -208,6 +228,7 @@ if __name__ == '__main__':
                 os.rmdir(tmp)
 
         elif args['import']:
+            # import dotfile(s)
             importer(opts, conf, args['<paths>'])
 
     except KeyboardInterrupt:
