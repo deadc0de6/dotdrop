@@ -33,10 +33,10 @@ class TestCompare(unittest.TestCase):
                          dry=opts['dry'], base=opts['dotpath'], quiet=True)
         results = {}
         for dotfile in dotfiles:
-            diffval = inst.compare(t, tmp, opts['profile'],
+            same, _ = inst.compare(t, tmp, opts['profile'],
                                    dotfile.src, dotfile.dst)
             path = os.path.expanduser(dotfile.dst)
-            results[path] = diffval
+            results[path] = same
         return results
 
     def edit_content(self, path, newcontent, binary=False):

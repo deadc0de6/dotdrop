@@ -30,8 +30,8 @@ USAGE = """
 %s
 
 Usage:
-  dotdrop.py install [-fndc <path>] [--profile=<profile>]
-  dotdrop.py compare [-c <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop.py install [-fndvc <path>] [--profile=<profile>]
+  dotdrop.py compare [-vc <path>] [--profile=<profile>] [--files=<files>]
   dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
   dotdrop.py list [-c <path>]
   dotdrop.py --help
@@ -44,6 +44,7 @@ Options:
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
+  -v --verbose            Be verbose.
   -d --dry                Dry run.
   --version               Show version.
   -h --help               Show this screen.
@@ -64,7 +65,7 @@ def install(opts, conf):
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
-                     diff=opts['installdiff'])
+                     diff=opts['installdiff'], quiet=opts['quiet'])
     installed = []
     for dotfile in dotfiles:
         if hasattr(dotfile, "link") and dotfile.link:
@@ -84,7 +85,8 @@ def compare(opts, conf, tmp, focus=None):
         return False
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
-                     dry=opts['dry'], base=opts['dotpath'], quiet=True)
+                     dry=opts['dry'], base=opts['dotpath'],
+                     quiet=opts['quiet'])
 
     # compare only specific files
     selected = dotfiles
@@ -98,8 +100,17 @@ def compare(opts, conf, tmp, focus=None):
                 LOG.err('no dotfile matches \"%s\"' % (selection))
 
     for dotfile in selected:
-        LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
-        inst.compare(t, tmp, opts['profile'], dotfile.src, dotfile.dst)
+        same, diff = inst.compare(t, tmp, opts['profile'],
+                                  dotfile.src, dotfile.dst)
+        if same:
+            if not opts['quiet']:
+                LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key,
+                                                      dotfile.dst))
+                LOG.raw('same file')
+        else:
+            LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
+            LOG.emph(diff)
+
     return len(dotfiles) > 0
 
 
@@ -177,6 +188,7 @@ if __name__ == '__main__':
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
     opts['link'] = args['--link']
+    opts['quiet'] = not args['--verbose']
 
     header()
 
@@ -191,7 +203,7 @@ if __name__ == '__main__':
         elif args['compare']:
             tmp = utils.get_tmpdir()
             if compare(opts, conf, tmp, args['--files']):
-                LOG.log('generated temporary files available under %s' % (tmp))
+                LOG.raw('\ntemporary files available under %s' % (tmp))
             else:
                 os.rmdir(tmp)
 

@@ -22,6 +22,7 @@ class Installer:
         self.base = base
         self.quiet = quiet
         self.diff = diff
+        self.comparing = False
         self.log = Logger()
 
     def install(self, templater, profile, src, dst):
@@ -76,10 +77,11 @@ class Installer:
             self.log.err('installing %s to %s' % (src, dst))
             return []
         if ret > 0:
-            self.log.sub('ignoring \"%s\", same content' % (dst))
+            if not self.quiet:
+                self.log.sub('ignoring \"%s\", same content' % (dst))
             return []
         if ret == 0:
-            if not self.quiet and not self.dry:
+            if not self.quiet and not self.dry and not self.comparing:
                 self.log.sub('copied %s to %s' % (src, dst))
             return [(src, dst)]
         return []
@@ -155,6 +157,7 @@ class Installer:
 
     def compare(self, templater, tmpfolder, profile, src, dst):
         '''Compare temporary generated dotfile with local one'''
+        self.comparing = True
         retval = False
         drysaved = self.dry
         self.dry = False
@@ -172,10 +175,10 @@ class Installer:
             if ret:
                 diff = utils.diff(tmpdst, dst, log=False, raw=False)
                 if diff == '':
-                    self.log.raw('same file')
-                    retval = True
+                    retval = True, ''
                 else:
-                    self.log.emph(diff)
+                    retval = False, diff
         self.dry = drysaved
         self.diff = diffsaved
+        self.comparing = False
         return retval
