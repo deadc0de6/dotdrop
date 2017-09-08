@@ -26,6 +26,7 @@ Features:
 * Comparison between local and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles in dotdrop
+* associate an action to the deployment of a dotfile
 
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) for more.
 
@@ -182,13 +183,17 @@ the following entries:
     it doesn't exist
   * `dotpath`: path to the folder containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
+
 * **dotfiles** entry: a list of dotfiles in the form
   * When `link` is true, dotdrop will create a link instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
 ```
   <dotfile-key-name>:
     dst: <where-this-file-is-deployed>
     src: <filename-within-the-dotpath>
-    link: <true|false>  # Optional
+    # Optional
+    link: <true|false>
+    actions:
+      - <action-key>
 ```
 
 * **profiles** entry: a list of profiles with a sublist
@@ -199,6 +204,11 @@ the following entries:
     - <some-dotfile-key-name-defined-above>
     - <some-other-dotfile-key-name>
     - ...
+```
+
+* **actions** entry: a list of action available
+```
+  <action-key>: <command-to-execute>
 ```
 
 ## Installing dotfiles
@@ -258,6 +268,37 @@ f_vimrc (file: "vimrc", link: False)
 f_dunstrc (file: "config/dunst/dunstrc", link: False)
 	-> ~/.config/dunst/dunstrc
 ```
+
+## Execute an action when deploying a dotfile
+
+It is sometimes useful to execute some kind of action
+when deploying a dotfile. For example let's consider
+[Vundle](https://github.com/VundleVim/Vundle.vim) is used
+to manage vim's plugins, the following action could
+be set to update and install the plugins when `vimrc` is
+deployed:
+
+```
+actions:
+  vundle: vim +VundleClean! +VundleInstall +VundleInstall! +qall
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+    actions:
+      - vundle
+profiles:
+  home:
+  - f_vimrc
+```
+
+Thus when `f_vimrc` is intalled, the command
+`vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
+be executed.
 
 ## Update dotbot
 
