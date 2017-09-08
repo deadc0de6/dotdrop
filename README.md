@@ -146,20 +146,21 @@ $ ./dotdrop.sh --help
                                |_|
 
 Usage:
-  dotdrop.py install [--profile=<profile>] [--cfg=<path>]
-    [(-f | --force)] [--nodiff] [--dry]
-  dotdrop.py compare [--profile=<profile>] [--cfg=<path>]
-  dotdrop.py list [--cfg=<path>]
-  dotdrop.py import [--cfg=<path>] [--profile=<profile>] [--dry] <paths>...
+  dotdrop.py install [-fndc <path>] [--profile=<profile>]
+  dotdrop.py compare [-c <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
+  dotdrop.py list [-c <path>]
   dotdrop.py (-h | --help)
   dotdrop.py (-v | --version)
 
 Options:
-  --profile=<profiles>    Specify the profile to use [default: hostname].
-  --cfg=<path>            Path to the config [default: config.yaml].
-  --dry                   Dry run.
-  --nodiff                Do not diff when installing [default: False].
+  --profile=<profile>     Specify the profile to use [default: thor].
+  -c --cfg=<path>         Path to the config [default: /home/drits/tools/dotdrop/config.yaml].
+  --files=<files>         Comma separated list of files to compare.
+  -n --nodiff             Do not diff when installing [default: False].
+  -l --link               Import and link [default: False].
   -f --force              Do not warn if exists [default: False].
+  -d --dry                Dry run.
   -v --version            Show version.
   -h --help               Show this screen.
 ```
