@@ -158,7 +158,7 @@ class Installer:
     def compare(self, templater, tmpfolder, profile, src, dst):
         '''Compare temporary generated dotfile with local one'''
         self.comparing = True
-        retval = False
+        retval = False, ''
         drysaved = self.dry
         self.dry = False
         diffsaved = self.diff
@@ -166,7 +166,7 @@ class Installer:
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         if not os.path.exists(dst):
-            self.log.warn('\"%s\" does not exist on local' % (dst))
+            retval = False, '\"%s\" does not exist on local\n' % (dst)
         else:
             ret, tmpdst = self._install_to_temp(templater,
                                                 profile,
