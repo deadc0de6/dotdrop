@@ -139,10 +139,9 @@ For additional usage see the help:
 
 ```
 $ ./dotdrop.sh --help
-     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/
+ \__,_|\___/ \__\__,_|_|  \___/| .__/  v0.2
                                |_|
 
 Usage:
@@ -150,18 +149,18 @@ Usage:
   dotdrop.py compare [-c <path>] [--profile=<profile>] [--files=<files>]
   dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
   dotdrop.py list [-c <path>]
-  dotdrop.py (-h | --help)
-  dotdrop.py (-v | --version)
+  dotdrop.py --help
+  dotdrop.py --version
 
 Options:
   --profile=<profile>     Specify the profile to use [default: thor].
   -c --cfg=<path>         Path to the config [default: /home/drits/tools/dotdrop/config.yaml].
   --files=<files>         Comma separated list of files to compare.
-  -n --nodiff             Do not diff when installing [default: False].
-  -l --link               Import and link [default: False].
-  -f --force              Do not warn if exists [default: False].
+  -n --nodiff             Do not diff when installing.
+  -l --link               Import and link.
+  -f --force              Do not warn if exists.
   -d --dry                Dry run.
-  -v --version            Show version.
+  --version               Show version.
   -h --help               Show this screen.
 ```
 
