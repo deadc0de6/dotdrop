@@ -139,15 +139,17 @@ For additional usage see the help:
 
 ```
 $ ./dotdrop.sh --help
+     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/  v0.2
+ \__,_|\___/ \__\__,_|_|  \___/| .__/  v0.4
                                |_|
 
 Usage:
-  dotdrop.py install [-fndc <path>] [--profile=<profile>]
-  dotdrop.py compare [-c <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop.py install [-fndvc <path>] [--profile=<profile>]
+  dotdrop.py compare [-vc <path>] [--profile=<profile>] [--files=<files>]
   dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
+  dotdrop.py listfiles [-c <path>] [--profile=<profile>]
   dotdrop.py list [-c <path>]
   dotdrop.py --help
   dotdrop.py --version
@@ -159,6 +161,7 @@ Options:
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
+  -v --verbose            Be verbose.
   -d --dry                Dry run.
   --version               Show version.
   -h --help               Show this screen.
@@ -237,6 +240,24 @@ Dotdrop allows to choose which profile to use
 with the *--profile* switch if you used something
 else than the default (the hostname).
 
+## List configured dotfiles
+
+The following command lists the different dotfiles
+configured for a specific profile:
+
+```
+$ ./dotdrop.sh listfiles --profile=<some-profile>
+```
+
+For example:
+```
+Dotfile(s) for profile "some-profile":
+
+f_vimrc (file: "vimrc", link: False)
+	-> ~/.vimrc
+f_dunstrc (file: "config/dunst/dunstrc", link: False)
+	-> ~/.config/dunst/dunstrc
+```
 
 ## Update dotbot
 

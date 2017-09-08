@@ -177,7 +177,7 @@ def list_files(opts, conf):
     if not opts['profile'] in conf.get_profiles():
         LOG.warn('unknown profile \"%s\"' % (opts['profile']))
         return
-    LOG.log('Dotfile(s) for profile \"%s\":' % (opts['profile']))
+    LOG.log('Dotfile(s) for profile \"%s\":\n' % (opts['profile']))
     for dotfile in conf.get_dotfiles(opts['profile']):
         LOG.log('%s (file: \"%s\", link: %s)' % (dotfile.key, dotfile.src,
                                                  str(dotfile.link)))
