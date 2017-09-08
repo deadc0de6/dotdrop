@@ -18,7 +18,7 @@ class Action:
     def execute(self):
         self.log.sub('executing \"%s\"' % (self.action))
         try:
-            subprocess.run(self.action, shell=True)
+            subprocess.call(self.action, shell=True)
         except KeyboardInterrupt:
             self.log.warn('action interrupted')
 
