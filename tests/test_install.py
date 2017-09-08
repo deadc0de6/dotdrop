@@ -11,6 +11,7 @@ from tests.helpers import *
 from dotdrop.dotfile import Dotfile
 from dotdrop.dotdrop import install
 from dotdrop.installer import Installer
+from dotdrop.action import Action
 
 
 class TestInstall(unittest.TestCase):
@@ -30,9 +31,12 @@ exec bspwm
 exec bspwm
 '''
 
-    def fake_config(self, path, dotfiles, profile, dotpath):
+    def fake_config(self, path, dotfiles, profile, dotpath, actions):
         '''Create a fake config file'''
         with open(path, 'w') as f:
+            f.write('actions:\n')
+            for action in actions:
+                f.write('  %s: %s\n' % (action.key, action.action))
             f.write('config:\n')
             f.write('  backup: true\n')
             f.write('  create: true\n')
@@ -43,6 +47,10 @@ exec bspwm
                 f.write('    dst: %s\n' % (d.dst))
                 f.write('    src: %s\n' % (d.src))
                 f.write('    link: %s\n' % str(d.link).lower())
+                if len(d.actions) > 0:
+                    f.write('    actions:\n')
+                    for action in actions:
+                        f.write('      - %s\n' % (action.key))
             f.write('profiles:\n')
             f.write('  %s:\n' % (profile))
             for d in dotfiles:
@@ -114,10 +122,19 @@ exec bspwm
         # make up the dotfile
         d7 = Dotfile(get_string(6), dst7, os.path.basename(dir2), link=True)
 
+        # to test actions
+        value = get_string(12)
+        fact = '/tmp/action'
+        act1 = Action('testaction', 'echo "%s" > %s' % (value, fact))
+        f8, c8 = create_random_file(tmp)
+        dst8 = os.path.join(dst, get_string(6))
+        d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7], profile, tmp)
+        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8],
+                         profile, tmp, [act1])
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
@@ -134,6 +151,7 @@ exec bspwm
         self.assertTrue(os.path.exists(dst5))
         self.assertTrue(os.path.exists(dst6))
         self.assertTrue(os.path.exists(dst7))
+        self.assertTrue(os.path.exists(dst8))
 
         # check if 'dst5' is a link whose target is 'f5'
         self.assertTrue(os.path.islink(dst5))
@@ -151,6 +169,11 @@ exec bspwm
         f2content = open(dst2, 'r').read()
         self.assertTrue(f2content == self.RESULT)
         self.assertTrue(filecmp.cmp(f3, dst3, shallow=True))
+
+        # test action has been executed
+        self.assertTrue(os.path.exists(fact))
+        actcontent = open(fact, 'r').read().rstrip()
+        self.assertTrue(actcontent == value)
 
 
 def main():

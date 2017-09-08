@@ -73,6 +73,10 @@ def install(opts, conf):
             r = inst.link(dotfile.src, dotfile.dst)
         else:
             r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
+        if len(r) > 0 and len(dotfile.actions) > 0:
+            # execute action
+            for action in dotfile.actions:
+                action.execute()
         installed.extend(r)
     LOG.log('\n%u dotfile(s) installed.' % (len(installed)))
     return True

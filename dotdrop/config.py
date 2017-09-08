@@ -8,6 +8,7 @@ import yaml
 import os
 from dotfile import Dotfile
 from logger import Logger
+from action import Action
 
 
 class Cfg:
@@ -15,10 +16,12 @@ class Cfg:
     key_config = 'config'
     key_profiles = 'profiles'
     key_dotfiles = 'dotfiles'
+    key_actions = 'actions'
     key_dotpath = 'dotpath'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
+    key_dotfiles_actions = 'actions'
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -27,6 +30,7 @@ class Cfg:
         self.log = Logger()
         self.configs = {}
         self.dotfiles = {}
+        self.actions = {}
         self.profiles = {}
         self.prodots = {}
         if not self._load_file():
@@ -51,21 +55,45 @@ class Cfg:
             return False
         return True
 
+    def _parse_actions(self, actions, entries):
+        """ parse actions specified for an element """
+        res = []
+        for entry in entries:
+            if entry in actions.keys():
+                res.append(actions[entry])
+            else:
+                self.log.err('unknown action \"%s\"' % (entry))
+                return False, []
+        return True, res
+
     def _parse(self):
         """ parse config file """
+        # parse all actions
+        if self.key_actions in self.content:
+            if self.content[self.key_actions] is not None:
+                for k, v in self.content[self.key_actions].items():
+                    self.actions[k] = Action(k, v)
+        # parse the profiles
         self.profiles = self.content[self.key_profiles]
         if self.profiles is None:
             self.profiles = {}
+        # parse the configs
         self.configs = self.content[self.key_config]
-        # contains all defined dotfiles
+        # parse the dotfiles
         if self.content[self.key_dotfiles] is not None:
             for k, v in self.content[self.key_dotfiles].items():
                 src = v[self.key_dotfiles_src]
                 dst = v[self.key_dotfiles_dst]
                 link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
                     in v else False
-                self.dotfiles[k] = Dotfile(k, dst, src, link)
-        # contains a list of dotfiles defined for each profile
+                entries = v[self.key_dotfiles_actions] if \
+                    self.key_dotfiles_actions in v else []
+                res, actions = self._parse_actions(self.actions, entries)
+                if not res:
+                    return False
+                self.dotfiles[k] = Dotfile(k, dst, src,
+                                           link=link, actions=actions)
+        # attribute dotfiles to each profile
         for k, v in self.profiles.items():
             self.prodots[k] = []
             if v is None:

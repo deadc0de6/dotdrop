@@ -102,4 +102,5 @@ def create_fake_config(folder, configname='config.yaml',
         f.write('  dotpath: %s\n' % (dotpath))
         f.write('dotfiles:\n')
         f.write('profiles:\n')
+        f.write('actions:\n')
     return path
