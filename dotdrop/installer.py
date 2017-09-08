@@ -81,7 +81,7 @@ class Installer:
                 self.log.sub('ignoring \"%s\", same content' % (dst))
             return []
         if ret == 0:
-            if not self.quiet and not self.dry and not self.comparing:
+            if not self.dry and not self.comparing:
                 self.log.sub('copied %s to %s' % (src, dst))
             return [(src, dst)]
         return []
