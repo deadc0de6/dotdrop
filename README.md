@@ -315,10 +315,10 @@ git submodule update --recursive --remote
 
 Dotdrop leverage the power of [jinja2](http://jinja.pocoo.org/) to handle the
 templating of dotfiles. See [jinja2 template doc](http://jinja.pocoo.org/docs/2.9/templates/)
-or the [example secion](#example) for more information on how to template your dotfiles.
+or the [example section](#example) for more information on how to template your dotfiles.
 
-Note that dotdrop uses different delimiters than the
-[jinja2](http://jinja.pocoo.org/) defaults:
+Note that dotdrop uses different delimiters than
+[jinja2](http://jinja.pocoo.org/)'s defaults:
 
 * block start = `{%@@`
 * block end = `@@%}`
