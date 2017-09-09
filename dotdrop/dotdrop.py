@@ -69,7 +69,7 @@ def install(opts, conf):
                      diff=opts['installdiff'], quiet=opts['quiet'])
     installed = []
     for dotfile in dotfiles:
-        if hasattr(dotfile, "link") and dotfile.link:
+        if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
             r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
@@ -194,7 +194,7 @@ def header():
     LOG.log("")
 
 
-if __name__ == '__main__':
+def main():
     ret = True
     args = docopt(USAGE, version=VERSION)
     conf = Cfg(args['--cfg'])
@@ -237,7 +237,12 @@ if __name__ == '__main__':
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
+        ret = False
 
-    if ret:
+    return ret
+
+
+if __name__ == '__main__':
+    if main():
         sys.exit(0)
     sys.exit(1)
