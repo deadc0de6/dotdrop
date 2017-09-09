@@ -116,7 +116,7 @@ def compare(opts, conf, tmp, focus=None):
             LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
             LOG.emph(diff)
 
-    return len(dotfiles) > 0
+    return len(selected) > 0
 
 
 def importer(opts, conf, paths):
