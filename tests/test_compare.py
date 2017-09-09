@@ -134,7 +134,11 @@ class TestCompare(unittest.TestCase):
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
-        compare(opts, conf, tmp)
+        # test compare from dotdrop
+        self.assertTrue(compare(opts, conf, tmp))
+        # test focus
+        self.assertTrue(compare(opts, conf, tmp, focus=d4))
+        self.assertFalse(compare(opts, conf, tmp, focus='/tmp/fake'))
 
 
 def main():
