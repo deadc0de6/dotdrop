@@ -44,6 +44,7 @@ class TestConfig(unittest.TestCase):
         dotpath = os.path.join(tmp, self.CONFIG_DOTPATH)
         self.assertTrue(opts['dotpath'] == dotpath)
         self.assertTrue(conf._is_valid())
+        self.assertTrue(conf.dump() != '')
 
 
 def main():

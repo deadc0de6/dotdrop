@@ -74,6 +74,8 @@ exec bspwm
         f1, c1 = create_random_file(tmp)
         dst1 = os.path.join(dst, get_string(6))
         d1 = Dotfile(get_string(5), dst1, os.path.basename(f1))
+        # fake a print
+        self.assertTrue(str(d1) != '')
         f2, c2 = create_random_file(tmp)
         dst2 = os.path.join(dst, get_string(6))
         d2 = Dotfile(get_string(5), dst2, os.path.basename(f2))

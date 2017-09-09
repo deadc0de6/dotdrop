@@ -11,6 +11,7 @@ import yaml
 
 from dotdrop.config import Cfg
 from dotdrop.dotdrop import importer
+from dotdrop.dotdrop import compare
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.templategen import Templategen
@@ -132,6 +133,8 @@ class TestCompare(unittest.TestCase):
         expected = {d1: False, d2: False, d3: False, d4: False, d5: False}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
+
+        compare(opts, conf, tmp)
 
 
 def main():

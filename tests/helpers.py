@@ -71,6 +71,7 @@ def load_config(confpath, profile):
     opts['safe'] = True
     opts['installdiff'] = True
     opts['link'] = False
+    opts['quiet'] = True
     return conf, opts
 
 
