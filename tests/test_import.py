@@ -10,6 +10,9 @@ import os
 import yaml
 
 from dotdrop.dotdrop import importer
+from dotdrop.dotdrop import list_profiles
+from dotdrop.dotdrop import list_files
+from dotdrop.dotdrop import header
 from dotdrop.config import Cfg
 
 from tests.helpers import *
@@ -188,6 +191,10 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.realpath(dotfile6) == indt6)
         self.assertTrue(os.path.islink(dotfile7))
         self.assertTrue(os.path.realpath(dotfile7) == indt7)
+
+        list_profiles(conf)
+        list_files(opts, conf)
+        header()
 
 
 def main():
