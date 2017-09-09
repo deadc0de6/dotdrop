@@ -296,7 +296,7 @@ profiles:
   - f_vimrc
 ```
 
-Thus when `f_vimrc` is intalled, the command
+Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
