@@ -174,6 +174,7 @@ exec bspwm
 
         # test action has been executed
         self.assertTrue(os.path.exists(fact))
+        self.assertTrue(str(act1) != '')
         actcontent = open(fact, 'r').read().rstrip()
         self.assertTrue(actcontent == value)
 
