@@ -150,15 +150,15 @@ def importer(opts, conf, paths):
             LOG.dry('would run: %s' % (' '.join(cmd)))
         else:
             utils.run(cmd, raw=False, log=False)
-        if opts['link']:
-            cmd = ['mv', '%s' % (dst), '%s' % (srcf)]
-        else:
-            cmd = ['cp', '-r', '%s' % (dst), '%s' % (srcf)]
+        cmd = ['cp', '-r', '-L', dst, srcf]
         if opts['dry']:
             LOG.dry('would run: %s' % (' '.join(cmd)))
+            if opts['link']:
+                LOG.dry('would symlink %s to %s' % (srcf, dst))
         else:
             utils.run(cmd, raw=False, log=False)
             if opts['link']:
+                utils.remove(dst)
                 os.symlink(srcf, dst)
         LOG.sub('\"%s\" imported' % (path))
         cnt += 1
