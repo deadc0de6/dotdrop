@@ -7,6 +7,7 @@ Added:
 Fixed:
 
   * issue with absent dotfile
+  * issue with importing symlinks
 
 # version 0.4
 
