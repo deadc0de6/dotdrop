@@ -30,11 +30,11 @@ USAGE = """
 %s
 
 Usage:
-  dotdrop.py install [-fndvc <path>] [--profile=<profile>]
-  dotdrop.py compare [-vc <path>] [--profile=<profile>] [--files=<files>]
-  dotdrop.py import [-ldc <path>] [--profile=<profile>] <paths>...
-  dotdrop.py listfiles [-c <path>] [--profile=<profile>]
-  dotdrop.py list [-c <path>]
+  dotdrop.py install [-fndVc <path>] [--profile=<profile>]
+  dotdrop.py compare [-Vc <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop.py import [-ldVc <path>] [--profile=<profile>] <paths>...
+  dotdrop.py listfiles [-Vc <path>] [--profile=<profile>]
+  dotdrop.py list [-Vc <path>]
   dotdrop.py --help
   dotdrop.py --version
 
@@ -45,9 +45,9 @@ Options:
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
-  -v --verbose            Be verbose.
+  -V --verbose            Be verbose.
   -d --dry                Dry run.
-  --version               Show version.
+  -v --version            Show version.
   -h --help               Show this screen.
 
 """ % (BANNER, HOSTNAME, CUR)
