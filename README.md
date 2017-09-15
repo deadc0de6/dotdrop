@@ -26,9 +26,11 @@ Features:
 * Comparison between local and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles
+* Handle files and directories
 * Associate an action to the deployment specific dotfiles
 
-Check the [blog post](https://deadc0de.re/articles/dotfiles.html) for more.
+Check the [blog post](https://deadc0de.re/articles/dotfiles.html) and
+and the [example](#example) for more.
 
 Quick start:
 ```bash
@@ -54,7 +56,7 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
   * [Execute an action when deploying a dotfile](#execute-an-action-when-deploying-a-dotfile)
   * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
   * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
-  * [Update dotbot](#update-dotbot)
+  * [Update dotdrop](#update-dotdrop)
 
 * [Template](#template)
 * [Example](#example)
@@ -74,15 +76,15 @@ why dotdrop rocks.
 The following will create a repository for your dotfiles and
 keep dotdrop as a submodules:
 ```bash
-mkdir dotfiles; cd dotfiles
-git init
-git submodule add https://github.com/deadc0de6/dotdrop.git
-./dotdrop/bootstrap.sh
+$ mkdir dotfiles; cd dotfiles
+$ git init
+$ git submodule add https://github.com/deadc0de6/dotdrop.git
+$ ./dotdrop/bootstrap.sh
 ```
 
 Then install the requirements:
 ```bash
-sudo pip3 install -r dotdrop/requirements.txt
+$ sudo pip3 install -r dotdrop/requirements.txt
 ```
 
 Finally import your dotfiles as described [below](#usage).
@@ -203,9 +205,9 @@ the following entries:
       - <action-key>
 ```
 
-* **profiles** entry: a list of profiles with a list
-  of dotfiles that need to be deployed for this profile
-  * `profiles`: the dotfiles associated to this profile
+* **profiles** entry: a list of profiles with the different dotfiles that
+  need to be managed
+  * `dotfiles`: the dotfiles associated to this profile
   * `include`: include all dotfiles from another profile (optional)
 
 ```
@@ -220,7 +222,7 @@ the following entries:
     - ...
 ```
 
-* **actions** entry: a list of action available
+* **actions** entry: a list of action
 ```
   <action-key>: <command-to-execute>
 ```
@@ -248,9 +250,9 @@ Dotdrop allows to import dotfiles directly from the
 filesystem. It will copy the dotfile and update the
 config file automatically.
 
-For example to import *$HOME/.xinitrc*
+For example to import *~/.xinitrc*
 ```bash
-$ ./dotdrop.sh import $HOME/.xinitrc
+$ ./dotdrop.sh import ~/.xinitrc
 
 ```
 
@@ -315,7 +317,7 @@ Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
-## Update dotbot
+## Update dotdrop
 
 If installed through the `bootstrap.sh` script, dotdrop is
 installed as a submodule within your git tree.
@@ -418,9 +420,12 @@ exec bspwm
 {%@@ endif @@%}
 ```
 
+The *if branch* will define which part is deployed based on the
+hostname of the host on which dotdrop is run from.
+
 And here's how the config file looks like with this setup.
 Of course any combination of the dotfiles (different sets)
-can be done once you have more dotfiles to deploy.
+can be done if more dotfiles have to be deployed.
 
 `config.yaml` file:
 ```yaml
@@ -468,7 +473,7 @@ have inspired me for dotdrop:
 * [https://github.com/anishathalye/dotbot](https://github.com/anishathalye/dotbot)
 * [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
 
-see also [github does dotfiles](https://dotfiles.github.io/)
+See also [github does dotfiles](https://dotfiles.github.io/)
 
 # Contribution
 
