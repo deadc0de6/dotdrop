@@ -7,6 +7,7 @@ basic unittest for the config parser
 
 import unittest
 import os
+import yaml
 import tempfile
 import shutil
 
@@ -45,6 +46,64 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(opts['dotpath'] == dotpath)
         self.assertTrue(conf._is_valid())
         self.assertTrue(conf.dump() != '')
+
+    def test_include(self):
+        tmp = get_tempfolder()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        # create a base config file
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+
+        # edit the config
+        with open(confpath, 'r') as f:
+            content = yaml.load(f)
+
+        # adding dotfiles
+        df1key = 'f_vimrc'
+        df2key = 'f_xinitrc'
+        content['dotfiles'] = {
+                df1key: {'dst': '~/.vimrc', 'src': 'vimrc'},
+                df2key: {'dst': '~/.xinitrc', 'src': 'xinitrc'}
+                }
+
+        # adding profiles
+        pf1key = 'host1'
+        pf2key = 'host2'
+        content['profiles'] = {
+                pf1key: {'dotfiles': [df2key], 'include': ['host2']},
+                pf2key: {'dotfiles': [df1key]}
+                }
+
+        print(content)
+        print(content['profiles'])
+
+        # save the new config
+        with open(confpath, 'w') as f:
+            yaml.dump(content, f, default_flow_style=False, indent=2)
+
+        # do the tests
+        conf = Cfg(confpath)
+        self.assertTrue(conf is not None)
+
+        # test profile
+        opts = conf.get_configs()
+        print(conf.get_profiles())
+        profiles = conf.get_profiles()
+        self.assertTrue(pf1key in profiles)
+        self.assertTrue(pf2key in profiles)
+
+        # test dotfiles
+        dotfiles = conf.get_dotfiles(pf1key)
+        self.assertTrue(df1key in [x.key for x in dotfiles])
+        self.assertTrue(df2key in [x.key for x in dotfiles])
+        dotfiles = conf.get_dotfiles(pf2key)
+        self.assertTrue(df1key in [x.key for x in dotfiles])
+        self.assertFalse(df2key in [x.key for x in dotfiles])
 
 
 def main():
