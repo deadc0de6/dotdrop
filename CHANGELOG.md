@@ -6,7 +6,8 @@ Modified:
 
 Added:
 
-  * adding "include" to include all dotfiles from another profile (#12)
+  * adding "include" to include all dotfiles from another profile
+    ([#12](https://github.com/deadc0de6/dotdrop/issues/12))
 
 # version 0.5
 
