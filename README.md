@@ -31,7 +31,7 @@ Features:
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) for more.
 
 Quick start:
-```
+```bash
 mkdir dotfiles && cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
@@ -53,7 +53,7 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
   * [List configured dotfiles](#list-configured-dotfiles)
   * [Execute an action when deploying a dotfile](#execute-an-action-when-deploying-a-dotfile)
   * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
-  * [Include all dotfiles from another profile](#include-all-dotfiles-from-another-profile)
+  * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
   * [Update dotbot](#update-dotbot)
 
 * [Template](#template)
@@ -72,8 +72,8 @@ why dotdrop rocks.
 # Installation
 
 The following will create a repository for your dotfiles and
-keep dotdrop as a submodules
-```
+keep dotdrop as a submodules:
+```bash
 mkdir dotfiles; cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
@@ -81,7 +81,7 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 ```
 
 Then install the requirements:
-```
+```bash
 sudo pip3 install -r dotdrop/requirements.txt
 ```
 
@@ -96,8 +96,8 @@ If starting fresh, the import function of dotdrop
 allows to easily and quickly get a running setup.
 
 Install dotdrop on one of your host and then import any dotfiles you want dotdrop to
-manage (be it a file or a folder)
-```
+manage (be it a file or a folder):
+```bash
 $ ./dotdrop.sh import ~/.vimrc ~/.xinitrc
 ```
 
@@ -110,8 +110,8 @@ Commit and push your changes.
 
 Then go to another host where your dotfiles need to be managed as well,
 clone the previously setup git tree
-and compare local dotfiles with the ones stored by dotdrop
-```
+and compare local dotfiles with the ones stored by dotdrop:
+```bash
 $ ./dotdrop.sh list
 $ ./dotdrop.sh compare --profile=<other-host-profile>
 ```
@@ -120,7 +120,7 @@ Then adapt any dotfile using the [template](#template) feature
 and set a new profile for the current host by simply adding lines in
 the config files, for example:
 
-```
+```yaml
 ...
 profiles:
   host1:
@@ -135,7 +135,7 @@ profiles:
 
 When done, you can install your dotfiles using
 
-```
+```bash
 $ ./dotdrop.sh install
 ```
 
@@ -228,7 +228,7 @@ the following entries:
 ## Installing dotfiles
 
 Simply run
-```
+```bash
 ./dotdrop.sh install
 ```
 
@@ -238,7 +238,7 @@ the host's hostname.
 ## Diffing your local dotfiles with dotdrop
 
 Compare local dotfiles with dotdrop's defined ones:
-```
+```bash
 ./dotdrop.sh compare
 ```
 
@@ -249,14 +249,14 @@ filesystem. It will copy the dotfile and update the
 config file automatically.
 
 For example to import *$HOME/.xinitrc*
-```
+```bash
 $ ./dotdrop.sh import $HOME/.xinitrc
 
 ```
 
 ## List the available profiles
 
-```
+```bash
 $ ./dotdrop.sh list
 ```
 
@@ -269,7 +269,7 @@ else than the default (the hostname).
 The following command lists the different dotfiles
 configured for a specific profile:
 
-```
+```bash
 $ ./dotdrop.sh listfiles --profile=<some-profile>
 ```
 
@@ -292,7 +292,7 @@ to manage vim's plugins, the following action could
 be set to update and install the plugins when `vimrc` is
 deployed:
 
-```
+```yaml
 actions:
   vundle: vim +VundleClean! +VundleInstall +VundleInstall! +qall
 config:
@@ -322,8 +322,8 @@ installed as a submodule within your git tree.
 You can thus simply run the following command
 to update the submodule:
 
-```
-git submodule update --recursive --remote
+```bash
+$ git submodule update --recursive --remote
 ```
 
 ## All dotfiles for a profile
@@ -332,7 +332,7 @@ To use all defined dotfiles for a profile, simply use
 the keyword `ALL`.
 
 For example:
-```
+```yaml
 dotfiles:
   f_xinitrc:
     dst: ~/.xinitrc
@@ -349,13 +349,13 @@ profiles:
     - f_vimrc
 ```
 
-## Include all dotfiles from another profile
+## Include dotfiles from another profile
 
 If one profile is using the entire set of another profile, one can use
 the `include` entry to avoid redundancy.
 
 For example:
-```
+```yaml
 profiles:
   host1:
       dotfiles:
@@ -401,7 +401,7 @@ The following file is the dotfile stored in dotdrop containing
 jinja2 directives for the deployment based on the profile used.
 
 Dotfile `<dotpath>/xinitrc`:
-```
+```bash
 #!/bin/bash
 
 # load Xresources
@@ -423,7 +423,7 @@ Of course any combination of the dotfiles (different sets)
 can be done once you have more dotfiles to deploy.
 
 `config.yaml` file:
-```
+```yaml
 config:
   backup: true
   create: true
@@ -443,19 +443,19 @@ profiles:
 
 Installing the dotfiles (the `--profile` switch is not needed if
 the hostname matches the entry in the config file):
-```
+```bash
 # on home computer
-./dotdrop.sh install --profile=home
+$ ./dotdrop.sh install --profile=home
 # on office computer
-./dotdrop.sh install --profile=office
+$ ./dotdrop.sh install --profile=office
 ```
 
 Comparing the dotfiles:
-```
+```bash
 # on home computer
-./dotdrop.sh compare
+$ ./dotdrop.sh compare
 # on office computer
-./dotdrop.sh compare
+$ ./dotdrop.sh compare
 ```
 
 # Related projects
