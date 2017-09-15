@@ -4,6 +4,10 @@ Modified:
 
   * migrate profiles' dotfiles under new entry "dotfiles" in config
 
+Added:
+
+  * adding "include" to include all dotfiles from another profile (#12)
+
 # version 0.5
 
 Added:
