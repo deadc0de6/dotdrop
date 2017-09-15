@@ -14,10 +14,11 @@ from action import Action
 class Cfg:
     key_all = 'ALL'
     key_config = 'config'
-    key_profiles = 'profiles'
     key_dotfiles = 'dotfiles'
     key_actions = 'actions'
     key_dotpath = 'dotpath'
+    key_profiles = 'profiles'
+    key_profiles_dots = 'dotfiles'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
@@ -53,7 +54,21 @@ class Cfg:
         if self.key_dotfiles not in self.content:
             self.log.err('missing \"%s\" in config' % (self.key_dotfiles))
             return False
+        if self.content[self.key_profiles]:
+            one = list(self.content[self.key_profiles].keys())[0]
+            if self.key_profiles_dots not in \
+                    self.content[self.key_profiles][one]:
+                self._migrate_conf()
         return True
+
+    def _migrate_conf(self):
+        """ make sure dotfiles are in a sub
+        "dotfiles" entry in profiles (#12) """
+        new = {}
+        for k, v in self.content[self.key_profiles].items():
+            new[k] = {self.key_profiles_dots: v}
+        self.content[self.key_profiles] = new
+        self._save(self.content, self.cfgpath)
 
     def _parse_actions(self, actions, entries):
         """ parse actions specified for an element """
@@ -77,6 +92,7 @@ class Cfg:
         self.profiles = self.content[self.key_profiles]
         if self.profiles is None:
             self.profiles = {}
+            self.content[self.key_profiles] = {}
         # parse the configs
         self.configs = self.content[self.key_config]
         # parse the dotfiles
@@ -96,12 +112,15 @@ class Cfg:
         # attribute dotfiles to each profile
         for k, v in self.profiles.items():
             self.prodots[k] = []
-            if v is None:
+            dots = None
+            if self.key_profiles_dots in v:
+                dots = v[self.key_profiles_dots]
+            if dots is None:
                 continue
-            if len(v) == 1 and v == [self.key_all]:
+            if len(dots) == 1 and dots == [self.key_all]:
                 self.prodots[k] = self.dotfiles.values()
             else:
-                self.prodots[k].extend([self.dotfiles[dot] for dot in v])
+                self.prodots[k].extend([self.dotfiles[d] for d in dots])
         # make sure we have an absolute dotpath
         self.curdotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self._get_abs_dotpath(self.curdotpath)
@@ -131,17 +150,25 @@ class Cfg:
             self.key_dotfiles_dst: dotfile.dst,
             self.key_dotfiles_src: dotfile.src
         }
+
         if link:
             dots[dotfile.key][self.key_dotfiles_link] = True
+
         profiles = self.profiles
-        if profile in profiles and profiles[profile] != [self.key_all]:
-            if self.content[self.key_profiles][profile] is None:
-                self.content[self.key_profiles][profile] = []
-            self.content[self.key_profiles][profile].append(dotfile.key)
+        if profile in profiles and \
+                profiles[profile][self.key_profiles_dots] != [self.key_all]:
+            # existing profile and not ALL
+            pro = self.content[self.key_profiles][profile]
+            if not pro[self.key_profiles_dots]:
+                pro[self.key_profiles_dots] = []
+            pro[self.key_profiles_dots].append(dotfile.key)
         elif profile not in profiles:
-            if self.content[self.key_profiles] is None:
-                self.content[self.key_profiles] = {}
-            self.content[self.key_profiles][profile] = [dotfile.key]
+            # new profile
+            if profile not in self.content[self.key_profiles]:
+                self.content[self.key_profiles][profile] = {}
+            pro = self.content[self.key_profiles][profile]
+            pro[self.key_profiles_dots] = [dotfile.key]
+        # assign profiles to the content
         self.profiles = self.content[self.key_profiles]
 
     def get_dotfiles(self, profile):
@@ -173,9 +200,14 @@ class Cfg:
         # temporary reset dotpath
         tmp = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self.curdotpath
-        with open(self.cfgpath, 'w') as f:
-            ret = yaml.dump(self.content, f,
-                            default_flow_style=False, indent=2)
+        ret = self._save(self.content, self.cfgpath)
         # restore dotpath
         self.configs[self.key_dotpath] = tmp
+        return ret
+
+    def _save(self, content, path):
+        ret = False
+        with open(path, 'w') as f:
+            ret = yaml.dump(content, f,
+                            default_flow_style=False, indent=2)
         return ret

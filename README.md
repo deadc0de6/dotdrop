@@ -121,10 +121,12 @@ the config files, for example:
 ...
 profiles:
   host1:
-  - f_vimrc
-  - f_xinitrc
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
   host2:
-  - f_vimrc
+    dotfiles:
+    - f_vimrc
 ...
 ```
 
@@ -203,6 +205,7 @@ the following entries:
 
 ```
   <some-name-usually-the-hostname>:
+    dotfiles:
     - <some-dotfile-key-name-defined-above>
     - <some-other-dotfile-key-name>
     - ...
@@ -295,7 +298,8 @@ dotfiles:
       - vundle
 profiles:
   home:
-  - f_vimrc
+    dotfiles:
+    - f_vimrc
 ```
 
 Thus when `f_vimrc` is installed, the command
@@ -379,9 +383,11 @@ dotfiles:
     src: xinitrc
 profiles:
   home:
-  - f_xinitrc
+    dotfiles:
+    - f_xinitrc
   office:
-  - f_xinitrc
+    dotfiles:
+    - f_xinitrc
 ```
 
 Installing the dotfiles (the `--profile` switch is not needed if
