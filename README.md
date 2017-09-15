@@ -52,6 +52,7 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
   * [List the available profiles](#List-the-available-profiles)
   * [List configured dotfiles](#List-configured-dotfiles)
   * [Execute an action when deploying a dotfile](#Execute-an-action-when-deploying-a-dotfile)
+  * [Include all dotfiles from another profile](#Include-all-dotfiles-from-another-profile)
   * [Update dotbot](#Update-dotbot)
 
 * [Template](#template)
@@ -201,14 +202,20 @@ the following entries:
       - <action-key>
 ```
 
-* **profiles** entry: a list of profiles with a sublist
+* **profiles** entry: a list of profiles with a list
   of dotfiles that need to be deployed for this profile
+  * `profiles`: the dotfiles associated to this profile
+  * `include`: include all dotfiles from another profile (optional)
 
 ```
   <some-name-usually-the-hostname>:
     dotfiles:
     - <some-dotfile-key-name-defined-above>
     - <some-other-dotfile-key-name>
+    - ...
+    # Optional
+    include:
+    - <some-other-profile>
     - ...
 ```
 
@@ -317,6 +324,25 @@ to update the submodule:
 ```
 git submodule update --recursive --remote
 ```
+
+## Include all dotfiles from another profile
+
+If one profile is using the entire set of another profile, one can use
+the `include` entry for a clean config file.
+
+For example:
+```
+profiles:
+  host1:
+      dotfiles:
+        - f_xinitrc
+      include:
+        - host2
+  host2:
+      dotfiles:
+        - f_vimrc
+```
+Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
 # Template
 
