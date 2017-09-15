@@ -1,3 +1,9 @@
+# version 0.6
+
+Modified:
+
+  * migrate profiles' dotfiles under new entry "dotfiles" in config
+
 # version 0.5
 
 Added:
