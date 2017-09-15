@@ -52,6 +52,7 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
   * [List the available profiles](#list-the-available-profiles)
   * [List configured dotfiles](#list-configured-dotfiles)
   * [Execute an action when deploying a dotfile](#execute-an-action-when-deploying-a-dotfile)
+  * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
   * [Include all dotfiles from another profile](#include-all-dotfiles-from-another-profile)
   * [Update dotbot](#update-dotbot)
 
@@ -325,10 +326,33 @@ to update the submodule:
 git submodule update --recursive --remote
 ```
 
+## All dotfiles for a profile
+
+To use all defined dotfiles for a profile, simply use
+the keyword `ALL`.
+
+For example:
+```
+dotfiles:
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+profiles:
+  host1:
+    dotfiles:
+    - ALL
+  host2:
+    dotfiles:
+    - f_vimrc
+```
+
 ## Include all dotfiles from another profile
 
 If one profile is using the entire set of another profile, one can use
-the `include` entry for a clean config file.
+the `include` entry to avoid redundancy.
 
 For example:
 ```
