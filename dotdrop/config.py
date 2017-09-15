@@ -101,7 +101,7 @@ class Cfg:
             self.content[self.key_profiles] = {}
             self.profiles = self.content[self.key_profiles]
         for k, v in self.profiles.items():
-            if not v[self.key_profiles_dots]:
+            if v[self.key_profiles_dots] is None:
                 v[self.key_profiles_dots] = []
 
         # parse the configs
