@@ -25,8 +25,8 @@ Features:
 * Allow dotfiles templating by leveraging [jinja2](http://jinja.pocoo.org/)
 * Comparison between local and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
-* Easy import dotfiles in dotdrop
-* Associate an action to the deployment of a dotfile
+* Easy import dotfiles
+* Associate an action to the deployment specific dotfiles
 
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) for more.
 
@@ -45,6 +45,15 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 
 * [Installation](#installation)
 * [Usage](#usage)
+
+  * [Installing dotfiles](#Installing-dotfiles)
+  * [Diffing your local dotfiles with dotdrop](#Diffing-your-local-dotfiles-with-dotdrop)
+  * [Import new dotfiles](#Import-new-dotfiles)
+  * [List the available profiles](#List-the-available-profiles)
+  * [List configured dotfiles](#List-configured-dotfiles)
+  * [Execute an action when deploying a dotfile](#Execute-an-action-when-deploying-a-dotfile)
+  * [Update dotbot](#Update-dotbot)
+
 * [Template](#template)
 * [Example](#example)
 
@@ -57,14 +66,6 @@ set of dotfiles that need to be deployed on a specific profile.
 
 See the [example](#example) for a concrete example on
 why dotdrop rocks.
-
-These are some dotfiles related projects that
-have inspired me for dotdrop:
-
-* [https://github.com/EvanPurkhiser/dots](https://github.com/EvanPurkhiser/dots)
-* [https://github.com/jaagr/dots](https://github.com/jaagr/dots)
-* [https://github.com/anishathalye/dotbot](https://github.com/anishathalye/dotbot)
-* [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
 
 # Installation
 
@@ -406,6 +407,18 @@ Comparing the dotfiles:
 # on office computer
 ./dotdrop.sh compare
 ```
+
+# Related projects
+
+These are some dotfiles related projects that
+have inspired me for dotdrop:
+
+* [https://github.com/EvanPurkhiser/dots](https://github.com/EvanPurkhiser/dots)
+* [https://github.com/jaagr/dots](https://github.com/jaagr/dots)
+* [https://github.com/anishathalye/dotbot](https://github.com/anishathalye/dotbot)
+* [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
+
+see also [github does dotfiles](https://dotfiles.github.io/)
 
 # Contribution
 
