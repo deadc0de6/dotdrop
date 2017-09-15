@@ -132,7 +132,7 @@ class Cfg:
                 continue
             dots = v[self.key_profiles_dots]
             if len(dots) == 1 and dots == [self.key_all]:
-                self.prodots[k] = self.dotfiles.values()
+                self.prodots[k] = list(self.dotfiles.values())
             else:
                 self.prodots[k].extend([self.dotfiles[d] for d in dots])
 
