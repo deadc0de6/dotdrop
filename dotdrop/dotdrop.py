@@ -141,27 +141,28 @@ def importer(opts, conf, paths):
         src = src.lstrip('.' + os.sep)
         dotfile = Dotfile(key, dst, src)
         srcf = os.path.join(CUR, opts['dotpath'], src)
-        if os.path.exists(srcf):
-            LOG.err('\"%s\" already exists, ignored !' % (srcf))
-            continue
-        conf.new(dotfile, opts['profile'], opts['link'])
-        cmd = ['mkdir', '-p', '%s' % (os.path.dirname(srcf))]
-        if opts['dry']:
-            LOG.dry('would run: %s' % (' '.join(cmd)))
+        retconf = conf.new(dotfile, opts['profile'], opts['link'])
+        if not os.path.exists(srcf):
+            cmd = ['mkdir', '-p', '%s' % (os.path.dirname(srcf))]
+            if opts['dry']:
+                LOG.dry('would run: %s' % (' '.join(cmd)))
+            else:
+                utils.run(cmd, raw=False, log=False)
+            cmd = ['cp', '-r', '-L', dst, srcf]
+            if opts['dry']:
+                LOG.dry('would run: %s' % (' '.join(cmd)))
+                if opts['link']:
+                    LOG.dry('would symlink %s to %s' % (srcf, dst))
+            else:
+                utils.run(cmd, raw=False, log=False)
+                if opts['link']:
+                    utils.remove(dst)
+                    os.symlink(srcf, dst)
+        if retconf:
+            LOG.sub('\"%s\" imported' % (path))
+            cnt += 1
         else:
-            utils.run(cmd, raw=False, log=False)
-        cmd = ['cp', '-r', '-L', dst, srcf]
-        if opts['dry']:
-            LOG.dry('would run: %s' % (' '.join(cmd)))
-            if opts['link']:
-                LOG.dry('would symlink %s to %s' % (srcf, dst))
-        else:
-            utils.run(cmd, raw=False, log=False)
-            if opts['link']:
-                utils.remove(dst)
-                os.symlink(srcf, dst)
-        LOG.sub('\"%s\" imported' % (path))
-        cnt += 1
+            LOG.warn('\"%s\" ignored' % (path))
     if opts['dry']:
         LOG.dry('new config file would be:')
         LOG.raw(conf.dump())

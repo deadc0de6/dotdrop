@@ -22,3 +22,9 @@ class Dotfile:
     def __str__(self):
         return 'key:%s, src: %s, dst: %s, link: %s' % (self.key, self.src,
                                                        self.dst, self.link)
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __hash__(self):
+        return hash(self.dst) ^ hash(self.src) ^ hash(self.key)

@@ -19,6 +19,7 @@ class Cfg:
     key_dotpath = 'dotpath'
     key_profiles = 'profiles'
     key_profiles_dots = 'dotfiles'
+    key_profiles_incl = 'include'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
@@ -29,10 +30,15 @@ class Cfg:
             raise ValueError('config file does not exist')
         self.cfgpath = cfgpath
         self.log = Logger()
+        # link inside content
         self.configs = {}
-        self.dotfiles = {}
-        self.actions = {}
+        # link inside content
         self.profiles = {}
+        # not linked to content
+        self.dotfiles = {}
+        # not linked to content
+        self.actions = {}
+        # not linked to content
         self.prodots = {}
         if not self._load_file():
             raise ValueError('config is not valid')
@@ -88,43 +94,69 @@ class Cfg:
             if self.content[self.key_actions] is not None:
                 for k, v in self.content[self.key_actions].items():
                     self.actions[k] = Action(k, v)
+
         # parse the profiles
         self.profiles = self.content[self.key_profiles]
         if self.profiles is None:
-            self.profiles = {}
             self.content[self.key_profiles] = {}
+            self.profiles = self.content[self.key_profiles]
+        for k, v in self.profiles.items():
+            if not v[self.key_profiles_dots]:
+                v[self.key_profiles_dots] = []
+
         # parse the configs
         self.configs = self.content[self.key_config]
+
         # parse the dotfiles
-        if self.content[self.key_dotfiles] is not None:
-            for k, v in self.content[self.key_dotfiles].items():
-                src = v[self.key_dotfiles_src]
-                dst = v[self.key_dotfiles_dst]
-                link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
-                    in v else False
-                entries = v[self.key_dotfiles_actions] if \
-                    self.key_dotfiles_actions in v else []
-                res, actions = self._parse_actions(self.actions, entries)
-                if not res:
-                    return False
-                self.dotfiles[k] = Dotfile(k, dst, src,
-                                           link=link, actions=actions)
-        # attribute dotfiles to each profile
+        if not self.content[self.key_dotfiles]:
+            self.content[self.key_dotfiles] = {}
+        for k, v in self.content[self.key_dotfiles].items():
+            src = v[self.key_dotfiles_src]
+            dst = v[self.key_dotfiles_dst]
+            link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
+                in v else False
+            entries = v[self.key_dotfiles_actions] if \
+                self.key_dotfiles_actions in v else []
+            res, actions = self._parse_actions(self.actions, entries)
+            if not res:
+                return False
+            self.dotfiles[k] = Dotfile(k, dst, src,
+                                       link=link, actions=actions)
+
+        # assign dotfiles to each profile
         for k, v in self.profiles.items():
             self.prodots[k] = []
-            dots = None
-            if self.key_profiles_dots in v:
-                dots = v[self.key_profiles_dots]
-            if dots is None:
+            if self.key_profiles_dots not in v:
+                v[self.key_profiles_dots] = []
+            if not v[self.key_profiles_dots]:
                 continue
+            dots = v[self.key_profiles_dots]
             if len(dots) == 1 and dots == [self.key_all]:
                 self.prodots[k] = self.dotfiles.values()
             else:
                 self.prodots[k].extend([self.dotfiles[d] for d in dots])
+
+        # handle "include" for each profile
+        for k in self.profiles.keys():
+            dots = self._get_included_dotfiles(k)
+            self.prodots[k].extend(dots)
+            # no duplicates
+            self.prodots[k] = list(set(self.prodots[k]))
+
         # make sure we have an absolute dotpath
         self.curdotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self._get_abs_dotpath(self.curdotpath)
         return True
+
+    def _get_included_dotfiles(self, profile):
+        included = []
+        if self.key_profiles_incl not in self.profiles[profile]:
+            return included
+        if not self.profiles[profile][self.key_profiles_incl]:
+            return included
+        for other in self.profiles[profile][self.key_profiles_incl]:
+            included.extend(self.prodots[other])
+        return included
 
     def _get_abs_dotpath(self, dotpath):
         """ transform dotpath to an absolute path """
@@ -136,40 +168,44 @@ class Cfg:
 
     def new(self, dotfile, profile, link=False):
         """ import new dotfile """
-        dots = self.content[self.key_dotfiles]
-        if dots is None:
-            self.content[self.key_dotfiles] = {}
-            dots = self.content[self.key_dotfiles]
-        if self.content[self.key_dotfiles] and dotfile.key in dots:
-            self.log.err('\"%s\" entry already exists in dotfiles' %
-                         (dotfile.key))
-            return False
+        # keep it short
         home = os.path.expanduser('~')
         dotfile.dst = dotfile.dst.replace(home, '~')
+
+        # ensure content is valid
+        if profile not in self.profiles:
+            self.profiles[profile] = {self.key_profiles_dots: []}
+
+        # when dotfile already there
+        if dotfile.key in self.dotfiles.keys():
+            # already in it
+            if profile in self.prodots and dotfile in self.prodots[profile]:
+                self.log.err('\"%s\" already present' % (dotfile.key))
+                return False
+
+            # add for this profile
+            if profile not in self.prodots:
+                self.prodots[profile] = []
+            self.prodots[profile].append(dotfile)
+            l = self.content[self.key_profiles][profile]
+            l[self.key_profiles_dots].append(dotfile.key)
+            return True
+
+        # adding the dotfile
+        dots = self.content[self.key_dotfiles]
         dots[dotfile.key] = {
             self.key_dotfiles_dst: dotfile.dst,
-            self.key_dotfiles_src: dotfile.src
+            self.key_dotfiles_src: dotfile.src,
         }
-
         if link:
+            # avoid putting it everywhere
             dots[dotfile.key][self.key_dotfiles_link] = True
 
-        profiles = self.profiles
-        if profile in profiles and \
-                profiles[profile][self.key_profiles_dots] != [self.key_all]:
-            # existing profile and not ALL
-            pro = self.content[self.key_profiles][profile]
-            if not pro[self.key_profiles_dots]:
-                pro[self.key_profiles_dots] = []
-            pro[self.key_profiles_dots].append(dotfile.key)
-        elif profile not in profiles:
-            # new profile
-            if profile not in self.content[self.key_profiles]:
-                self.content[self.key_profiles][profile] = {}
-            pro = self.content[self.key_profiles][profile]
-            pro[self.key_profiles_dots] = [dotfile.key]
-        # assign profiles to the content
-        self.profiles = self.content[self.key_profiles]
+        # link it to this profile
+        pro = self.content[self.key_profiles][profile]
+        pro[self.key_profiles_dots].append(dotfile.key)
+
+        return True
 
     def get_dotfiles(self, profile):
         """ returns a list of dotfiles for a specific profile """
