@@ -80,12 +80,11 @@ class Cfg:
         """ parse actions specified for an element """
         res = []
         for entry in entries:
-            if entry in actions.keys():
-                res.append(actions[entry])
-            else:
-                self.log.err('unknown action \"%s\"' % (entry))
-                return False, []
-        return True, res
+            if entry not in actions.keys():
+                self.log.warn('unknown action \"%s\"' % (entry))
+                continue
+            res.append(actions[entry])
+        return res
 
     def _parse(self):
         """ parse config file """
@@ -117,9 +116,7 @@ class Cfg:
                 in v else False
             entries = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
-            res, actions = self._parse_actions(self.actions, entries)
-            if not res:
-                return False
+            actions = self._parse_actions(self.actions, entries)
             self.dotfiles[k] = Dotfile(k, dst, src,
                                        link=link, actions=actions)
 
