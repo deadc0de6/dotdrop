@@ -61,20 +61,18 @@ class Cfg:
             self.log.err('missing \"%s\" in config' % (self.key_dotfiles))
             return False
         if self.content[self.key_profiles]:
-            one = list(self.content[self.key_profiles].keys())[0]
-            if self.key_profiles_dots not in \
-                    self.content[self.key_profiles][one]:
-                self._migrate_conf()
-        return True
+            # make sure dotfiles are in a sub called "dotfiles"
+            pro = self.content[self.key_profiles]
+            tosave = False
+            for k in pro.keys():
+                if self.key_profiles_dots not in pro[k]:
+                    pro[k] = {self.key_profiles_dots: pro[k]}
+                    tosave = True
+            if tosave:
+                # save the new config file
+                self._save(self.content, self.cfgpath)
 
-    def _migrate_conf(self):
-        """ make sure dotfiles are in a sub
-        "dotfiles" entry in profiles (#12) """
-        new = {}
-        for k, v in self.content[self.key_profiles].items():
-            new[k] = {self.key_profiles_dots: v}
-        self.content[self.key_profiles] = new
-        self._save(self.content, self.cfgpath)
+        return True
 
     def _parse_actions(self, actions, entries):
         """ parse actions specified for an element """
@@ -166,6 +164,13 @@ class Cfg:
             return absconf
         return dotpath
 
+    def _save(self, content, path):
+        ret = False
+        with open(path, 'w') as f:
+            ret = yaml.dump(content, f,
+                            default_flow_style=False, indent=2)
+        return ret
+
     def new(self, dotfile, profile, link=False):
         """ import new dotfile """
         # keep it short
@@ -239,11 +244,4 @@ class Cfg:
         ret = self._save(self.content, self.cfgpath)
         # restore dotpath
         self.configs[self.key_dotpath] = tmp
-        return ret
-
-    def _save(self, content, path):
-        ret = False
-        with open(path, 'w') as f:
-            ret = yaml.dump(content, f,
-                            default_flow_style=False, indent=2)
         return ret
