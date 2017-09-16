@@ -155,6 +155,9 @@ class Cfg:
         if not self.profiles[profile][self.key_profiles_incl]:
             return included
         for other in self.profiles[profile][self.key_profiles_incl]:
+            if other not in self.prodots:
+                self.log.warn('unknown included profile \"%s\"' % (other))
+                continue
             included.extend(self.prodots[other])
         return included
 

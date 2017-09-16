@@ -79,9 +79,6 @@ class TestConfig(unittest.TestCase):
                 pf2key: {'dotfiles': [df1key]}
                 }
 
-        print(content)
-        print(content['profiles'])
-
         # save the new config
         with open(confpath, 'w') as f:
             yaml.dump(content, f, default_flow_style=False, indent=2)
@@ -104,6 +101,23 @@ class TestConfig(unittest.TestCase):
         dotfiles = conf.get_dotfiles(pf2key)
         self.assertTrue(df1key in [x.key for x in dotfiles])
         self.assertFalse(df2key in [x.key for x in dotfiles])
+
+        # test not existing included profile
+        # edit the config
+        with open(confpath, 'r') as f:
+            content = yaml.load(f)
+        content['profiles'] = {
+                pf1key: {'dotfiles': [df2key], 'include': ['host2']},
+                pf2key: {'dotfiles': [df1key], 'include': ['host3']}
+                }
+
+        # save the new config
+        with open(confpath, 'w') as f:
+            yaml.dump(content, f, default_flow_style=False, indent=2)
+
+        # do the tests
+        conf = Cfg(confpath)
+        self.assertTrue(conf is not None)
 
 
 def main():
