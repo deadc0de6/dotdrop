@@ -148,7 +148,7 @@ def importer(opts, conf, paths):
                 LOG.dry('would run: %s' % (' '.join(cmd)))
             else:
                 utils.run(cmd, raw=False, log=False)
-            cmd = ['cp', '-r', '-L', dst, srcf]
+            cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: %s' % (' '.join(cmd)))
                 if opts['link']:
