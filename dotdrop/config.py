@@ -126,7 +126,7 @@ class Cfg:
             if not v[self.key_profiles_dots]:
                 continue
             dots = v[self.key_profiles_dots]
-            if len(dots) == 1 and dots == [self.key_all]:
+            if self.key_all in dots:
                 self.prodots[k] = list(self.dotfiles.values())
             else:
                 self.prodots[k].extend([self.dotfiles[d] for d in dots])
@@ -192,8 +192,10 @@ class Cfg:
             if profile not in self.prodots:
                 self.prodots[profile] = []
             self.prodots[profile].append(dotfile)
+
             l = self.content[self.key_profiles][profile]
-            l[self.key_profiles_dots].append(dotfile.key)
+            if self.key_all not in l[self.key_profiles_dots]:
+                l[self.key_profiles_dots].append(dotfile.key)
             return True
 
         # adding the dotfile
@@ -208,7 +210,8 @@ class Cfg:
 
         # link it to this profile
         pro = self.content[self.key_profiles][profile]
-        pro[self.key_profiles_dots].append(dotfile.key)
+        if self.key_all not in pro[self.key_profiles_dots]:
+            pro[self.key_profiles_dots].append(dotfile.key)
 
         return True
 
