@@ -389,17 +389,17 @@ Note that dotdrop uses different delimiters than
 ## Available variables
 ### Profile
 
-`{{@@ profile @@}}` contains the profile being used. Below in the example you can see how this is useful.
+`{{@@ profile @@}}` contains the profile provided to dotdrop. Below example shows how it is used.
 
 ### Environment variables
 
-It's possible to access environment variables inside the templates. You can utilize this functionality like this:
+It's possible to access environment variables inside the templates. This feature can be used like this:
 
 ```
 {{@@ env['MY_VAR'] @@}}
 ```
 
-This allows for storing host-specific properties and/or secrets as environment variables.
+This allows for storing host-specific properties and/or secrets in environment.
 
 You can have an `.env` file in the directory where your `config.yaml` lies:
 
