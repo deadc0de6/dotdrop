@@ -387,6 +387,7 @@ Note that dotdrop uses different delimiters than
 * comment end = `@@#}`
 
 ## Available variables
+
 ### Profile
 
 `{{@@ profile @@}}` contains the profile provided to dotdrop. Below example shows how it is used.
@@ -399,7 +400,7 @@ It's possible to access environment variables inside the templates. This feature
 {{@@ env['MY_VAR'] @@}}
 ```
 
-This allows for storing host-specific properties and/or secrets in environment.
+This allows for storing host-specific properties and/or secrets in environment variables.
 
 You can have an `.env` file in the directory where your `config.yaml` lies:
 
@@ -496,6 +497,10 @@ $ ./dotdrop.sh compare
 # on office computer
 $ ./dotdrop.sh compare
 ```
+
+For more examples, see how people are using dotdrop:
+
+* [https://github.com/open-dynaMIX/dotfiles](https://github.com/open-dynaMIX/dotfiles)
 
 # Related projects
 
