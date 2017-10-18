@@ -416,7 +416,7 @@ Of course, this file should not be tracked by git (put it in your `.gitignore`).
 
 Then you can invoke dotdrop with the help of an alias like that:
 ```
-alias dotdrop='eval $(cat ~/dotfiles/.env | egrep -v "^#") ~/dotfiles/dotdrop.sh'
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
 ```
 This loads all the variables from `.env` (while omitting lines starting with `#`) before calling `~/dotfiles/dotdrop.sh`.
 
