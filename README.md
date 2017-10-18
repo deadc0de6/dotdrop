@@ -386,6 +386,40 @@ Note that dotdrop uses different delimiters than
 * comment start = `{#@@`
 * comment end = `@@#}`
 
+## Available variables
+### Profile
+
+`{{@@ profile @@}}` contains the profile provided to dotdrop. Below example shows how it is used.
+
+### Environment variables
+
+It's possible to access environment variables inside the templates. This feature can be used like this:
+
+```
+{{@@ env['MY_VAR'] @@}}
+```
+
+This allows for storing host-specific properties and/or secrets in environment.
+
+You can have an `.env` file in the directory where your `config.yaml` lies:
+
+```
+# My variables for this host
+var1="some value"
+var2="some other value"
+
+# Some secrets
+pass="verysecurepassword"
+```
+Of course, this file should not be tracked by git (put it in your `.gitignore`).
+
+
+Then you can invoke dotdrop with the help of an alias like that:
+```
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
+```
+This loads all the variables from `.env` (while omitting lines starting with `#`) before calling `~/dotfiles/dotdrop.sh`.
+
 # Example
 
 Let's consider two hosts:

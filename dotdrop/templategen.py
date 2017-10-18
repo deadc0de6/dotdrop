@@ -6,7 +6,7 @@ jinja2 template generator
 
 import os
 import utils
-from jinja2 import Environment, Template, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -48,12 +48,12 @@ class Templategen:
         length = len(self.base) + 1
         try:
             template = self.env.get_template(src[length:])
-            content = template.render(profile=profile)
+            content = template.render(profile=profile, env=os.environ)
         except UnicodeDecodeError:
             data = self._read_bad_encoded_text(src)
             template = self.env.from_string(data)
+            content = template.render(profile=profile, env=os.environ)
 
-        content = template.render(profile=profile)
         content = content.encode('UTF-8')
         return content
 
