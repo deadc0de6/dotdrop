@@ -502,6 +502,7 @@ For more examples, see how people are using dotdrop:
 
 * [https://github.com/open-dynaMIX/dotfiles](https://github.com/open-dynaMIX/dotfiles)
 * [https://github.com/moyiz/dotfiles](https://github.com/moyiz/dotfiles)
+* [https://github.com/japorized/dotfiles](https://github.com/japorized/dotfiles)
 
 # Related projects
 
