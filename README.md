@@ -41,6 +41,16 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 ./dotdrop.sh --help
 ```
 
+## Why dotdrop ?
+
+There exist many tools to manage dotfiles however not
+many allow to deploy different versions of the same dotfile
+on different hosts. Moreover dotdrop allows to specify the
+set of dotfiles that need to be deployed on a specific profile.
+
+See the [example](#example) for a concrete example on
+why dotdrop rocks.
+
 ---
 
 **Table of Contents**
@@ -60,16 +70,6 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 
 * [Template](#template)
 * [Example](#example)
-
-## Why dotdrop ?
-
-There exist many tools to manage dotfiles however not
-many allow to deploy different versions of the same dotfile
-on different hosts. Moreover dotdrop allows to specify the
-set of dotfiles that need to be deployed on a specific profile.
-
-See the [example](#example) for a concrete example on
-why dotdrop rocks.
 
 # Installation
 
