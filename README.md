@@ -16,7 +16,7 @@ a different set for your office desktop. Those sets may overlap and different
 versions of the same dotfile can be deployed on different predefined *profiles*.
 Another use case is when you have a main set of dotfiles for your
 everyday's host and a sub-set you only need to deploy to temporary
-hosts (cloud, etc) that may be using
+hosts (cloud VM, etc) that may be using
 a slightly different version of some of the dotfiles.
 
 Features:
@@ -27,7 +27,7 @@ Features:
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles
 * Handle files and directories
-* Associate an action to the deployment specific dotfiles
+* Associate an action to the deployment of specific dotfiles
 
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) and
 and the [example](#example) for more.
@@ -70,6 +70,7 @@ why dotdrop rocks.
 
 * [Template](#template)
 * [Example](#example)
+* [People using dotdrop](#people-using-dotdrop)
 
 # Installation
 
@@ -94,7 +95,7 @@ For MacOS users, make sure to install `realpath` through homebrew
 
 # Usage
 
-If starting fresh, the import function of dotdrop
+If starting fresh, the `import` command of dotdrop
 allows to easily and quickly get a running setup.
 
 Install dotdrop on one of your host and then import any dotfiles you want dotdrop to
@@ -193,8 +194,9 @@ the following entries:
   * `dotpath`: path to the folder containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
 
-* **dotfiles** entry: a list of dotfiles in the form
-  * When `link` is true, dotdrop will create a link instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
+* **dotfiles** entry: a list of dotfiles
+  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
+  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
 ```
   <dotfile-key-name>:
     dst: <where-this-file-is-deployed>
@@ -234,7 +236,7 @@ Simply run
 ./dotdrop.sh install
 ```
 
-Use the *--profile* switch to specify a profile if not using
+Use the `--profile` switch to specify a profile if not using
 the host's hostname.
 
 ## Diffing your local dotfiles with dotdrop
@@ -250,7 +252,7 @@ Dotdrop allows to import dotfiles directly from the
 filesystem. It will copy the dotfile and update the
 config file automatically.
 
-For example to import *~/.xinitrc*
+For example to import `~/.xinitrc`
 ```bash
 $ ./dotdrop.sh import ~/.xinitrc
 
@@ -263,7 +265,7 @@ $ ./dotdrop.sh list
 ```
 
 Dotdrop allows to choose which profile to use
-with the *--profile* switch if you used something
+with the *--profile* switch if you use something
 else than the default (the hostname).
 
 ## List configured dotfiles
@@ -497,6 +499,8 @@ $ ./dotdrop.sh compare
 # on office computer
 $ ./dotdrop.sh compare
 ```
+
+# People using dotdrop
 
 For more examples, see how people are using dotdrop:
 
