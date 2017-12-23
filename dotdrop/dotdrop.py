@@ -10,7 +10,18 @@ import subprocess
 from docopt import docopt
 
 # local imports
-from . import __version__ as VERSION
+try:
+    from . import __version__ as VERSION
+except:
+    errmsg = '''
+Dotdrop has been updated to be included in pypi and
+the way it needs to be called has changed.
+First update dotdrop:
+    $ git submodule update --init --recursive
+And then re-run the bootstrap script:
+    $ ./dotdrop/bootstrap.sh
+'''
+    print(errmsg)
 from .logger import Logger
 from .templategen import Templategen
 from .installer import Installer
