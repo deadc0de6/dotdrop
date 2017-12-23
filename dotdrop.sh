@@ -25,6 +25,6 @@ cd "${cur}" || { echo "Folder \"${cur}\" doesn't exist, aborting." && exit; }
 # init the submodule
 git submodule update --init --recursive
 # launch dotdrop
-python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
+PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
 # pivot back
 cd "${opwd}" || { echo "Folder \"${opwd}\" doesn't exist, aborting." && exit; }
