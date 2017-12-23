@@ -17,17 +17,17 @@ except:
 Dotdrop has been updated to be included in pypi and
 the way it needs to be called has slightly changed.
 
+If you want to keep it as a submodule, simply do the following:
+
 First get the latest version of dotdrop:
     $ git submodule update --init --recursive
 And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
 
-Instead of calling dotdrop directly like this:
-    $ python3 dotdrop/dotdrop/dotdrop.py ...
-Call it like this:
-    $ PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop ...
+Otherwise you can simply install dotdrop from pypi:
+    $ sudo pip3 install dotdrop
 
-See TODO
+see https://github.com/deadc0de6/dotdrop#migrate-from-submodule
 '''
     print(errmsg)
     sys.exit(1)
@@ -52,13 +52,13 @@ USAGE = """
 %s
 
 Usage:
-  dotdrop.py install [-fndVc <path>] [--profile=<profile>]
-  dotdrop.py compare [-Vc <path>] [--profile=<profile>] [--files=<files>]
-  dotdrop.py import [-ldVc <path>] [--profile=<profile>] <paths>...
-  dotdrop.py listfiles [-Vc <path>] [--profile=<profile>]
-  dotdrop.py list [-Vc <path>]
-  dotdrop.py --help
-  dotdrop.py --version
+  dotdrop install   [-fndVc <path>] [--profile=<profile>]
+  dotdrop compare   [-Vc <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop import    [-ldVc <path>] [--profile=<profile>] <paths>...
+  dotdrop listfiles [-Vc <path>] [--profile=<profile>]
+  dotdrop list      [-Vc <path>]
+  dotdrop --help
+  dotdrop --version
 
 Options:
   --profile=<profile>     Specify the profile to use [default: %s].
