@@ -7,15 +7,17 @@ entry point
 import os
 import sys
 import subprocess
-import utils
 from docopt import docopt
-from logger import Logger
-from templategen import Templategen
-from installer import Installer
-from dotfile import Dotfile
-from config import Cfg
 
-VERSION = '0.6'
+# local imports
+from . import __version__ as VERSION
+from .logger import Logger
+from .templategen import Templategen
+from .installer import Installer
+from .dotfile import Dotfile
+from .config import Cfg
+from .utils import *
+
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 HOSTNAME = os.uname()[1]
@@ -40,7 +42,7 @@ Usage:
 
 Options:
   --profile=<profile>     Specify the profile to use [default: %s].
-  -c --cfg=<path>         Path to the config [default: %s/config.yaml].
+  -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
@@ -50,7 +52,7 @@ Options:
   -v --version            Show version.
   -h --help               Show this screen.
 
-""" % (BANNER, HOSTNAME, CUR)
+""" % (BANNER, HOSTNAME)
 
 ###########################################################
 # entry point
@@ -147,16 +149,16 @@ def importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: %s' % (' '.join(cmd)))
             else:
-                utils.run(cmd, raw=False, log=False)
+                run(cmd, raw=False, log=False)
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: %s' % (' '.join(cmd)))
                 if opts['link']:
                     LOG.dry('would symlink %s to %s' % (srcf, dst))
             else:
-                utils.run(cmd, raw=False, log=False)
+                run(cmd, raw=False, log=False)
                 if opts['link']:
-                    utils.remove(dst)
+                    remove(dst)
                     os.symlink(srcf, dst)
         if retconf:
             LOG.sub('\"%s\" imported' % (path))
@@ -226,7 +228,7 @@ def main():
 
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
-            tmp = utils.get_tmpdir()
+            tmp = get_tmpdir()
             if compare(opts, conf, tmp, args['--files']):
                 LOG.raw('\ntemporary files available under %s' % (tmp))
             else:

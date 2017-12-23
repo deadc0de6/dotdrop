@@ -7,8 +7,10 @@ utilities
 import subprocess
 import tempfile
 import os
-from logger import Logger
 from shutil import rmtree
+
+# local import
+from dotdrop.logger import Logger
 
 
 LOG = Logger()

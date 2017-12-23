@@ -18,7 +18,6 @@ fi
 args=("$@")
 cur=$(dirname "$(${rl} "${0}")")
 opwd=$(pwd)
-bin="${cur}/dotdrop/dotdrop.py"
 cfg="${cur}/config.yaml"
 
 # pivot
@@ -26,6 +25,6 @@ cd "${cur}" || { echo "Folder \"${cur}\" doesn't exist, aborting." && exit; }
 # init the submodule
 git submodule update --init --recursive
 # launch dotdrop
-python3 "${bin}" --cfg="${cfg}" "${args[@]}"
+python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
 # pivot back
 cd "${opwd}" || { echo "Folder \"${opwd}\" doesn't exist, aborting." && exit; }

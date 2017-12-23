@@ -5,8 +5,10 @@ handle the installation of dotfiles
 """
 
 import os
-import utils
-from logger import Logger
+
+# local imports
+from dotdrop.logger import Logger
+import dotdrop.utils as utils
 
 
 class Installer:

@@ -5,7 +5,9 @@ Represent an action in dotdrop
 """
 
 import subprocess
-from logger import Logger
+
+# local imports
+from dotdrop.logger import Logger
 
 
 class Action:

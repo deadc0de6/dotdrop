@@ -6,9 +6,11 @@ config file manager
 
 import yaml
 import os
-from dotfile import Dotfile
-from logger import Logger
-from action import Action
+
+# local import
+from dotdrop.dotfile import Dotfile
+from dotdrop.logger import Logger
+from dotdrop.action import Action
 
 
 class Cfg:

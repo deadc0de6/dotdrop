@@ -5,8 +5,10 @@ jinja2 template generator
 """
 
 import os
-import utils
 from jinja2 import Environment, FileSystemLoader
+
+# local imports
+import dotdrop.utils as utils
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
