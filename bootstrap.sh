@@ -6,7 +6,7 @@ fold="dotfiles"
 conf="config.yaml"
 
 # copy dotdrop entry point
-cp dotdrop/dotdrop.sh > dotdrop.sh
+cp dotdrop/dotdrop.sh dotdrop.sh
 chmod +x dotdrop.sh
 mkdir -p $fold
 
