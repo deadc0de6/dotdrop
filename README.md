@@ -79,9 +79,6 @@ why dotdrop rocks.
 There's two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
 to your dotfiles git tree or system-wide [through pypi](#with-pypi).
 
-For MacOS users, make sure to install `realpath` through homebrew
-(part of *coreutils*).
-
 ## With pypi
 
 Start by installing dotdrop
@@ -98,7 +95,7 @@ $ git init
 To avoid the need to provide the config file path to dotdrop each time it
 is call, you can create an alias:
 ```
-alias dotdrop='cd <path-to-your-dotfiles-git-tree> && dotdrop'
+alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
 
 Finally import your dotfiles as described [below](#usage).
@@ -120,42 +117,16 @@ Then install the requirements:
 $ sudo pip3 install -r dotdrop/requirements.txt
 ```
 
+For MacOS users, make sure to install `realpath` through homebrew
+(part of *coreutils*).
+
 Using this solution will need you to work with dotdrop by
-using the generated script `dotdrop.sh` at the base
+using the generated script `dotdrop.sh` at the root
 of your dotfiles repository. For any documentation below,
 simply replace the call to `dotdrop` by the bash script
 `dotdrop.sh`.
 
 Finally import your dotfiles as described [below](#usage).
-
-## Migrate from submodule
-
-Initially dotdrop was used as a submodule directly in the
-dotfiles git tree. It has since been packaged in pypi and
-can thus be used directly.
-
-If you want to keep it as a submodule, simply do the following
-```bash
-$ cd <dotfiles-directory>
-
-## get latest version
-$ git submodule update --init --recursive
-
-## update the bash script wrapper
-$ ./dotdrop/bootstrap.sh
-```
-
-Otherwise, simply install it from pypi as explained [above](#with-pypi)
-and get rid of the submodule:
-
-* move to the dotfiles directory where dotdrop is used as a submodule
-* remove the entire `submodule "dotdrop"` section in `.gitmodules`
-* stage the change with `git add .gitmodules`
-* remove the entire `submodule "dotdrop"` section in `.git/config`
-* remove the submodule with `git rm --cached dotdrop`
-* remove the submodule from .git with `rm -rf .git/modules/dotdrop`
-* commit the changes
-* delete any remaining files from the dotdrop submodule with `rm -rf dotdrop`
 
 # Usage
 
@@ -212,7 +183,6 @@ For additional usage see the help:
 
 ```
 $ dotdrop --help
-
      _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
@@ -220,17 +190,17 @@ $ dotdrop --help
                                |_|
 
 Usage:
-  dotdrop install [-fndVc <path>] [--profile=<profile>]
-  dotdrop compare [-Vc <path>] [--profile=<profile>] [--files=<files>]
-  dotdrop import [-ldVc <path>] [--profile=<profile>] <paths>...
-  dotdrop listfiles [-Vc <path>] [--profile=<profile>]
-  dotdrop list [-Vc <path>]
+  dotdrop install   [-fndV] [-c <path>] [-p <profile>]
+  dotdrop compare   [-V]    [-c <path>] [-p <profile>] [--files=<files>]
+  dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
+  dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
+  dotdrop list      [-V]    [-c <path>]
   dotdrop --help
   dotdrop --version
 
 Options:
-  --profile=<profile>     Specify the profile to use [default: thor].
-  -c --cfg=<path>         Path to the config [default: /home/drits/gits/github/dotdrop/config.yaml].
+  -p --profile=<profile>  Specify the profile to use [default: thor].
+  -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
@@ -590,6 +560,36 @@ have inspired me for dotdrop:
 * [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
 
 See also [github does dotfiles](https://dotfiles.github.io/)
+
+# Migrate from submodule
+
+Initially dotdrop was used as a submodule directly in the
+dotfiles git tree. It has since been packaged in pypi and
+can thus be used directly.
+
+If you want to keep it as a submodule, simply do the following
+```bash
+$ cd <dotfiles-directory>
+
+## get latest version
+$ git submodule update --init --recursive
+
+## update the bash script wrapper
+$ ./dotdrop/bootstrap.sh
+```
+
+Otherwise, simply install it from pypi as explained [above](#with-pypi)
+and get rid of the submodule:
+
+* move to the dotfiles directory where dotdrop is used as a submodule
+* remove the entire `submodule "dotdrop"` section in `.gitmodules`
+* stage the change with `git add .gitmodules`
+* remove the entire `submodule "dotdrop"` section in `.git/config`
+* remove the submodule with `git rm --cached dotdrop`
+* remove the submodule from .git with `rm -rf .git/modules/dotdrop`
+* commit the changes
+* delete any remaining files from the dotdrop submodule with `rm -rf dotdrop`
+
 
 # Contribution
 
