@@ -24,12 +24,7 @@ sub="dotdrop"
 # pivot
 cd "${cur}" || { echo "Folder \"${cur}\" doesn't exist, aborting." && exit; }
 # init/update the submodule
-if [ -e ${sub} ]; then
-  cd dotdrop
-  git checkout master
-  git pull
-  cd ..
-fi
+git submodule foreach git pull origin master
 # launch dotdrop
 PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
 # pivot back

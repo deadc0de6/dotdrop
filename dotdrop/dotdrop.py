@@ -20,9 +20,7 @@ the way it needs to be called has slightly changed.
 If you want to keep it as a submodule (recommended), simply do the following:
 
 First get the latest version of dotdrop:
-    $ cd dotdrop
-    $ git checkout master
-    $ git pull
+    $ git submodule foreach git pull origin master
 And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
 

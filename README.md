@@ -361,7 +361,7 @@ be executed.
 
 If used as a submodule, update it with
 ```bash
-$ git submodule update --recursive --remote
+$ git submodule foreach git pull origin master
 ```
 
 Through pypi:
@@ -577,10 +577,7 @@ If you want to keep it as a submodule, simply do the following
 $ cd <dotfiles-directory>
 
 ## get latest version of the submodule
-$ cd dotdrop/
-$ git checkout master
-$ git pull
-$ cd ../
+$ git submodule foreach git pull origin master
 
 ## update the bash script wrapper
 $ ./dotdrop/bootstrap.sh
