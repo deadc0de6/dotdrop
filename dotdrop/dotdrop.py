@@ -52,16 +52,16 @@ USAGE = """
 %s
 
 Usage:
-  dotdrop install   [-fndVc <path>] [--profile=<profile>]
-  dotdrop compare   [-Vc <path>] [--profile=<profile>] [--files=<files>]
-  dotdrop import    [-ldVc <path>] [--profile=<profile>] <paths>...
-  dotdrop listfiles [-Vc <path>] [--profile=<profile>]
-  dotdrop list      [-Vc <path>]
+  dotdrop install   [-fndV] [-c <path>] [-p <profile>]
+  dotdrop compare   [-V]    [-c <path>] [-p <profile>] [--files=<files>]
+  dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
+  dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
+  dotdrop list      [-V]    [-c <path>]
   dotdrop --help
   dotdrop --version
 
 Options:
-  --profile=<profile>     Specify the profile to use [default: %s].
+  -p --profile=<profile>  Specify the profile to use [default: %s].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
   -n --nodiff             Do not diff when installing.
