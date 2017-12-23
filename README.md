@@ -362,6 +362,9 @@ be executed.
 If used as a submodule, update it with
 ```bash
 $ git submodule foreach git pull origin master
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
 ```
 
 Through pypi:
@@ -579,6 +582,11 @@ $ cd <dotfiles-directory>
 ## get latest version of the submodule
 $ git submodule foreach git pull origin master
 
+## and update it upstream
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
+
 ## update the bash script wrapper
 $ ./dotdrop/bootstrap.sh
 ```
@@ -587,13 +595,40 @@ Otherwise, simply install it from pypi as explained [above](#with-pypi)
 and get rid of the submodule:
 
 * move to the dotfiles directory where dotdrop is used as a submodule
+```bash
+$ cd <dotfiles-repository>
+```
 * remove the entire `submodule "dotdrop"` section in `.gitmodules`
-* stage the change with `git add .gitmodules`
+* stage the changes
+```bash
+$ git add .gitmodules
+```
 * remove the entire `submodule "dotdrop"` section in `.git/config`
-* remove the submodule with `git rm --cached dotdrop`
-* remove the submodule from .git with `rm -rf .git/modules/dotdrop`
+* remove the submodule
+```bash
+$ git rm --cached dotdrop
+```
+* remove the submodule from .git
+```bash
+$ rm -rf .git/modules/dotdrop
+```
 * commit the changes
-* delete any remaining files from the dotdrop submodule with `rm -rf dotdrop`
+```bash
+$ git commit -m 'removing dotdrop submodule'
+```
+* remove any remaining files from the dotdrop submodule
+```bash
+$ rm -rf dotdrop
+```
+* remove `dotdrop.sh`
+```bash
+$ git rm dotdrop.sh
+$ git commit -m 'remove dotdrop.sh script'
+```
+* push upstream
+```bash
+$ git push
+```
 
 # Contribution
 

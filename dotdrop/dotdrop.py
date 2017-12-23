@@ -21,6 +21,9 @@ If you want to keep it as a submodule (recommended), simply do the following:
 
 First get the latest version of dotdrop:
     $ git submodule foreach git pull origin master
+    $ git add dotdrop
+    $ git commit -m 'update dotdrop'
+    $ git push
 And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
 
