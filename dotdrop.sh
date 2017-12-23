@@ -22,7 +22,7 @@ cfg="${cur}/config.yaml"
 
 # pivot
 cd "${cur}" || { echo "Folder \"${cur}\" doesn't exist, aborting." && exit; }
-# init the submodule
+# init/update the submodule
 git submodule update --init --recursive
 # launch dotdrop
 PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
