@@ -576,9 +576,11 @@ If you want to keep it as a submodule, simply do the following
 ```bash
 $ cd <dotfiles-directory>
 
-## get latest version
-$ git submodule update --init --recursive
-$ git submodule update --remote dotdrop
+## get latest version of the submodule
+$ cd dotdrop/
+$ git checkout master
+$ git pull
+$ cd ../
 
 ## update the bash script wrapper
 $ ./dotdrop/bootstrap.sh
