@@ -23,9 +23,12 @@ First get the latest version of dotdrop:
     $ git submodule foreach git pull origin master
     $ git add dotdrop
     $ git commit -m 'update dotdrop'
-    $ git push
 And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
+    $ git add dotdrop.sh
+    $ git commit -m 'update dotdrop.sh'
+And finally push the changes upstream
+    $ git push
 
 For more, see https://github.com/deadc0de6/dotdrop#migrate-from-submodule
 '''

@@ -582,13 +582,19 @@ $ cd <dotfiles-directory>
 ## get latest version of the submodule
 $ git submodule foreach git pull origin master
 
-## and update it upstream
+## and stage the changes
 $ git add dotdrop
 $ git commit -m 'update dotdrop'
-$ git push
 
 ## update the bash script wrapper
 $ ./dotdrop/bootstrap.sh
+
+## and stage the change to the dotdrop.sh script
+$ git add dotdrop.sh
+$ git commit -m 'update dotdrop.sh'
+
+## and finally push the changes upstream
+$ git push
 ```
 
 Otherwise, simply install it from pypi as explained [above](#with-pypi)
