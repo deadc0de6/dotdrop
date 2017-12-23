@@ -578,6 +578,7 @@ $ cd <dotfiles-directory>
 
 ## get latest version
 $ git submodule update --init --recursive
+$ git submodule update --remote dotdrop
 
 ## update the bash script wrapper
 $ ./dotdrop/bootstrap.sh
