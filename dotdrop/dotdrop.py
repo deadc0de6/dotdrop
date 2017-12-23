@@ -220,7 +220,11 @@ def header():
 def main():
     ret = True
     args = docopt(USAGE, version=VERSION)
-    conf = Cfg(args['--cfg'])
+    try:
+        conf = Cfg(args['--cfg'])
+    except ValueError as e:
+        LOG.err('error: %s' % (str(e)))
+        return False
 
     opts = conf.get_configs()
     opts['dry'] = args['--dry']
