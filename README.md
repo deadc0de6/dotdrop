@@ -572,10 +572,10 @@ See also [github does dotfiles](https://dotfiles.github.io/)
 
 Initially dotdrop was used as a submodule directly in the
 dotfiles git tree. That solution allows your dotfiles to be shipped along
-with the tool able to handle those. Dotdrop is however also directly available
+with the tool able to handle them. Dotdrop is however also directly available
 on pypi.
 
-If you want to keep it as a submodule, simply do the following
+If you want to keep it as a submodule (recommended), simply do the following
 ```bash
 $ cd <dotfiles-directory>
 
