@@ -17,17 +17,14 @@ except:
 Dotdrop has been updated to be included in pypi and
 the way it needs to be called has slightly changed.
 
-If you want to keep it as a submodule, simply do the following:
+If you want to keep it as a submodule (recommended), simply do the following:
 
 First get the latest version of dotdrop:
     $ git submodule update --init --recursive
 And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
 
-Otherwise you can simply install dotdrop from pypi:
-    $ sudo pip3 install dotdrop
-
-see https://github.com/deadc0de6/dotdrop#migrate-from-submodule
+For more, see https://github.com/deadc0de6/dotdrop#migrate-from-submodule
 '''
     print(errmsg)
     sys.exit(1)
