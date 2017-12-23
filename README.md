@@ -122,7 +122,7 @@ $ git init
 ```
 
 To avoid the need to provide the config file path to dotdrop each time it
-is call, you can create an alias:
+is called, you can create an alias:
 ```
 alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
