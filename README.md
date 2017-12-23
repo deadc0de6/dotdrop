@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/deadc0de6/dotdrop.svg?branch=master)](https://travis-ci.org/deadc0de6/dotdrop)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![Coverage Status](https://coveralls.io/repos/github/deadc0de6/dotdrop/badge.svg?branch=master)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
+[![PyPI version](https://badge.fury.io/py/dotdrop.svg)](https://badge.fury.io/py/dotdrop)
+[![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
 
 *Save your dotfiles once, deploy them everywhere*
 
@@ -34,11 +36,11 @@ and the [example](#example) for more.
 
 Quick start:
 ```bash
+sudo pip3 install dotdrop
 mkdir dotfiles && cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
-./dotdrop/bootstrap.sh
-./dotdrop.sh --help
+dotdrop --help
 ```
 
 ## Why dotdrop ?
@@ -74,6 +76,35 @@ why dotdrop rocks.
 
 # Installation
 
+There's two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
+to your dotfiles git tree or system-wide [through pypi](#with-pypi).
+
+For MacOS users, make sure to install `realpath` through homebrew
+(part of *coreutils*).
+
+## With pypi
+
+Start by installing dotdrop
+```bash
+$ sudo pip3 install dotdrop
+```
+
+And then create a repository for your dotfiles
+```bash
+$ mkdir dotfiles; cd dotfiles
+$ git init
+```
+
+To avoid the need to provide the config file path to dotdrop each time it
+is call, you can create an alias:
+```
+alias dotdrop='cd <path-to-your-dotfiles-git-tree> && dotdrop'
+```
+
+Finally import your dotfiles as described [below](#usage).
+
+## As a submodule
+
 The following will create a repository for your dotfiles and
 keep dotdrop as a submodules:
 ```bash
@@ -81,6 +112,7 @@ $ mkdir dotfiles; cd dotfiles
 $ git init
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
 $ ./dotdrop/bootstrap.sh
+$ ./dotdrop.sh --help
 ```
 
 Then install the requirements:
@@ -88,10 +120,42 @@ Then install the requirements:
 $ sudo pip3 install -r dotdrop/requirements.txt
 ```
 
+Using this solution will need you to work with dotdrop by
+using the generated script `dotdrop.sh` at the base
+of your dotfiles repository. For any documentation below,
+simply replace the call to `dotdrop` by the bash script
+`dotdrop.sh`.
+
 Finally import your dotfiles as described [below](#usage).
 
-For MacOS users, make sure to install `realpath` through homebrew
-(part of *coreutils*).
+## Migrate from submodule
+
+Initially dotdrop was used as a submodule directly in the
+dotfiles git tree. It has since been packaged in pypi and
+can thus be used directly.
+
+If you want to keep it as a submodule, simply do the following
+```bash
+$ cd <dotfiles-directory>
+
+## get latest version
+$ git submodule update --init --recursive
+
+## update the bash script wrapper
+$ ./dotdrop/bootstrap.sh
+```
+
+Otherwise, simply install it from pypi as explained [above](#with-pypi)
+and get rid of the submodule:
+
+* move to the dotfiles directory where dotdrop is used as a submodule
+* remove the entire `submodule "dotdrop"` section in `.gitmodules`
+* stage the change with `git add .gitmodules`
+* remove the entire `submodule "dotdrop"` section in `.git/config`
+* remove the submodule with `git rm --cached dotdrop`
+* remove the submodule from .git with `rm -rf .git/modules/dotdrop`
+* commit the changes
+* delete any remaining files from the dotdrop submodule with `rm -rf dotdrop`
 
 # Usage
 
@@ -99,14 +163,14 @@ If starting fresh, the `import` command of dotdrop
 allows to easily and quickly get a running setup.
 
 Install dotdrop on one of your host and then import any dotfiles you want dotdrop to
-manage (be it a file or a folder):
+manage (be it a file or a directory):
 ```bash
-$ ./dotdrop.sh import ~/.vimrc ~/.xinitrc
+$ dotdrop import ~/.vimrc ~/.xinitrc
 ```
 
 Dotdrop does two things:
 
-* Copy the dotfiles in the *dotfiles* folder
+* Copy the dotfiles in the *dotfiles* directory
 * Create the entries in the *config.yaml* file
 
 Commit and push your changes.
@@ -115,8 +179,8 @@ Then go to another host where your dotfiles need to be managed as well,
 clone the previously setup git tree
 and compare local dotfiles with the ones stored by dotdrop:
 ```bash
-$ ./dotdrop.sh list
-$ ./dotdrop.sh compare --profile=<other-host-profile>
+$ dotdrop list
+$ dotdrop compare --profile=<other-host-profile>
 ```
 
 Then adapt any dotfile using the [template](#template) feature
@@ -139,7 +203,7 @@ profiles:
 When done, you can install your dotfiles using
 
 ```bash
-$ ./dotdrop.sh install
+$ dotdrop install
 ```
 
 That's it, a single repository with all your dotfiles for your different hosts.
@@ -147,7 +211,7 @@ That's it, a single repository with all your dotfiles for your different hosts.
 For additional usage see the help:
 
 ```
-$ ./dotdrop.sh --help
+$ dotdrop --help
 
      _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -156,13 +220,13 @@ $ ./dotdrop.sh --help
                                |_|
 
 Usage:
-  dotdrop.py install [-fndVc <path>] [--profile=<profile>]
-  dotdrop.py compare [-Vc <path>] [--profile=<profile>] [--files=<files>]
-  dotdrop.py import [-ldVc <path>] [--profile=<profile>] <paths>...
-  dotdrop.py listfiles [-Vc <path>] [--profile=<profile>]
-  dotdrop.py list [-Vc <path>]
-  dotdrop.py --help
-  dotdrop.py --version
+  dotdrop install [-fndVc <path>] [--profile=<profile>]
+  dotdrop compare [-Vc <path>] [--profile=<profile>] [--files=<files>]
+  dotdrop import [-ldVc <path>] [--profile=<profile>] <paths>...
+  dotdrop listfiles [-Vc <path>] [--profile=<profile>]
+  dotdrop list [-Vc <path>]
+  dotdrop --help
+  dotdrop --version
 
 Options:
   --profile=<profile>     Specify the profile to use [default: thor].
@@ -189,9 +253,9 @@ the following entries:
 * **config** entry: contains settings for the deployment
   * `backup`: create a backup of the dotfile in case it differs from the
     one that will be installed by dotdrop
-  * `create`: create folder hierarchy when installing dotfiles if
+  * `create`: create directory hierarchy when installing dotfiles if
     it doesn't exist
-  * `dotpath`: path to the folder containing the dotfiles to be managed
+  * `dotpath`: path to the directory containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
 
 * **dotfiles** entry: a list of dotfiles
@@ -233,7 +297,7 @@ the following entries:
 
 Simply run
 ```bash
-./dotdrop.sh install
+$ dotdrop install
 ```
 
 Use the `--profile` switch to specify a profile if not using
@@ -243,7 +307,7 @@ the host's hostname.
 
 Compare local dotfiles with dotdrop's defined ones:
 ```bash
-./dotdrop.sh compare
+$ dotdrop compare
 ```
 
 ## Import new dotfiles
@@ -254,14 +318,14 @@ config file automatically.
 
 For example to import `~/.xinitrc`
 ```bash
-$ ./dotdrop.sh import ~/.xinitrc
+$ dotdrop import ~/.xinitrc
 
 ```
 
 ## List the available profiles
 
 ```bash
-$ ./dotdrop.sh list
+$ dotdrop list
 ```
 
 Dotdrop allows to choose which profile to use
@@ -274,7 +338,7 @@ The following command lists the different dotfiles
 configured for a specific profile:
 
 ```bash
-$ ./dotdrop.sh listfiles --profile=<some-profile>
+$ dotdrop listfiles --profile=<some-profile>
 ```
 
 For example:
@@ -321,11 +385,12 @@ be executed.
 
 ## Update dotdrop
 
-If installed through the `bootstrap.sh` script, dotdrop is
-installed as a submodule within your git tree.
-You can thus simply run the following command
-to update the submodule:
+Through pypi:
+```bash
+$ sudo pip3 install dotdrop --upgrade
+```
 
+If used as a submodule, update it with
 ```bash
 $ git submodule update --recursive --remote
 ```
@@ -407,11 +472,11 @@ This allows for storing host-specific properties and/or secrets in environment v
 You can have an `.env` file in the directory where your `config.yaml` lies:
 
 ```
-# My variables for this host
+## My variables for this host
 var1="some value"
 var2="some other value"
 
-# Some secrets
+## Some secrets
 pass="verysecurepassword"
 ```
 Of course, this file should not be tracked by git (put it in your `.gitignore`).
@@ -419,9 +484,13 @@ Of course, this file should not be tracked by git (put it in your `.gitignore`).
 
 Then you can invoke dotdrop with the help of an alias like that:
 ```
+## when using dotdrop as a submodule
 alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
+
+## when using dotdrop from pypi
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) dotdrop --cfg=~/dotfiles/config.yaml'
 ```
-This loads all the variables from `.env` (while omitting lines starting with `#`) before calling `~/dotfiles/dotdrop.sh`.
+This loads all the variables from `.env` (while omitting lines starting with `#`) before calling dotdrop.
 
 # Example
 
@@ -487,17 +556,19 @@ Installing the dotfiles (the `--profile` switch is not needed if
 the hostname matches the entry in the config file):
 ```bash
 # on home computer
-$ ./dotdrop.sh install --profile=home
+$ dotdrop install --profile=home
+
 # on office computer
-$ ./dotdrop.sh install --profile=office
+$ dotdrop install --profile=office
 ```
 
 Comparing the dotfiles:
 ```bash
 # on home computer
-$ ./dotdrop.sh compare
+$ dotdrop compare
+
 # on office computer
-$ ./dotdrop.sh compare
+$ dotdroph compare
 ```
 
 # People using dotdrop
