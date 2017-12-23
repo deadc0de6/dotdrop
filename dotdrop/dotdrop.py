@@ -16,12 +16,14 @@ except:
     errmsg = '''
 Dotdrop has been updated to be included in pypi and
 the way it needs to be called has changed.
+
 First update dotdrop:
     $ git submodule update --init --recursive
 And then re-run the bootstrap script:
     $ ./dotdrop/bootstrap.sh
 '''
     print(errmsg)
+    sys.exit(1)
 from .logger import Logger
 from .templategen import Templategen
 from .installer import Installer
