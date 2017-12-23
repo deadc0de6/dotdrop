@@ -15,12 +15,19 @@ try:
 except:
     errmsg = '''
 Dotdrop has been updated to be included in pypi and
-the way it needs to be called has changed.
+the way it needs to be called has slightly changed.
 
-First update dotdrop:
+First get the latest version of dotdrop:
     $ git submodule update --init --recursive
-And then re-run the bootstrap script:
+And then re-run the bootstrap script to update \"dotdrop.sh\":
     $ ./dotdrop/bootstrap.sh
+
+Instead of calling dotdrop directly like this:
+    $ python3 dotdrop/dotdrop/dotdrop.py ...
+Call it like this:
+    $ PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop ...
+
+See TODO
 '''
     print(errmsg)
     sys.exit(1)
