@@ -7,6 +7,7 @@ utilities
 import subprocess
 import tempfile
 import os
+import shlex
 from shutil import rmtree
 
 # local import
@@ -28,8 +29,9 @@ def run(cmd, log=False, raw=True):
     return ''.join(lines)
 
 
-def diff(src, dst, log=False, raw=True):
-    return run(['diff', '-r', src, dst], log=log, raw=raw)
+def diff(src, dst, log=False, raw=True, opts=''):
+    cmd = 'diff -r %s \"%s\" \"%s\"' % (opts, src, dst)
+    return run(shlex.split(cmd), log=log, raw=raw)
 
 
 def get_tmpdir():

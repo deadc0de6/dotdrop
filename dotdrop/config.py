@@ -195,9 +195,9 @@ class Cfg:
                 self.prodots[profile] = []
             self.prodots[profile].append(dotfile)
 
-            l = self.content[self.key_profiles][profile]
-            if self.key_all not in l[self.key_profiles_dots]:
-                l[self.key_profiles_dots].append(dotfile.key)
+            ent = self.content[self.key_profiles][profile]
+            if self.key_all not in ent[self.key_profiles_dots]:
+                ent[self.key_profiles_dots].append(dotfile.key)
             return True
 
         # adding the dotfile

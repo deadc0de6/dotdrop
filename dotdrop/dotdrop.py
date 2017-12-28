@@ -56,8 +56,9 @@ USAGE = """
 
 Usage:
   dotdrop install   [-fndV] [-c <path>] [-p <profile>]
-  dotdrop compare   [-V]    [-c <path>] [-p <profile>] [--files=<files>]
   dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
+  dotdrop compare   [-V]    [-c <path>] [-p <profile>]
+                            [-o <opts>] [--files=<files>]
   dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
   dotdrop list      [-V]    [-c <path>]
   dotdrop --help
@@ -67,6 +68,7 @@ Options:
   -p --profile=<profile>  Specify the profile to use [default: %s].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
+  -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
@@ -131,7 +133,8 @@ def compare(opts, conf, tmp, focus=None):
 
     for dotfile in selected:
         same, diff = inst.compare(t, tmp, opts['profile'],
-                                  dotfile.src, dotfile.dst)
+                                  dotfile.src, dotfile.dst,
+                                  opts=opts['dopts'])
         if same:
             if not opts['quiet']:
                 LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key,
@@ -256,6 +259,7 @@ def main():
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
+            opts['dopts'] = args['--dopts']
             if compare(opts, conf, tmp, args['--files']):
                 LOG.raw('\ntemporary files available under %s' % (tmp))
             else:

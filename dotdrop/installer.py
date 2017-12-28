@@ -157,7 +157,7 @@ class Installer:
         tmpdst = os.path.join(tmpfolder, sub)
         return self.install(templater, profile, src, tmpdst), tmpdst
 
-    def compare(self, templater, tmpfolder, profile, src, dst):
+    def compare(self, templater, tmpfolder, profile, src, dst, opts=''):
         '''Compare temporary generated dotfile with local one'''
         self.comparing = True
         retval = False, ''
@@ -175,7 +175,8 @@ class Installer:
                                                 src, dst,
                                                 tmpfolder)
             if ret:
-                diff = utils.diff(tmpdst, dst, log=False, raw=False)
+                diff = utils.diff(tmpdst, dst, log=False,
+                                  raw=False, opts=opts)
                 if diff == '':
                     retval = True, ''
                 else:
