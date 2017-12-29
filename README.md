@@ -195,17 +195,19 @@ $ dotdrop.sh --help
 
 Usage:
   dotdrop install   [-fndV] [-c <path>] [-p <profile>]
-  dotdrop compare   [-V]    [-c <path>] [-p <profile>] [--files=<files>]
   dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
+  dotdrop compare   [-V]    [-c <path>] [-p <profile>]
+                            [-o <opts>] [--files=<files>]
   dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
   dotdrop list      [-V]    [-c <path>]
   dotdrop --help
   dotdrop --version
 
 Options:
-  -p --profile=<profile>  Specify the profile to use [default: thor].
+  -p --profile=<profile>  Specify the profile to use [default: ilak].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
+  -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
@@ -283,6 +285,9 @@ Compare local dotfiles with dotdrop's defined ones:
 ```bash
 $ dotdrop.sh compare
 ```
+
+The diffing is done by diff in the backend, one can provide specific
+options to diff using the `-o` switch.
 
 ## Import new dotfiles
 
