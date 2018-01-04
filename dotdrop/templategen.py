@@ -21,7 +21,7 @@ COMMENT_END = '@@#}'
 class Templategen:
 
     def __init__(self, base='.'):
-        self.base = base
+        self.base = base.rstrip(os.sep)
         loader = FileSystemLoader(self.base)
         self.env = Environment(loader=loader,
                                trim_blocks=True, lstrip_blocks=True,
@@ -47,9 +47,9 @@ class Templategen:
         return self._handle_text_file(src, profile)
 
     def _handle_text_file(self, src, profile):
-        length = len(self.base) + 1
+        template_rel_path = src.split(self.base)[-1]
         try:
-            template = self.env.get_template(src[length:])
+            template = self.env.get_template(template_rel_path)
             content = template.render(profile=profile, env=os.environ)
         except UnicodeDecodeError:
             data = self._read_bad_encoded_text(src)
