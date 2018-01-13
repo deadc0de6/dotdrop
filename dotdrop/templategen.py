@@ -70,3 +70,6 @@ class Templategen:
         with open(path, 'rb') as f:
             data = f.read()
         return data.decode('utf-8', 'replace')
+
+    def get_marker():
+        return BLOCK_START

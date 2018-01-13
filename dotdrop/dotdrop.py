@@ -44,6 +44,7 @@ from .utils import *
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 HOSTNAME = os.uname()[1]
+TILD = '~'
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -59,6 +60,7 @@ Usage:
   dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-V]    [-c <path>] [-p <profile>]
                             [-o <opts>] [--files=<files>]
+  dotdrop update    [-dV]   [-c <path>] <path>
   dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
   dotdrop list      [-V]    [-c <path>]
   dotdrop --help
@@ -147,8 +149,43 @@ def compare(opts, conf, tmp, focus=None):
     return len(selected) > 0
 
 
+def update(opts, conf, path):
+    if not os.path.exists(path):
+        LOG.err('\"%s\" does not exist!' % (path))
+        return False
+    home = os.path.expanduser(TILD)
+    path = os.path.expanduser(path)
+    path = os.path.expandvars(path)
+    # normalize the path
+    if path.startswith(home):
+        path = path.lstrip(home)
+        path = os.path.join(TILD, path)
+    dotfiles = conf.get_dotfiles(opts['profile'])
+    l = [d for d in dotfiles if d.dst == path]
+    if not l:
+        LOG.err('\"%s\" is not managed!' % (path))
+        return False
+    if len(l) > 1:
+        found = ','.join([d.src for d in dotfiles])
+        LOG.err('multiple dotfiles found: %s' % (found))
+        return False
+    dotfile = l[0]
+    src = os.path.join(conf.get_abs_dotpath(opts['dotpath']), dotfile.src)
+    if Templategen.get_marker() in open(src, 'r').read():
+        LOG.warn('\"%s\" uses template, please update manually' % (src))
+        return False
+    cmd = ['cp', '-R', '-L', os.path.expanduser(path), src]
+    if opts['dry']:
+        LOG.dry('would run: %s' % (' '.join(cmd)))
+    else:
+        if LOG.ask('Overwrite \"%s\" with \"%s\"?' % (src, path)):
+            run(cmd, raw=False, log=False)
+            LOG.log('\"%s\" updated from \"%s\".' % (src, path))
+    return True
+
+
 def importer(opts, conf, paths):
-    home = os.path.expanduser('~')
+    home = os.path.expanduser(TILD)
     cnt = 0
     for path in paths:
         if not os.path.exists(path):
@@ -220,7 +257,7 @@ def list_files(opts, conf):
 
 def header():
     LOG.log(BANNER)
-    LOG.log("")
+    LOG.log('')
 
 
 def main():
@@ -268,6 +305,10 @@ def main():
         elif args['import']:
             # import dotfile(s)
             importer(opts, conf, args['<paths>'])
+
+        elif args['update']:
+            # update a dotfile
+            update(opts, conf, args['<path>'])
 
     except KeyboardInterrupt:
         LOG.err('interrupted')

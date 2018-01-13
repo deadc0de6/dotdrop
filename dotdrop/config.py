@@ -142,7 +142,7 @@ class Cfg:
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.configs[self.key_dotpath]
-        self.configs[self.key_dotpath] = self._get_abs_dotpath(self.curdotpath)
+        self.configs[self.key_dotpath] = self.get_abs_dotpath(self.curdotpath)
         return True
 
     def _get_included_dotfiles(self, profile):
@@ -158,7 +158,7 @@ class Cfg:
             included.extend(self.prodots[other])
         return included
 
-    def _get_abs_dotpath(self, dotpath):
+    def get_abs_dotpath(self, dotpath):
         """ transform dotpath to an absolute path """
         if not dotpath.startswith(os.sep):
             absconf = os.path.join(os.path.dirname(
