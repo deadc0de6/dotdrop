@@ -69,6 +69,7 @@ why dotdrop rocks.
   * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
   * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
   * [Update dotdrop](#update-dotdrop)
+  * [Update dotfiles](#update-dotfiles)
 
 * [Template](#template)
 * [Example](#example)
@@ -362,21 +363,6 @@ Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
-## Update dotdrop
-
-If used as a submodule, update it with
-```bash
-$ git submodule foreach git pull origin master
-$ git add dotdrop
-$ git commit -m 'update dotdrop'
-$ git push
-```
-
-Through pypi:
-```bash
-$ sudo pip3 install dotdrop --upgrade
-```
-
 ## All dotfiles for a profile
 
 To use all defined dotfiles for a profile, simply use
@@ -418,6 +404,37 @@ profiles:
         - f_vimrc
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
+
+## Update dotdrop
+
+If used as a submodule, update it with
+```bash
+$ git submodule foreach git pull origin master
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
+```
+
+Through pypi:
+```bash
+$ sudo pip3 install dotdrop --upgrade
+```
+
+
+## Update dotfiles
+
+Dotfiles managed by dotdrop can be updated using the `update` command.
+There are two cases:
+
+  * the dotfile doesn't use [templating](#template): the new version of the dotfile is copied to the
+    *dotfiles* directory and overwrites the old version. If git is used to version the dotfiles stored
+    by dotdrop, the git command `diff` can be used to view the changes.
+  * the dotfile uses [templating](#template): the dotfile must be manually updated, the use of
+    the dotdrop command `compare` can be helpful to identify the changes to apply to the template.
+
+```
+$ dotdrop.sh update ~/.vimrc
+```
 
 # Template
 
