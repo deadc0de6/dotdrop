@@ -60,7 +60,7 @@ Usage:
   dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-V]    [-c <path>] [-p <profile>]
                             [-o <opts>] [--files=<files>]
-  dotdrop update    [-dV]   [-c <path>] <path>
+  dotdrop update    [-fdV]  [-c <path>] <path>
   dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
   dotdrop list      [-V]    [-c <path>]
   dotdrop --help
@@ -178,7 +178,10 @@ def update(opts, conf, path):
     if opts['dry']:
         LOG.dry('would run: %s' % (' '.join(cmd)))
     else:
-        if LOG.ask('Overwrite \"%s\" with \"%s\"?' % (src, path)):
+        msg = 'Overwrite \"%s\" with \"%s\"?' % (src, path)
+        if opts['safe'] and not LOG.ask(msg):
+            return False
+        else:
             run(cmd, raw=False, log=False)
             LOG.log('\"%s\" updated from \"%s\".' % (src, path))
     return True
