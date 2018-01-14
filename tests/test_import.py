@@ -13,6 +13,7 @@ from dotdrop.dotdrop import importer
 from dotdrop.dotdrop import list_profiles
 from dotdrop.dotdrop import list_files
 from dotdrop.dotdrop import header
+from dotdrop.dotdrop import update
 from dotdrop.config import Cfg
 
 from tests.helpers import *
@@ -195,6 +196,15 @@ class TestImport(unittest.TestCase):
         list_profiles(conf)
         list_files(opts, conf)
         header()
+
+        # fake test update
+        editcontent = 'edited'
+        with open(dotfile1, 'w') as f:
+            f.write('edited')
+        opts['safe'] = False
+        update(opts, conf, dotfile1)
+        c2 = open(indt1, 'r').read()
+        self.assertTrue(editcontent == c2)
 
 
 def main():
