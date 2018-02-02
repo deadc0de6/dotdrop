@@ -91,11 +91,12 @@ keep dotdrop as a submodules:
 $ mkdir dotfiles; cd dotfiles
 $ git init
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
+$ sudo pip3 install -r dotdrop/requirements.txt
 $ ./dotdrop/bootstrap.sh
 $ ./dotdrop.sh --help
 ```
 
-Then install the requirements:
+Install the requirements with:
 ```bash
 $ sudo pip3 install -r dotdrop/requirements.txt
 ```
