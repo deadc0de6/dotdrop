@@ -135,9 +135,9 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(results == expected)
 
         # test compare from dotdrop
-        self.assertTrue(compare(opts, conf, tmp))
+        self.assertFalse(compare(opts, conf, tmp))
         # test focus
-        self.assertTrue(compare(opts, conf, tmp, focus=d4))
+        self.assertFalse(compare(opts, conf, tmp, focus=d4))
         self.assertFalse(compare(opts, conf, tmp, focus='/tmp/fake'))
 
 

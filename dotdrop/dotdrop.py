@@ -112,17 +112,19 @@ def install(opts, conf):
 
 
 def compare(opts, conf, tmp, focus=None):
+    '''compare dotfiles and return True if all same'''
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         LOG.err('no dotfiles defined for this profile (\"%s\")' %
                 (str(opts['profile'])))
-        return False
+        return True
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
                      quiet=opts['quiet'])
 
     # compare only specific files
+    ret = True
     selected = dotfiles
     if focus:
         selected = []
@@ -132,11 +134,11 @@ def compare(opts, conf, tmp, focus=None):
                 selected.append(df)
             else:
                 LOG.err('no dotfile matches \"%s\"' % (selection))
+                ret = False
 
     if len(selected) < 1:
-        return True
+        return ret
 
-    ret = True
     for dotfile in selected:
         same, diff = inst.compare(t, tmp, opts['profile'],
                                   dotfile.src, dotfile.dst,
