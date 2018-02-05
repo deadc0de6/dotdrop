@@ -71,12 +71,12 @@ class Installer:
             self.log.err('generate from template \"%s\"' % (src))
             return []
         if not os.path.exists(src):
-            self.log.err('installing %s to %s' % (src, dst))
+            self.log.err('source dotfile does not exist: \"%s\"' % (src))
             return []
         st = os.stat(src)
         ret = self._write(dst, content, st.st_mode)
         if ret < 0:
-            self.log.err('installing %s to %s' % (src, dst))
+            self.log.err('installing \"%s\" to \"%s\"' % (src, dst))
             return []
         if ret > 0:
             if not self.quiet:
@@ -84,7 +84,7 @@ class Installer:
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
-                self.log.sub('copied %s to %s' % (src, dst))
+                self.log.sub('copied \"%s\" to \"%s\"' % (src, dst))
             return [(src, dst)]
         return []
 
@@ -125,7 +125,7 @@ class Installer:
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for %s' % (dst))
+            self.log.err('creating directory for \"%s\"' % (dst))
             return -1
         with open(dst, 'wb') as f:
             f.write(content)
@@ -165,6 +165,8 @@ class Installer:
         self.dry = False
         diffsaved = self.diff
         self.diff = False
+        createsaved = self.create
+        self.create = True
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         if not os.path.exists(dst):
@@ -184,4 +186,5 @@ class Installer:
         self.dry = drysaved
         self.diff = diffsaved
         self.comparing = False
+        self.create = createsaved
         return retval
