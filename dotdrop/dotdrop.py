@@ -133,6 +133,10 @@ def compare(opts, conf, tmp, focus=None):
             else:
                 LOG.err('no dotfile matches \"%s\"' % (selection))
 
+    if len(selected) < 1:
+        return True
+
+    ret = True
     for dotfile in selected:
         same, diff = inst.compare(t, tmp, opts['profile'],
                                   dotfile.src, dotfile.dst,
@@ -145,8 +149,9 @@ def compare(opts, conf, tmp, focus=None):
         else:
             LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
             LOG.emph(diff)
+            ret = False
 
-    return len(selected) > 0
+    return ret
 
 
 def update(opts, conf, path):
@@ -300,7 +305,8 @@ def main():
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
-            if compare(opts, conf, tmp, args['--files']):
+            ret = compare(opts, conf, tmp, args['--files'])
+            if ret:
                 LOG.raw('\ntemporary files available under %s' % (tmp))
             else:
                 os.rmdir(tmp)
