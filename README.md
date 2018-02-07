@@ -193,10 +193,11 @@ For additional usage see the help:
 
 ```
 $ dotdrop.sh --help
+
      _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/
+ \__,_|\___/ \__\__,_|_|  \___/| .__/ 
                                |_|
 
 Usage:
@@ -204,13 +205,14 @@ Usage:
   dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-V]    [-c <path>] [-p <profile>]
                             [-o <opts>] [--files=<files>]
+  dotdrop update    [-fdV]  [-c <path>] <path>
   dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
   dotdrop list      [-V]    [-c <path>]
   dotdrop --help
   dotdrop --version
 
 Options:
-  -p --profile=<profile>  Specify the profile to use [default: ilak].
+  -p --profile=<profile>  Specify the profile to use [default: carbon].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
   -o --dopts=<opts>       Diff options [default: ].
@@ -221,7 +223,6 @@ Options:
   -d --dry                Dry run.
   -v --version            Show version.
   -h --help               Show this screen.
-
 ```
 
 For easy deployment the default profile used by dotdrop reflects the
@@ -364,6 +365,9 @@ cp <encrypted-version-of-secret> dotfiles/secret
 ```
 * edit the config file and add the transformation to the dotfile
 * commit and push the changes
+
+Note that transformations cannot be used if the dotfiles is to be linked (`link: true`)
+and `compare` won't work on dotfiles using transformations.
 
 ## Update dotdrop
 
