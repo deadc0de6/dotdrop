@@ -13,7 +13,6 @@ from dotdrop.logger import Logger
 
 class Action:
 
-
     def __init__(self, key, action):
         self.key = key
         self.action = action
