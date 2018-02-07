@@ -38,6 +38,11 @@ def get_tmpdir():
     return tempfile.mkdtemp(prefix='dotdrop-')
 
 
+def get_tmpfile():
+    (fd, path) = tempfile.mkstemp(prefix='dotdrop-')
+    return path
+
+
 def remove(path):
     ''' Remove a file / directory / symlink '''
     if not os.path.exists(path):

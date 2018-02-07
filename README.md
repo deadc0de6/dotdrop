@@ -59,18 +59,20 @@ why dotdrop rocks.
 
 * [Installation](#installation)
 * [Usage](#usage)
+* How to
 
-  * [Installing dotfiles](#installing-dotfiles)
-  * [Diffing your local dotfiles with dotdrop](#diffing-your-local-dotfiles-with-dotdrop)
-  * [Import new dotfiles](#import-new-dotfiles)
-  * [List the available profiles](#list-the-available-profiles)
-  * [List configured dotfiles](#list-configured-dotfiles)
-  * [Execute an action when deploying a dotfile](#execute-an-action-when-deploying-a-dotfile)
-  * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
-  * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
+  * [Install dotfiles](#install-dotfiles)
+  * [Compare dotfiles](#compare-dotfiles)
+  * [Import dotfiles](#import-dotfiles)
+  * [List profiles](#list-profiles)
+  * [List dotfiles](#list-dotfiles)
+  * [Use actions](#use-actions)
+  * [Use transformations](#use-transformations)
   * [Update dotdrop](#update-dotdrop)
   * [Update dotfiles](#update-dotfiles)
+  * [Store sensitive dotfiles](#store-sensitive-dotfiles)
 
+* [Config](#config)
 * [Template](#template)
 * [Example](#example)
 * [People using dotdrop](#people-using-dotdrop)
@@ -78,10 +80,12 @@ why dotdrop rocks.
 # Installation
 
 There's two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
-to your dotfiles git tree or system-wide [through pypi](#with-pypi).
+to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
+
+Dotdrop is also available on aur: https://aur.archlinux.org/packages/dotdrop/
 
 ## As a submodule
 
@@ -223,55 +227,7 @@ Options:
 For easy deployment the default profile used by dotdrop reflects the
 hostname of the host on which it runs.
 
-## Config file details
-
-The config file (defaults to *config.yaml*) is a yaml file containing
-the following entries:
-
-* **config** entry: contains settings for the deployment
-  * `backup`: create a backup of the dotfile in case it differs from the
-    one that will be installed by dotdrop
-  * `create`: create directory hierarchy when installing dotfiles if
-    it doesn't exist
-  * `dotpath`: path to the directory containing the dotfiles to be managed
-    by dotdrop (absolute path or relative to the config file location)
-
-* **dotfiles** entry: a list of dotfiles
-  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
-  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
-```
-  <dotfile-key-name>:
-    dst: <where-this-file-is-deployed>
-    src: <filename-within-the-dotpath>
-    # Optional
-    link: <true|false>
-    actions:
-      - <action-key>
-```
-
-* **profiles** entry: a list of profiles with the different dotfiles that
-  need to be managed
-  * `dotfiles`: the dotfiles associated to this profile
-  * `include`: include all dotfiles from another profile (optional)
-
-```
-  <some-name-usually-the-hostname>:
-    dotfiles:
-    - <some-dotfile-key-name-defined-above>
-    - <some-other-dotfile-key-name>
-    - ...
-    # Optional
-    include:
-    - <some-other-profile>
-    - ...
-```
-
-* **actions** entry: a list of action
-```
-  <action-key>: <command-to-execute>
-```
-
-## Installing dotfiles
+## Install dotfiles
 
 Simply run
 ```bash
@@ -281,7 +237,7 @@ $ dotdrop.sh install
 Use the `--profile` switch to specify a profile if not using
 the host's hostname.
 
-## Diffing your local dotfiles with dotdrop
+## Compare dotfiles
 
 Compare local dotfiles with dotdrop's defined ones:
 ```bash
@@ -291,7 +247,7 @@ $ dotdrop.sh compare
 The diffing is done by diff in the backend, one can provide specific
 options to diff using the `-o` switch.
 
-## Import new dotfiles
+## Import dotfiles
 
 Dotdrop allows to import dotfiles directly from the
 filesystem. It will copy the dotfile and update the
@@ -300,10 +256,9 @@ config file automatically.
 For example to import `~/.xinitrc`
 ```bash
 $ dotdrop.sh import ~/.xinitrc
-
 ```
 
-## List the available profiles
+## List profiles
 
 ```bash
 $ dotdrop.sh list
@@ -313,7 +268,7 @@ Dotdrop allows to choose which profile to use
 with the *--profile* switch if you use something
 else than the default (the hostname).
 
-## List configured dotfiles
+## List dotfiles
 
 The following command lists the different dotfiles
 configured for a specific profile:
@@ -332,7 +287,7 @@ f_dunstrc (file: "config/dunst/dunstrc", link: False)
 	-> ~/.config/dunst/dunstrc
 ```
 
-## Execute an action when deploying a dotfile
+## Use actions
 
 It is sometimes useful to execute some kind of action
 when deploying a dotfile. For example let's consider
@@ -363,6 +318,143 @@ profiles:
 Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
+
+## Use transformations
+
+Transformation actions are used to transform a dotfile before it is
+installed. They work like [actions](#use-actions) but are executed before the
+dotfile is installed to transform the source.
+
+Transformation commands have two arguments:
+
+* **{0}** will be replaced with the dotfile to process
+* **{1}** will be replaced with a temporary file to store the result of the transformation
+
+A typical use-case for transformations is when the dotfile needs to be
+stored encrypted.
+
+Here's an example of part of a config file to use gpg encrypted dotfiles:
+```
+dotfiles:
+  f_secret:
+    dst: ~/.secret
+    src: secret
+    trans:
+      - gpg
+trans:
+  gpg: gpg2 -q --for-your-eyes-only --no-tty -d {0} > {1}
+```
+
+The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
+directory and uses gpg to decrypt it when install is run.
+
+Here's how to deploy the above solution:
+
+* import the clear dotfile (creates the correct entries in the config file)
+```
+./dotdrop.sh import ~/.secret
+```
+* encrypt the original dotfile 
+```
+<some-gpg-command> ~/.secret
+```
+* overwrite the dotfile with the encrypted version
+```
+cp <encrypted-version-of-secret> dotfiles/secret
+```
+* edit the config file and add the transformation to the dotfile
+* commit and push the changes
+
+## Update dotdrop
+
+If used as a submodule, update it with
+```bash
+$ git submodule foreach git pull origin master
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
+```
+
+Through pypi:
+```bash
+$ sudo pip3 install dotdrop --upgrade
+```
+
+## Update dotfiles
+
+Dotfiles managed by dotdrop can be updated using the `update` command.
+There are two cases:
+
+  * the dotfile doesn't use [templating](#template): the new version of the dotfile is copied to the
+    *dotfiles* directory and overwrites the old version. If git is used to version the dotfiles stored
+    by dotdrop, the git command `diff` can be used to view the changes.
+  * the dotfile uses [templating](#template): the dotfile must be manually updated, the use of
+    the dotdrop command `compare` can be helpful to identify the changes to apply to the template.
+
+```
+$ dotdrop.sh update ~/.vimrc
+```
+
+## Store sensitive dotfiles
+
+Two solutions exist, the first one using an unversioned file (see [Environment variables](#environment-variables))
+and the second using transformations (see [Transformations](#use-transformations)).
+
+# Config
+
+The config file (defaults to *config.yaml*) is a yaml file containing
+the following entries:
+
+* **config** entry: contains settings for the deployment
+  * `backup`: create a backup of the dotfile in case it differs from the
+    one that will be installed by dotdrop
+  * `create`: create directory hierarchy when installing dotfiles if
+    it doesn't exist
+  * `dotpath`: path to the directory containing the dotfiles to be managed
+    by dotdrop (absolute path or relative to the config file location)
+
+* **dotfiles** entry: a list of dotfiles
+  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
+  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
+  * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
+```
+  <dotfile-key-name>:
+    dst: <where-this-file-is-deployed>
+    src: <filename-within-the-dotpath>
+    # Optional
+    link: <true|false>
+    actions:
+      - <action-key>
+    trans:
+      - <transformation-key>
+```
+
+* **profiles** entry: a list of profiles with the different dotfiles that
+  need to be managed
+  * `dotfiles`: the dotfiles associated to this profile
+  * `include`: include all dotfiles from another profile (optional)
+
+```
+  <some-name-usually-the-hostname>:
+    dotfiles:
+    - <some-dotfile-key-name-defined-above>
+    - <some-other-dotfile-key-name>
+    - ...
+    # Optional
+    include:
+    - <some-other-profile>
+    - ...
+```
+
+* **actions** entry: a list of action
+```
+  <action-key>: <command-to-execute>
+```
+
+* **trans** entry: a list of transformations
+```
+  <trans-key>: <command-to-execute>
+```
 
 ## All dotfiles for a profile
 
@@ -406,37 +498,6 @@ profiles:
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
-## Update dotdrop
-
-If used as a submodule, update it with
-```bash
-$ git submodule foreach git pull origin master
-$ git add dotdrop
-$ git commit -m 'update dotdrop'
-$ git push
-```
-
-Through pypi:
-```bash
-$ sudo pip3 install dotdrop --upgrade
-```
-
-
-## Update dotfiles
-
-Dotfiles managed by dotdrop can be updated using the `update` command.
-There are two cases:
-
-  * the dotfile doesn't use [templating](#template): the new version of the dotfile is copied to the
-    *dotfiles* directory and overwrites the old version. If git is used to version the dotfiles stored
-    by dotdrop, the git command `diff` can be used to view the changes.
-  * the dotfile uses [templating](#template): the dotfile must be manually updated, the use of
-    the dotdrop command `compare` can be helpful to identify the changes to apply to the template.
-
-```
-$ dotdrop.sh update ~/.vimrc
-```
-
 # Template
 
 Dotdrop leverage the power of [jinja2](http://jinja.pocoo.org/) to handle the
@@ -455,11 +516,10 @@ Note that dotdrop uses different delimiters than
 
 ## Available variables
 
-### Profile
+* `{{@@ profile @@}}` contains the profile provided to dotdrop.
+* `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables))
 
-`{{@@ profile @@}}` contains the profile provided to dotdrop. Below example shows how it is used.
-
-### Environment variables
+## Environment variables
 
 It's possible to access environment variables inside the templates. This feature can be used like this:
 
@@ -480,7 +540,6 @@ var2="some other value"
 pass="verysecurepassword"
 ```
 Of course, this file should not be tracked by git (put it in your `.gitignore`).
-
 
 Then you can invoke dotdrop with the help of an alias like that:
 ```
@@ -621,7 +680,7 @@ $ git push
 ```
 
 Otherwise, simply install it from pypi as explained [above](#with-pypi)
-and get rid of the submodule:
+and get rid of the submodule as shown below:
 
 * move to the dotfiles directory where dotdrop is used as a submodule
 ```bash

@@ -18,6 +18,7 @@ class Cfg:
     key_config = 'config'
     key_dotfiles = 'dotfiles'
     key_actions = 'actions'
+    key_trans = 'trans'
     key_dotpath = 'dotpath'
     key_profiles = 'profiles'
     key_profiles_dots = 'dotfiles'
@@ -26,6 +27,7 @@ class Cfg:
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
     key_dotfiles_actions = 'actions'
+    key_dotfiles_trans = 'trans'
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -40,6 +42,8 @@ class Cfg:
         self.dotfiles = {}
         # not linked to content
         self.actions = {}
+        # not linked to content
+        self.trans = {}
         # not linked to content
         self.prodots = {}
         if not self._load_file():
@@ -94,6 +98,12 @@ class Cfg:
                 for k, v in self.content[self.key_actions].items():
                     self.actions[k] = Action(k, v)
 
+        # parse all transformations
+        if self.key_trans in self.content:
+            if self.content[self.key_trans] is not None:
+                for k, v in self.content[self.key_trans].items():
+                    self.trans[k] = Action(k, v)
+
         # parse the profiles
         self.profiles = self.content[self.key_profiles]
         if self.profiles is None:
@@ -117,8 +127,17 @@ class Cfg:
             entries = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
             actions = self._parse_actions(self.actions, entries)
-            self.dotfiles[k] = Dotfile(k, dst, src,
-                                       link=link, actions=actions)
+            entries = v[self.key_dotfiles_trans] if \
+                self.key_dotfiles_trans in v else []
+            trans = self._parse_actions(self.trans, entries)
+            if len(trans) > 0 and link:
+                msg = 'transformations disabled for \"%s\"' % (dst)
+                msg += ' as link is True' % (dst)
+                self.log.warn(msg)
+                trans = []
+            self.dotfiles[k] = Dotfile(k, dst, src, link=link,
+                                       actions=actions,
+                                       trans=trans)
 
         # assign dotfiles to each profile
         for k, v in self.profiles.items():
