@@ -152,6 +152,7 @@ the following entries:
 * **dotfiles** entry: a list of dotfiles
   * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
   * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
+  * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
 ```
   <dotfile-key-name>:
     dst: <where-this-file-is-deployed>
