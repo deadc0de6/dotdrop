@@ -7,7 +7,8 @@ represents a dotfile in dotdrop
 
 class Dotfile:
 
-    def __init__(self, key, dst, src, actions=[], link=False):
+    def __init__(self, key, dst, src,
+                 actions=[], trans=[], link=False):
         # key of dotfile in the config
         self.key = key
         # where to install this dotfile
@@ -18,6 +19,8 @@ class Dotfile:
         self.link = link
         # list of actions
         self.actions = actions
+        # list of transformations
+        self.trans = trans
 
     def __str__(self):
         return 'key:%s, src: %s, dst: %s, link: %s' % (self.key, self.src,
