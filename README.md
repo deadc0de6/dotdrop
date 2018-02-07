@@ -323,17 +323,18 @@ be executed.
 ## Use transformations
 
 Transformation actions are used to transform a dotfile before it is
-installed. They work like [actions](#use-actions) but have two arguments:
+installed. They work like [actions](#use-actions) but are executed before the
+dotfile is installed to transform the source.
+
+Transformation commands have two arguments:
 
 * **{0}** will be replaced with the dotfile to process
-* **{1}** will be replaced with a temporary file to store the result
+* **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when the dotfile needs to be
 stored encrypted.
 
-For example:
-
-the transformation and the dotfile in `config.yaml`:
+Here's an example of part of a config file to use gpg encrypted dotfiles:
 ```
 dotfiles:
   f_secret:
@@ -347,6 +348,23 @@ trans:
 
 The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
 directory and uses gpg to decrypt it when install is run.
+
+Here's how to deploy the above solution:
+
+* import the clear dotfile (creates the entries in the config)
+```
+./dotdrop.sh import ~/.secret
+```
+* encrypt it and 
+```
+<some-gpg-command> ~/.secret
+```
+* overwrite the dotfile
+```
+cp <encrypted-version-of-secret> dotfiles/secret
+```
+* edit the config file and add the transformation to the dotfile
+* commit and push changes
 
 ## Update dotdrop
 
