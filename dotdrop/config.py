@@ -130,8 +130,13 @@ class Cfg:
             entries = v[self.key_dotfiles_trans] if \
                 self.key_dotfiles_trans in v else []
             trans = self._parse_actions(self.trans, entries)
-            self.dotfiles[k] = Dotfile(k, dst, src,
-                                       link=link, actions=actions
+            if len(trans) > 0 and link:
+                msg = 'transformations disabled for \"%s\"' % (dst)
+                msg += ' as link is True' % (dst)
+                self.log.warn(msg)
+                trans = []
+            self.dotfiles[k] = Dotfile(k, dst, src, link=link,
+                                       actions=actions,
                                        trans=trans)
 
         # assign dotfiles to each profile

@@ -101,6 +101,11 @@ def install(opts, conf):
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
+            if dotfile.trans:
+                # TODO
+                tmp = get_tmpfile()
+                for trans in dotfile.trans:
+                    pass
             r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
         if len(r) > 0 and len(dotfile.actions) > 0:
             # execute action
