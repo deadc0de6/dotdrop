@@ -39,7 +39,8 @@ def get_tmpdir():
 
 
 def get_tmpfile():
-    return tempfile.mkstemp(prefix='dotdrop-')
+    (fd, path) = tempfile.mkstemp(prefix='dotdrop-')
+    return path
 
 
 def remove(path):
