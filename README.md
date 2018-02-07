@@ -70,6 +70,8 @@ why dotdrop rocks.
   * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
   * [Update dotdrop](#update-dotdrop)
   * [Update dotfiles](#update-dotfiles)
+  * [Storing sensitive dotfiles](#storing-sensitive-dotfiles)
+  * [Transformations](#transformations)
 
 * [Template](#template)
 * [Example](#example)
@@ -247,6 +249,8 @@ the following entries:
     link: <true|false>
     actions:
       - <action-key>
+    trans:
+      - <transformation-key>
 ```
 
 * **profiles** entry: a list of profiles with the different dotfiles that
@@ -269,6 +273,11 @@ the following entries:
 * **actions** entry: a list of action
 ```
   <action-key>: <command-to-execute>
+```
+
+* **trans** entry: a list of transformations
+```
+  <trans-key>: <command-to-execute>
 ```
 
 ## Installing dotfiles
@@ -436,6 +445,39 @@ There are two cases:
 ```
 $ dotdrop.sh update ~/.vimrc
 ```
+
+## Storing sensitive dotfiles
+
+Two solutions exist, the first one using an unversioned file (see [Environment variables](#Environment variables))
+and the second using transformation actions (see [Transformations](#transformations)).
+
+## Transformations
+
+Transformation actions are used to transform a dotfile before it is
+installed. They work like actions but have two arguments:
+
+* **{0}** will be replaced with the dotfile to process
+* **{1}** will be replaced with a temporary file to store the result
+
+A typical use-case for transformations is when the dotfile needs to be
+stored encrypted.
+
+For example:
+
+the transformation and the dotfile in `config.yaml`:
+```
+dotfiles:
+  f_secret:
+    dst: ~/.secret
+    src: secret
+    trans:
+      - gpg
+trans:
+  gpg: gpg2 -q --for-your-eyes-only --no-tty -d {0} > {1}
+```
+
+The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
+directory.
 
 # Template
 
