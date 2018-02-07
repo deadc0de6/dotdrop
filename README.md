@@ -80,10 +80,12 @@ why dotdrop rocks.
 # Installation
 
 There's two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
-to your dotfiles git tree or system-wide [through pypi](#with-pypi).
+to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
+
+Dotdrop is also available on aur: https://aur.archlinux.org/packages/dotdrop/
 
 ## As a submodule
 
