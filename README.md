@@ -256,7 +256,6 @@ config file automatically.
 For example to import `~/.xinitrc`
 ```bash
 $ dotdrop.sh import ~/.xinitrc
-
 ```
 
 ## List profiles
@@ -351,20 +350,20 @@ directory and uses gpg to decrypt it when install is run.
 
 Here's how to deploy the above solution:
 
-* import the clear dotfile (creates the entries in the config)
+* import the clear dotfile (creates the correct entries in the config file)
 ```
 ./dotdrop.sh import ~/.secret
 ```
-* encrypt it and 
+* encrypt the original dotfile 
 ```
 <some-gpg-command> ~/.secret
 ```
-* overwrite the dotfile
+* overwrite the dotfile with the encrypted version
 ```
 cp <encrypted-version-of-secret> dotfiles/secret
 ```
 * edit the config file and add the transformation to the dotfile
-* commit and push changes
+* commit and push the changes
 
 ## Update dotdrop
 
@@ -380,7 +379,6 @@ Through pypi:
 ```bash
 $ sudo pip3 install dotdrop --upgrade
 ```
-
 
 ## Update dotfiles
 
