@@ -308,7 +308,7 @@ def main():
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
             ret = compare(opts, conf, tmp, args['--files'])
-            if ret:
+            if os.listdir(tmp):
                 LOG.raw('\ntemporary files available under %s' % (tmp))
             else:
                 os.rmdir(tmp)
