@@ -45,6 +45,7 @@ CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 HOSTNAME = os.uname()[1]
 TILD = '~'
+TRANS_SUFFIX = 'trans'
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -101,12 +102,29 @@ def install(opts, conf):
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
+            src = dotfile.src
+            tmp = None
             if dotfile.trans:
-                # TODO
-                tmp = get_tmpfile()
+                tmp = '%s.%s' % (src, TRANS_SUFFIX)
+                err = False
                 for trans in dotfile.trans:
-                    pass
-            r = inst.install(t, opts['profile'], dotfile.src, dotfile.dst)
+                    s = os.path.join(opts['dotpath'], src)
+                    temp = os.path.join(opts['dotpath'], tmp)
+                    if not trans.transform(s, temp):
+                        msg = 'transformation \"%s\" failed for %s'
+                        LOG.err(msg % (trans.key, dotfile.key))
+                        err = True
+                        break
+                if err:
+                    if tmp and os.path.exists(tmp):
+                        remove(tmp)
+                    continue
+                src = tmp
+            r = inst.install(t, opts['profile'], src, dotfile.dst)
+            if tmp:
+                tmp = os.path.join(opts['dotpath'], tmp)
+                if os.path.exists(tmp):
+                    remove(tmp)
         if len(r) > 0 and len(dotfile.actions) > 0:
             # execute action
             for action in dotfile.actions:
@@ -145,6 +163,10 @@ def compare(opts, conf, tmp, focus=None):
         return ret
 
     for dotfile in selected:
+        if dotfile.trans:
+            msg = 'ignore %s as it uses transformation(s)'
+            LOG.log(msg % (dotfile.key))
+            continue
         same, diff = inst.compare(t, tmp, opts['profile'],
                                   dotfile.src, dotfile.dst,
                                   opts=opts['dopts'])
