@@ -444,8 +444,6 @@ trans:
 The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
 directory and uses gpg to decrypt it when install is run.
 
-
-
 ## Update dotdrop
 
 If used as a submodule, update it with
@@ -480,7 +478,7 @@ $ dotdrop.sh update ~/.vimrc
 ## Store sensitive dotfiles
 
 Two solutions exist, the first one using an unversioned file (see [Environment variables](#environment-variables))
-and the second using transformation actions (see [Transformations](#transformations)).
+and the second using transformations (see [Transformations](#use-transformations)).
 
 # Template
 
