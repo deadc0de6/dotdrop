@@ -58,7 +58,6 @@ why dotdrop rocks.
 **Table of Contents**
 
 * [Installation](#installation)
-* [Config](#config)
 * [Usage](#usage)
 * How to
 
@@ -73,6 +72,7 @@ why dotdrop rocks.
   * [Update dotfiles](#update-dotfiles)
   * [Store sensitive dotfiles](#store-sensitive-dotfiles)
 
+* [Config](#config)
 * [Template](#template)
 * [Example](#example)
 * [People using dotdrop](#people-using-dotdrop)
@@ -135,104 +135,6 @@ Replace any call to `dotdrop.sh` in the documentation below
 by `dotdrop` if using the pypi solution.
 
 Finally import your dotfiles as described [below](#usage).
-
-# Config
-
-The config file (defaults to *config.yaml*) is a yaml file containing
-the following entries:
-
-* **config** entry: contains settings for the deployment
-  * `backup`: create a backup of the dotfile in case it differs from the
-    one that will be installed by dotdrop
-  * `create`: create directory hierarchy when installing dotfiles if
-    it doesn't exist
-  * `dotpath`: path to the directory containing the dotfiles to be managed
-    by dotdrop (absolute path or relative to the config file location)
-
-* **dotfiles** entry: a list of dotfiles
-  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
-  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
-  * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
-```
-  <dotfile-key-name>:
-    dst: <where-this-file-is-deployed>
-    src: <filename-within-the-dotpath>
-    # Optional
-    link: <true|false>
-    actions:
-      - <action-key>
-    trans:
-      - <transformation-key>
-```
-
-* **profiles** entry: a list of profiles with the different dotfiles that
-  need to be managed
-  * `dotfiles`: the dotfiles associated to this profile
-  * `include`: include all dotfiles from another profile (optional)
-
-```
-  <some-name-usually-the-hostname>:
-    dotfiles:
-    - <some-dotfile-key-name-defined-above>
-    - <some-other-dotfile-key-name>
-    - ...
-    # Optional
-    include:
-    - <some-other-profile>
-    - ...
-```
-
-* **actions** entry: a list of action
-```
-  <action-key>: <command-to-execute>
-```
-
-* **trans** entry: a list of transformations
-```
-  <trans-key>: <command-to-execute>
-```
-
-## All dotfiles for a profile
-
-To use all defined dotfiles for a profile, simply use
-the keyword `ALL`.
-
-For example:
-```yaml
-dotfiles:
-  f_xinitrc:
-    dst: ~/.xinitrc
-    src: xinitrc
-  f_vimrc:
-    dst: ~/.vimrc
-    src: vimrc
-profiles:
-  host1:
-    dotfiles:
-    - ALL
-  host2:
-    dotfiles:
-    - f_vimrc
-```
-
-## Include dotfiles from another profile
-
-If one profile is using the entire set of another profile, one can use
-the `include` entry to avoid redundancy.
-
-For example:
-```yaml
-profiles:
-  host1:
-      dotfiles:
-        - f_xinitrc
-      include:
-        - host2
-  host2:
-      dotfiles:
-        - f_vimrc
-```
-Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
 # Usage
 
@@ -480,6 +382,104 @@ $ dotdrop.sh update ~/.vimrc
 Two solutions exist, the first one using an unversioned file (see [Environment variables](#environment-variables))
 and the second using transformations (see [Transformations](#use-transformations)).
 
+# Config
+
+The config file (defaults to *config.yaml*) is a yaml file containing
+the following entries:
+
+* **config** entry: contains settings for the deployment
+  * `backup`: create a backup of the dotfile in case it differs from the
+    one that will be installed by dotdrop
+  * `create`: create directory hierarchy when installing dotfiles if
+    it doesn't exist
+  * `dotpath`: path to the directory containing the dotfiles to be managed
+    by dotdrop (absolute path or relative to the config file location)
+
+* **dotfiles** entry: a list of dotfiles
+  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
+  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
+  * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
+```
+  <dotfile-key-name>:
+    dst: <where-this-file-is-deployed>
+    src: <filename-within-the-dotpath>
+    # Optional
+    link: <true|false>
+    actions:
+      - <action-key>
+    trans:
+      - <transformation-key>
+```
+
+* **profiles** entry: a list of profiles with the different dotfiles that
+  need to be managed
+  * `dotfiles`: the dotfiles associated to this profile
+  * `include`: include all dotfiles from another profile (optional)
+
+```
+  <some-name-usually-the-hostname>:
+    dotfiles:
+    - <some-dotfile-key-name-defined-above>
+    - <some-other-dotfile-key-name>
+    - ...
+    # Optional
+    include:
+    - <some-other-profile>
+    - ...
+```
+
+* **actions** entry: a list of action
+```
+  <action-key>: <command-to-execute>
+```
+
+* **trans** entry: a list of transformations
+```
+  <trans-key>: <command-to-execute>
+```
+
+## All dotfiles for a profile
+
+To use all defined dotfiles for a profile, simply use
+the keyword `ALL`.
+
+For example:
+```yaml
+dotfiles:
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+profiles:
+  host1:
+    dotfiles:
+    - ALL
+  host2:
+    dotfiles:
+    - f_vimrc
+```
+
+## Include dotfiles from another profile
+
+If one profile is using the entire set of another profile, one can use
+the `include` entry to avoid redundancy.
+
+For example:
+```yaml
+profiles:
+  host1:
+      dotfiles:
+        - f_xinitrc
+      include:
+        - host2
+  host2:
+      dotfiles:
+        - f_vimrc
+```
+Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
+
 # Template
 
 Dotdrop leverage the power of [jinja2](http://jinja.pocoo.org/) to handle the
@@ -498,11 +498,10 @@ Note that dotdrop uses different delimiters than
 
 ## Available variables
 
-### Profile
+* `{{@@ profile @@}}` contains the profile provided to dotdrop.
+* `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables))
 
-`{{@@ profile @@}}` contains the profile provided to dotdrop. Below example shows how it is used.
-
-### Environment variables
+## Environment variables
 
 It's possible to access environment variables inside the templates. This feature can be used like this:
 
@@ -523,7 +522,6 @@ var2="some other value"
 pass="verysecurepassword"
 ```
 Of course, this file should not be tracked by git (put it in your `.gitignore`).
-
 
 Then you can invoke dotdrop with the help of an alias like that:
 ```
@@ -664,7 +662,7 @@ $ git push
 ```
 
 Otherwise, simply install it from pypi as explained [above](#with-pypi)
-and get rid of the submodule:
+and get rid of the submodule as shown below:
 
 * move to the dotfiles directory where dotdrop is used as a submodule
 ```bash
