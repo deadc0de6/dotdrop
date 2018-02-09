@@ -31,11 +31,15 @@ exec bspwm
 exec bspwm
 '''
 
-    def fake_config(self, path, dotfiles, profile, dotpath, actions):
+    def fake_config(self, path, dotfiles, profile,
+                    dotpath, actions, trans):
         '''Create a fake config file'''
         with open(path, 'w') as f:
             f.write('actions:\n')
             for action in actions:
+                f.write('  %s: %s\n' % (action.key, action.action))
+            f.write('trans:\n')
+            for action in trans:
                 f.write('  %s: %s\n' % (action.key, action.action))
             f.write('config:\n')
             f.write('  backup: true\n')
@@ -49,7 +53,11 @@ exec bspwm
                 f.write('    link: %s\n' % str(d.link).lower())
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
-                    for action in actions:
+                    for action in d.actions:
+                        f.write('      - %s\n' % (action.key))
+                if len(d.trans) > 0:
+                    f.write('    trans:\n')
+                    for action in d.trans:
                         f.write('      - %s\n' % (action.key))
             f.write('profiles:\n')
             f.write('  %s:\n' % (profile))
@@ -132,11 +140,20 @@ exec bspwm
         dst8 = os.path.join(dst, get_string(6))
         d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])
 
+        # to test transformations
+        trans1 = 'trans1'
+        trans2 = 'trans2'
+        cmd = 'cat {0} | sed \'s/%s/%s/g\' > {1}' % (trans1, trans2)
+        tr = Action('testtrans', cmd)
+        f9, c9 = create_random_file(tmp, content=trans1)
+        dst9 = os.path.join(dst, get_string(6))
+        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans=[tr])
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8],
-                         profile, tmp, [act1])
+        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8, d9],
+                         profile, tmp, [act1], [tr])
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
@@ -177,6 +194,11 @@ exec bspwm
         self.assertTrue(str(act1) != '')
         actcontent = open(fact, 'r').read().rstrip()
         self.assertTrue(actcontent == value)
+
+        # test transformation has been done
+        self.assertTrue(os.path.exists(dst9))
+        transcontent = open(dst9, 'r').read().rstrip()
+        self.assertTrue(transcontent == trans2)
 
 
 def main():
