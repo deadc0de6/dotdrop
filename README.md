@@ -30,6 +30,7 @@ Features:
 * Easy import dotfiles
 * Handle files and directories
 * Associate an action to the deployment of specific dotfiles
+* Associate transformations that allow to store encrypted dotfiles
 
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) and
 and the [example](#example) for more.
