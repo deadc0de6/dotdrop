@@ -12,11 +12,6 @@ depends=('python' 'python-jinja' 'python-docopt' 'python-pyaml')
 source=("git+https://github.com/deadc0de6/dotdrop.git")
 md5sums=('SKIP')
 
-pkgver() {
-  cd "$pkgname"
-  git tag -l | tail -1 | sed 's/^v//g'
-}
-
 package() {
   cd "${pkgname}"
   python setup.py install --root="${pkgdir}/"
