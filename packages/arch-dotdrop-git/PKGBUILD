@@ -2,7 +2,7 @@
 
 _pkgname=dotdrop
 pkgname="${_pkgname}-git"
-pkgver=
+pkgver=0.10.r10.gafe0c71
 pkgrel=1
 pkgdesc="Save your dotfiles once, deploy them everywhere "
 arch=('any')
