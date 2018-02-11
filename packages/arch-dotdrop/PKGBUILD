@@ -10,11 +10,11 @@ license=('GPL')
 groups=()
 depends=('python' 'python-setuptools' 'python-jinja' 'python-docopt' 'python-pyaml')
 makedepends=('git')
-source=("git+https://github.com/deadc0de6/dotdrop.git")
+source=("git+https://github.com/deadc0de6/dotdrop.git#tag=v${pkgver}")
 md5sums=('SKIP')
 
 pkgver() {
-  cd "$pkgname"
+  cd "${pkgname}"
   git describe --abbrev=0 --tags | sed 's/^v//g'
 }
 
