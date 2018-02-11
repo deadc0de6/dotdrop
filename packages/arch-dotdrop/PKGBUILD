@@ -15,7 +15,7 @@ md5sums=('SKIP')
 
 pkgver() {
   cd "$pkgname"
-  git tag -l | tail -1 | sed 's/^v//g'
+  git describe --abbrev=0 --tags | sed 's/^v//g'
 }
 
 package() {
