@@ -87,7 +87,9 @@ to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
 
-Dotdrop is also available on aur: https://aur.archlinux.org/packages/dotdrop/
+Dotdrop is also available on aur:
+* stable: https://aur.archlinux.org/packages/dotdrop/
+* git version: https://aur.archlinux.org/packages/dotdrop-git/
 
 ## As a submodule
 
