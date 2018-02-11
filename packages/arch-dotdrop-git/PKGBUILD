@@ -1,6 +1,7 @@
 # Maintainer: deadc0de6 <info@deadc0de.ch>
 
-pkgname=dotdrop-git
+_pkgname=dotdrop
+pkgname="${_pkgname}-git"
 pkgver=
 pkgrel=1
 pkgdesc="Save your dotfiles once, deploy them everywhere "
@@ -16,12 +17,12 @@ source=("git+https://github.com/deadc0de6/dotdrop.git")
 md5sums=('SKIP')
 
 pkgver() {
-  cd "$pkgname"
+  cd "${_pkgname}"
   git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
 }
 
 package() {
-  cd "${pkgname}"
+  cd "${_pkgname}"
   python setup.py install --root="${pkgdir}/" --optimize=1
 }
 
