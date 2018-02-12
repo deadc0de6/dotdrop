@@ -301,7 +301,7 @@ def main():
     ret = True
     args = docopt(USAGE, version=VERSION)
     try:
-        conf = Cfg(args['--cfg'])
+        conf = Cfg(os.path.expanduser(args['--cfg']))
     except ValueError as e:
         LOG.err('error: %s' % (str(e)))
         return False
