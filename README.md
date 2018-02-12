@@ -4,6 +4,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![Coverage Status](https://coveralls.io/repos/github/deadc0de6/dotdrop/badge.svg?branch=master)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
 [![PyPI version](https://badge.fury.io/py/dotdrop.svg)](https://badge.fury.io/py/dotdrop)
+[![AUR](https://img.shields.io/aur/version/dotdrop.svg)](https://aur.archlinux.org/packages/dotdrop)
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
 
 *Save your dotfiles once, deploy them everywhere*
@@ -30,6 +31,7 @@ Features:
 * Easy import dotfiles
 * Handle files and directories
 * Associate an action to the deployment of specific dotfiles
+* Associate transformations that allow to store encrypted dotfiles
 
 Check the [blog post](https://deadc0de.re/articles/dotfiles.html) and
 and the [example](#example) for more.
@@ -85,7 +87,9 @@ to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
 
-Dotdrop is also available on aur: https://aur.archlinux.org/packages/dotdrop/
+Dotdrop is also available on aur:
+* stable: https://aur.archlinux.org/packages/dotdrop/
+* git version: https://aur.archlinux.org/packages/dotdrop-git/
 
 ## As a submodule
 
