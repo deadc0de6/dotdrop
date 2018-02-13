@@ -549,15 +549,17 @@ pass="verysecurepassword"
 ```
 Of course, this file should not be tracked by git (put it in your `.gitignore`).
 
-Then you can invoke dotdrop with the help of an alias like that:
+Then you can invoke dotdrop with the help of an alias when using dotdrop as a submodule:
 ```
-## when using dotdrop as a submodule
 alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
-
-## when using dotdrop from pypi
-alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) dotdrop --cfg=~/dotfiles/config.yaml'
 ```
-This loads all the variables from `.env` (while omitting lines starting with `#`) before calling dotdrop.
+
+When using dotdrop from pypi or aur, the absolute path to the binary should be used in the alias to avoid recursion issues
+```
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dotfiles/config.yaml'
+```
+
+The above aliases load all the variables from `~/dotfiles/.env` (while omitting lines starting with `#`) before calling dotdrop.
 
 # Example
 
