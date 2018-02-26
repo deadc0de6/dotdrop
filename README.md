@@ -338,7 +338,7 @@ A typical use-case for transformations is when the dotfile needs to be
 stored encrypted.
 
 Here's an example of part of a config file to use gpg encrypted dotfiles:
-```
+```yaml
 dotfiles:
   f_secret:
     dst: ~/.secret
@@ -355,15 +355,15 @@ directory and uses gpg to decrypt it when install is run.
 Here's how to deploy the above solution:
 
 * import the clear dotfile (creates the correct entries in the config file)
-```
+```bash
 ./dotdrop.sh import ~/.secret
 ```
 * encrypt the original dotfile 
-```
+```bash
 <some-gpg-command> ~/.secret
 ```
 * overwrite the dotfile with the encrypted version
-```
+```bash
 cp <encrypted-version-of-secret> dotfiles/secret
 ```
 * edit the config file and add the transformation to the dotfile
