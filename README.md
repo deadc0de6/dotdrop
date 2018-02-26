@@ -33,8 +33,7 @@ Features:
 * Associate an action to the deployment of specific dotfiles
 * Associate transformations that allow to store encrypted dotfiles
 
-Check the [blog post](https://deadc0de.re/articles/dotfiles.html) and
-and the [example](#example) for more.
+Check also the [blog post](https://deadc0de.re/articles/dotfiles.html), the [example](#example) or how [people are using dotdrop](#people-using-dotdrop) for more.
 
 Quick start:
 ```bash
@@ -622,7 +621,7 @@ profiles:
 ```
 
 Installing the dotfiles (the `--profile` switch is not needed if
-the hostname matches the entry in the config file):
+the hostname matches the *profile* entry in the config file):
 ```bash
 # on home computer
 $ dotdrop.sh install --profile=home
