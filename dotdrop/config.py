@@ -241,8 +241,7 @@ class Cfg:
         if profile not in self.prodots:
             return []
         return sorted(self.prodots[profile],
-                      key=lambda x: str(x.key),
-                      reverse=True)
+                      key=lambda x: str(x.key))
 
     def get_profiles(self):
         """ returns all defined profiles """
