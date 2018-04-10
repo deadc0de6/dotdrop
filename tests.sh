@@ -5,8 +5,8 @@
 # stop on first error
 set -ev
 
-pep8 dotdrop/
-pep8 tests/
+pycodestyle dotdrop/
+pycodestyle tests/
 PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop nosetests -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m nose --with-coverage --cover-package=dotdrop
