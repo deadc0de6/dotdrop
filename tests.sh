@@ -5,7 +5,7 @@
 # stop on first error
 set -ev
 
-pycodestyle dotdrop/
+pycodestyle --ignore=W605 dotdrop/
 pycodestyle tests/
 PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop nosetests -s --with-coverage --cover-package=dotdrop
