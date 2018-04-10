@@ -12,7 +12,7 @@ from docopt import docopt
 # local imports
 try:
     from . import __version__ as VERSION
-except:
+except ImportError:
     errmsg = '''
 Dotdrop has been updated to be included in pypi and
 the way it needs to be called has slightly changed.
@@ -182,15 +182,15 @@ def update(opts, conf, path):
         path = path.lstrip(home)
         path = os.path.join(TILD, path)
     dotfiles = conf.get_dotfiles(opts['profile'])
-    l = [d for d in dotfiles if d.dst == path]
-    if not l:
+    subs = [d for d in dotfiles if d.dst == path]
+    if not subs:
         LOG.err('\"%s\" is not managed!' % (path))
         return False
-    if len(l) > 1:
+    if len(subs) > 1:
         found = ','.join([d.src for d in dotfiles])
         LOG.err('multiple dotfiles found: %s' % (found))
         return False
-    dotfile = l[0]
+    dotfile = subs[0]
     src = os.path.join(conf.get_abs_dotpath(opts['dotpath']), dotfile.src)
     if Templategen.get_marker() in open(src, 'r').read():
         LOG.warn('\"%s\" uses template, please update manually' % (src))
