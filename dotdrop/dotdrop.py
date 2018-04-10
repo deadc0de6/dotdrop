@@ -17,20 +17,7 @@ except:
 Dotdrop has been updated to be included in pypi and
 the way it needs to be called has slightly changed.
 
-If you want to keep it as a submodule (recommended), simply do the following:
-
-First get the latest version of dotdrop:
-    $ git submodule foreach git pull origin master
-    $ git add dotdrop
-    $ git commit -m 'update dotdrop'
-And then re-run the bootstrap script to update \"dotdrop.sh\":
-    $ ./dotdrop/bootstrap.sh
-    $ git add dotdrop.sh
-    $ git commit -m 'update dotdrop.sh'
-And finally push the changes upstream
-    $ git push
-
-For more, see https://github.com/deadc0de6/dotdrop#migrate-from-submodule
+See https://github.com/deadc0de6/dotdrop/wiki/migrate-from-submodule
 '''
     print(errmsg)
     sys.exit(1)

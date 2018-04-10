@@ -200,7 +200,7 @@ $ dotdrop.sh --help
      _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/ 
+ \__,_|\___/ \__\__,_|_|  \___/| .__/
                                |_|
 
 Usage:
@@ -358,7 +358,7 @@ Here's how to deploy the above solution:
 ```bash
 ./dotdrop.sh import ~/.secret
 ```
-* encrypt the original dotfile 
+* encrypt the original dotfile
 ```bash
 <some-gpg-command> ~/.secret
 ```
@@ -649,83 +649,7 @@ For more examples, see how people are using dotdrop:
 
 # Related projects
 
-These are some dotfiles related projects that
-have inspired me for dotdrop:
-
-* [https://github.com/EvanPurkhiser/dots](https://github.com/EvanPurkhiser/dots)
-* [https://github.com/jaagr/dots](https://github.com/jaagr/dots)
-* [https://github.com/anishathalye/dotbot](https://github.com/anishathalye/dotbot)
-* [https://github.com/tomjnixon/Dotfiles](https://github.com/tomjnixon/Dotfiles)
-
-See also [github does dotfiles](https://dotfiles.github.io/)
-
-# Migrate from submodule
-
-Initially dotdrop was used as a submodule directly in the
-dotfiles git tree. That solution allows your dotfiles to be shipped along
-with the tool able to handle them. Dotdrop is however also directly available
-on pypi.
-
-If you want to keep it as a submodule (recommended), simply do the following
-```bash
-$ cd <dotfiles-directory>
-
-## get latest version of the submodule
-$ git submodule foreach git pull origin master
-
-## and stage the changes
-$ git add dotdrop
-$ git commit -m 'update dotdrop'
-
-## update the bash script wrapper
-$ ./dotdrop/bootstrap.sh
-
-## and stage the change to the dotdrop.sh script
-$ git add dotdrop.sh
-$ git commit -m 'update dotdrop.sh'
-
-## and finally push the changes upstream
-$ git push
-```
-
-Otherwise, simply install it from pypi as explained [above](#with-pypi)
-and get rid of the submodule as shown below:
-
-* move to the dotfiles directory where dotdrop is used as a submodule
-```bash
-$ cd <dotfiles-repository>
-```
-* remove the entire `submodule "dotdrop"` section in `.gitmodules`
-* stage the changes
-```bash
-$ git add .gitmodules
-```
-* remove the entire `submodule "dotdrop"` section in `.git/config`
-* remove the submodule
-```bash
-$ git rm --cached dotdrop
-```
-* remove the submodule from .git
-```bash
-$ rm -rf .git/modules/dotdrop
-```
-* commit the changes
-```bash
-$ git commit -m 'removing dotdrop submodule'
-```
-* remove any remaining files from the dotdrop submodule
-```bash
-$ rm -rf dotdrop
-```
-* remove `dotdrop.sh`
-```bash
-$ git rm dotdrop.sh
-$ git commit -m 'remove dotdrop.sh script'
-```
-* push upstream
-```bash
-$ git push
-```
+See [github does dotfiles](https://dotfiles.github.io/)
 
 # Contribution
 
