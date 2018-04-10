@@ -1,3 +1,4 @@
 pycodestyle; python_version >= '3.0'
 nose; python_version >= '3.0'
 coverage; python_version >= '3.0'
+coveralls; python_version >= '3.0'
