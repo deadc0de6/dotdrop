@@ -14,6 +14,7 @@ except ImportError:
     read_readme = lambda f: open(f, 'r').read()
 
 VERSION = dotdrop.__version__
+REQUIRES_PYTHON = '>=3'
 
 setup(
     name='dotdrop',
@@ -28,6 +29,7 @@ setup(
     author_email='deadc0de6@foo.bar',
 
     license='GPLv3',
+    requires_python=REQUIRES_PYTHON,
     classifiers=[
             'Development Status :: 5 - Production/Stable',
             'Programming Language :: Python :: 3.3',
