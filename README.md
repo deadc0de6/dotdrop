@@ -76,6 +76,7 @@ why dotdrop rocks.
 * [Config](#config)
 * [Template](#template)
 * [Example](#example)
+* [User tricks](#user-tricks)
 * [People using dotdrop](#people-using-dotdrop)
 
 # Installation
@@ -638,6 +639,10 @@ $ dotdrop.sh compare
 # on office computer
 $ dotdrop.sh compare
 ```
+
+# User tricks
+
+See the [related wiki page](https://github.com/deadc0de6/dotdrop/wiki/user-tricks)
 
 # People using dotdrop
 
