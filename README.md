@@ -80,7 +80,7 @@ why dotdrop rocks.
 
 # Installation
 
-There's two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
+There are two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
 to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
