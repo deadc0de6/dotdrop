@@ -7,6 +7,7 @@ utilities
 import subprocess
 import tempfile
 import os
+import os.path
 import shlex
 from shutil import rmtree
 
