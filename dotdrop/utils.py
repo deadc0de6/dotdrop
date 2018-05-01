@@ -55,10 +55,10 @@ def remove(path):
     else:
         raise OSError("Unsupported file type for deletion: %s" % path)
 
-        
+
 def relative_path_from_base(base, path):
     ''' Return `path' relative to `base'.
-    
+
     >>> relative_path_from_base('base/dir', 'base/dir/some/file')
     'some/file'
     '''
