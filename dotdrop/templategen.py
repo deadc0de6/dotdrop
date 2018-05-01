@@ -47,7 +47,7 @@ class Templategen:
         return self._handle_text_file(src, profile)
 
     def _handle_text_file(self, src, profile):
-        template_rel_path = relative_path_from_base(self.base, src)
+        template_rel_path = utils.relative_path_from_base(self.base, src)
         try:
             template = self.env.get_template(template_rel_path)
             content = template.render(profile=profile, env=os.environ)
