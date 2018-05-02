@@ -20,7 +20,7 @@ class Action:
 
     def execute(self):
         ret = 1
-        self.log.sub('executing \"%s\"' % (self.action))
+        self.log.sub('executing \"{}\"'.format(self.action))
         try:
             ret = subprocess.call(self.action, shell=True)
         except KeyboardInterrupt:
@@ -32,12 +32,12 @@ class Action:
         where {0} is the file to transform and
         {1} is the result file'''
         if os.path.exists(arg1):
-            msg = 'transformation destination exists: %s'
-            self.log.warn(msg % (arg1))
+            msg = 'transformation destination exists: {}'
+            self.log.warn(msg.format(arg1))
             return False
         ret = 1
         cmd = self.action.format(arg0, arg1)
-        self.log.sub('transforming with \"%s\"' % (cmd))
+        self.log.sub('transforming with \"{}\"'.format(cmd))
         try:
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
@@ -45,7 +45,7 @@ class Action:
         return ret == 0
 
     def __str__(self):
-        return 'key:%s -> \"%s\"' % (self.key, self.action)
+        return 'key:{} -> \"{}\"'.format(self.key, self.action)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

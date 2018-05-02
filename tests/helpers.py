@@ -99,9 +99,9 @@ def create_fake_config(directory, configname='config.yaml',
     path = os.path.join(directory, configname)
     with open(path, 'w') as f:
         f.write('config:\n')
-        f.write('  backup: %s\n' % (str(backup)))
-        f.write('  create: %s\n' % (str(create)))
-        f.write('  dotpath: %s\n' % (dotpath))
+        f.write('  backup: {}\n'.format(str(backup)))
+        f.write('  create: {}\n'.format(str(create)))
+        f.write('  dotpath: {}\n'.format(dotpath))
         f.write('dotfiles:\n')
         f.write('profiles:\n')
         f.write('actions:\n')

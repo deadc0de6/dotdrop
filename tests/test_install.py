@@ -37,32 +37,32 @@ exec bspwm
         with open(path, 'w') as f:
             f.write('actions:\n')
             for action in actions:
-                f.write('  %s: %s\n' % (action.key, action.action))
+                f.write('  {}: {}\n'.format(action.key, action.action))
             f.write('trans:\n')
             for action in trans:
-                f.write('  %s: %s\n' % (action.key, action.action))
+                f.write('  {}: {}\n'.format(action.key, action.action))
             f.write('config:\n')
             f.write('  backup: true\n')
             f.write('  create: true\n')
-            f.write('  dotpath: %s\n' % (dotpath))
+            f.write('  dotpath: {}\n'.format(dotpath))
             f.write('dotfiles:\n')
             for d in dotfiles:
-                f.write('  %s:\n' % (d.key))
-                f.write('    dst: %s\n' % (d.dst))
-                f.write('    src: %s\n' % (d.src))
-                f.write('    link: %s\n' % str(d.link).lower())
+                f.write('  {}:\n'.format(d.key))
+                f.write('    dst: {}\n'.format(d.dst))
+                f.write('    src: {}\n'.format(d.src))
+                f.write('    link: {}\n'.format(str(d.link).lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
-                        f.write('      - %s\n' % (action.key))
+                        f.write('      - {}\n'.format(action.key))
                 if len(d.trans) > 0:
                     f.write('    trans:\n')
                     for action in d.trans:
-                        f.write('      - %s\n' % (action.key))
+                        f.write('      - {}\n'.format(action.key))
             f.write('profiles:\n')
-            f.write('  %s:\n' % (profile))
+            f.write('  {}:\n'.format(profile))
             for d in dotfiles:
-                f.write('  - %s\n' % (d.key))
+                f.write('  - {}\n'.format(d.key))
         return path
 
     def test_install(self):
@@ -135,7 +135,7 @@ exec bspwm
         # to test actions
         value = get_string(12)
         fact = '/tmp/action'
-        act1 = Action('testaction', 'echo "%s" > %s' % (value, fact))
+        act1 = Action('testaction', 'echo "{}" > {}'.format(value, fact))
         f8, c8 = create_random_file(tmp)
         dst8 = os.path.join(dst, get_string(6))
         d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])

@@ -42,30 +42,30 @@ class Installer:
         dst = os.path.join(self.base, os.path.expanduser(dst))
         if os.path.exists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                self.log.sub('ignoring "%s", link exists' % dst)
+                self.log.sub('ignoring "{}", link exists'.format(dst))
                 return []
             if self.dry:
-                self.log.dry('would remove %s and link it to %s'
-                             % (dst, src))
+                self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return []
-            if self.safe and \
-                    not self.log.ask('Remove "%s" for link creation?' % dst):
-                self.log.warn('ignoring "%s", link was not created' % dst)
+            msg = 'Remove "{}" for link creation?'.format(dst)
+            if self.safe and not self.log.ask(msg):
+                msg = 'ignoring "{}", link was not created'
+                self.log.warn(msg.format(dst))
                 return []
             try:
                 utils.remove(dst)
             except OSError:
-                self.log.err('something went wrong with %s' % src)
+                self.log.err('something went wrong with {}'.format(src))
                 return []
         if self.dry:
-            self.log.dry('would link %s to %s' % (dst, src))
+            self.log.dry('would link {} to {}'.format(dst, src))
             return []
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for \"%s\"' % (dst))
+            self.log.err('creating directory for \"{}\"'.format(dst))
             return []
         os.symlink(src, dst)
-        self.log.sub('linked %s to %s' % (dst, src))
+        self.log.sub('linked {} to {}'.format(dst, src))
         # Follows original developer's behavior
         return [(src, dst)]
 
@@ -74,22 +74,22 @@ class Installer:
         self.log.dbg('generate template for {}'.format(src))
         content = templater.generate(src, profile)
         if content is None:
-            self.log.err('generate from template \"%s\"' % (src))
+            self.log.err('generate from template \"{}\"'.format(src))
             return []
         if not os.path.exists(src):
-            self.log.err('source dotfile does not exist: \"%s\"' % (src))
+            self.log.err('source dotfile does not exist: \"{}\"'.format(src))
             return []
         st = os.stat(src)
         ret = self._write(dst, content, st.st_mode)
         if ret < 0:
-            self.log.err('installing \"%s\" to \"%s\"' % (src, dst))
+            self.log.err('installing \"{}\" to \"{}\"'.format(src, dst))
             return []
         if ret > 0:
-            self.log.dbg('ignoring \"%s\", same content' % (dst))
+            self.log.dbg('ignoring \"{}\", same content'.format(dst))
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
-                self.log.sub('copied \"%s\" to \"%s\"' % (src, dst))
+                self.log.sub('copied \"{}\" to \"{}\"'.format(src, dst))
             return [(src, dst)]
         return []
 
@@ -121,28 +121,28 @@ class Installer:
                  1 when already exists
                 -1 when error'''
         if self.dry:
-            self.log.dry('would install %s' % (dst))
+            self.log.dry('would install {}'.format(dst))
             return 0
         if os.path.exists(dst):
             samerights = os.stat(dst).st_mode == rights
             if self.diff and self._fake_diff(dst, content) and samerights:
                 self.log.dbg('{} is the same'.format(dst))
                 return 1
-            if self.safe and not self.log.ask('Overwrite \"%s\"' % (dst)):
-                self.log.warn('ignoring \"%s\", already present' % (dst))
+            if self.safe and not self.log.ask('Overwrite \"{}\"'.format(dst)):
+                self.log.warn('ignoring \"{}\", already present'.format(dst))
                 return 1
         if self.backup and os.path.exists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for \"%s\"' % (dst))
+            self.log.err('creating directory for \"{}\"'.format(dst))
             return -1
         self.log.dbg('write content to {}'.format(dst))
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
         except NotADirectoryError as e:
-            self.log.err('opening dest file: %s' % (e))
+            self.log.err('opening dest file: {}'.format(e))
             return -1
         os.chmod(dst, rights)
         return 0
@@ -162,7 +162,7 @@ class Installer:
         if self.dry:
             return
         dst = path.rstrip(os.sep) + self.BACKUP_SUFFIX
-        self.log.log('backup %s to %s' % (path, dst))
+        self.log.log('backup {} to {}'.format(path, dst))
         os.rename(path, dst)
 
     def _install_to_temp(self, templater, profile, src, dst, tmpdir):
@@ -187,7 +187,7 @@ class Installer:
         dst = os.path.expanduser(dst)
         self.log.dbg('comparing {} and {}'.format(src, dst))
         if not os.path.exists(dst):
-            retval = False, '\"%s\" does not exist on local\n' % (dst)
+            retval = False, '\"{}\" does not exist on local\n'.format(dst)
         else:
             ret, tmpdst = self._install_to_temp(templater,
                                                 profile,

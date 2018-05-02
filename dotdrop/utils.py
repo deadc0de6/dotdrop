@@ -26,7 +26,7 @@ def run(cmd, raw=True):
 
 def diff(src, dst, raw=True, opts=''):
     ''' call diff to compare two files '''
-    cmd = 'diff -r %s \"%s\" \"%s\"' % (opts, src, dst)
+    cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, src, dst)
     return run(shlex.split(cmd), raw=raw)
 
 
@@ -42,10 +42,10 @@ def get_tmpfile():
 def remove(path):
     ''' Remove a file / directory / symlink '''
     if not os.path.exists(path):
-        raise OSError("File not found: %s" % path)
+        raise OSError("File not found: {}".format(path))
     if os.path.islink(path) or os.path.isfile(path):
         os.unlink(path)
     elif os.path.isdir(path):
         rmtree(path)
     else:
-        raise OSError("Unsupported file type for deletion: %s" % path)
+        raise OSError("Unsupported file type for deletion: {}".format(path))

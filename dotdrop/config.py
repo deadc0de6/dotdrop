@@ -58,13 +58,13 @@ class Cfg:
 
     def _is_valid(self):
         if self.key_profiles not in self.content:
-            self.log.err('missing \"%s\" in config' % (self.key_profiles))
+            self.log.err('missing \"{}\" in config'.format(self.key_profiles))
             return False
         if self.key_config not in self.content:
-            self.log.err('missing \"%s\" in config' % (self.key_config))
+            self.log.err('missing \"{}\" in config'.format(self.key_config))
             return False
         if self.key_dotfiles not in self.content:
-            self.log.err('missing \"%s\" in config' % (self.key_dotfiles))
+            self.log.err('missing \"{}\" in config'.format(self.key_dotfiles))
             return False
         if self.content[self.key_profiles]:
             # make sure dotfiles are in a sub called "dotfiles"
@@ -85,7 +85,7 @@ class Cfg:
         res = []
         for entry in entries:
             if entry not in actions.keys():
-                self.log.warn('unknown action \"%s\"' % (entry))
+                self.log.warn('unknown action \"{}\"'.format(entry))
                 continue
             res.append(actions[entry])
         return res
@@ -131,8 +131,8 @@ class Cfg:
                 self.key_dotfiles_trans in v else []
             trans = self._parse_actions(self.trans, entries)
             if len(trans) > 0 and link:
-                msg = 'transformations disabled for \"%s\"' % (dst)
-                msg += ' as link is True' % (dst)
+                msg = 'transformations disabled for \"{}\"'.format(dst)
+                msg += ' because link is True'
                 self.log.warn(msg)
                 trans = []
             self.dotfiles[k] = Dotfile(k, dst, src, link=link,
@@ -172,7 +172,7 @@ class Cfg:
             return included
         for other in self.profiles[profile][self.key_profiles_incl]:
             if other not in self.prodots:
-                self.log.warn('unknown included profile \"%s\"' % (other))
+                self.log.warn('unknown included profile \"{}\"'.format(other))
                 continue
             included.extend(self.prodots[other])
         return included
@@ -206,7 +206,7 @@ class Cfg:
         if dotfile.key in self.dotfiles.keys():
             # already in it
             if profile in self.prodots and dotfile in self.prodots[profile]:
-                self.log.err('\"%s\" already present' % (dotfile.key))
+                self.log.err('\"{}\" already present'.format(dotfile.key))
                 return False
 
             # add for this profile

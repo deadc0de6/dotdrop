@@ -24,27 +24,27 @@ class Logger:
     def log(self, string, end='\n', pre=''):
         cs = self._color(self.BLUE)
         ce = self._color(self.RESET)
-        sys.stdout.write('%s%s%s%s%s' % (pre, cs, string, end, ce))
+        sys.stdout.write('{}{}{}{}{}'.format(pre, cs, string, end, ce))
 
     def sub(self, string):
         cs = self._color(self.BLUE)
         ce = self._color(self.RESET)
-        sys.stdout.write('\t%s->%s %s\n' % (cs, ce, string))
+        sys.stdout.write('\t{}->{} {}\n'.format(cs, ce, string))
 
     def emph(self, string):
         cs = self._color(self.EMPH)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s%s%s' % (cs, string, ce))
+        sys.stderr.write('{}{}{}'.format(cs, string, ce))
 
     def err(self, string, end='\n'):
         cs = self._color(self.RED)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[ERR] %s %s%s' % (cs, string, end, ce))
+        sys.stderr.write('{}[ERR] {} {}{}'.format(cs, string, end, ce))
 
     def warn(self, string, end='\n'):
         cs = self._color(self.YELLOW)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[WARN] %s %s%s' % (cs, string, end, ce))
+        sys.stderr.write('{}[WARN] {} {}{}'.format(cs, string, end, ce))
 
     def dbg(self, string):
         if not self.debug:
@@ -54,20 +54,21 @@ class Logger:
         func = inspect.stack()[1][3]
         cs = self._color(self.MAGENTA)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[DEBUG][%s.%s] %s%s\n' % (cs, mod, func, string, ce))
+        line = '{}[DEBUG][{}.{}] {}{}\n'
+        sys.stderr.write(line.format(cs, mod, func, string, ce))
 
     def dry(self, string, end='\n'):
         cs = self._color(self.GREEN)
         ce = self._color(self.RESET)
-        sys.stdout.write('%s[DRY] %s %s%s' % (cs, string, end, ce))
+        sys.stdout.write('{}[DRY] {} {}{}'.format(cs, string, end, ce))
 
     def raw(self, string, end='\n'):
-        sys.stdout.write('%s%s' % (string, end))
+        sys.stdout.write('{}{}'.format(string, end))
 
     def ask(self, query):
         cs = self._color(self.BLUE)
         ce = self._color(self.RESET)
-        q = '%s%s%s' % (cs, query + ' [y/N] ? ', ce)
+        q = '{}{}{}'.format(cs, query + ' [y/N] ? ', ce)
         r = input(q)
         return r == 'y'
 
