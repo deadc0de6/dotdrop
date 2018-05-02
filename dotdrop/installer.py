@@ -59,6 +59,9 @@ class Installer:
         if self.dry:
             self.log.dry('would link %s to %s' % (dst, src))
             return []
+        dstDir = os.path.dirname(dst)
+        if not os.path.exists(dstDir):
+            os.makedirs(dstDir)
         os.symlink(src, dst)
         self.log.sub('linked %s to %s' % (dst, src))
         # Follows original developer's behavior
