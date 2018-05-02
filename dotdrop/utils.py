@@ -7,6 +7,7 @@ utilities
 import subprocess
 import tempfile
 import os
+import os.path
 import shlex
 from shutil import rmtree
 
@@ -54,3 +55,18 @@ def remove(path):
         rmtree(path)
     else:
         raise OSError("Unsupported file type for deletion: %s" % path)
+
+
+def relative_path_from_base(base, path):
+    ''' Return `path' relative to `base'.
+
+    >>> relative_path_from_base('base/dir', 'base/dir/some/file')
+    'some/file'
+    '''
+    head, tail = path, ''
+    while head != base:
+        head, new_tail = os.path.split(head)
+        tail = os.path.join(new_tail, tail) if tail else new_tail
+        if not head:
+            raise ValueError('Path "%s" not under "%s"' % (path, base))
+    return tail
