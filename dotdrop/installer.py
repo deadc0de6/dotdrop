@@ -123,7 +123,8 @@ class Installer:
             self.log.dry('would install %s' % (dst))
             return 0
         if os.path.exists(dst):
-            if self.diff and self._fake_diff(dst, content):
+            samerights = os.stat(dst).st_mode == rights
+            if self.diff and self._fake_diff(dst, content) and samerights:
                 return 1
             if self.safe and not self.log.ask('Overwrite \"%s\"' % (dst)):
                 self.log.warn('ignoring \"%s\", already present' % (dst))
