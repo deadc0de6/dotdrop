@@ -59,9 +59,10 @@ class Installer:
         if self.dry:
             self.log.dry('would link %s to %s' % (dst, src))
             return []
-        dstDir = os.path.dirname(dst)
-        if not os.path.exists(dstDir):
-            os.makedirs(dstDir)
+        base = os.path.dirname(dst)
+        if not self._create_dirs(base):
+            self.log.err('creating directory for \"%s\"' % (dst))
+            return []
         os.symlink(src, dst)
         self.log.sub('linked %s to %s' % (dst, src))
         # Follows original developer's behavior
