@@ -115,7 +115,10 @@ class Installer:
         return cur == content
 
     def _write(self, dst, content, rights):
-        '''Write file'''
+        '''Write file
+        returns  0 for success,
+                 1 when already exists
+                -1 when error'''
         if self.dry:
             self.log.dry('would install %s' % (dst))
             return 0
@@ -131,8 +134,12 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for \"%s\"' % (dst))
             return -1
-        with open(dst, 'wb') as f:
-            f.write(content)
+        try:
+            with open(dst, 'wb') as f:
+                f.write(content)
+        except NotADirectoryError as e:
+            self.log.err('opening dest file: %s' % (e))
+            return -1
         os.chmod(dst, rights)
         return 0
 
