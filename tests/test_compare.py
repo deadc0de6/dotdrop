@@ -49,23 +49,23 @@ class TestCompare(unittest.TestCase):
 
     def test_compare(self):
         '''Test the compare function'''
-        # setup some folders
+        # setup some directories
         fold_config = os.path.join(os.path.expanduser('~'), '.config')
         create_dir(fold_config)
         fold_subcfg = os.path.join(os.path.expanduser('~'), '.config',
                                    get_string(5))
         create_dir(fold_subcfg)
         self.addCleanup(clean, fold_subcfg)
-        fold_tmp = get_tempfolder()
+        fold_tmp = get_tempdir()
         create_dir(fold_tmp)
         self.addCleanup(clean, fold_tmp)
 
-        # create the folders
-        tmp = get_tempfolder()
+        # create the directories
+        tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
-        dotfilespath = get_tempfolder()
+        dotfilespath = get_tempdir()
         self.assertTrue(os.path.exists(dotfilespath))
         self.addCleanup(clean, dotfilespath)
 
@@ -82,7 +82,7 @@ class TestCompare(unittest.TestCase):
         d4, c4 = create_random_file(fold_tmp, binary=True)
         self.assertTrue(os.path.exists(d4))
         self.addCleanup(clean, d4)
-        d5 = get_tempfolder()
+        d5 = get_tempdir()
         self.assertTrue(os.path.exists(d5))
         self.addCleanup(clean, d5)
         d6, _ = create_random_file(d5)
@@ -120,7 +120,7 @@ class TestCompare(unittest.TestCase):
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
-        # add file in folder
+        # add file in directory
         d7, _ = create_random_file(d5)
         self.assertTrue(os.path.exists(d7))
         expected = {d1: False, d2: True, d3: True, d4: False, d5: False}

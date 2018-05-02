@@ -25,7 +25,7 @@ class TestConfig(unittest.TestCase):
 
     def test_config(self):
         '''Test the config class'''
-        tmp = get_tempfolder()
+        tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
@@ -48,7 +48,7 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(conf.dump() != '')
 
     def test_include(self):
-        tmp = get_tempfolder()
+        tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 

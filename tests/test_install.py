@@ -69,12 +69,12 @@ exec bspwm
         '''Test the install function'''
 
         # dotpath location
-        tmp = get_tempfolder()
+        tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
         # where dotfiles will be installed
-        dst = get_tempfolder()
+        dst = get_tempdir()
         self.assertTrue(os.path.exists(dst))
         self.addCleanup(clean, dst)
 
@@ -106,7 +106,7 @@ exec bspwm
         self.addCleanup(clean, dst5)
         d5 = Dotfile(get_string(6), dst5, os.path.basename(f5), link=True)
 
-        # create the dotfile folders in dotdrop
+        # create the dotfile directories in dotdrop
         dir1 = create_dir(os.path.join(tmp, get_string(6)))
         self.assertTrue(os.path.exists(dir1))
         self.addCleanup(clean, dir1)
@@ -119,7 +119,7 @@ exec bspwm
         # make up the dotfile
         d6 = Dotfile(get_string(6), dst6, os.path.basename(dir1))
 
-        # to test symlink folders
+        # to test symlink directories
         dir2 = create_dir(os.path.join(tmp, get_string(6)))
         self.assertTrue(os.path.exists(dir2))
         self.addCleanup(clean, dir2)

@@ -53,12 +53,12 @@ class TestImport(unittest.TestCase):
     def test_import(self):
         '''Test the import function'''
         # on filesystem
-        src = get_tempfolder()
+        src = get_tempdir()
         self.assertTrue(os.path.exists(src))
         self.addCleanup(clean, src)
 
         # in dotdrop
-        dotfilespath = get_tempfolder()
+        dotfilespath = get_tempdir()
         self.assertTrue(os.path.exists(dotfilespath))
         self.addCleanup(clean, dotfilespath)
 
@@ -87,8 +87,8 @@ class TestImport(unittest.TestCase):
         dotfile4, content3 = create_random_file(homeconf)
         self.addCleanup(clean, dotfile4)
 
-        # fake a folder containing dotfiles
-        dotfile5 = get_tempfolder()
+        # fake a directory containing dotfiles
+        dotfile5 = get_tempdir()
         self.assertTrue(os.path.exists(dotfile5))
         self.addCleanup(clean, dotfile5)
         sub1, _ = create_random_file(dotfile5)
@@ -98,8 +98,8 @@ class TestImport(unittest.TestCase):
         dotfile6, content6 = create_random_file(dotconfig)
         self.addCleanup(clean, dotfile6)
 
-        # fake a folder for symlink
-        dotfile7 = get_tempfolder()
+        # fake a directory for symlink
+        dotfile7 = get_tempdir()
         self.assertTrue(os.path.exists(dotfile7))
         self.addCleanup(clean, dotfile7)
         sub3, _ = create_random_file(dotfile7)
@@ -137,7 +137,7 @@ class TestImport(unittest.TestCase):
         self.assert_in_yaml(dotfile6, y, link=True)
         self.assert_in_yaml(dotfile7, y, link=True)
 
-        # test have been imported in dotdrop dotpath folder
+        # test have been imported in dotdrop dotpath directory
         indt1 = os.path.join(dotfilespath,
                              self.CONFIG_DOTPATH,
                              get_path_strip_version(dotfile1))

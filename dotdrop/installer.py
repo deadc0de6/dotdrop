@@ -92,7 +92,7 @@ class Installer:
         return []
 
     def _handle_dir(self, templater, profile, src, dst):
-        '''Install a folder using templater for "profile"'''
+        '''Install a directory using templater for "profile"'''
         ret = []
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
@@ -143,14 +143,14 @@ class Installer:
         os.chmod(dst, rights)
         return 0
 
-    def _create_dirs(self, folder):
-        '''mkdir -p "folder"'''
-        if not self.create and not os.path.exists(folder):
+    def _create_dirs(self, directory):
+        '''mkdir -p "directory"'''
+        if not self.create and not os.path.exists(directory):
             return False
-        if os.path.exists(folder):
+        if os.path.exists(directory):
             return True
-        os.makedirs(folder)
-        return os.path.exists(folder)
+        os.makedirs(directory)
+        return os.path.exists(directory)
 
     def _backup(self, path):
         '''Backup the file'''
@@ -160,15 +160,15 @@ class Installer:
         self.log.log('backup %s to %s' % (path, dst))
         os.rename(path, dst)
 
-    def _install_to_temp(self, templater, profile, src, dst, tmpfolder):
-        '''Install a dotfile to a tempfolder for comparing'''
+    def _install_to_temp(self, templater, profile, src, dst, tmpdir):
+        '''Install a dotfile to a tempdir for comparing'''
         sub = dst
         if dst[0] == os.sep:
             sub = dst[1:]
-        tmpdst = os.path.join(tmpfolder, sub)
+        tmpdst = os.path.join(tmpdir, sub)
         return self.install(templater, profile, src, tmpdst), tmpdst
 
-    def compare(self, templater, tmpfolder, profile, src, dst, opts=''):
+    def compare(self, templater, tmpdir, profile, src, dst, opts=''):
         '''Compare temporary generated dotfile with local one'''
         self.comparing = True
         retval = False, ''
@@ -186,7 +186,7 @@ class Installer:
             ret, tmpdst = self._install_to_temp(templater,
                                                 profile,
                                                 src, dst,
-                                                tmpfolder)
+                                                tmpdir)
             if ret:
                 diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
                 if diff == '':

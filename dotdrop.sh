@@ -22,10 +22,10 @@ cfg="${cur}/config.yaml"
 sub="dotdrop"
 
 # pivot
-cd "${cur}" || { echo "Folder \"${cur}\" doesn't exist, aborting." && exit; }
+cd "${cur}" || { echo "Directory \"${cur}\" doesn't exist, aborting." && exit; }
 # init/update the submodule
 git submodule update --init --recursive
 # launch dotdrop
 PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop --cfg="${cfg}" "${args[@]}"
 # pivot back
-cd "${opwd}" || { echo "Folder \"${opwd}\" doesn't exist, aborting." && exit; }
+cd "${opwd}" || { echo "Directory \"${opwd}\" doesn't exist, aborting." && exit; }
