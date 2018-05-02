@@ -78,7 +78,7 @@ def install(opts, conf):
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         LOG.err('no dotfiles defined for this profile (\"%s\")' %
-                (str(opts['profile'])))
+                (opts['profile']))
         return False
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
@@ -126,7 +126,7 @@ def compare(opts, conf, tmp, focus=None):
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         LOG.err('no dotfiles defined for this profile (\"%s\")' %
-                (str(opts['profile'])))
+                (opts['profile']))
         return True
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
