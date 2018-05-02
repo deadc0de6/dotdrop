@@ -160,7 +160,7 @@ exec bspwm
         # install them
         conf, opts = load_config(confpath, profile)
         opts['safe'] = False
-        opts['quiet'] = True
+        opts['debug'] = True
         install(opts, conf)
 
         # now compare the generated files

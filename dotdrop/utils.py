@@ -14,13 +14,8 @@ from shutil import rmtree
 from dotdrop.logger import Logger
 
 
-LOG = Logger()
-
-
-def run(cmd, log=False, raw=True):
-    """ expects a list """
-    if log:
-        LOG.log('cmd: \"%s\"' % (' '.join(cmd)))
+def run(cmd, raw=True):
+    ''' expects a list '''
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if raw:
@@ -29,10 +24,10 @@ def run(cmd, log=False, raw=True):
     return ''.join(lines)
 
 
-def diff(src, dst, log=False, raw=True, opts=''):
+def diff(src, dst, raw=True, opts=''):
     ''' call diff to compare two files '''
     cmd = 'diff -r %s \"%s\" \"%s\"' % (opts, src, dst)
-    return run(shlex.split(cmd), log=log, raw=raw)
+    return run(shlex.split(cmd), raw=raw)
 
 
 def get_tmpdir():

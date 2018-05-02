@@ -83,7 +83,7 @@ def install(opts, conf):
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
-                     diff=opts['installdiff'], quiet=opts['quiet'])
+                     diff=opts['installdiff'], debug=opts['debug'])
     installed = []
     for dotfile in dotfiles:
         if hasattr(dotfile, 'link') and dotfile.link:
@@ -131,7 +131,7 @@ def compare(opts, conf, tmp, focus=None):
     t = Templategen(base=opts['dotpath'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
-                     quiet=opts['quiet'])
+                     debug=opts['debug'])
 
     # compare only specific files
     ret = True
@@ -158,8 +158,8 @@ def compare(opts, conf, tmp, focus=None):
                                   dotfile.src, dotfile.dst,
                                   opts=opts['dopts'])
         if same:
-            if not opts['quiet']:
-                LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key,
+            if not opts['debug']:
+                LOG.dbg('diffing \"%s\" VS \"%s\"' % (dotfile.key,
                                                       dotfile.dst))
                 LOG.raw('same file')
         else:
@@ -203,7 +203,7 @@ def update(opts, conf, path):
         if opts['safe'] and not LOG.ask(msg):
             return False
         else:
-            run(cmd, raw=False, log=False)
+            run(cmd, raw=False)
             LOG.log('\"%s\" updated from \"%s\".' % (src, path))
     return True
 
@@ -236,14 +236,14 @@ def importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: %s' % (' '.join(cmd)))
             else:
-                run(cmd, raw=False, log=False)
+                run(cmd, raw=False)
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: %s' % (' '.join(cmd)))
                 if opts['link']:
                     LOG.dry('would symlink %s to %s' % (srcf, dst))
             else:
-                run(cmd, raw=False, log=False)
+                run(cmd, raw=False)
                 if opts['link']:
                     remove(dst)
                     os.symlink(srcf, dst)
@@ -299,7 +299,10 @@ def main():
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
     opts['link'] = args['--link']
-    opts['quiet'] = not args['--verbose']
+    opts['debug'] = not args['--verbose']
+
+    if opts['debug']:
+        LOG.debug = True
 
     header()
 

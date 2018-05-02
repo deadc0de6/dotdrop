@@ -16,16 +16,16 @@ class Installer:
     BACKUP_SUFFIX = '.dotdropbak'
 
     def __init__(self, base='.', create=True, backup=True,
-                 dry=False, safe=False, quiet=False, diff=True):
+                 dry=False, safe=False, debug=False, diff=True):
         self.create = create
         self.backup = backup
         self.dry = dry
         self.safe = safe
         self.base = base
-        self.quiet = quiet
+        self.debug = debug
         self.diff = diff
         self.comparing = False
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
 
     def install(self, templater, profile, src, dst):
         '''Install the dotfile for profile "profile"'''
@@ -83,8 +83,7 @@ class Installer:
             self.log.err('installing \"%s\" to \"%s\"' % (src, dst))
             return []
         if ret > 0:
-            if not self.quiet:
-                self.log.sub('ignoring \"%s\", same content' % (dst))
+            self.log.dbg('ignoring \"%s\", same content' % (dst))
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
@@ -189,8 +188,7 @@ class Installer:
                                                 src, dst,
                                                 tmpfolder)
             if ret:
-                diff = utils.diff(tmpdst, dst, log=False,
-                                  raw=False, opts=opts)
+                diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
                 if diff == '':
                     retval = True, ''
                 else:

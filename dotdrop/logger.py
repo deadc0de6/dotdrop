@@ -17,8 +17,8 @@ class Logger:
     RESET = '\033[0m'
     EMPH = '\033[33m'
 
-    def __init__(self):
-        pass
+    def __init__(self, debug=False):
+        self.debug = debug
 
     def log(self, string, end='\n', pre=''):
         cs = self._color(self.BLUE)
@@ -44,6 +44,11 @@ class Logger:
         cs = self._color(self.YELLOW)
         ce = self._color(self.RESET)
         sys.stderr.write('%s[WARN] %s %s%s' % (cs, string, end, ce))
+
+    def dbg(self, string):
+        cs = self._color(self.MAGENTA)
+        ce = self._color(self.RESET)
+        sys.stderr.write('%s[DEBUG] %s%s\n' % (cs, string, ce))
 
     def dry(self, string, end='\n'):
         cs = self._color(self.GREEN)

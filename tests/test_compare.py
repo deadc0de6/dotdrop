@@ -31,7 +31,7 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(len(dotfiles) == nbdotfiles)
         t = Templategen(base=opts['dotpath'])
         inst = Installer(create=opts['create'], backup=opts['backup'],
-                         dry=opts['dry'], base=opts['dotpath'], quiet=True)
+                         dry=opts['dry'], base=opts['dotpath'], debug=True)
         results = {}
         for dotfile in dotfiles:
             same, _ = inst.compare(t, tmp, opts['profile'],
