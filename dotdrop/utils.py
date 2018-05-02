@@ -30,6 +30,7 @@ def run(cmd, log=False, raw=True):
 
 
 def diff(src, dst, log=False, raw=True, opts=''):
+    ''' call diff to compare two files '''
     cmd = 'diff -r %s \"%s\" \"%s\"' % (opts, src, dst)
     return run(shlex.split(cmd), log=log, raw=raw)
 
