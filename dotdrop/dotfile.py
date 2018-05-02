@@ -23,7 +23,7 @@ class Dotfile:
         self.trans = trans
 
     def __str__(self):
-        return 'key:%s, src: %s, dst: %s, link: %s' % (self.key, self.src,
+        return 'key:\"%s\", src:\"%s\", dst:\"%s\", link:\"%s\"' % (self.key, self.src,
                                                        self.dst, self.link)
 
     def __eq__(self, other):

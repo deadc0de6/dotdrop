@@ -86,6 +86,7 @@ def install(opts, conf):
                      diff=opts['installdiff'], debug=opts['debug'])
     installed = []
     for dotfile in dotfiles:
+        LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
@@ -95,6 +96,7 @@ def install(opts, conf):
                 tmp = '%s.%s' % (src, TRANS_SUFFIX)
                 err = False
                 for trans in dotfile.trans:
+                    LOG.dbg('executing transformation {}'.format(trans))
                     s = os.path.join(opts['dotpath'], src)
                     temp = os.path.join(opts['dotpath'], tmp)
                     if not trans.transform(s, temp):
@@ -115,6 +117,7 @@ def install(opts, conf):
         if len(r) > 0 and len(dotfile.actions) > 0:
             # execute action
             for action in dotfile.actions:
+                LOG.dbg('executing action {}'.format(action))
                 action.execute()
         installed.extend(r)
     LOG.log('\n%u dotfile(s) installed.' % (len(installed)))
@@ -150,6 +153,7 @@ def compare(opts, conf, tmp, focus=None):
         return ret
 
     for dotfile in selected:
+        LOG.dbg('comparing {}'.format(dotfile))
         if dotfile.trans:
             msg = 'ignore %s as it uses transformation(s)'
             LOG.log(msg % (dotfile.key))
@@ -158,10 +162,9 @@ def compare(opts, conf, tmp, focus=None):
                                   dotfile.src, dotfile.dst,
                                   opts=opts['dopts'])
         if same:
-            if not opts['debug']:
-                LOG.dbg('diffing \"%s\" VS \"%s\"' % (dotfile.key,
+            LOG.dbg('diffing \"%s\" VS \"%s\"' % (dotfile.key,
                                                       dotfile.dst))
-                LOG.raw('same file')
+            LOG.dbg('same file')
         else:
             LOG.log('diffing \"%s\" VS \"%s\"' % (dotfile.key, dotfile.dst))
             LOG.emph(diff)
@@ -299,10 +302,10 @@ def main():
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
     opts['link'] = args['--link']
-    opts['debug'] = not args['--verbose']
+    opts['debug'] = args['--verbose']
 
-    if opts['debug']:
-        LOG.debug = True
+    LOG.debug = opts['debug']
+    LOG.dbg('opts: {}'.format(opts))
 
     header()
 

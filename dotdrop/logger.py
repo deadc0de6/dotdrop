@@ -5,6 +5,7 @@ handle logging to stdout/stderr
 """
 
 import sys
+import inspect
 
 
 class Logger:
@@ -46,9 +47,14 @@ class Logger:
         sys.stderr.write('%s[WARN] %s %s%s' % (cs, string, end, ce))
 
     def dbg(self, string):
+        if not self.debug:
+            return
+        frame = inspect.stack()[1]
+        mod = inspect.getmodule(frame[0]).__name__
+        func = inspect.stack()[1][3]
         cs = self._color(self.MAGENTA)
         ce = self._color(self.RESET)
-        sys.stderr.write('%s[DEBUG] %s%s\n' % (cs, string, ce))
+        sys.stderr.write('%s[DEBUG][%s.%s] %s%s\n' % (cs, mod, func, string, ce))
 
     def dry(self, string, end='\n'):
         cs = self._color(self.GREEN)

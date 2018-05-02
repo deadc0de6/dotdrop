@@ -31,6 +31,7 @@ class Installer:
         '''Install the dotfile for profile "profile"'''
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
+        self.log.dbg('install {} to {}'.format(src, dst))
         if os.path.isdir(src):
             return self._handle_dir(templater, profile, src, dst)
         return self._handle_file(templater, profile, src, dst)
@@ -70,6 +71,7 @@ class Installer:
 
     def _handle_file(self, templater, profile, src, dst):
         '''Install a file using templater for "profile"'''
+        self.log.dbg('generate template for {}'.format(src))
         content = templater.generate(src, profile)
         if content is None:
             self.log.err('generate from template \"%s\"' % (src))
@@ -124,6 +126,7 @@ class Installer:
         if os.path.exists(dst):
             samerights = os.stat(dst).st_mode == rights
             if self.diff and self._fake_diff(dst, content) and samerights:
+                self.log.dbg('{} is the same'.format(dst))
                 return 1
             if self.safe and not self.log.ask('Overwrite \"%s\"' % (dst)):
                 self.log.warn('ignoring \"%s\", already present' % (dst))
@@ -134,6 +137,7 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for \"%s\"' % (dst))
             return -1
+        self.log.dbg('write content to {}'.format(dst))
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
@@ -149,6 +153,7 @@ class Installer:
             return False
         if os.path.exists(directory):
             return True
+        self.log.dbg('mkdir -p {}'.format(directory))
         os.makedirs(directory)
         return os.path.exists(directory)
 
@@ -180,6 +185,7 @@ class Installer:
         self.create = True
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
+        self.log.dbg('comparing {} and {}'.format(src, dst))
         if not os.path.exists(dst):
             retval = False, '\"%s\" does not exist on local\n' % (dst)
         else:
@@ -188,6 +194,7 @@ class Installer:
                                                 src, dst,
                                                 tmpdir)
             if ret:
+                self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
                 diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
                 if diff == '':
                     retval = True, ''
