@@ -66,7 +66,6 @@ class Installer:
             return []
         os.symlink(src, dst)
         self.log.sub('linked {} to {}'.format(dst, src))
-        # Follows original developer's behavior
         return [(src, dst)]
 
     def _handle_file(self, templater, profile, src, dst):
