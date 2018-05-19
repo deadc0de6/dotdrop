@@ -652,6 +652,7 @@ For more examples, see how people are using dotdrop:
 * [https://github.com/moyiz/dotfiles](https://github.com/moyiz/dotfiles)
 * [https://github.com/japorized/dotfiles](https://github.com/japorized/dotfiles)
 * [https://gitlab.com/lyze237/dotfiles-public](https://gitlab.com/lyze237/dotfiles-public)
+* [https://github.com/whitelynx/dotfiles](https://github.com/whitelynx/dotfiles)
 
 # Related projects
 
