@@ -193,41 +193,7 @@ $ dotdrop.sh install
 
 That's it, a single repository with all your dotfiles for your different hosts.
 
-For additional usage see the help:
-
-```
-$ dotdrop.sh --help
-
-     _       _      _
-  __| | ___ | |_ __| |_ __ ___  _ __
- / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/
-                               |_|
-
-Usage:
-  dotdrop install   [-fndV] [-c <path>] [-p <profile>]
-  dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
-  dotdrop compare   [-V]    [-c <path>] [-p <profile>]
-                            [-o <opts>] [--files=<files>]
-  dotdrop update    [-fdV]  [-c <path>] <path>
-  dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
-  dotdrop list      [-V]    [-c <path>]
-  dotdrop --help
-  dotdrop --version
-
-Options:
-  -p --profile=<profile>  Specify the profile to use [default: carbon].
-  -c --cfg=<path>         Path to the config [default: config.yaml].
-  --files=<files>         Comma separated list of files to compare.
-  -o --dopts=<opts>       Diff options [default: ].
-  -n --nodiff             Do not diff when installing.
-  -l --link               Import and link.
-  -f --force              Do not warn if exists.
-  -V --verbose            Be verbose.
-  -d --dry                Dry run.
-  -v --version            Show version.
-  -h --help               Show this screen.
-```
+For more options see `dotdrop.sh --help`.
 
 For easy deployment the default profile used by dotdrop reflects the
 hostname of the host on which it runs.
