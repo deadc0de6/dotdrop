@@ -44,13 +44,13 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-fndV] [-c <path>] [-p <profile>]
-  dotdrop import    [-ldV]  [-c <path>] [-p <profile>] <paths>...
-  dotdrop compare   [-V]    [-c <path>] [-p <profile>]
-                            [-o <opts>] [--files=<files>]
-  dotdrop update    [-fdV]  [-c <path>] <path>
-  dotdrop listfiles [-V]    [-c <path>] [-p <profile>]
-  dotdrop list      [-V]    [-c <path>]
+  dotdrop install   [-fndVb] [-c <path>] [-p <profile>]
+  dotdrop import    [-ldVb]  [-c <path>] [-p <profile>] <paths>...
+  dotdrop compare   [-Vb]    [-c <path>] [-p <profile>]
+                             [-o <opts>] [--files=<files>]
+  dotdrop update    [-fdVb]  [-c <path>] <path>
+  dotdrop listfiles [-Vb]    [-c <path>] [-p <profile>]
+  dotdrop list      [-Vb]    [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -64,6 +64,7 @@ Options:
   -f --force              Do not warn if exists.
   -V --verbose            Be verbose.
   -d --dry                Dry run.
+  -b --no-banner          Do not display the banner.
   -v --version            Show version.
   -h --help               Show this screen.
 
@@ -308,7 +309,8 @@ def main():
     LOG.debug = opts['debug']
     LOG.dbg('opts: {}'.format(opts))
 
-    header()
+    if not args['--no-banner']:
+        header()
 
     try:
 
