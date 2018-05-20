@@ -309,7 +309,7 @@ def main():
     LOG.debug = opts['debug']
     LOG.dbg('opts: {}'.format(opts))
 
-    if not args['--no-banner']:
+    if opts['banner'] and not args['--no-banner']:
         header()
 
     try:
