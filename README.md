@@ -386,6 +386,7 @@ the following entries:
     it doesn't exist
   * `dotpath`: path to the directory containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
+  * `banner`: display the banner
 
 * **dotfiles** entry: a list of dotfiles
   * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
