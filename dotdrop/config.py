@@ -15,19 +15,38 @@ from dotdrop.action import Action
 
 class Cfg:
     key_all = 'ALL'
+
+    # key configs
     key_config = 'config'
-    key_dotfiles = 'dotfiles'
-    key_actions = 'actions'
-    key_trans = 'trans'
     key_dotpath = 'dotpath'
-    key_profiles = 'profiles'
-    key_profiles_dots = 'dotfiles'
-    key_profiles_incl = 'include'
+    key_backup = 'backup'
+    key_create = 'create'
+    key_banner = 'banner'
+
+    # key actions
+    key_actions = 'actions'
+
+    # key transformations
+    key_trans = 'trans'
+
+    # key dotfiles
+    key_dotfiles = 'dotfiles'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
     key_dotfiles_actions = 'actions'
     key_dotfiles_trans = 'trans'
+
+    # key profiles
+    key_profiles = 'profiles'
+    key_profiles_dots = 'dotfiles'
+    key_profiles_incl = 'include'
+
+    # config defaults
+    default_backup = True
+    default_create = True
+    default_banner = True
+    default_link = False
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -90,6 +109,15 @@ class Cfg:
             res.append(actions[entry])
         return res
 
+    def _complete_configs(self):
+        """ set config defaults if not present """
+        if self.key_backup not in self.configs:
+            self.configs[self.key_backup] = self.default_backup
+        if self.key_create not in self.configs:
+            self.configs[self.key_create] = self.default_create
+        if self.key_banner not in self.configs:
+            self.configs[self.key_banner] = self.default_banner
+
     def _parse(self):
         """ parse config file """
         # parse all actions
@@ -115,6 +143,7 @@ class Cfg:
 
         # parse the configs
         self.configs = self.content[self.key_config]
+        self._complete_configs()
 
         # parse the dotfiles
         if not self.content[self.key_dotfiles]:
@@ -123,7 +152,7 @@ class Cfg:
             src = v[self.key_dotfiles_src]
             dst = v[self.key_dotfiles_dst]
             link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
-                in v else False
+                in v else self.default_link
             entries = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
             actions = self._parse_actions(self.actions, entries)
@@ -254,19 +283,33 @@ class Cfg:
     def dump(self):
         """ dump config file """
         # temporary reset dotpath
-        tmp = self.configs[self.key_dotpath]
+        dotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self.curdotpath
+        # reset banner
+        if self.configs[self.key_banner]:
+            del self.configs[self.key_banner]
+        # dump
         ret = yaml.dump(self.content, default_flow_style=False, indent=2)
         # restore dotpath
-        self.configs[self.key_dotpath] = tmp
+        self.configs[self.key_dotpath] = dotpath
+        # restore banner
+        if self.key_banner not in self.configs:
+            self.configs[self.key_banner] = self.default_banner
         return ret
 
     def save(self):
         """ save config file to path """
         # temporary reset dotpath
-        tmp = self.configs[self.key_dotpath]
+        dotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self.curdotpath
+        # reset banner
+        if self.configs[self.key_banner]:
+            del self.configs[self.key_banner]
+        # save
         ret = self._save(self.content, self.cfgpath)
         # restore dotpath
-        self.configs[self.key_dotpath] = tmp
+        self.configs[self.key_dotpath] = dotpath
+        # restore banner
+        if self.key_banner not in self.configs:
+            self.configs[self.key_banner] = self.default_banner
         return ret
