@@ -111,10 +111,12 @@ class Cfg:
         for entry in entries:
             key = 'actions'
             action = None
-            if self.key_actions_pre in actions and entry in actions[self.key_actions_pre]:
+            if self.key_actions_pre in actions and \
+                    entry in actions[self.key_actions_pre]:
                 key = self.key_actions_pre
                 action = actions[self.key_actions_pre][entry]
-            elif self.key_actions_post in actions and entry in actions[self.key_actions_post]:
+            elif self.key_actions_post in actions and \
+                    entry in actions[self.key_actions_post]:
                 key = self.key_actions_post
                 action = actions[self.key_actions_post][entry]
             elif entry not in actions.keys():
@@ -141,7 +143,8 @@ class Cfg:
             if self.content[self.key_actions] is not None:
                 for k, v in self.content[self.key_actions].items():
                     if k in [self.key_actions_pre, self.key_actions_post]:
-                        for k2, v2 in self.content[self.key_actions][k].items():
+                        items = self.content[self.key_actions][k].items()
+                        for k2, v2 in items:
                             if k not in self.actions:
                                 self.actions[k] = {}
                             self.actions[k][k2] = Action(k2, v2)
