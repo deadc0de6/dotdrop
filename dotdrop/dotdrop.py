@@ -87,16 +87,20 @@ def install(opts, conf):
                      diff=opts['installdiff'], debug=opts['debug'])
     installed = []
     for dotfile in dotfiles:
+        if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
+            for action in dotfile.actions[Cfg.key_actions_pre]:
+                LOG.dbg('executing pre action {}'.format(action))
+                action.execute()
         LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
             src = dotfile.src
             tmp = None
-            if dotfile.trans:
+            if 'actions' in dotfile.trans and dotfile.trans['actions']:
                 tmp = '{}.{}'.format(src, TRANS_SUFFIX)
                 err = False
-                for trans in dotfile.trans:
+                for trans in dotfile.trans['actions']:
                     LOG.dbg('executing transformation {}'.format(trans))
                     s = os.path.join(opts['dotpath'], src)
                     temp = os.path.join(opts['dotpath'], tmp)
@@ -115,11 +119,19 @@ def install(opts, conf):
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
                     remove(tmp)
-        if len(r) > 0 and len(dotfile.actions) > 0:
-            # execute action
-            for action in dotfile.actions:
-                LOG.dbg('executing action {}'.format(action))
-                action.execute()
+        if len(r) > 0:
+            if 'actions' in dotfile.actions:
+                actions = dotfile.actions['actions']
+                # execute action
+                for action in actions:
+                    LOG.dbg('executing action {}'.format(action))
+                    action.execute()
+            if Cfg.key_actions_post in dotfile.actions:
+                actions = dotfile.actions[Cfg.key_actions_post]
+                # execute action
+                for action in actions:
+                    LOG.dbg('executing post action {}'.format(action))
+                    action.execute()
         installed.extend(r)
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
@@ -155,7 +167,7 @@ def compare(opts, conf, tmp, focus=None):
 
     for dotfile in selected:
         LOG.dbg('comparing {}'.format(dotfile))
-        if dotfile.trans:
+        if 'actions' in dotfile.trans and dotfile.trans['actions']:
             msg = 'ignore {} as it uses transformation(s)'
             LOG.log(msg.format(dotfile.key))
             continue
