@@ -1,0 +1,40 @@
+# author: deadc0de6 (https://github.com/deadc0de6)
+# Copyright (c) 2017, deadc0de6
+#
+# file to be sourced from test scripts
+#
+
+# create a directory with sub-dirs and file
+# for tests
+#
+# $1: path of the parent directory to create
+# ret: set the variable token that allows to check
+create_dir()
+{
+  dirs="a/aa a/ab a/ac b/ba c"
+  mkdir -p ${1}
+  for d in ${dirs}; do
+    # create some dirs
+    mkdir -p ${1}/${d}
+    # create some files
+    fn=`echo ${d} | sed 's#/#-#g'`
+    f="${1}/${d}/${fn}"
+    echo "${d}" > ${f}
+    token=${f}
+  done
+}
+
+# create a clean config file
+#
+# $1: path to save to
+create_conf()
+{
+  cat > ${1} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+profiles:
+_EOF
+}

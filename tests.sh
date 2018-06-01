@@ -10,3 +10,8 @@ pycodestyle tests/
 PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop nosetests -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m nose --with-coverage --cover-package=dotdrop
+
+# execute bash script tests
+for scr in tests-ng/*.sh; do
+  ${scr}
+done
