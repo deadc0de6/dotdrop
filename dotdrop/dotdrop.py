@@ -161,7 +161,7 @@ def compare(opts, conf, tmp, focus=None):
 
     for dotfile in selected:
         LOG.dbg('comparing {}'.format(dotfile))
-        if 'actions' in dotfile.trans and dotfile.trans['actions']:
+        if dotfile.trans:
             msg = 'ignore {} as it uses transformation(s)'
             LOG.log(msg.format(dotfile.key))
             continue
