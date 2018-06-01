@@ -97,10 +97,10 @@ def install(opts, conf):
         else:
             src = dotfile.src
             tmp = None
-            if 'actions' in dotfile.trans and dotfile.trans['actions']:
+            if dotfile.trans:
                 tmp = '{}.{}'.format(src, TRANS_SUFFIX)
                 err = False
-                for trans in dotfile.trans['actions']:
+                for trans in dotfile.trans:
                     LOG.dbg('executing transformation {}'.format(trans))
                     s = os.path.join(opts['dotpath'], src)
                     temp = os.path.join(opts['dotpath'], tmp)
@@ -120,12 +120,6 @@ def install(opts, conf):
                 if os.path.exists(tmp):
                     remove(tmp)
         if len(r) > 0:
-            if 'actions' in dotfile.actions:
-                actions = dotfile.actions['actions']
-                # execute action
-                for action in actions:
-                    LOG.dbg('executing action {}'.format(action))
-                    action.execute()
             if Cfg.key_actions_post in dotfile.actions:
                 actions = dotfile.actions[Cfg.key_actions_post]
                 # execute action

@@ -11,12 +11,24 @@ import os
 from dotdrop.logger import Logger
 
 
-class Action:
+class Cmd:
 
     def __init__(self, key, action):
         self.key = key
         self.action = action
         self.log = Logger()
+
+    def __str__(self):
+        return 'key:{} -> \"{}\"'.format(self.key, self.action)
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __hash__(self):
+        return hash(self.key) ^ hash(self.action)
+
+
+class Action(Cmd):
 
     def execute(self):
         ret = 1
@@ -26,6 +38,9 @@ class Action:
         except KeyboardInterrupt:
             self.log.warn('action interrupted')
         return ret == 0
+
+
+class Transform(Cmd):
 
     def transform(self, arg0, arg1):
         '''execute transformation with {0} and {1}
@@ -43,12 +58,3 @@ class Action:
         except KeyboardInterrupt:
             self.log.warn('action interrupted')
         return ret == 0
-
-    def __str__(self):
-        return 'key:{} -> \"{}\"'.format(self.key, self.action)
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __hash__(self):
-        return hash(self.key) ^ hash(self.action)
