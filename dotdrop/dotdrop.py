@@ -197,10 +197,15 @@ def update(opts, conf, path):
         return False
     dotfile = subs[0]
     src = os.path.join(conf.get_abs_dotpath(opts['dotpath']), dotfile.src)
-    if Templategen.get_marker() in open(src, 'r').read():
+    if os.path.isfile(src) and \
+            Templategen.get_marker() in open(src, 'r').read():
         LOG.warn('\"{}\" uses template, please update manually'.format(src))
         return False
-    cmd = ['cp', '-R', '-L', os.path.expanduser(path), src]
+    # Handle directory update
+    src_clean = src
+    if os.path.isdir(src):
+        src_clean = os.path.join(src, '..')
+    cmd = ['cp', '-R', '-L', os.path.expanduser(path), src_clean]
     if opts['dry']:
         LOG.dry('would run: {}'.format(' '.join(cmd)))
     else:
