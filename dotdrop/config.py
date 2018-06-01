@@ -90,7 +90,8 @@ class Cfg:
             pro = self.content[self.key_profiles]
             tosave = False
             for k in pro.keys():
-                if self.key_profiles_dots not in pro[k]:
+                if self.key_profiles_dots not in pro[k] and \
+                        self.key_profiles_incl not in pro[k]:
                     pro[k] = {self.key_profiles_dots: pro[k]}
                     tosave = True
             if tosave:
@@ -138,7 +139,8 @@ class Cfg:
             self.content[self.key_profiles] = {}
             self.profiles = self.content[self.key_profiles]
         for k, v in self.profiles.items():
-            if v[self.key_profiles_dots] is None:
+            if self.key_profiles_dots in v and \
+                    v[self.key_profiles_dots] is None:
                 v[self.key_profiles_dots] = []
 
         # parse the configs
