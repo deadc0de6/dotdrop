@@ -232,21 +232,18 @@ def importer(opts, conf, paths):
             LOG.err('\"{}\" does not exist, ignored !'.format(path))
             continue
         dst = path.rstrip(os.sep)
-        key = dst.split(os.sep)[-1]
-        if key == 'config':
-            key = '_'.join(dst.split(os.sep)[-2:])
-        key = key.lstrip('.').lower()
-        if os.path.isdir(dst):
-            key = 'd_{}'.format(key)
-        else:
-            key = 'f_{}'.format(key)
         src = dst
         if dst.startswith(home):
             src = dst[len(home):]
         src = src.lstrip('.' + os.sep)
-        dotfile = Dotfile(key, dst, src)
+
+        # create a new dotfile
+        dotfile = Dotfile('', dst, src)
+        retconf, new_dotfile = conf.new(dotfile, opts['profile'], opts['link'])
+        dotfile = new_dotfile
+
+        # prepare hierarchy for dotfile
         srcf = os.path.join(CUR, opts['dotpath'], src)
-        retconf = conf.new(dotfile, opts['profile'], opts['link'])
         if not os.path.exists(srcf):
             cmd = ['mkdir', '-p', '{}'.format(os.path.dirname(srcf))]
             if opts['dry']:

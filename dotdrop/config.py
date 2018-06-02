@@ -281,7 +281,7 @@ class Cfg:
         return False, self._get_unique_key(dotfile.dst)
 
     def new(self, dotfile, profile, link=False):
-        """ import new dotfile (key is to be changed) """
+        """ import new dotfile (key will change) """
 
         # keep it short
         home = os.path.expanduser('~')
@@ -298,7 +298,7 @@ class Cfg:
             # already in it
             if profile in self.prodots and dotfile in self.prodots[profile]:
                 self.log.err('\"{}\" already present'.format(dotfile.key))
-                return False
+                return False, dotfile
 
             # add for this profile
             if profile not in self.prodots:
@@ -308,7 +308,7 @@ class Cfg:
             ent = self.content[self.key_profiles][profile]
             if self.key_all not in ent[self.key_profiles_dots]:
                 ent[self.key_profiles_dots].append(dotfile.key)
-            return True
+            return True, dotfile
 
         # adding the dotfile
         dotfile.key = key
@@ -329,7 +329,7 @@ class Cfg:
         # adding to global list
         self.dotfiles[dotfile.key] = dotfile
 
-        return True
+        return True, dotfile
 
     def get_dotfiles(self, profile):
         """ returns a list of dotfiles for a specific profile """
