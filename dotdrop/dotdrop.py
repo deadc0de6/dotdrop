@@ -224,6 +224,10 @@ def update(opts, conf, path):
     return True
 
 
+def _lower_and_undot(name):
+    return name.lstrip('.').lower()
+
+
 def importer(opts, conf, paths):
     home = os.path.expanduser(TILD)
     cnt = 0
@@ -232,10 +236,13 @@ def importer(opts, conf, paths):
             LOG.err('\"{}\" does not exist, ignored !'.format(path))
             continue
         dst = path.rstrip(os.sep)
-        key = dst.split(os.sep)[-1]
-        if key == 'config':
-            key = '_'.join(dst.split(os.sep)[-2:])
-        key = key.lstrip('.').lower()
+        token = dst
+        if token.startswith(home):
+            temp = token.replace(home, '', 1)
+            if token != temp:
+                token = temp.lstrip('/')
+        tokens = list(map(_lower_and_undot, token.split(os.sep)))
+        key = '_'.join(tokens)
         if os.path.isdir(dst):
             key = 'd_{}'.format(key)
         else:
