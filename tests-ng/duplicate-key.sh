@@ -68,22 +68,30 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
+cat ${cfg}
 
-# create the source
+# create the imported one
 mkdir -p ${tmps}/dotfiles/${tmpd}
 echo "test" > ${tmps}/dotfiles/${tmpd}/abc
+echo "test" > ${tmpd}/abc
 
-mkdir -p ${tmps}/dotfiles/${tmpd}/sub
-echo "test2" > ${tmps}/dotfiles/${tmpd}/sub/abc
+# create the to-be-imported
+mkdir -p ${tmpd}/sub
+echo "test2" > ${tmpd}/sub/abc
 
-mkdir -p ${tmps}/dotfiles/${tmpd}/sub/sub2
-echo "test2" > ${tmps}/dotfiles/${tmpd}/sub/sub2/abc
+mkdir -p ${tmpd}/sub/sub2
+echo "test2" > ${tmpd}/sub/sub2/abc
+
+mkdir -p ${tmpd}/sub/sub
+echo "test2" > ${tmpd}/sub/sub/abc
 
 # import
 cd ${ddpath} | ${bin} import -c ${cfg} -p p2 \
-  ${tmps}/dotfiles/${tmpd}/sub/abc \
-  ${tmps}/dotfiles/${tmpd}/sub/abc \
-  ${tmps}/dotfiles/${tmpd}/sub/sub2/abc
+  ${tmpd}/abc \
+  ${tmpd}/sub/abc \
+  ${tmpd}/sub/abc \
+  ${tmpd}/sub/sub/abc \
+  ${tmpd}/sub/sub2/abc
 
 cat ${cfg}
 
