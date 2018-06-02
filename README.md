@@ -290,6 +290,49 @@ Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
+
+Sometimes, you may even want to execute some action prior deploying a dotfile.
+Let's take another example with
+[vim-plug](https://github.com/junegunn/vim-plug):
+
+```yaml
+actions:
+  pre:
+    vim-plug-install: test -e ~/.vim/autoload/plug.vim || (mkdir -p ~/.vim/autoload; curl
+      -fLo ~/.vim/autoload/plug.vim https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim)
+  vim-plug: vim +PlugInstall +qall
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+    actions:
+       - vim-plug-install
+       - vim-plug
+profiles:
+  home:
+    dotfiles:
+    - f_vimrc
+```
+
+This way, we make sure [vim-plug](https://github.com/junegunn/vim-plug)
+is installed prior deploying the `~/.vimrc` dotfile.
+
+
+Note: You can also define `post` actions like this:
+
+```yaml
+actions:
+  post:
+    some-action: echo "Hello, World!" >/tmp/log
+```
+
+If you don't specify neither `post` or `pre`, actions will be executed
+after dotfiles deployment (which is equivalent to `post`).
+
 ## Use transformations
 
 Transformation actions are used to transform a dotfile before it is

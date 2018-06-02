@@ -10,7 +10,7 @@ import os
 # local import
 from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
-from dotdrop.action import Action
+from dotdrop.action import Action, Transform
 
 
 class Cfg:
@@ -25,6 +25,8 @@ class Cfg:
 
     # key actions
     key_actions = 'actions'
+    key_actions_pre = 'pre'
+    key_actions_post = 'post'
 
     # key transformations
     key_trans = 'trans'
@@ -101,12 +103,37 @@ class Cfg:
 
     def _parse_actions(self, actions, entries):
         """ parse actions specified for an element """
-        res = []
+        res = {
+            self.key_actions_pre: [],
+            self.key_actions_post: [],
+        }
         for entry in entries:
-            if entry not in actions.keys():
+            action = None
+            if self.key_actions_pre in actions and \
+                    entry in actions[self.key_actions_pre]:
+                key = self.key_actions_pre
+                action = actions[self.key_actions_pre][entry]
+            elif self.key_actions_post in actions and \
+                    entry in actions[self.key_actions_post]:
+                key = self.key_actions_post
+                action = actions[self.key_actions_post][entry]
+            elif entry not in actions.keys():
                 self.log.warn('unknown action \"{}\"'.format(entry))
                 continue
-            res.append(actions[entry])
+            else:
+                key = self.key_actions_post
+                action = actions[entry]
+            res[key].append(action)
+        return res
+
+    def _parse_trans(self, trans, entries):
+        """ parse trans specified for an element """
+        res = []
+        for entry in entries:
+            if entry not in trans.keys():
+                self.log.warn('unknown trans \"{}\"'.format(entry))
+                continue
+            res.append(trans[entry])
         return res
 
     def _complete_configs(self):
@@ -124,13 +151,20 @@ class Cfg:
         if self.key_actions in self.content:
             if self.content[self.key_actions] is not None:
                 for k, v in self.content[self.key_actions].items():
-                    self.actions[k] = Action(k, v)
+                    if k in [self.key_actions_pre, self.key_actions_post]:
+                        items = self.content[self.key_actions][k].items()
+                        for k2, v2 in items:
+                            if k not in self.actions:
+                                self.actions[k] = {}
+                            self.actions[k][k2] = Action(k2, v2)
+                    else:
+                        self.actions[k] = Action(k, v)
 
         # parse all transformations
         if self.key_trans in self.content:
             if self.content[self.key_trans] is not None:
                 for k, v in self.content[self.key_trans].items():
-                    self.trans[k] = Action(k, v)
+                    self.trans[k] = Transform(k, v)
 
         # parse the profiles
         self.profiles = self.content[self.key_profiles]
@@ -158,7 +192,7 @@ class Cfg:
             actions = self._parse_actions(self.actions, entries)
             entries = v[self.key_dotfiles_trans] if \
                 self.key_dotfiles_trans in v else []
-            trans = self._parse_actions(self.trans, entries)
+            trans = self._parse_trans(self.trans, entries)
             if len(trans) > 0 and link:
                 msg = 'transformations disabled for \"{}\"'.format(dst)
                 msg += ' because link is True'

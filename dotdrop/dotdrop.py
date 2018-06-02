@@ -87,6 +87,10 @@ def install(opts, conf):
                      diff=opts['installdiff'], debug=opts['debug'])
     installed = []
     for dotfile in dotfiles:
+        if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
+            for action in dotfile.actions[Cfg.key_actions_pre]:
+                LOG.dbg('executing pre action {}'.format(action))
+                action.execute()
         LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
@@ -115,11 +119,13 @@ def install(opts, conf):
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
                     remove(tmp)
-        if len(r) > 0 and len(dotfile.actions) > 0:
-            # execute action
-            for action in dotfile.actions:
-                LOG.dbg('executing action {}'.format(action))
-                action.execute()
+        if len(r) > 0:
+            if Cfg.key_actions_post in dotfile.actions:
+                actions = dotfile.actions[Cfg.key_actions_post]
+                # execute action
+                for action in actions:
+                    LOG.dbg('executing post action {}'.format(action))
+                    action.execute()
         installed.extend(r)
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
