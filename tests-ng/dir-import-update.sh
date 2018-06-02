@@ -65,7 +65,10 @@ echo "changed" > ${token}
 # update
 cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd}
 
+grep 'changed' ${token} >/dev/null 2>&1
+
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
 
+echo "OK"
 exit 0

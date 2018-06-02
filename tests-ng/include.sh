@@ -83,7 +83,12 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p2
 
+# count
+cnt=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 -b | grep '^f_' | wc -l`
+[ "${cnt}" != "1" ] && exit 1
+
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
 
+echo "OK"
 exit 0

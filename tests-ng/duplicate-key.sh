@@ -93,9 +93,12 @@ cd ${ddpath} | ${bin} import -c ${cfg} -p p2 \
   ${tmpd}/sub/sub/abc \
   ${tmpd}/sub/sub2/abc
 
-cat ${cfg}
+# count dotfiles for p2
+cnt=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
+[ "${cnt}" != "4" ] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
 
+echo "OK"
 exit 0
