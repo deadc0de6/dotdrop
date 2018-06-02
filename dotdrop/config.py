@@ -123,6 +123,7 @@ class Cfg:
         if self.key_actions in self.content:
             if self.content[self.key_actions] is not None:
                 for k, v in self.content[self.key_actions].items():
+                    # loop through all actions
                     if k in [self.key_actions_pre, self.key_actions_post]:
                         # parse pre/post actions
                         items = self.content[self.key_actions][k].items()
@@ -132,7 +133,9 @@ class Cfg:
                             self.actions[k][k2] = Action(k2, v2)
                     else:
                         # parse naked actions as post actions
-                        self.actions[k] = Action(k, v)
+                        if self.key_actions_post not in self.actions:
+                            self.actions[self.key_actions_post] = {}
+                        self.actions[self.key_actions_post][k] = Action(k, v)
 
         # parse all transformations
         if self.key_trans in self.content:
@@ -246,12 +249,9 @@ class Cfg:
                     entry in self.actions[self.key_actions_post]:
                 key = self.key_actions_post
                 action = self.actions[self.key_actions_post][entry]
-            elif entry not in self.actions.keys():
+            else:
                 self.log.warn('unknown action \"{}\"'.format(entry))
                 continue
-            else:
-                key = self.key_actions_post
-                action = self.actions[entry]
             res[key].append(action)
         return res
 
