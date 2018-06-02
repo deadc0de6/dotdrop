@@ -45,27 +45,42 @@ echo "RUNNING $(basename $BASH_SOURCE)"
 # this is the test
 ################################################################
 
-# dotdrop directory
-basedir=`mktemp -d`
-echo "dotdrop dir: ${basedir}"
-# the dotfile
+# the dotfile source
+tmps=`mktemp -d`
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d`
-create_dir ${tmpd}
 
 # create the config file
-cfg="${basedir}/config.yaml"
-create_conf ${cfg} # sets token
+cfg="${tmps}/config.yaml"
 
-# import the dir
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+  p2:
+    dotfiles:
+      include: p1
+_EOF
 
-# change token
-echo "changed" > ${token}
+# create the source
+mkdir -p ${tmps}/dotfiles/${tmpd}
+echo "test" > ${tmps}/dotfiles/${tmpd}/abc
 
-# update
-cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd}
+# compare
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p2
 
 ## CLEANING
-rm -rf ${basedir} ${tmpd}
+rm -rf ${tmps} ${tmpd}
 
 exit 0
