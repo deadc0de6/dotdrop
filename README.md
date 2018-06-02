@@ -290,7 +290,6 @@ Thus when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
-
 Sometimes, you may even want to execute some action prior to deploying a dotfile.
 Let's take another example with
 [vim-plug](https://github.com/junegunn/vim-plug):
@@ -332,6 +331,7 @@ actions:
 
 If you don't specify neither `post` nor `pre`, the action will be executed
 after the dotfile deployment (which is equivalent to `post`).
+Actions cannot obviously be named `pre` or `post`.
 
 ## Use transformations
 
