@@ -31,17 +31,17 @@ version="`git describe --abbrev=0 --tags | sed 's/^v//g'`"
 up ${version}
 cd ${OLDPWD}
 
-########################
-# update arch package
-# git release
-########################
-dir="arch-dotdrop-git"
-echo "doing ${dir} ..."
-cd ${dir}
-# replace pkgver
-#version="`git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'`"
-up
-cd ${OLDPWD}
+#########################
+## update arch package
+## git release
+#########################
+#dir="arch-dotdrop-git"
+#echo "doing ${dir} ..."
+#cd ${dir}
+## replace pkgver
+##version="`git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'`"
+#up
+#cd ${OLDPWD}
 
 # pivot back
 cd ${opwd}
