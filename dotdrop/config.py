@@ -17,22 +17,22 @@ from dotdrop.action import Action, Transform
 class Cfg:
     key_all = 'ALL'
 
-    # key configs
-    key_config = 'config'
+    # settings keys
+    key_settings = 'config'
     key_dotpath = 'dotpath'
     key_backup = 'backup'
     key_create = 'create'
     key_banner = 'banner'
 
-    # key actions
+    # actions keys
     key_actions = 'actions'
     key_actions_pre = 'pre'
     key_actions_post = 'post'
 
-    # key transformations
+    # transformations keys
     key_trans = 'trans'
 
-    # key dotfiles
+    # dotfiles keys
     key_dotfiles = 'dotfiles'
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
@@ -40,12 +40,12 @@ class Cfg:
     key_dotfiles_actions = 'actions'
     key_dotfiles_trans = 'trans'
 
-    # key profiles
+    # profiles keys
     key_profiles = 'profiles'
     key_profiles_dots = 'dotfiles'
     key_profiles_incl = 'include'
 
-    # config defaults
+    # settings defaults
     default_backup = True
     default_create = True
     default_banner = True
@@ -57,7 +57,7 @@ class Cfg:
         self.cfgpath = cfgpath
         self.log = Logger()
         # link inside content
-        self.configs = {}
+        self.settings = {}
         # link inside content
         self.profiles = {}
         # not linked to content
@@ -84,8 +84,8 @@ class Cfg:
         if self.key_profiles not in self.content:
             self.log.err('missing \"{}\" in config'.format(self.key_profiles))
             return False
-        if self.key_config not in self.content:
-            self.log.err('missing \"{}\" in config'.format(self.key_config))
+        if self.key_settings not in self.content:
+            self.log.err('missing \"{}\" in config'.format(self.key_settings))
             return False
         if self.key_dotfiles not in self.content:
             self.log.err('missing \"{}\" in config'.format(self.key_dotfiles))
@@ -144,14 +144,14 @@ class Cfg:
             res.append(trans[entry])
         return res
 
-    def _complete_configs(self):
-        """set config defaults if not present"""
-        if self.key_backup not in self.configs:
-            self.configs[self.key_backup] = self.default_backup
-        if self.key_create not in self.configs:
-            self.configs[self.key_create] = self.default_create
-        if self.key_banner not in self.configs:
-            self.configs[self.key_banner] = self.default_banner
+    def _complete_settings(self):
+        """set settings defaults if not present"""
+        if self.key_backup not in self.settings:
+            self.settings[self.key_backup] = self.default_backup
+        if self.key_create not in self.settings:
+            self.settings[self.key_create] = self.default_create
+        if self.key_banner not in self.settings:
+            self.settings[self.key_banner] = self.default_banner
 
     def _parse(self):
         """parse config file"""
@@ -184,9 +184,9 @@ class Cfg:
                     v[self.key_profiles_dots] is None:
                 v[self.key_profiles_dots] = []
 
-        # parse the configs
-        self.configs = self.content[self.key_config]
-        self._complete_configs()
+        # parse the settings
+        self.settings = self.content[self.key_settings]
+        self._complete_settings()
 
         # parse the dotfiles
         if not self.content[self.key_dotfiles]:
@@ -232,8 +232,8 @@ class Cfg:
             self.prodots[k] = list(set(self.prodots[k]))
 
         # make sure we have an absolute dotpath
-        self.curdotpath = self.configs[self.key_dotpath]
-        self.configs[self.key_dotpath] = self.get_abs_dotpath(self.curdotpath)
+        self.curdotpath = self.settings[self.key_dotpath]
+        self.settings[self.key_dotpath] = self.get_abs_dotpath(self.curdotpath)
         return True
 
     def _get_included_dotfiles(self, profile):
@@ -353,40 +353,40 @@ class Cfg:
         """return all defined profiles"""
         return self.profiles.keys()
 
-    def get_configs(self):
-        """return all defined configs"""
-        return self.configs.copy()
+    def get_settings(self):
+        """return all defined settings"""
+        return self.settings.copy()
 
     def dump(self):
         """return a dump of the config"""
         # temporary reset dotpath
-        dotpath = self.configs[self.key_dotpath]
-        self.configs[self.key_dotpath] = self.curdotpath
+        dotpath = self.settings[self.key_dotpath]
+        self.settings[self.key_dotpath] = self.curdotpath
         # reset banner
-        if self.configs[self.key_banner]:
-            del self.configs[self.key_banner]
+        if self.settings[self.key_banner]:
+            del self.settings[self.key_banner]
         # dump
         ret = yaml.dump(self.content, default_flow_style=False, indent=2)
         # restore dotpath
-        self.configs[self.key_dotpath] = dotpath
+        self.settings[self.key_dotpath] = dotpath
         # restore banner
-        if self.key_banner not in self.configs:
-            self.configs[self.key_banner] = self.default_banner
+        if self.key_banner not in self.settings:
+            self.settings[self.key_banner] = self.default_banner
         return ret
 
     def save(self):
         """save the config to file"""
         # temporary reset dotpath
-        dotpath = self.configs[self.key_dotpath]
-        self.configs[self.key_dotpath] = self.curdotpath
+        dotpath = self.settings[self.key_dotpath]
+        self.settings[self.key_dotpath] = self.curdotpath
         # reset banner
-        if self.configs[self.key_banner]:
-            del self.configs[self.key_banner]
+        if self.settings[self.key_banner]:
+            del self.settings[self.key_banner]
         # save
         ret = self._save(self.content, self.cfgpath)
         # restore dotpath
-        self.configs[self.key_dotpath] = dotpath
+        self.settings[self.key_dotpath] = dotpath
         # restore banner
-        if self.key_banner not in self.configs:
-            self.configs[self.key_banner] = self.default_banner
+        if self.key_banner not in self.settings:
+            self.settings[self.key_banner] = self.default_banner
         return ret

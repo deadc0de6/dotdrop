@@ -65,7 +65,7 @@ def create_dir(path):
 def load_config(confpath, profile):
     '''Load the config file from path'''
     conf = Cfg(confpath)
-    opts = conf.get_configs()
+    opts = conf.get_settings()
     opts['dry'] = False
     opts['profile'] = profile
     opts['safe'] = True

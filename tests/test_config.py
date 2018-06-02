@@ -37,7 +37,7 @@ class TestConfig(unittest.TestCase):
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
-        opts = conf.get_configs()
+        opts = conf.get_settings()
         self.assertTrue(opts is not None)
         self.assertTrue(opts != {})
         self.assertTrue(opts['backup'] == self.CONFIG_BACKUP)
@@ -88,7 +88,7 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(conf is not None)
 
         # test profile
-        opts = conf.get_configs()
+        opts = conf.get_settings()
         print(conf.get_profiles())
         profiles = conf.get_profiles()
         self.assertTrue(pf1key in profiles)

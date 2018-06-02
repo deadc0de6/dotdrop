@@ -314,7 +314,7 @@ def main():
         LOG.err('error: {}'.format(str(e)))
         return False
 
-    opts = conf.get_configs()
+    opts = conf.get_settings()
     opts['dry'] = args['--dry']
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
