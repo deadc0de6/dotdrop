@@ -68,8 +68,8 @@ profiles:
     dotfiles:
     - f_abc
   p2:
-    dotfiles:
-      include: p1
+    include:
+    - p1
 _EOF
 
 # create the source
