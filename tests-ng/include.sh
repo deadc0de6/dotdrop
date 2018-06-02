@@ -73,8 +73,11 @@ profiles:
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/${tmpd}
-echo "test" > ${tmps}/dotfiles/${tmpd}/abc
+mkdir -p ${tmps}/dotfiles/
+echo "test" > ${tmps}/dotfiles/abc
+
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
 
 # compare
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
