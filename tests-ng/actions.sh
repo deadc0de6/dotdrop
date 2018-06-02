@@ -84,7 +84,6 @@ cat ${cfg}
 
 # create the dotfile
 echo "test" > ${tmps}/dotfiles/abc
-tree ${tmps}
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
