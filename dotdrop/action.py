@@ -31,6 +31,7 @@ class Cmd:
 class Action(Cmd):
 
     def execute(self):
+        """execute the action in the shell"""
         ret = 1
         self.log.sub('executing \"{}\"'.format(self.action))
         try:
@@ -43,9 +44,9 @@ class Action(Cmd):
 class Transform(Cmd):
 
     def transform(self, arg0, arg1):
-        '''execute transformation with {0} and {1}
+        """execute transformation with {0} and {1}
         where {0} is the file to transform and
-        {1} is the result file'''
+        {1} is the result file"""
         if os.path.exists(arg1):
             msg = 'transformation destination exists: {}'
             self.log.warn(msg.format(arg1))

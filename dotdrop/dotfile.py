@@ -11,11 +11,11 @@ class Dotfile:
                  actions={}, trans=[], link=False):
         # key of dotfile in the config
         self.key = key
-        # where to install this dotfile
+        # path where to install this dotfile
         self.dst = dst
-        # stored dotfile in dotdrop
+        # path where this dotfile is stored in dotdrop
         self.src = src
-        # should be a link
+        # if it is a link
         self.link = link
         # list of actions
         self.actions = actions

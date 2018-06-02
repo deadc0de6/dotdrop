@@ -39,7 +39,7 @@ class Templategen:
         return self._handle_file(src, profile)
 
     def _handle_file(self, src, profile):
-        """ generate the file content from template """
+        """generate the file content from template"""
         filetype = utils.run(['file', '-b', src], raw=False)
         istext = 'text' in filetype
         if not istext:
@@ -47,6 +47,7 @@ class Templategen:
         return self._handle_text_file(src, profile)
 
     def _handle_text_file(self, src, profile):
+        """write text to file"""
         template_rel_path = os.path.relpath(src, self.base)
         try:
             template = self.env.get_template(template_rel_path)
@@ -60,6 +61,7 @@ class Templategen:
         return content
 
     def _handle_bin_file(self, src, profile):
+        """write binary to file"""
         # this is dirty
         if not src.startswith(self.base):
             src = os.path.join(self.base, src)
@@ -67,9 +69,11 @@ class Templategen:
             return f.read()
 
     def _read_bad_encoded_text(self, path):
+        """decode non utf-8 data"""
         with open(path, 'rb') as f:
             data = f.read()
         return data.decode('utf-8', 'replace')
 
     def get_marker():
+        """return identifier for template dotfile"""
         return BLOCK_START

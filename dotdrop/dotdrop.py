@@ -76,6 +76,7 @@ Options:
 
 
 def install(opts, conf):
+    """install all dotfiles for this profile"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         msg = 'no dotfiles defined for this profile (\"{}\")'
@@ -132,7 +133,7 @@ def install(opts, conf):
 
 
 def compare(opts, conf, tmp, focus=None):
-    '''compare dotfiles and return True if all same'''
+    """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         msg = 'no dotfiles defined for this profile (\"{}\")'
@@ -182,6 +183,7 @@ def compare(opts, conf, tmp, focus=None):
 
 
 def update(opts, conf, path):
+    """update the dotfile from path"""
     if not os.path.exists(path):
         LOG.err('\"{}\" does not exist!'.format(path))
         return False
@@ -225,6 +227,7 @@ def update(opts, conf, path):
 
 
 def importer(opts, conf, paths):
+    """import dotfile(s) from paths"""
     home = os.path.expanduser(TILD)
     cnt = 0
     for path in paths:
@@ -274,6 +277,7 @@ def importer(opts, conf, paths):
 
 
 def list_profiles(conf):
+    """list all profiles"""
     LOG.log('Available profile(s):')
     for p in conf.get_profiles():
         LOG.sub(p)
@@ -281,6 +285,7 @@ def list_profiles(conf):
 
 
 def list_files(opts, conf):
+    """list all dotfiles for a specific profile"""
     if not opts['profile'] in conf.get_profiles():
         LOG.warn('unknown profile \"{}\"'.format(opts['profile']))
         return
@@ -293,11 +298,13 @@ def list_files(opts, conf):
 
 
 def header():
+    """print the header"""
     LOG.log(BANNER)
     LOG.log('')
 
 
 def main():
+    """entry point"""
     ret = True
     args = docopt(USAGE, version=VERSION)
     try:

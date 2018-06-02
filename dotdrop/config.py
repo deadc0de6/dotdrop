@@ -71,6 +71,7 @@ class Cfg:
             raise ValueError('config is not valid')
 
     def _load_file(self):
+        """load the yaml file"""
         with open(self.cfgpath, 'r') as f:
             self.content = yaml.load(f)
         if not self._is_valid():
@@ -78,6 +79,7 @@ class Cfg:
         return self._parse()
 
     def _is_valid(self):
+        """test the yaml file (self.content) is valid"""
         if self.key_profiles not in self.content:
             self.log.err('missing \"{}\" in config'.format(self.key_profiles))
             return False
@@ -103,7 +105,9 @@ class Cfg:
         return True
 
     def _parse_actions(self, actions, entries):
-        """ parse actions specified for an element """
+        """parse actions specified for an element
+        where actions are all known actions and
+        entries are the ones defined for this dotfile"""
         res = {
             self.key_actions_pre: [],
             self.key_actions_post: [],
@@ -128,7 +132,9 @@ class Cfg:
         return res
 
     def _parse_trans(self, trans, entries):
-        """ parse trans specified for an element """
+        """parse transformations specified for an element
+        where trans are all known transformation and
+        entries are the ones defined for this dotfile"""
         res = []
         for entry in entries:
             if entry not in trans.keys():
@@ -138,7 +144,7 @@ class Cfg:
         return res
 
     def _complete_configs(self):
-        """ set config defaults if not present """
+        """set config defaults if not present"""
         if self.key_backup not in self.configs:
             self.configs[self.key_backup] = self.default_backup
         if self.key_create not in self.configs:
@@ -147,7 +153,7 @@ class Cfg:
             self.configs[self.key_banner] = self.default_banner
 
     def _parse(self):
-        """ parse config file """
+        """parse config file"""
         # parse all actions
         if self.key_actions in self.content:
             if self.content[self.key_actions] is not None:
@@ -230,6 +236,7 @@ class Cfg:
         return True
 
     def _get_included_dotfiles(self, profile):
+        """find all dotfiles for a specific include keyword"""
         included = []
         if self.key_profiles_incl not in self.profiles[profile]:
             return included
@@ -243,7 +250,7 @@ class Cfg:
         return included
 
     def get_abs_dotpath(self, dotpath):
-        """ transform dotpath to an absolute path """
+        """transform dotpath to an absolute path"""
         if not dotpath.startswith(os.sep):
             absconf = os.path.join(os.path.dirname(
                 self.cfgpath), dotpath)
@@ -251,6 +258,7 @@ class Cfg:
         return dotpath
 
     def _save(self, content, path):
+        """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
             ret = yaml.dump(content, f,
@@ -258,7 +266,7 @@ class Cfg:
         return ret
 
     def _get_unique_key(self, dst):
-        """ return a unique key for an inexistent dotfile """
+        """return a unique key for an inexistent dotfile"""
         allkeys = self.dotfiles.keys()
         idx = -1
         while True:
@@ -275,16 +283,15 @@ class Cfg:
         return key
 
     def _dotfile_exists(self, dotfile):
-        """ returns <bool> and the key if this dotfile exists,
-        a new unique key otherwise """
+        """return True and the existing dotfile key
+        if it already exists, False and a new unique key otherwise"""
         dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
         if dotfile.dst in [x[1] for x in dsts]:
             return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
         return False, self._get_unique_key(dotfile.dst)
 
     def new(self, dotfile, profile, link=False):
-        """ import new dotfile (key will change) """
-
+        """import new dotfile (key will change)"""
         # keep it short
         home = os.path.expanduser('~')
         dotfile.dst = dotfile.dst.replace(home, '~')
@@ -335,22 +342,22 @@ class Cfg:
         return True, dotfile
 
     def get_dotfiles(self, profile):
-        """ returns a list of dotfiles for a specific profile """
+        """return a list of dotfiles for a specific profile"""
         if profile not in self.prodots:
             return []
         return sorted(self.prodots[profile],
                       key=lambda x: str(x.key))
 
     def get_profiles(self):
-        """ returns all defined profiles """
+        """return all defined profiles"""
         return self.profiles.keys()
 
     def get_configs(self):
-        """ returns all defined configs """
+        """return all defined configs"""
         return self.configs.copy()
 
     def dump(self):
-        """ dump config file """
+        """return a dump of the config"""
         # temporary reset dotpath
         dotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self.curdotpath
@@ -367,7 +374,7 @@ class Cfg:
         return ret
 
     def save(self):
-        """ save config file to path """
+        """save the config to file"""
         # temporary reset dotpath
         dotpath = self.configs[self.key_dotpath]
         self.configs[self.key_dotpath] = self.curdotpath
