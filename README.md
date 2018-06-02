@@ -291,7 +291,7 @@ Thus when `f_vimrc` is installed, the command
 be executed.
 
 
-Sometimes, you may even want to execute some action prior deploying a dotfile.
+Sometimes, you may even want to execute some action prior to deploying a dotfile.
 Let's take another example with
 [vim-plug](https://github.com/junegunn/vim-plug):
 
@@ -319,7 +319,7 @@ profiles:
 ```
 
 This way, we make sure [vim-plug](https://github.com/junegunn/vim-plug)
-is installed prior deploying the `~/.vimrc` dotfile.
+is installed prior to deploying the `~/.vimrc` dotfile.
 
 
 Note: You can also define `post` actions like this:
@@ -330,8 +330,8 @@ actions:
     some-action: echo "Hello, World!" >/tmp/log
 ```
 
-If you don't specify neither `post` or `pre`, actions will be executed
-after dotfiles deployment (which is equivalent to `post`).
+If you don't specify neither `post` nor `pre`, the action will be executed
+after the dotfile deployment (which is equivalent to `post`).
 
 ## Use transformations
 
