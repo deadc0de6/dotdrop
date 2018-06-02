@@ -205,7 +205,7 @@ def update(opts, conf, path):
         LOG.err('multiple dotfiles found: {}'.format(found))
         return False
     dotfile = subs[0]
-    src = os.path.join(conf.get_abs_dotpath(opts['dotpath']), dotfile.src)
+    src = os.path.join(conf.get_abs(opts['dotpath']), dotfile.src)
     if os.path.isfile(src) and \
             Templategen.get_marker() in open(src, 'r').read():
         LOG.warn('\"{}\" uses template, please update manually'.format(src))
