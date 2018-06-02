@@ -279,7 +279,7 @@ class Cfg:
         a new unique key otherwise """
         dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
         if dotfile.dst in [x[1] for x in dsts]:
-            return True, [x[0] for x in dsts][0]
+            return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
         return False, self._get_unique_key(dotfile.dst)
 
     def new(self, dotfile, profile, link=False):
@@ -289,22 +289,21 @@ class Cfg:
         home = os.path.expanduser('~')
         dotfile.dst = dotfile.dst.replace(home, '~')
 
-        # ensure content is valid
+        # adding new profile if doesn't exist
         if profile not in self.profiles:
             self.profiles[profile] = {self.key_profiles_dots: []}
+            self.prodots[profile] = []
 
         # when dotfile already there
         exists, key = self._dotfile_exists(dotfile)
         if exists:
             dotfile = self.dotfiles[key]
             # already in it
-            if profile in self.prodots and dotfile in self.prodots[profile]:
+            if dotfile in self.prodots[profile]:
                 self.log.err('\"{}\" already present'.format(dotfile.key))
                 return False, dotfile
 
             # add for this profile
-            if profile not in self.prodots:
-                self.prodots[profile] = []
             self.prodots[profile].append(dotfile)
 
             ent = self.content[self.key_profiles][profile]
@@ -330,6 +329,8 @@ class Cfg:
 
         # adding to global list
         self.dotfiles[dotfile.key] = dotfile
+        # adding to the profile
+        self.prodots[profile].append(dotfile)
 
         return True, dotfile
 
