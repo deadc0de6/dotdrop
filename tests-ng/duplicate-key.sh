@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 #
-# test importing and updating entire directories
+# test duplicate keys
 # returns 1 in case of error
 #
 
