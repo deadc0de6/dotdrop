@@ -255,8 +255,34 @@ class Cfg:
                             default_flow_style=False, indent=2)
         return ret
 
+    def _get_unique_key(self, dst):
+        """ return a unique key for an inexistent dotfile """
+        allkeys = self.dotfiles.keys()
+        idx = -1
+        while True:
+            key = '_'.join(dst.split(os.sep)[idx:])
+            key = key.lstrip('.').lower()
+
+            if os.path.isdir(dst):
+                key = 'd_{}'.format(key)
+            else:
+                key = 'f_{}'.format(key)
+            if key not in allkeys:
+                break
+            idx -= 1
+        return key
+
+    def _dotfile_exists(self, dotfile):
+        """ returns <bool> and the key if this dotfile exists,
+        a new unique key otherwise """
+        dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
+        if dotfile.dst in [x[1] for x in dsts]:
+            return True, [x[0] for x in dsts][0]
+        return False, self._get_unique_key(dotfile.dst)
+
     def new(self, dotfile, profile, link=False):
-        """ import new dotfile """
+        """ import new dotfile (key is to be changed) """
+
         # keep it short
         home = os.path.expanduser('~')
         dotfile.dst = dotfile.dst.replace(home, '~')
@@ -266,7 +292,9 @@ class Cfg:
             self.profiles[profile] = {self.key_profiles_dots: []}
 
         # when dotfile already there
-        if dotfile.key in self.dotfiles.keys():
+        exists, key = self._dotfile_exists(dotfile)
+        if exists:
+            dotfile = self.dotfiles[key]
             # already in it
             if profile in self.prodots and dotfile in self.prodots[profile]:
                 self.log.err('\"{}\" already present'.format(dotfile.key))
@@ -283,6 +311,7 @@ class Cfg:
             return True
 
         # adding the dotfile
+        dotfile.key = key
         dots = self.content[self.key_dotfiles]
         dots[dotfile.key] = {
             self.key_dotfiles_dst: dotfile.dst,
@@ -296,6 +325,9 @@ class Cfg:
         pro = self.content[self.key_profiles][profile]
         if self.key_all not in pro[self.key_profiles_dots]:
             pro[self.key_profiles_dots].append(dotfile.key)
+
+        # adding to global list
+        self.dotfiles[dotfile.key] = dotfile
 
         return True
 
