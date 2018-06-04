@@ -229,6 +229,24 @@ For example to import `~/.xinitrc`
 $ dotdrop.sh import ~/.xinitrc
 ```
 
+You can control how the dotfile key is generated in the config file
+with the option `longkey` (per default to *false*).
+
+Two formats are available:
+
+  * short format (default): take the shortest unique path
+  * long format: take the full path
+
+For example `~/.config/awesome/rc.lua` gives
+
+  * `f_rc.lua` in the short format
+  * `f_config_awesome_rc.lua` in the long format
+
+Importing `~/.mutt/colors` and `~/.vim/colors` will result in
+
+  * `d_colors` and `d_vim_colors` in the short format
+  * `d_mutt_colors` and `d_vim_colors` in the long format
+
 ## List profiles
 
 ```bash
@@ -430,6 +448,7 @@ the following entries:
   * `dotpath`: path to the directory containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
   * `banner`: display the banner
+  * `longkey`: use long keys for dotfiles when importing
 
 * **dotfiles** entry: a list of dotfiles
   * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
