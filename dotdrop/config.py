@@ -14,6 +14,9 @@ from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
 
 
+TILD = '~'
+
+
 class Cfg:
     key_all = 'ALL'
 
@@ -23,6 +26,7 @@ class Cfg:
     key_backup = 'backup'
     key_create = 'create'
     key_banner = 'banner'
+    key_long = 'longkey'
 
     # actions keys
     key_actions = 'actions'
@@ -50,6 +54,7 @@ class Cfg:
     default_create = True
     default_banner = True
     default_link = False
+    default_longkey = False
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -274,6 +279,8 @@ class Cfg:
             self.lnk_settings[self.key_create] = self.default_create
         if self.key_banner not in self.lnk_settings:
             self.lnk_settings[self.key_banner] = self.default_banner
+        if self.key_long not in self.lnk_settings:
+            self.lnk_settings[self.key_long] = self.default_longkey
 
     def get_abs(self, path):
         """transform path to an absolute path based on config path"""
@@ -291,23 +298,93 @@ class Cfg:
                             default_flow_style=False, indent=2)
         return ret
 
-    def _get_unique_key(self, dst):
-        """return a unique key where dst
-        is known not to be an already existing dotfile"""
-        allkeys = self.dotfiles.keys()
-        idx = -1
-        while True:
-            key = '_'.join(dst.split(os.sep)[idx:])
-            key = key.lstrip('.').lower()
+    def _norm_key_elem(self, elem):
+        """normalize key element for sanity"""
+        elem = elem.lstrip('.')
+        elem = elem.replace(' ', '-')
+        return elem.lower()
 
-            if os.path.isdir(dst):
-                key = 'd_{}'.format(key)
-            else:
-                key = 'f_{}'.format(key)
-            if key not in allkeys:
+    def _get_paths(self, path):
+        p = self._strip_home(path)
+        dirs = []
+        while True:
+            p, f = os.path.split(p)
+            dirs.append(f)
+            if not p or not f:
                 break
-            idx -= 1
+        dirs.reverse()
+        # remove empty entries
+        dirs = filter(None, dirs)
+        # normalize entries
+        dirs = list(map(self._norm_key_elem, dirs))
+        return dirs
+
+    def _get_long_key(self, path):
+        """return a long key representing the
+        absolute path of path"""
+        dirs = self._get_paths(path)
+        # prepend with indicator
+        if os.path.isdir(path):
+            key = 'd_{}'.format('_'.join(dirs))
+        else:
+            key = 'f_{}'.format('_'.join(dirs))
         return key
+
+    def _get_short_key(self, path, keys):
+        """return a unique key where path
+        is known not to be an already existing dotfile"""
+        dirs = self._get_paths(path)
+        dirs.reverse()
+        pre = 'f'
+        if os.path.isdir(path):
+            pre = 'd'
+        entries = []
+        for d in dirs:
+            entries.insert(0, d)
+            key = '_'.join(entries)
+            key = '{}_{}'.format(pre, key)
+            if key not in keys:
+                break
+        return key
+
+    def _strip_home(self, path):
+        """strip home part if any"""
+        path = os.path.expanduser(path)
+        home = os.path.expanduser(TILD)
+        if path.startswith(home):
+            path = path.lstrip(home)
+        return path
+
+    def short_to_long(self):
+        """transform all short keys to long keys"""
+        if not self.content[self.key_dotfiles]:
+            return
+        match = {}
+        new = {}
+        # handle the entries in dotfiles
+        for oldkey, v in self.content[self.key_dotfiles].items():
+            path = v[self.key_dotfiles_dst]
+            path = os.path.expanduser(path)
+            newkey = self._get_long_key(path)
+            new[newkey] = v
+            match[oldkey] = newkey
+        # replace with new keys
+        self.content[self.key_dotfiles] = new
+
+        # handle the entries in profiles
+        for k, v in self.lnk_profiles.items():
+            if self.key_profiles_dots not in v:
+                continue
+            if not v[self.key_profiles_dots]:
+                continue
+            new = []
+            for oldkey in v[self.key_profiles_dots]:
+                if oldkey == self.key_all:
+                    continue
+                newkey = match[oldkey]
+                new.append(newkey)
+            # replace with new keys
+            v[self.key_profiles_dots] = new
 
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
@@ -315,14 +392,17 @@ class Cfg:
         dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
         if dotfile.dst in [x[1] for x in dsts]:
             return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
-        return False, self._get_unique_key(dotfile.dst)
+        path = os.path.expanduser(dotfile.dst)
+        if self.lnk_settings[self.key_long]:
+            return False, self._get_long_key(path)
+        return False, self._get_short_key(path, self.dotfiles.keys())
 
     def new(self, dotfile, profile, link=False):
         """import new dotfile
         dotfile key will change and can be empty"""
         # keep it short
         home = os.path.expanduser('~')
-        dotfile.dst = dotfile.dst.replace(home, '~')
+        dotfile.dst = dotfile.dst.replace(home, '~', 1)
 
         # adding new profile if doesn't exist
         if profile not in self.lnk_profiles:
