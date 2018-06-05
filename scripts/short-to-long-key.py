@@ -15,7 +15,7 @@ For example ~/.config/awesome/rc.lua
 from docopt import docopt
 import sys
 import os
-sys.path.append('../dotdrop')
+sys.path.insert(0, '../dotdrop')
 try:
     from dotdrop.config import Cfg
 except Exception as e:
