@@ -2,5 +2,8 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  banner: true
+  longkey: false
+  keepdot: false
 dotfiles:
 profiles:
