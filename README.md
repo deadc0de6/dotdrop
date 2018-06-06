@@ -338,8 +338,9 @@ profiles:
 This way, we make sure [vim-plug](https://github.com/junegunn/vim-plug)
 is installed prior to deploying the `~/.vimrc` dotfile.
 
+Note that `pre` actions are always executed even if the dotfile is not installed.
 
-Note: You can also define `post` actions like this:
+You can also define `post` actions like this:
 
 ```yaml
 actions:
