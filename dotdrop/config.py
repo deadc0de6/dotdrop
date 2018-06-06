@@ -27,6 +27,7 @@ class Cfg:
     key_create = 'create'
     key_banner = 'banner'
     key_long = 'longkey'
+    key_keepdot = 'keepdot'
 
     # actions keys
     key_actions = 'actions'
@@ -55,6 +56,7 @@ class Cfg:
     default_banner = True
     default_link = False
     default_longkey = False
+    default_keepdot = False
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -281,6 +283,8 @@ class Cfg:
             self.lnk_settings[self.key_banner] = self.default_banner
         if self.key_long not in self.lnk_settings:
             self.lnk_settings[self.key_long] = self.default_longkey
+        if self.key_keepdot not in self.lnk_settings:
+            self.lnk_settings[self.key_keepdot] = self.default_keepdot
 
     def get_abs(self, path):
         """transform path to an absolute path based on config path"""
@@ -473,16 +477,10 @@ class Cfg:
         # temporary reset dotpath
         dotpath = self.lnk_settings[self.key_dotpath]
         self.lnk_settings[self.key_dotpath] = self.curdotpath
-        # reset banner
-        if self.lnk_settings[self.key_banner]:
-            del self.lnk_settings[self.key_banner]
         # dump
         ret = yaml.dump(self.content, default_flow_style=False, indent=2)
         # restore dotpath
         self.lnk_settings[self.key_dotpath] = dotpath
-        # restore banner
-        if self.key_banner not in self.lnk_settings:
-            self.lnk_settings[self.key_banner] = self.default_banner
         return ret
 
     def save(self):
@@ -490,14 +488,8 @@ class Cfg:
         # temporary reset dotpath
         dotpath = self.lnk_settings[self.key_dotpath]
         self.lnk_settings[self.key_dotpath] = self.curdotpath
-        # reset banner
-        if self.lnk_settings[self.key_banner]:
-            del self.lnk_settings[self.key_banner]
         # save
         ret = self._save(self.content, self.cfgpath)
         # restore dotpath
         self.lnk_settings[self.key_dotpath] = dotpath
-        # restore banner
-        if self.key_banner not in self.lnk_settings:
-            self.lnk_settings[self.key_banner] = self.default_banner
         return ret

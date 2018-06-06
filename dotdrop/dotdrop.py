@@ -239,7 +239,10 @@ def importer(opts, conf, paths):
         src = dst
         if dst.startswith(home):
             src = dst[len(home):]
-        src = src.lstrip('.' + os.sep)
+        strip = '.' + os.sep
+        if opts['keepdot']:
+            strip = os.sep
+        src = src.lstrip(strip)
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)

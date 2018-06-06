@@ -443,13 +443,14 @@ the following entries:
 
 * **config** entry: contains settings for the deployment
   * `backup`: create a backup of the dotfile in case it differs from the
-    one that will be installed by dotdrop
+    one that will be installed by dotdrop (default *true*)
   * `create`: create directory hierarchy when installing dotfiles if
-    it doesn't exist
+    it doesn't exist (default *true*)
   * `dotpath`: path to the directory containing the dotfiles to be managed
     by dotdrop (absolute path or relative to the config file location)
-  * `banner`: display the banner
-  * `longkey`: use long keys for dotfiles when importing
+  * `banner`: display the banner (default *true*)
+  * `longkey`: use long keys for dotfiles when importing (default *false*)
+  * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
 
 * **dotfiles** entry: a list of dotfiles
   * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
