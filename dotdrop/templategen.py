@@ -10,6 +10,7 @@ from jinja2 import Environment, FileSystemLoader
 
 # local imports
 import dotdrop.utils as utils
+from dotdrop.logger import Logger
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -21,7 +22,7 @@ COMMENT_END = '@@#}'
 
 class Templategen:
 
-    def __init__(self, base='.'):
+    def __init__(self, base='.', debug=False):
         self.base = base.rstrip(os.sep)
         loader = FileSystemLoader(self.base)
         self.env = Environment(loader=loader,
@@ -33,6 +34,7 @@ class Templategen:
                                variable_end_string=VAR_END,
                                comment_start_string=COMMENT_START,
                                comment_end_string=COMMENT_END)
+        self.log = Logger(debug=debug)
 
     def generate(self, src, profile):
         if not os.path.exists(src):
@@ -41,8 +43,10 @@ class Templategen:
 
     def _handle_file(self, src, profile):
         """generate the file content from template"""
-        filetype = utils.run(['file', '-b', src], raw=False)
+        filetype = utils.run(['file', '-b', src], raw=False).strip()
+        self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
         istext = 'text' in filetype
+        self.log.dbg('\"{}\" is text: {}'.format(src, istext))
         if not istext:
             return self._handle_bin_file(src, profile)
         return self._handle_text_file(src, profile)
