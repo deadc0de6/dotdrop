@@ -43,7 +43,7 @@ class Installer:
         dst = os.path.join(self.base, os.path.expanduser(dst))
         if os.path.exists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                self.log.sub('ignoring "{}", link exists'.format(dst))
+                self.log.dbg('ignoring "{}", link exists'.format(dst))
                 return []
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
