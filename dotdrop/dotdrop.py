@@ -214,6 +214,10 @@ def update(opts, conf, path):
     src_clean = src
     if os.path.isdir(src):
         src_clean = os.path.join(src, '..')
+    if os.path.samefile(src_clean, path):
+        # symlink loop
+        Log.err('dotfile points to itself: {}'.format(path))
+        return False
     cmd = ['cp', '-R', '-L', os.path.expanduser(path), src_clean]
     if opts['dry']:
         LOG.dry('would run: {}'.format(' '.join(cmd)))
