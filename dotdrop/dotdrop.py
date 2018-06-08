@@ -91,8 +91,11 @@ def install(opts, conf):
     for dotfile in dotfiles:
         if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
-                LOG.dbg('executing pre action {}'.format(action))
-                action.execute()
+                if opts['dry']:
+                    LOG.dry('would execute action: {}'.format(action))
+                else:
+                    LOG.dbg('executing pre action {}'.format(action))
+                    action.execute()
         LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
@@ -126,8 +129,11 @@ def install(opts, conf):
                 actions = dotfile.actions[Cfg.key_actions_post]
                 # execute action
                 for action in actions:
-                    LOG.dbg('executing post action {}'.format(action))
-                    action.execute()
+                    if opts['dry']:
+                        LOG.dry('would execute action: {}'.format(action))
+                    else:
+                        LOG.dbg('executing post action {}'.format(action))
+                        action.execute()
         installed.extend(r)
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
