@@ -52,3 +52,12 @@ def remove(path):
         rmtree(path)
     else:
         raise OSError("Unsupported file type for deletion: {}".format(path))
+
+
+def samefile(path1, path2):
+    """return True if represent the same file"""
+    if not os.path.exists(path1):
+        return False
+    if not os.path.exists(path2):
+        return False
+    return os.path.samefile(path1, path2)

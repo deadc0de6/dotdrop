@@ -32,7 +32,7 @@ class Installer:
         """install the src to dst using a template"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
-        if os.path.samefile(src, dst):
+        if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []
@@ -76,7 +76,7 @@ class Installer:
     def _handle_file(self, templater, profile, src, dst):
         """install src to dst when is a file"""
         self.log.dbg('generate template for {}'.format(src))
-        if os.path.samefile(src, dst):
+        if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []

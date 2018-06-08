@@ -214,7 +214,7 @@ def update(opts, conf, path):
     src_clean = src
     if os.path.isdir(src):
         src_clean = os.path.join(src, '..')
-    if os.path.samefile(src_clean, path):
+    if samefile(src_clean, path):
         # symlink loop
         Log.err('dotfile points to itself: {}'.format(path))
         return False
