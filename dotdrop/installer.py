@@ -183,6 +183,7 @@ class Installer:
 
     def compare(self, templater, tmpdir, profile, src, dst, opts=''):
         """compare a temporary generated dotfile with the local one"""
+        # saved some flags while comparing
         self.comparing = True
         retval = False, ''
         drysaved = self.dry
@@ -191,16 +192,17 @@ class Installer:
         self.diff = False
         createsaved = self.create
         self.create = True
+        # normalize src and dst
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         self.log.dbg('comparing {} and {}'.format(src, dst))
         if not os.path.exists(dst):
+            # destination dotfile does not exist
             retval = False, '\"{}\" does not exist on local\n'.format(dst)
         else:
-            ret, tmpdst = self._install_to_temp(templater,
-                                                profile,
-                                                src, dst,
-                                                tmpdir)
+            # install the dotfile to a temp directory for comparing
+            ret, tmpdst = self._install_to_temp(templater, profile,
+                                                src, dst, tmpdir)
             if ret:
                 self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
                 diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
@@ -208,6 +210,7 @@ class Installer:
                     retval = True, ''
                 else:
                     retval = False, diff
+        # reset flags
         self.dry = drysaved
         self.diff = diffsaved
         self.comparing = False

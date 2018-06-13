@@ -103,20 +103,8 @@ def install(opts, conf):
             src = dotfile.src
             tmp = None
             if dotfile.trans:
-                tmp = '{}.{}'.format(src, TRANS_SUFFIX)
-                err = False
-                for trans in dotfile.trans:
-                    LOG.dbg('executing transformation {}'.format(trans))
-                    s = os.path.join(opts['dotpath'], src)
-                    temp = os.path.join(opts['dotpath'], tmp)
-                    if not trans.transform(s, temp):
-                        msg = 'transformation \"{}\" failed for {}'
-                        LOG.err(msg.format(trans.key, dotfile.key))
-                        err = True
-                        break
-                if err:
-                    if tmp and os.path.exists(tmp):
-                        remove(tmp)
+                tmp = apply_trans(opts, dotfile)
+                if not tmp:
                     continue
                 src = tmp
             r = inst.install(t, opts['profile'], src, dotfile.dst)
@@ -137,6 +125,28 @@ def install(opts, conf):
         installed.extend(r)
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
+
+
+def apply_trans(opts, dotfile):
+    """apply the transformation to the dotfile
+    return None if fails and new source if succeed"""
+    src = dotfile.src
+    new_src = '{}.{}'.format(src, TRANS_SUFFIX)
+    err = False
+    for trans in dotfile.trans:
+        LOG.dbg('executing transformation {}'.format(trans))
+        s = os.path.join(opts['dotpath'], src)
+        temp = os.path.join(opts['dotpath'], new_src)
+        if not trans.transform(s, temp):
+            msg = 'transformation \"{}\" failed for {}'
+            LOG.err(msg.format(trans.key, dotfile.key))
+            err = True
+            break
+    if err:
+        if new_src and os.path.exists(new_src):
+            remove(new_src)
+        return None
+    return new_src
 
 
 def compare(opts, conf, tmp, focus=None):
@@ -169,13 +179,20 @@ def compare(opts, conf, tmp, focus=None):
 
     for dotfile in selected:
         LOG.dbg('comparing {}'.format(dotfile))
+        src = dotfile.src
+        tmpsrc = None
         if dotfile.trans:
-            msg = 'ignore {} as it uses transformation(s)'
-            LOG.log(msg.format(dotfile.key))
-            continue
+            tmpsrc = apply_trans(opts, dotfile)
+            if not tmpsrc:
+                continue
+            src = tmpsrc
+            # create a fake dotfile which is the result of the transformation
         same, diff = inst.compare(t, tmp, opts['profile'],
-                                  dotfile.src, dotfile.dst,
-                                  opts=opts['dopts'])
+                                  src, dotfile.dst, opts=opts['dopts'])
+        if tmpsrc:
+            tmpsrc = os.path.join(opts['dotpath'], tmpsrc)
+            if os.path.exists(tmpsrc):
+                remove(tmpsrc)
         if same:
             LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
                                                       dotfile.dst))
