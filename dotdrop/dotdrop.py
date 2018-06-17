@@ -353,6 +353,7 @@ def main():
     opts['debug'] = args['--verbose']
 
     LOG.debug = opts['debug']
+    LOG.dbg('config file: {}'.format(args['--cfg']))
     LOG.dbg('opts: {}'.format(opts))
 
     if opts['banner'] and not args['--no-banner']:
