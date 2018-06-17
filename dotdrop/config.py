@@ -60,7 +60,7 @@ class Cfg:
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
-            raise ValueError('config file does not exist')
+            raise ValueError('config file does not exist: {}'.format(cfgpath))
         # make sure to have an absolute path to config file
         self.cfgpath = os.path.abspath(cfgpath)
 
