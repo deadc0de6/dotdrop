@@ -208,7 +208,7 @@ def compare(opts, conf, tmp, focus=None):
 
 def update(opts, conf, path):
     """update the dotfile from path"""
-    if not os.path.exists(path):
+    if not os.path.lexists(path):
         LOG.err('\"{}\" does not exist!'.format(path))
         return False
     home = os.path.expanduser(TILD)
@@ -228,7 +228,7 @@ def update(opts, conf, path):
         LOG.err('multiple dotfiles found: {}'.format(found))
         return False
     dotfile = subs[0]
-    src = os.path.join(conf.get_abs(opts['dotpath']), dotfile.src)
+    src = os.path.join(conf.abs_dotpath(opts['dotpath']), dotfile.src)
     if os.path.isfile(src) and \
             Templategen.get_marker() in open(src, 'r').read():
         LOG.warn('\"{}\" uses template, please update manually'.format(src))
@@ -259,7 +259,7 @@ def importer(opts, conf, paths):
     home = os.path.expanduser(TILD)
     cnt = 0
     for path in paths:
-        if not os.path.exists(path):
+        if not os.path.lexists(path):
             LOG.err('\"{}\" does not exist, ignored !'.format(path))
             continue
         dst = path.rstrip(os.sep)

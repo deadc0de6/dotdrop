@@ -44,7 +44,7 @@ def get_tmpfile():
 
 def remove(path):
     """remove a file/directory/symlink"""
-    if not os.path.exists(path):
+    if not os.path.lexists(path):
         raise OSError("File not found: {}".format(path))
     if os.path.islink(path) or os.path.isfile(path):
         os.unlink(path)

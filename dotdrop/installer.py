@@ -45,7 +45,7 @@ class Installer:
         """set src as the link target of dst"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
-        if os.path.exists(dst):
+        if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
                 self.log.dbg('ignoring "{}", link exists'.format(dst))
                 return []
@@ -131,7 +131,7 @@ class Installer:
         if self.dry:
             self.log.dry('would install {}'.format(dst))
             return 0
-        if os.path.exists(dst):
+        if os.path.lexists(dst):
             samerights = os.stat(dst).st_mode == rights
             if self.diff and self._fake_diff(dst, content) and samerights:
                 self.log.dbg('{} is the same'.format(dst))
@@ -139,7 +139,7 @@ class Installer:
             if self.safe and not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring \"{}\", already present'.format(dst))
                 return 1
-        if self.backup and os.path.exists(dst):
+        if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
@@ -196,7 +196,7 @@ class Installer:
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         self.log.dbg('comparing {} and {}'.format(src, dst))
-        if not os.path.exists(dst):
+        if not os.path.lexists(dst):
             # destination dotfile does not exist
             retval = False, '\"{}\" does not exist on local\n'.format(dst)
         else:
