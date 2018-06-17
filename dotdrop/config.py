@@ -61,7 +61,10 @@ class Cfg:
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist')
-        self.cfgpath = cfgpath
+        # make sure to have an absolute path to config file
+        self.cfgpath = os.path.abspath(cfgpath)
+
+        # init the logger
         self.log = Logger()
 
         # represents all entries under "config"
@@ -218,7 +221,7 @@ class Cfg:
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = self.get_abs(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = self.abs_dotpath(self.curdotpath)
         return True
 
     def _get_included_dotfiles(self, profile):
@@ -286,9 +289,9 @@ class Cfg:
         if self.key_keepdot not in self.lnk_settings:
             self.lnk_settings[self.key_keepdot] = self.default_keepdot
 
-    def get_abs(self, path):
+    def abs_dotpath(self, path):
         """transform path to an absolute path based on config path"""
-        if not path.startswith(os.sep):
+        if not os.path.isabs(path):
             absconf = os.path.join(os.path.dirname(
                 self.cfgpath), path)
             return absconf
