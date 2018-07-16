@@ -104,6 +104,8 @@ class Installer:
     def _handle_dir(self, templater, profile, src, dst):
         """install src to dst when is a directory"""
         ret = []
+        self._create_dirs(dst)
+        # handle all files in dir
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
@@ -160,6 +162,9 @@ class Installer:
         if not self.create and not os.path.exists(directory):
             return False
         if os.path.exists(directory):
+            return True
+        if self.dry:
+            self.log.dry('would mkdir -p {}'.format(directory))
             return True
         self.log.dbg('mkdir -p {}'.format(directory))
         os.makedirs(directory)

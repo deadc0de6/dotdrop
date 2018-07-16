@@ -24,6 +24,7 @@ class Templategen:
 
     def __init__(self, base='.', debug=False):
         self.base = base.rstrip(os.sep)
+        self.debug = debug
         loader = FileSystemLoader(self.base)
         self.env = Environment(loader=loader,
                                trim_blocks=True, lstrip_blocks=True,
@@ -43,7 +44,8 @@ class Templategen:
 
     def _handle_file(self, src, profile):
         """generate the file content from template"""
-        filetype = utils.run(['file', '-b', src], raw=False).strip()
+        filetype = utils.run(['file', '-b', src], raw=False, debug=self.debug)
+        filetype = filetype.strip()
         self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
         istext = 'text' in filetype
         self.log.dbg('\"{}\" is text: {}'.format(src, istext))

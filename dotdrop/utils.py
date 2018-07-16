@@ -14,9 +14,13 @@ from shutil import rmtree
 # local import
 from dotdrop.logger import Logger
 
+LOG = Logger()
 
-def run(cmd, raw=True):
+
+def run(cmd, raw=True, debug=False):
     """run a command in the shell (expects a list)"""
+    if debug:
+        LOG.dbg('exec: {}'.format(' '.join(cmd)))
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if raw:

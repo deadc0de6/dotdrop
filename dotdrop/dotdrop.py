@@ -249,7 +249,7 @@ def update(opts, conf, path):
         if opts['safe'] and not LOG.ask(msg):
             return False
         else:
-            run(cmd, raw=False)
+            run(cmd, raw=False, debug=opts['debug'])
             LOG.log('\"{}\" updated from \"{}\".'.format(src, path))
     return True
 
@@ -283,14 +283,14 @@ def importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
-                run(cmd, raw=False)
+                run(cmd, raw=False, debug=opts['debug'])
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
                 if opts['link']:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
-                run(cmd, raw=False)
+                run(cmd, raw=False, debug=opts['debug'])
                 if opts['link']:
                     remove(dst)
                     os.symlink(srcf, dst)
