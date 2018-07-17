@@ -19,8 +19,8 @@ class Logger:
     RESET = '\033[0m'
     EMPH = '\033[33m'
 
-    def __init__(self, debug=False):
-        self.debug = debug
+    def __init__(self):
+        pass
 
     def log(self, string, end='\n', pre=''):
         cs = self._color(self.BLUE)
@@ -48,8 +48,6 @@ class Logger:
         sys.stderr.write('{}[WARN] {} {}{}'.format(cs, string, end, ce))
 
     def dbg(self, string):
-        if not self.debug:
-            return
         frame = inspect.stack()[1]
         mod = inspect.getmodule(frame[0]).__name__
         func = inspect.stack()[1][3]

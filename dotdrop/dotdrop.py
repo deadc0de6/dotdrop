@@ -94,9 +94,11 @@ def install(opts, conf):
                 if opts['dry']:
                     LOG.dry('would execute action: {}'.format(action))
                 else:
-                    LOG.dbg('executing pre action {}'.format(action))
+                    if opts['debug']:
+                        LOG.dbg('executing pre action {}'.format(action))
                     action.execute()
-        LOG.dbg('installing {}'.format(dotfile))
+        if opts['debug']:
+            LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
             r = inst.link(dotfile.src, dotfile.dst)
         else:
@@ -120,7 +122,8 @@ def install(opts, conf):
                     if opts['dry']:
                         LOG.dry('would execute action: {}'.format(action))
                     else:
-                        LOG.dbg('executing post action {}'.format(action))
+                        if opts['debug']:
+                            LOG.dbg('executing post action {}'.format(action))
                         action.execute()
         installed.extend(r)
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
@@ -134,7 +137,8 @@ def apply_trans(opts, dotfile):
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
     err = False
     for trans in dotfile.trans:
-        LOG.dbg('executing transformation {}'.format(trans))
+        if opts['debug']:
+            LOG.dbg('executing transformation {}'.format(trans))
         s = os.path.join(opts['dotpath'], src)
         temp = os.path.join(opts['dotpath'], new_src)
         if not trans.transform(s, temp):
@@ -178,7 +182,8 @@ def compare(opts, conf, tmp, focus=None):
         return ret
 
     for dotfile in selected:
-        LOG.dbg('comparing {}'.format(dotfile))
+        if opts['debug']:
+            LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
         tmpsrc = None
         if dotfile.trans:
@@ -194,9 +199,10 @@ def compare(opts, conf, tmp, focus=None):
             if os.path.exists(tmpsrc):
                 remove(tmpsrc)
         if same:
-            LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
-                                                      dotfile.dst))
-            LOG.dbg('same file')
+            if opts['debug']:
+                LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
+                                                          dotfile.dst))
+                LOG.dbg('same file')
         else:
             LOG.log('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
                                                       dotfile.dst))
@@ -352,9 +358,9 @@ def main():
     opts['link'] = args['--link']
     opts['debug'] = args['--verbose']
 
-    LOG.debug = opts['debug']
-    LOG.dbg('config file: {}'.format(args['--cfg']))
-    LOG.dbg('opts: {}'.format(opts))
+    if opts['debug']:
+        LOG.dbg('config file: {}'.format(args['--cfg']))
+        LOG.dbg('opts: {}'.format(opts))
 
     if opts['banner'] and not args['--no-banner']:
         header()

@@ -35,7 +35,7 @@ class Templategen:
                                variable_end_string=VAR_END,
                                comment_start_string=COMMENT_START,
                                comment_end_string=COMMENT_END)
-        self.log = Logger(debug=debug)
+        self.log = Logger()
 
     def generate(self, src, profile):
         if not os.path.exists(src):
@@ -46,9 +46,11 @@ class Templategen:
         """generate the file content from template"""
         filetype = utils.run(['file', '-b', src], raw=False, debug=self.debug)
         filetype = filetype.strip()
-        self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
+        if self.debug:
+            self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
         istext = 'text' in filetype
-        self.log.dbg('\"{}\" is text: {}'.format(src, istext))
+        if self.debug:
+            self.log.dbg('\"{}\" is text: {}'.format(src, istext))
         if not istext:
             return self._handle_bin_file(src, profile)
         return self._handle_text_file(src, profile)

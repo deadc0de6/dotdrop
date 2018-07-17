@@ -26,7 +26,7 @@ class Installer:
         self.debug = debug
         self.diff = diff
         self.comparing = False
-        self.log = Logger(debug=self.debug)
+        self.log = Logger()
 
     def install(self, templater, profile, src, dst):
         """install the src to dst using a template"""
@@ -36,7 +36,8 @@ class Installer:
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []
-        self.log.dbg('install {} to {}'.format(src, dst))
+        if self.debug:
+            self.log.dbg('install {} to {}'.format(src, dst))
         if os.path.isdir(src):
             return self._handle_dir(templater, profile, src, dst)
         return self._handle_file(templater, profile, src, dst)
@@ -47,7 +48,8 @@ class Installer:
         dst = os.path.join(self.base, os.path.expanduser(dst))
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                self.log.dbg('ignoring "{}", link exists'.format(dst))
+                if self.debug:
+                    self.log.dbg('ignoring "{}", link exists'.format(dst))
                 return []
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
@@ -75,7 +77,8 @@ class Installer:
 
     def _handle_file(self, templater, profile, src, dst):
         """install src to dst when is a file"""
-        self.log.dbg('generate template for {}'.format(src))
+        if self.debug:
+            self.log.dbg('generate template for {}'.format(src))
         if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
@@ -93,7 +96,8 @@ class Installer:
             self.log.err('installing \"{}\" to \"{}\"'.format(src, dst))
             return []
         if ret > 0:
-            self.log.dbg('ignoring \"{}\", same content'.format(dst))
+            if self.debug:
+                self.log.dbg('ignoring \"{}\", same content'.format(dst))
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
@@ -136,7 +140,8 @@ class Installer:
         if os.path.lexists(dst):
             samerights = os.stat(dst).st_mode == rights
             if self.diff and self._fake_diff(dst, content) and samerights:
-                self.log.dbg('{} is the same'.format(dst))
+                if self.debug:
+                    self.log.dbg('{} is the same'.format(dst))
                 return 1
             if self.safe and not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring \"{}\", already present'.format(dst))
@@ -147,7 +152,8 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for \"{}\"'.format(dst))
             return -1
-        self.log.dbg('write content to {}'.format(dst))
+        if self.debug:
+            self.log.dbg('write content to {}'.format(dst))
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
@@ -166,7 +172,8 @@ class Installer:
         if self.dry:
             self.log.dry('would mkdir -p {}'.format(directory))
             return True
-        self.log.dbg('mkdir -p {}'.format(directory))
+        if self.debug:
+            self.log.dbg('mkdir -p {}'.format(directory))
         os.makedirs(directory)
         return os.path.exists(directory)
 
@@ -200,7 +207,8 @@ class Installer:
         # normalize src and dst
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
-        self.log.dbg('comparing {} and {}'.format(src, dst))
+        if self.debug:
+            self.log.dbg('comparing {} and {}'.format(src, dst))
         if not os.path.lexists(dst):
             # destination dotfile does not exist
             retval = False, '\"{}\" does not exist on local\n'.format(dst)
@@ -209,7 +217,8 @@ class Installer:
             ret, tmpdst = self._install_to_temp(templater, profile,
                                                 src, dst, tmpdir)
             if ret:
-                self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
+                if self.debug:
+                    self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
                 diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
                 if diff == '':
                     retval = True, ''
