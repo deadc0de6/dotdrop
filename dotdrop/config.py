@@ -28,6 +28,7 @@ class Cfg:
     key_banner = 'banner'
     key_long = 'longkey'
     key_keepdot = 'keepdot'
+    key_deflink = 'link_by_default'
 
     # actions keys
     key_actions = 'actions'
@@ -57,6 +58,7 @@ class Cfg:
     default_link = False
     default_longkey = False
     default_keepdot = False
+    default_link_by_default = False
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -288,6 +290,8 @@ class Cfg:
             self.lnk_settings[self.key_long] = self.default_longkey
         if self.key_keepdot not in self.lnk_settings:
             self.lnk_settings[self.key_keepdot] = self.default_keepdot
+        if self.key_deflink not in self.lnk_settings:
+            self.lnk_settings[self.key_deflink] = self.default_link_by_default
 
     def abs_dotpath(self, path):
         """transform path to an absolute path based on config path"""
