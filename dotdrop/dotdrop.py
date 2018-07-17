@@ -11,23 +11,13 @@ import subprocess
 from docopt import docopt
 
 # local imports
-try:
-    from . import __version__ as VERSION
-except ImportError:
-    errmsg = '''
-Dotdrop has been updated to be included in pypi and
-the way it needs to be called has slightly changed.
-
-See https://github.com/deadc0de6/dotdrop/wiki/migrate-from-submodule
-'''
-    print(errmsg)
-    sys.exit(1)
-from .logger import Logger
-from .templategen import Templategen
-from .installer import Installer
-from .dotfile import Dotfile
-from .config import Cfg
-from .utils import *
+from dotdrop.version import __version__ as VERSION
+from dotdrop.logger import Logger
+from dotdrop.templategen import Templategen
+from dotdrop.installer import Installer
+from dotdrop.dotfile import Dotfile
+from dotdrop.config import Cfg
+from dotdrop.utils import *
 
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()

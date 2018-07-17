@@ -13,7 +13,10 @@ except ImportError:
     print('\n[WARNING] pypandoc not found, could not convert \"{}\"\n'.format(readme))
     read_readme = lambda f: open(f, 'r').read()
 
-VERSION = dotdrop.__version__
+try:
+    VERSION = open('dotdrop/version.py', "rt").read()
+except:
+    raise('cannot find version module')
 REQUIRES_PYTHON = '>=3'
 
 setup(
