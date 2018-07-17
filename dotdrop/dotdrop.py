@@ -289,7 +289,8 @@ def importer(opts, conf, paths):
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
-        retconf, new_dotfile = conf.new(dotfile, opts['profile'], opts['link'])
+        linkit = opts['link'] or opts['link_by_default']
+        retconf, new_dotfile = conf.new(dotfile, opts['profile'], linkit)
         dotfile = new_dotfile
 
         # prepare hierarchy for dotfile
@@ -303,11 +304,11 @@ def importer(opts, conf, paths):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if opts['link']:
+                if linkit:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 run(cmd, raw=False, debug=opts['debug'])
-                if opts['link']:
+                if linkit:
                     remove(dst)
                     os.symlink(srcf, dst)
         if retconf:
