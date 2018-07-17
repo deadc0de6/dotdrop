@@ -10,16 +10,15 @@ format
 For example ~/.config/awesome/rc.lua
   short format: f_rc.lua
   long format:  f_config_awesome_rc.lua
+
+You need to have dotdrop installed for this script
+to work (either with setup.py or pypi).
 """
 
 from docopt import docopt
 import sys
 import os
-sys.path.insert(0, '../dotdrop')
-try:
-    from dotdrop.config import Cfg
-except Exception as e:
-    raise
+from dotdrop.config import Cfg
 
 
 USAGE = """
