@@ -219,7 +219,8 @@ class Installer:
             if ret:
                 if self.debug:
                     self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
-                diff = utils.diff(tmpdst, dst, raw=False, opts=opts)
+                diff = utils.diff(tmpdst, dst, raw=False,
+                                  opts=opts, debug=self.debug)
                 if diff == '':
                     retval = True, ''
                 else:

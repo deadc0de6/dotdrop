@@ -29,10 +29,10 @@ def run(cmd, raw=True, debug=False):
     return ''.join(lines)
 
 
-def diff(src, dst, raw=True, opts=''):
+def diff(src, dst, raw=True, opts='', debug=False):
     """call unix diff to compare two files"""
     cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, src, dst)
-    return run(shlex.split(cmd), raw=raw)
+    return run(shlex.split(cmd), raw=raw, debug=debug)
 
 
 def get_tmpdir():
