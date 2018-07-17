@@ -153,6 +153,23 @@ def apply_trans(opts, dotfile):
     return new_src
 
 
+def _select(selections, dotfiles):
+    ret = True
+    selected = []
+    for selection in selections:
+        df = next(
+            (x for x in dotfiles
+                if os.path.expanduser(x.dst) == os.path.expanduser(selection)),
+            None
+        )
+        if df:
+            selected.append(df)
+        else:
+            LOG.err('no dotfile matches \"{}\"'.format(selection))
+            ret = False
+    return selected, ret
+
+
 def compare(opts, conf, tmp, focus=None):
     """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
@@ -169,14 +186,7 @@ def compare(opts, conf, tmp, focus=None):
     ret = True
     selected = dotfiles
     if focus:
-        selected = []
-        for selection in focus.replace(' ', '').split(','):
-            df = next((x for x in dotfiles if x.dst == selection), None)
-            if df:
-                selected.append(df)
-            else:
-                LOG.err('no dotfile matches \"{}\"'.format(selection))
-                ret = False
+        selected, ret = _select(focus.replace(' ', '').split(','), dotfiles)
 
     if len(selected) < 1:
         return ret
