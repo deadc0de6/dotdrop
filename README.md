@@ -454,7 +454,7 @@ the following entries:
   * `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
 
 * **dotfiles** entry: a list of dotfiles
-  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true.
+  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true (default *false*).
   * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
   * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
 ```
