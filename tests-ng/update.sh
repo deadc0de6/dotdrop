@@ -67,6 +67,7 @@ echo 'this file is the same' > ${tmpd}/dir1/common_file
 echo 'in dir1' > ${tmpd}/dir1/not_the_same
 echo 'This is a file in dir1' > ${tmpd}/dir1/file_in_dir1
 mkdir -p ${tmpd}/dir1/sub/sub2
+mkdir -p ${tmpd}/dir1/notindir2/notindir2
 echo 'first' > ${tmpd}/dir1/sub/sub2/different
 #tree ${tmpd}/dir1
 
