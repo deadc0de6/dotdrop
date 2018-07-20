@@ -108,7 +108,7 @@ class Updater:
         if self.debug:
             self.log.dbg('handle update for dir {} to {}'.format(left, right))
         # find the difference
-        diff = filecmp.dircmp(left, right, ignore=None, hide=None)
+        diff = filecmp.dircmp(left, right, ignore=None)
         # handle directories diff
         # create dirs that don't exist in dotdrop
         if self.debug:
