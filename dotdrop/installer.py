@@ -9,6 +9,7 @@ import os
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.comparator import Comparator
 import dotdrop.utils as utils
 
 
@@ -219,8 +220,8 @@ class Installer:
             if ret:
                 if self.debug:
                     self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
-                diff = utils.diff(tmpdst, dst, raw=False,
-                                  opts=opts, debug=self.debug)
+                comparator = Comparator(opts, self.debug)
+                diff = comparator.compare(tmpdst, dst)
                 if diff == '':
                     retval = True, ''
                 else:
