@@ -68,7 +68,7 @@ echo 'in dir1' > ${tmpd}/dir1/not_the_same
 echo 'This is a file in dir1' > ${tmpd}/dir1/file_in_dir1
 mkdir -p ${tmpd}/dir1/sub/sub2
 echo 'first' > ${tmpd}/dir1/sub/sub2/different
-tree ${tmpd}/dir1
+#tree ${tmpd}/dir1
 
 # create the hierarchy
 # for dir2 (modified original for update)
@@ -82,7 +82,7 @@ mkdir -p ${tmpd}/dir2/file_in_dir1
 mkdir -p ${tmpd}/dir2/sub/sub2
 echo 'modified' > ${tmpd}/dir2/sub/sub2/different
 mkdir -p ${tmpd}/dir2/new/new2
-tree ${tmpd}/dir2
+#tree ${tmpd}/dir2
 
 # create the config file
 cfg="${basedir}/config.yaml"
@@ -94,13 +94,13 @@ cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/dir1
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/uniquefile
 
 # let's see the dotpath
-tree ${basedir}/dotfiles
+#tree ${basedir}/dotfiles
 
 # change dir1 to dir2 in deployed
 echo "[+] change dir"
 rm -rf ${tmpd}/dir1
 mv ${tmpd}/dir2 ${tmpd}/dir1
-tree ${tmpd}/dir1
+#tree ${tmpd}/dir1
 
 # change unique file
 echo 'changed' > ${tmpd}/uniquefile
