@@ -137,6 +137,8 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('rm -r {}'.format(new))
+            if not self._confirm_rm_r(new):
+                continue
             utils.remove(new)
 
         # handle files diff
@@ -205,6 +207,13 @@ class Updater:
     def _overwrite(self, src, dst):
         """ask for overwritting"""
         msg = 'Overwrite \"{}\" with \"{}\"?'.format(dst, src)
+        if self.safe and not self.log.ask(msg):
+            return False
+        return True
+
+    def _confirm_rm_r(self, directory):
+        """ask for rm -r directory"""
+        msg = 'Recursively remove \"{}\"?'.format(directory)
         if self.safe and not self.log.ask(msg):
             return False
         return True
