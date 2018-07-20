@@ -15,6 +15,7 @@ from dotdrop.version import __version__ as VERSION
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
+from dotdrop.updater import Updater
 from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
 from dotdrop.utils import *
@@ -39,7 +40,7 @@ Usage:
   dotdrop import    [-ldVb]  [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-Vb]    [-c <path>] [-p <profile>]
                              [-o <opts>] [--files=<files>]
-  dotdrop update    [-fdVb]  [-c <path>] <path>
+  dotdrop update    [-fdVb]  [-c <path>] [-p <profile>] <paths>...
   dotdrop listfiles [-Vb]    [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]    [-c <path>]
   dotdrop --help
@@ -212,52 +213,12 @@ def compare(opts, conf, tmp, focus=None):
     return ret
 
 
-def update(opts, conf, path):
-    """update the dotfile from path"""
-    if not os.path.lexists(path):
-        LOG.err('\"{}\" does not exist!'.format(path))
-        return False
-    home = os.path.expanduser(TILD)
-    path = os.path.expanduser(path)
-    path = os.path.expandvars(path)
-    # normalize the path
-    if path.startswith(home):
-        path = path.lstrip(home)
-        path = os.path.join(TILD, path)
-    dotfiles = conf.get_dotfiles(opts['profile'])
-    subs = [d for d in dotfiles if d.dst == path]
-    if not subs:
-        LOG.err('\"{}\" is not managed!'.format(path))
-        return False
-    if len(subs) > 1:
-        found = ','.join([d.src for d in dotfiles])
-        LOG.err('multiple dotfiles found: {}'.format(found))
-        return False
-    dotfile = subs[0]
-    src = os.path.join(conf.abs_dotpath(opts['dotpath']), dotfile.src)
-    if os.path.isfile(src) and \
-            Templategen.get_marker() in open(src, 'r').read():
-        LOG.warn('\"{}\" uses template, please update manually'.format(src))
-        return False
-    # Handle directory update
-    src_clean = src
-    if os.path.isdir(src):
-        src_clean = os.path.join(src, '..')
-    if samefile(src_clean, path):
-        # symlink loop
-        Log.err('dotfile points to itself: {}'.format(path))
-        return False
-    cmd = ['cp', '-R', '-L', os.path.expanduser(path), src_clean]
-    if opts['dry']:
-        LOG.dry('would run: {}'.format(' '.join(cmd)))
-    else:
-        msg = 'Overwrite \"{}\" with \"{}\"?'.format(src, path)
-        if opts['safe'] and not LOG.ask(msg):
-            return False
-        else:
-            run(cmd, raw=False, debug=opts['debug'])
-            LOG.log('\"{}\" updated from \"{}\".'.format(src, path))
-    return True
+def update(opts, conf, paths):
+    """update the dotfile(s) from path(s)"""
+    updater = Updater(conf, opts['dotpath'], opts['dry'],
+                      opts['safe'], opts['debug'])
+    for path in paths:
+        updater.update(path, opts['profile'])
 
 
 def importer(opts, conf, paths):
@@ -396,7 +357,7 @@ def main():
 
         elif args['update']:
             # update a dotfile
-            update(opts, conf, args['<path>'])
+            update(opts, conf, args['<paths>'])
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
