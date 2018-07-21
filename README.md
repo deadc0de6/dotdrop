@@ -44,6 +44,8 @@ git submodule add https://github.com/deadc0de6/dotdrop.git
 ./dotdrop.sh --help
 ```
 
+A mirror of this repository is available on gitlab under <https://gitlab.com/deadc0de6/dotdrop>.
+
 ## Why dotdrop ?
 
 There exist many tools to manage dotfiles however not
