@@ -42,7 +42,7 @@ Usage:
   dotdrop compare   [-Vb]    [-c <path>] [-p <profile>]
                              [-o <opts>] [-i <name>...]
                              [--files=<files>]
-  dotdrop update    [-fdVb]  [-c <path>] <path>
+  dotdrop update    [-fdVb]  [-c <path>] <paths>...
   dotdrop listfiles [-Vb]    [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]    [-c <path>]
   dotdrop --help
