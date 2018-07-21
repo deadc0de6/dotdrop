@@ -190,7 +190,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
         if opts['debug']:
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
-        if not os.path.lexists(dotfile.dst):
+        if not os.path.lexists(os.path.expanduser(dotfile.dst)):
             LOG.emph('\"{}\" does not exist on local\n'.format(dotfile.dst))
 
         tmpsrc = None
