@@ -213,9 +213,6 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
             tmpsrc = os.path.join(opts['dotpath'], tmpsrc)
             if os.path.exists(tmpsrc):
                 remove(tmpsrc)
-        if os.path.exists(insttmp):
-            # clean temporary installed dotfile
-            remove(insttmp)
         if diff == '':
             if opts['debug']:
                 LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
