@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-set -e
+#set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -53,64 +53,44 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d`
 
-# single file
-echo 'unique' > ${tmpd}/uniquefile
-
-# hierarchy from https://pymotw.com/2/filecmp/
-# create the hierarchy
-# for dir1 (originally imported directory))))
-mkdir ${tmpd}/dir1
-touch ${tmpd}/dir1/file_only_in_dir1
-mkdir -p ${tmpd}/dir1/dir_only_in_dir1
-mkdir -p ${tmpd}/dir1/common_dir
-echo 'this file is the same' > ${tmpd}/dir1/common_file
-echo 'in dir1' > ${tmpd}/dir1/not_the_same
-echo 'This is a file in dir1' > ${tmpd}/dir1/file_in_dir1
-mkdir -p ${tmpd}/dir1/sub/sub2
-mkdir -p ${tmpd}/dir1/notindir2/notindir2
-echo 'first' > ${tmpd}/dir1/sub/sub2/different
-#tree ${tmpd}/dir1
-
-# create the hierarchy
-# for dir2 (modified original for update)
-mkdir ${tmpd}/dir2
-touch ${tmpd}/dir2/file_only_in_dir2
-mkdir -p ${tmpd}/dir2/dir_only_in_dir2
-mkdir -p ${tmpd}/dir2/common_dir
-echo 'this file is the same' > ${tmpd}/dir2/common_file
-echo 'in dir2' > ${tmpd}/dir2/not_the_same
-mkdir -p ${tmpd}/dir2/file_in_dir1
-mkdir -p ${tmpd}/dir2/sub/sub2
-echo 'modified' > ${tmpd}/dir2/sub/sub2/different
-mkdir -p ${tmpd}/dir2/new/new2
-#tree ${tmpd}/dir2
+# some files
+mkdir -p ${tmpd}/{program,config}
+touch ${tmpd}/program/a
+touch ${tmpd}/config/a
 
 # create the config file
 cfg="${basedir}/config.yaml"
 create_conf ${cfg} # sets token
 
-# import dir1
+# import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/dir1
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/uniquefile
+cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
 
-# let's see the dotpath
-#tree ${basedir}/dotfiles
+# add files
+echo "[+] add files"
+touch ${tmpd}/program/b
+touch ${tmpd}/config/b
 
-# change dir1 to dir2 in deployed
-echo "[+] change dir"
-rm -rf ${tmpd}/dir1
-mv ${tmpd}/dir2 ${tmpd}/dir1
-#tree ${tmpd}/dir1
-
-# change unique file
-echo 'changed' > ${tmpd}/uniquefile
-
-# compare
-echo "[+] comparing"
+# expects diff
+echo "[+] comparing normal"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose
 [ "$?" = "0" ] && exit 1
+set -e
+
+# expects one diff
+echo "[+] comparing with ignore"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${tmpd}/config/b
+[ "$?" = "0" ] && exit 1
+set -e
+
+# expects no diff
+echo "[+] comparing with ignore pattern"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=b
+[ "$?" != "0" ] && exit 1
 set -e
 
 ## CLEANING
