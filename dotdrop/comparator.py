@@ -16,16 +16,14 @@ import dotdrop.utils as utils
 
 class Comparator:
 
-    # TODO add ignore
     def __init__(self, diffopts='', ignore=[], debug=False):
-        """diff left (deployed file) and right (dotdrop dotfile)"""
         self.diffopts = diffopts
         self.ignore = [os.path.expanduser(i) for i in ignore]
         self.debug = debug
         self.log = Logger()
 
     def compare(self, left, right):
-        """compare two files/directories"""
+        """diff left (dotdrop dotfile) and right (deployed file)"""
         left = os.path.expanduser(left)
         right = os.path.expanduser(right)
         if not os.path.isdir(left):
@@ -52,32 +50,41 @@ class Comparator:
         comp = filecmp.dircmp(left, right, ignore=self.ignore)
         # handle files only in deployed file
         for i in comp.left_only:
-            ret.append('Only in {}: {}'.format(left, i))
+            if os.path.join(left, i) in self.ignore:
+                continue
+            ret.append('only in left: \"{}\"\n'.format(i))
         for i in comp.right_only:
-            ret.append('Only in {}: {}'.format(right, i))
+            if os.path.join(right, i) in self.ignore:
+                continue
+            ret.append('only in right: \"{}\"\n'.format(i))
 
-        for i in comp.common_funny:
+        # same left and right but different type
+        funny = comp.common_funny
+        for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
-            diff = self._diff(lfile, rfile)
-            ret.append(diff)
+            short = os.path.basename(lfile)
+            # file vs dir
+            ret.append('different type: \"{}\"\n'.format(short))
 
-        for i in comp.diff_files:
+        # content is different
+        funny = comp.diff_files
+        funny.extend(comp.funny_files)
+        funny = list(set(funny))
+        for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
-            diff = self._diff(lfile, rfile)
+            diff = self._diff(lfile, rfile, header=True)
             ret.append(diff)
 
-        for i in comp.funny_files:
-            lfile = os.path.join(left, i)
-            rfile = os.path.join(right, i)
-            diff = self._diff(lfile, rfile)
-            ret.append(diff)
+        return ''.join(ret)
 
-        return '\n'.join(ret)
-
-    def _diff(self, left, right):
+    def _diff(self, left, right, header=False):
         """diff using the unix tool diff"""
         diff = utils.diff(left, right, raw=False,
                           opts=self.diffopts, debug=self.debug)
+        if header:
+            lshort = os.path.basename(left)
+            rshort = os.path.basename(right)
+            diff = 'diff \"{}\":\n{}'.format(lshort, diff)
         return diff

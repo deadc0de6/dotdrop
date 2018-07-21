@@ -194,11 +194,12 @@ class Installer:
         tmpdst = os.path.join(tmpdir, sub)
         return self.install(templater, profile, src, tmpdst), tmpdst
 
-    def compare(self, templater, tmpdir, profile, src, dst, opts=''):
+    def install_to_temp(self, templater, tmpdir, profile, src, dst):
         """compare a temporary generated dotfile with the local one"""
+        ret = False
+        tmpdst = ''
         # saved some flags while comparing
         self.comparing = True
-        retval = False, ''
         drysaved = self.dry
         self.dry = False
         diffsaved = self.diff
@@ -209,26 +210,15 @@ class Installer:
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         if self.debug:
-            self.log.dbg('comparing {} and {}'.format(src, dst))
-        if not os.path.lexists(dst):
-            # destination dotfile does not exist
-            retval = False, '\"{}\" does not exist on local\n'.format(dst)
-        else:
-            # install the dotfile to a temp directory for comparing
-            ret, tmpdst = self._install_to_temp(templater, profile,
-                                                src, dst, tmpdir)
-            if ret:
-                if self.debug:
-                    self.log.dbg('diffing {} and {}'.format(tmpdst, dst))
-                comparator = Comparator(opts, self.debug)
-                diff = comparator.compare(tmpdst, dst)
-                if diff == '':
-                    retval = True, ''
-                else:
-                    retval = False, diff
+            self.log.dbg('tmp install {} to {}'.format(src, dst))
+        # install the dotfile to a temp directory for comparing
+        ret, tmpdst = self._install_to_temp(templater, profile,
+                                            src, dst, tmpdir)
+        if self.debug:
+            self.log.dbg('tmp installed in {}'.format(tmpdst))
         # reset flags
         self.dry = drysaved
         self.diff = diffsaved
         self.comparing = False
         self.create = createsaved
-        return retval
+        return ret, tmpdst
