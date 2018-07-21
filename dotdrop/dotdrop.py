@@ -16,6 +16,7 @@ from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
+from dotdrop.comparator import Comparator
 from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
 from dotdrop.utils import *
@@ -39,8 +40,9 @@ Usage:
   dotdrop install   [-fndVb] [-c <path>] [-p <profile>]
   dotdrop import    [-ldVb]  [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-Vb]    [-c <path>] [-p <profile>]
-                             [-o <opts>] [--files=<files>]
-  dotdrop update    [-fdVb]  [-c <path>] [-p <profile>] <paths>...
+                             [-o <opts>] [-i <name>...]
+                             [--files=<files>]
+  dotdrop update    [-fdVb]  [-c <path>] <path>
   dotdrop listfiles [-Vb]    [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]    [-c <path>]
   dotdrop --help
@@ -50,6 +52,7 @@ Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   --files=<files>         Comma separated list of files to compare.
+  -i --ignore=<name>      File name to ignore when diffing.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -l --link               Import and link.
@@ -161,45 +164,57 @@ def _select(selections, dotfiles):
     return selected, ret
 
 
-def compare(opts, conf, tmp, focus=None):
+def compare(opts, conf, tmp, focus=None, ignore=[]):
     """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
         msg = 'no dotfiles defined for this profile (\"{}\")'
         LOG.err(msg.format(opts['profile']))
         return True
-    t = Templategen(base=opts['dotpath'], debug=opts['debug'])
-    inst = Installer(create=opts['create'], backup=opts['backup'],
-                     dry=opts['dry'], base=opts['dotpath'],
-                     debug=opts['debug'])
-
     # compare only specific files
-    ret = True
+    same = True
     selected = dotfiles
     if focus:
         selected, ret = _select(focus.replace(' ', '').split(','), dotfiles)
 
     if len(selected) < 1:
-        return ret
+        return False
+
+    t = Templategen(base=opts['dotpath'], debug=opts['debug'])
+    inst = Installer(create=opts['create'], backup=opts['backup'],
+                     dry=opts['dry'], base=opts['dotpath'],
+                     debug=opts['debug'])
+    comp = Comparator(diffopts=opts['dopts'], debug=opts['debug'],
+                      ignore=ignore)
 
     for dotfile in selected:
         if opts['debug']:
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
+        if not os.path.lexists(os.path.expanduser(dotfile.dst)):
+            LOG.emph('\"{}\" does not exist on local\n'.format(dotfile.dst))
+
         tmpsrc = None
         if dotfile.trans:
+            # apply transformation
             tmpsrc = apply_trans(opts, dotfile)
             if not tmpsrc:
+                # could not apply trans
                 continue
             src = tmpsrc
-            # create a fake dotfile which is the result of the transformation
-        same, diff = inst.compare(t, tmp, opts['profile'],
-                                  src, dotfile.dst, opts=opts['dopts'])
+        # install dotfile to temporary dir
+        ret, insttmp = inst.install_to_temp(t, tmp, opts['profile'],
+                                            src, dotfile.dst)
+        if not ret:
+            # failed to install to tmp
+            continue
+        diff = comp.compare(insttmp, dotfile.dst)
         if tmpsrc:
+            # clean tmp transformed dotfile if any
             tmpsrc = os.path.join(opts['dotpath'], tmpsrc)
             if os.path.exists(tmpsrc):
                 remove(tmpsrc)
-        if same:
+        if diff == '':
             if opts['debug']:
                 LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
                                                           dotfile.dst))
@@ -208,9 +223,9 @@ def compare(opts, conf, tmp, focus=None):
             LOG.log('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
                                                       dotfile.dst))
             LOG.emph(diff)
-            ret = False
+            same = False
 
-    return ret
+    return same
 
 
 def update(opts, conf, paths):
@@ -345,7 +360,7 @@ def main():
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
-            ret = compare(opts, conf, tmp, args['--files'])
+            ret = compare(opts, conf, tmp, args['--files'], args['--ignore'])
             if os.listdir(tmp):
                 LOG.raw('\ntemporary files available under {}'.format(tmp))
             else:

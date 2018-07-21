@@ -14,6 +14,7 @@ from dotdrop.dotdrop import importer
 from dotdrop.dotdrop import compare
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
+from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
 
 from tests.helpers import *
@@ -32,12 +33,20 @@ class TestCompare(unittest.TestCase):
         t = Templategen(base=opts['dotpath'], debug=True)
         inst = Installer(create=opts['create'], backup=opts['backup'],
                          dry=opts['dry'], base=opts['dotpath'], debug=True)
+        comp = Comparator()
         results = {}
         for dotfile in dotfiles:
-            same, _ = inst.compare(t, tmp, opts['profile'],
-                                   dotfile.src, dotfile.dst)
+            ret, insttmp = inst.install_to_temp(t, tmp, opts['profile'],
+                                                dotfile.src, dotfile.dst)
+            if not ret:
+                results[path] = False
+                continue
+            diff = comp.compare(insttmp, dotfile.dst)
+            print('XXXX diff for {} and {}:\n{}'.format(dotfile.src,
+                                                        dotfile.dst,
+                                                        diff))
             path = os.path.expanduser(dotfile.dst)
-            results[path] = same
+            results[path] = diff == ''
         return results
 
     def edit_content(self, path, newcontent, binary=False):
