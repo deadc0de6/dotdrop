@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 import dotdrop
+from dotdrop.version import __version__ as VERSION
 
 readme = 'README.md'
 here = path.abspath(path.dirname(__file__))
@@ -13,10 +14,6 @@ except ImportError:
     print('\n[WARNING] pypandoc not found, could not convert \"{}\"\n'.format(readme))
     read_readme = lambda f: open(f, 'r').read()
 
-try:
-    VERSION = open('dotdrop/version.py', "rt").read()
-except:
-    raise('cannot find version module')
 REQUIRES_PYTHON = '>=3'
 
 setup(
