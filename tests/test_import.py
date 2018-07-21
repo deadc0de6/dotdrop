@@ -202,7 +202,7 @@ class TestImport(unittest.TestCase):
         with open(dotfile1, 'w') as f:
             f.write('edited')
         opts['safe'] = False
-        update(opts, conf, dotfile1)
+        update(opts, conf, [dotfile1])
         c2 = open(indt1, 'r').read()
         self.assertTrue(editcontent == c2)
 
