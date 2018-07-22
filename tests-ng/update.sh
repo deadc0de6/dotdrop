@@ -83,6 +83,8 @@ mkdir -p ${tmpd}/dir2/file_in_dir1
 mkdir -p ${tmpd}/dir2/sub/sub2
 echo 'modified' > ${tmpd}/dir2/sub/sub2/different
 mkdir -p ${tmpd}/dir2/new/new2
+mkdir -p ${tmpd}/dir2/sub1/sub2/sub3/
+touch ${tmpd}/dir2/sub1/sub2/sub3/file
 #tree ${tmpd}/dir2
 
 # create the config file
@@ -121,6 +123,7 @@ mkdir -p ${basedir}/dotfiles/${tmpd}/dir1/file_in_dir1
 # ensure changes applied correctly
 diff ${tmpd}/dir1 ${basedir}/dotfiles/${tmpd}/dir1
 diff ${tmpd}/uniquefile ${basedir}/dotfiles/${tmpd}/uniquefile
+[ ! -e ${basedir}/dotfiles/${tmpd}/dir1/sub1/sub2/sub3/file ] && echo "sub does not exist" && exit 1
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
