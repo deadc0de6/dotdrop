@@ -60,7 +60,7 @@ class Updater:
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
         left = self._normalize(path)
-        dotfile = self._get_dotfile(path, profile)
+        dotfile = self._get_dotfile(left, profile)
         if not dotfile:
             return False
         if self.debug:
@@ -75,7 +75,7 @@ class Updater:
     def _is_template(self, path):
         if Templategen.get_marker() not in open(path, 'r').read():
             return False
-        self.log.warn('{} uses template, update manually'.format(right))
+        self.log.warn('{} uses template, update manually'.format(path))
         return True
 
     def _handle_file(self, left, right, compare=True):
@@ -107,9 +107,20 @@ class Updater:
         """sync left (deployed dir) and right (dotdrop dir)"""
         if self.debug:
             self.log.dbg('handle update for dir {} to {}'.format(left, right))
-        # find the difference
+        # paths must be absolute (no tildes)
+        left = os.path.expanduser(left)
+        right = os.path.expanduser(right)
+        # find the differences
         diff = filecmp.dircmp(left, right, ignore=None)
         # handle directories diff
+        self._merge_dirs(diff)
+
+    def _merge_dirs(self, diff):
+        """Synchronize directories recursively."""
+        left, right = diff.left, diff.right
+        if self.debug:
+            self.log.dbg('sync dir {} to {}'.format(left, right))
+
         # create dirs that don't exist in dotdrop
         if self.debug:
             self.log.dbg('handle dirs that do not exist in dotdrop')
@@ -121,25 +132,29 @@ class Updater:
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
             if self.dry:
-                self.log.dry('would mkdir -p {}'.format(new))
+                self.log.dry('would cp -r {} {}'.format(exist, new))
                 continue
             if self.debug:
-                self.log.dbg('mkdir -p {}'.format(new))
-            self._create_dirs(new)
+                self.log.dbg('cp -r {} {}'.format(exist, new))
+            # Newly created directory should be copied as is (for efficiency).
+            shutil.copytree(exist, new)
 
         # remove dirs that don't exist in deployed version
         if self.debug:
             self.log.dbg('remove dirs that do not exist in deployed version')
         for toremove in diff.right_only:
-            new = os.path.join(right, toremove)
+            old = os.path.join(right, toremove)
+            if not os.path.isdir(old):
+                # ignore files for now
+                continue
             if self.dry:
-                self.log.dry('would rm -r {}'.format(new))
+                self.log.dry('would rm -r {}'.format(old))
                 continue
             if self.debug:
-                self.log.dbg('rm -r {}'.format(new))
-            if not self._confirm_rm_r(new):
+                self.log.dbg('rm -r {}'.format(old))
+            if not self._confirm_rm_r(old):
                 continue
-            utils.remove(new)
+            utils.remove(old)
 
         # handle files diff
         # sync files that exist in both but are different
@@ -190,6 +205,12 @@ class Updater:
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
             utils.remove(new)
+
+        # Recursively decent into common subdirectories.
+        for subdir in diff.subdirs.values():
+            self._merge_dirs(subdir)
+
+        # Nothing more to do here.
         return True
 
     def _create_dirs(self, directory):
