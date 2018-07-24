@@ -67,6 +67,9 @@ class Updater:
             self.log.dbg('updating {} from {}'.format(dotfile, path))
 
         right = os.path.join(self.conf.abs_dotpath(self.dotpath), dotfile.src)
+        # expands user
+        left = os.path.expanduser(left)
+        right = os.path.expanduser(right)
         # go through all files and update
         if os.path.isdir(path):
             return self._handle_dir(left, right)
