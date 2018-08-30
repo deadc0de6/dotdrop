@@ -8,6 +8,7 @@ entry point
 import os
 import sys
 import subprocess
+import socket
 from docopt import docopt
 
 # local imports
@@ -23,7 +24,7 @@ from dotdrop.utils import *
 
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
-HOSTNAME = os.uname()[1]
+HOSTNAME = socket.gethostname()
 TILD = '~'
 TRANS_SUFFIX = 'trans'
 
