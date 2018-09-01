@@ -76,7 +76,7 @@ class Updater:
         return self._handle_file(left, right)
 
     def _is_template(self, path):
-        if Templategen.get_marker() not in open(path, 'r').read():
+        if not Templategen.is_template(path):
             return False
         self.log.warn('{} uses template, update manually'.format(path))
         return True

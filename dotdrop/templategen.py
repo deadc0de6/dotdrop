@@ -91,6 +91,13 @@ class Templategen:
             data = f.read()
         return data.decode('utf-8', 'replace')
 
-    def get_marker():
-        """return identifier for template dotfile"""
-        return BLOCK_START
+    def is_template(path):
+        if not os.path.exists(path):
+            return False
+        with open(path, 'r') as f:
+            data = f.read()
+        markers = [BLOCK_START, VAR_START, COMMENT_START]
+        for marker in markers:
+            if marker in data:
+                return True
+        return False
