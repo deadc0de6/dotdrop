@@ -91,10 +91,11 @@ to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
 
-If you want to keep your python environment clean, it is recommended to use
+If you want to keep your python environment clean, use
 the virtualenv installation instructions
-(see [As a submodule in a virtualenv](as-a-submodule-in-a-virtualenv) and
-[With pypi in a virtualenv](with-pypi-in-a-virtualenv)).
+(see [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv) and
+[With pypi in a virtualenv](#with-pypi-in-a-virtualenv)).
+The environment must be loaded before any attempt to use dotdrop.
 
 Dotdrop is also available on aur:
 * stable: https://aur.archlinux.org/packages/dotdrop/
@@ -139,7 +140,7 @@ $ mkdir dotfiles; cd dotfiles
 $ git init
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
 $ virtualenv -p python3 env
-$ echo 'env' » .gitignore
+$ echo 'env' > .gitignore
 $ source env/bin/activate
 $ pip install -r dotdrop/requirements.txt
 $ ./dotdrop/bootstrap.sh
