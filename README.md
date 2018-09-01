@@ -118,6 +118,15 @@ Using this solution will need you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
 of your dotfiles repository.
 
+A good practice is to create a symlink to the `dotdrop.sh` script in your
+personal bin directory (for example `~/bin`) or any other directory that
+is loading in your `$PATH` (for example `/usr/local/bin`).
+
+Or add an alias in your shell
+```bash
+alias dotdrop=<absolute-path-to-dotdrop.sh>
+```
+
 Finally import your dotfiles as described [below](#usage).
 
 ## With pypi
@@ -198,9 +207,7 @@ That's it, a single repository with all your dotfiles for your different hosts.
 For more options see `dotdrop.sh --help`.
 
 For easy deployment the default profile used by dotdrop reflects the
-hostname of the host on which it runs.
-
-The default profile used can be changed by defining
+hostname of the host on which it runs. The default can also be changed by defining
 the `DOTDROP_PROFILE` environment variable.
 
 ## Install dotfiles
