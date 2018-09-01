@@ -35,12 +35,17 @@ class Templategen:
                                variable_end_string=VAR_END,
                                comment_start_string=COMMENT_START,
                                comment_end_string=COMMENT_END)
+        self.env.globals['header'] = self._header
         self.log = Logger()
 
     def generate(self, src, profile):
         if not os.path.exists(src):
             return ''
         return self._handle_file(src, profile)
+
+    def _header(self, prepend=''):
+        """add a comment usually in the header of a dotfile"""
+        return '{}{}'.format(prepend, utils.header())
 
     def _handle_file(self, src, profile):
         """generate the file content from template"""

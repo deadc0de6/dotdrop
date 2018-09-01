@@ -9,10 +9,12 @@ import subprocess
 import tempfile
 import os
 import shlex
+import datetime
 from shutil import rmtree
 
 # local import
 from dotdrop.logger import Logger
+from dotdrop.version import __version__ as VERSION
 
 LOG = Logger()
 
@@ -65,3 +67,11 @@ def samefile(path1, path2):
     if not os.path.exists(path2):
         return False
     return os.path.samefile(path1, path2)
+
+
+def header():
+    header = 'This dotfile is managed using dotdrop'
+    header += ' v{}'.format(VERSION)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    header += ' / last updated {}'.format(now)
+    return header

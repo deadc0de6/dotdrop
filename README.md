@@ -77,7 +77,7 @@ why dotdrop rocks.
   * [Store sensitive dotfiles](#store-sensitive-dotfiles)
 
 * [Config](#config)
-* [Template](#template)
+* [Templating](#templating)
 * [Example](#example)
 * [User tricks](#user-tricks)
 * [People using dotdrop](#people-using-dotdrop)
@@ -555,7 +555,7 @@ profiles:
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
-# Template
+# Templating
 
 Dotdrop leverage the power of [jinja2](http://jinja.pocoo.org/) to handle the
 templating of dotfiles. See [jinja2 template doc](http://jinja.pocoo.org/docs/2.9/templates/)
@@ -574,7 +574,31 @@ Note that dotdrop uses different delimiters than
 ## Available variables
 
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
-* `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables))
+* `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
+* `{{@@ header @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
+
+## Dotdrop header
+
+Dotdrop is able to insert a header in the generated dotfiles. This allows
+to remind anyone opening the file for editing that this file is managed by dotdrop.
+The header provides additional information like the last update date/time and
+dotdrop's version used.
+
+Here's an example of such an header:
+```
+This dotfile is managed using dotdrop v0.19.2 / last updated 2018-09-01 00:01
+```
+
+Such a header can be automatically added using jinja2 directive:
+```
+{{@@ header @@}}
+```
+
+Properly commenting the header is the responsability of the user as jinja2 has no way of
+knowning what is the proper char(s) used for comments.
+
+Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header @@}}`)
+or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
 ## Environment variables
 
