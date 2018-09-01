@@ -41,6 +41,7 @@ Quick start:
 mkdir dotfiles && cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
+sudo pip3 install -r dotdrop/requirements.txt
 ./dotdrop/bootstrap.sh
 ./dotdrop.sh --help
 ```
@@ -90,6 +91,11 @@ to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
 from you'll have dotdrop shipped with it. It is the recommended way.
 
+If you want to keep your python environment clean, it is recommended to use
+the virtualenv installation instructions
+(see [As a submodule in a virtualenv](as-a-submodule-in-a-virtualenv) and
+[With pypi in a virtualenv](with-pypi-in-a-virtualenv)).
+
 Dotdrop is also available on aur:
 * stable: https://aur.archlinux.org/packages/dotdrop/
 * git version: https://aur.archlinux.org/packages/dotdrop-git/
@@ -105,11 +111,6 @@ $ git submodule add https://github.com/deadc0de6/dotdrop.git
 $ sudo pip3 install -r dotdrop/requirements.txt
 $ ./dotdrop/bootstrap.sh
 $ ./dotdrop.sh --help
-```
-
-Install the requirements with:
-```bash
-$ sudo pip3 install -r dotdrop/requirements.txt
 ```
 
 For MacOS users, make sure to install `realpath` through homebrew
@@ -129,6 +130,30 @@ alias dotdrop=<absolute-path-to-dotdrop.sh>
 ```
 
 Finally import your dotfiles as described [below](#usage).
+
+## As a submodule in a virtualenv
+
+To install in a [virtualenv](https://virtualenv.pypa.io):
+```bash
+$ mkdir dotfiles; cd dotfiles
+$ git init
+$ git submodule add https://github.com/deadc0de6/dotdrop.git
+$ virtualenv -p python3 env
+$ echo 'env' » .gitignore
+$ source env/bin/activate
+$ pip install -r dotdrop/requirements.txt
+$ ./dotdrop/bootstrap.sh
+$ ./dotdrop.sh --help
+```
+
+When using a virtualenv, make sure to source the environment
+before using dotdrop:
+```bash
+$ source env/bin/activate
+$ ./dotdrop.sh --help
+```
+
+Then follow the instructions under [As a submodule](#as-a-submodule).
 
 ## With pypi
 
@@ -153,6 +178,24 @@ Replace any call to `dotdrop.sh` in the documentation below
 by `dotdrop` if using the pypi solution.
 
 Finally import your dotfiles as described [below](#usage).
+
+## With pypi in a virtualenv
+
+Install dotdrop in a virtualenv from pypi
+```bash
+$ virtualenv -p python3 env
+$ source env/bin/activate
+$ pip install dotdrop
+```
+
+When using a virtualenv, make sure to source the environment
+before using dotdrop:
+```bash
+$ source env/bin/activate
+$ dotdrop --help
+```
+
+Then follow the instructions under [With pypi](#with-pypi).
 
 # Usage
 
