@@ -547,14 +547,19 @@ the following entries:
     - ...
 ```
 
-* **actions** entry: a list of action
+* **actions** entry: a list of action (see [Use actions](#use-actions))
 ```
   <action-key>: <command-to-execute>
 ```
 
-* **trans** entry: a list of transformations
+* **trans** entry: a list of transformations (see [Use transformations](#use-transformations))
 ```
   <trans-key>: <command-to-execute>
+```
+
+* **variables** entry: a list of template variables
+```
+  <variable-name>: <variable-content>
 ```
 
 ## All dotfiles for a profile
@@ -620,6 +625,21 @@ Note that dotdrop uses different delimiters than
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
+
+Addionally to the above, variables can be added in the config yaml file under
+the `variables` entry. The variables added there are directly reachable in
+any templates.
+
+For example in the config file:
+```yaml
+variables:
+  var1: some variable content
+```
+
+Those can then be used in any template with
+```
+{{@@ var1 @@}}
+```
 
 ## Dotdrop header
 

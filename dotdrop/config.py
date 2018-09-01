@@ -38,6 +38,9 @@ class Cfg:
     # transformations keys
     key_trans = 'trans'
 
+    # template variables
+    key_variables = 'variables'
+
     # dotfiles keys
     key_dotfiles = 'dotfiles'
     key_dotfiles_src = 'src'
@@ -478,6 +481,11 @@ class Cfg:
     def get_settings(self):
         """return all defined settings"""
         return self.lnk_settings.copy()
+
+    def get_variables(self):
+        if self.key_variables in self.content:
+            return self.content[self.key_variables]
+        return {}
 
     def dump(self):
         """return a dump of the config"""

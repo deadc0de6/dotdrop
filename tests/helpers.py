@@ -73,6 +73,7 @@ def load_config(confpath, profile):
     opts['link'] = False
     opts['debug'] = True
     opts['dopts'] = ''
+    opts['variables'] = {}
     return conf, opts
 
 
