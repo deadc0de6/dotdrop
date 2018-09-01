@@ -9,14 +9,15 @@
 
 *Save your dotfiles once, deploy them everywhere*
 
-Dotdrop makes the management of dotfiles between different
-hosts easy.
+Dotdrop makes the management of dotfiles between different hosts easy.
 It allows to store your dotfiles on git and automagically deploy
-different versions on different setups.
+different versions of the same file on different setups.
 
+It also allows to manage different *sets* of dotfiles.
 For example you can have a set of dotfiles for your home laptop and
 a different set for your office desktop. Those sets may overlap and different
-versions of the same dotfile can be deployed on different predefined *profiles*.
+versions of the same dotfiles can be deployed on different predefined *profiles*.
+
 Another use case is when you have a main set of dotfiles for your
 everyday's host and a sub-set you only need to deploy to temporary
 hosts (cloud VM, etc) that may be using
@@ -143,7 +144,7 @@ $ git init
 ```
 
 To avoid the need to provide the config file path to dotdrop each time it
-is called, you can create an alias:
+is called, you can create an alias in your shell:
 ```
 alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
@@ -401,15 +402,15 @@ Here's how to deploy the above solution:
 
 * import the clear dotfile (creates the correct entries in the config file)
 ```bash
-./dotdrop.sh import ~/.secret
+$ ./dotdrop.sh import ~/.secret
 ```
 * encrypt the original dotfile
 ```bash
-<some-gpg-command> ~/.secret
+$ <some-gpg-command> ~/.secret
 ```
 * overwrite the dotfile with the encrypted version
 ```bash
-cp <encrypted-version-of-secret> dotfiles/secret
+$ cp <encrypted-version-of-secret> dotfiles/secret
 ```
 * edit the config file and add the transformation to the dotfile
 * commit and push the changes
