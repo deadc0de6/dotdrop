@@ -62,10 +62,10 @@ class Installer:
 
             # and then symlink it as any other file
             # by udating src and dst
+            return []
 
-        else:
-            # is not a template
-            self._link(src, dst)
+        # is not a template
+        return self._link(src, dst)
 
     def _link(self, src, dst):
         """set src as a link target of dst"""
