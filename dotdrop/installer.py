@@ -29,7 +29,7 @@ class Installer:
         self.comparing = False
         self.log = Logger()
 
-    def install(self, templater, profile, src, dst):
+    def install(self, templater, src, dst):
         """install the src to dst using a template"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
@@ -40,8 +40,8 @@ class Installer:
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
         if os.path.isdir(src):
-            return self._handle_dir(templater, profile, src, dst)
-        return self._handle_file(templater, profile, src, dst)
+            return self._handle_dir(templater, src, dst)
+        return self._handle_file(templater, src, dst)
 
     def link(self, src, dst):
         """set src as the link target of dst"""
@@ -76,7 +76,7 @@ class Installer:
         self.log.sub('linked {} to {}'.format(dst, src))
         return [(src, dst)]
 
-    def _handle_file(self, templater, profile, src, dst):
+    def _handle_file(self, templater, src, dst):
         """install src to dst when is a file"""
         if self.debug:
             self.log.dbg('generate template for {}'.format(src))
@@ -84,7 +84,7 @@ class Installer:
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []
-        content = templater.generate(src, profile)
+        content = templater.generate(src)
         if content is None:
             self.log.err('generate from template \"{}\"'.format(src))
             return []
@@ -106,7 +106,7 @@ class Installer:
             return [(src, dst)]
         return []
 
-    def _handle_dir(self, templater, profile, src, dst):
+    def _handle_dir(self, templater, src, dst):
         """install src to dst when is a directory"""
         ret = []
         self._create_dirs(dst)
@@ -114,12 +114,10 @@ class Installer:
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
-                res = self._handle_file(
-                    templater, profile, f, os.path.join(dst, entry))
+                res = self._handle_file(templater, f, os.path.join(dst, entry))
                 ret.extend(res)
             else:
-                res = self._handle_dir(
-                    templater, profile, f, os.path.join(dst, entry))
+                res = self._handle_dir(templater, f, os.path.join(dst, entry))
                 ret.extend(res)
         return ret
 
@@ -186,15 +184,15 @@ class Installer:
         self.log.log('backup {} to {}'.format(path, dst))
         os.rename(path, dst)
 
-    def _install_to_temp(self, templater, profile, src, dst, tmpdir):
+    def _install_to_temp(self, templater, src, dst, tmpdir):
         """install a dotfile to a tempdir for comparing"""
         sub = dst
         if dst[0] == os.sep:
             sub = dst[1:]
         tmpdst = os.path.join(tmpdir, sub)
-        return self.install(templater, profile, src, tmpdst), tmpdst
+        return self.install(templater, src, tmpdst), tmpdst
 
-    def install_to_temp(self, templater, tmpdir, profile, src, dst):
+    def install_to_temp(self, templater, tmpdir, src, dst):
         """compare a temporary generated dotfile with the local one"""
         ret = False
         tmpdst = ''
@@ -212,8 +210,7 @@ class Installer:
         if self.debug:
             self.log.dbg('tmp install {} to {}'.format(src, dst))
         # install the dotfile to a temp directory for comparing
-        ret, tmpdst = self._install_to_temp(templater, profile,
-                                            src, dst, tmpdir)
+        ret, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
         if self.debug:
             self.log.dbg('tmp installed in {}'.format(tmpdst))
         # reset flags

@@ -22,7 +22,7 @@ COMMENT_END = '@@#}'
 
 class Templategen:
 
-    def __init__(self, base='.', variables={}, debug=False):
+    def __init__(self, profile, base='.', variables={}, debug=False):
         self.base = base.rstrip(os.sep)
         self.debug = debug
         loader = FileSystemLoader(self.base)
@@ -36,19 +36,21 @@ class Templategen:
                                comment_start_string=COMMENT_START,
                                comment_end_string=COMMENT_END)
         self.env.globals['header'] = self._header
+        self.env.globals['env'] = os.environ
+        self.env.globals['profile'] = profile
         self.env.globals.update(variables)
         self.log = Logger()
 
-    def generate(self, src, profile):
+    def generate(self, src):
         if not os.path.exists(src):
             return ''
-        return self._handle_file(src, profile)
+        return self._handle_file(src)
 
     def _header(self, prepend=''):
         """add a comment usually in the header of a dotfile"""
         return '{}{}'.format(prepend, utils.header())
 
-    def _handle_file(self, src, profile):
+    def _handle_file(self, src):
         """generate the file content from template"""
         filetype = utils.run(['file', '-b', src], raw=False, debug=self.debug)
         filetype = filetype.strip()
@@ -58,24 +60,24 @@ class Templategen:
         if self.debug:
             self.log.dbg('\"{}\" is text: {}'.format(src, istext))
         if not istext:
-            return self._handle_bin_file(src, profile)
-        return self._handle_text_file(src, profile)
+            return self._handle_bin_file(src)
+        return self._handle_text_file(src)
 
-    def _handle_text_file(self, src, profile):
+    def _handle_text_file(self, src):
         """write text to file"""
         template_rel_path = os.path.relpath(src, self.base)
         try:
             template = self.env.get_template(template_rel_path)
-            content = template.render(profile=profile, env=os.environ)
+            content = template.render()
         except UnicodeDecodeError:
             data = self._read_bad_encoded_text(src)
             template = self.env.from_string(data)
-            content = template.render(profile=profile, env=os.environ)
+            content = template.render()
 
         content = content.encode('UTF-8')
         return content
 
-    def _handle_bin_file(self, src, profile):
+    def _handle_bin_file(self, src):
         """write binary to file"""
         # this is dirty
         if not src.startswith(self.base):

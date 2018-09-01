@@ -81,8 +81,8 @@ def install(opts, conf):
         msg = 'no dotfiles defined for this profile (\"{}\")'
         LOG.err(msg.format(opts['profile']))
         return False
-    t = Templategen(base=opts['dotpath'], variables=opts['variables'],
-                    debug=opts['debug'])
+    t = Templategen(opts['profile'], base=opts['dotpath'],
+                    variables=opts['variables'], debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
                      diff=opts['installdiff'], debug=opts['debug'])
@@ -108,7 +108,7 @@ def install(opts, conf):
                 if not tmp:
                     continue
                 src = tmp
-            r = inst.install(t, opts['profile'], src, dotfile.dst)
+            r = inst.install(t, src, dotfile.dst)
             if tmp:
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
@@ -185,8 +185,8 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
     if len(selected) < 1:
         return False
 
-    t = Templategen(base=opts['dotpath'], variables=opts['variables'],
-                    debug=opts['debug'])
+    t = Templategen(opts['profile'], base=opts['dotpath'],
+                    variables=opts['variables'], debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
                      debug=opts['debug'])
@@ -209,8 +209,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
                 continue
             src = tmpsrc
         # install dotfile to temporary dir
-        ret, insttmp = inst.install_to_temp(t, tmp, opts['profile'],
-                                            src, dotfile.dst)
+        ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
         if not ret:
             # failed to install to tmp
             continue

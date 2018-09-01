@@ -30,14 +30,14 @@ class TestCompare(unittest.TestCase):
     def compare(self, opts, conf, tmp, nbdotfiles):
         dotfiles = conf.get_dotfiles(opts['profile'])
         self.assertTrue(len(dotfiles) == nbdotfiles)
-        t = Templategen(base=opts['dotpath'], debug=True)
+        t = Templategen(opts['profile'], base=opts['dotpath'], debug=True)
         inst = Installer(create=opts['create'], backup=opts['backup'],
                          dry=opts['dry'], base=opts['dotpath'], debug=True)
         comp = Comparator()
         results = {}
         for dotfile in dotfiles:
-            ret, insttmp = inst.install_to_temp(t, tmp, opts['profile'],
-                                                dotfile.src, dotfile.dst)
+            ret, insttmp = inst.install_to_temp(t, tmp, dotfile.src,
+                                                dotfile.dst)
             if not ret:
                 results[path] = False
                 continue
