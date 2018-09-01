@@ -200,6 +200,9 @@ For more options see `dotdrop.sh --help`.
 For easy deployment the default profile used by dotdrop reflects the
 hostname of the host on which it runs.
 
+The default profile used can be changed by defining
+the `DOTDROP_PROFILE` environment variable.
+
 ## Install dotfiles
 
 Simply run
@@ -207,8 +210,9 @@ Simply run
 $ dotdrop.sh install
 ```
 
-Use the `--profile` switch to specify a profile if not using
-the host's hostname.
+Use the `--profile` switch to specify a different profile than
+the host's hostname or define it through the `DOTDROP_PROFILE`
+environment variable.
 
 ## Compare dotfiles
 
@@ -256,8 +260,11 @@ $ dotdrop.sh list
 ```
 
 Dotdrop allows to choose which profile to use
-with the *--profile* switch if you use something
+with the `--profile` switch if you use something
 else than the default (the hostname).
+
+The default profile can be changed by defining the
+`DOTDROP_PROFILE` environment variable.
 
 ## List dotfiles
 

@@ -24,7 +24,10 @@ from dotdrop.utils import *
 
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
-HOSTNAME = socket.gethostname()
+ENV_PROFILE = 'DOTDROP_PROFILE'
+PROFILE = socket.gethostname()
+if ENV_PROFILE in os.environ:
+    PROFILE = os.environ[ENV_PROFILE]
 TILD = '~'
 TRANS_SUFFIX = 'trans'
 
@@ -64,7 +67,7 @@ Options:
   -v --version            Show version.
   -h --help               Show this screen.
 
-""".format(BANNER, HOSTNAME)
+""".format(BANNER, PROFILE)
 
 ###########################################################
 # entry point
@@ -322,6 +325,7 @@ def main():
     """entry point"""
     ret = True
     args = docopt(USAGE, version=VERSION)
+
     try:
         conf = Cfg(os.path.expanduser(args['--cfg']))
     except ValueError as e:
