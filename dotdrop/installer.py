@@ -10,12 +10,15 @@ import os
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.comparator import Comparator
+from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
 
 
 class Installer:
 
     BACKUP_SUFFIX = '.dotdropbak'
+    # TODO get this from the config file with a default
+    DOTDROP_WORK = '{}/.config/dotdrop'.format(os.path.expanduser('~'))
 
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, debug=False, diff=True):
@@ -28,6 +31,9 @@ class Installer:
         self.diff = diff
         self.comparing = False
         self.log = Logger()
+
+    def _dotdrop_work(self):
+        os.makedirs(self.DOTDROP_WORK, exist_ok=True)
 
     def install(self, templater, src, dst):
         """install the src to dst using a template"""
@@ -47,6 +53,22 @@ class Installer:
         """set src as the link target of dst"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.join(self.base, os.path.expanduser(dst))
+
+        if Templategen.is_template(src):
+            # TODO
+            # first make sure the template is generated in the working dir
+
+            # if it's not generate it
+
+            # and then symlink it as any other file
+            # by udating src and dst
+
+        else:
+            # is not a template
+            self._link(src, dst)
+
+    def _link(self, src, dst):
+        """set src as a link target of dst"""
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
                 if self.debug:
