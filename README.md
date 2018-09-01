@@ -547,17 +547,17 @@ the following entries:
     - ...
 ```
 
-* **actions** entry: a list of action (see [Use actions](#use-actions))
+* **actions** entry (optional): a list of action (see [Use actions](#use-actions))
 ```
   <action-key>: <command-to-execute>
 ```
 
-* **trans** entry: a list of transformations (see [Use transformations](#use-transformations))
+* **trans** entry (optional): a list of transformations (see [Use transformations](#use-transformations))
 ```
   <trans-key>: <command-to-execute>
 ```
 
-* **variables** entry: a list of template variables
+* **variables** entry (optional): a list of template variables (see [Available variables](#available-variables))
 ```
   <variable-name>: <variable-content>
 ```
