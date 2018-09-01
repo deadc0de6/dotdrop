@@ -92,7 +92,7 @@ class Templategen:
         return data.decode('utf-8', 'replace')
 
     def is_template(path):
-        if not os.path.exists(path):
+        if not os.path.isfile(path):
             return False
         with open(path, 'r') as f:
             data = f.read()
