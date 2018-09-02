@@ -85,7 +85,8 @@ def install(opts, conf):
                     variables=opts['variables'], debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
-                     diff=opts['installdiff'], debug=opts['debug'])
+                     workdir=opts['workdir'], diff=opts['installdiff'],
+                     debug=opts['debug'])
     installed = []
     for dotfile in dotfiles:
         if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
@@ -99,7 +100,7 @@ def install(opts, conf):
         if opts['debug']:
             LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
-            r = inst.link(dotfile.src, dotfile.dst)
+            r = inst.link(t, dotfile.src, dotfile.dst)
         else:
             src = dotfile.src
             tmp = None
@@ -189,7 +190,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
                     variables=opts['variables'], debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
-                     debug=opts['debug'])
+                     workdir=opts['workdir'], debug=opts['debug'])
     comp = Comparator(diffopts=opts['dopts'], debug=opts['debug'],
                       ignore=ignore)
 

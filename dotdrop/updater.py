@@ -19,8 +19,6 @@ TILD = '~'
 
 class Updater:
 
-    BACKUP_SUFFIX = '.dotdropbak'
-
     def __init__(self, conf, dotpath, dry, safe, debug):
         self.home = os.path.expanduser(TILD)
         self.conf = conf

@@ -29,6 +29,7 @@ class Cfg:
     key_long = 'longkey'
     key_keepdot = 'keepdot'
     key_deflink = 'link_by_default'
+    key_workdir = 'workdir'
 
     # actions keys
     key_actions = 'actions'
@@ -62,6 +63,7 @@ class Cfg:
     default_longkey = False
     default_keepdot = False
     default_link_by_default = False
+    default_workdir = '~/.config/dotdrop'
 
     def __init__(self, cfgpath):
         if not os.path.exists(cfgpath):
@@ -295,6 +297,8 @@ class Cfg:
             self.lnk_settings[self.key_keepdot] = self.default_keepdot
         if self.key_deflink not in self.lnk_settings:
             self.lnk_settings[self.key_deflink] = self.default_link_by_default
+        if self.key_workdir not in self.lnk_settings:
+            self.lnk_settings[self.key_workdir] = self.default_workdir
 
     def abs_dotpath(self, path):
         """transform path to an absolute path based on config path"""

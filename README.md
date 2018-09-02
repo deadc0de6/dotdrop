@@ -507,9 +507,10 @@ the following entries:
   * `longkey`: use long keys for dotfiles when importing (default *false*)
   * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
   * `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
+  * `workdir`: directory where templates are installed before being symlink when using `link` (default *~/.config/dotdrop*)
 
 * **dotfiles** entry: a list of dotfiles
-  * When `link` is true, dotdrop will create a symlink instead of copying. Template generation (as in [template](#template)) is not supported when `link` is true (default *false*).
+  * When `link` is true, dotdrop will create a symlink instead of copying (default *false*).
   * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
   * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
 ```

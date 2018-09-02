@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 #
-# test variables from yaml file
+# test link of templates
 # returns 1 in case of error
 #
 
@@ -48,10 +48,14 @@ echo "RUNNING $(basename $BASH_SOURCE)"
 # the dotfile source
 tmps=`mktemp -d`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
+echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d`
-#echo "dotfile destination: ${tmpd}"
+echo "dotfiles destination: ${tmpd}"
+# the workdir
+tmpw=`mktemp -d`
+echo "workdir: ${tmpw}"
+
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -61,14 +65,12 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-variables:
-  var1: "this is some test"
-  var2: 12
-  var3: another test
+  workdir: ${tmpw}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+    link: true
 profiles:
   p1:
     dotfiles:
@@ -77,22 +79,18 @@ _EOF
 cat ${cfg}
 
 # create the dotfile
-echo "{{@@ var1 @@}}" > ${tmps}/dotfiles/abc
-echo "{{@@ var2 @@}}" >> ${tmps}/dotfiles/abc
-echo "{{@@ var3 @@}}" >> ${tmps}/dotfiles/abc
-echo "test" >> ${tmps}/dotfiles/abc
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/abc
+echo "blabla" >> ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 
-grep '^this is some test' ${tmpd}/abc >/dev/null
-grep '^12' ${tmpd}/abc >/dev/null
-grep '^another test' ${tmpd}/abc >/dev/null
-
-#cat ${tmpd}/abc
+# checks
+[ ! -e ${tmpd}/abc ] && echo "[ERROR] dotfile not installed" && exit 1
+[ ! -h ${tmpd}/abc ] && echo "[ERROR] dotfile is not a symlink" && exit 1
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${tmpw}
 
 echo "OK"
 exit 0
