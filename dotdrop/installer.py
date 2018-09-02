@@ -20,7 +20,7 @@ class Installer:
 
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
-                 debug=False, diff=True):
+                 debug=False, diff=True, totemp=None):
         self.create = create
         self.backup = backup
         self.dry = dry
@@ -29,6 +29,7 @@ class Installer:
         self.base = base
         self.debug = debug
         self.diff = diff
+        self.totemp = totemp
         self.comparing = False
         self.log = Logger()
 
@@ -36,6 +37,8 @@ class Installer:
         """install the src to dst using a template"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.expanduser(dst)
+        if self.totemp:
+            dst = self._pivot_path(dst, self.totemp)
         if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
@@ -50,6 +53,8 @@ class Installer:
         """set src as the link target of dst"""
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.expanduser(dst)
+        if self.totemp:
+            return self.install(templater, src, dst)
 
         if Templategen.is_template(src):
             if self.debug:

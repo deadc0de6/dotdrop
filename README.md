@@ -272,6 +272,10 @@ $ dotdrop.sh compare
 The diffing is done by diff in the backend, one can provide specific
 options to diff using the `-o` switch.
 
+It is also possible to install all dotfiles for a specific profile
+in a temporary directory in order to manually compare them with
+the local version by using `install` and the `-t` switch.
+
 ## Import dotfiles
 
 Dotdrop allows to import dotfiles directly from the
@@ -477,16 +481,37 @@ $ sudo pip3 install dotdrop --upgrade
 ## Update dotfiles
 
 Dotfiles managed by dotdrop can be updated using the `update` command.
+
 There are two cases:
 
-  * the dotfile doesn't use [templating](#template): the new version of the dotfile is copied to the
-    *dotfiles* directory and overwrites the old version. If git is used to version the dotfiles stored
-    by dotdrop, the git command `diff` can be used to view the changes.
-  * the dotfile uses [templating](#template): the dotfile must be manually updated, the use of
-    the dotdrop command `compare` can be helpful to identify the changes to apply to the template.
+**The dotfile doesn't use [templating](#template)**
 
-```
+The new version of the dotfile is copied to the *dotfiles* directory and overwrites
+the old version. If git is used to version the dotfiles stored by dotdrop, the git command
+`diff` can be used to view the changes.
+
+```bash
 $ dotdrop.sh update ~/.vimrc
+$ git diff
+```
+
+**The dotfile uses [templating](#template)**
+
+The dotfile must be manually updated, two solutions can be used to identify the
+changes to apply to the template:
+
+* Use dotdrop's `compare` command
+* Install the dotfiles to a temporary directory (using the `install` command and the
+  `-t` switch) and compare the generated dotfile with the local one.
+
+```bash
+# use compare to identify change(s)
+$ ./dotdrop.sh compare --files=~/.vimrc
+
+# use install to identify change(s)
+$ ./dotdrop.sh install -t
+Installed to tmp /tmp/dotdrop-6kix7555
+$ diff ~/.vimrc /tmp/dotdrop-6kix7555/home/user/.vimrc
 ```
 
 ## Store sensitive dotfiles

@@ -41,14 +41,14 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-fndVb] [-c <path>] [-p <profile>]
-  dotdrop import    [-ldVb]  [-c <path>] [-p <profile>] <paths>...
-  dotdrop compare   [-Vb]    [-c <path>] [-p <profile>]
-                             [-o <opts>] [-i <name>...]
-                             [--files=<files>]
-  dotdrop update    [-fdVb]  [-c <path>] <paths>...
-  dotdrop listfiles [-Vb]    [-c <path>] [-p <profile>]
-  dotdrop list      [-Vb]    [-c <path>]
+  dotdrop install   [-tfndVb] [-c <path>] [-p <profile>]
+  dotdrop import    [-ldVb]   [-c <path>] [-p <profile>] <paths>...
+  dotdrop compare   [-Vb]     [-c <path>] [-p <profile>]
+                              [-o <opts>] [-i <name>...]
+                              [--files=<files>]
+  dotdrop update    [-fdVb]   [-c <path>] <paths>...
+  dotdrop listfiles [-Vb]     [-c <path>] [-p <profile>]
+  dotdrop list      [-Vb]     [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -59,6 +59,7 @@ Options:
   -i --ignore=<name>      File name to ignore when diffing.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
+  -t --temp               Install to a temporary directory for review.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
   -V --verbose            Be verbose.
@@ -74,7 +75,7 @@ Options:
 ###########################################################
 
 
-def install(opts, conf):
+def install(opts, conf, temporary=False):
     """install all dotfiles for this profile"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
@@ -83,10 +84,13 @@ def install(opts, conf):
         return False
     t = Templategen(opts['profile'], base=opts['dotpath'],
                     variables=opts['variables'], debug=opts['debug'])
+    tmpdir = None
+    if temporary:
+        tmpdir = get_tmpdir()
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
                      workdir=opts['workdir'], diff=opts['installdiff'],
-                     debug=opts['debug'])
+                     debug=opts['debug'], totemp=tmpdir)
     installed = []
     for dotfile in dotfiles:
         if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
@@ -126,6 +130,8 @@ def install(opts, conf):
                             LOG.dbg('executing post action {}'.format(action))
                         action.execute()
         installed.extend(r)
+    if temporary:
+        LOG.log('\nInstalled to tmp {}.'.format(tmpdir))
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
 
@@ -154,7 +160,6 @@ def apply_trans(opts, dotfile):
 
 
 def _select(selections, dotfiles):
-    ret = True
     selected = []
     for selection in selections:
         df = next(
@@ -166,8 +171,7 @@ def _select(selections, dotfiles):
             selected.append(df)
         else:
             LOG.err('no dotfile matches \"{}\"'.format(selection))
-            ret = False
-    return selected, ret
+    return selected
 
 
 def compare(opts, conf, tmp, focus=None, ignore=[]):
@@ -181,7 +185,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
     same = True
     selected = dotfiles
     if focus:
-        selected, ret = _select(focus.replace(' ', '').split(','), dotfiles)
+        selected = _select(focus.replace(' ', '').split(','), dotfiles)
 
     if len(selected) < 1:
         return False
@@ -362,13 +366,14 @@ def main():
 
         elif args['install']:
             # install the dotfiles stored in dotdrop
-            ret = install(opts, conf)
+            ret = install(opts, conf, temporary=args['--temp'])
 
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
-            ret = compare(opts, conf, tmp, args['--files'], args['--ignore'])
+            ret = compare(opts, conf, tmp, focus=args['--files'],
+                          ignore=args['--ignore'])
             if os.listdir(tmp):
                 LOG.raw('\ntemporary files available under {}'.format(tmp))
             else:
