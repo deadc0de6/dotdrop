@@ -98,11 +98,13 @@ def create_fake_config(directory, configname='config.yaml',
                        dotpath='dotfiles', backup=True, create=True):
     '''Create a fake config file'''
     path = os.path.join(directory, configname)
+    workdir = os.path.join(directory, 'workdir')
     with open(path, 'w') as f:
         f.write('config:\n')
         f.write('  backup: {}\n'.format(str(backup)))
         f.write('  create: {}\n'.format(str(create)))
         f.write('  dotpath: {}\n'.format(dotpath))
+        f.write('  workdir: {}\n'.format(workdir))
         f.write('dotfiles:\n')
         f.write('profiles:\n')
         f.write('actions:\n')

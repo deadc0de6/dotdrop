@@ -17,28 +17,25 @@ import dotdrop.utils as utils
 class Installer:
 
     BACKUP_SUFFIX = '.dotdropbak'
-    # TODO get this from the config file with a default
-    DOTDROP_WORK = '{}/.config/dotdrop'.format(os.path.expanduser('~'))
 
     def __init__(self, base='.', create=True, backup=True,
-                 dry=False, safe=False, debug=False, diff=True):
+                 dry=False, safe=False, workdir='~/.config/dotdrop',
+                 debug=False, diff=True):
         self.create = create
         self.backup = backup
         self.dry = dry
         self.safe = safe
+        self.workdir = os.path.expanduser(workdir)
         self.base = base
         self.debug = debug
         self.diff = diff
         self.comparing = False
         self.log = Logger()
 
-    def _dotdrop_work(self):
-        os.makedirs(self.DOTDROP_WORK, exist_ok=True)
-
     def install(self, templater, src, dst):
         """install the src to dst using a template"""
         src = os.path.join(self.base, os.path.expanduser(src))
-        dst = os.path.join(self.base, os.path.expanduser(dst))
+        dst = os.path.expanduser(dst)
         if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
@@ -49,22 +46,19 @@ class Installer:
             return self._handle_dir(templater, src, dst)
         return self._handle_file(templater, src, dst)
 
-    def link(self, src, dst):
+    def link(self, templater, src, dst):
         """set src as the link target of dst"""
         src = os.path.join(self.base, os.path.expanduser(src))
-        dst = os.path.join(self.base, os.path.expanduser(dst))
+        dst = os.path.expanduser(dst)
 
         if Templategen.is_template(src):
-            # TODO
-            # first make sure the template is generated in the working dir
-
-            # if it's not generate it
-
-            # and then symlink it as any other file
-            # by udating src and dst
-            return []
-
-        # is not a template
+            if self.debug:
+                self.log.dbg('dotfile is a template')
+                self.log.dbg('install to {} and symlink'.format(self.workdir))
+            tmp = self._pivot_path(dst, self.workdir, striphome=True)
+            if not self.install(templater, src, tmp):
+                return []
+            src = tmp
         return self._link(src, dst)
 
     def _link(self, src, dst):
@@ -95,7 +89,7 @@ class Installer:
             self.log.err('creating directory for \"{}\"'.format(dst))
             return []
         os.symlink(src, dst)
-        self.log.sub('linked {} to {}'.format(dst, src))
+        self.log.sub('linked \"{}\" to \"{}\"'.format(dst, src))
         return [(src, dst)]
 
     def _handle_file(self, templater, src, dst):
@@ -206,19 +200,24 @@ class Installer:
         self.log.log('backup {} to {}'.format(path, dst))
         os.rename(path, dst)
 
+    def _pivot_path(self, path, newdir, striphome=False):
+        """change path to be under newdir"""
+        if striphome:
+            home = os.path.expanduser('~')
+            path = path.lstrip(home)
+        sub = path.lstrip(os.sep)
+        return os.path.join(newdir, sub)
+
     def _install_to_temp(self, templater, src, dst, tmpdir):
-        """install a dotfile to a tempdir for comparing"""
-        sub = dst
-        if dst[0] == os.sep:
-            sub = dst[1:]
-        tmpdst = os.path.join(tmpdir, sub)
+        """install a dotfile to a tempdir"""
+        tmpdst = self._pivot_path(dst, tmpdir)
         return self.install(templater, src, tmpdst), tmpdst
 
     def install_to_temp(self, templater, tmpdir, src, dst):
-        """compare a temporary generated dotfile with the local one"""
+        """install a dotfile to a tempdir"""
         ret = False
         tmpdst = ''
-        # saved some flags while comparing
+        # save some flags while comparing
         self.comparing = True
         drysaved = self.dry
         self.dry = False
