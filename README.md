@@ -654,28 +654,22 @@ These can then be used in any template with
 
 Dotdrop is able to insert a header in the generated dotfiles. This allows
 to remind anyone opening the file for editing that this file is managed by dotdrop.
-The header provides additional information like the last update date/time and
-dotdrop's version.
 
-Here's an example of such an header:
+Here's what it looks like:
 ```
-This dotfile is managed using dotdrop v0.19.2 / last updated 2018-09-01 00:01
+This dotfile is managed using dotdrop
 ```
 
-Such a header can be automatically added using jinja2 directive:
+The header can be automatically added using jinja2 directive:
 ```
 {{@@ header() @@}}
 ```
 
-Properly commenting the header in the dotfile is the responsability of the user
+Properly commenting the header in templates is the responsability of the user
 as jinja2 has no way of knowing what is the proper char(s) used for comments.
 
 Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
 or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
-
-Remember that when using the header, comparing dotfiles will notice changes as the
-temporary version generated to compare with the local dotfile will have a different
-date and time.
 
 ## Environment variables
 

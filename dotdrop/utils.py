@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 import os
 import shlex
-import datetime
 from shutil import rmtree
 
 # local import
@@ -70,8 +69,4 @@ def samefile(path1, path2):
 
 
 def header():
-    header = 'This dotfile is managed using dotdrop'
-    header += ' v{}'.format(VERSION)
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    header += ' / last updated {}'.format(now)
-    return header
+    return 'This dotfile is managed using dotdrop'
