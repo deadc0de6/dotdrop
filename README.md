@@ -33,6 +33,7 @@ Features:
 * Allow to symlink dotfiles
 * Associate an action to the deployment of specific dotfiles
 * Associate transformations that allow to store encrypted dotfiles
+* Provide different solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html), the [example](#example) or how [people are using dotdrop](#people-using-dotdrop) for more.
 
@@ -76,6 +77,7 @@ why dotdrop rocks.
   * [Update dotdrop](#update-dotdrop)
   * [Update dotfiles](#update-dotfiles)
   * [Store sensitive dotfiles](#store-sensitive-dotfiles)
+  * [Symlink dotfiles](#symlink-dotfiles)
 
 * [Config](#config)
 * [Templating](#templating)
@@ -91,16 +93,6 @@ to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 Having dotdrop as a submodule guarantees that anywhere your are cloning your
 dotfiles git tree from you'll have dotdrop shipped with it. It is the recommended way.
 
-To ease the use of dotdrop, it is recommended to add an alias to it in your
-shell with the config file path, for example
-```
-# when used as a submodule
-alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
-
-# when installed with pypi
-alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
-```
-
 If you want to keep your python environment clean, use
 the virtualenv installation instructions
 (see [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv) and
@@ -114,8 +106,8 @@ Dotdrop is also available on aur:
 
 ## As a submodule
 
-The following will create a repository for your dotfiles and
-keep dotdrop as a submodules:
+The following will create a git repository for your dotfiles and
+keep dotdrop as a submodule:
 ```bash
 $ mkdir dotfiles; cd dotfiles
 $ git init
@@ -131,6 +123,12 @@ For MacOS users, make sure to install `realpath` through homebrew
 Using this solution will need you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
 of your dotfiles repository.
+
+To ease the use of dotdrop, it is recommended to add an alias to it in your
+shell with the config file path, for example
+```
+alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
+```
 
 Finally import your dotfiles as described [below](#usage).
 
@@ -173,6 +171,12 @@ $ git init
 
 Replace any call to `dotdrop.sh` in the documentation below
 by `dotdrop` if using the pypi solution.
+
+To ease the use of dotdrop, it is recommended to add an alias to it in your
+shell with the config file path, for example
+```
+alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
+```
 
 Finally import your dotfiles as described [below](#usage).
 
@@ -220,7 +224,7 @@ $ dotdrop.sh list
 $ dotdrop.sh compare --profile=<other-host-profile>
 ```
 
-Then adapt any dotfile using the [template](#template) feature
+Then adapt any dotfile using the [template](#template) feature (if needed)
 and set a new profile for the current host by simply adding lines in
 the config files, for example:
 
@@ -407,9 +411,8 @@ Actions cannot obviously be named `pre` or `post`.
 
 ## Use transformations
 
-Transformation actions are used to transform a dotfile before it is
-installed. They work like [actions](#use-actions) but are executed before the
-dotfile is installed to transform the source.
+Transformations are used to transform a dotfile before it is
+installed. These are executed before the dotfile is installed to transform the source.
 
 Transformation commands have two arguments:
 
@@ -438,7 +441,7 @@ Here's how to deploy the above solution:
 
 * import the clear dotfile (creates the correct entries in the config file)
 ```bash
-$ ./dotdrop.sh import ~/.secret
+$ dotdrop.sh import ~/.secret
 ```
 * encrypt the original dotfile
 ```bash
@@ -490,6 +493,17 @@ $ dotdrop.sh update ~/.vimrc
 
 Two solutions exist, the first one using an unversioned file (see [Environment variables](#environment-variables))
 and the second using transformations (see [Transformations](#use-transformations)).
+
+## Symlink dotfiles
+
+Dotdrop allows to symlink dotfiles. Simply set the `link: true` under the
+dotfile entry in the config file.
+
+For dotfile not using any templating directives, those are directly linked
+to dotdrop's `dotpath` directory (see [Config](#config)).
+When using templating directives, the dotfile are first installed into
+`workdir` (defaults to *~/.config/dotdrop*, see [Config](#config))
+and then symlinked there.
 
 # Config
 
@@ -621,7 +635,7 @@ Note that dotdrop uses different delimiters than
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
 
-Addionally to the above, variables can be added in the config yaml file under
+Addionally to the above, variables can be added in the config file under
 the `variables` entry. The variables added there are directly reachable in
 any templates.
 
@@ -631,7 +645,7 @@ variables:
   var1: some variable content
 ```
 
-Those can then be used in any template with
+These can then be used in any template with
 ```
 {{@@ var1 @@}}
 ```
@@ -659,40 +673,41 @@ as jinja2 has no way of knowing what is the proper char(s) used for comments.
 Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
 or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
+Remember that when using the header, comparing dotfiles will notice changes as the
+temporary version generated to compare with the local dotfile will have a different
+date and time.
+
 ## Environment variables
 
-It's possible to access environment variables inside the templates. This feature can be used like this:
-
+It's possible to access environment variables inside the templates.
 ```
 {{@@ env['MY_VAR'] @@}}
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
+It is recommended to use `variables` (see [Available variables](#available-variables)
+instead of environment variables unless these contain sensitive information that
+shouldn't be versioned in git.
 
-You can have an `.env` file in the directory where your `config.yaml` lies:
-
+For example you can have a `.env` file in the directory where your `config.yaml` lies:
 ```
-## My variables for this host
-var1="some value"
-var2="some other value"
-
 ## Some secrets
 pass="verysecurepassword"
 ```
 If this file contains secrets that should not be tracked by git,
 put it in your `.gitignore`.
 
-Then you can invoke dotdrop with the help of an alias when using dotdrop as a submodule:
-```
+You can then invoke dotdrop with the help of an alias
+```bash
+# when dotdrop is installed as a submodule
 alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
-```
 
-When using dotdrop from pypi or aur, the absolute path to the binary should be used in the alias to avoid recursion issues
-```
+# when dotdrop is installed from pypi or aur
 alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dotfiles/config.yaml'
 ```
 
-The above aliases load all the variables from `~/dotfiles/.env` (while omitting lines starting with `#`) before calling dotdrop.
+The above aliases load all the variables from `~/dotfiles/.env`
+(while omitting lines starting with `#`) before calling dotdrop.
 
 # Example
 
