@@ -17,8 +17,7 @@ It also allows to manage different *sets* of dotfiles.
 For example you can have a set of dotfiles for your home laptop and
 a different set for your office desktop. Those sets may overlap and different
 versions of the same dotfiles can be deployed on different predefined *profiles*.
-
-Another use case is when you have a main set of dotfiles for your
+Or you may have a main set of dotfiles for your
 everyday's host and a sub-set you only need to deploy to temporary
 hosts (cloud VM, etc) that may be using
 a slightly different version of some of the dotfiles.
@@ -31,6 +30,7 @@ Features:
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles
 * Handle files and directories
+* Allow to symlink dotfiles
 * Associate an action to the deployment of specific dotfiles
 * Associate transformations that allow to store encrypted dotfiles
 
@@ -88,14 +88,25 @@ why dotdrop rocks.
 There are two ways of installing and using dotdrop, either [as a submodule](#as-a-submodule)
 to your dotfiles git tree or system-wide [with pypi](#with-pypi).
 
-Having dotdrop as a submodule guarantees that anywhere your are cloning your dotfiles git tree
-from you'll have dotdrop shipped with it. It is the recommended way.
+Having dotdrop as a submodule guarantees that anywhere your are cloning your
+dotfiles git tree from you'll have dotdrop shipped with it. It is the recommended way.
+
+To ease the use of dotdrop, it is recommended to add an alias to it in your
+shell with the config file path, for example
+```
+# when used as a submodule
+alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
+
+# when installed with pypi
+alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
+```
 
 If you want to keep your python environment clean, use
 the virtualenv installation instructions
 (see [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv) and
 [With pypi in a virtualenv](#with-pypi-in-a-virtualenv)).
-The environment must be loaded before any attempt to use dotdrop.
+In that case, the virtualenv environment must be loaded
+before any attempt to use dotdrop.
 
 Dotdrop is also available on aur:
 * stable: https://aur.archlinux.org/packages/dotdrop/
@@ -120,15 +131,6 @@ For MacOS users, make sure to install `realpath` through homebrew
 Using this solution will need you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
 of your dotfiles repository.
-
-A good practice is to create a symlink to the `dotdrop.sh` script in your
-personal bin directory (for example `~/bin`) or any other directory that
-is loading in your `$PATH` (for example `/usr/local/bin`).
-
-Or add an alias in your shell
-```bash
-alias dotdrop=<absolute-path-to-dotdrop.sh>
-```
 
 Finally import your dotfiles as described [below](#usage).
 
@@ -167,12 +169,6 @@ And then create a repository for your dotfiles
 ```bash
 $ mkdir dotfiles; cd dotfiles
 $ git init
-```
-
-To avoid the need to provide the config file path to dotdrop each time it
-is called, you can create an alias in your shell:
-```
-alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
 
 Replace any call to `dotdrop.sh` in the documentation below
@@ -252,8 +248,8 @@ That's it, a single repository with all your dotfiles for your different hosts.
 For more options see `dotdrop.sh --help`.
 
 For easy deployment the default profile used by dotdrop reflects the
-hostname of the host on which it runs. The default can also be changed by defining
-the `DOTDROP_PROFILE` environment variable.
+hostname of the host on which it runs. It can be changed either with the
+`--profile` switch or by defining the `DOTDROP_PROFILE` environment variable.
 
 ## Install dotfiles
 
@@ -261,10 +257,6 @@ Simply run
 ```bash
 $ dotdrop.sh install
 ```
-
-Use the `--profile` switch to specify a different profile than
-the host's hostname or define it through the `DOTDROP_PROFILE`
-environment variable.
 
 ## Compare dotfiles
 
@@ -315,7 +307,7 @@ Dotdrop allows to choose which profile to use
 with the `--profile` switch if you use something
 else than the default (the hostname).
 
-The default profile can be changed by defining the
+The default profile can also be changed by defining the
 `DOTDROP_PROFILE` environment variable.
 
 ## List dotfiles
@@ -457,10 +449,12 @@ $ <some-gpg-command> ~/.secret
 $ cp <encrypted-version-of-secret> dotfiles/secret
 ```
 * edit the config file and add the transformation to the dotfile
+  (as shown in the example above)
+
 * commit and push the changes
 
-Note that transformations cannot be used if the dotfiles is to be linked (`link: true`)
-and `compare` won't work on dotfiles using transformations.
+Note that transformations cannot be used if the dotfiles is to be linked (`link: true`).
+Also `compare` won't work on dotfiles using transformations.
 
 ## Update dotdrop
 
@@ -624,7 +618,7 @@ Note that dotdrop uses different delimiters than
 
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
-* `{{@@ header @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
+* `{{@@ header() @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
 
 Addionally to the above, variables can be added in the config yaml file under
 the `variables` entry. The variables added there are directly reachable in
@@ -646,7 +640,7 @@ Those can then be used in any template with
 Dotdrop is able to insert a header in the generated dotfiles. This allows
 to remind anyone opening the file for editing that this file is managed by dotdrop.
 The header provides additional information like the last update date/time and
-dotdrop's version used.
+dotdrop's version.
 
 Here's an example of such an header:
 ```
@@ -655,13 +649,13 @@ This dotfile is managed using dotdrop v0.19.2 / last updated 2018-09-01 00:01
 
 Such a header can be automatically added using jinja2 directive:
 ```
-{{@@ header @@}}
+{{@@ header() @@}}
 ```
 
-Properly commenting the header is the responsability of the user as jinja2 has no way of
-knowning what is the proper char(s) used for comments.
+Properly commenting the header in the dotfile is the responsability of the user
+as jinja2 has no way of knowing what is the proper char(s) used for comments.
 
-Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header @@}}`)
+Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
 or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
 ## Environment variables
@@ -684,7 +678,8 @@ var2="some other value"
 ## Some secrets
 pass="verysecurepassword"
 ```
-Of course, this file should not be tracked by git (put it in your `.gitignore`).
+If this file contains secrets that should not be tracked by git,
+put it in your `.gitignore`.
 
 Then you can invoke dotdrop with the help of an alias when using dotdrop as a submodule:
 ```
