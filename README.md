@@ -147,8 +147,7 @@ $ ./dotdrop/bootstrap.sh
 $ ./dotdrop.sh --help
 ```
 
-When using a virtualenv, make sure to source the environment
-before using dotdrop:
+When using a virtualenv, make sure to source the environment before using dotdrop
 ```bash
 $ source env/bin/activate
 $ ./dotdrop.sh --help
@@ -501,17 +500,18 @@ The dotfile must be manually updated, two solutions can be used to identify the
 changes to apply to the template:
 
 * Use dotdrop's `compare` command
-* Install the dotfiles to a temporary directory (using the `install` command and the
-  `-t` switch) and compare the generated dotfile with the local one.
-
 ```bash
 # use compare to identify change(s)
 $ ./dotdrop.sh compare --files=~/.vimrc
+```
 
+* Install the dotfiles to a temporary directory (using the `install` command and the
+  `-t` switch) and compare the generated dotfile with the local one.
+```bash
 # use install to identify change(s)
 $ ./dotdrop.sh install -t
-Installed to tmp /tmp/dotdrop-6kix7555
-$ diff ~/.vimrc /tmp/dotdrop-6kix7555/home/user/.vimrc
+Installed to tmp /tmp/dotdrop-6ajz7565
+$ diff ~/.vimrc /tmp/dotdrop-6ajz7565/home/user/.vimrc
 ```
 
 ## Store sensitive dotfiles
@@ -728,6 +728,15 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
 
+## Debug template
+
+To debug the result of a template, one can install the dotfiles to a temporary
+directory with the `install` command and the `-t` switch:
+```bash
+$ ./dotdrop.sh install -t
+Installed to tmp /tmp/dotdrop-6ajz7565
+```
+
 # Example
 
 Let's consider two hosts:
@@ -813,7 +822,7 @@ See the [related wiki page](https://github.com/deadc0de6/dotdrop/wiki/user-trick
 
 # People using dotdrop
 
-For more examples, see how people are using dotdrop:
+For more examples, see how people are using dotdrop
 
 * [https://github.com/open-dynaMIX/dotfiles](https://github.com/open-dynaMIX/dotfiles)
 * [https://github.com/moyiz/dotfiles](https://github.com/moyiz/dotfiles)
