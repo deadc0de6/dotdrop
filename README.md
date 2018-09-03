@@ -168,9 +168,6 @@ $ mkdir dotfiles; cd dotfiles
 $ git init
 ```
 
-Replace any call to `dotdrop.sh` in the documentation below
-by `dotdrop` if using the pypi solution.
-
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell with the config file path, for example
 ```
@@ -205,7 +202,7 @@ allows to easily and quickly get a running setup.
 Install dotdrop on one of your host and then import any dotfiles you want dotdrop to
 manage (be it a file or a directory):
 ```bash
-$ dotdrop.sh import ~/.vimrc ~/.xinitrc
+$ dotdrop import ~/.vimrc ~/.xinitrc
 ```
 
 Dotdrop does two things:
@@ -219,8 +216,8 @@ Then go to another host where your dotfiles need to be managed as well,
 clone the previously setup git tree
 and compare local dotfiles with the ones stored by dotdrop:
 ```bash
-$ dotdrop.sh list
-$ dotdrop.sh compare --profile=<other-host-profile>
+$ dotdrop list
+$ dotdrop compare --profile=<other-host-profile>
 ```
 
 Then adapt any dotfile using the [template](#template) feature (if needed)
@@ -243,12 +240,12 @@ profiles:
 When done, you can install your dotfiles using
 
 ```bash
-$ dotdrop.sh install
+$ dotdrop install
 ```
 
 That's it, a single repository with all your dotfiles for your different hosts.
 
-For more options see `dotdrop.sh --help`.
+For more options see `dotdrop --help`.
 
 For easy deployment the default profile used by dotdrop reflects the
 hostname of the host on which it runs. It can be changed either with the
@@ -258,17 +255,17 @@ hostname of the host on which it runs. It can be changed either with the
 
 Simply run
 ```bash
-$ dotdrop.sh install
+$ dotdrop install
 ```
 
 ## Compare dotfiles
 
 Compare local dotfiles with dotdrop's defined ones:
 ```bash
-$ dotdrop.sh compare
+$ dotdrop compare
 ```
 
-The diffing is done by diff in the backend, one can provide specific
+The diffing is done by `diff` in the backend, one can provide specific
 options to diff using the `-o` switch.
 
 It is also possible to install all dotfiles for a specific profile
@@ -283,7 +280,7 @@ config file automatically.
 
 For example to import `~/.xinitrc`
 ```bash
-$ dotdrop.sh import ~/.xinitrc
+$ dotdrop import ~/.xinitrc
 ```
 
 You can control how the dotfile key is generated in the config file
@@ -299,7 +296,7 @@ For example `~/.config/awesome/rc.lua` gives
   * `f_rc.lua` in the short format
   * `f_config_awesome_rc.lua` in the long format
 
-Importing `~/.mutt/colors` and `~/.vim/colors` will result in
+Importing `~/.mutt/colors` and then `~/.vim/colors` will result in
 
   * `d_colors` and `d_vim_colors` in the short format
   * `d_mutt_colors` and `d_vim_colors` in the long format
@@ -307,7 +304,7 @@ Importing `~/.mutt/colors` and `~/.vim/colors` will result in
 ## List profiles
 
 ```bash
-$ dotdrop.sh list
+$ dotdrop list
 ```
 
 Dotdrop allows to choose which profile to use
@@ -323,7 +320,7 @@ The following command lists the different dotfiles
 configured for a specific profile:
 
 ```bash
-$ dotdrop.sh listfiles --profile=<some-profile>
+$ dotdrop listfiles --profile=<some-profile>
 ```
 
 For example:
@@ -438,22 +435,28 @@ trans:
 ```
 
 The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
-directory and uses gpg to decrypt it when install is run.
+directory and uses gpg to decrypt it when `install` is run.
 
 Here's how to deploy the above solution:
 
-* import the clear dotfile (creates the correct entries in the config file)
+* import the clear dotfile (what creates the correct entries in the config file)
+
 ```bash
-$ dotdrop.sh import ~/.secret
+$ dotdrop import ~/.secret
 ```
+
 * encrypt the original dotfile
+
 ```bash
 $ <some-gpg-command> ~/.secret
 ```
+
 * overwrite the dotfile with the encrypted version
+
 ```bash
 $ cp <encrypted-version-of-secret> dotfiles/secret
 ```
+
 * edit the config file and add the transformation to the dotfile
   (as shown in the example above)
 
@@ -490,7 +493,7 @@ the old version. If git is used to version the dotfiles stored by dotdrop, the g
 `diff` can be used to view the changes.
 
 ```bash
-$ dotdrop.sh update ~/.vimrc
+$ dotdrop update ~/.vimrc
 $ git diff
 ```
 
@@ -502,14 +505,14 @@ changes to apply to the template:
 * Use dotdrop's `compare` command
 ```bash
 # use compare to identify change(s)
-$ ./dotdrop.sh compare --files=~/.vimrc
+$ dotdrop compare --files=~/.vimrc
 ```
 
 * Install the dotfiles to a temporary directory (using the `install` command and the
   `-t` switch) and compare the generated dotfile with the local one.
 ```bash
 # use install to identify change(s)
-$ ./dotdrop.sh install -t
+$ dotdrop install -t
 Installed to tmp /tmp/dotdrop-6ajz7565
 $ diff ~/.vimrc /tmp/dotdrop-6ajz7565/home/user/.vimrc
 ```
@@ -524,9 +527,9 @@ and the second using transformations (see [Transformations](#use-transformations
 Dotdrop allows to symlink dotfiles. Simply set the `link: true` under the
 dotfile entry in the config file.
 
-For dotfile not using any templating directives, those are directly linked
+For dotfiles not using any templating directives, those are directly linked
 to dotdrop's `dotpath` directory (see [Config](#config)).
-When using templating directives, the dotfile are first installed into
+When using templating directives, the dotfiles are first installed into
 `workdir` (defaults to *~/.config/dotdrop*, see [Config](#config))
 and then symlinked there.
 
@@ -552,7 +555,8 @@ the following entries:
   * When `link` is true, dotdrop will create a symlink instead of copying (default *false*).
   * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
   * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
-```
+
+```yaml
   <dotfile-key-name>:
     dst: <where-this-file-is-deployed>
     src: <filename-within-the-dotpath>
@@ -569,7 +573,7 @@ the following entries:
   * `dotfiles`: the dotfiles associated to this profile
   * `include`: include all dotfiles from another profile (optional)
 
-```
+```yaml
   <some-name-usually-the-hostname>:
     dotfiles:
     - <some-dotfile-key-name-defined-above>
@@ -582,16 +586,19 @@ the following entries:
 ```
 
 * **actions** entry (optional): a list of action (see [Use actions](#use-actions))
+
 ```
   <action-key>: <command-to-execute>
 ```
 
 * **trans** entry (optional): a list of transformations (see [Use transformations](#use-transformations))
+
 ```
   <trans-key>: <command-to-execute>
 ```
 
 * **variables** entry (optional): a list of template variables (see [Available variables](#available-variables))
+
 ```
   <variable-name>: <variable-content>
 ```
@@ -692,7 +699,6 @@ The header can be automatically added using jinja2 directive:
 
 Properly commenting the header in templates is the responsability of the user
 as jinja2 has no way of knowing what is the proper char(s) used for comments.
-
 Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
 or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
@@ -704,7 +710,7 @@ It's possible to access environment variables inside the templates.
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
-It is recommended to use `variables` (see [Available variables](#available-variables)
+It is recommended to use `variables` (see [Available variables](#available-variables))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in git.
 
@@ -733,7 +739,7 @@ The above aliases load all the variables from `~/dotfiles/.env`
 To debug the result of a template, one can install the dotfiles to a temporary
 directory with the `install` command and the `-t` switch:
 ```bash
-$ ./dotdrop.sh install -t
+$ dotdrop install -t
 Installed to tmp /tmp/dotdrop-6ajz7565
 ```
 
@@ -801,19 +807,19 @@ Installing the dotfiles (the `--profile` switch is not needed if
 the hostname matches the *profile* entry in the config file):
 ```bash
 # on home computer
-$ dotdrop.sh install --profile=home
+$ dotdrop install --profile=home
 
 # on office computer
-$ dotdrop.sh install --profile=office
+$ dotdrop install --profile=office
 ```
 
 Comparing the dotfiles:
 ```bash
 # on home computer
-$ dotdrop.sh compare
+$ dotdrop compare
 
 # on office computer
-$ dotdrop.sh compare
+$ dotdrop compare
 ```
 
 # User tricks
