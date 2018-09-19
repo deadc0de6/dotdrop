@@ -9,7 +9,8 @@ represents a dotfile in dotdrop
 class Dotfile:
 
     def __init__(self, key, dst, src,
-                 actions={}, trans=[], link=False):
+                 actions={}, trans=[],
+                 link=False, cmpignore=[]):
         # key of dotfile in the config
         self.key = key
         # path where to install this dotfile
@@ -22,6 +23,8 @@ class Dotfile:
         self.actions = actions
         # list of transformations
         self.trans = trans
+        # pattern to ignore when comparing
+        self.cmpignore = cmpignore
 
     def __str__(self):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'

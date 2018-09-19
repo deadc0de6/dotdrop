@@ -73,23 +73,61 @@ touch ${tmpd}/program/b
 touch ${tmpd}/config/b
 
 # expects diff
-echo "[+] comparing normal"
+echo "[+] comparing normal - 2 diffs"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose
 [ "$?" = "0" ] && exit 1
 set -e
 
 # expects one diff
-echo "[+] comparing with ignore"
+patt="${tmpd}/config/b"
+echo "[+] comparing with ignore (pattern: ${patt}) - 1 diff"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${tmpd}/config/b
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
 [ "$?" = "0" ] && exit 1
 set -e
 
 # expects no diff
-echo "[+] comparing with ignore pattern"
+patt="*b"
+echo "[+] comparing with ignore (pattern: ${patt}) - 0 diff"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=b
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
+[ "$?" != "0" ] && exit 1
+set -e
+
+# expects one diff
+patt="*/config/*b"
+echo "[+] comparing with ignore (pattern: ${patt}) - 1 diff"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
+[ "$?" = "0" ] && exit 1
+set -e
+
+cat ${cfg}
+
+# adding ignore in dotfile
+cfg2="${basedir}/config2.yaml"
+sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
+cat ${cfg2}
+
+# expects one diff
+echo "[+] comparing with ignore in dotfile - 1 diff"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
+[ "$?" = "0" ] && exit 1
+set -e
+
+# adding ignore in dotfile
+cfg2="${basedir}/config2.yaml"
+sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
+sed -i '/d_program:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg2}
+cat ${cfg2}
+
+# expects no diff
+patt="*b"
+echo "[+] comparing with ignore in dotfile - 0 diff"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
 [ "$?" != "0" ] && exit 1
 set -e
 

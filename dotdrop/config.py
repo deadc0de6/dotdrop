@@ -47,6 +47,7 @@ class Cfg:
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
+    key_dotfiles_cmpignore = 'cmpignore'
     key_dotfiles_actions = 'actions'
     key_dotfiles_trans = 'trans'
 
@@ -198,10 +199,11 @@ class Cfg:
                 msg += ' because link is True'
                 self.log.warn(msg)
                 trans = []
+            ignores = v[self.key_dotfiles_cmpignore] if \
+                self.key_dotfiles_cmpignore in v else []
             self.dotfiles[k] = Dotfile(k, dst, src,
-                                       link=link,
-                                       actions=actions,
-                                       trans=trans)
+                                       link=link, actions=actions,
+                                       trans=trans, cmpignore=ignores)
 
         # assign dotfiles to each profile
         for k, v in self.lnk_profiles.items():

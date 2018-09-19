@@ -268,6 +268,15 @@ $ dotdrop compare
 The diffing is done by `diff` in the backend, one can provide specific
 options to diff using the `-o` switch.
 
+It is possible to add patterns to ignore when using `compare` for example
+when a directory is managed by dotdrop and might contain temporary files
+that don't need to appear in the output of compare.
+
+Either use the command line switch `-i --ignore` or add an entry in the dotfile
+directly in the `cmpignore` entry (see [Config](#config)).
+The pattern follows Unix shell-style wildcards like for example `*/path/file`.
+Make sure to quote those when using wildcards in the config file.
+
 It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
 the local version by using `install` and the `-t` switch.
@@ -553,6 +562,7 @@ the following entries:
 
 * **dotfiles** entry: a list of dotfiles
   * When `link` is true, dotdrop will create a symlink instead of copying (default *false*).
+  * `cmpignore` contains a list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
   * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
 
@@ -562,6 +572,8 @@ the following entries:
     src: <filename-within-the-dotpath>
     # Optional
     link: <true|false>
+    cmpignore:
+      - "<ignore-pattern>"
     actions:
       - <action-key>
     trans:

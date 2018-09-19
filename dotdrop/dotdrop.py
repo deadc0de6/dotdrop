@@ -195,8 +195,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
                      workdir=opts['workdir'], debug=opts['debug'])
-    comp = Comparator(diffopts=opts['dopts'], debug=opts['debug'],
-                      ignore=ignore)
+    comp = Comparator(diffopts=opts['dopts'], debug=opts['debug'])
 
     for dotfile in selected:
         if opts['debug']:
@@ -218,7 +217,8 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
         if not ret:
             # failed to install to tmp
             continue
-        diff = comp.compare(insttmp, dotfile.dst)
+        ignores = list(set(ignore + dotfile.cmpignore))
+        diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
         if tmpsrc:
             # clean tmp transformed dotfile if any
             tmpsrc = os.path.join(opts['dotpath'], tmpsrc)
