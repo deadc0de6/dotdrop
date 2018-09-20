@@ -478,13 +478,18 @@ Also `compare` won't work on dotfiles using transformations.
 
 If used as a submodule, update it with
 ```bash
-$ git submodule foreach git pull origin master
+$ git submodule update --init --recursive
+$ git submodule update --remote dotdrop
+```
+
+You will then need to commit the changes with
+```bash
 $ git add dotdrop
 $ git commit -m 'update dotdrop'
 $ git push
 ```
 
-Through pypi:
+Or if installed through pypi:
 ```bash
 $ sudo pip3 install dotdrop --upgrade
 ```

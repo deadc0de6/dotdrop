@@ -25,6 +25,7 @@ sub="dotdrop"
 cd "${cur}" || { echo "Directory \"${cur}\" doesn't exist, aborting." && exit; }
 # init/update the submodule
 git submodule update --init --recursive
+git submodule update --remote dotdrop
 # launch dotdrop
 PYTHONPATH=dotdrop python3 -m dotdrop.dotdrop "${args[@]}"
 # pivot back
