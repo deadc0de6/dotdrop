@@ -7,6 +7,7 @@ yaml config file manager
 
 import yaml
 import os
+import shlex
 
 # local import
 from dotdrop.dotfile import Dotfile
@@ -259,7 +260,7 @@ class Cfg:
             self.key_actions_post: [],
         }
         for line in entries:
-            fields = line.split(' ')
+            fields = shlex.split(line)
             entry = fields[0]
             args = []
             if len(fields) > 1:
