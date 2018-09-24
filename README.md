@@ -421,7 +421,7 @@ Actions cannot obviously be named `pre` or `post`.
 Actions can even be parameterized. For example:
 ```yaml
 actions:
-  echoaction: echo '{0}' >> {1}
+  echoaction: echo '{0}' > {1}
 config:
   backup: true
   create: true
