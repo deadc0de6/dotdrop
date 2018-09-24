@@ -36,6 +36,8 @@ class Installer:
     def install(self, templater, src, dst):
         """install the src to dst using a template"""
         src = os.path.join(self.base, os.path.expanduser(src))
+        if not os.path.exists(src):
+            self.log.err('source dotfile does not exist: {}'.format(src))
         dst = os.path.expanduser(dst)
         if self.totemp:
             dst = self._pivot_path(dst, self.totemp)
@@ -52,6 +54,8 @@ class Installer:
     def link(self, templater, src, dst):
         """set src as the link target of dst"""
         src = os.path.join(self.base, os.path.expanduser(src))
+        if not os.path.exists(src):
+            self.log.err('source dotfile does not exist: {}'.format(src))
         dst = os.path.expanduser(dst)
         if self.totemp:
             return self.install(templater, src, dst)

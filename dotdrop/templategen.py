@@ -93,6 +93,8 @@ class Templategen:
 
     def is_template(path):
         """recursively check if any file is a template within path"""
+        if not os.path.exists(path):
+            return False
         if os.path.isfile(path):
             # is file
             return Templategen._is_template(path)
@@ -112,8 +114,12 @@ class Templategen:
         """test if file pointed by path is a template"""
         if not os.path.isfile(path):
             return False
-        with open(path, 'r') as f:
-            data = f.read()
+        try:
+            with open(path, 'r') as f:
+                data = f.read()
+        except UnicodeDecodeError:
+            # is binary so surely no template
+            return False
         markers = [BLOCK_START, VAR_START, COMMENT_START]
         for marker in markers:
             if marker in data:
