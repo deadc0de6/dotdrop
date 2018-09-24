@@ -61,7 +61,8 @@ class Installer:
                 self.log.dbg('dotfile is a template')
                 self.log.dbg('install to {} and symlink'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
-            if not self.install(templater, src, tmp):
+            i = self.install(templater, src, tmp)
+            if not i and not os.path.exists(tmp):
                 return []
             src = tmp
         return self._link(src, dst)
