@@ -64,6 +64,7 @@ actions:
     postaction: echo '{0} {1} {2}' > ${tmpa}/post
   nakedaction: echo '{0}' > ${tmpa}/naked
   emptyaction: echo 'empty' > ${tmpa}/empty
+  tgtaction: echo 'tgt' > ${tmpa}/{0}
 config:
   backup: true
   create: true
@@ -75,8 +76,9 @@ dotfiles:
     actions:
       - preaction test1 test2
       - postaction test3 test4 test5
-      - nakedaction test6
+      - nakedaction "test6 something"
       - emptyaction
+      - tgtaction tgt
 profiles:
   p1:
     dotfiles:
@@ -101,10 +103,13 @@ grep test4 ${tmpa}/post >/dev/null
 grep test5 ${tmpa}/post >/dev/null
 
 [ ! -e ${tmpa}/naked ] && echo "naked arg action not found" && exit 1
-grep test6 ${tmpa}/naked >/dev/null
+grep "test6 something" ${tmpa}/naked >/dev/null
 
 [ ! -e ${tmpa}/empty ] && echo "empty arg action not found" && exit 1
 grep empty ${tmpa}/empty >/dev/null
+
+[ ! -e ${tmpa}/tgt ] && echo "tgt arg action not found" && exit 1
+grep tgt ${tmpa}/tgt >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}
