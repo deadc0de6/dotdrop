@@ -11,7 +11,7 @@ pycodestyle scripts/
 
 # travis
 PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
-# arch
+# arch / debian
 #PYTHONPATH=dotdrop python3 -m nose --with-coverage --cover-package=dotdrop
 # others
 #PYTHONPATH=dotdrop nosetests -s --with-coverage --cover-package=dotdrop
