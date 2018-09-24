@@ -418,13 +418,14 @@ If you don't specify neither `post` nor `pre`, the action will be executed
 after the dotfile deployment (which is equivalent to `post`).
 Actions cannot obviously be named `pre` or `post`.
 
-Action can even be parameterized. You can define an action taking one or more
-arguments which will be replaced depending on its use on different dotfiles.
-For example:
-```bash
+Actions can even be parameterized. For example:
+```yaml
 actions:
   echoaction: echo '{0}' >> {1}
-...
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
 dotfiles:
   f_vimrc:
     dst: ~/.vimrc
@@ -436,7 +437,11 @@ dotfiles:
     src: xinitrc
     actions:
       - echoaction "xinitrc installed" /tmp/myotherlog.log
-...
+profiles:
+  home:
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
 ```
 
 The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
