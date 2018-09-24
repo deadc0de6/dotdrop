@@ -93,6 +93,8 @@ class Templategen:
 
     def is_template(path):
         """recursively check if any file is a template within path"""
+        if not os.path.exists(path):
+            return False
         if os.path.isfile(path):
             # is file
             return Templategen._is_template(path)
