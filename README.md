@@ -418,6 +418,31 @@ If you don't specify neither `post` nor `pre`, the action will be executed
 after the dotfile deployment (which is equivalent to `post`).
 Actions cannot obviously be named `pre` or `post`.
 
+Action can even be parameterized. You can define an action taking one or more
+arguments which will be replaced depending on its use on different dotfiles.
+For example:
+```bash
+actions:
+  echoaction: echo '{0}' >> {1}
+...
+dotfiles:
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+    actions:
+      - echoaction "vim installed" /tmp/mydotdrop.log
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+    actions:
+      - echoaction "xinitrc installed" /tmp/myotherlog.log
+...
+```
+
+The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
+vimrc is installed and `echo 'xinitrc installed' > /tmp/myotherlog.log'`
+when xinitrc is installed.
+
 ## Use transformations
 
 Transformations are used to transform a dotfile before it is
