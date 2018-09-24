@@ -547,6 +547,15 @@ When using templating directives, the dotfiles are first installed into
 `workdir` (defaults to *~/.config/dotdrop*, see [Config](#config))
 and then symlinked there.
 
+For example
+```bash
+# with template
+/home/user/.xyz -> /home/user/.config/dotdrop/.xyz
+
+# without template
+/home/user/.xyz -> /home/user/dotdrop/dotfiles/xyz
+```
+
 # Config
 
 The config file (defaults to *config.yaml*) is a yaml file containing
