@@ -41,20 +41,14 @@ class TestCompare(unittest.TestCase):
             if not ret:
                 results[path] = False
                 continue
-            diff = comp.compare(insttmp, dotfile.dst)
+            diff = comp.compare(insttmp, dotfile.dst,
+                                ignore=['whatever', 'whatelse'])
             print('XXXX diff for {} and {}:\n{}'.format(dotfile.src,
                                                         dotfile.dst,
                                                         diff))
             path = os.path.expanduser(dotfile.dst)
             results[path] = diff == ''
         return results
-
-    def edit_content(self, path, newcontent, binary=False):
-        mode = 'w'
-        if binary:
-            mode = 'wb'
-        with open(path, mode) as f:
-            f.write(newcontent)
 
     def test_compare(self):
         '''Test the compare function'''
@@ -118,13 +112,13 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(results == expected)
 
         # modify file
-        self.edit_content(d1, get_string(20))
+        edit_content(d1, get_string(20))
         expected = {d1: False, d2: True, d3: True, d4: True, d5: True}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify binary file
-        self.edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
+        edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
         expected = {d1: False, d2: True, d3: True, d4: False, d5: True}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)
@@ -137,8 +131,8 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(results == expected)
 
         # modify all files
-        self.edit_content(d2, get_string(20))
-        self.edit_content(d3, get_string(21))
+        edit_content(d2, get_string(20))
+        edit_content(d3, get_string(21))
         expected = {d1: False, d2: False, d3: False, d4: False, d5: False}
         results = self.compare(opts, conf, tmp, len(dfiles))
         self.assertTrue(results == expected)

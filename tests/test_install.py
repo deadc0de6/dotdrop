@@ -156,10 +156,16 @@ exec bspwm
         dst9 = os.path.join(dst, get_string(6))
         d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans=[tr])
 
+        # to test template
+        f10, _ = create_random_file(tmp, content='{{@@ profile @@}}')
+        dst10 = os.path.join(dst, get_string(6))
+        d10 = Dotfile(get_string(6), dst10, os.path.basename(f10))
+
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8, d9, ddot],
+        dotfiles = [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, ddot]
+        self.fake_config(confpath, dotfiles,
                          profile, tmp, [act1], [tr])
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
@@ -179,6 +185,7 @@ exec bspwm
         self.assertTrue(os.path.exists(dst6))
         self.assertTrue(os.path.exists(dst7))
         self.assertTrue(os.path.exists(dst8))
+        self.assertTrue(os.path.exists(dst10))
         self.assertTrue(os.path.exists(fd))
 
         # check if 'dst5' is a link whose target is 'f5'
@@ -208,6 +215,11 @@ exec bspwm
         self.assertTrue(os.path.exists(dst9))
         transcontent = open(dst9, 'r').read().rstrip()
         self.assertTrue(transcontent == trans2)
+
+        # test template has been remplaced
+        self.assertTrue(os.path.exists(dst10))
+        tempcontent = open(dst10, 'r').read().rstrip()
+        self.assertTrue(tempcontent == profile)
 
 
 def main():

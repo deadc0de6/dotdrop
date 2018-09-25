@@ -55,6 +55,15 @@ def create_random_file(directory, content=None, binary=False):
     return path, content
 
 
+def edit_content(path, newcontent, binary=False):
+    '''edit file content'''
+    mode = 'w'
+    if binary:
+        mode = 'wb'
+    with open(path, mode) as f:
+        f.write(newcontent)
+
+
 def create_dir(path):
     '''Create a directory'''
     if not os.path.exists(path):

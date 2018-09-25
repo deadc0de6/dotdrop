@@ -24,13 +24,6 @@ class TestUpdate(unittest.TestCase):
     CONFIG_DOTPATH = 'dotfiles'
     CONFIG_NAME = 'config.yaml'
 
-    def edit_content(self, path, newcontent, binary=False):
-        mode = 'w'
-        if binary:
-            mode = 'wb'
-        with open(path, mode) as f:
-            f.write(newcontent)
-
     def test_update(self):
         '''Test the update function'''
         # setup some directories
@@ -79,11 +72,16 @@ class TestUpdate(unittest.TestCase):
         conf, opts = load_config(confpath, profile)
 
         # edit the files
-        self.edit_content(d1, 'newcontent')
-        self.edit_content(dirf1, 'newcontent')
+        edit_content(d1, 'newcontent')
+        edit_content(dirf1, 'newcontent')
 
         # add more file
         dirf2, _ = create_random_file(dpath)
+
+        # add more dirs
+        dpath = os.path.join(dpath, get_string(5))
+        create_dir(dpath)
+        create_random_file(dpath)
 
         # update it
         opts['safe'] = False

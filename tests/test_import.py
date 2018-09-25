@@ -199,8 +199,7 @@ class TestImport(unittest.TestCase):
 
         # fake test update
         editcontent = 'edited'
-        with open(dotfile1, 'w') as f:
-            f.write('edited')
+        edit_content(dotfile1, editcontent)
         opts['safe'] = False
         update(opts, conf, [dotfile1])
         c2 = open(indt1, 'r').read()
