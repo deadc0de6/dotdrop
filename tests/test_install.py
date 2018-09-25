@@ -93,6 +93,13 @@ exec bspwm
         dst3 = os.path.join(dst, get_string(6))
         d3 = Dotfile(get_string(5), dst3, os.path.basename(f3))
 
+        # create a directory dotfile
+        dir1 = os.path.join(tmp, 'somedir')
+        create_dir(dir1)
+        fd, _ = create_random_file(dir1)
+        dstd = os.path.join(dst, get_string(6))
+        ddot = Dotfile(get_string(5), dstd, os.path.basename(dir1))
+
         # to test backup
         f4, c4 = create_random_file(tmp)
         dst4 = os.path.join(dst, get_string(6))
@@ -152,7 +159,7 @@ exec bspwm
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8, d9],
+        self.fake_config(confpath, [d1, d2, d3, d4, d5, d6, d7, d8, d9, ddot],
                          profile, tmp, [act1], [tr])
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
@@ -172,6 +179,7 @@ exec bspwm
         self.assertTrue(os.path.exists(dst6))
         self.assertTrue(os.path.exists(dst7))
         self.assertTrue(os.path.exists(dst8))
+        self.assertTrue(os.path.exists(fd))
 
         # check if 'dst5' is a link whose target is 'f5'
         self.assertTrue(os.path.islink(dst5))

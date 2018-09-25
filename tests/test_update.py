@@ -1,0 +1,92 @@
+"""
+author: deadc0de6 (https://github.com/deadc0de6)
+Copyright (c) 2017, deadc0de6
+basic unittest for the update function
+"""
+
+
+import unittest
+import os
+import yaml
+
+from dotdrop.config import Cfg
+from dotdrop.dotdrop import importer
+from dotdrop.dotdrop import update
+from dotdrop.dotfile import Dotfile
+
+from tests.helpers import *
+
+
+class TestUpdate(unittest.TestCase):
+
+    CONFIG_BACKUP = False
+    CONFIG_CREATE = True
+    CONFIG_DOTPATH = 'dotfiles'
+    CONFIG_NAME = 'config.yaml'
+
+    def edit_content(self, path, newcontent, binary=False):
+        mode = 'w'
+        if binary:
+            mode = 'wb'
+        with open(path, mode) as f:
+            f.write(newcontent)
+
+    def test_update(self):
+        '''Test the update function'''
+        # setup some directories
+        fold_config = os.path.join(os.path.expanduser('~'), '.config')
+        create_dir(fold_config)
+        fold_subcfg = os.path.join(os.path.expanduser('~'), '.config',
+                                   get_string(5))
+        create_dir(fold_subcfg)
+        self.addCleanup(clean, fold_subcfg)
+        fold_tmp = get_tempdir()
+        create_dir(fold_tmp)
+        self.addCleanup(clean, fold_tmp)
+
+        # create the directories
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        dotfilespath = get_tempdir()
+        self.assertTrue(os.path.exists(dotfilespath))
+        self.addCleanup(clean, dotfilespath)
+
+        # create the dotfiles to test
+        d1, c1 = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(d1))
+        self.addCleanup(clean, d1)
+
+        # create the config file
+        profile = get_string(5)
+        confpath = create_fake_config(dotfilespath,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        self.assertTrue(os.path.exists(confpath))
+        conf, opts = load_config(confpath, profile)
+        dfiles = [d1]
+
+        # import the files
+        importer(opts, conf, dfiles)
+        conf, opts = load_config(confpath, profile)
+
+        # edit the file
+        self.edit_content(d1, 'newcontent')
+
+        # update it
+        update(opts, conf, d1)
+
+        # test content
+        newcontent = open(d1, 'r').read()
+        self.assertTrue(newcontent == 'newcontent')
+
+
+def main():
+    unittest.main()
+
+
+if __name__ == '__main__':
+    main()
