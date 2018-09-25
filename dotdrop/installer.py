@@ -31,10 +31,12 @@ class Installer:
         self.diff = diff
         self.totemp = totemp
         self.comparing = False
+        self.action_executed = False
         self.log = Logger()
 
     def install(self, templater, src, dst, actions=[]):
         """install the src to dst using a template"""
+        self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.expanduser(dst)
         if self.totemp:
@@ -51,10 +53,12 @@ class Installer:
 
     def link(self, templater, src, dst, actions=[]):
         """set src as the link target of dst"""
+        self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         dst = os.path.expanduser(dst)
         if self.totemp:
-            return self.install(templater, src, dst, actions=actions)
+            # ignore actions
+            return self.install(templater, src, dst, actions=[])
 
         if Templategen.is_template(src):
             if self.debug:
@@ -220,8 +224,16 @@ class Installer:
 
     def _exec_pre_actions(self, actions):
         """execute pre-actions if any"""
+        if self.action_executed:
+            return
         for action in actions:
-            action.execute()
+            if self.dry:
+                self.log.dry('would execute action: {}'.format(action))
+            else:
+                if self.debug:
+                    self.log.dbg('executing pre action {}'.format(action))
+                action.execute()
+        self.action_executed = True
 
     def _install_to_temp(self, templater, src, dst, tmpdir):
         """install a dotfile to a tempdir"""

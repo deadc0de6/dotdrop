@@ -96,12 +96,7 @@ def install(opts, conf, temporary=False):
         preactions = []
         if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
-                if opts['dry']:
-                    LOG.dry('would execute action: {}'.format(action))
-                else:
-                    if opts['debug']:
-                        LOG.dbg('executing pre action {}'.format(action))
-                    preactions.append(action)
+                preactions.append(action)
         if opts['debug']:
             LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
