@@ -58,6 +58,11 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d1))
         self.addCleanup(clean, d1)
 
+        # create the directory to test
+        dpath = os.path.join(fold_config, get_string(5))
+        dir1 = create_dir(dpath)
+        dirf1, _ = create_random_file(dpath)
+
         # create the config file
         profile = get_string(5)
         confpath = create_fake_config(dotfilespath,
@@ -67,20 +72,28 @@ class TestUpdate(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         conf, opts = load_config(confpath, profile)
-        dfiles = [d1]
+        dfiles = [d1, dir1]
 
         # import the files
         importer(opts, conf, dfiles)
         conf, opts = load_config(confpath, profile)
 
-        # edit the file
+        # edit the files
         self.edit_content(d1, 'newcontent')
+        self.edit_content(dirf1, 'newcontent')
+
+        # add more file
+        dirf2, _ = create_random_file(dpath)
 
         # update it
-        update(opts, conf, d1)
+        opts['safe'] = False
+        opts['debug'] = True
+        update(opts, conf, [d1, dir1])
 
         # test content
         newcontent = open(d1, 'r').read()
+        self.assertTrue(newcontent == 'newcontent')
+        newcontent = open(dirf1, 'r').read()
         self.assertTrue(newcontent == 'newcontent')
 
 
