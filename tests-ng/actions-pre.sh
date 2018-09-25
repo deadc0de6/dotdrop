@@ -60,7 +60,13 @@ cat > ${cfg} << _EOF
 actions:
   pre:
     preaction: echo 'pre' > ${tmpa}/pre
+    preaction2: echo 'pre2' > ${tmpa}/pre2
+    preaction3: echo 'pre3' > ${tmpa}/pre3
+    multiple: echo 'multiple' >> ${tmpa}/multiple
+    multiple2: echo 'multiple2' >> ${tmpa}/multiple2
   nakedaction: echo 'naked' > ${tmpa}/naked
+  nakedaction2: echo 'naked2' > ${tmpa}/naked2
+  nakedaction3: echo 'naked3' > ${tmpa}/naked3
 config:
   backup: true
   create: true
@@ -72,24 +78,72 @@ dotfiles:
     actions:
       - preaction
       - nakedaction
+  f_link:
+    dst: ${tmpd}/link
+    src: link
+    link: true
+    actions:
+      - preaction2
+      - nakedaction2
+  d_dir:
+    dst: ${tmpd}/dir
+    src: dir
+    actions:
+      - multiple
+  d_dlink:
+    dst: ${tmpd}/dlink
+    src: dlink
+    link: true
+    actions:
+      - preaction3
+      - nakedaction3
+      - multiple2
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - f_link
+    - d_dir
+    - d_dlink
 _EOF
 cat ${cfg}
 
 # create the dotfile
-echo "test" > ${tmps}/dotfiles/abc
+echo 'test' > ${tmps}/dotfiles/abc
+echo 'link' > ${tmps}/dotfiles/link
+
+mkdir -p ${tmps}/dotfiles/dir
+echo 'test1' > ${tmps}/dotfiles/dir/file1
+echo 'test2' > ${tmps}/dotfiles/dir/file2
+
+mkdir -p ${tmps}/dotfiles/dlink
+echo 'test3' > ${tmps}/dotfiles/dlink/dfile1
+echo 'test4' > ${tmps}/dotfiles/dlink/dfile2
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
-[ ! -e ${tmpa}/pre ] && exit 1
+[ ! -e ${tmpa}/pre ] && echo 'pre action not executed' && exit 1
 grep pre ${tmpa}/pre >/dev/null
-[ ! -e ${tmpa}/naked ] && exit 1
+[ ! -e ${tmpa}/naked ] && echo 'naked action not executed'  && exit 1
 grep naked ${tmpa}/naked >/dev/null
+
+[ ! -e ${tmpa}/multiple ] && echo 'pre action multiple not executed' && exit 1
+grep multiple ${tmpa}/multiple >/dev/null
+[ "`wc -l ${tmpa}/multiple | awk '{print $1}'`" -gt "1" ] && echo 'pre action multiple executed twice' && exit 1
+
+[ ! -e ${tmpa}/pre2 ] && echo 'pre action 2 not executed' && exit 1
+grep pre2 ${tmpa}/pre2 >/dev/null
+[ ! -e ${tmpa}/naked2 ] && echo 'naked action 2 not executed'  && exit 1
+grep naked2 ${tmpa}/naked2 >/dev/null
+
+[ ! -e ${tmpa}/multiple2 ] && echo 'pre action multiple 2 not executed' && exit 1
+grep multiple2 ${tmpa}/multiple2 >/dev/null
+[ "`wc -l ${tmpa}/multiple2 | awk '{print $1}'`" -gt "1" ] && echo 'pre action multiple 2 executed twice' && exit 1
+[ ! -e ${tmpa}/naked3 ] && echo 'naked action 3 not executed'  && exit 1
+grep naked3 ${tmpa}/naked3 >/dev/null
+
 
 # remove the pre action result and re-run
 rm ${tmpa}/pre
