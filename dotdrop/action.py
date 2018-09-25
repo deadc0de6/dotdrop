@@ -32,12 +32,23 @@ class Cmd:
 
 class Action(Cmd):
 
+    def __init__(self, key, action, *args):
+        super(Action, self).__init__(key, action)
+        self.args = args
+
     def execute(self):
         """execute the action in the shell"""
         ret = 1
-        self.log.sub('executing \"{}\"'.format(self.action))
         try:
-            ret = subprocess.call(self.action, shell=True)
+            cmd = self.action.format(*self.args)
+        except IndexError:
+            err = 'bad action: \"{}\"'.format(self.action)
+            err += ' with \"{}\"'.format(self.args)
+            self.log.warn(err)
+            return False
+        self.log.sub('executing \"{}\"'.format(cmd))
+        try:
+            ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
             self.log.warn('action interrupted')
         return ret == 0

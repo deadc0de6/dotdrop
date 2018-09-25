@@ -404,8 +404,6 @@ profiles:
 This way, we make sure [vim-plug](https://github.com/junegunn/vim-plug)
 is installed prior to deploying the `~/.vimrc` dotfile.
 
-Note that `pre` actions are always executed even if the dotfile is not installed.
-
 You can also define `post` actions like this:
 
 ```yaml
@@ -417,6 +415,36 @@ actions:
 If you don't specify neither `post` nor `pre`, the action will be executed
 after the dotfile deployment (which is equivalent to `post`).
 Actions cannot obviously be named `pre` or `post`.
+
+Actions can even be parameterized. For example:
+```yaml
+actions:
+  echoaction: echo '{0}' > {1}
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+    actions:
+      - echoaction "vim installed" /tmp/mydotdrop.log
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+    actions:
+      - echoaction "xinitrc installed" /tmp/myotherlog.log
+profiles:
+  home:
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
+```
+
+The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
+vimrc is installed and `echo 'xinitrc installed' > /tmp/myotherlog.log'`
+when xinitrc is installed.
 
 ## Use transformations
 

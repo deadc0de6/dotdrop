@@ -7,6 +7,7 @@ yaml config file manager
 
 import yaml
 import os
+import shlex
 
 # local import
 from dotdrop.dotfile import Dotfile
@@ -258,16 +259,29 @@ class Cfg:
             self.key_actions_pre: [],
             self.key_actions_post: [],
         }
-        for entry in entries:
+        for line in entries:
+            fields = shlex.split(line)
+            entry = fields[0]
+            args = []
+            if len(fields) > 1:
+                args = fields[1:]
             action = None
             if self.key_actions_pre in self.actions and \
                     entry in self.actions[self.key_actions_pre]:
                 key = self.key_actions_pre
-                action = self.actions[self.key_actions_pre][entry]
+                if not args:
+                    action = self.actions[self.key_actions_pre][entry]
+                else:
+                    a = self.actions[self.key_actions_pre][entry].action
+                    action = Action(key, a, *args)
             elif self.key_actions_post in self.actions and \
                     entry in self.actions[self.key_actions_post]:
                 key = self.key_actions_post
-                action = self.actions[self.key_actions_post][entry]
+                if not args:
+                    action = self.actions[self.key_actions_post][entry]
+                else:
+                    a = self.actions[self.key_actions_post][entry].action
+                    action = Action(key, a, *args)
             else:
                 self.log.warn('unknown action \"{}\"'.format(entry))
                 continue

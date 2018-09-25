@@ -31,10 +31,12 @@ class Installer:
         self.diff = diff
         self.totemp = totemp
         self.comparing = False
+        self.action_executed = False
         self.log = Logger()
 
-    def install(self, templater, src, dst):
+    def install(self, templater, src, dst, actions=[]):
         """install the src to dst using a template"""
+        self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
@@ -48,30 +50,32 @@ class Installer:
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
         if os.path.isdir(src):
-            return self._handle_dir(templater, src, dst)
-        return self._handle_file(templater, src, dst)
+            return self._handle_dir(templater, src, dst, actions=actions)
+        return self._handle_file(templater, src, dst, actions=actions)
 
-    def link(self, templater, src, dst):
+    def link(self, templater, src, dst, actions=[]):
         """set src as the link target of dst"""
+        self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
         dst = os.path.expanduser(dst)
         if self.totemp:
-            return self.install(templater, src, dst)
+            # ignore actions
+            return self.install(templater, src, dst, actions=[])
 
         if Templategen.is_template(src):
             if self.debug:
                 self.log.dbg('dotfile is a template')
                 self.log.dbg('install to {} and symlink'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
-            i = self.install(templater, src, tmp)
+            i = self.install(templater, src, tmp, actions=actions)
             if not i and not os.path.exists(tmp):
                 return []
             src = tmp
-        return self._link(src, dst)
+        return self._link(src, dst, actions=actions)
 
-    def _link(self, src, dst):
+    def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
@@ -98,11 +102,12 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for \"{}\"'.format(dst))
             return []
+        self._exec_pre_actions(actions)
         os.symlink(src, dst)
         self.log.sub('linked \"{}\" to \"{}\"'.format(dst, src))
         return [(src, dst)]
 
-    def _handle_file(self, templater, src, dst):
+    def _handle_file(self, templater, src, dst, actions=[]):
         """install src to dst when is a file"""
         if self.debug:
             self.log.dbg('generate template for {}'.format(src))
@@ -118,7 +123,7 @@ class Installer:
             self.log.err('source dotfile does not exist: \"{}\"'.format(src))
             return []
         st = os.stat(src)
-        ret = self._write(dst, content, st.st_mode)
+        ret = self._write(dst, content, st.st_mode, actions=actions)
         if ret < 0:
             self.log.err('installing \"{}\" to \"{}\"'.format(src, dst))
             return []
@@ -132,18 +137,21 @@ class Installer:
             return [(src, dst)]
         return []
 
-    def _handle_dir(self, templater, src, dst):
+    def _handle_dir(self, templater, src, dst, actions=[]):
         """install src to dst when is a directory"""
         ret = []
-        self._create_dirs(dst)
+        if not self._create_dirs(dst):
+            return []
         # handle all files in dir
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
-                res = self._handle_file(templater, f, os.path.join(dst, entry))
+                res = self._handle_file(templater, f, os.path.join(dst, entry),
+                                        actions=actions)
                 ret.extend(res)
             else:
-                res = self._handle_dir(templater, f, os.path.join(dst, entry))
+                res = self._handle_dir(templater, f, os.path.join(dst, entry),
+                                       actions=actions)
                 ret.extend(res)
         return ret
 
@@ -154,7 +162,7 @@ class Installer:
             cur = f.read()
         return cur == content
 
-    def _write(self, dst, content, rights):
+    def _write(self, dst, content, rights, actions=[]):
         """write content to file
         return  0 for success,
                 1 when already exists
@@ -179,6 +187,7 @@ class Installer:
             return -1
         if self.debug:
             self.log.dbg('write content to {}'.format(dst))
+        self._exec_pre_actions(actions)
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
@@ -217,6 +226,19 @@ class Installer:
             path = path.lstrip(home)
         sub = path.lstrip(os.sep)
         return os.path.join(newdir, sub)
+
+    def _exec_pre_actions(self, actions):
+        """execute pre-actions if any"""
+        if self.action_executed:
+            return
+        for action in actions:
+            if self.dry:
+                self.log.dry('would execute action: {}'.format(action))
+            else:
+                if self.debug:
+                    self.log.dbg('executing pre action {}'.format(action))
+                action.execute()
+        self.action_executed = True
 
     def _install_to_temp(self, templater, src, dst, tmpdir):
         """install a dotfile to a tempdir"""
