@@ -559,6 +559,12 @@ Installed to tmp /tmp/dotdrop-6ajz7565
 $ diff ~/.vimrc /tmp/dotdrop-6ajz7565/home/user/.vimrc
 ```
 
+It is also possible to install only specific dotfiles by providing their keys
+in the command line. For example for a dotfile having a key `f_zshrc` in the config file.
+```bash
+$ dotdrop install -t f_zshrc
+```
+
 ## Store sensitive dotfiles
 
 Two solutions exist, the first one using an unversioned file (see [Environment variables](#environment-variables))
