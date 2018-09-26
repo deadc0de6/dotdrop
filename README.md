@@ -9,7 +9,7 @@
 
 *Save your dotfiles once, deploy them everywhere*
 
-Dotdrop makes the management of dotfiles between different hosts easy.
+[Dotdrop](https://github.com/deadc0de6/dotdrop)  makes the management of dotfiles between different hosts easy.
 It allows to store your dotfiles on git and automagically deploy
 different versions of the same file on different setups.
 
@@ -57,7 +57,7 @@ on different hosts. Moreover dotdrop allows to specify the
 set of dotfiles that need to be deployed on a specific profile.
 
 See the [example](#example) for a concrete example on
-why dotdrop rocks.
+why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 
 ---
 
