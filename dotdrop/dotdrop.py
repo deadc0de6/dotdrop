@@ -25,6 +25,7 @@ from dotdrop.utils import *
 CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 ENV_PROFILE = 'DOTDROP_PROFILE'
+ENV_NOBANNER = 'DOTDROP_NOBANNER'
 PROFILE = socket.gethostname()
 if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
@@ -47,7 +48,7 @@ Usage:
                               [-o <opts>] [-i <name>...]
                               [--files=<files>]
   dotdrop update    [-fdVb]   [-c <path>] <paths>...
-  dotdrop listfiles [-Vb]     [-c <path>] [-p <profile>]
+  dotdrop listfiles [-VTb]    [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]     [-c <path>]
   dotdrop --help
   dotdrop --version
@@ -60,6 +61,7 @@ Options:
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
+  -T --template           Only template dotfiles.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
   -V --verbose            Be verbose.
@@ -308,13 +310,20 @@ def list_profiles(conf):
     LOG.log('')
 
 
-def list_files(opts, conf):
+def list_files(opts, conf, templateonly=False):
     """list all dotfiles for a specific profile"""
     if not opts['profile'] in conf.get_profiles():
         LOG.warn('unknown profile \"{}\"'.format(opts['profile']))
         return
-    LOG.log('Dotfile(s) for profile \"{}\":\n'.format(opts['profile']))
+    what = 'Dotfile(s)'
+    if templateonly:
+        what = 'Template(s)'
+    LOG.log('{} for profile \"{}\":\n'.format(what, opts['profile']))
     for dotfile in conf.get_dotfiles(opts['profile']):
+        if templateonly:
+            p = os.path.join(opts['dotpath'], dotfile.src)
+            if not Templategen.is_template(p):
+                continue
         LOG.log('{} (file: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
                                                      dotfile.link))
         LOG.sub('{}'.format(dotfile.dst))
@@ -351,7 +360,9 @@ def main():
         LOG.dbg('config file: {}'.format(args['--cfg']))
         LOG.dbg('opts: {}'.format(opts))
 
-    if opts['banner'] and not args['--no-banner']:
+    if ENV_NOBANNER not in os.environ \
+            and opts['banner'] \
+            and not args['--no-banner']:
         header()
 
     try:
@@ -362,7 +373,7 @@ def main():
 
         elif args['listfiles']:
             # list files for selected profile
-            list_files(opts, conf)
+            list_files(opts, conf, templateonly=args['--template'])
 
         elif args['install']:
             # install the dotfiles stored in dotdrop
