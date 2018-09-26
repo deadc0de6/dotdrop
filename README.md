@@ -342,6 +342,9 @@ f_dunstrc (file: "config/dunst/dunstrc", link: False)
 	-> ~/.config/dunst/dunstrc
 ```
 
+By using the `-T --template` switch, only the dotfiles that
+are using jinja2 directives are listed.
+
 ## Use actions
 
 It is sometimes useful to execute some kind of action
