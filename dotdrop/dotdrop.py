@@ -41,7 +41,7 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-tfndVb] [-c <path>] [-p <profile>]
+  dotdrop install   [-tfndVb] [-c <path>] [-p <profile>] [<key>...]
   dotdrop import    [-ldVb]   [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-Vb]     [-c <path>] [-p <profile>]
                               [-o <opts>] [-i <name>...]
@@ -75,13 +75,17 @@ Options:
 ###########################################################
 
 
-def install(opts, conf, temporary=False):
-    """install all dotfiles for this profile"""
+def install(opts, conf, temporary=False, keys=[]):
+    """install dotfiles for this profile"""
     dotfiles = conf.get_dotfiles(opts['profile'])
-    if dotfiles == []:
-        msg = 'no dotfiles defined for this profile (\"{}\")'
+    if keys:
+        # filtered dotfiles to install
+        dotfiles = [d for d in dotfiles if d.key in set(keys)]
+    if not dotfiles:
+        msg = 'no dotfiles to install for this profile (\"{}\")'
         LOG.err(msg.format(opts['profile']))
         return False
+
     t = Templategen(opts['profile'], base=opts['dotpath'],
                     variables=opts['variables'], debug=opts['debug'])
     tmpdir = None
@@ -366,7 +370,9 @@ def main():
 
         elif args['install']:
             # install the dotfiles stored in dotdrop
-            ret = install(opts, conf, temporary=args['--temp'])
+            keys = args['<key>']
+            ret = install(opts, conf, temporary=args['--temp'],
+                          keys=keys)
 
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
