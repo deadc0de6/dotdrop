@@ -43,6 +43,8 @@ class Comparator:
 
     def _comp_dir(self, left, right, ignore):
         """compare a directory"""
+        if not os.path.exists(right):
+            return ''
         if self._ignore([left, right], ignore):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))

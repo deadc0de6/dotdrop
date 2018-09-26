@@ -97,18 +97,14 @@ def install(opts, conf, temporary=False, keys=[]):
                      debug=opts['debug'], totemp=tmpdir)
     installed = []
     for dotfile in dotfiles:
+        preactions = []
         if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
-                if opts['dry']:
-                    LOG.dry('would execute action: {}'.format(action))
-                else:
-                    if opts['debug']:
-                        LOG.dbg('executing pre action {}'.format(action))
-                    action.execute()
+                preactions.append(action)
         if opts['debug']:
             LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link:
-            r = inst.link(t, dotfile.src, dotfile.dst)
+            r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
         else:
             src = dotfile.src
             tmp = None
@@ -117,7 +113,7 @@ def install(opts, conf, temporary=False, keys=[]):
                 if not tmp:
                     continue
                 src = tmp
-            r = inst.install(t, src, dotfile.dst)
+            r = inst.install(t, src, dotfile.dst, actions=preactions)
             if tmp:
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
