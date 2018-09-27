@@ -5,16 +5,22 @@
 # stop on first error
 set -ev
 
+# PEP8 tests
 pycodestyle --ignore=W605 dotdrop/
 pycodestyle tests/
 pycodestyle scripts/
 
-# travis
-PYTHONPATH=dotdrop nosetests --with-coverage --cover-package=dotdrop
-# arch / debian
-#PYTHONPATH=dotdrop python3 -m nose --with-coverage --cover-package=dotdrop
-# others
-#PYTHONPATH=dotdrop nosetests -s --with-coverage --cover-package=dotdrop
+# retrieve the nosetests binary
+set +e
+nosebin="nosetests"
+which ${nosebin} 2>/dev/null
+[ "$?" != "0" ] && nosebin="nosetests3"
+which ${nosebin} 2>/dev/null
+[ "$?" != "0" ] && echo "Install nosetests" && exit 1
+set -e
+
+# execute tests with coverage
+PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 
 # execute bash script tests
 for scr in tests-ng/*.sh; do
