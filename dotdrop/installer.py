@@ -40,6 +40,7 @@ class Installer:
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
+            return []
         dst = os.path.expanduser(dst)
         if self.totemp:
             dst = self._pivot_path(dst, self.totemp)
@@ -59,6 +60,7 @@ class Installer:
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
+            return []
         dst = os.path.expanduser(dst)
         if self.totemp:
             # ignore actions
@@ -100,11 +102,11 @@ class Installer:
             return []
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for \"{}\"'.format(dst))
+            self.log.err('creating directory for {}'.format(dst))
             return []
         self._exec_pre_actions(actions)
         os.symlink(src, dst)
-        self.log.sub('linked \"{}\" to \"{}\"'.format(dst, src))
+        self.log.sub('linked {} to {}'.format(dst, src))
         return [(src, dst)]
 
     def _handle_file(self, templater, src, dst, actions=[]):
@@ -117,23 +119,23 @@ class Installer:
             return []
         content = templater.generate(src)
         if content is None:
-            self.log.err('generate from template \"{}\"'.format(src))
+            self.log.err('generate from template {}'.format(src))
             return []
         if not os.path.exists(src):
-            self.log.err('source dotfile does not exist: \"{}\"'.format(src))
+            self.log.err('source dotfile does not exist: {}'.format(src))
             return []
         st = os.stat(src)
         ret = self._write(dst, content, st.st_mode, actions=actions)
         if ret < 0:
-            self.log.err('installing \"{}\" to \"{}\"'.format(src, dst))
+            self.log.err('installing {} to {}'.format(src, dst))
             return []
         if ret > 0:
             if self.debug:
-                self.log.dbg('ignoring \"{}\", same content'.format(dst))
+                self.log.dbg('ignoring {}, same content'.format(dst))
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
-                self.log.sub('copied \"{}\" to \"{}\"'.format(src, dst))
+                self.log.sub('copied {} to {}'.format(src, dst))
             return [(src, dst)]
         return []
 
@@ -177,13 +179,13 @@ class Installer:
                     self.log.dbg('{} is the same'.format(dst))
                 return 1
             if self.safe and not self.log.ask('Overwrite \"{}\"'.format(dst)):
-                self.log.warn('ignoring \"{}\", already present'.format(dst))
+                self.log.warn('ignoring {}, already present'.format(dst))
                 return 1
         if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for \"{}\"'.format(dst))
+            self.log.err('creating directory for {}'.format(dst))
             return -1
         if self.debug:
             self.log.dbg('write content to {}'.format(dst))
