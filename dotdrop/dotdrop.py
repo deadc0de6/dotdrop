@@ -257,6 +257,7 @@ def importer(opts, conf, paths):
             LOG.err('\"{}\" does not exist, ignored !'.format(path))
             continue
         dst = path.rstrip(os.sep)
+        dst = os.path.abspath(dst)
         src = dst
         if dst.startswith(home):
             src = dst[len(home):]
