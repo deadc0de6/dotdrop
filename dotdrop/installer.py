@@ -131,7 +131,7 @@ class Installer:
             return []
         if ret > 0:
             if self.debug:
-                self.log.dbg('ignoring {}, same content'.format(dst))
+                self.log.dbg('ignoring {}'.format(dst))
             return []
         if ret == 0:
             if not self.dry and not self.comparing:
