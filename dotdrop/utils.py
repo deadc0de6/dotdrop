@@ -18,15 +18,20 @@ from dotdrop.version import __version__ as VERSION
 LOG = Logger()
 
 
-def run(cmd, raw=True, debug=False):
+def run(cmd, raw=True, debug=False, checkerr=False):
     """run a command in the shell (expects a list)"""
     if debug:
         LOG.dbg('exec: {}'.format(' '.join(cmd)))
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    p.wait()
+    out = p.stdout.readlines()
+    ret = p.returncode
+    if checkerr and ret != 0:
+        LOG.warn('cmd \"{}\" returned non zero ({}): {}'.format(ret, out))
     if raw:
-        return p.stdout.readlines()
-    lines = [x.decode('utf-8', 'replace') for x in p.stdout.readlines()]
+        return out
+    lines = [x.decode('utf-8', 'replace') for x in out]
     return ''.join(lines)
 
 

@@ -279,14 +279,14 @@ def importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
-                run(cmd, raw=False, debug=opts['debug'])
+                run(cmd, raw=False, debug=opts['debug'], checkerr=True)
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
                 if linkit:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
-                run(cmd, raw=False, debug=opts['debug'])
+                run(cmd, raw=False, debug=opts['debug'], checkerr=True)
                 if linkit:
                     remove(dst)
                     os.symlink(srcf, dst)
