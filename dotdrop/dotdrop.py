@@ -254,7 +254,7 @@ def importer(opts, conf, paths):
     cnt = 0
     for path in paths:
         if not os.path.lexists(path):
-            LOG.err('\"{}\" does not exist, ignored !'.format(path))
+            LOG.err('\"{}\" does not exist, ignored!'.format(path))
             continue
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
@@ -269,8 +269,6 @@ def importer(opts, conf, paths):
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
         linkit = opts['link'] or opts['link_by_default']
-        retconf, new_dotfile = conf.new(dotfile, opts['profile'], linkit)
-        dotfile = new_dotfile
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(CUR, opts['dotpath'], src)
@@ -279,17 +277,24 @@ def importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
-                run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                if not r:
+                    LOG.err('importing \"{}\" failed!'.format(path))
+                    continue
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
                 if linkit:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
-                run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                if not r:
+                    LOG.err('importing \"{}\" failed!'.format(path))
+                    continue
                 if linkit:
                     remove(dst)
                     os.symlink(srcf, dst)
+        retconf, dotfile = conf.new(dotfile, opts['profile'], linkit)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1

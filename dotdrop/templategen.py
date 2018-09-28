@@ -52,7 +52,8 @@ class Templategen:
 
     def _handle_file(self, src):
         """generate the file content from template"""
-        filetype = utils.run(['file', '-b', src], raw=False, debug=self.debug)
+        _, filetype = utils.run(['file', '-b', src],
+                                raw=False, debug=self.debug)
         filetype = filetype.strip()
         if self.debug:
             self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))

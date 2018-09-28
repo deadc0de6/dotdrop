@@ -25,20 +25,24 @@ def run(cmd, raw=True, debug=False, checkerr=False):
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p.wait()
-    out = p.stdout.readlines()
     ret = p.returncode
+    out = p.stdout.readlines()
+    lines = ''.join([x.decode('utf-8', 'replace') for x in out])
     if checkerr and ret != 0:
-        LOG.warn('cmd \"{}\" returned non zero ({}): {}'.format(ret, out))
+        c = ' '.join(cmd)
+        errl = lines.rstrip()
+        m = '\"{}\" returned non zero ({}): {}'.format(c, ret, errl)
+        LOG.err(m)
     if raw:
-        return out
-    lines = [x.decode('utf-8', 'replace') for x in out]
-    return ''.join(lines)
+        return ret == 0, out
+    return ret == 0, lines
 
 
 def diff(src, dst, raw=True, opts='', debug=False):
     """call unix diff to compare two files"""
     cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, src, dst)
-    return run(shlex.split(cmd), raw=raw, debug=debug)
+    _, out = run(shlex.split(cmd), raw=raw, debug=debug)
+    return out
 
 
 def get_tmpdir():
