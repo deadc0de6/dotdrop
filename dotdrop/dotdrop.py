@@ -45,7 +45,7 @@ Usage:
   dotdrop install   [-tfndVbD] [-c <path>] [-p <profile>] [<key>...]
   dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <paths>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
-                               [-o <opts>] [-C <files>] [-i <name>...]
+                               [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-fdVb]    [-c <path>] <paths>...
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]      [-c <path>]
@@ -55,8 +55,8 @@ Usage:
 Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -c --cfg=<path>         Path to the config [default: config.yaml].
-  -C --files=<files>      Comma separated list of files to compare.
-  -i --ignore=<name>      File name to ignore when diffing.
+  -C --file=<path>        Path of dotfile to compare.
+  -i --ignore=<pattern>   Pattern to ignore when diffing.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
@@ -177,7 +177,7 @@ def _select(selections, dotfiles):
     return selected
 
 
-def compare(opts, conf, tmp, focus=None, ignore=[]):
+def compare(opts, conf, tmp, focus=[], ignore=[]):
     """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
@@ -188,7 +188,7 @@ def compare(opts, conf, tmp, focus=None, ignore=[]):
     same = True
     selected = dotfiles
     if focus:
-        selected = _select(focus.replace(' ', '').split(','), dotfiles)
+        selected = _select(focus, dotfiles)
 
     if len(selected) < 1:
         return False
@@ -393,7 +393,7 @@ def main():
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
-            ret = compare(opts, conf, tmp, focus=args['--files'],
+            ret = compare(opts, conf, tmp, focus=args['--file'],
                           ignore=args['--ignore'])
             if os.listdir(tmp):
                 LOG.raw('\ntemporary files available under {}'.format(tmp))

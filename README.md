@@ -550,7 +550,7 @@ changes to apply to the template:
 * Use dotdrop's `compare` command
 ```bash
 # use compare to identify change(s)
-$ dotdrop compare --files=~/.vimrc
+$ dotdrop compare --file=~/.vimrc
 ```
 
 * Install the dotfiles to a temporary directory (using the `install` command and the
