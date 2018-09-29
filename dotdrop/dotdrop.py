@@ -395,10 +395,8 @@ def main():
             opts['dopts'] = args['--dopts']
             ret = compare(opts, conf, tmp, focus=args['--file'],
                           ignore=args['--ignore'])
-            if os.listdir(tmp):
-                LOG.raw('\ntemporary files available under {}'.format(tmp))
-            else:
-                os.rmdir(tmp)
+            # clean tmp directory
+            remove(tmp)
 
         elif args['import']:
             # import dotfile(s)
