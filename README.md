@@ -93,9 +93,6 @@ to your dotfiles git tree or system-wide with [pypi](https://pypi.org/project/do
 Having dotdrop as a submodule guarantees that anywhere your are cloning your
 dotfiles git tree from you'll have dotdrop shipped with it. It is the recommended way.
 
-If you want to keep your python environment clean, use
-the virtualenv installation instructions. 
-
 Below instructions show how to install dotdrop as a submodule. For alternative
 installation instructions (with virtualenv, pypi, etc), see the
 [wiki installation page](https://github.com/deadc0de6/dotdrop/wiki/installation).
