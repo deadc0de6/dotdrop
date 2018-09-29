@@ -1,7 +1,7 @@
 # Maintainer: deadc0de6 <info@deadc0de.ch>
 
 pkgname=dotdrop
-pkgver=0.20.1
+pkgver=0.21.2
 pkgrel=1
 pkgdesc="Save your dotfiles once, deploy them everywhere "
 arch=('any')
