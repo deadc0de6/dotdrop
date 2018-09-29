@@ -20,7 +20,7 @@ class Installer:
 
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
-                 debug=False, diff=True, totemp=None):
+                 debug=False, diff=True, totemp=None, showdiff=False):
         self.create = create
         self.backup = backup
         self.dry = dry
@@ -30,6 +30,7 @@ class Installer:
         self.debug = debug
         self.diff = diff
         self.totemp = totemp
+        self.showdiff = showdiff
         self.comparing = False
         self.action_executed = False
         self.log = Logger()
@@ -125,7 +126,7 @@ class Installer:
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
         st = os.stat(src)
-        ret = self._write(dst, content, st.st_mode, actions=actions)
+        ret = self._write(src, dst, content, st.st_mode, actions=actions)
         if ret < 0:
             self.log.err('installing {} to {}'.format(src, dst))
             return []
@@ -164,7 +165,7 @@ class Installer:
             cur = f.read()
         return cur == content
 
-    def _write(self, dst, content, rights, actions=[]):
+    def _write(self, src, dst, content, rights, actions=[]):
         """write content to file
         return  0 for success,
                 1 when already exists
@@ -178,9 +179,17 @@ class Installer:
                 if self.debug:
                     self.log.dbg('{} is the same'.format(dst))
                 return 1
-            if self.safe and not self.log.ask('Overwrite \"{}\"'.format(dst)):
-                self.log.warn('ignoring {}, already present'.format(dst))
-                return 1
+            if self.safe:
+                if self.debug:
+                    self.log.dbg('change detected for {}'.format(dst))
+                if self.showdiff:
+                    comp = Comparator(debug=self.debug)
+                    diff = comp.compare(src, dst)
+                    self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
+                    self.log.emph(diff)
+                if not self.log.ask('Overwrite \"{}\"'.format(dst)):
+                    self.log.warn('ignoring {}'.format(dst))
+                    return 1
         if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)

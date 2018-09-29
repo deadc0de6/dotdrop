@@ -42,26 +42,26 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-tfndVb] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-ldVb]   [-c <path>] [-p <profile>] <paths>...
-  dotdrop compare   [-Vb]     [-c <path>] [-p <profile>]
-                              [-o <opts>] [-i <name>...]
-                              [--files=<files>]
-  dotdrop update    [-fdVb]   [-c <path>] <paths>...
-  dotdrop listfiles [-VTb]    [-c <path>] [-p <profile>]
-  dotdrop list      [-Vb]     [-c <path>]
+  dotdrop install   [-tfndVbD] [-c <path>] [-p <profile>] [<key>...]
+  dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <paths>...
+  dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
+                               [-o <opts>] [-C <files>] [-i <name>...]
+  dotdrop update    [-fdVb]    [-c <path>] <paths>...
+  dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
+  dotdrop list      [-Vb]      [-c <path>]
   dotdrop --help
   dotdrop --version
 
 Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -c --cfg=<path>         Path to the config [default: config.yaml].
-  --files=<files>         Comma separated list of files to compare.
+  -C --files=<files>      Comma separated list of files to compare.
   -i --ignore=<name>      File name to ignore when diffing.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
+  -D --showdiff           Show a diff before overwriting.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
   -V --verbose            Be verbose.
@@ -94,9 +94,10 @@ def install(opts, conf, temporary=False, keys=[]):
     if temporary:
         tmpdir = get_tmpdir()
     inst = Installer(create=opts['create'], backup=opts['backup'],
-                     dry=opts['dry'], safe=opts['safe'], base=opts['dotpath'],
-                     workdir=opts['workdir'], diff=opts['installdiff'],
-                     debug=opts['debug'], totemp=tmpdir)
+                     dry=opts['dry'], safe=opts['safe'],
+                     base=opts['dotpath'], workdir=opts['workdir'],
+                     diff=opts['installdiff'], debug=opts['debug'],
+                     totemp=tmpdir, showdiff=opts['showdiff'])
     installed = []
     for dotfile in dotfiles:
         preactions = []
@@ -361,6 +362,7 @@ def main():
     opts['link'] = args['--link']
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables()
+    opts['showdiff'] = opts['showdiff'] or args['--showdiff']
 
     if opts['debug']:
         LOG.dbg('config file: {}'.format(args['--cfg']))

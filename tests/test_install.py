@@ -174,6 +174,7 @@ exec bspwm
         conf, opts = load_config(confpath, profile)
         opts['safe'] = False
         opts['debug'] = True
+        opts['showdiff'] = True
         opts['variables'] = {}
         install(opts, conf)
 
