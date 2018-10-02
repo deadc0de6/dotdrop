@@ -13,7 +13,7 @@ it comes to manage those across different hosts.
 
 * [✔] **GET QUICKLY STARTED**
 
-  Quickly get all your dotfiles imported and use dotdrop to help you manage your dotfiles
+  Quickly get all your dotfiles imported and use dotdrop to manage your dotfiles
 
 * [✔] **NO DUPLICATES, EFFICIENT**
 
@@ -25,20 +25,15 @@ it comes to manage those across different hosts.
   Different profiles can be defined that allows for a fine-grained control over which
   dotfiles has to be installed on different hosts (home, work, vps, etc)
 
-* [✔] **DIFFERENT DOTFILES SETS FOR DIFFERENT PROFILES**
+* [✔] **GRANULARITY CONTROL OF EACH PROFILE**
 
-  Some hosts will have all your dotfiles installed while others might just
+  Some hosts/profiles will have all your dotfiles installed while others might just
   need a subset of the dotfiles
 
 * [✔] **TO SYMLINK OR NOT TO SYMLINK**
 
   You can choose for each dotfile if you want it to be symlinked or
   directly copied to its final destination
-
-* [✔] **FINE GRAINED CONTROL**
-
-  Each dotfile is unique and thus each may have specific settings
-  linked to it when installed
 
 * [✔] **POST DEPLOYMENT ACTION**
 
@@ -50,9 +45,9 @@ it comes to manage those across different hosts.
   Multiple solutions are available to handle dotfiles containing sensitive information
   as well as full encrypted dotfiles/rc files
 
-* [✔] **VISUALLY COMPARE**
+* [✔] **QUICK COMPARE**
 
-  Quickly compare your local dotfiles with the managed ones
+  Quickly compare your local dotfiles with the version managed by dotdrop
 
 … and much more …
 
