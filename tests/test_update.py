@@ -51,6 +51,10 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d1))
         self.addCleanup(clean, d1)
 
+        d2, c2 = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(d2))
+        self.addCleanup(clean, d2)
+
         # create the directory to test
         dpath = os.path.join(fold_config, get_string(5))
         dir1 = create_dir(dpath)
@@ -65,7 +69,7 @@ class TestUpdate(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         conf, opts = load_config(confpath, profile)
-        dfiles = [d1, dir1]
+        dfiles = [d1, dir1, d2]
 
         # import the files
         cmd_importer(opts, conf, dfiles)
@@ -93,6 +97,25 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(newcontent == 'newcontent')
         newcontent = open(dirf1, 'r').read()
         self.assertTrue(newcontent == 'newcontent')
+
+        edit_content(d2, 'newcontentbykey')
+
+        # update it by key
+        dfiles = conf.get_dotfiles(profile)
+        d2key = ''
+        for ds in dfiles:
+            t = os.path.expanduser(ds.dst)
+            if t == d2:
+                d2key = ds.key
+                break
+        self.assertTrue(d2key != '')
+        opts['safe'] = False
+        opts['debug'] = True
+        cmd_update(opts, conf, [d2key], iskey=True)
+
+        # test content
+        newcontent = open(d2, 'r').read()
+        self.assertTrue(newcontent == 'newcontentbykey')
 
 
 def main():

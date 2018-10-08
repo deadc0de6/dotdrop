@@ -46,7 +46,7 @@ Usage:
   dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVb]    [-c <path>] [-p <profile>] <path>...
+  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>] [<path>...]
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]      [-c <path>]
   dotdrop --help
@@ -64,6 +64,7 @@ Options:
   -D --showdiff           Show a diff before overwriting.
   -l --link               Import and link.
   -f --force              Do not warn if exists.
+  -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
   -d --dry                Dry run.
   -b --no-banner          Do not display the banner.
@@ -203,21 +204,41 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     return same
 
 
-def cmd_update(opts, conf, paths):
-    """update the dotfile(s) from path(s)"""
+def cmd_update(opts, conf, paths, iskey=False):
+    """update the dotfile(s) from path(s) or key(s)"""
+    ret = True
     updater = Updater(conf, opts['dotpath'], opts['dry'],
-                      opts['safe'], opts['debug'])
-    for path in paths:
-        updater.update(path, opts['profile'])
+                      opts['safe'], iskey=iskey, debug=opts['debug'])
+    if not iskey:
+        # update paths
+        if opts['debug']:
+            LOG.dbg('update by paths: {}'.format(paths))
+        for path in paths:
+            if not updater.update_path(path, opts['profile']):
+                ret = False
+    else:
+        # update keys
+        keys = paths
+        if not keys:
+            # if not provided, take all keys
+            keys = [d.key for d in conf.get_dotfiles(opts['profile'])]
+        if opts['debug']:
+            LOG.dbg('update by keys: {}'.format(keys))
+        for key in keys:
+            if not updater.update_key(key, opts['profile']):
+                ret = False
+    return ret
 
 
 def cmd_importer(opts, conf, paths):
     """import dotfile(s) from paths"""
+    ret = True
     home = os.path.expanduser(TILD)
     cnt = 0
     for path in paths:
         if not os.path.lexists(path):
             LOG.err('\"{}\" does not exist, ignored!'.format(path))
+            ret = False
             continue
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
@@ -243,6 +264,7 @@ def cmd_importer(opts, conf, paths):
                 r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
                 if not r:
                     LOG.err('importing \"{}\" failed!'.format(path))
+                    ret = False
                     continue
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
@@ -253,6 +275,7 @@ def cmd_importer(opts, conf, paths):
                 r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
                 if not r:
                     LOG.err('importing \"{}\" failed!'.format(path))
+                    ret = False
                     continue
                 if linkit:
                     remove(dst)
@@ -269,6 +292,7 @@ def cmd_importer(opts, conf, paths):
     else:
         conf.save()
     LOG.log('\n{} file(s) imported.'.format(cnt))
+    return True
 
 
 def cmd_list_profiles(conf):
@@ -386,19 +410,27 @@ def main():
 
         if args['list']:
             # list existing profiles
+            if opts['debug']:
+                LOG.dbg('running cmd: list')
             cmd_list_profiles(conf)
 
         elif args['listfiles']:
             # list files for selected profile
+            if opts['debug']:
+                LOG.dbg('running cmd: listfiles')
             cmd_list_files(opts, conf, templateonly=args['--template'])
 
         elif args['install']:
             # install the dotfiles stored in dotdrop
+            if opts['debug']:
+                LOG.dbg('running cmd: install')
             ret = cmd_install(opts, conf, temporary=args['--temp'],
                               keys=args['<key>'])
 
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
+            if opts['debug']:
+                LOG.dbg('running cmd: compare')
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
             ret = cmd_compare(opts, conf, tmp, focus=args['--file'],
@@ -408,11 +440,16 @@ def main():
 
         elif args['import']:
             # import dotfile(s)
-            cmd_importer(opts, conf, args['<path>'])
+            if opts['debug']:
+                LOG.dbg('running cmd: import')
+            ret = cmd_importer(opts, conf, args['<path>'])
 
         elif args['update']:
             # update a dotfile
-            cmd_update(opts, conf, args['<path>'])
+            if opts['debug']:
+                LOG.dbg('running cmd: update')
+            iskey = args['--key']
+            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey)
 
     except KeyboardInterrupt:
         LOG.err('interrupted')

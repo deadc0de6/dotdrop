@@ -47,6 +47,7 @@ echo "RUNNING $(basename $BASH_SOURCE)"
 
 # dotdrop directory
 basedir=`mktemp -d`
+dotfiles="${basedir}/dotfiles"
 echo "dotdrop dir: ${basedir}"
 # the dotfile
 tmpd=`mktemp -d`
@@ -63,7 +64,7 @@ cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}
 echo "changed" > ${token}
 
 # update
-cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd}
+cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd} --verbose
 
 grep 'changed' ${token} >/dev/null 2>&1
 
