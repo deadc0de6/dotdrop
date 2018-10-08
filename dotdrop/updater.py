@@ -28,6 +28,27 @@ class Updater:
         self.debug = debug
         self.log = Logger()
 
+    def update(self, path, profile):
+        """update the dotfile installed on path"""
+        if not os.path.lexists(path):
+            self.log.err('\"{}\" does not exist!'.format(path))
+            return False
+        left = self._normalize(path)
+        dotfile = self._get_dotfile(left, profile)
+        if not dotfile:
+            return False
+        if self.debug:
+            self.log.dbg('updating {} from {}'.format(dotfile, path))
+
+        right = os.path.join(self.conf.abs_dotpath(self.dotpath), dotfile.src)
+        # expands user
+        left = os.path.expanduser(left)
+        right = os.path.expanduser(right)
+        # go through all files and update
+        if os.path.isdir(path):
+            return self._handle_dir(left, right)
+        return self._handle_file(left, right)
+
     def _normalize(self, path):
         """normalize the path to match dotfile"""
         path = os.path.expanduser(path)
@@ -51,27 +72,6 @@ class Updater:
             self.log.err('multiple dotfiles found: {}'.format(found))
             return None
         return subs[0]
-
-    def update(self, path, profile):
-        """update the dotfile installed on path"""
-        if not os.path.lexists(path):
-            self.log.err('\"{}\" does not exist!'.format(path))
-            return False
-        left = self._normalize(path)
-        dotfile = self._get_dotfile(left, profile)
-        if not dotfile:
-            return False
-        if self.debug:
-            self.log.dbg('updating {} from {}'.format(dotfile, path))
-
-        right = os.path.join(self.conf.abs_dotpath(self.dotpath), dotfile.src)
-        # expands user
-        left = os.path.expanduser(left)
-        right = os.path.expanduser(right)
-        # go through all files and update
-        if os.path.isdir(path):
-            return self._handle_dir(left, right)
-        return self._handle_file(left, right)
 
     def _is_template(self, path):
         if not Templategen.is_template(path):
