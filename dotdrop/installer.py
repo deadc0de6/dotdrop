@@ -183,10 +183,7 @@ class Installer:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
-                    comp = Comparator(debug=self.debug)
-                    diff = comp.compare(src, dst)
-                    self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
-                    self.log.emph(diff)
+                    self._diff_before_write(src, dst, content)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1
@@ -207,6 +204,20 @@ class Installer:
             return -1
         os.chmod(dst, rights)
         return 0
+
+    def _diff_before_write(self, src, dst, src_content):
+        """diff before writing when using --showdiff - not efficient"""
+        # create tmp to diff for templates
+        tmpfile = utils.get_tmpfile()
+        with open(tmpfile, 'wb') as f:
+            f.write(src_content)
+        comp = Comparator(debug=self.debug)
+        diff = comp.compare(tmpfile, dst)
+        # fake the output for readability
+        self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
+        self.log.emph(diff)
+        if tmpfile:
+            utils.remove(tmpfile)
 
     def _create_dirs(self, directory):
         """mkdir -p <directory>"""

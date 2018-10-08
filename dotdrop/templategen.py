@@ -84,7 +84,8 @@ class Templategen:
         if not src.startswith(self.base):
             src = os.path.join(self.base, src)
         with open(src, 'rb') as f:
-            return f.read()
+            content = f.read()
+        return content
 
     def _read_bad_encoded_text(self, path):
         """decode non utf-8 data"""
