@@ -462,9 +462,23 @@ $ sudo pip3 install dotdrop --upgrade
 
 ## Update dotfiles
 
-Dotfiles managed by dotdrop can be updated using the `update` command.
+Dotfiles managed by dotdrop can be updated using the `update` command. When updating, only
+dotfiles that have differences with the stored version are updated.
+A confirmation is requested from the user before any overwrite/update unless the
+`--force` switch is used.
 
-There are two cases:
+Either provide the path of the file containing the new version of the dotfile or
+provide the dotfile key to update (as found in the config file) along with the `--key` switch.
+When using the `--key` switch and no key is provided, all dotfiles for that profile are updated.
+```bash
+# update by path
+$ dotdrop update ~/.vimrc
+
+# update by key
+$ dotdrop update f_vimrc
+```
+
+There are two cases when updating a dotfile:
 
 **The dotfile doesn't use [templating](#template)**
 
