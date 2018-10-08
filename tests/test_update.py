@@ -10,8 +10,8 @@ import os
 import yaml
 
 from dotdrop.config import Cfg
-from dotdrop.dotdrop import importer
-from dotdrop.dotdrop import update
+from dotdrop.dotdrop import cmd_update
+from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotfile import Dotfile
 
 from tests.helpers import *
@@ -68,7 +68,7 @@ class TestUpdate(unittest.TestCase):
         dfiles = [d1, dir1]
 
         # import the files
-        importer(opts, conf, dfiles)
+        cmd_importer(opts, conf, dfiles)
         conf, opts = load_config(confpath, profile)
 
         # edit the files
@@ -86,7 +86,7 @@ class TestUpdate(unittest.TestCase):
         # update it
         opts['safe'] = False
         opts['debug'] = True
-        update(opts, conf, [d1, dir1])
+        cmd_update(opts, conf, [d1, dir1])
 
         # test content
         newcontent = open(d1, 'r').read()

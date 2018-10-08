@@ -9,9 +9,9 @@ import filecmp
 
 from tests.helpers import *
 from dotdrop.dotfile import Dotfile
-from dotdrop.dotdrop import install
 from dotdrop.installer import Installer
 from dotdrop.action import Action
+from dotdrop.dotdrop import cmd_install
 
 
 class TestInstall(unittest.TestCase):
@@ -176,7 +176,7 @@ exec bspwm
         opts['debug'] = True
         opts['showdiff'] = True
         opts['variables'] = {}
-        install(opts, conf)
+        cmd_install(opts, conf)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(dst1))

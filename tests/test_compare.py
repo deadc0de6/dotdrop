@@ -10,8 +10,8 @@ import os
 import yaml
 
 from dotdrop.config import Cfg
-from dotdrop.dotdrop import importer
-from dotdrop.dotdrop import compare
+from dotdrop.dotdrop import cmd_importer
+from dotdrop.dotdrop import cmd_compare
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.comparator import Comparator
@@ -103,7 +103,7 @@ class TestCompare(unittest.TestCase):
         dfiles = [d1, d2, d3, d4, d5]
 
         # import the files
-        importer(opts, conf, dfiles)
+        cmd_importer(opts, conf, dfiles)
         conf, opts = load_config(confpath, profile)
 
         # compare the files
@@ -138,10 +138,10 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(results == expected)
 
         # test compare from dotdrop
-        self.assertFalse(compare(opts, conf, tmp))
+        self.assertFalse(cmd_compare(opts, conf, tmp))
         # test focus
-        self.assertFalse(compare(opts, conf, tmp, focus=d4))
-        self.assertFalse(compare(opts, conf, tmp, focus='/tmp/fake'))
+        self.assertFalse(cmd_compare(opts, conf, tmp, focus=d4))
+        self.assertFalse(cmd_compare(opts, conf, tmp, focus='/tmp/fake'))
 
 
 def main():

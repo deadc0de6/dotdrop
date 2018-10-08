@@ -77,7 +77,7 @@ Options:
 ###########################################################
 
 
-def install(opts, conf, temporary=False, keys=[]):
+def cmd_install(opts, conf, temporary=False, keys=[]):
     """install dotfiles for this profile"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if keys:
@@ -139,45 +139,7 @@ def install(opts, conf, temporary=False, keys=[]):
     return True
 
 
-def apply_trans(opts, dotfile):
-    """apply the transformation to the dotfile
-    return None if fails and new source if succeed"""
-    src = dotfile.src
-    new_src = '{}.{}'.format(src, TRANS_SUFFIX)
-    err = False
-    for trans in dotfile.trans:
-        if opts['debug']:
-            LOG.dbg('executing transformation {}'.format(trans))
-        s = os.path.join(opts['dotpath'], src)
-        temp = os.path.join(opts['dotpath'], new_src)
-        if not trans.transform(s, temp):
-            msg = 'transformation \"{}\" failed for {}'
-            LOG.err(msg.format(trans.key, dotfile.key))
-            err = True
-            break
-    if err:
-        if new_src and os.path.exists(new_src):
-            remove(new_src)
-        return None
-    return new_src
-
-
-def _select(selections, dotfiles):
-    selected = []
-    for selection in selections:
-        df = next(
-            (x for x in dotfiles
-                if os.path.expanduser(x.dst) == os.path.expanduser(selection)),
-            None
-        )
-        if df:
-            selected.append(df)
-        else:
-            LOG.err('no dotfile matches \"{}\"'.format(selection))
-    return selected
-
-
-def compare(opts, conf, tmp, focus=[], ignore=[]):
+def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
@@ -241,7 +203,7 @@ def compare(opts, conf, tmp, focus=[], ignore=[]):
     return same
 
 
-def update(opts, conf, paths):
+def cmd_update(opts, conf, paths):
     """update the dotfile(s) from path(s)"""
     updater = Updater(conf, opts['dotpath'], opts['dry'],
                       opts['safe'], opts['debug'])
@@ -249,7 +211,7 @@ def update(opts, conf, paths):
         updater.update(path, opts['profile'])
 
 
-def importer(opts, conf, paths):
+def cmd_importer(opts, conf, paths):
     """import dotfile(s) from paths"""
     home = os.path.expanduser(TILD)
     cnt = 0
@@ -309,7 +271,7 @@ def importer(opts, conf, paths):
     LOG.log('\n{} file(s) imported.'.format(cnt))
 
 
-def list_profiles(conf):
+def cmd_list_profiles(conf):
     """list all profiles"""
     LOG.log('Available profile(s):')
     for p in conf.get_profiles():
@@ -317,7 +279,7 @@ def list_profiles(conf):
     LOG.log('')
 
 
-def list_files(opts, conf, templateonly=False):
+def cmd_list_files(opts, conf, templateonly=False):
     """list all dotfiles for a specific profile"""
     if not opts['profile'] in conf.get_profiles():
         LOG.warn('unknown profile \"{}\"'.format(opts['profile']))
@@ -336,11 +298,58 @@ def list_files(opts, conf, templateonly=False):
         LOG.sub('{}'.format(dotfile.dst))
     LOG.log('')
 
+###########################################################
+# helpers
+###########################################################
 
-def header():
+
+def _header():
     """print the header"""
     LOG.log(BANNER)
     LOG.log('')
+
+
+def _select(selections, dotfiles):
+    selected = []
+    for selection in selections:
+        df = next(
+            (x for x in dotfiles
+                if os.path.expanduser(x.dst) == os.path.expanduser(selection)),
+            None
+        )
+        if df:
+            selected.append(df)
+        else:
+            LOG.err('no dotfile matches \"{}\"'.format(selection))
+    return selected
+
+
+def apply_trans(opts, dotfile):
+    """apply the transformation to the dotfile
+    return None if fails and new source if succeed"""
+    src = dotfile.src
+    new_src = '{}.{}'.format(src, TRANS_SUFFIX)
+    err = False
+    for trans in dotfile.trans:
+        if opts['debug']:
+            LOG.dbg('executing transformation {}'.format(trans))
+        s = os.path.join(opts['dotpath'], src)
+        temp = os.path.join(opts['dotpath'], new_src)
+        if not trans.transform(s, temp):
+            msg = 'transformation \"{}\" failed for {}'
+            LOG.err(msg.format(trans.key, dotfile.key))
+            err = True
+            break
+    if err:
+        if new_src and os.path.exists(new_src):
+            remove(new_src)
+        return None
+    return new_src
+
+
+###########################################################
+# main
+###########################################################
 
 
 def main():
@@ -371,40 +380,39 @@ def main():
     if ENV_NOBANNER not in os.environ \
             and opts['banner'] \
             and not args['--no-banner']:
-        header()
+        _header()
 
     try:
 
         if args['list']:
             # list existing profiles
-            list_profiles(conf)
+            cmd_list_profiles(conf)
 
         elif args['listfiles']:
             # list files for selected profile
-            list_files(opts, conf, templateonly=args['--template'])
+            cmd_list_files(opts, conf, templateonly=args['--template'])
 
         elif args['install']:
             # install the dotfiles stored in dotdrop
-            keys = args['<key>']
-            ret = install(opts, conf, temporary=args['--temp'],
-                          keys=keys)
+            ret = cmd_install(opts, conf, temporary=args['--temp'],
+                              keys=args['<key>'])
 
         elif args['compare']:
             # compare local dotfiles with dotfiles stored in dotdrop
             tmp = get_tmpdir()
             opts['dopts'] = args['--dopts']
-            ret = compare(opts, conf, tmp, focus=args['--file'],
-                          ignore=args['--ignore'])
+            ret = cmd_compare(opts, conf, tmp, focus=args['--file'],
+                              ignore=args['--ignore'])
             # clean tmp directory
             remove(tmp)
 
         elif args['import']:
             # import dotfile(s)
-            importer(opts, conf, args['<paths>'])
+            cmd_importer(opts, conf, args['<paths>'])
 
         elif args['update']:
             # update a dotfile
-            update(opts, conf, args['<paths>'])
+            cmd_update(opts, conf, args['<paths>'])
 
     except KeyboardInterrupt:
         LOG.err('interrupted')

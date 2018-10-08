@@ -9,11 +9,11 @@ import unittest
 import os
 import yaml
 
-from dotdrop.dotdrop import importer
-from dotdrop.dotdrop import list_profiles
-from dotdrop.dotdrop import list_files
-from dotdrop.dotdrop import header
-from dotdrop.dotdrop import update
+from dotdrop.dotdrop import cmd_importer
+from dotdrop.dotdrop import cmd_list_profiles
+from dotdrop.dotdrop import cmd_list_files
+from dotdrop.dotdrop import _header
+from dotdrop.dotdrop import cmd_update
 from dotdrop.config import Cfg
 
 from tests.helpers import *
@@ -107,11 +107,11 @@ class TestImport(unittest.TestCase):
 
         # import the dotfiles
         dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
-        importer(opts, conf, dfiles)
+        cmd_importer(opts, conf, dfiles)
         # import symlink
         opts[Cfg.key_dotfiles_link] = True
         sfiles = [dotfile6, dotfile7]
-        importer(opts, conf, sfiles)
+        cmd_importer(opts, conf, sfiles)
         opts[Cfg.key_dotfiles_link] = False
 
         # reload the config
@@ -193,15 +193,15 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.islink(dotfile7))
         self.assertTrue(os.path.realpath(dotfile7) == indt7)
 
-        list_profiles(conf)
-        list_files(opts, conf)
-        header()
+        cmd_list_profiles(conf)
+        cmd_list_files(opts, conf)
+        _header()
 
         # fake test update
         editcontent = 'edited'
         edit_content(dotfile1, editcontent)
         opts['safe'] = False
-        update(opts, conf, [dotfile1])
+        cmd_update(opts, conf, [dotfile1])
         c2 = open(indt1, 'r').read()
         self.assertTrue(editcontent == c2)
 
