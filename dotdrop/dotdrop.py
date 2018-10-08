@@ -43,10 +43,10 @@ USAGE = """
 
 Usage:
   dotdrop install   [-tfndVbD] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <paths>...
+  dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVb]    [-c <path>] [-p <profile>] <paths>...
+  dotdrop update    [-fdVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop list      [-Vb]      [-c <path>]
   dotdrop --help
@@ -408,11 +408,11 @@ def main():
 
         elif args['import']:
             # import dotfile(s)
-            cmd_importer(opts, conf, args['<paths>'])
+            cmd_importer(opts, conf, args['<path>'])
 
         elif args['update']:
             # update a dotfile
-            cmd_update(opts, conf, args['<paths>'])
+            cmd_update(opts, conf, args['<path>'])
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
