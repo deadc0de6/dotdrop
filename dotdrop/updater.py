@@ -39,6 +39,7 @@ class Updater:
         dotfile = self._get_dotfile_by_path(path, profile)
         if not dotfile:
             return False
+        path = os.path.expanduser(path)
         if self.debug:
             self.log.dbg('updating {} from path \"{}\"'.format(dotfile, path))
         return self._update(path, dotfile)
@@ -110,6 +111,8 @@ class Updater:
         if self.debug:
             self.log.dbg('update for file {} and {}'.format(left, right))
         if self._is_template(right):
+            if self.debug:
+                self.log.dbg('{} is a template'.format(right))
             return False
         if compare and filecmp.cmp(left, right, shallow=True):
             # no difference
