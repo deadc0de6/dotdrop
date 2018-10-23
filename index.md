@@ -4,7 +4,7 @@ layout: default
 
 [Dotdrop](https://github.com/deadc0de6/dotdrop) is a dotfile manager written in Python3
 that provides efficient ways of managing your dotfiles. It is especially powerful when
-it comes to manage those across different hosts.
+it comes to managing those across different hosts.
 
 * [✔] **VERSIONED**
 
