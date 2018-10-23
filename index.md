@@ -13,7 +13,7 @@ it comes to managing those across different hosts.
 
 * [✔] **GET QUICKLY STARTED**
 
-  Quickly get all your dotfiles imported and use dotdrop to manage your dotfiles
+  Get easily all your dotfiles imported and use dotdrop to manage them
 
 * [✔] **NO DUPLICATES, EFFICIENT**
 
@@ -43,11 +43,11 @@ it comes to managing those across different hosts.
 * [✔] **HANDLE SENSITIVE INFORMATION**
 
   Multiple solutions are available to handle dotfiles containing sensitive information
-  as well as full encrypted dotfiles/rc files
+  as well as fully encrypted dotfiles/rc files
 
 * [✔] **QUICK COMPARE**
 
-  Quickly compare your local dotfiles with the version managed by dotdrop
+  Quickly compare your local dotfiles with the one managed by dotdrop
 
 … and much more …
 
