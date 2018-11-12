@@ -95,8 +95,8 @@ class Installer:
                 return []
             try:
                 utils.remove(dst)
-            except OSError:
-                self.log.err('something went wrong with {}'.format(src))
+            except OSError as e:
+                self.log.err('something went wrong with {}: {}'.format(src, e))
                 return []
         if self.dry:
             self.log.dry('would link {} to {}'.format(dst, src))
