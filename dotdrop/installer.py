@@ -6,6 +6,7 @@ handle the installation of dotfiles
 """
 
 import os
+import re
 
 # local imports
 from dotdrop.logger import Logger
@@ -17,10 +18,12 @@ import dotdrop.utils as utils
 class Installer:
 
     BACKUP_SUFFIX = '.dotdropbak'
+    PROFILE_INTERPOLATION = '{{dd_profile}}'
 
-    def __init__(self, base='.', create=True, backup=True,
+    def __init__(self, profile=None, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
                  debug=False, diff=True, totemp=None, showdiff=False):
+        self.profile = profile
         self.create = create
         self.backup = backup
         self.dry = dry
@@ -39,6 +42,7 @@ class Installer:
         """install the src to dst using a template"""
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
+        src = src.replace(self.PROFILE_INTERPOLATION, self.profile or "")
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
@@ -59,6 +63,7 @@ class Installer:
         """set src as the link target of dst"""
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
+        src = src.replace(self.PROFILE_INTERPOLATION, self.profile or "")
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
