@@ -280,6 +280,16 @@ f_dunstrc (file: "config/dunst/dunstrc", link: False)
 By using the `-T --template` switch, only the dotfiles that
 are using jinja2 directives are listed.
 
+It is also possible to list all files related to each dotfile entries
+by invoking the `detail` command, for example:
+```bash
+$ dotdrop listfiles --profile=<some-profile> f_vimrc
+```
+
+This is especially useful when the dotfile entry is a directory
+and one wants to have information on the different files (is it
+a templated file, etc).
+
 ## Use actions
 
 It is sometimes useful to execute some kind of action
