@@ -40,7 +40,7 @@ echo "pythonpath: ${PYTHONPATH}"
 # get the helpers
 source ${cur}/helpers
 
-echo "RUNNING $(basename $BASH_SOURCE)"
+echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 
 ################################################################
 # this is the test
