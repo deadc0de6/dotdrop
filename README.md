@@ -283,7 +283,7 @@ are using jinja2 directives are listed.
 It is also possible to list all files related to each dotfile entries
 by invoking the `detail` command, for example:
 ```bash
-$ dotdrop listfiles --profile=<some-profile> f_vimrc
+$ dotdrop detail
 ```
 
 This is especially useful when the dotfile entry is a directory
