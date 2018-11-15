@@ -19,7 +19,7 @@ LOG = Logger()
 
 
 def run(cmd, raw=True, debug=False, checkerr=False):
-    """run a command in the shell (expects a list)"""
+    """run a command (expects a list)"""
     if debug:
         LOG.dbg('exec: {}'.format(' '.join(cmd)))
     p = subprocess.Popen(cmd, shell=False,
@@ -36,6 +36,11 @@ def run(cmd, raw=True, debug=False, checkerr=False):
     if raw:
         return ret == 0, out
     return ret == 0, lines
+
+
+def shell(cmd):
+    """run a command in the shell (expects a string)"""
+    return subprocess.getoutput(cmd)
 
 
 def diff(src, dst, raw=True, opts='', debug=False):

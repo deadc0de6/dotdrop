@@ -81,6 +81,10 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 
 * [Config](#config)
 * [Templating](#templating)
+
+  * [Available variables](#available-variables)
+  * [Dotdrop header](#dotdrop-header)
+
 * [Example](#example)
 * [User tricks](#user-tricks)
 * [People using dotdrop](#people-using-dotdrop)
@@ -623,10 +627,16 @@ the following entries:
   <trans-key>: <command-to-execute>
 ```
 
-* **variables** entry (optional): a list of template variables (see [Available variables](#available-variables))
+* **variables** entry (optional): a list of template variables (see [Variables](#variables))
 
 ```
   <variable-name>: <variable-content>
+```
+
+* **dynvariables** entry (optional): a list of interpreted variables (see [Interpreted variables](#interpreted-variables))
+
+```
+  <variable-name>: <shell-oneliner>>
 ```
 
 ## All dotfiles for a profile
@@ -673,9 +683,10 @@ Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinit
 
 ## Ignore empty template
 
-It is possible not to deploy template file if their rendered content
-is empty. Simply set the global setting `ignoreempty` to true for this
-behavior for all dotfiles or specifically to one or more dotfile entries.
+It is possible to avoid having an empty rendered template being
+deployed by setting the `ignoreempty` entry to *true*. This can be set
+globally for all dotfiles or only for specific dotfiles.
+For more see the [Config](#config).
 
 # Templating
 
@@ -695,13 +706,18 @@ Note that dotdrop uses different delimiters than
 
 ## Available variables
 
+Following template variables are available:
+
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
+* defined variables (see [Variables](#variables))
+* interpreted variables (see [Interpreted variables](#interpreted-variables))
 
-Addionally to the above, variables can be added in the config file under
-the `variables` entry. The variables added there are directly reachable in
-any templates.
+## Variables
+
+Variables can be added in the config file under the `variables` entry.
+The variables added there are directly reachable in any templates.
 
 For example in the config file:
 ```yaml
@@ -714,25 +730,23 @@ These can then be used in any template with
 {{@@ var1 @@}}
 ```
 
-## Dotdrop header
+## Interpreted variables
 
-Dotdrop is able to insert a header in the generated dotfiles. This allows
-to remind anyone opening the file for editing that this file is managed by dotdrop.
+It is also possible to have *dynamic* variables in the sense that their
+content will be interpreted by the shell before being replaced in the templates.
 
-Here's what it looks like:
-```
-This dotfile is managed using dotdrop
-```
-
-The header can be automatically added using jinja2 directive:
-```
-{{@@ header() @@}}
+For example:
+```yaml
+dynvariables:
+  dvar1: head -1 /proc/meminfo
+  dvar2: "echo 'this is some test' | rev | tr ' ' ','"
+  dvar3: /tmp/my_shell_script.sh
 ```
 
-Properly commenting the header in templates is the responsability of the user
-as jinja2 has no way of knowing what is the proper char(s) used for comments.
-Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
-or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
+These can be used as any variables in the templates
+```
+{{@@ dvar1 @@}}
+```
 
 ## Environment variables
 
@@ -765,6 +779,26 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
+
+## Dotdrop header
+
+Dotdrop is able to insert a header in the generated dotfiles. This allows
+to remind anyone opening the file for editing that this file is managed by dotdrop.
+
+Here's what it looks like:
+```
+This dotfile is managed using dotdrop
+```
+
+The header can be automatically added using jinja2 directive:
+```
+{{@@ header() @@}}
+```
+
+Properly commenting the header in templates is the responsability of the user
+as jinja2 has no way of knowing what is the proper char(s) used for comments.
+Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
+or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
 ## Debug template
 

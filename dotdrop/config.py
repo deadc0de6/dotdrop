@@ -13,6 +13,7 @@ import shlex
 from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
+from dotdrop.utils import *
 
 
 TILD = '~'
@@ -44,6 +45,8 @@ class Cfg:
 
     # template variables
     key_variables = 'variables'
+    # shell variable
+    key_dynvariables = 'dynvariables'
 
     # dotfiles keys
     key_dotfiles = 'dotfiles'
@@ -521,9 +524,15 @@ class Cfg:
         return self.lnk_settings.copy()
 
     def get_variables(self):
+        variables = {}
         if self.key_variables in self.content:
-            return self.content[self.key_variables]
-        return {}
+            variables.update(self.content[self.key_variables])
+        if self.key_dynvariables in self.content:
+            # interpret dynamic variables
+            dynvars = self.content[self.key_dynvariables]
+            for key, cmd in dynvars.items():
+                variables[key] = shell(cmd)
+        return variables
 
     def dump(self):
         """return a dump of the config"""
