@@ -26,6 +26,7 @@ Features:
 
 * Sync once every dotfile on git for different usages
 * Allow dotfiles templating by leveraging [jinja2](http://jinja.pocoo.org/)
+* Dynamically generate dotfile content with variables
 * Comparison between local and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
 * Easy import dotfiles
