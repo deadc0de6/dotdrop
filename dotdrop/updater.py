@@ -233,18 +233,6 @@ class Updater:
         # Nothing more to do here.
         return True
 
-    def _create_dirs(self, directory):
-        """mkdir -p <directory>"""
-        if os.path.exists(directory):
-            return True
-        if self.dry:
-            self.log.dry('would mkdir -p {}'.format(directory))
-            return True
-        if self.debug:
-            self.log.dbg('mkdir -p {}'.format(directory))
-        os.makedirs(directory)
-        return os.path.exists(directory)
-
     def _overwrite(self, src, dst):
         """ask for overwritting"""
         msg = 'Overwrite \"{}\" with \"{}\"?'.format(dst, src)
