@@ -93,6 +93,7 @@ class Templategen:
             data = f.read()
         return data.decode('utf-8', 'replace')
 
+    @staticmethod
     def is_template(path):
         """recursively check if any file is a template within path"""
         path = os.path.expanduser(path)
@@ -113,6 +114,7 @@ class Templategen:
                     return True
         return False
 
+    @staticmethod
     def _is_template(path):
         """test if file pointed by path is a template"""
         if not os.path.isfile(path):
