@@ -100,6 +100,7 @@ class TestCompare(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         conf, opts = load_config(confpath, profile)
+        opts['longkey'] = True
         dfiles = [d1, d2, d3, d4, d5]
 
         # import the files

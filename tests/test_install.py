@@ -119,7 +119,7 @@ exec bspwm
         self.addCleanup(clean, dir1)
         dst6 = os.path.join(dst, get_string(6))
         # fill with files
-        sub1, _ = create_random_file(dir1)
+        sub1, _ = create_random_file(dir1, template=True)
         self.assertTrue(os.path.exists(sub1))
         sub2, _ = create_random_file(dir1)
         self.assertTrue(os.path.exists(sub2))

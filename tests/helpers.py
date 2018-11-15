@@ -38,7 +38,8 @@ def get_tempdir():
     return tempfile.mkdtemp(suffix=TMPSUFFIX)
 
 
-def create_random_file(directory, content=None, binary=False):
+def create_random_file(directory, content=None,
+                       binary=False, template=False):
     '''Create a new file in directory with random content.'''
     fname = get_string(8)
     mode = 'w'
@@ -46,9 +47,15 @@ def create_random_file(directory, content=None, binary=False):
         mode = 'wb'
     if content is None:
         if binary:
-            content = bytes(get_string(100), 'ascii')
+            pre = bytes()
+            if template:
+                pre = bytes('{{@@ header() @@}}\n', 'ascii')
+            content = bytes('{}{}\n'.format(pre, get_string(100)), 'ascii')
         else:
-            content = get_string(100)
+            pre = ''
+            if template:
+                pre = '{{@@ header() @@}}\n'
+            content = '{}{}\n'.format(pre, get_string(100))
     path = os.path.join(directory, fname)
     with open(path, mode) as f:
         f.write(content)
