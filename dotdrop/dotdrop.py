@@ -48,6 +48,7 @@ Usage:
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>] [<path>...]
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]      [-c <path>]
   dotdrop --help
   dotdrop --version
@@ -311,20 +312,56 @@ def cmd_list_files(opts, conf, templateonly=False):
     what = 'Dotfile(s)'
     if templateonly:
         what = 'Template(s)'
-    LOG.log('{} for profile \"{}\":\n'.format(what, opts['profile']))
+    LOG.emph('{} for profile \"{}\"\n'.format(what, opts['profile']))
     for dotfile in conf.get_dotfiles(opts['profile']):
         if templateonly:
-            p = os.path.join(opts['dotpath'], dotfile.src)
-            if not Templategen.is_template(p):
+            src = os.path.join(opts['dotpath'], dotfile.src)
+            if not Templategen.is_template(src):
                 continue
-        LOG.log('{} (file: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
-                                                     dotfile.link))
+        LOG.log('{} (src: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
+                                                    dotfile.link))
         LOG.sub('{}'.format(dotfile.dst))
     LOG.log('')
+
+
+def cmd_detail(opts, conf, keys=None):
+    """list details on all files for all dotfile entries"""
+    if not opts['profile'] in conf.get_profiles():
+        LOG.warn('unknown profile \"{}\"'.format(opts['profile']))
+        return
+    dotfiles = conf.get_dotfiles(opts['profile'])
+    if keys:
+        # filtered dotfiles to install
+        dotfiles = [d for d in dotfiles if d.key in set(keys)]
+    LOG.emph('dotfiles details for profile \"{}\":\n'.format(opts['profile']))
+    for d in dotfiles:
+        _detail(opts['dotpath'], d)
+    LOG.log('')
+
 
 ###########################################################
 # helpers
 ###########################################################
+
+
+def _detail(dotpath, dotfile):
+    """print details on all files under a dotfile entry"""
+    LOG.log('{} (dst: \"{}\", link: {})'.format(dotfile.key, dotfile.dst,
+                                                dotfile.link))
+    path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
+    if not os.path.isdir(path):
+        template = 'no'
+        if Templategen.is_template(path):
+            template = 'yes'
+        LOG.sub('{} (template:{})'.format(path, template))
+    else:
+        for root, dir, files in os.walk(path):
+            for f in files:
+                p = os.path.join(root, f)
+                template = 'no'
+                if Templategen.is_template(p):
+                    template = 'yes'
+                LOG.sub('{} (template:{})'.format(p, template))
 
 
 def _header():
@@ -450,6 +487,12 @@ def main():
                 LOG.dbg('running cmd: update')
             iskey = args['--key']
             ret = cmd_update(opts, conf, args['<path>'], iskey=iskey)
+
+        elif args['detail']:
+            # detail files
+            if opts['debug']:
+                LOG.dbg('running cmd: update')
+            cmd_detail(opts, conf, keys=args['<key>'])
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
