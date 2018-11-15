@@ -6,7 +6,6 @@ handle the comparison of dotfiles and local deployment
 """
 
 import os
-import shutil
 import filecmp
 import fnmatch
 
