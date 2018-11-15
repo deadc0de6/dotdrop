@@ -570,12 +570,14 @@ the following entries:
   * `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
   * `workdir`: directory where templates are installed before being symlink when using `link` (default *~/.config/dotdrop*)
   * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
+  * `ignoreempty`: do not deploy template if empty (default *false*)
 
 * **dotfiles** entry: a list of dotfiles
-  * When `link` is true, dotdrop will create a symlink instead of copying (default *false*).
-  * `cmpignore` contains a list of pattern to ignore when comparing (enclose in quotes when using wildcards).
-  * `actions` contains a list of action keys that need to be defined in the **actions** entry below.
-  * `trans` contains a list of transformation keys that need to be defined in the **trans** entry below.
+  * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
+  * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
+  * `actions`: list of action keys that need to be defined in the **actions** entry below.
+  * `trans`: list of transformation keys that need to be defined in the **trans** entry below.
+  * `ignoreempty`: if true empty template will not be deployed (default global value of `ignoreempty` above)
 
 ```yaml
   <dotfile-key-name>:
@@ -583,6 +585,7 @@ the following entries:
     src: <filename-within-the-dotpath>
     # Optional
     link: <true|false>
+    ignoreempty: <true|false>
     cmpignore:
       - "<ignore-pattern>"
     actions:
@@ -667,6 +670,12 @@ profiles:
         - f_vimrc
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
+
+## Ignore empty template
+
+It is possible not to deploy template file if their rendered content
+is empty. Simply set the global setting `ignoreempty` to true for this
+behavior for all dotfiles or specifically to one or more dotfile entries.
 
 # Templating
 

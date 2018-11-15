@@ -29,6 +29,7 @@ class Cfg:
     key_banner = 'banner'
     key_long = 'longkey'
     key_keepdot = 'keepdot'
+    key_ignoreempty = 'ignoreempty'
     key_showdiff = 'showdiff'
     key_deflink = 'link_by_default'
     key_workdir = 'workdir'
@@ -49,6 +50,7 @@ class Cfg:
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
+    key_dotfiles_noempty = 'ignoreempty'
     key_dotfiles_cmpignore = 'cmpignore'
     key_dotfiles_actions = 'actions'
     key_dotfiles_trans = 'trans'
@@ -66,6 +68,7 @@ class Cfg:
     default_longkey = False
     default_keepdot = False
     default_showdiff = False
+    default_ignoreempty = False
     default_link_by_default = False
     default_workdir = '~/.config/dotdrop'
 
@@ -191,6 +194,9 @@ class Cfg:
             dst = v[self.key_dotfiles_dst]
             link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
                 in v else self.default_link
+            noempty = v[self.key_dotfiles_noempty] if \
+                self.key_dotfiles_noempty \
+                in v else self.lnk_settings[self.key_ignoreempty]
             itsactions = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
             actions = self._parse_actions(itsactions)
@@ -206,7 +212,8 @@ class Cfg:
                 self.key_dotfiles_cmpignore in v else []
             self.dotfiles[k] = Dotfile(k, dst, src,
                                        link=link, actions=actions,
-                                       trans=trans, cmpignore=ignores)
+                                       trans=trans, cmpignore=ignores,
+                                       noempty=noempty)
 
         # assign dotfiles to each profile
         for k, v in self.lnk_profiles.items():
@@ -222,7 +229,12 @@ class Cfg:
                 self.prodots[k] = list(self.dotfiles.values())
             else:
                 # add the dotfiles
-                self.prodots[k].extend([self.dotfiles[d] for d in dots])
+                for d in dots:
+                    if d not in self.dotfiles:
+                        msg = 'unknown dotfile \"{}\" for {}'.format(d, k)
+                        self.log.err(msg)
+                        continue
+                    self.prodots[k].append(self.dotfiles[d])
 
         # handle "include" for each profile
         for k in self.lnk_profiles.keys():
@@ -319,6 +331,8 @@ class Cfg:
             self.lnk_settings[self.key_workdir] = self.default_workdir
         if self.key_showdiff not in self.lnk_settings:
             self.lnk_settings[self.key_showdiff] = self.default_showdiff
+        if self.key_ignoreempty not in self.lnk_settings:
+            self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
 
     def abs_dotpath(self, path):
         """transform path to an absolute path based on config path"""

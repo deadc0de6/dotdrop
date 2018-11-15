@@ -35,7 +35,7 @@ class Installer:
         self.action_executed = False
         self.log = Logger()
 
-    def install(self, templater, src, dst, actions=[]):
+    def install(self, templater, src, dst, actions=[], noempty=False):
         """install the src to dst using a template"""
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
@@ -52,8 +52,10 @@ class Installer:
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
         if os.path.isdir(src):
-            return self._handle_dir(templater, src, dst, actions=actions)
-        return self._handle_file(templater, src, dst, actions=actions)
+            return self._handle_dir(templater, src, dst, actions=actions,
+                                    noempty=noempty)
+        return self._handle_file(templater, src, dst,
+                                 actions=actions, noempty=noempty)
 
     def link(self, templater, src, dst, actions=[]):
         """set src as the link target of dst"""
@@ -110,15 +112,19 @@ class Installer:
         self.log.sub('linked {} to {}'.format(dst, src))
         return [(src, dst)]
 
-    def _handle_file(self, templater, src, dst, actions=[]):
+    def _handle_file(self, templater, src, dst, actions=[], noempty=False):
         """install src to dst when is a file"""
         if self.debug:
             self.log.dbg('generate template for {}'.format(src))
+            self.log.dbg('ignore empty: {}'.format(noempty))
         if utils.samefile(src, dst):
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []
         content = templater.generate(src)
+        if noempty and utils.content_empty(content):
+            self.log.warn('ignoring empty template: {}'.format(src))
+            return []
         if content is None:
             self.log.err('generate from template {}'.format(src))
             return []
@@ -140,8 +146,11 @@ class Installer:
             return [(src, dst)]
         return []
 
-    def _handle_dir(self, templater, src, dst, actions=[]):
+    def _handle_dir(self, templater, src, dst, actions=[], noempty=False):
         """install src to dst when is a directory"""
+        if self.debug:
+            self.log.dbg('install dir {}'.format(src))
+            self.log.dbg('ignore empty: {}'.format(noempty))
         ret = []
         if not self._create_dirs(dst):
             return []
@@ -150,11 +159,11 @@ class Installer:
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
                 res = self._handle_file(templater, f, os.path.join(dst, entry),
-                                        actions=actions)
+                                        actions=actions, noempty=noempty)
                 ret.extend(res)
             else:
                 res = self._handle_dir(templater, f, os.path.join(dst, entry),
-                                       actions=actions)
+                                       actions=actions, noempty=noempty)
                 ret.extend(res)
         return ret
 

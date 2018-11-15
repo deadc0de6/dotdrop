@@ -10,7 +10,8 @@ class Dotfile:
 
     def __init__(self, key, dst, src,
                  actions={}, trans=[],
-                 link=False, cmpignore=[]):
+                 link=False, cmpignore=[],
+                 noempty=False):
         # key of dotfile in the config
         self.key = key
         # path where to install this dotfile
@@ -25,6 +26,8 @@ class Dotfile:
         self.trans = trans
         # pattern to ignore when comparing
         self.cmpignore = cmpignore
+        # do not deploy empty file
+        self.noempty = noempty
 
     def __str__(self):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'

@@ -78,4 +78,14 @@ def samefile(path1, path2):
 
 
 def header():
+    """return dotdrop header"""
     return 'This dotfile is managed using dotdrop'
+
+
+def content_empty(string):
+    """return True if is empty or only one CRLF"""
+    if not string:
+        return True
+    if string == b'\n':
+        return True
+    return False

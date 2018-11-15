@@ -86,8 +86,8 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
         # filtered dotfiles to install
         dotfiles = [d for d in dotfiles if d.key in set(keys)]
     if not dotfiles:
-        msg = 'no dotfiles to install for this profile (\"{}\")'
-        LOG.err(msg.format(opts['profile']))
+        msg = 'no dotfile to install for this profile (\"{}\")'
+        LOG.warn(msg.format(opts['profile']))
         return False
 
     t = Templategen(opts['profile'], base=opts['dotpath'],
@@ -118,7 +118,8 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                 if not tmp:
                     continue
                 src = tmp
-            r = inst.install(t, src, dotfile.dst, actions=preactions)
+            r = inst.install(t, src, dotfile.dst, actions=preactions,
+                             noempty=dotfile.noempty)
             if tmp:
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
@@ -145,8 +146,8 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     """compare dotfiles and return True if all identical"""
     dotfiles = conf.get_dotfiles(opts['profile'])
     if dotfiles == []:
-        msg = 'no dotfiles defined for this profile (\"{}\")'
-        LOG.err(msg.format(opts['profile']))
+        msg = 'no dotfile defined for this profile (\"{}\")'
+        LOG.warn(msg.format(opts['profile']))
         return True
     # compare only specific files
     same = True
