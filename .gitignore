@@ -3,3 +3,7 @@
 .idea/
 .vscode/
 .atom/
+
+dist/
+build/
+*.egg-info/
