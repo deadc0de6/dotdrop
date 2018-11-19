@@ -84,6 +84,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 * [Templating](#templating)
 
   * [Available variables](#available-variables)
+  * [Available methods](#available-methods)
   * [Dotdrop header](#dotdrop-header)
 
 * [Example](#example)
@@ -780,6 +781,22 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
+
+## Available methods
+
+Beside jinja2 global functions
+(see [jinja2 global functions](http://jinja.pocoo.org/docs/2.10/templates/#list-of-global-functions)
+the following functions are available and can be used within the templates:
+
+* `exists(path)`: return true when path exists
+```
+{%@@ if exists('/dev/null') @@%}
+it does exist
+{%@@ endif @@%}
+```
+
+If you'd like a specific function to be available, either open an issue
+or do a PR.
 
 ## Dotdrop header
 

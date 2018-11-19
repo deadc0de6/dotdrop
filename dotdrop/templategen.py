@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 # local imports
 import dotdrop.utils as utils
 from dotdrop.logger import Logger
+import dotdrop.jhelpers as jhelpers
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -25,6 +26,7 @@ class Templategen:
     def __init__(self, profile, base='.', variables={}, debug=False):
         self.base = base.rstrip(os.sep)
         self.debug = debug
+        self.log = Logger()
         loader = FileSystemLoader(self.base)
         self.env = Environment(loader=loader,
                                trim_blocks=True, lstrip_blocks=True,
@@ -35,11 +37,14 @@ class Templategen:
                                variable_end_string=VAR_END,
                                comment_start_string=COMMENT_START,
                                comment_end_string=COMMENT_END)
-        self.env.globals['header'] = self._header
+        # adding variables
         self.env.globals['env'] = os.environ
         self.env.globals['profile'] = profile
         self.env.globals.update(variables)
-        self.log = Logger()
+        # adding header method
+        self.env.globals['header'] = self._header
+        # adding helper methods
+        self.env.globals['exists'] = jhelpers.exists
 
     def generate(self, src):
         if not os.path.exists(src):
