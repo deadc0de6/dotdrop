@@ -582,7 +582,7 @@ the following entries:
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
   * `trans`: list of transformation keys that need to be defined in the **trans** entry below.
-  * `ignoreempty`: if true empty template will not be deployed (default global value of `ignoreempty` above)
+  * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
 
 ```yaml
   <dotfile-key-name>:
@@ -637,7 +637,7 @@ the following entries:
 * **dynvariables** entry (optional): a list of interpreted variables (see [Interpreted variables](#interpreted-variables))
 
 ```
-  <variable-name>: <shell-oneliner>>
+  <variable-name>: <shell-oneliner>
 ```
 
 ## All dotfiles for a profile
