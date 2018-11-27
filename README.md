@@ -85,6 +85,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 
   * [Available variables](#available-variables)
   * [Available methods](#available-methods)
+  * [Dynamic dotfile paths](#dynamic-dotfile-paths)
   * [Dotdrop header](#dotdrop-header)
 
 * [Example](#example)
@@ -579,6 +580,8 @@ the following entries:
   * `ignoreempty`: do not deploy template if empty (default *false*)
 
 * **dotfiles** entry: a list of dotfiles
+  * `dst`: where this dotfile needs to be deployed (can use `variables` and `dynvariables`, make sure to quote).
+  * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
@@ -625,9 +628,7 @@ the following entries:
 
 * **trans** entry (optional): a list of transformations (see [Use transformations](#use-transformations))
 
-```
-  <trans-key>: <command-to-execute>
-```
+``` <trans-key>: <command-to-execute> ```
 
 * **variables** entry (optional): a list of template variables (see [Variables](#variables))
 
@@ -797,6 +798,28 @@ it does exist
 
 If you'd like a specific function to be available, either open an issue
 or do a PR.
+
+## Dynamic dotfile paths
+
+Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
+defined variables (`variables` or `dynvariables`).
+
+For example to have a dotfile deployed on the unique firefox profile where the
+profile path is dynamically found using a shell oneliner stored in a dynvariable:
+```yaml
+dynvariables:
+  mozpath: find ~/.mozilla/firefox -name '*.default'
+dotfiles:
+  f_somefile:
+    dst: "{{@@ mozpath @@}}/somefile"
+    src: firefox/somefile
+profiles:
+  home:
+    dotfiles:
+    - f_somefile
+```
+
+Make sure to quote the path in the config file.
 
 ## Dotdrop header
 

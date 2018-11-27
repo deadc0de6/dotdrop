@@ -90,7 +90,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
         LOG.warn(msg.format(opts['profile']))
         return False
 
-    t = Templategen(opts['profile'], base=opts['dotpath'],
+    t = Templategen(profile=opts['profile'], base=opts['dotpath'],
                     variables=opts['variables'], debug=opts['debug'])
     tmpdir = None
     if temporary:
@@ -158,7 +158,7 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     if len(selected) < 1:
         return False
 
-    t = Templategen(opts['profile'], base=opts['dotpath'],
+    t = Templategen(profile=opts['profile'], base=opts['dotpath'],
                     variables=opts['variables'], debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
@@ -438,6 +438,9 @@ def main():
     if opts['debug']:
         LOG.dbg('config file: {}'.format(args['--cfg']))
         LOG.dbg('opts: {}'.format(opts))
+
+    # resolve dynamic paths
+    conf.eval_dotfiles(opts['profile'], debug=opts['debug'])
 
     if ENV_NOBANNER not in os.environ \
             and opts['banner'] \

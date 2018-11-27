@@ -23,7 +23,7 @@ COMMENT_END = '@@#}'
 
 class Templategen:
 
-    def __init__(self, profile, base='.', variables={}, debug=False):
+    def __init__(self, profile='', base='.', variables={}, debug=False):
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger()
@@ -39,7 +39,8 @@ class Templategen:
                                comment_end_string=COMMENT_END)
         # adding variables
         self.env.globals['env'] = os.environ
-        self.env.globals['profile'] = profile
+        if profile:
+            self.env.globals['profile'] = profile
         self.env.globals.update(variables)
         # adding header method
         self.env.globals['header'] = self._header
@@ -47,9 +48,16 @@ class Templategen:
         self.env.globals['exists'] = jhelpers.exists
 
     def generate(self, src):
+        """render template from path"""
         if not os.path.exists(src):
             return ''
         return self._handle_file(src)
+
+    def generate_string(self, string):
+        """render template from string"""
+        if not string:
+            return ''
+        return self.env.from_string(string).render()
 
     def _header(self, prepend=''):
         """add a comment usually in the header of a dotfile"""

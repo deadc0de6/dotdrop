@@ -11,6 +11,7 @@ import shlex
 
 # local import
 from dotdrop.dotfile import Dotfile
+from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
 from dotdrop.utils import *
@@ -109,6 +110,15 @@ class Cfg:
         self.prodots = {}
         if not self._load_file():
             raise ValueError('config is not valid')
+
+    def eval_dotfiles(self, profile, debug=False):
+        """resolve dotfiles src/dst templates"""
+        t = Templategen(profile=profile,
+                        variables=self.get_variables(),
+                        debug=debug)
+        for d in self.get_dotfiles(profile):
+            d.src = t.generate_string(d.src)
+            d.dst = t.generate_string(d.dst)
 
     def _load_file(self):
         """load the yaml file"""
