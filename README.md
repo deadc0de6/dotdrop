@@ -628,7 +628,9 @@ the following entries:
 
 * **trans** entry (optional): a list of transformations (see [Use transformations](#use-transformations))
 
-``` <trans-key>: <command-to-execute> ```
+```
+   <trans-key>: <command-to-execute>
+```
 
 * **variables** entry (optional): a list of template variables (see [Variables](#variables))
 
