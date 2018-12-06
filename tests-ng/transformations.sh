@@ -9,6 +9,7 @@
 
 # exit on first error
 set -e
+#set -v
 
 # all this crap to get current path
 rl="readlink -f"
@@ -59,10 +60,16 @@ cfg="${tmps}/config.yaml"
 
 # token
 token="test-base64"
+tokend="compressed archive"
+touched="touched"
 
 cat > ${cfg} << _EOF
 trans:
   base64: cat {0} | base64 -d > {1}
+  uncompress: mkdir -p {1} && tar -xf {0} -C {1}
+trans_write:
+  base64: cat {0} | base64 > {1}
+  compress: tar -cf {1} -C {0} .
 config:
   backup: true
   create: true
@@ -74,42 +81,116 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
-    trans:
-      - base64
+    trans: base64
+    trans_write: base64
+  d_ghi:
+    dst: ${tmpd}/ghi
+    src: ghi
+    trans: uncompress
+    trans_write: compress
 profiles:
   p1:
     dotfiles:
     - f_abc
     - f_def
+    - d_ghi
 _EOF
 cat ${cfg}
 
-# create the dotfile
+# create the base64 dotfile
 tmpf=`mktemp`
-echo ${token}  > ${tmpf}
+echo ${token} > ${tmpf}
 cat ${tmpf} | base64 > ${tmps}/dotfiles/abc
 rm -f ${tmpf}
 
+# create the canary dotfile
 echo 'marker' > ${tmps}/dotfiles/def
 
-# install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b
+# create the compressed dotfile
+tmpx=`mktemp -d`
+mkdir -p ${tmpx}/{a,b,c}
+mkdir -p ${tmpx}/a/{dir1,dir2}
+# ambiguous redirect ??
+#echo ${tokend} > ${tmpd}/{a,b,c}/somefile
+echo ${tokend} > ${tmpx}/a/somefile
+echo ${tokend} > ${tmpx}/b/somefile
+echo ${tokend} > ${tmpx}/c/somefile
+echo ${tokend} > ${tmpx}/a/dir1/otherfile
+tar -cf ${tmps}/dotfiles/ghi -C ${tmpx} .
+rm -rf ${tmpx}
+tar -tf ${tmps}/dotfiles/ghi
 
-# checks
+###########################
+# test install and compare
+###########################
+
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
+
+# check canary dotfile
+[ ! -e ${tmpd}/def ] && exit 1
+
+# check base64 dotfile
 [ ! -e ${tmpd}/abc ] && exit 1
 content=`cat ${tmpd}/abc`
 [ "${content}" != "${token}" ] && exit 1
 
+# check directory dotfile
+[ ! -e ${tmpd}/ghi/a/dir1/otherfile ] && exit 1
+content=`cat ${tmpd}/ghi/a/somefile`
+[ "${content}" != "${tokend}" ] && exit 1
+content=`cat ${tmpd}/ghi/a/dir1/otherfile`
+[ "${content}" != "${tokend}" ] && exit 1
+
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
 [ "$?" != "0" ] && exit 1
 
-# change file
-echo 'touched' >> ${tmpd}/abc
+# change base64 deployed file
+echo ${touched} > ${tmpd}/abc
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
 [ "$?" != "1" ] && exit 1
 set -e
+
+# change uncompressed deployed dotfile
+echo ${touched} > ${tmpd}/ghi/a/somefile
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+[ "$?" != "1" ] && exit 1
+set -e
+
+###########################
+# test update
+###########################
+
+# update single file
+cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V f_abc
+[ "$?" != "0" ] && exit 1
+
+# test updated file
+[ ! -e ${tmps}/dotfiles/abc ] && exit 1
+content=`cat ${tmps}/dotfiles/abc`
+bcontent=`echo ${touched} | base64`
+[ "${content}" != "${bcontent}" ] && exit 1
+
+# update directory
+echo ${touched} > ${tmpd}/ghi/b/newfile
+rm -r ${tmpd}/ghi/c
+cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V d_ghi
+[ "$?" != "0" ] && exit 1
+
+# test updated directory
+tar -tf ${tmps}/dotfiles/ghi | grep './b/newfile'
+tar -tf ${tmps}/dotfiles/ghi | grep './a/dir1/otherfile'
+
+tmpy=`mktemp -d`
+tar -xf ${tmps}/dotfiles/ghi -C ${tmpy}
+content=`cat ${tmpy}/a/somefile`
+[ "${content}" != "${touched}" ] && exit 1
+
+# check canary dotfile
+[ ! -e ${tmps}/dotfiles/def ] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

@@ -113,7 +113,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
         else:
             src = dotfile.src
             tmp = None
-            if dotfile.trans:
+            if dotfile.trans_r:
                 tmp = apply_trans(opts, dotfile)
                 if not tmp:
                     continue
@@ -173,7 +173,7 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             LOG.emph('\"{}\" does not exist on local\n'.format(dotfile.dst))
 
         tmpsrc = None
-        if dotfile.trans:
+        if dotfile.trans_r:
             # apply transformation
             tmpsrc = apply_trans(opts, dotfile)
             if not tmpsrc:
@@ -387,22 +387,18 @@ def _select(selections, dotfiles):
 
 
 def apply_trans(opts, dotfile):
-    """apply the transformation to the dotfile
+    """apply the read transformation to the dotfile
     return None if fails and new source if succeed"""
     src = dotfile.src
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
-    err = False
-    for trans in dotfile.trans:
-        if opts['debug']:
-            LOG.dbg('executing transformation {}'.format(trans))
-        s = os.path.join(opts['dotpath'], src)
-        temp = os.path.join(opts['dotpath'], new_src)
-        if not trans.transform(s, temp):
-            msg = 'transformation \"{}\" failed for {}'
-            LOG.err(msg.format(trans.key, dotfile.key))
-            err = True
-            break
-    if err:
+    trans = dotfile.trans_r
+    if opts['debug']:
+        LOG.dbg('executing transformation {}'.format(trans))
+    s = os.path.join(opts['dotpath'], src)
+    temp = os.path.join(opts['dotpath'], new_src)
+    if not trans.transform(s, temp):
+        msg = 'transformation \"{}\" failed for {}'
+        LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
             remove(new_src)
         return None
@@ -422,7 +418,7 @@ def main():
     try:
         conf = Cfg(os.path.expanduser(args['--cfg']))
     except ValueError as e:
-        LOG.err('error: {}'.format(str(e)))
+        LOG.err('Config format error: {}'.format(str(e)))
         return False
 
     opts = conf.get_settings()

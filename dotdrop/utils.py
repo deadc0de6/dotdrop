@@ -8,6 +8,7 @@ utilities
 import subprocess
 import tempfile
 import os
+import uuid
 import shlex
 from shutil import rmtree
 
@@ -59,6 +60,12 @@ def get_tmpfile():
     """create a temporary file"""
     (fd, path) = tempfile.mkstemp(prefix='dotdrop-')
     return path
+
+
+def get_unique_tmp_name():
+    """get a unique file name (not created)"""
+    unique = str(uuid.uuid4())
+    return os.path.join(tempfile.gettempdir(), unique)
 
 
 def remove(path):

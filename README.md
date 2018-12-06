@@ -403,13 +403,19 @@ when xinitrc is installed.
 
 ## Use transformations
 
-Transformations are used to transform a dotfile before it is
-installed. These are executed before the dotfile is installed to transform the source.
+There are two types of transformations available:
 
-Transformation commands have two arguments:
+* **read transformations** ([Config](#config) key *trans*): used to transform dotfiles before they are installed
+  (used for commands `install` and `compare`). They have two arguments:
 
-* **{0}** will be replaced with the dotfile to process
-* **{1}** will be replaced with a temporary file to store the result of the transformation
+  * **{0}** will be replaced with the dotfile to process
+  * **{1}** will be replaced with a temporary file to store the result of the transformation
+
+* **write transformations** ([Config](#config) key *trans_write**): used to transform files before updating a dotfile
+  (used for command `update`). They have two arguments
+
+  * **{0}** will be replaced with the file path to update the dotfile with
+  * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when the dotfile needs to be
 stored encrypted.
@@ -420,42 +426,19 @@ dotfiles:
   f_secret:
     dst: ~/.secret
     src: secret
-    trans:
-      - gpg
+    trans: gpg
 trans:
   gpg: gpg2 -q --for-your-eyes-only --no-tty -d {0} > {1}
 ```
 
-The above config allows to store the dotfile `~/.secret` encrypted in the *dotfiles*
+The above config allows to store the dotfile `~/.secret` encrypted in the *dotpath*
 directory and uses gpg to decrypt it when `install` is run.
 
-Here's how to deploy the above solution:
-
-* import the clear dotfile (what creates the correct entries in the config file)
-
-```bash
-$ dotdrop import ~/.secret
-```
-
-* encrypt the original dotfile
-
-```bash
-$ <some-gpg-command> ~/.secret
-```
-
-* overwrite the dotfile with the encrypted version
-
-```bash
-$ cp <encrypted-version-of-secret> dotfiles/secret
-```
-
-* edit the config file and add the transformation to the dotfile
-  (as shown in the example above)
-
-* commit and push the changes
+See the wiki page for a walkthrough on how to deploy this solution as well
+as more information on transformations:
+[wiki transformation page](https://github.com/deadc0de6/dotdrop/wiki/transformations).
 
 Note that transformations cannot be used if the dotfiles is to be linked (`link: true`).
-Also `compare` won't work on dotfiles using transformations.
 
 ## Update dotdrop
 
@@ -482,17 +465,17 @@ $ sudo pip3 install dotdrop --upgrade
 Dotfiles managed by dotdrop can be updated using the `update` command. When updating, only
 dotfiles that have differences with the stored version are updated.
 A confirmation is requested from the user before any overwrite/update unless the
-`--force` switch is used.
+`-f --force` switch is used.
 
 Either provide the path of the file containing the new version of the dotfile or
-provide the dotfile key to update (as found in the config file) along with the `--key` switch.
-When using the `--key` switch and no key is provided, all dotfiles for that profile are updated.
+provide the dotfile key to update (as found in the config file) along with the `-k --key` switch.
+When using the `-k --key` switch and no key is provided, all dotfiles for that profile are updated.
 ```bash
 # update by path
 $ dotdrop update ~/.vimrc
 
-# update by key
-$ dotdrop update f_vimrc
+# update by key with the --key switch
+$ dotdrop update --key f_vimrc
 ```
 
 There are two cases when updating a dotfile:
@@ -585,7 +568,8 @@ the following entries:
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
-  * `trans`: list of transformation keys that need to be defined in the **trans** entry below.
+  * `trans`: transformation key to apply when installing this dotfile (must be defined in the **trans** entry below).
+  * `trans_write`: transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below).
   * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
 
 ```yaml
@@ -599,8 +583,8 @@ the following entries:
       - "<ignore-pattern>"
     actions:
       - <action-key>
-    trans:
-      - <transformation-key>
+    trans: <transformation-key>
+    trans_write: <transformation-key>
 ```
 
 * **profiles** entry: a list of profiles with the different dotfiles that
@@ -627,6 +611,12 @@ the following entries:
 ```
 
 * **trans** entry (optional): a list of transformations (see [Use transformations](#use-transformations))
+
+```
+   <trans-key>: <command-to-execute>
+```
+
+* **trans_write** entry (optional): a list of write transformations (see [Use transformations](#use-transformations))
 
 ```
    <trans-key>: <command-to-execute>

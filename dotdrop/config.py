@@ -42,7 +42,8 @@ class Cfg:
     key_actions_post = 'post'
 
     # transformations keys
-    key_trans = 'trans'
+    key_trans_r = 'trans'
+    key_trans_w = 'trans_write'
 
     # template variables
     key_variables = 'variables'
@@ -57,7 +58,8 @@ class Cfg:
     key_dotfiles_noempty = 'ignoreempty'
     key_dotfiles_cmpignore = 'cmpignore'
     key_dotfiles_actions = 'actions'
-    key_dotfiles_trans = 'trans'
+    key_dotfiles_trans_r = 'trans'
+    key_dotfiles_trans_w = 'trans_write'
 
     # profiles keys
     key_profiles = 'profiles'
@@ -101,9 +103,13 @@ class Cfg:
         # NOT linked inside the yaml dict (self.content)
         self.actions = {}
 
-        # dict of all transformation objects by trans key
+        # dict of all read transformation objects by trans key
         # NOT linked inside the yaml dict (self.content)
-        self.trans = {}
+        self.trans_r = {}
+
+        # dict of all write transformation objects by trans key
+        # NOT linked inside the yaml dict (self.content)
+        self.trans_w = {}
 
         # represents all dotfiles per profile by profile key
         # NOT linked inside the yaml dict (self.content)
@@ -174,11 +180,17 @@ class Cfg:
                             self.actions[self.key_actions_post] = {}
                         self.actions[self.key_actions_post][k] = Action(k, v)
 
-        # parse all transformations
-        if self.key_trans in self.content:
-            if self.content[self.key_trans] is not None:
-                for k, v in self.content[self.key_trans].items():
-                    self.trans[k] = Transform(k, v)
+        # parse read transformations
+        if self.key_trans_r in self.content:
+            if self.content[self.key_trans_r] is not None:
+                for k, v in self.content[self.key_trans_r].items():
+                    self.trans_r[k] = Transform(k, v)
+
+        # parse write transformations
+        if self.key_trans_w in self.content:
+            if self.content[self.key_trans_w] is not None:
+                for k, v in self.content[self.key_trans_w].items():
+                    self.trans_w[k] = Transform(k, v)
 
         # parse the profiles
         self.lnk_profiles = self.content[self.key_profiles]
@@ -213,20 +225,60 @@ class Cfg:
             itsactions = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
             actions = self._parse_actions(itsactions)
-            itstrans = v[self.key_dotfiles_trans] if \
-                self.key_dotfiles_trans in v else []
-            trans = self._parse_trans(itstrans)
-            if len(trans) > 0 and link:
+
+            # parse read transformation
+            itstrans_r = v[self.key_dotfiles_trans_r] if \
+                self.key_dotfiles_trans_r in v else None
+            trans_r = None
+            if itstrans_r:
+                if type(itstrans_r) is list:
+                    msg = 'One transformation allowed per dotfile'
+                    msg += ', error on dotfile \"{}\"'
+                    self.log.err(msg.format(k))
+                    msg = 'Please modify your config file to: \"trans: {}\"'
+                    self.log.err(msg.format(itstrans_r[0]))
+                    return False
+                trans_r = self._parse_trans(itstrans_r, read=True)
+                if not trans_r:
+                    msg = 'unknown trans \"{}\" for \"{}\"'
+                    self.log.err(msg.format(itstrans_r, k))
+                    return False
+
+            # parse write transformation
+            itstrans_w = v[self.key_dotfiles_trans_w] if \
+                self.key_dotfiles_trans_w in v else None
+            trans_w = None
+            if itstrans_w:
+                if type(itstrans_w) is list:
+                    msg = 'One write transformation allowed per dotfile'
+                    msg += ', error on dotfile \"{}\"'
+                    self.log.err(msg.format(k))
+                    msg = 'Please modify your config file: \"trans_write: {}\"'
+                    self.log.err(msg.format(itstrans_w[0]))
+                    return False
+                trans_w = self._parse_trans(itstrans_w, read=False)
+                if not trans_w:
+                    msg = 'unknown trans_write \"{}\" for \"{}\"'
+                    self.log.err(msg.format(itstrans_w, k))
+                    return False
+
+            # disable transformation when link is true
+            if link and (trans_r or trans_w):
                 msg = 'transformations disabled for \"{}\"'.format(dst)
                 msg += ' because link is True'
                 self.log.warn(msg)
-                trans = []
+                trans_r = None
+                trans_w = None
+
+            # parse ignore pattern
             ignores = v[self.key_dotfiles_cmpignore] if \
                 self.key_dotfiles_cmpignore in v else []
+
+            # create new dotfile
             self.dotfiles[k] = Dotfile(k, dst, src,
                                        link=link, actions=actions,
-                                       trans=trans, cmpignore=ignores,
-                                       noempty=noempty)
+                                       trans_r=trans_r, trans_w=trans_w,
+                                       cmpignore=ignores, noempty=noempty)
 
         # assign dotfiles to each profile
         for k, v in self.lnk_profiles.items():
@@ -315,16 +367,14 @@ class Cfg:
             res[key].append(action)
         return res
 
-    def _parse_trans(self, entries):
-        """parse transformations specified for an element
-        where entries are the ones defined for this dotfile"""
-        res = []
-        for entry in entries:
-            if entry not in self.trans.keys():
-                self.log.warn('unknown trans \"{}\"'.format(entry))
-                continue
-            res.append(self.trans[entry])
-        return res
+    def _parse_trans(self, trans, read=True):
+        """parse transformation key specified for a dotfile"""
+        transformations = self.trans_r
+        if not read:
+            transformations = self.trans_w
+        if trans not in transformations.keys():
+            return None
+        return transformations[trans]
 
     def _complete_settings(self):
         """set settings defaults if not present"""

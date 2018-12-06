@@ -60,15 +60,15 @@ class Transform(Cmd):
         """execute transformation with {0} and {1}
         where {0} is the file to transform and
         {1} is the result file"""
-        if os.path.exists(arg1):
-            msg = 'transformation destination exists: {}'
-            self.log.warn(msg.format(arg1))
-            return False
         ret = 1
         cmd = self.action.format(arg0, arg1)
+        if os.path.exists(arg1):
+            msg = 'transformation \"{}\": destination exists: {}'
+            self.log.warn(msg.format(cmd, arg1))
+            return False
         self.log.sub('transforming with \"{}\"'.format(cmd))
         try:
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
-            self.log.warn('action interrupted')
+            self.log.warn('transformation interrupted')
         return ret == 0

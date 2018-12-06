@@ -55,10 +55,8 @@ exec bspwm
                     f.write('    actions:\n')
                     for action in d.actions:
                         f.write('      - {}\n'.format(action.key))
-                if len(d.trans) > 0:
-                    f.write('    trans:\n')
-                    for action in d.trans:
-                        f.write('      - {}\n'.format(action.key))
+                if d.trans_r:
+                    f.write('    trans: {}\n'.format(d.trans_r.key))
             f.write('profiles:\n')
             f.write('  {}:\n'.format(profile))
             for d in dotfiles:
@@ -154,7 +152,7 @@ exec bspwm
         tr = Action('testtrans', cmd)
         f9, c9 = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
-        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans=[tr])
+        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=tr)
 
         # to test template
         f10, _ = create_random_file(tmp, content='{{@@ profile @@}}')

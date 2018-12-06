@@ -56,12 +56,39 @@ class Updater:
 
     def _update(self, path, dotfile):
         """update dotfile from file pointed by path"""
+        ret = False
+        new_path = None
         left = os.path.expanduser(path)
         right = os.path.join(self.conf.abs_dotpath(self.dotpath), dotfile.src)
         right = os.path.expanduser(right)
-        if os.path.isdir(path):
-            return self._handle_dir(left, right)
-        return self._handle_file(left, right)
+        if dotfile.trans_w:
+            # apply write transformation if any
+            new_path = self._apply_trans_w(path, dotfile)
+            if not new_path:
+                return False
+            left = new_path
+        if os.path.isdir(left):
+            ret = self._handle_dir(left, right)
+        else:
+            ret = self._handle_file(left, right)
+        # clean temporary files
+        if new_path and os.path.exists(new_path):
+            utils.remove(new_path)
+        return ret
+
+    def _apply_trans_w(self, path, dotfile):
+        """apply write transformation to dotfile"""
+        trans = dotfile.trans_w
+        if self.debug:
+            self.log.dbg('executing write transformation {}'.format(trans))
+        tmp = utils.get_unique_tmp_name()
+        if not trans.transform(path, tmp):
+            msg = 'transformation \"{}\" failed for {}'
+            self.log.err(msg.format(trans.key, dotfile.key))
+            if os.path.exists(tmp):
+                utils.remove(tmp)
+            return None
+        return tmp
 
     def _normalize(self, path):
         """normalize the path to match dotfile"""

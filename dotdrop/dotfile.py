@@ -9,9 +9,8 @@ represents a dotfile in dotdrop
 class Dotfile:
 
     def __init__(self, key, dst, src,
-                 actions={}, trans=[],
-                 link=False, cmpignore=[],
-                 noempty=False):
+                 actions={}, trans_r=None, trans_w=None,
+                 link=False, cmpignore=[], noempty=False):
         # key of dotfile in the config
         self.key = key
         # path where to install this dotfile
@@ -22,8 +21,10 @@ class Dotfile:
         self.link = link
         # list of actions
         self.actions = actions
-        # list of transformations
-        self.trans = trans
+        # read transformation
+        self.trans_r = trans_r
+        # write transformation
+        self.trans_w = trans_w
         # pattern to ignore when comparing
         self.cmpignore = cmpignore
         # do not deploy empty file
