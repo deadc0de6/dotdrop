@@ -405,22 +405,28 @@ when xinitrc is installed.
 
 There are two types of transformations available:
 
-* **read transformations** ([Config](#config) key *trans*): used to transform dotfiles before they are installed
-  (used for commands `install` and `compare`). They have two arguments:
+* **read transformations**: used to transform dotfiles before they are installed
 
-  * **{0}** will be replaced with the dotfile to process
-  * **{1}** will be replaced with a temporary file to store the result of the transformation
+  * [Config](#config) key *trans*
+  * Used for commands `install` and `compare`
+  * They have two arguments:
 
-* **write transformations** ([Config](#config) key *trans_write**): used to transform files before updating a dotfile
-  (used for command `update`). They have two arguments
+    * **{0}** will be replaced with the dotfile to process
+    * **{1}** will be replaced with a temporary file to store the result of the transformation
 
-  * **{0}** will be replaced with the file path to update the dotfile with
-  * **{1}** will be replaced with a temporary file to store the result of the transformation
+* **write transformations**: used to transform files before updating a dotfile
+*
+  * [Config](#config) key *trans_write*
+  * Used for command `update`
+  * They have two arguments:
 
-A typical use-case for transformations is when the dotfile needs to be
+    * **{0}** will be replaced with the file path to update the dotfile with
+    * **{1}** will be replaced with a temporary file to store the result of the transformation
+
+A typical use-case for transformations is when dotfiles need to be
 stored encrypted.
 
-Here's an example of part of a config file to use gpg encrypted dotfiles:
+Here's an example of part of a config file to use PGP encrypted dotfiles:
 ```yaml
 dotfiles:
   f_secret:
@@ -432,13 +438,13 @@ trans:
 ```
 
 The above config allows to store the dotfile `~/.secret` encrypted in the *dotpath*
-directory and uses gpg to decrypt it when `install` is run.
+directory and uses `gpg2` to decrypt it when `install` is run.
 
 See the wiki page for a walkthrough on how to deploy this solution as well
 as more information on transformations:
 [wiki transformation page](https://github.com/deadc0de6/dotdrop/wiki/transformations).
 
-Note that transformations cannot be used if the dotfiles is to be linked (`link: true`).
+Note that transformations cannot be used if the dotfiles is to be linked (when `link: true`).
 
 ## Update dotdrop
 
