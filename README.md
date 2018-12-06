@@ -406,20 +406,16 @@ when xinitrc is installed.
 There are two types of transformations available:
 
 * **read transformations**: used to transform dotfiles before they are installed
-
   * [Config](#config) key *trans*
   * Used for commands `install` and `compare`
   * They have two arguments:
-
     * **{0}** will be replaced with the dotfile to process
     * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 * **write transformations**: used to transform files before updating a dotfile
-*
   * [Config](#config) key *trans_write*
   * Used for command `update`
   * They have two arguments:
-
     * **{0}** will be replaced with the file path to update the dotfile with
     * **{1}** will be replaced with a temporary file to store the result of the transformation
 
