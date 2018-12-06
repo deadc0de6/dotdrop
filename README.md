@@ -67,7 +67,6 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 * [Installation](#installation)
 * [Usage](#usage)
 * How to
-
   * [Install dotfiles](#install-dotfiles)
   * [Compare dotfiles](#compare-dotfiles)
   * [Import dotfiles](#import-dotfiles)
@@ -79,15 +78,12 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
   * [Update dotfiles](#update-dotfiles)
   * [Store sensitive dotfiles](#store-sensitive-dotfiles)
   * [Symlink dotfiles](#symlink-dotfiles)
-
 * [Config](#config)
 * [Templating](#templating)
-
   * [Available variables](#available-variables)
   * [Available methods](#available-methods)
   * [Dynamic dotfile paths](#dynamic-dotfile-paths)
   * [Dotdrop header](#dotdrop-header)
-
 * [Example](#example)
 * [User tricks](#user-tricks)
 * [People using dotdrop](#people-using-dotdrop)
@@ -405,15 +401,13 @@ when xinitrc is installed.
 
 There are two types of transformations available:
 
-* **read transformations**: used to transform dotfiles before they are installed
-  * [Config](#config) key *trans*
+* **read transformations**: used to transform dotfiles before they are installed ([Config](#config) key *trans*)
   * Used for commands `install` and `compare`
   * They have two arguments:
     * **{0}** will be replaced with the dotfile to process
     * **{1}** will be replaced with a temporary file to store the result of the transformation
 
-* **write transformations**: used to transform files before updating a dotfile
-  * [Config](#config) key *trans_write*
+* **write transformations**: used to transform files before updating a dotfile ([Config](#config) key *trans_write*)
   * Used for command `update`
   * They have two arguments:
     * **{0}** will be replaced with the file path to update the dotfile with
