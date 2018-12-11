@@ -92,8 +92,8 @@ class Updater:
 
     def _normalize(self, path):
         """normalize the path to match dotfile"""
-        path = os.path.expanduser(path)
         path = os.path.expandvars(path)
+        path = os.path.abspath(path)
 
         # normalize the path
         if path.startswith(self.home):
