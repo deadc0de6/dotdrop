@@ -1,6 +1,6 @@
 pkgbase = dotdrop
 	pkgdesc = Save your dotfiles once, deploy them everywhere
-	pkgver = 0.24.0
+	pkgver = 0.24.1
 	pkgrel = 1
 	url = https://github.com/deadc0de6/dotdrop
 	arch = any
@@ -11,7 +11,7 @@ pkgbase = dotdrop
 	depends = python-jinja
 	depends = python-docopt
 	depends = python-pyaml
-	source = git+https://github.com/deadc0de6/dotdrop.git#tag=v0.24.0
+	source = git+https://github.com/deadc0de6/dotdrop.git#tag=v0.24.1
 	md5sums = SKIP
 
 pkgname = dotdrop
