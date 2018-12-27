@@ -118,11 +118,11 @@ class Templategen:
         for entry in os.listdir(path):
             fpath = os.path.join(path, entry)
             if not os.path.isfile(fpath):
-                # rec explore dir
+                # recursively explore directory
                 if Templategen.is_template(fpath):
                     return True
             else:
-                # is file a template
+                # check if file is a template
                 if Templategen._is_template(fpath):
                     return True
         return False
