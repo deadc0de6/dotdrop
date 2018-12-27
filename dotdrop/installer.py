@@ -253,8 +253,7 @@ class Installer:
     def _pivot_path(self, path, newdir, striphome=False):
         """change path to be under newdir"""
         if striphome:
-            home = os.path.expanduser('~')
-            path = path.lstrip(home)
+            utils.strip_home(path)
         sub = path.lstrip(os.sep)
         return os.path.join(newdir, sub)
 

@@ -22,14 +22,12 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
 from dotdrop.utils import *
 
-CUR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG = Logger()
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_NOBANNER = 'DOTDROP_NOBANNER'
 PROFILE = socket.gethostname()
 if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
-TILD = '~'
 TRANS_SUFFIX = 'trans'
 
 BANNER = """     _       _      _
@@ -235,7 +233,6 @@ def cmd_update(opts, conf, paths, iskey=False):
 def cmd_importer(opts, conf, paths):
     """import dotfile(s) from paths"""
     ret = True
-    home = os.path.expanduser(TILD)
     cnt = 0
     for path in paths:
         if not os.path.lexists(path):
@@ -244,9 +241,7 @@ def cmd_importer(opts, conf, paths):
             continue
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
-        src = dst
-        if dst.startswith(home):
-            src = dst[len(home):]
+        src = strip_home(dst)
         strip = '.' + os.sep
         if opts['keepdot']:
             strip = os.sep
@@ -257,7 +252,7 @@ def cmd_importer(opts, conf, paths):
         linkit = opts['link'] or opts['link_by_default']
 
         # prepare hierarchy for dotfile
-        srcf = os.path.join(CUR, opts['dotpath'], src)
+        srcf = os.path.join(opts['dotpath'], src)
         if not os.path.exists(srcf):
             cmd = ['mkdir', '-p', '{}'.format(os.path.dirname(srcf))]
             if opts['dry']:
@@ -294,7 +289,7 @@ def cmd_importer(opts, conf, paths):
     else:
         conf.save()
     LOG.log('\n{} file(s) imported.'.format(cnt))
-    return True
+    return ret
 
 
 def cmd_list_profiles(conf):

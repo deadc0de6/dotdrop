@@ -14,6 +14,7 @@ from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
 
+
 TILD = '~'
 
 
@@ -21,7 +22,6 @@ class Updater:
 
     def __init__(self, conf, dotpath, dry, safe,
                  iskey=False, debug=False):
-        self.home = os.path.expanduser(TILD)
         self.conf = conf
         self.dotpath = dotpath
         self.dry = dry
@@ -59,7 +59,7 @@ class Updater:
         ret = False
         new_path = None
         left = os.path.expanduser(path)
-        right = os.path.join(self.conf.abs_dotpath(self.dotpath), dotfile.src)
+        right = os.path.join(self.conf.abs_or_rel(self.dotpath), dotfile.src)
         right = os.path.expanduser(right)
         if dotfile.trans_w:
             # apply write transformation if any
@@ -95,10 +95,11 @@ class Updater:
         path = os.path.expanduser(path)
         path = os.path.expandvars(path)
         path = os.path.abspath(path)
+        home = os.path.expanduser(TILD) + os.sep
 
         # normalize the path
-        if path.startswith(self.home):
-            path = path.lstrip(self.home)
+        if path.startswith(home):
+            path = path[len(home):]
             path = os.path.join(TILD, path)
         return path
 

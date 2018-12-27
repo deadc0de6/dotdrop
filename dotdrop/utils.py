@@ -101,3 +101,11 @@ def content_empty(string):
     if string == b'\n':
         return True
     return False
+
+
+def strip_home(path):
+    """properly strip $HOME from path"""
+    home = os.path.expanduser('~') + os.sep
+    if path.startswith(home):
+        path = path[len(home):]
+    return path

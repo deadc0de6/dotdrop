@@ -89,7 +89,6 @@ class TestConfig(unittest.TestCase):
 
         # test profile
         opts = conf.get_settings()
-        print(conf.get_profiles())
         profiles = conf.get_profiles()
         self.assertTrue(pf1key in profiles)
         self.assertTrue(pf2key in profiles)

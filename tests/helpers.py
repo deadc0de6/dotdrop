@@ -11,6 +11,7 @@ import random
 import tempfile
 
 from dotdrop.config import Cfg
+from dotdrop.utils import *
 
 TMPSUFFIX = '.dotdrop'
 
@@ -96,11 +97,9 @@ def load_config(confpath, profile):
 
 def get_path_strip_version(path):
     '''Return the path of a file as stored in yaml config'''
-    strip = path
-    home = os.path.expanduser('~')
-    if strip.startswith(home):
-        strip = strip[len(home):]
-    return strip.lstrip('.' + os.sep)
+    path = strip_home(path)
+    path = path.lstrip('.' + os.sep)
+    return path
 
 
 def get_dotfile_from_yaml(dic, path):

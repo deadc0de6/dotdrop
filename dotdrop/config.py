@@ -17,9 +17,6 @@ from dotdrop.action import Action, Transform
 from dotdrop.utils import *
 
 
-TILD = '~'
-
-
 class Cfg:
     key_all = 'ALL'
 
@@ -314,7 +311,12 @@ class Cfg:
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = self.abs_dotpath(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = self.abs_or_rel(self.curdotpath)
+
+        # make sure we have an absolute workdir
+        self.curworkdir = self.lnk_settings[self.key_workdir]
+        self.lnk_settings[self.key_workdir] = self.abs_or_rel(self.curworkdir)
+
         return True
 
     def _get_included_dotfiles(self, profile):
@@ -401,8 +403,9 @@ class Cfg:
         if self.key_ignoreempty not in self.lnk_settings:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
 
-    def abs_dotpath(self, path):
-        """transform path to an absolute path based on config path"""
+    def abs_or_rel(self, path):
+        """path is either absolute or relative to the config path"""
+        path = os.path.expanduser(path)
         if not os.path.isabs(path):
             absconf = os.path.join(os.path.dirname(
                 self.cfgpath), path)
@@ -424,7 +427,7 @@ class Cfg:
         return elem.lower()
 
     def _get_paths(self, path):
-        p = self._strip_home(path)
+        p = strip_home(path)
         dirs = []
         while True:
             p, f = os.path.split(p)
@@ -465,14 +468,6 @@ class Cfg:
             if key not in keys:
                 break
         return key
-
-    def _strip_home(self, path):
-        """strip home part if any"""
-        path = os.path.expanduser(path)
-        home = os.path.expanduser(TILD)
-        if path.startswith(home):
-            path = path.lstrip(home)
-        return path
 
     def short_to_long(self):
         """transform all short keys to long keys"""
@@ -600,22 +595,28 @@ class Cfg:
 
     def dump(self):
         """return a dump of the config"""
-        # temporary reset dotpath
+        # temporary reset paths
         dotpath = self.lnk_settings[self.key_dotpath]
+        workdir = self.lnk_settings[self.key_workdir]
         self.lnk_settings[self.key_dotpath] = self.curdotpath
+        self.lnk_settings[self.key_workdir] = self.curworkdir
         # dump
         ret = yaml.dump(self.content, default_flow_style=False, indent=2)
-        # restore dotpath
+        # restore paths
         self.lnk_settings[self.key_dotpath] = dotpath
+        self.lnk_settings[self.key_workdir] = workdir
         return ret
 
     def save(self):
         """save the config to file"""
-        # temporary reset dotpath
+        # temporary reset paths
         dotpath = self.lnk_settings[self.key_dotpath]
+        workdir = self.lnk_settings[self.key_workdir]
         self.lnk_settings[self.key_dotpath] = self.curdotpath
+        self.lnk_settings[self.key_workdir] = self.curworkdir
         # save
         ret = self._save(self.content, self.cfgpath)
-        # restore dotpath
+        # restore path
         self.lnk_settings[self.key_dotpath] = dotpath
+        self.lnk_settings[self.key_workdir] = workdir
         return ret
