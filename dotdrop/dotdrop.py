@@ -235,6 +235,8 @@ def cmd_importer(opts, conf, paths):
     ret = True
     cnt = 0
     for path in paths:
+        if opts['debug']:
+            LOG.dbg('trying to import {}'.format(path))
         if not os.path.lexists(path):
             LOG.err('\"{}\" does not exist, ignored!'.format(path))
             ret = False
@@ -250,6 +252,8 @@ def cmd_importer(opts, conf, paths):
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
         linkit = opts['link'] or opts['link_by_default']
+        if opts['debug']:
+            LOG.dbg('new dotfile: {}'.format(dotfile))
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(opts['dotpath'], src)
@@ -277,7 +281,8 @@ def cmd_importer(opts, conf, paths):
                 if linkit:
                     remove(dst)
                     os.symlink(srcf, dst)
-        retconf, dotfile = conf.new(dotfile, opts['profile'], linkit)
+        retconf, dotfile = conf.new(dotfile, opts['profile'],
+                                    linkit, debug=opts['debug'])
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1

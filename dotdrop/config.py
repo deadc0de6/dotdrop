@@ -421,12 +421,13 @@ class Cfg:
         return ret
 
     def _norm_key_elem(self, elem):
-        """normalize key element for sanity"""
+        """normalize path element for sanity"""
         elem = elem.lstrip('.')
         elem = elem.replace(' ', '-')
         return elem.lower()
 
     def _get_paths(self, path):
+        """return a list of path elements, excluded home path"""
         p = strip_home(path)
         dirs = []
         while True:
@@ -466,7 +467,14 @@ class Cfg:
             key = '_'.join(entries)
             key = '{}_{}'.format(pre, key)
             if key not in keys:
-                break
+                return key
+        okey = key
+        cnt = 1
+        while key in keys:
+            # if unable to get a unique path
+            # get a random one
+            key = '{}_{}'.format(okey, cnt)
+            cnt += 1
         return key
 
     def short_to_long(self):
@@ -506,12 +514,13 @@ class Cfg:
         dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
         if dotfile.dst in [x[1] for x in dsts]:
             return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
+        # return key for this new dotfile
         path = os.path.expanduser(dotfile.dst)
         if self.lnk_settings[self.key_long]:
             return False, self._get_long_key(path)
         return False, self._get_short_key(path, self.dotfiles.keys())
 
-    def new(self, dotfile, profile, link=False):
+    def new(self, dotfile, profile, link=False, debug=False):
         """import new dotfile
         dotfile key will change and can be empty"""
         # keep it short
@@ -520,6 +529,8 @@ class Cfg:
 
         # adding new profile if doesn't exist
         if profile not in self.lnk_profiles:
+            if debug:
+                self.log.dbg('adding profile to config')
             # in the yaml
             self.lnk_profiles[profile] = {self.key_profiles_dots: []}
             # in the global list of dotfiles per profile
@@ -527,6 +538,8 @@ class Cfg:
 
         exists, key = self._dotfile_exists(dotfile)
         if exists:
+            if debug:
+                self.log.dbg('key already exists: {}'.format(key))
             # when dotfile already there somewhere
             dotfile = self.dotfiles[key]
             if dotfile in self.prodots[profile]:
@@ -543,8 +556,12 @@ class Cfg:
                 pro[self.key_profiles_dots].append(dotfile.key)
             return True, dotfile
 
+        if debug:
+            self.log.dbg('dotfile attributed key: {}'.format(key))
         # adding the new dotfile
         dotfile.key = key
+        if debug:
+            self.log.dbg('adding new dotfile: {}'.format(dotfile))
         # add the entry in the yaml file
         dots = self.content[self.key_dotfiles]
         dots[dotfile.key] = {
