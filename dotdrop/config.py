@@ -540,7 +540,7 @@ class Cfg:
         if exists:
             if debug:
                 self.log.dbg('key already exists: {}'.format(key))
-            # when dotfile already there somewhere
+            # retrieve existing dotfile
             dotfile = self.dotfiles[key]
             if dotfile in self.prodots[profile]:
                 self.log.err('\"{}\" already present'.format(dotfile.key))
@@ -560,6 +560,7 @@ class Cfg:
             self.log.dbg('dotfile attributed key: {}'.format(key))
         # adding the new dotfile
         dotfile.key = key
+        dotfile.link = link
         if debug:
             self.log.dbg('adding new dotfile: {}'.format(dotfile))
         # add the entry in the yaml file

@@ -282,7 +282,7 @@ def cmd_importer(opts, conf, paths):
                     remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = conf.new(dotfile, opts['profile'],
-                                    linkit, debug=opts['debug'])
+                                    link=linkit, debug=opts['debug'])
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
