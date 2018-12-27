@@ -499,6 +499,9 @@ def main():
         LOG.err('interrupted')
         ret = False
 
+    if opts['debug']:
+        LOG.dbg('configs:\n{}'.format(conf.dump()))
+
     return ret
 
 
