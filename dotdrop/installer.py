@@ -252,10 +252,16 @@ class Installer:
 
     def _pivot_path(self, path, newdir, striphome=False):
         """change path to be under newdir"""
+        if self.debug:
+            self.log.dbg('pivot new dir: \"{}\"'.format(newdir))
+            self.log.dbg('strip home: {}'.format(striphome))
         if striphome:
-            utils.strip_home(path)
+            path = utils.strip_home(path)
         sub = path.lstrip(os.sep)
-        return os.path.join(newdir, sub)
+        new = os.path.join(newdir, sub)
+        if self.debug:
+            self.log.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
+        return new
 
     def _exec_pre_actions(self, actions):
         """execute pre-actions if any"""
