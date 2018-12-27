@@ -156,5 +156,56 @@ grep -r ${string} ${tmpw} >/dev/null
 ## CLEANING
 rm -rf ${tmp} ${tmpd}
 
+## NONE
+echo "RUNNING UNDEFINED WORKDIR"
+# the dotfile source
+tmp=`mktemp -d`
+
+tmpf="${tmp}/dotfiles"
+
+mkdir -p ${tmpf}
+echo "dotfiles source (dotpath): ${tmpf}"
+
+# create the config file
+cfg="${tmp}/config.yaml"
+echo "config file: ${cfg}"
+
+# the dotfile destination
+tmpd=`mktemp -d`
+echo "dotfiles destination: ${tmpd}"
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+    link: true
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+cat ${cfg}
+
+# create the dotfile
+echo "{{@@ profile @@}}" > ${tmpf}/abc
+echo "${string}" >> ${tmpf}/abc
+
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
+
+# checks
+#grep -r p1 ${tmpw} >/dev/null
+#grep -r ${string} ${tmpw} >/dev/null
+[ ! -e ${tmpd}/abc ] && echo "[ERROR] dotfile not installed" && exit 1
+[ ! -h ${tmpd}/abc ] && echo "[ERROR] dotfile is not a symlink" && exit 1
+
+## CLEANING
+rm -rf ${tmp} ${tmpd}
+
 echo "OK"
 exit 0
