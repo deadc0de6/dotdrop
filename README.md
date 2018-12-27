@@ -554,7 +554,8 @@ the following entries:
   * `longkey`: use long keys for dotfiles when importing (default *false*)
   * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
   * `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
-  * `workdir`: directory where templates are installed before being symlink when using `link` (default *~/.config/dotdrop*)
+  * `workdir`: path to the directory where templates are installed before being symlinked when using `link`
+    (absolute path or relative to the config file location, defaults to *~/.config/dotdrop*)
   * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
   * `ignoreempty`: do not deploy template if empty (default *false*)
 
