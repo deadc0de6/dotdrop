@@ -602,6 +602,7 @@ class Cfg:
         self.lnk_settings[self.key_workdir] = self.curworkdir
         # dump
         ret = yaml.dump(self.content, default_flow_style=False, indent=2)
+        ret = ret.replace('{}', '')
         # restore paths
         self.lnk_settings[self.key_dotpath] = dotpath
         self.lnk_settings[self.key_workdir] = workdir

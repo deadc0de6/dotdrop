@@ -428,7 +428,8 @@ def main():
 
     if opts['debug']:
         LOG.dbg('config file: {}'.format(args['--cfg']))
-        LOG.dbg('opts: {}'.format(opts))
+        LOG.dbg('options:\n{}'.format(opts))
+        LOG.dbg('configs:\n{}'.format(conf.dump()))
 
     # resolve dynamic paths
     conf.eval_dotfiles(opts['profile'], debug=opts['debug'])
