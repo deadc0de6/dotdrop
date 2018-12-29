@@ -64,7 +64,7 @@ class Installer:
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
-        dst = os.path.expanduser(dst).rstrip('/')
+        dst = os.path.expanduser(dst).rstrip(os.sep)
         if self.totemp:
             # ignore actions
             return self.install(templater, src, dst, actions=[])
