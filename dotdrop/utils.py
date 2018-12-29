@@ -10,11 +10,12 @@ import tempfile
 import os
 import uuid
 import shlex
+import functools
+import operator
 from shutil import rmtree
 
 # local import
 from dotdrop.logger import Logger
-from dotdrop.version import __version__ as VERSION
 
 LOG = Logger()
 
@@ -109,3 +110,9 @@ def strip_home(path):
     if path.startswith(home):
         path = path[len(home):]
     return path
+
+
+def flatten(a):
+    """flatten list"""
+    return functools.reduce(operator.iconcat, a, [])
+

@@ -7,7 +7,6 @@ entry point
 
 import os
 import sys
-import subprocess
 import socket
 from docopt import docopt
 
@@ -20,7 +19,8 @@ from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
-from dotdrop.utils import *
+import dotdrop.utils as dd
+from dotdrop.linktypes import LinkTypes
 
 LOG = Logger()
 ENV_PROFILE = 'DOTDROP_PROFILE'
@@ -92,7 +92,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                     variables=opts['variables'], debug=opts['debug'])
     tmpdir = None
     if temporary:
-        tmpdir = get_tmpdir()
+        tmpdir = dd.get_tmpdir()
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], safe=opts['safe'],
                      base=opts['dotpath'], workdir=opts['workdir'],
@@ -106,8 +106,10 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                 preactions.append(action)
         if opts['debug']:
             LOG.dbg('installing {}'.format(dotfile))
-        if hasattr(dotfile, 'link') and dotfile.link:
+        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENTS:
             r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
+        elif hasattr(dotfile, 'link') and dotfile.link == LinkTypes.CHILDREN:
+            r = inst.linkall(t, dotfile.src, dotfile.dst, actions=preactions)
         else:
             src = dotfile.src
             tmp = None
@@ -121,7 +123,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
             if tmp:
                 tmp = os.path.join(opts['dotpath'], tmp)
                 if os.path.exists(tmp):
-                    remove(tmp)
+                    dd.remove(tmp)
         if len(r) > 0:
             if Cfg.key_actions_post in dotfile.actions:
                 actions = dotfile.actions[Cfg.key_actions_post]
@@ -189,7 +191,7 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             # clean tmp transformed dotfile if any
             tmpsrc = os.path.join(opts['dotpath'], tmpsrc)
             if os.path.exists(tmpsrc):
-                remove(tmpsrc)
+                dd.remove(tmpsrc)
         if diff == '':
             if opts['debug']:
                 LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
@@ -243,7 +245,7 @@ def cmd_importer(opts, conf, paths):
             continue
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
-        src = strip_home(dst)
+        src = dd.strip_home(dst)
         strip = '.' + os.sep
         if opts['keepdot']:
             strip = os.sep
@@ -262,7 +264,7 @@ def cmd_importer(opts, conf, paths):
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
-                r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                r, _ = dd.run(cmd, raw=False, debug=opts['debug'], checkerr=True)
                 if not r:
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
@@ -273,13 +275,13 @@ def cmd_importer(opts, conf, paths):
                 if linkit:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
-                r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
+                r, _ = dd.run(cmd, raw=False, debug=opts['debug'], checkerr=True)
                 if not r:
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
                 if linkit:
-                    remove(dst)
+                    dd.remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = conf.new(dotfile, opts['profile'],
                                     link=linkit, debug=opts['debug'])
@@ -400,7 +402,7 @@ def apply_trans(opts, dotfile):
         msg = 'transformation \"{}\" failed for {}'
         LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
-            remove(new_src)
+            dd.remove(new_src)
         return None
     return new_src
 
@@ -469,12 +471,12 @@ def main():
             # compare local dotfiles with dotfiles stored in dotdrop
             if opts['debug']:
                 LOG.dbg('running cmd: compare')
-            tmp = get_tmpdir()
+            tmp = dd.get_tmpdir()
             opts['dopts'] = args['--dopts']
             ret = cmd_compare(opts, conf, tmp, focus=args['--file'],
                               ignore=args['--ignore'])
             # clean tmp directory
-            remove(tmp)
+            dd.remove(tmp)
 
         elif args['import']:
             # import dotfile(s)

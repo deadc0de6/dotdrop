@@ -64,7 +64,7 @@ class Installer:
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
-        dst = os.path.expanduser(dst)
+        dst = os.path.normpath(os.path.expanduser(dst))
         if self.totemp:
             # ignore actions
             return self.install(templater, src, dst, actions=[])
@@ -79,6 +79,42 @@ class Installer:
                 return []
             src = tmp
         return self._link(src, dst, actions=actions)
+
+    def linkall(self, templater, src, dst, actions=[]):
+        """link all dotfiles in a given directory"""
+        self.action_executed = False
+        parent = os.path.join(self.base, os.path.expanduser(src))
+        if not os.path.exists(parent):
+            self.log.err('source dotfile does not exist: {}'.format(parent))
+            return []
+
+        dst = os.path.normpath(os.path.expanduser(dst))
+        if not os.path.lexists(dst):
+            self.log.sub('creating directory "{}"'.format(dst))
+            os.makedirs(dst)
+
+        if os.path.isfile(dst):
+            msg = 'Remove regular file "{}" and replace with empty directory?' \
+                .format(dst)
+            if self.safe and not self.log.ask(msg):
+                msg = 'ignoring "{}", nothing installed'
+                self.log.warn(msg.format(dst))
+                return []
+            os.unlink(dst)
+            os.mkdir(dst)
+
+        children = os.listdir(parent)
+        srcs = [os.path.join(parent, child) for child in children]
+        dsts = [os.path.join(dst, child) for child in children]
+
+        results = []
+        for i in range(len(children)):
+            result = self._link(srcs[i], dsts[i], actions)
+            if len(result):
+                actions = []
+            results.append(result)
+
+        return utils.flatten(results)
 
     def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""
@@ -308,3 +344,4 @@ class Installer:
         self.comparing = False
         self.create = createsaved
         return ret, tmpdst
+

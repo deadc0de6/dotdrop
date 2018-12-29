@@ -15,6 +15,7 @@ from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
 from dotdrop.utils import *
+from dotdrop.linktypes import LinkTypes
 
 
 class Cfg:
@@ -67,7 +68,7 @@ class Cfg:
     default_backup = True
     default_create = True
     default_banner = True
-    default_link = False
+    default_link = LinkTypes.NOLINK
     default_longkey = False
     default_keepdot = False
     default_showdiff = False
@@ -212,10 +213,13 @@ class Cfg:
             # ensures the dotfiles entry is a dict
             self.content[self.key_dotfiles] = {}
         for k, v in self.content[self.key_dotfiles].items():
-            src = v[self.key_dotfiles_src]
-            dst = v[self.key_dotfiles_dst]
-            link = v[self.key_dotfiles_link] if self.key_dotfiles_link \
-                in v else self.default_link
+            src = os.path.normpath(v[self.key_dotfiles_src])
+            dst = os.path.normpath(v[self.key_dotfiles_dst])
+            link = LinkTypes.PARENTS \
+                if self.key_dotfiles_link in v and v[self.key_dotfiles_link] \
+                else LinkTypes.CHILDREN \
+                if 'link_children' in v and v['link_children'] \
+                else LinkTypes.NOLINK
             noempty = v[self.key_dotfiles_noempty] if \
                 self.key_dotfiles_noempty \
                 in v else self.lnk_settings[self.key_ignoreempty]
@@ -264,7 +268,7 @@ class Cfg:
                     return False
 
             # disable transformation when link is true
-            if link and (trans_r or trans_w):
+            if link != LinkTypes.NOLINK and (trans_r or trans_w):
                 msg = 'transformations disabled for \"{}\"'.format(dst)
                 msg += ' because link is True'
                 self.log.warn(msg)
@@ -520,7 +524,7 @@ class Cfg:
             return False, self._get_long_key(path)
         return False, self._get_short_key(path, self.dotfiles.keys())
 
-    def new(self, dotfile, profile, link=False, debug=False):
+    def new(self, dotfile, profile, link=LinkTypes.NOLINK, debug=False):
         """import new dotfile
         dotfile key will change and can be empty"""
         # keep it short
@@ -569,9 +573,9 @@ class Cfg:
             self.key_dotfiles_dst: dotfile.dst,
             self.key_dotfiles_src: dotfile.src,
         }
-        if link:
+        if link != LinkTypes.NOLINK:
             # set the link flag
-            dots[dotfile.key][self.key_dotfiles_link] = True
+            dots[dotfile.key][self.key_dotfiles_link] = link
 
         # link it to this profile in the yaml file
         pro = self.content[self.key_profiles][profile]
