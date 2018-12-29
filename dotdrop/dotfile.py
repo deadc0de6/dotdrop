@@ -41,4 +41,3 @@ class Dotfile:
 
     def __hash__(self):
         return hash(self.dst) ^ hash(self.src) ^ hash(self.key)
-

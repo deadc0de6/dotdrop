@@ -94,8 +94,11 @@ class Installer:
             os.makedirs(dst)
 
         if os.path.isfile(dst):
-            msg = 'Remove regular file "{}" and replace with empty directory?' \
-                .format(dst)
+            msg = ''.join([
+                'Remove regular file "{}" and ',
+                'replace with empty directory?',
+            ]).format(dst)
+
             if self.safe and not self.log.ask(msg):
                 msg = 'ignoring "{}", nothing installed'
                 self.log.warn(msg.format(dst))
@@ -344,4 +347,3 @@ class Installer:
         self.comparing = False
         self.create = createsaved
         return ret, tmpdst
-

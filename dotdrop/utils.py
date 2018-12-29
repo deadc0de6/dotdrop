@@ -115,4 +115,3 @@ def strip_home(path):
 def flatten(a):
     """flatten list"""
     return functools.reduce(operator.iconcat, a, [])
-
