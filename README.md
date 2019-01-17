@@ -731,7 +731,7 @@ These can then be used in any template with
 
 Profile variables will take precedence over globally defined variables what
 means that you could do something like this:
-```
+```yaml
 variables:
   git_email: home@email.com
 dotfiles:
