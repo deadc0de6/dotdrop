@@ -57,6 +57,7 @@ class Cfg:
     key_dotfiles_actions = 'actions'
     key_dotfiles_trans_r = 'trans'
     key_dotfiles_trans_w = 'trans_write'
+    key_dotfiles_upignore = 'upignore'
 
     # profiles keys
     key_profiles = 'profiles'
@@ -272,15 +273,20 @@ class Cfg:
                 trans_r = None
                 trans_w = None
 
-            # parse ignore pattern
-            ignores = v[self.key_dotfiles_cmpignore] if \
+            # parse cmpignore pattern
+            cmpignores = v[self.key_dotfiles_cmpignore] if \
                 self.key_dotfiles_cmpignore in v else []
+
+            # parse upignore pattern
+            upignores = v[self.key_dotfiles_upignore] if \
+                self.key_dotfiles_upignore in v else []
 
             # create new dotfile
             self.dotfiles[k] = Dotfile(k, dst, src,
                                        link=link, actions=actions,
                                        trans_r=trans_r, trans_w=trans_w,
-                                       cmpignore=ignores, noempty=noempty)
+                                       cmpignore=cmpignores, noempty=noempty,
+                                       upignore=upignores)
 
         # assign dotfiles to each profile
         for k, v in self.lnk_profiles.items():

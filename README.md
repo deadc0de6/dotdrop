@@ -212,7 +212,7 @@ that don't need to appear in the output of compare.
 
 Either use the command line switch `-i --ignore` or add an entry in the dotfile
 directly in the `cmpignore` entry (see [Config](#config)).
-The pattern follows Unix shell-style wildcards like for example `*/path/file`.
+The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
 Make sure to quote those when using wildcards in the config file.
 
 It is also possible to install all dotfiles for a specific profile
@@ -474,6 +474,21 @@ $ dotdrop update ~/.vimrc
 $ dotdrop update --key f_vimrc
 ```
 
+It is possible to ignore files to update using unix pattern by providing those
+either through the switch `-i --ignore` or as part of the dotfile under the
+key `upignore` (see [Config](#config)).
+The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
+Make sure to quote those when using wildcards in the config file.
+```yaml
+dotfiles:
+  d_vim
+    dst: ~/.vim
+    src: vim
+    upignore:
+    - "*/undo-dir"
+    - "*/plugged"
+```
+
 There are two cases when updating a dotfile:
 
 **The dotfile doesn't use [templating](#template)**
@@ -564,6 +579,7 @@ the following entries:
   * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
+  * `upignore`: list of pattern to ignore when updating (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
   * `trans`: transformation key to apply when installing this dotfile (must be defined in the **trans** entry below).
   * `trans_write`: transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below).
@@ -577,6 +593,8 @@ the following entries:
     link: <true|false>
     ignoreempty: <true|false>
     cmpignore:
+      - "<ignore-pattern>"
+    upignore:
       - "<ignore-pattern>"
     actions:
       - <action-key>

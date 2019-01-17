@@ -21,13 +21,14 @@ TILD = '~'
 class Updater:
 
     def __init__(self, conf, dotpath, dry, safe,
-                 iskey=False, debug=False):
+                 iskey=False, debug=False, ignore=[]):
         self.conf = conf
         self.dotpath = dotpath
         self.dry = dry
         self.safe = safe
         self.iskey = iskey
         self.debug = debug
+        self.ignore = ignore
         self.log = Logger()
 
     def update_path(self, path, profile):
@@ -58,9 +59,16 @@ class Updater:
         """update dotfile from file pointed by path"""
         ret = False
         new_path = None
+        self.ignores = list(set(self.ignore + dotfile.upignore))
+        if self.debug:
+            self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
+
         left = os.path.expanduser(path)
         right = os.path.join(self.conf.abs_or_rel(self.dotpath), dotfile.src)
         right = os.path.expanduser(right)
+
+        if self._ignore([left, right]):
+            return True
         if dotfile.trans_w:
             # apply write transformation if any
             new_path = self._apply_trans_w(path, dotfile)
@@ -137,6 +145,8 @@ class Updater:
 
     def _handle_file(self, left, right, compare=True):
         """sync left (deployed file) and right (dotdrop dotfile)"""
+        if self._ignore([left, right]):
+            return True
         if self.debug:
             self.log.dbg('update for file {} and {}'.format(left, right))
         if self._is_template(right):
@@ -169,6 +179,8 @@ class Updater:
         # paths must be absolute (no tildes)
         left = os.path.expanduser(left)
         right = os.path.expanduser(right)
+        if self._ignore([left, right]):
+            return True
         # find the differences
         diff = filecmp.dircmp(left, right, ignore=None)
         # handle directories diff
@@ -179,6 +191,8 @@ class Updater:
         left, right = diff.left, diff.right
         if self.debug:
             self.log.dbg('sync dir {} to {}'.format(left, right))
+        if self._ignore([left, right]):
+            return True
 
         # create dirs that don't exist in dotdrop
         for toadd in diff.left_only:
@@ -188,6 +202,8 @@ class Updater:
                 continue
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
+            if self._ignore([exist, new]):
+                continue
             if self.dry:
                 self.log.dry('would cp -r {} {}'.format(exist, new))
                 continue
@@ -201,6 +217,8 @@ class Updater:
             old = os.path.join(right, toremove)
             if not os.path.isdir(old):
                 # ignore files for now
+                continue
+            if self._ignore([old]):
                 continue
             if self.dry:
                 self.log.dry('would rm -r {}'.format(old))
@@ -219,6 +237,8 @@ class Updater:
         for f in fdiff:
             fleft = os.path.join(left, f)
             fright = os.path.join(right, f)
+            if self._ignore([fleft, fright]):
+                continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
                 continue
@@ -233,6 +253,8 @@ class Updater:
                 # ignore dirs, done above
                 continue
             new = os.path.join(right, toadd)
+            if self._ignore([exist, new]):
+                continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(exist, new))
                 continue
@@ -247,6 +269,8 @@ class Updater:
                 continue
             if os.path.isdir(new):
                 # ignore dirs, done above
+                continue
+            if self._ignore([new]):
                 continue
             if self.dry:
                 self.log.dry('would rm {}'.format(new))
@@ -275,3 +299,10 @@ class Updater:
         if self.safe and not self.log.ask(msg):
             return False
         return True
+
+    def _ignore(self, paths):
+        if utils.must_ignore(paths, self.ignores, debug=self.debug):
+            if self.debug:
+                self.log.dbg('ignoring update for {}'.format(paths))
+            return True
+        return False

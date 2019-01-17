@@ -44,7 +44,8 @@ Usage:
   dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>] [<path>...]
+  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>]
+                               [-i <pattern>...] [<path>...]
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]      [-c <path>]
@@ -55,7 +56,7 @@ Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   -C --file=<path>        Path of dotfile to compare.
-  -i --ignore=<pattern>   Pattern to ignore when diffing.
+  -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
@@ -209,11 +210,12 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     return same
 
 
-def cmd_update(opts, conf, paths, iskey=False):
+def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
     updater = Updater(conf, opts['dotpath'], opts['dry'],
-                      opts['safe'], iskey=iskey, debug=opts['debug'])
+                      opts['safe'], iskey=iskey,
+                      debug=opts['debug'], ignore=[])
     if not iskey:
         # update paths
         if opts['debug']:
@@ -494,7 +496,8 @@ def main():
             if opts['debug']:
                 LOG.dbg('running cmd: update')
             iskey = args['--key']
-            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey)
+            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey,
+                             ignore=args['--ignore'])
 
         elif args['detail']:
             # detail files
