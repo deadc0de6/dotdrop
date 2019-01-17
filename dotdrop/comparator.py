@@ -56,11 +56,11 @@ class Comparator:
         for i in comp.left_only:
             if self._ignore([os.path.join(left, i)], ignore):
                 continue
-            ret.append('only in left: \"{}\"\n'.format(i))
+            ret.append('=> \"{}\" does not exist on local\n'.format(i))
         for i in comp.right_only:
             if self._ignore([os.path.join(right, i)], ignore):
                 continue
-            ret.append('only in right: \"{}\"\n'.format(i))
+            ret.append('=> \"{}\" does not exist in dotdrop\n'.format(i))
 
         # same left and right but different type
         funny = comp.common_funny
@@ -90,7 +90,7 @@ class Comparator:
         if header:
             lshort = os.path.basename(left)
             rshort = os.path.basename(right)
-            diff = 'diff \"{}\":\n{}'.format(lshort, diff)
+            diff = '=> diff \"{}\":\n{}'.format(lshort, diff)
         return diff
 
     def _ignore(self, paths, ignore):

@@ -168,7 +168,10 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
         if not os.path.lexists(os.path.expanduser(dotfile.dst)):
-            LOG.emph('\"{}\" does not exist on local\n'.format(dotfile.dst))
+            line = '=> compare {}: \"{}\" does not exist on local'
+            LOG.log(line.format(dotfile.key, dotfile.dst))
+            same = False
+            continue
 
         tmpsrc = None
         if dotfile.trans_r:
@@ -176,12 +179,14 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             tmpsrc = apply_trans(opts, dotfile)
             if not tmpsrc:
                 # could not apply trans
+                same = False
                 continue
             src = tmpsrc
         # install dotfile to temporary dir
         ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
         if not ret:
             # failed to install to tmp
+            same = False
             continue
         ignores = list(set(ignore + dotfile.cmpignore))
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
@@ -192,12 +197,12 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
                 remove(tmpsrc)
         if diff == '':
             if opts['debug']:
-                LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
-                                                          dotfile.dst))
+                line = '=> compare {}: diffing with \"{}\"'
+                LOG.dbg(line.format(dotfile.key, dotfile.dst))
                 LOG.dbg('same file')
         else:
-            LOG.log('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
-                                                      dotfile.dst))
+            line = '=> compare {}: diffing with \"{}\"'
+            LOG.log(line.format(dotfile.key, dotfile.dst))
             LOG.emph(diff)
             same = False
 
