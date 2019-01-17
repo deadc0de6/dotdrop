@@ -61,7 +61,7 @@ Options:
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --link               Import and link.
+  -l --inv-link           Invert the value of "link_by_default" when importing.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
@@ -256,7 +256,9 @@ def cmd_importer(opts, conf, paths):
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
-        linkit = opts['link'] or opts['link_by_default']
+        linkit = opts['link_by_default']
+        if opts['link']:
+            linkit = not linkit
         if opts['debug']:
             LOG.dbg('new dotfile: {}'.format(dotfile))
 
@@ -431,7 +433,7 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = args['--link']
+    opts['link'] = args['--inv-link']
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables()
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
