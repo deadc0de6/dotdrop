@@ -70,7 +70,7 @@ class Templategen:
         filetype = filetype.strip()
         if self.debug:
             self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
-        istext = 'text' in filetype
+        istext = 'text' in filetype or 'empty' in filetype
         if self.debug:
             self.log.dbg('\"{}\" is text: {}'.format(src, istext))
         if not istext:
