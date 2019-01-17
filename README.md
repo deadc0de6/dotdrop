@@ -602,9 +602,9 @@ the following entries:
     - <some-other-profile>
     - ...
     variables:
-    <name>: <value>
+      <name>: <value>
     dynvariables:
-    <name>: <value>
+      <name>: <value>
 ```
 
 * **actions** entry (optional): a list of action (see [Use actions](#use-actions))
