@@ -588,6 +588,8 @@ the following entries:
   need to be managed
   * `dotfiles`: the dotfiles associated to this profile
   * `include`: include all dotfiles from another profile (optional)
+  * `variables`: profile specific variables (see [Variables](#variables))
+  * `dynvariables`: profile specific interpreted variables (see [Interpreted variables](#interpreted-variables))
 
 ```yaml
   <some-name-usually-the-hostname>:
@@ -599,6 +601,10 @@ the following entries:
     include:
     - <some-other-profile>
     - ...
+    variables:
+    <name>: <value>
+    dynvariables:
+    <name>: <value>
 ```
 
 * **actions** entry (optional): a list of action (see [Use actions](#use-actions))
@@ -715,11 +721,32 @@ For example in the config file:
 ```yaml
 variables:
   var1: some variable content
+  var2: some other content
 ```
 
 These can then be used in any template with
 ```
 {{@@ var1 @@}}
+```
+
+Profile variables will take precedence over globally defined variables what
+means that you could do something like this:
+```
+variables:
+  git_email: home@email.com
+dotfiles:
+  f_gitconfig:
+    dst: ~/.gitconfig
+    src: gitconfig
+profiles:
+  work:
+    dotfiles:
+    - f_gitconfig
+    variables:
+      git_email: work@email.com
+  private:
+    dotfiles:
+    - f_gitconfig
 ```
 
 ## Interpreted variables
@@ -739,6 +766,9 @@ These can be used as any variables in the templates
 ```
 {{@@ dvar1 @@}}
 ```
+
+As for variables (see [Variables](#variables)) profile dynvariables will take
+precedence over globally defined dynvariables.
 
 ## Environment variables
 

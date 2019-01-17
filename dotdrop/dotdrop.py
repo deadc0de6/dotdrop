@@ -435,7 +435,7 @@ def main():
     opts['installdiff'] = not args['--nodiff']
     opts['link'] = args['--inv-link']
     opts['debug'] = args['--verbose']
-    opts['variables'] = conf.get_variables()
+    opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
 
     if opts['debug']:

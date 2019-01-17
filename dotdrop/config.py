@@ -44,7 +44,7 @@ class Cfg:
 
     # template variables
     key_variables = 'variables'
-    # shell variable
+    # shell variables
     key_dynvariables = 'dynvariables'
 
     # dotfiles keys
@@ -111,13 +111,14 @@ class Cfg:
         # represents all dotfiles per profile by profile key
         # NOT linked inside the yaml dict (self.content)
         self.prodots = {}
+
         if not self._load_file():
             raise ValueError('config is not valid')
 
     def eval_dotfiles(self, profile, debug=False):
-        """resolve dotfiles src/dst templates"""
+        """resolve dotfiles src/dst templating"""
         t = Templategen(profile=profile,
-                        variables=self.get_variables(),
+                        variables=self.get_variables(profile),
                         debug=debug)
         for d in self.get_dotfiles(profile):
             d.src = t.generate_string(d.src)
@@ -600,15 +601,35 @@ class Cfg:
         """return all defined settings"""
         return self.lnk_settings.copy()
 
-    def get_variables(self):
+    def get_variables(self, profile):
+        """return the variables for this profile"""
         variables = {}
+
+        # global variables
         if self.key_variables in self.content:
             variables.update(self.content[self.key_variables])
+
+        # global dynvariables
         if self.key_dynvariables in self.content:
             # interpret dynamic variables
             dynvars = self.content[self.key_dynvariables]
-            for key, cmd in dynvars.items():
-                variables[key] = shell(cmd)
+            for k, v in dynvars.items():
+                variables[k] = shell(v)
+
+        if profile not in self.lnk_profiles:
+            return variables
+
+        # profile variables
+        var = self.lnk_profiles[profile]
+        if self.key_variables in var.keys():
+            for k, v in var[self.key_variables].items():
+                variables[k] = v
+
+        # profile dynvariables
+        if self.key_dynvariables in var.keys():
+            for k, v in var[self.key_dynvariables].items():
+                variables[k] = shell(v)
+
         return variables
 
     def dump(self):
