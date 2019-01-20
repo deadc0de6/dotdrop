@@ -7,17 +7,16 @@ basic unittest for the compare function
 
 import unittest
 import os
-import yaml
 
-from dotdrop.config import Cfg
 from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotdrop import cmd_compare
-from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
 
-from tests.helpers import *
+# from tests.helpers import *
+from tests.helpers import create_dir, get_string, get_tempdir, clean, \
+    create_random_file, create_fake_config, load_config, edit_content
 
 
 class TestCompare(unittest.TestCase):
