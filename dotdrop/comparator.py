@@ -7,7 +7,6 @@ handle the comparison of dotfiles and local deployment
 
 import os
 import filecmp
-import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
@@ -34,7 +33,7 @@ class Comparator:
 
     def _comp_file(self, left, right, ignore):
         """compare a file"""
-        if self._ignore([left, right], ignore):
+        if utils.must_ignore([left, right], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
             return ''
@@ -44,7 +43,7 @@ class Comparator:
         """compare a directory"""
         if not os.path.exists(right):
             return ''
-        if self._ignore([left, right], ignore):
+        if utils.must_ignore([left, right], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
             return ''
@@ -54,13 +53,15 @@ class Comparator:
         comp = filecmp.dircmp(left, right)
         # handle files only in deployed file
         for i in comp.left_only:
-            if self._ignore([os.path.join(left, i)], ignore):
+            if utils.must_ignore([os.path.join(left, i)],
+                                 ignore, debug=self.debug):
                 continue
-            ret.append('only in left: \"{}\"\n'.format(i))
+            ret.append('=> \"{}\" does not exist on local\n'.format(i))
         for i in comp.right_only:
-            if self._ignore([os.path.join(right, i)], ignore):
+            if utils.must_ignore([os.path.join(right, i)],
+                                 ignore, debug=self.debug):
                 continue
-            ret.append('only in right: \"{}\"\n'.format(i))
+            ret.append('=> \"{}\" does not exist in dotdrop\n'.format(i))
 
         # same left and right but different type
         funny = comp.common_funny
@@ -90,17 +91,5 @@ class Comparator:
         if header:
             lshort = os.path.basename(left)
             rshort = os.path.basename(right)
-            diff = 'diff \"{}\":\n{}'.format(lshort, diff)
+            diff = '=> diff \"{}\":\n{}'.format(lshort, diff)
         return diff
-
-    def _ignore(self, paths, ignore):
-        '''return True if any paths is ignored - not very efficient'''
-        if not ignore:
-            return False
-        for p in paths:
-            for i in ignore:
-                if fnmatch.fnmatch(p, i):
-                    if self.debug:
-                        self.log.dbg('ignore match {}'.format(p))
-                    return True
-        return False

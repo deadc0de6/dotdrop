@@ -12,6 +12,7 @@ import uuid
 import shlex
 import functools
 import operator
+import fnmatch
 from shutil import rmtree
 
 # local import
@@ -115,3 +116,16 @@ def strip_home(path):
 def flatten(a):
     """flatten list"""
     return functools.reduce(operator.iconcat, a, [])
+
+
+def must_ignore(paths, ignores, debug=False):
+    """return true if any paths in list matches any ignore patterns"""
+    if not ignores:
+        return False
+    for p in paths:
+        for i in ignores:
+            if fnmatch.fnmatch(p, i):
+                if debug:
+                    LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
+                return True
+    return False

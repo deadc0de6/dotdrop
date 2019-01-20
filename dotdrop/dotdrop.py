@@ -44,7 +44,8 @@ Usage:
   dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>] [<path>...]
+  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>]
+                               [-i <pattern>...] [<path>...]
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]      [-c <path>]
@@ -55,13 +56,13 @@ Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -c --cfg=<path>         Path to the config [default: config.yaml].
   -C --file=<path>        Path of dotfile to compare.
-  -i --ignore=<pattern>   Pattern to ignore when diffing.
+  -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --link               Import and link.
+  -l --inv-link           Invert the value of "link_by_default" when importing.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
@@ -170,7 +171,10 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
         if not os.path.lexists(os.path.expanduser(dotfile.dst)):
-            LOG.emph('\"{}\" does not exist on local\n'.format(dotfile.dst))
+            line = '=> compare {}: \"{}\" does not exist on local'
+            LOG.log(line.format(dotfile.key, dotfile.dst))
+            same = False
+            continue
 
         tmpsrc = None
         if dotfile.trans_r:
@@ -178,12 +182,14 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
             tmpsrc = apply_trans(opts, dotfile)
             if not tmpsrc:
                 # could not apply trans
+                same = False
                 continue
             src = tmpsrc
         # install dotfile to temporary dir
         ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
         if not ret:
             # failed to install to tmp
+            same = False
             continue
         ignores = list(set(ignore + dotfile.cmpignore))
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
@@ -194,23 +200,24 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
                 remove(tmpsrc)
         if diff == '':
             if opts['debug']:
-                LOG.dbg('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
-                                                          dotfile.dst))
+                line = '=> compare {}: diffing with \"{}\"'
+                LOG.dbg(line.format(dotfile.key, dotfile.dst))
                 LOG.dbg('same file')
         else:
-            LOG.log('diffing \"{}\" VS \"{}\"'.format(dotfile.key,
-                                                      dotfile.dst))
+            line = '=> compare {}: diffing with \"{}\"'
+            LOG.log(line.format(dotfile.key, dotfile.dst))
             LOG.emph(diff)
             same = False
 
     return same
 
 
-def cmd_update(opts, conf, paths, iskey=False):
+def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
     updater = Updater(conf, opts['dotpath'], opts['dry'],
-                      opts['safe'], iskey=iskey, debug=opts['debug'])
+                      opts['safe'], iskey=iskey,
+                      debug=opts['debug'], ignore=[])
     if not iskey:
         # update paths
         if opts['debug']:
@@ -434,9 +441,9 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = args['--link']
+    opts['link'] = args['--inv-link']
     opts['debug'] = args['--verbose']
-    opts['variables'] = conf.get_variables()
+    opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
 
     if opts['debug']:
@@ -495,7 +502,8 @@ def main():
             if opts['debug']:
                 LOG.dbg('running cmd: update')
             iskey = args['--key']
-            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey)
+            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey,
+                             ignore=args['--ignore'])
 
         elif args['detail']:
             # detail files

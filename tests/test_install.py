@@ -277,11 +277,12 @@ exec bspwm
         src = create_random_file(src_dir)[0]
 
         logger = MagicMock()
+        templater = MagicMock()
         installer = Installer()
         installer.log.err = logger
 
         # pass src file not src dir
-        res = installer.linkall(templater=MagicMock(), src=src, dst='/dev/null',
+        res = installer.linkall(templater=templater, src=src, dst='/dev/null',
                                 actions=[])
 
         # ensure nothing performed

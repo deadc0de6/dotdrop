@@ -212,7 +212,7 @@ that don't need to appear in the output of compare.
 
 Either use the command line switch `-i --ignore` or add an entry in the dotfile
 directly in the `cmpignore` entry (see [Config](#config)).
-The pattern follows Unix shell-style wildcards like for example `*/path/file`.
+The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
 Make sure to quote those when using wildcards in the config file.
 
 It is also possible to install all dotfiles for a specific profile
@@ -474,6 +474,21 @@ $ dotdrop update ~/.vimrc
 $ dotdrop update --key f_vimrc
 ```
 
+It is possible to ignore files to update using unix pattern by providing those
+either through the switch `-i --ignore` or as part of the dotfile under the
+key `upignore` (see [Config](#config)).
+The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
+Make sure to quote those when using wildcards in the config file.
+```yaml
+dotfiles:
+  d_vim
+    dst: ~/.vim
+    src: vim
+    upignore:
+    - "*/undo-dir"
+    - "*/plugged"
+```
+
 There are two cases when updating a dotfile:
 
 **The dotfile doesn't use [templating](#template)**
@@ -592,6 +607,7 @@ the following entries:
   * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
+  * `upignore`: list of pattern to ignore when updating (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
   * `trans`: transformation key to apply when installing this dotfile (must be defined in the **trans** entry below).
   * `trans_write`: transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below).
@@ -606,6 +622,8 @@ the following entries:
     ignoreempty: <true|false>
     cmpignore:
       - "<ignore-pattern>"
+    upignore:
+      - "<ignore-pattern>"
     actions:
       - <action-key>
     trans: <transformation-key>
@@ -616,6 +634,8 @@ the following entries:
   need to be managed
   * `dotfiles`: the dotfiles associated to this profile
   * `include`: include all dotfiles from another profile (optional)
+  * `variables`: profile specific variables (see [Variables](#variables))
+  * `dynvariables`: profile specific interpreted variables (see [Interpreted variables](#interpreted-variables))
 
 ```yaml
   <some-name-usually-the-hostname>:
@@ -627,6 +647,10 @@ the following entries:
     include:
     - <some-other-profile>
     - ...
+    variables:
+      <name>: <value>
+    dynvariables:
+      <name>: <value>
 ```
 
 * **actions** entry (optional): a list of action (see [Use actions](#use-actions))
@@ -743,11 +767,32 @@ For example in the config file:
 ```yaml
 variables:
   var1: some variable content
+  var2: some other content
 ```
 
 These can then be used in any template with
 ```
 {{@@ var1 @@}}
+```
+
+Profile variables will take precedence over globally defined variables what
+means that you could do something like this:
+```yaml
+variables:
+  git_email: home@email.com
+dotfiles:
+  f_gitconfig:
+    dst: ~/.gitconfig
+    src: gitconfig
+profiles:
+  work:
+    dotfiles:
+    - f_gitconfig
+    variables:
+      git_email: work@email.com
+  private:
+    dotfiles:
+    - f_gitconfig
 ```
 
 ## Interpreted variables
@@ -767,6 +812,9 @@ These can be used as any variables in the templates
 ```
 {{@@ dvar1 @@}}
 ```
+
+As for variables (see [Variables](#variables)) profile dynvariables will take
+precedence over globally defined dynvariables.
 
 ## Environment variables
 
