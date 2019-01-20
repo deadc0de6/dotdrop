@@ -9,4 +9,5 @@ build/
 *.egg-info/
 tags
 env
+htmlcov
 

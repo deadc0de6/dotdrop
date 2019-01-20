@@ -103,7 +103,7 @@ class Installer:
 
         if os.path.isfile(dst):
             msg = ''.join([
-                'Remove regular file "{}" and ',
+                'Remove regular file {} and ',
                 'replace with empty directory?',
             ]).format(dst)
 
