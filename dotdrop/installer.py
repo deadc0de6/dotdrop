@@ -120,9 +120,27 @@ class Installer:
 
         results = []
         for i in range(len(children)):
-            result = self._link(srcs[i], dsts[i], actions)
+            src = srcs[i]
+            dst = dsts[i]
+
+            if Templategen.is_template(src):
+                if self.debug:
+                    self.log.dbg('dotfile is a template')
+                    self.log.dbg('install to {} and symlink'
+                                 .format(self.workdir))
+                tmp = self._pivot_path(dst, self.workdir, striphome=True)
+                i = self.install(templater, src, tmp, actions=actions)
+                if not i and not os.path.exists(tmp):
+                    continue
+                src = tmp
+
+            result = self._link(src, dst, actions)
+
+            # Empty actions if dotfile installed
+            # This prevents from running actions multiple times
             if len(result):
                 actions = []
+
             results.append(result)
 
         return utils.flatten(results)
