@@ -7,3 +7,6 @@
 dist/
 build/
 *.egg-info/
+tags
+env
+
