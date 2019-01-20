@@ -84,8 +84,16 @@ class Installer:
         """link all dotfiles in a given directory"""
         self.action_executed = False
         parent = os.path.join(self.base, os.path.expanduser(src))
+
+        # Fail if source doesn't exist
         if not os.path.exists(parent):
             self.log.err('source dotfile does not exist: {}'.format(parent))
+            return []
+
+        # Fail if source not a directory
+        if not os.path.isdir(parent):
+            self.log.err('source dotfile is not a directory: {}'
+                         .format(parent))
             return []
 
         dst = os.path.normpath(os.path.expanduser(dst))
