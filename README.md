@@ -520,14 +520,42 @@ and the second using transformations (see [Transformations](#use-transformations
 
 ## Symlink dotfiles
 
-Dotdrop allows to symlink dotfiles. Simply set the `link: true` under the
+Dotdrop offers two ways to symlink dotfiles. The first simply links `dst` to `src`. To enable it, simply set `link: true` under the
 dotfile entry in the config file.
+
+The second symlink method is a little more complicated. It creates a symlink in
+`dst` for every file/folder in `src`. This feature can be very useful dotfiles
+such as vim where you may not want plugins cluttering your dotfiles repository.
+An example configuration and the corresponding result is given below.
+
+```yml
+vim:
+  dst: ~/.vim/
+  src: ./vim/
+  actions:
+   - vim-plug-install
+   - vim-plug
+  link_children: true
+```
+```
+after -> ~/.dotfiles/vim/after
+autoload
+plugged
+plugin -> ~/.dotfiles/vim/plugin
+snippets -> ~/.dotfiles/vim/snippets
+spell
+swap
+vimrc -> ~/.dotfiles/vim/vimrc
+```
+
+### Templating symlinked dotfiles
 
 For dotfiles not using any templating directives, those are directly linked
 to dotdrop's `dotpath` directory (see [Config](#config)).
 When using templating directives, the dotfiles are first installed into
 `workdir` (defaults to *~/.config/dotdrop*, see [Config](#config))
-and then symlinked there.
+and then symlinked there. This applies to both dotfiles with `link: true` and
+`link_children: true`.
 
 For example
 ```bash
