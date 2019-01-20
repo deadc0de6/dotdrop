@@ -253,7 +253,13 @@ def cmd_importer(opts, conf, paths):
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
-        linkit = opts['link'] or opts['link_by_default']
+
+        linktype = LinkTypes.NOLINK
+        if opts['link'] or opts['link_by_default']:
+            linktype = LinkTypes.PARENTS
+        elif opts['link_children']:
+            linktype = LinkTypes.CHILDREN
+
         if opts['debug']:
             LOG.dbg('new dotfile: {}'.format(dotfile))
 
@@ -272,7 +278,7 @@ def cmd_importer(opts, conf, paths):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if linkit:
+                if linktype == LinkTypes.PARENTS:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
@@ -280,11 +286,11 @@ def cmd_importer(opts, conf, paths):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-                if linkit:
+                if linktype == LinkTypes.PARENTS:
                     remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = conf.new(dotfile, opts['profile'],
-                                    link=linkit, debug=opts['debug'])
+                                    link=linktype, debug=opts['debug'])
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1

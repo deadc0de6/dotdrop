@@ -4,14 +4,18 @@ Copyright (c) 2017, deadc0de6
 basic unittest for the install function
 """
 
+import os
 import unittest
 import filecmp
 
-from tests.helpers import *
+from dotdrop.config import Cfg
+from tests.helpers import create_dir, get_string, get_tempdir, clean, \
+    create_random_file, load_config
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
 from dotdrop.dotdrop import cmd_install
+from dotdrop.linktypes import LinkTypes
 
 
 class TestInstall(unittest.TestCase):
@@ -50,7 +54,10 @@ exec bspwm
                 f.write('  {}:\n'.format(d.key))
                 f.write('    dst: {}\n'.format(d.dst))
                 f.write('    src: {}\n'.format(d.src))
-                f.write('    link: {}\n'.format(str(d.link).lower()))
+                f.write('    link: {}\n'
+                        .format(str(d.link == LinkTypes.PARENTS).lower()))
+                f.write('    link_children: {}\n'
+                        .format(str(d.link == LinkTypes.CHILDREN).lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
@@ -101,7 +108,7 @@ exec bspwm
         # to test backup
         f4, c4 = create_random_file(tmp)
         dst4 = os.path.join(dst, get_string(6))
-        d4 = Dotfile(get_string(6), dst4, os.path.basename(f4))
+        d4 = Dotfile(key=get_string(6), dst=dst4, src=os.path.basename(f4))
         with open(dst4, 'w') as f:
             f.write(get_string(16))
 

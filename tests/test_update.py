@@ -7,14 +7,12 @@ basic unittest for the update function
 
 import unittest
 import os
-import yaml
 
-from dotdrop.config import Cfg
 from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
-from dotdrop.dotfile import Dotfile
 
-from tests.helpers import *
+from tests.helpers import create_dir, get_string, get_tempdir, clean, \
+    create_random_file, create_fake_config, load_config, edit_content
 
 
 class TestUpdate(unittest.TestCase):
