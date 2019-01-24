@@ -102,7 +102,8 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
     installed = []
     for dotfile in dotfiles:
         preactions = []
-        if not temporary and dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
+        if not temporary and dotfile.actions \
+                and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
                 preactions.append(action)
         if opts['debug']:
