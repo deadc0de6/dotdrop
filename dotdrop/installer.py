@@ -92,6 +92,9 @@ class Installer:
 
         # Fail if source not a directory
         if not os.path.isdir(parent):
+            if self.debug:
+                self.log.dbg('symlink children of {} to {}'.format(src, dst))
+
             self.log.err('source dotfile is not a directory: {}'
                          .format(parent))
             return []
@@ -121,6 +124,9 @@ class Installer:
         for i in range(len(children)):
             src = srcs[i]
             dst = dsts[i]
+
+            if self.debug:
+                self.log.dbg('symlink child {} to {}'.format(src, dst))
 
             if Templategen.is_template(src):
                 if self.debug:
