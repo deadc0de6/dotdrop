@@ -539,7 +539,7 @@ Dotdrop offers two ways to symlink dotfiles. The first simply links `dst` to `sr
 dotfile entry in the config file.
 
 The second symlink method is a little more complicated. It creates a symlink in
-`dst` for every file/folder in `src`. This feature can be very useful dotfiles
+`dst` for every file/directory in `src`. This feature can be very useful dotfiles
 such as vim where you may not want plugins cluttering your dotfiles repository.
 An example configuration and the corresponding result is given below.
 
