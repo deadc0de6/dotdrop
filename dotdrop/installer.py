@@ -118,7 +118,6 @@ class Installer:
         srcs = [os.path.join(parent, child) for child in children]
         dsts = [os.path.join(dst, child) for child in children]
 
-        results = []
         for i in range(len(children)):
             src = srcs[i]
             dst = dsts[i]
@@ -141,9 +140,7 @@ class Installer:
             if len(result):
                 actions = []
 
-            results.append(result)
-
-        return utils.flatten(results)
+        return (src, dst)
 
     def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""

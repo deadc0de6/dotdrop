@@ -113,11 +113,6 @@ def strip_home(path):
     return path
 
 
-def flatten(a):
-    """flatten list"""
-    return functools.reduce(operator.iconcat, a, [])
-
-
 def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
     if not ignores:
