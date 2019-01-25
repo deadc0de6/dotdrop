@@ -102,7 +102,8 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
     installed = []
     for dotfile in dotfiles:
         preactions = []
-        if dotfile.actions and Cfg.key_actions_pre in dotfile.actions:
+        if not temporary and dotfile.actions \
+                and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
                 preactions.append(action)
         if opts['debug']:
@@ -126,7 +127,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                 if os.path.exists(tmp):
                     remove(tmp)
         if len(r) > 0:
-            if Cfg.key_actions_post in dotfile.actions:
+            if not temporary and Cfg.key_actions_post in dotfile.actions:
                 actions = dotfile.actions[Cfg.key_actions_post]
                 # execute action
                 for action in actions:
@@ -138,7 +139,7 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                         action.execute()
         installed.extend(r)
     if temporary:
-        LOG.log('\nInstalled to tmp {}.'.format(tmpdir))
+        LOG.log('\nInstalled to tmp \"{}\".'.format(tmpdir))
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
 
