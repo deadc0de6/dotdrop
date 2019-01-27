@@ -262,13 +262,9 @@ def cmd_importer(opts, conf, paths):
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
 
-        linktype = LinkTypes.NOLINK
-        if opts['link_by_default']:
-            linktype = LinkTypes.PARENTS
-        elif opts['link_children']:
-            linktype = LinkTypes.CHILDREN
+        linktype = LinkTypes(opts['link'])
 
-        if opts['link'] and linktype == LinkTypes.PARENTS:
+        if opts['link_by_default'] and linktype == LinkTypes.PARENTS:
             linktype = LinkTypes.NOLINK
         else:
             linktype = LinkTypes.PARENTS
