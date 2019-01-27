@@ -259,9 +259,6 @@ def cmd_importer(opts, conf, paths):
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
-        linkit = opts['link_by_default']
-        if opts['link']:
-            linkit = not linkit
         if opts['debug']:
             LOG.dbg('new dotfile: {}'.format(dotfile))
 
@@ -280,7 +277,7 @@ def cmd_importer(opts, conf, paths):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if linkit:
+                if opts['link']:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
@@ -288,11 +285,11 @@ def cmd_importer(opts, conf, paths):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-                if linkit:
+                if opts['link']:
                     remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = conf.new(dotfile, opts['profile'],
-                                    link=linkit, debug=opts['debug'])
+                                    link=opts['link'], debug=opts['debug'])
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
@@ -436,7 +433,9 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = args['--inv-link']
+    opts['link'] = opts['link_by_default']
+    if args['--inv-link']:
+        opts['link'] = not opts['link']
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
