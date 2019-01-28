@@ -116,7 +116,7 @@ class Updater:
         dotfiles = self.conf.get_dotfiles(profile)
         subs = [d for d in dotfiles if d.key == key]
         if not subs:
-            self.log.err('key \"{}\" not found!'.format(path))
+            self.log.err('key \"{}\" not found!'.format(key))
             return None
         if len(subs) > 1:
             found = ','.join([d.src for d in dotfiles])
