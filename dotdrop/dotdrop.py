@@ -443,7 +443,9 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = args['--inv-link']
+    opts['link'] = opts['link_by_default']
+    if args['--inv-link']:
+        opts['link'] = not opts['link']
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
