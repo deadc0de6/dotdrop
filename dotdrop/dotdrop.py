@@ -264,11 +264,6 @@ def cmd_importer(opts, conf, paths):
 
         linktype = LinkTypes(opts['link'])
 
-        if opts['link_by_default'] and linktype == LinkTypes.PARENTS:
-            linktype = LinkTypes.NOLINK
-        else:
-            linktype = LinkTypes.PARENTS
-
         if opts['debug']:
             LOG.dbg('new dotfile: {}'.format(dotfile))
 
@@ -443,9 +438,16 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = opts['link_by_default']
-    if args['--inv-link']:
-        opts['link'] = not opts['link']
+    opts['link'] = LinkTypes.NOLINK
+    if opts['link_by_default']:
+        opts['link'] = LinkTypes.PARENTS
+
+    # Only invert link type from NOLINK to PARENTS and vice-versa
+    if args['--inv-link'] and opts['link'] == LinkTypes.NOLINK:
+        opts['link'] = LinkTypes.PARENTS
+    if args['--inv-link'] and opts['link'] == LinkTypes.PARENTS:
+        opts['link'] = LinkTypes.NOLINK
+
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
