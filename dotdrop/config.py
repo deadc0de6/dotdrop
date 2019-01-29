@@ -53,6 +53,7 @@ class Cfg:
     key_dotfiles_src = 'src'
     key_dotfiles_dst = 'dst'
     key_dotfiles_link = 'link'
+    key_dotfiles_link_children = 'link_children'
     key_dotfiles_noempty = 'ignoreempty'
     key_dotfiles_cmpignore = 'cmpignore'
     key_dotfiles_actions = 'actions'
@@ -217,11 +218,22 @@ class Cfg:
         for k, v in self.content[self.key_dotfiles].items():
             src = os.path.normpath(v[self.key_dotfiles_src])
             dst = os.path.normpath(v[self.key_dotfiles_dst])
-            link = LinkTypes.PARENTS \
-                if self.key_dotfiles_link in v and v[self.key_dotfiles_link] \
-                else LinkTypes.CHILDREN \
-                if 'link_children' in v and v['link_children'] \
-                else LinkTypes.NOLINK
+
+            # Fail if both `link` and `link_children` present
+            if self.key_dotfiles_link in v \
+                    and self.key_dotfiles_link_children in v:
+                msg = 'only one of `link` or `link_children` allowed per'
+                msg += 'dotfile, error on dotfile "{}".'
+                self.log.err(msg.format(k))
+
+            # Otherwise, get link type
+            link = LinkTypes.NOLINK
+            if self.key_dotfiles_link in v and v[self.key_dotfiles_link]:
+                link = LinkTypes.PARENTS
+            if self.key_dotfiles_link_children in v \
+                    and v[self.key_dotfiles_link_children]:
+                link = LinkTypes.CHILDREN
+
             noempty = v[self.key_dotfiles_noempty] if \
                 self.key_dotfiles_noempty \
                 in v else self.lnk_settings[self.key_ignoreempty]
