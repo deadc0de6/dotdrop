@@ -223,7 +223,7 @@ class Cfg:
             if self.key_dotfiles_link in v \
                     and self.key_dotfiles_link_children in v:
                 msg = 'only one of `link` or `link_children` allowed per'
-                msg += 'dotfile, error on dotfile "{}".'
+                msg += ' dotfile, error on dotfile "{}".'
                 self.log.err(msg.format(k))
 
             # Otherwise, get link type
