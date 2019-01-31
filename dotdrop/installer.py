@@ -80,6 +80,74 @@ class Installer:
             src = tmp
         return self._link(src, dst, actions=actions)
 
+    def linkall(self, templater, src, dst, actions=[]):
+        """link all dotfiles in a given directory"""
+        self.action_executed = False
+        parent = os.path.join(self.base, os.path.expanduser(src))
+
+        # Fail if source doesn't exist
+        if not os.path.exists(parent):
+            self.log.err('source dotfile does not exist: {}'.format(parent))
+            return []
+
+        # Fail if source not a directory
+        if not os.path.isdir(parent):
+            if self.debug:
+                self.log.dbg('symlink children of {} to {}'.format(src, dst))
+
+            self.log.err('source dotfile is not a directory: {}'
+                         .format(parent))
+            return []
+
+        dst = os.path.normpath(os.path.expanduser(dst))
+        if not os.path.lexists(dst):
+            self.log.sub('creating directory "{}"'.format(dst))
+            os.makedirs(dst)
+
+        if os.path.isfile(dst):
+            msg = ''.join([
+                'Remove regular file {} and ',
+                'replace with empty directory?',
+            ]).format(dst)
+
+            if self.safe and not self.log.ask(msg):
+                msg = 'ignoring "{}", nothing installed'
+                self.log.warn(msg.format(dst))
+                return []
+            os.unlink(dst)
+            os.mkdir(dst)
+
+        children = os.listdir(parent)
+        srcs = [os.path.join(parent, child) for child in children]
+        dsts = [os.path.join(dst, child) for child in children]
+
+        for i in range(len(children)):
+            src = srcs[i]
+            dst = dsts[i]
+
+            if self.debug:
+                self.log.dbg('symlink child {} to {}'.format(src, dst))
+
+            if Templategen.is_template(src):
+                if self.debug:
+                    self.log.dbg('dotfile is a template')
+                    self.log.dbg('install to {} and symlink'
+                                 .format(self.workdir))
+                tmp = self._pivot_path(dst, self.workdir, striphome=True)
+                i = self.install(templater, src, tmp, actions=actions)
+                if not i and not os.path.exists(tmp):
+                    continue
+                src = tmp
+
+            result = self._link(src, dst, actions)
+
+            # Empty actions if dotfile installed
+            # This prevents from running actions multiple times
+            if len(result):
+                actions = []
+
+        return (src, dst)
+
     def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""
         if os.path.lexists(dst):

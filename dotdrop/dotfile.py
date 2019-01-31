@@ -5,12 +5,14 @@ Copyright (c) 2017, deadc0de6
 represents a dotfile in dotdrop
 """
 
+from dotdrop.linktypes import LinkTypes
+
 
 class Dotfile:
 
     def __init__(self, key, dst, src,
                  actions={}, trans_r=None, trans_w=None,
-                 link=False, cmpignore=[], noempty=False,
+                 link=LinkTypes.NOLINK, cmpignore=[], noempty=False,
                  upignore=[]):
         # key of dotfile in the config
         self.key = key
@@ -35,7 +37,7 @@ class Dotfile:
 
     def __str__(self):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
-        return msg.format(self.key, self.src, self.dst, self.link)
+        return msg.format(self.key, self.src, self.dst, self.link.name)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

@@ -4,14 +4,19 @@ Copyright (c) 2017, deadc0de6
 basic unittest for the install function
 """
 
+import os
 import unittest
+from unittest.mock import MagicMock, patch
 import filecmp
 
-from tests.helpers import *
+from dotdrop.config import Cfg
+from tests.helpers import create_dir, get_string, get_tempdir, clean, \
+    create_random_file, load_config
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
 from dotdrop.dotdrop import cmd_install
+from dotdrop.linktypes import LinkTypes
 
 
 class TestInstall(unittest.TestCase):
@@ -50,7 +55,10 @@ exec bspwm
                 f.write('  {}:\n'.format(d.key))
                 f.write('    dst: {}\n'.format(d.dst))
                 f.write('    src: {}\n'.format(d.src))
-                f.write('    link: {}\n'.format(str(d.link).lower()))
+                f.write('    link: {}\n'
+                        .format(str(d.link == LinkTypes.PARENTS).lower()))
+                f.write('    link_children: {}\n'
+                        .format(str(d.link == LinkTypes.CHILDREN).lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
@@ -101,7 +109,7 @@ exec bspwm
         # to test backup
         f4, c4 = create_random_file(tmp)
         dst4 = os.path.join(dst, get_string(6))
-        d4 = Dotfile(get_string(6), dst4, os.path.basename(f4))
+        d4 = Dotfile(key=get_string(6), dst=dst4, src=os.path.basename(f4))
         with open(dst4, 'w') as f:
             f.write(get_string(16))
 
@@ -219,6 +227,161 @@ exec bspwm
         self.assertTrue(os.path.exists(dst10))
         tempcontent = open(dst10, 'r').read().rstrip()
         self.assertTrue(tempcontent == profile)
+
+    def test_link_children(self):
+
+        # create source dir
+        src_dir = get_tempdir()
+        self.assertTrue(os.path.exists(src_dir))
+        self.addCleanup(clean, src_dir)
+
+        # where dotfiles will be installed
+        dst_dir = get_tempdir()
+        self.assertTrue(os.path.exists(dst_dir))
+        self.addCleanup(clean, dst_dir)
+
+        # create 3 random files in source
+        srcs = [create_random_file(src_dir)[0] for _ in range(3)]
+
+        installer = Installer()
+        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst_dir,
+                          actions=[])
+
+        # Ensure all destination files point to source
+        for src in srcs:
+            dst = os.path.join(dst_dir, src)
+            self.assertEqual(os.path.realpath(dst), src)
+
+    def test_fails_without_src(self):
+        src = '/some/non/existant/file'
+
+        installer = Installer()
+        logger = MagicMock()
+        installer.log.err = logger
+
+        res = installer.linkall(templater=MagicMock(),
+                                src=src,
+                                dst='/dev/null', actions=[])
+
+        self.assertEqual(res, [])
+        logger.assert_called_with('source dotfile does not exist: {}'
+                                  .format(src))
+
+    def test_fails_when_src_file(self):
+
+        # create source dir
+        src_dir = get_tempdir()
+        self.assertTrue(os.path.exists(src_dir))
+        self.addCleanup(clean, src_dir)
+
+        src = create_random_file(src_dir)[0]
+
+        logger = MagicMock()
+        templater = MagicMock()
+        installer = Installer()
+        installer.log.err = logger
+
+        # pass src file not src dir
+        res = installer.linkall(templater=templater, src=src, dst='/dev/null',
+                                actions=[])
+
+        # ensure nothing performed
+        self.assertEqual(res, [])
+        # ensure logger logged error
+        logger.assert_called_with('source dotfile is not a directory: {}'
+                                  .format(src))
+
+    def test_creates_dst(self):
+        src_dir = get_tempdir()
+        self.assertTrue(os.path.exists(src_dir))
+        self.addCleanup(clean, src_dir)
+
+        # where dotfiles will be installed
+        dst_dir = get_tempdir()
+        self.addCleanup(clean, dst_dir)
+
+        # move dst dir to new (uncreated) dir in dst
+        dst_dir = os.path.join(dst_dir, get_string(6))
+        self.assertFalse(os.path.exists(dst_dir))
+
+        installer = Installer()
+        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst_dir,
+                          actions=[])
+
+        # ensure dst dir created
+        self.assertTrue(os.path.exists(dst_dir))
+
+    def test_prompts_to_replace_dst(self):
+
+        # create source dir
+        src_dir = get_tempdir()
+        self.assertTrue(os.path.exists(src_dir))
+        self.addCleanup(clean, src_dir)
+
+        # where dotfiles will be installed
+        dst_dir = get_tempdir()
+        self.addCleanup(clean, dst_dir)
+
+        # Create destination file to be replaced
+        dst = os.path.join(dst_dir, get_string(6))
+        with open(dst, 'w'):
+            pass
+        self.assertTrue(os.path.isfile(dst))
+
+        # setup mocks
+        ask = MagicMock()
+        ask.return_value = True
+
+        # setup installer
+        installer = Installer()
+        installer.safe = True
+        installer.log.ask = ask
+
+        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst,
+                          actions=[])
+
+        # ensure destination now a directory
+        self.assertTrue(os.path.isdir(dst))
+
+        # ensure prompted
+        ask.assert_called_with(
+            'Remove regular file {} and replace with empty directory?'
+            .format(dst))
+
+    @patch('dotdrop.installer.Templategen')
+    def test_runs_templater(self, mocked_templategen):
+
+        # create source dir
+        src_dir = get_tempdir()
+        self.assertTrue(os.path.exists(src_dir))
+        self.addCleanup(clean, src_dir)
+
+        # where dotfiles will be installed
+        dst_dir = get_tempdir()
+        self.assertTrue(os.path.exists(dst_dir))
+        self.addCleanup(clean, dst_dir)
+
+        # create 3 random files in source
+        srcs = [create_random_file(src_dir)[0] for _ in range(3)]
+
+        # setup installer and mocks
+        installer = Installer()
+        templater = MagicMock()
+        templater.generate.return_value = b'content'
+        # make templategen treat everything as a template
+        mocked_templategen.is_template.return_value = True
+
+        installer.linkall(templater=templater, src=src_dir, dst=dst_dir,
+                          actions=[])
+
+        for src in srcs:
+            dst = os.path.join(dst_dir, os.path.basename(src))
+
+            # ensure dst is link
+            self.assertTrue(os.path.islink(dst))
+            # ensure dst not directly linked to src
+            # TODO: maybe check that its actually linked to template folder
+            self.assertNotEqual(os.path.realpath(dst), src)
 
 
 def main():

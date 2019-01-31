@@ -7,7 +7,6 @@ entry point
 
 import os
 import sys
-import subprocess
 import socket
 from docopt import docopt
 
@@ -20,7 +19,8 @@ from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
-from dotdrop.utils import *
+from dotdrop.utils import get_tmpdir, remove, strip_home, run
+from dotdrop.linktypes import LinkTypes
 
 LOG = Logger()
 ENV_PROFILE = 'DOTDROP_PROFILE'
@@ -108,8 +108,10 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
                 preactions.append(action)
         if opts['debug']:
             LOG.dbg('installing {}'.format(dotfile))
-        if hasattr(dotfile, 'link') and dotfile.link:
+        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENTS:
             r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
+        elif hasattr(dotfile, 'link') and dotfile.link == LinkTypes.CHILDREN:
+            r = inst.linkall(t, dotfile.src, dotfile.dst, actions=preactions)
         else:
             src = dotfile.src
             tmp = None
@@ -259,6 +261,9 @@ def cmd_importer(opts, conf, paths):
 
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
+
+        linktype = LinkTypes(opts['link'])
+
         if opts['debug']:
             LOG.dbg('new dotfile: {}'.format(dotfile))
 
@@ -277,7 +282,7 @@ def cmd_importer(opts, conf, paths):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if opts['dry']:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if opts['link']:
+                if linktype == LinkTypes.PARENTS:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 r, _ = run(cmd, raw=False, debug=opts['debug'], checkerr=True)
@@ -285,11 +290,11 @@ def cmd_importer(opts, conf, paths):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-                if opts['link']:
+                if linktype == LinkTypes.PARENTS:
                     remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = conf.new(dotfile, opts['profile'],
-                                    link=opts['link'], debug=opts['debug'])
+                                    link=linktype, debug=opts['debug'])
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
@@ -433,9 +438,16 @@ def main():
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
     opts['installdiff'] = not args['--nodiff']
-    opts['link'] = opts['link_by_default']
-    if args['--inv-link']:
-        opts['link'] = not opts['link']
+    opts['link'] = LinkTypes.NOLINK
+    if opts['link_by_default']:
+        opts['link'] = LinkTypes.PARENTS
+
+    # Only invert link type from NOLINK to PARENTS and vice-versa
+    if args['--inv-link'] and opts['link'] == LinkTypes.NOLINK:
+        opts['link'] = LinkTypes.PARENTS
+    if args['--inv-link'] and opts['link'] == LinkTypes.PARENTS:
+        opts['link'] = LinkTypes.NOLINK
+
     opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables(opts['profile'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']

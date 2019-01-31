@@ -10,12 +10,13 @@ import tempfile
 import os
 import uuid
 import shlex
+import functools
+import operator
 import fnmatch
 from shutil import rmtree
 
 # local import
 from dotdrop.logger import Logger
-from dotdrop.version import __version__ as VERSION
 
 LOG = Logger()
 

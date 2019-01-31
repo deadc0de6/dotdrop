@@ -535,14 +535,77 @@ and the second using transformations (see [Transformations](#use-transformations
 
 ## Symlink dotfiles
 
-Dotdrop allows to symlink dotfiles. Simply set the `link: true` under the
-dotfile entry in the config file.
+Dotdrop offers two ways to symlink dotfiles. The first simply links `dst` to
+`src`. To enable it, simply set `link: true` under the dotfile entry in the
+config file.
+
+The second symlink method is a little more complicated. It creates a symlink in
+`dst` for every file/directory in `src`.
+
+### Why would I use `link_children`?
+This feature can be very useful dotfiles such as vim where you may not want
+plugins cluttering your dotfiles repository. First, the simpler `link: true` is
+shown for comparison. With the `config.yaml` entry shown below, `~/.vim` gets
+symlinked to `~/.dotfiles/vim/`. This means that using vim will now pollute the
+dotfiles repository. `plugged` (if using
+[vim-plug](https://github.com/junegunn/vim-plug)), `spell`, and `swap`
+directories will appear `~/.dotfiles/vim/`.
+
+```yml
+vim:
+  dst: ~/.vim/
+  src: ./vim/
+  actions:
+   - vim-plug-install
+   - vim-plug
+  link: true
+```
+```
+$ readlink ~/.vim
+~/.dotfiles/vim/
+$ ls ~/.dotfiles/vim/
+after  autoload  plugged  plugin  snippets  spell  swap  vimrc
+```
+Let's say we just want to store `after`, `plugin`, `snippets`, and `vimrc` in
+our `~/.dotfiles` repository. This is where `link_children` comes in. Using the
+configuration below, `~/.vim/` is a normal directory and only the children of
+`~/.dotfiles/vim` are symlinked into it.
+```yml
+vim:
+  dst: ~/.vim/
+  src: ./vim/
+  actions:
+   - vim-plug-install
+   - vim-plug
+  link_children: true
+```
+
+As can be seen below, `~/.vim/` is a normal directory, not a symlink. Also, the
+files/directories `after`, `plugin`, `snippets`, and `vimrc` are symlinked to
+`~/.dotfiles/vim/`.
+```
+$ readlink -f ~/.vim
+~/.vim
+$ tree -L 1 ~/.vim
+~/.vim
+├── after -> /.dotfiles/./vim/after
+├── autoload
+├── plugged
+├── plugin -> /.dotfiles/./vim/plugin
+├── snippets -> /.dotfiles/./vim/snippets
+├── spell
+├── swap
+└── vimrc -> /.dotfiles/./vim/vimrc
+```
+
+### Templating symlinked dotfiles
 
 For dotfiles not using any templating directives, those are directly linked
 to dotdrop's `dotpath` directory (see [Config](#config)).
 When using templating directives, the dotfiles are first installed into
 `workdir` (defaults to *~/.config/dotdrop*, see [Config](#config))
-and then symlinked there.
+and then symlinked there. This applies to both dotfiles with `link: true` and
+`link_children: true`.
 
 For example
 ```bash
