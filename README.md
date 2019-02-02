@@ -546,11 +546,11 @@ config file.
 The second symlink method allows to have every files/directories under `src` to
 be symlinked in `dst`. It is enabled by setting `link_children: true`.
 
-### link children
+### Link children
 
 This feature can be very useful for dotfiles when you don't want the entire
 directory to be symlink but still want to keep a clean config files (with a
-limited number of entry).
+limited number of entries).
 
 A good example of its use is when managing `~/.vim` with dotdrop.
 
@@ -559,10 +559,7 @@ directory `~/.vim` is symlinked to the *dotpath* location (here `~/.dotfiles/vim
 ```yaml
 vim:
   dst: ~/.vim/
-  src: ./vim/
-  actions:
-   - vim-plug-install
-   - vim-plug
+  src: vim
   link: true
 ```
 
@@ -579,18 +576,15 @@ dotdrop (including unwanted directories like `spell`, `swap`, etc).
 A cleaner solution is to use `link_children` which allows to only symlink specific
 files under the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
 need to be managed in dotdrop. `~/.vim` is imported in dotdrop, cleaned off all unwanted
-files and directories and then the `link_children` entry is set to `true`.
+files and directories and then the `link_children` entry is set to `true` in the config file.
 
-All children of the `vim` directory in the *dotpath* will be symlinked under `~/.vim/`
+Now all children of the `vim` dotfile's directory in the *dotpath* will be symlinked under `~/.vim/`
 without affecting the rest of the local files, keeping the config file clean
 and all unwanted files only on the local system.
 ```yaml
 vim:
   dst: ~/.vim/
-  src: ./vim/
-  actions:
-   - vim-plug-install
-   - vim-plug
+  src: vim
   link_children: true
 ```
 
@@ -599,14 +593,14 @@ $ readlink -f ~/.vim
 ~/.vim
 $ tree -L 1 ~/.vim
 ~/.vim
-├── after -> /.dotfiles/./vim/after
+├── after -> ~/.dotfiles/vim/after
 ├── autoload
 ├── plugged
-├── plugin -> /.dotfiles/./vim/plugin
-├── snippets -> /.dotfiles/./vim/snippets
+├── plugin -> ~/.dotfiles/vim/plugin
+├── snippets -> ~/.dotfiles/vim/snippets
 ├── spell
 ├── swap
-└── vimrc -> /.dotfiles/./vim/vimrc
+└── vimrc -> ~/.dotfiles/vim/vimrc
 ```
 
 ### Templating symlinked dotfiles
