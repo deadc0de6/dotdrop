@@ -573,12 +573,17 @@ $ ls ~/.dotfiles/vim/
 after  autoload  plugged  plugin  snippets  spell  swap  vimrc
 ```
 
-A consequences is that all files under `~/.vim` will be managed by
+As a result, all files under `~/.vim` will be managed by
 dotdrop (including unwanted directories like `spell`, `swap`, etc).
 
-Let's say only `after`, `plugin`, `snippets`, and `vimrc` need to be managed in
-dotdrop. This is where `link_children` shines. Only the children of the managed
-`vim` entry will be symlinked without affecting the rest of the local config.
+A cleaner solution is to use `link_children` which allows to only symlink specific
+files under the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
+need to be managed in dotdrop. `~/.vim` is imported in dotdrop, cleaned off all unwanted
+files and directories and then the `link_children` entry is set to `true`.
+
+All children of the `vim` directory in the *dotpath* will be symlinked under `~/.vim/`
+without affecting the rest of the local files, keeping the config file clean
+and all unwanted files only on the local system.
 ```yaml
 vim:
   dst: ~/.vim/
