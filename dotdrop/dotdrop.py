@@ -449,7 +449,8 @@ def main():
         opts['link'] = LinkTypes.NOLINK
 
     opts['debug'] = args['--verbose']
-    opts['variables'] = conf.get_variables(opts['profile'])
+    opts['variables'] = conf.get_variables(opts['profile'],
+                                           debug=opts['debug'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']
 
     if opts['debug']:

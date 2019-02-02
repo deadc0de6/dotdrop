@@ -119,9 +119,8 @@ class Cfg:
             raise ValueError('config is not valid')
 
     def eval_dotfiles(self, profile, debug=False):
-        """resolve dotfiles src/dst templating"""
-        t = Templategen(variables=self.get_variables(profile),
-                        debug=debug)
+        """resolve dotfiles src/dst templating for this profile"""
+        t = Templategen(variables=self.get_variables(profile, debug=debug))
         for d in self.get_dotfiles(profile):
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
@@ -622,8 +621,44 @@ class Cfg:
         """return all defined settings"""
         return self.lnk_settings.copy()
 
-    def get_variables(self, profile):
+    def get_variables(self, profile, debug=False):
         """return the variables for this profile"""
+        # get flat variables
+        variables = self._get_variables(profile)
+
+        # get interpreted variables
+        dvariables = self._get_dynvariables(profile)
+
+        # recursive resolve variables
+        allvars = variables.copy()
+        allvars.update(dvariables)
+        var = self._rec_resolve_vars(allvars)
+
+        # execute dynvariables
+        for k in dvariables.keys():
+            var[k] = shell(var[k])
+
+        if debug:
+            self.log.dbg('variables:')
+            for k, v in var.items():
+                self.log.dbg('\t\"{}\": {}'.format(k, v))
+
+        return var
+
+    def _rec_resolve_vars(self, variables):
+        """recursive resolve all variables"""
+        t = Templategen(variables=variables)
+
+        for k in variables.keys():
+            val = variables[k]
+            while Templategen.var_is_template(val):
+                val = t.generate_string(val)
+                variables[k] = val
+                t.update_variables(variables)
+        return variables
+
+    def _get_variables(self, profile):
+        """return the flat variables"""
         variables = {}
 
         # profile variable
@@ -632,13 +667,6 @@ class Cfg:
         # global variables
         if self.key_variables in self.content:
             variables.update(self.content[self.key_variables])
-
-        # global dynvariables
-        if self.key_dynvariables in self.content:
-            # interpret dynamic variables
-            dynvars = self.content[self.key_dynvariables]
-            for k, v in dynvars.items():
-                variables[k] = shell(v)
 
         if profile not in self.lnk_profiles:
             return variables
@@ -649,10 +677,24 @@ class Cfg:
             for k, v in var[self.key_variables].items():
                 variables[k] = v
 
+        return variables
+
+    def _get_dynvariables(self, profile):
+        """return the dyn variables"""
+        variables = {}
+
+        # global dynvariables
+        if self.key_dynvariables in self.content:
+            # interpret dynamic variables
+            variables.update(self.content[self.key_dynvariables])
+
+        if profile not in self.lnk_profiles:
+            return variables
+
         # profile dynvariables
+        var = self.lnk_profiles[profile]
         if self.key_dynvariables in var.keys():
-            for k, v in var[self.key_dynvariables].items():
-                variables[k] = shell(v)
+            variables.update(var[self.key_dynvariables])
 
         return variables
 

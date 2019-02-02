@@ -57,6 +57,10 @@ class Templategen:
             return ''
         return self.env.from_string(string).render()
 
+    def update_variables(self, variables):
+        """update variables"""
+        self.env.globals.update(variables)
+
     def _header(self, prepend=''):
         """add a comment usually in the header of a dotfile"""
         return '{}{}'.format(prepend, utils.header())
@@ -124,6 +128,11 @@ class Templategen:
                 if Templategen._is_template(fpath):
                     return True
         return False
+
+    @staticmethod
+    def var_is_template(string):
+        """check if variable contains template(s)"""
+        return VAR_START in str(string)
 
     @staticmethod
     def _is_template(path):

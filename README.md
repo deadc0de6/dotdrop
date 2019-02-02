@@ -543,7 +543,8 @@ The second symlink method is a little more complicated. It creates a symlink in
 `dst` for every file/directory in `src`.
 
 ### Why would I use `link_children`?
-This feature can be very useful dotfiles such as vim where you may not want
+
+This feature can be very useful for dotfiles such as vim where you may not want
 plugins cluttering your dotfiles repository. First, the simpler `link: true` is
 shown for comparison. With the `config.yaml` entry shown below, `~/.vim` gets
 symlinked to `~/.dotfiles/vim/`. This means that using vim will now pollute the
@@ -792,6 +793,27 @@ Following template variables are available:
 * `{{@@ header() @@}}` insert dotdrop header (see [Dotdrop header](#dotdrop-header)).
 * defined variables (see [Variables](#variables))
 * interpreted variables (see [Interpreted variables](#interpreted-variables))
+
+All variables are recursively evaluated what means that
+a config similar to:
+```yaml
+variables:
+  var1: "var1"
+  var2: "{{@@ var1 @@}} var2"
+  var3: "{{@@ var2 @@}} var3"
+  var4: "{{@@ dvar4 @@}}"
+dynvariables:
+  dvar1: "echo dvar1"
+  dvar2: "{{@@ dvar1 @@}} dvar2"
+  dvar3: "{{@@ dvar2 @@}} dvar3"
+  dvar4: "echo {{@@ var3 @@}}"
+```
+
+will result in
+* var3: `var1 var2 var3`
+* dvar3: `dvar1 dvar2 dvar3`
+* var4: `echo var1 var2 var3`
+* dvar4: `var1 var2 var3`
 
 ## Variables
 
