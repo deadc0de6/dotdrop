@@ -332,7 +332,7 @@ def cmd_list_files(opts, conf, templateonly=False):
             if not Templategen.is_template(src):
                 continue
         LOG.log('{} (src: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
-                                                    dotfile.link))
+                                                    dotfile.link.name.lower()))
         LOG.sub('{}'.format(dotfile.dst))
     LOG.log('')
 
