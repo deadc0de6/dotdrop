@@ -23,7 +23,7 @@ COMMENT_END = '@@#}'
 
 class Templategen:
 
-    def __init__(self, profile='', base='.', variables={}, debug=False):
+    def __init__(self, base='.', variables={}, debug=False):
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger()
@@ -39,8 +39,6 @@ class Templategen:
                                comment_end_string=COMMENT_END)
         # adding variables
         self.env.globals['env'] = os.environ
-        if profile:
-            self.env.globals['profile'] = profile
         self.env.globals.update(variables)
         # adding header method
         self.env.globals['header'] = self._header

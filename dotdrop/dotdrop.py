@@ -89,8 +89,8 @@ def cmd_install(opts, conf, temporary=False, keys=[]):
         LOG.warn(msg.format(opts['profile']))
         return False
 
-    t = Templategen(profile=opts['profile'], base=opts['dotpath'],
-                    variables=opts['variables'], debug=opts['debug'])
+    t = Templategen(base=opts['dotpath'], variables=opts['variables'],
+                    debug=opts['debug'])
     tmpdir = None
     if temporary:
         tmpdir = get_tmpdir()
@@ -160,8 +160,8 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     if len(selected) < 1:
         return False
 
-    t = Templategen(profile=opts['profile'], base=opts['dotpath'],
-                    variables=opts['variables'], debug=opts['debug'])
+    t = Templategen(base=opts['dotpath'], variables=opts['variables'],
+                    debug=opts['debug'])
     inst = Installer(create=opts['create'], backup=opts['backup'],
                      dry=opts['dry'], base=opts['dotpath'],
                      workdir=opts['workdir'], debug=opts['debug'])

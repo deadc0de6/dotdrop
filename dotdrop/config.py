@@ -120,8 +120,7 @@ class Cfg:
 
     def eval_dotfiles(self, profile, debug=False):
         """resolve dotfiles src/dst templating"""
-        t = Templategen(profile=profile,
-                        variables=self.get_variables(profile),
+        t = Templategen(variables=self.get_variables(profile),
                         debug=debug)
         for d in self.get_dotfiles(profile):
             d.src = t.generate_string(d.src)
@@ -626,6 +625,9 @@ class Cfg:
     def get_variables(self, profile):
         """return the variables for this profile"""
         variables = {}
+
+        # profile variable
+        variables['profile'] = profile
 
         # global variables
         if self.key_variables in self.content:

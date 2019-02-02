@@ -17,6 +17,7 @@ from dotdrop.installer import Installer
 from dotdrop.action import Action
 from dotdrop.dotdrop import cmd_install
 from dotdrop.linktypes import LinkTypes
+from dotdrop.utils import header
 
 
 class TestInstall(unittest.TestCase):
@@ -163,7 +164,7 @@ exec bspwm
         d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=tr)
 
         # to test template
-        f10, _ = create_random_file(tmp, content='{{@@ profile @@}}')
+        f10, _ = create_random_file(tmp, content='{{@@ header() @@}}')
         dst10 = os.path.join(dst, get_string(6))
         d10 = Dotfile(get_string(6), dst10, os.path.basename(f10))
 
@@ -226,7 +227,7 @@ exec bspwm
         # test template has been remplaced
         self.assertTrue(os.path.exists(dst10))
         tempcontent = open(dst10, 'r').read().rstrip()
-        self.assertTrue(tempcontent == profile)
+        self.assertTrue(tempcontent == header())
 
     def test_link_children(self):
 
