@@ -397,6 +397,20 @@ The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
 vimrc is installed and `echo 'xinitrc installed' > /tmp/myotherlog.log'`
 when xinitrc is installed.
 
+Variables (see [Available variables](#available-variables)) can be used
+in actions for more advanced usage:
+```yaml
+dynvariables:
+  trizen_itself_available: (command -v trizen>/dev/null || cd /tmp; git clone https://aur.archlinux.org/trizen.git; cd trizen; makepkg -si)
+  trizen_package_install: {{@@ trizen_itself_available @@}} && trizen -S --needed
+
+actions:
+  trizen_install: {{@@ trizen_package_install @@}} {0}
+  pre:
+    pip_install: {{@@ trizen_package_install @@}} python-pip && pip install {0}
+    yarn_install: {{@@ trizen_package_install @@}} yarn && yarn global add {0}
+```
+
 ## Use transformations
 
 There are two types of transformations available:

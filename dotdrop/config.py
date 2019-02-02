@@ -119,11 +119,20 @@ class Cfg:
             raise ValueError('config is not valid')
 
     def eval_dotfiles(self, profile, debug=False):
-        """resolve dotfiles src/dst templating for this profile"""
+        """resolve dotfiles src/dst/actions templating for this profile"""
         t = Templategen(variables=self.get_variables(profile, debug=debug))
         for d in self.get_dotfiles(profile):
+            # src and dst path
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
+            # pre actions
+            if self.key_actions_pre in d.actions:
+                for action in d.actions[self.key_actions_pre]:
+                    action.action = t.generate_string(action.action)
+            # post actions
+            if self.key_actions_post in d.actions:
+                for action in d.actions[self.key_actions_post]:
+                    action.action = t.generate_string(action.action)
 
     def _load_file(self):
         """load the yaml file"""
