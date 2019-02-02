@@ -216,15 +216,15 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
 def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
-    updater = Updater(conf, opts['dotpath'], opts['dry'],
-                      opts['safe'], iskey=iskey,
+    updater = Updater(conf, opts['dotpath'], opts['profile'],
+                      opts['dry'], opts['safe'], iskey=iskey,
                       debug=opts['debug'], ignore=[])
     if not iskey:
         # update paths
         if opts['debug']:
             LOG.dbg('update by paths: {}'.format(paths))
         for path in paths:
-            if not updater.update_path(path, opts['profile']):
+            if not updater.update_path(path):
                 ret = False
     else:
         # update keys
@@ -235,7 +235,7 @@ def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
         if opts['debug']:
             LOG.dbg('update by keys: {}'.format(keys))
         for key in keys:
-            if not updater.update_key(key, opts['profile']):
+            if not updater.update_key(key):
                 ret = False
     return ret
 
