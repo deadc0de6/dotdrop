@@ -360,7 +360,7 @@ def cmd_detail(opts, conf, keys=None):
 def _detail(dotpath, dotfile):
     """print details on all files under a dotfile entry"""
     LOG.log('{} (dst: \"{}\", link: {})'.format(dotfile.key, dotfile.dst,
-                                                dotfile.link))
+                                                dotfile.link.name.lower()))
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
         template = 'no'
