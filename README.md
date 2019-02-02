@@ -646,7 +646,7 @@ the following entries:
   * `dst`: where this dotfile needs to be deployed (can use `variables` and `dynvariables`, make sure to quote).
   * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
-  * `link_children`: if true dotdrop will create a symlink for each files under `src` (default *false*).
+  * `link_children`: if true dotdrop will create a symlink for each file under `src` (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `upignore`: list of pattern to ignore when updating (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
