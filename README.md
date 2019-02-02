@@ -83,6 +83,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
   * [Available variables](#available-variables)
   * [Available methods](#available-methods)
   * [Dynamic dotfile paths](#dynamic-dotfile-paths)
+  * [Dynamic actions](#dynamic-actions)
   * [Dotdrop header](#dotdrop-header)
 * [Example](#example)
 * [User tricks](#user-tricks)
@@ -198,7 +199,7 @@ $ dotdrop install
 
 ## Compare dotfiles
 
-Compare local dotfiles with dotdrop's defined ones:
+Compare local dotfiles with the ones stored in dotdrop:
 ```bash
 $ dotdrop compare
 ```
@@ -209,8 +210,7 @@ options to diff using the `-o` switch.
 It is possible to add patterns to ignore when using `compare` for example
 when a directory is managed by dotdrop and might contain temporary files
 that don't need to appear in the output of compare.
-
-Either use the command line switch `-i --ignore` or add an entry in the dotfile
+Either use the command line switch `-i --ignore` or add a line in the dotfile
 directly in the `cmpignore` entry (see [Config](#config)).
 The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
 Make sure to quote those when using wildcards in the config file.
@@ -235,8 +235,8 @@ with the option `longkey` (per default to *false*).
 
 Two formats are available:
 
-  * short format (default): take the shortest unique path
-  * long format: take the full path
+  * *short format* (default): take the shortest unique path
+  * *long format*: take the full path
 
 For example `~/.config/awesome/rc.lua` gives
 
@@ -273,20 +273,24 @@ $ dotdrop listfiles --profile=<some-profile>
 For example:
 ```
 Dotfile(s) for profile "some-profile":
-
-f_vimrc (file: "vimrc", link: False)
+f_vimrc (file: "vimrc", link: nolink)
 	-> ~/.vimrc
-f_dunstrc (file: "config/dunst/dunstrc", link: False)
+f_dunstrc (file: "config/dunst/dunstrc", link: nolink)
 	-> ~/.config/dunst/dunstrc
 ```
 
 By using the `-T --template` switch, only the dotfiles that
-are using jinja2 directives are listed.
+are using [jinja2](http://jinja.pocoo.org/) directives are listed.
 
 It is also possible to list all files related to each dotfile entries
 by invoking the `detail` command, for example:
 ```bash
 $ dotdrop detail
+dotfiles details for profile "some-profile":
+f_tmux.conf (dst: "~/.tmux.conf", link: nolink)
+        -> /home/user/dotfiles/tmux.conf (template:no)
+f_vimrc (dst: "~/.vimrc", link: nolink)
+        -> /home/user/dotfiles/vimrc (template:no)
 ```
 
 This is especially useful when the dotfile entry is a directory
@@ -397,20 +401,6 @@ The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
 vimrc is installed and `echo 'xinitrc installed' > /tmp/myotherlog.log'`
 when xinitrc is installed.
 
-Variables (see [Available variables](#available-variables)) can be used
-in actions for more advanced usage:
-```yaml
-dynvariables:
-  trizen_itself_available: (command -v trizen>/dev/null || cd /tmp; git clone https://aur.archlinux.org/trizen.git; cd trizen; makepkg -si)
-  trizen_package_install: {{@@ trizen_itself_available @@}} && trizen -S --needed
-
-actions:
-  trizen_install: {{@@ trizen_package_install @@}} {0}
-  pre:
-    pip_install: {{@@ trizen_package_install @@}} python-pip && pip install {0}
-    yarn_install: {{@@ trizen_package_install @@}} yarn && yarn global add {0}
-```
-
 ## Use transformations
 
 There are two types of transformations available:
@@ -488,7 +478,7 @@ $ dotdrop update ~/.vimrc
 $ dotdrop update --key f_vimrc
 ```
 
-It is possible to ignore files to update using unix pattern by providing those
+It is possible to ignore files to update using unix patterns by providing those
 either through the switch `-i --ignore` or as part of the dotfile under the
 key `upignore` (see [Config](#config)).
 The ignore pattern must follow Unix shell-style wildcards like for example `*/path/file`.
@@ -553,20 +543,20 @@ Dotdrop offers two ways to symlink dotfiles. The first simply links `dst` to
 `src`. To enable it, simply set `link: true` under the dotfile entry in the
 config file.
 
-The second symlink method is a little more complicated. It creates a symlink in
-`dst` for every file/directory in `src`.
+The second symlink method allows to have every files/directories under `src` to
+be symlinked in `dst`. It is enabled by setting `link_children: true`.
 
-### Why would I use `link_children`?
+### link children
 
-This feature can be very useful for dotfiles such as vim where you may not want
-plugins cluttering your dotfiles repository. First, the simpler `link: true` is
-shown for comparison. With the `config.yaml` entry shown below, `~/.vim` gets
-symlinked to `~/.dotfiles/vim/`. This means that using vim will now pollute the
-dotfiles repository. `plugged` (if using
-[vim-plug](https://github.com/junegunn/vim-plug)), `spell`, and `swap`
-directories will appear `~/.dotfiles/vim/`.
+This feature can be very useful for dotfiles when you don't want the entire
+directory to be symlink but still want to keep a clean config files (with a
+limited number of entry).
 
-```yml
+A good example of its use is when managing `~/.vim` with dotdrop.
+
+Here's what it looks like when using the basic `link: true`. The top
+directory `~/.vim` is symlinked to the *dotpath* location (here `~/.dotfiles/vim`):
+```yaml
 vim:
   dst: ~/.vim/
   src: ./vim/
@@ -575,17 +565,21 @@ vim:
    - vim-plug
   link: true
 ```
-```
+
+```bash
 $ readlink ~/.vim
 ~/.dotfiles/vim/
 $ ls ~/.dotfiles/vim/
 after  autoload  plugged  plugin  snippets  spell  swap  vimrc
 ```
-Let's say we just want to store `after`, `plugin`, `snippets`, and `vimrc` in
-our `~/.dotfiles` repository. This is where `link_children` comes in. Using the
-configuration below, `~/.vim/` is a normal directory and only the children of
-`~/.dotfiles/vim` are symlinked into it.
-```yml
+
+A consequences is that all files under `~/.vim` will be managed by
+dotdrop (including unwanted directories like `spell`, `swap`, etc).
+
+Let's say only `after`, `plugin`, `snippets`, and `vimrc` need to be managed in
+dotdrop. This is where `link_children` shines. Only the children of the managed
+`vim` entry will be symlinked without affecting the rest of the local config.
+```yaml
 vim:
   dst: ~/.vim/
   src: ./vim/
@@ -595,10 +589,7 @@ vim:
   link_children: true
 ```
 
-As can be seen below, `~/.vim/` is a normal directory, not a symlink. Also, the
-files/directories `after`, `plugin`, `snippets`, and `vimrc` are symlinked to
-`~/.dotfiles/vim/`.
-```
+```bash
 $ readlink -f ~/.vim
 ~/.vim
 $ tree -L 1 ~/.vim
@@ -628,7 +619,7 @@ For example
 /home/user/.xyz -> /home/user/.config/dotdrop/.xyz
 
 # without template
-/home/user/.xyz -> /home/user/dotdrop/dotfiles/xyz
+/home/user/.xyz -> /home/user/dotfiles/xyz
 ```
 
 # Config
@@ -656,6 +647,7 @@ the following entries:
   * `dst`: where this dotfile needs to be deployed (can use `variables` and `dynvariables`, make sure to quote).
   * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
+  * `link_children`: if true dotdrop will create a symlink for each files under `src` (default *false*).
   * `cmpignore`: list of pattern to ignore when comparing (enclose in quotes when using wildcards).
   * `upignore`: list of pattern to ignore when updating (enclose in quotes when using wildcards).
   * `actions`: list of action keys that need to be defined in the **actions** entry below.
@@ -668,7 +660,7 @@ the following entries:
     dst: <where-this-file-is-deployed>
     src: <filename-within-the-dotpath>
     # Optional
-    link: <true|false>
+    (link|link_children): <true|false>
     ignoreempty: <true|false>
     cmpignore:
       - "<ignore-pattern>"
@@ -809,7 +801,7 @@ Following template variables are available:
 * interpreted variables (see [Interpreted variables](#interpreted-variables))
 
 All variables are recursively evaluated what means that
-a config similar to:
+a config like the below
 ```yaml
 variables:
   var1: "var1"
@@ -823,7 +815,7 @@ dynvariables:
   dvar4: "echo {{@@ var3 @@}}"
 ```
 
-will result in
+will result in the following available variables
 * var3: `var1 var2 var3`
 * dvar3: `dvar1 dvar2 dvar3`
 * var4: `echo var1 var2 var3`
@@ -957,6 +949,24 @@ profiles:
 
 Make sure to quote the path in the config file.
 
+## Dynamic actions
+
+Variables (`variables` and `dynvariables`) can be used
+in actions for more advanced use-cases:
+
+For example
+```yaml
+dynvariables:
+  trizen_itself_available: (command -v trizen>/dev/null || cd /tmp; git clone https://aur.archlinux.org/trizen.git; cd trizen; makepkg -si)
+  trizen_package_install: {{@@ trizen_itself_available @@}} && trizen -S --needed
+
+actions:
+  trizen_install: {{@@ trizen_package_install @@}} {0}
+  pre:
+    pip_install: {{@@ trizen_package_install @@}} python-pip && pip install {0}
+    yarn_install: {{@@ trizen_package_install @@}} yarn && yarn global add {0}
+```
+
 ## Dotdrop header
 
 Dotdrop is able to insert a header in the generated dotfiles. This allows
@@ -967,13 +977,13 @@ Here's what it looks like:
 This dotfile is managed using dotdrop
 ```
 
-The header can be automatically added using jinja2 directive:
+The header can be automatically added using [jinja2](http://jinja.pocoo.org/) directive:
 ```
 {{@@ header() @@}}
 ```
 
 Properly commenting the header in templates is the responsability of the user
-as jinja2 has no way of knowing what is the proper char(s) used for comments.
+as [jinja2](http://jinja.pocoo.org/) has no way of knowing what is the proper char(s) used for comments.
 Either prepend the directive with the commenting char(s) used in the dotfile (for example `# {{@@ header() @@}}`)
 or provide it as an argument `{{@@ header('# ') @@}}`. The result is equivalent.
 
@@ -1000,7 +1010,7 @@ Dotdrop allows to store only one single *.xinitrc* but
 to deploy different versions depending on where it is run from.
 
 The following file is the dotfile stored in dotdrop containing
-jinja2 directives for the deployment based on the profile used.
+[jinja2](http://jinja.pocoo.org/) directives for the deployment based on the profile used.
 
 Dotfile `<dotpath>/xinitrc`:
 ```bash
