@@ -182,6 +182,18 @@ class Installer:
             self.log.err('creating directory for {}'.format(dst))
             return []
         self._exec_pre_actions(actions)
+        # re-check in case action created the file
+        if os.path.lexists(dst):
+            msg = 'Remove "{}" for link creation?'.format(dst)
+            if self.safe and not self.log.ask(msg):
+                msg = 'ignoring "{}", link was not created'
+                self.log.warn(msg.format(dst))
+                return []
+            try:
+                utils.remove(dst)
+            except OSError as e:
+                self.log.err('something went wrong with {}: {}'.format(src, e))
+                return []
         os.symlink(src, dst)
         self.log.sub('linked {} to {}'.format(dst, src))
         return [(src, dst)]
@@ -279,6 +291,12 @@ class Installer:
         if self.debug:
             self.log.dbg('write content to {}'.format(dst))
         self._exec_pre_actions(actions)
+        # re-check in case action created the file
+        if os.path.lexists(dst) and self.safe:
+            if not self.log.ask('Overwrite \"{}\"'.format(dst)):
+                self.log.warn('ignoring {}'.format(dst))
+                return 1
+        # write the file
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
