@@ -37,7 +37,7 @@ class Dotfile:
 
     def __str__(self):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
-        return msg.format(self.key, self.src, self.dst, self.link.name)
+        return msg.format(self.key, self.src, self.dst, self.link.name.lower())
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

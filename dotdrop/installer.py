@@ -64,7 +64,8 @@ class Installer:
         if self.debug:
             self.log.dbg('link {} to {}'.format(src, dst))
         self.action_executed = False
-        src = os.path.join(self.base, os.path.expanduser(src))
+        src = os.path.normpath(os.path.join(self.base,
+                                            os.path.expanduser(src)))
         if not os.path.exists(src):
             self.log.err('source dotfile does not exist: {}'.format(src))
             return []
@@ -124,8 +125,10 @@ class Installer:
             os.mkdir(dst)
 
         children = os.listdir(parent)
-        srcs = [os.path.join(parent, child) for child in children]
-        dsts = [os.path.join(dst, child) for child in children]
+        srcs = [os.path.normpath(os.path.join(parent, child))
+                for child in children]
+        dsts = [os.path.normpath(os.path.join(dst, child))
+                for child in children]
 
         for i in range(len(children)):
             src = srcs[i]

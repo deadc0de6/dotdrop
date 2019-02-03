@@ -216,15 +216,15 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
 def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
-    updater = Updater(conf, opts['dotpath'], opts['dry'],
-                      opts['safe'], iskey=iskey,
+    updater = Updater(conf, opts['dotpath'], opts['profile'],
+                      opts['dry'], opts['safe'], iskey=iskey,
                       debug=opts['debug'], ignore=[])
     if not iskey:
         # update paths
         if opts['debug']:
             LOG.dbg('update by paths: {}'.format(paths))
         for path in paths:
-            if not updater.update_path(path, opts['profile']):
+            if not updater.update_path(path):
                 ret = False
     else:
         # update keys
@@ -235,7 +235,7 @@ def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
         if opts['debug']:
             LOG.dbg('update by keys: {}'.format(keys))
         for key in keys:
-            if not updater.update_key(key, opts['profile']):
+            if not updater.update_key(key):
                 ret = False
     return ret
 
@@ -332,7 +332,7 @@ def cmd_list_files(opts, conf, templateonly=False):
             if not Templategen.is_template(src):
                 continue
         LOG.log('{} (src: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
-                                                    dotfile.link))
+                                                    dotfile.link.name.lower()))
         LOG.sub('{}'.format(dotfile.dst))
     LOG.log('')
 
@@ -360,7 +360,7 @@ def cmd_detail(opts, conf, keys=None):
 def _detail(dotpath, dotfile):
     """print details on all files under a dotfile entry"""
     LOG.log('{} (dst: \"{}\", link: {})'.format(dotfile.key, dotfile.dst,
-                                                dotfile.link))
+                                                dotfile.link.name.lower()))
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
         template = 'no'

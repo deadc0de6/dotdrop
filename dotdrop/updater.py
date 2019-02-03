@@ -20,10 +20,11 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, conf, dotpath, dry, safe,
+    def __init__(self, conf, dotpath, profile, dry, safe,
                  iskey=False, debug=False, ignore=[]):
         self.conf = conf
         self.dotpath = dotpath
+        self.profile = profile
         self.dry = dry
         self.safe = safe
         self.iskey = iskey
@@ -31,13 +32,13 @@ class Updater:
         self.ignore = ignore
         self.log = Logger()
 
-    def update_path(self, path, profile):
+    def update_path(self, path):
         """update the dotfile installed on path"""
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
         path = self._normalize(path)
-        dotfile = self._get_dotfile_by_path(path, profile)
+        dotfile = self._get_dotfile_by_path(path)
         if not dotfile:
             return False
         path = os.path.expanduser(path)
@@ -45,9 +46,9 @@ class Updater:
             self.log.dbg('updating {} from path \"{}\"'.format(dotfile, path))
         return self._update(path, dotfile)
 
-    def update_key(self, key, profile):
+    def update_key(self, key):
         """update the dotfile referenced by key"""
-        dotfile = self._get_dotfile_by_key(key, profile)
+        dotfile = self._get_dotfile_by_key(key)
         if not dotfile:
             return False
         if self.debug:
@@ -111,9 +112,9 @@ class Updater:
             path = os.path.join(TILD, path)
         return path
 
-    def _get_dotfile_by_key(self, key, profile):
+    def _get_dotfile_by_key(self, key):
         """get the dotfile matching this key"""
-        dotfiles = self.conf.get_dotfiles(profile)
+        dotfiles = self.conf.get_dotfiles(self.profile)
         subs = [d for d in dotfiles if d.key == key]
         if not subs:
             self.log.err('key \"{}\" not found!'.format(key))
@@ -124,9 +125,9 @@ class Updater:
             return None
         return subs[0]
 
-    def _get_dotfile_by_path(self, path, profile):
+    def _get_dotfile_by_path(self, path):
         """get the dotfile matching this path"""
-        dotfiles = self.conf.get_dotfiles(profile)
+        dotfiles = self.conf.get_dotfiles(self.profile)
         subs = [d for d in dotfiles if d.dst == path]
         if not subs:
             self.log.err('\"{}\" is not managed!'.format(path))
