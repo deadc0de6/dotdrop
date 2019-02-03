@@ -37,6 +37,8 @@ class Installer:
 
     def install(self, templater, src, dst, actions=[], noempty=False):
         """install the src to dst using a template"""
+        if self.debug:
+            self.log.dbg('install {} to {}'.format(src, dst))
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
@@ -59,6 +61,8 @@ class Installer:
 
     def link(self, templater, src, dst, actions=[]):
         """set src as the link target of dst"""
+        if self.debug:
+            self.log.dbg('link {} to {}'.format(src, dst))
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
@@ -82,6 +86,8 @@ class Installer:
 
     def linkall(self, templater, src, dst, actions=[]):
         """link all dotfiles in a given directory"""
+        if self.debug:
+            self.log.dbg('linkall {} to {}'.format(src, dst))
         self.action_executed = False
         parent = os.path.join(self.base, os.path.expanduser(src))
 
