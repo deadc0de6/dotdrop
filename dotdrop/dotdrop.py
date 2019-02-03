@@ -44,7 +44,7 @@ Usage:
   dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVbk]   [-c <path>] [-p <profile>]
+  dotdrop update    [-fdVbkP]  [-c <path>] [-p <profile>]
                                [-i <pattern>...] [<path>...]
   dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
@@ -63,6 +63,7 @@ Options:
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
   -l --inv-link           Invert the value of "link_by_default" when importing.
+  -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
@@ -213,12 +214,13 @@ def cmd_compare(opts, conf, tmp, focus=[], ignore=[]):
     return same
 
 
-def cmd_update(opts, conf, paths, iskey=False, ignore=[]):
+def cmd_update(opts, conf, paths, iskey=False, ignore=[], showpatch=False):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
     updater = Updater(conf, opts['dotpath'], opts['profile'],
                       opts['dry'], opts['safe'], iskey=iskey,
-                      debug=opts['debug'], ignore=[])
+                      debug=opts['debug'], ignore=[],
+                      showpatch=showpatch)
     if not iskey:
         # update paths
         if opts['debug']:
@@ -509,8 +511,9 @@ def main():
             if opts['debug']:
                 LOG.dbg('running cmd: update')
             iskey = args['--key']
-            ret = cmd_update(opts, conf, args['<path>'], iskey=iskey,
-                             ignore=args['--ignore'])
+            ret = cmd_update(opts, conf, args['<path>'],
+                             iskey=iskey, ignore=args['--ignore'],
+                             showpatch=args['--show-patch'])
 
         elif args['detail']:
             # detail files

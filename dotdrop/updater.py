@@ -21,7 +21,7 @@ TILD = '~'
 class Updater:
 
     def __init__(self, conf, dotpath, profile, dry, safe,
-                 iskey=False, debug=False, ignore=[]):
+                 iskey=False, debug=False, ignore=[], showpatch=False):
         self.conf = conf
         self.dotpath = dotpath
         self.profile = profile
@@ -30,6 +30,7 @@ class Updater:
         self.iskey = iskey
         self.debug = debug
         self.ignore = ignore
+        self.showpatch = showpatch
         self.log = Logger()
 
     def update_path(self, path):
@@ -144,6 +145,21 @@ class Updater:
         self.log.warn('{} uses template, update manually'.format(path))
         return True
 
+    def _show_patch(self, tpath, fpath):
+        """provide a way to manually patch the template"""
+        content = self._resolve_template(tpath)
+        tmp = utils.write_to_tmpfile(content)
+        cmds = ['diff', '-u', tmp, fpath, '|', 'patch', tpath]
+        self.log.warn('try patching with: \"{}\"'.format(' '.join(cmds)))
+        return False
+
+    def _resolve_template(self, tpath):
+        """resolve the template to a temporary file"""
+        variables = self.conf.get_variables(self.profile)
+        t = Templategen(variables=variables, base=self.dotpath,
+                        debug=self.debug)
+        return t.generate(tpath)
+
     def _handle_file(self, left, right, compare=True):
         """sync left (deployed file) and right (dotdrop dotfile)"""
         if self._ignore([left, right]):
@@ -151,8 +167,11 @@ class Updater:
         if self.debug:
             self.log.dbg('update for file {} and {}'.format(left, right))
         if self._is_template(right):
+            # dotfile is a template
             if self.debug:
                 self.log.dbg('{} is a template'.format(right))
+            if self.showpatch:
+                self._show_patch(right, left)
             return False
         if compare and filecmp.cmp(left, right, shallow=True):
             # no difference

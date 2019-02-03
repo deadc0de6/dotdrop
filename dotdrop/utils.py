@@ -41,6 +41,14 @@ def run(cmd, raw=True, debug=False, checkerr=False):
     return ret == 0, lines
 
 
+def write_to_tmpfile(content):
+    """write some content to a tmp file"""
+    path = get_tmpfile()
+    with open(path, 'wb') as f:
+        f.write(content)
+    return path
+
+
 def shell(cmd):
     """run a command in the shell (expects a string)"""
     return subprocess.getoutput(cmd)

@@ -508,13 +508,22 @@ $ git diff
 
 **The dotfile uses [templating](#template)**
 
-The dotfile must be manually updated, two solutions can be used to identify the
+The dotfile must be manually updated, three solutions can be used to identify the
 changes to apply to the template:
 
 * Use dotdrop's `compare` command
 ```bash
 # use compare to identify change(s)
 $ dotdrop compare --file=~/.vimrc
+```
+
+* Provide the switch `-P --show-patch` that will provide with an ad-hoc solution
+  to manually patch the template file using a temporary generated version of the template
+  (this isn't a bullet proof solution and might need manual checking)
+```bash
+./dotdrop.sh update --show-patch ~/.vimrc
+[WARN] /home/user/dotfiles/vimrc uses template, update manually
+[WARN] try patching with: "diff -u /tmp/dotdrop-sbx6hw0r /home/user/.vimrc | patch /home/user/dotfiles/vimrc"
 ```
 
 * Install the dotfiles to a temporary directory (using the `install` command and the
