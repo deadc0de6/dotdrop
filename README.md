@@ -146,7 +146,7 @@ $ dotdrop import ~/.vimrc ~/.xinitrc
 
 Dotdrop does two things:
 
-* Copy the dotfiles in the *dotfiles* directory
+* Copy the dotfiles in the *dotpath* directory
 * Create the entries in the *config.yaml* file
 
 Commit and push your changes.
@@ -497,7 +497,7 @@ There are two cases when updating a dotfile:
 
 **The dotfile doesn't use [templating](#template)**
 
-The new version of the dotfile is copied to the *dotfiles* directory and overwrites
+The new version of the dotfile is copied to the *dotpath* directory and overwrites
 the old version. If git is used to version the dotfiles stored by dotdrop, the git command
 `diff` can be used to view the changes.
 
@@ -517,11 +517,12 @@ changes to apply to the template:
 $ dotdrop compare --file=~/.vimrc
 ```
 
-* Provide the switch `-P --show-patch` that will provide with an ad-hoc solution
+* Call `update` with the `-P --show-patch` switch that will provide with an ad-hoc solution
   to manually patch the template file using a temporary generated version of the template
   (this isn't a bullet proof solution and might need manual checking)
 ```bash
-./dotdrop.sh update --show-patch ~/.vimrc
+# get an ad-hoc solution to manually patch the template
+$ dotdrop update --show-patch ~/.vimrc
 [WARN] /home/user/dotfiles/vimrc uses template, update manually
 [WARN] try patching with: "diff -u /tmp/dotdrop-sbx6hw0r /home/user/.vimrc | patch /home/user/dotfiles/vimrc"
 ```
@@ -559,19 +560,19 @@ be symlinked in `dst`. It is enabled by setting `link_children: true`.
 
 This feature can be very useful for dotfiles when you don't want the entire
 directory to be symlink but still want to keep a clean config files (with a
-limited number of entries).
+limited number of entries). A good example of its use is when managing `~/.vim` with dotdrop.
 
-A good example of its use is when managing `~/.vim` with dotdrop.
-
-Here's what it looks like when using the basic `link: true`. The top
-directory `~/.vim` is symlinked to the *dotpath* location (here `~/.dotfiles/vim`):
+Here's what it looks like when using `link: true`.
 ```yaml
+config:
+  dotpath: dotfiles
 vim:
-  dst: ~/.vim/
+  dst: ~/.vim
   src: vim
   link: true
 ```
 
+The top directory `~/.vim` is symlinked to the *dotpath* location
 ```bash
 $ readlink ~/.vim
 ~/.dotfiles/vim/
@@ -586,17 +587,18 @@ A cleaner solution is to use `link_children` which allows to only symlink specif
 files under the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
 need to be managed in dotdrop. `~/.vim` is imported in dotdrop, cleaned off all unwanted
 files and directories and then the `link_children` entry is set to `true` in the config file.
-
-Now all children of the `vim` dotfile's directory in the *dotpath* will be symlinked under `~/.vim/`
-without affecting the rest of the local files, keeping the config file clean
-and all unwanted files only on the local system.
 ```yaml
+config:
+  dotpath: dotfiles
 vim:
   dst: ~/.vim/
   src: vim
   link_children: true
 ```
 
+Now all children of the `vim` dotfile's directory in the *dotpath* will be symlinked under `~/.vim/`
+without affecting the rest of the local files, keeping the config file clean
+and all unwanted files only on the local system.
 ```bash
 $ readlink -f ~/.vim
 ~/.vim
@@ -962,7 +964,6 @@ Make sure to quote the path in the config file.
 Variables (`variables` and `dynvariables`) can be used
 in actions for more advanced use-cases:
 
-For example with variables
 ```yaml
 dotfiles:
   f_test:
