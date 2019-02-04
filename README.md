@@ -962,17 +962,20 @@ Make sure to quote the path in the config file.
 Variables (`variables` and `dynvariables`) can be used
 in actions for more advanced use-cases:
 
-For example
+For example with variables
 ```yaml
-dynvariables:
-  trizen_itself_available: (command -v trizen>/dev/null || cd /tmp; git clone https://aur.archlinux.org/trizen.git; cd trizen; makepkg -si)
-  trizen_package_install: "{{@@ trizen_itself_available @@}} && trizen -S --needed"
-
+dotfiles:
+  f_test:
+    dst: ~/.test
+    src: test
+    actions:
+      - cookie_mv_somewhere "/tmp/moved-cookie"
+variables:
+  cookie_dir_available: (test -d /tmp/cookiedir || mkdir -p /tmp/cookiedir)
+  cookie_header: "{{@@ cookie_dir_available @@}} && echo 'header' > /tmp/cookiedir/cookie"
+  cookie_mv: "{{@@ cookie_header @@}} && mv /tmp/cookiedir/cookie"
 actions:
-  trizen_install: "{{@@ trizen_package_install @@}} {0}"
-  pre:
-    pip_install: "{{@@ trizen_package_install @@}} python-pip && pip install {0}"
-    yarn_install: "{{@@ trizen_package_install @@}} yarn && yarn global add {0}"
+  cookie_mv_somewhere: "{{@@ cookie_mv @@}} {0}"
 ```
 
 Make sure to quote the actions using variables.
