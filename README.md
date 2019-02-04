@@ -966,14 +966,16 @@ For example
 ```yaml
 dynvariables:
   trizen_itself_available: (command -v trizen>/dev/null || cd /tmp; git clone https://aur.archlinux.org/trizen.git; cd trizen; makepkg -si)
-  trizen_package_install: {{@@ trizen_itself_available @@}} && trizen -S --needed
+  trizen_package_install: "{{@@ trizen_itself_available @@}} && trizen -S --needed"
 
 actions:
-  trizen_install: {{@@ trizen_package_install @@}} {0}
+  trizen_install: "{{@@ trizen_package_install @@}} {0}"
   pre:
-    pip_install: {{@@ trizen_package_install @@}} python-pip && pip install {0}
-    yarn_install: {{@@ trizen_package_install @@}} yarn && yarn global add {0}
+    pip_install: "{{@@ trizen_package_install @@}} python-pip && pip install {0}"
+    yarn_install: "{{@@ trizen_package_install @@}} yarn && yarn global add {0}"
 ```
+
+Make sure to quote the actions using variables.
 
 ## Dotdrop header
 
