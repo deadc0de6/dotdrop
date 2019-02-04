@@ -181,12 +181,14 @@ class Cfg:
                         for k2, v2 in items:
                             if k not in self.actions:
                                 self.actions[k] = {}
-                            self.actions[k][k2] = Action(k2, v2)
+                            self.actions[k][k2] = Action(k2, k, v2)
                     else:
                         # parse naked actions as post actions
                         if self.key_actions_post not in self.actions:
                             self.actions[self.key_actions_post] = {}
-                        self.actions[self.key_actions_post][k] = Action(k, v)
+                        self.actions[self.key_actions_post][k] = Action(k,
+                                                                        '',
+                                                                        v)
 
         # parse read transformations
         if self.key_trans_r in self.content:
@@ -383,24 +385,24 @@ class Cfg:
             action = None
             if self.key_actions_pre in self.actions and \
                     entry in self.actions[self.key_actions_pre]:
-                key = self.key_actions_pre
+                kind = self.key_actions_pre
                 if not args:
                     action = self.actions[self.key_actions_pre][entry]
                 else:
                     a = self.actions[self.key_actions_pre][entry].action
-                    action = Action(key, a, *args)
+                    action = Action(entry, kind, a, *args)
             elif self.key_actions_post in self.actions and \
                     entry in self.actions[self.key_actions_post]:
-                key = self.key_actions_post
+                kind = self.key_actions_post
                 if not args:
                     action = self.actions[self.key_actions_post][entry]
                 else:
                     a = self.actions[self.key_actions_post][entry].action
-                    action = Action(key, a, *args)
+                    action = Action(entry, kind, a, *args)
             else:
                 self.log.warn('unknown action \"{}\"'.format(entry))
                 continue
-            res[key].append(action)
+            res[kind].append(action)
         return res
 
     def _parse_trans(self, trans, read=True):

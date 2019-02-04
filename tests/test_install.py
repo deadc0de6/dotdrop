@@ -149,7 +149,8 @@ exec bspwm
         # to test actions
         value = get_string(12)
         fact = '/tmp/action'
-        act1 = Action('testaction', 'echo "{}" > {}'.format(value, fact))
+        act1 = Action('testaction', 'post', 'echo "{}" > {}'.format(value,
+                                                                    fact))
         f8, c8 = create_random_file(tmp)
         dst8 = os.path.join(dst, get_string(6))
         d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])
@@ -158,7 +159,7 @@ exec bspwm
         trans1 = 'trans1'
         trans2 = 'trans2'
         cmd = 'cat {0} | sed \'s/%s/%s/g\' > {1}' % (trans1, trans2)
-        tr = Action('testtrans', cmd)
+        tr = Action('testtrans', 'post', cmd)
         f9, c9 = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
         d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=tr)

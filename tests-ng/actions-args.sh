@@ -90,7 +90,7 @@ cat ${cfg}
 echo "test" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --verbose
 
 # checks
 [ ! -e ${tmpa}/pre ] && echo "pre arg action not found" && exit 1

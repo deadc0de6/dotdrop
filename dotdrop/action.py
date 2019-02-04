@@ -32,9 +32,14 @@ class Cmd:
 
 class Action(Cmd):
 
-    def __init__(self, key, action, *args):
+    def __init__(self, key, kind, action, *args):
         super(Action, self).__init__(key, action)
+        self.kind = kind
         self.args = args
+
+    def __str__(self):
+        out = '{}: \"{}\" with args: {}'
+        return out.format(self.key, self.action, self.args)
 
     def execute(self):
         """execute the action in the shell"""
