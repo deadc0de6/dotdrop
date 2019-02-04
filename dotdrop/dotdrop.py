@@ -218,8 +218,8 @@ def cmd_update(opts, conf, paths, iskey=False, ignore=[], showpatch=False):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
     updater = Updater(conf, opts['dotpath'], opts['profile'],
-                      opts['dry'], opts['safe'], iskey=iskey,
-                      debug=opts['debug'], ignore=[],
+                      opts['variables'], opts['dry'], opts['safe'],
+                      iskey=iskey, debug=opts['debug'], ignore=[],
                       showpatch=showpatch)
     if not iskey:
         # update paths
@@ -461,7 +461,8 @@ def main():
         LOG.dbg('configs:\n{}'.format(conf.dump()))
 
     # resolve dynamic paths
-    conf.eval_dotfiles(opts['profile'], debug=opts['debug'])
+    conf.eval_dotfiles(opts['profile'], opts['variables'],
+                       debug=opts['debug'])
 
     if ENV_NOBANNER not in os.environ \
             and opts['banner'] \

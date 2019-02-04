@@ -20,11 +20,12 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, conf, dotpath, profile, dry, safe,
+    def __init__(self, conf, dotpath, profile, variables, dry, safe,
                  iskey=False, debug=False, ignore=[], showpatch=False):
         self.conf = conf
         self.dotpath = dotpath
         self.profile = profile
+        self.variables = variables
         self.dry = dry
         self.safe = safe
         self.iskey = iskey
@@ -155,8 +156,7 @@ class Updater:
 
     def _resolve_template(self, tpath):
         """resolve the template to a temporary file"""
-        variables = self.conf.get_variables(self.profile)
-        t = Templategen(variables=variables, base=self.dotpath,
+        t = Templategen(variables=self.variables, base=self.dotpath,
                         debug=self.debug)
         return t.generate(tpath)
 

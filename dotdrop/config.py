@@ -118,9 +118,9 @@ class Cfg:
         if not self._load_file():
             raise ValueError('config is not valid')
 
-    def eval_dotfiles(self, profile, debug=False):
+    def eval_dotfiles(self, profile, variables, debug=False):
         """resolve dotfiles src/dst/actions templating for this profile"""
-        t = Templategen(variables=self.get_variables(profile, debug=debug))
+        t = Templategen(variables=variables)
         for d in self.get_dotfiles(profile):
             # src and dst path
             d.src = t.generate_string(d.src)
