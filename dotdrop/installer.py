@@ -159,6 +159,7 @@ class Installer:
 
     def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""
+        overwrite = not self.safe
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
                 if self.debug:
@@ -172,6 +173,7 @@ class Installer:
                 msg = 'ignoring "{}", link was not created'
                 self.log.warn(msg.format(dst))
                 return []
+            overwrite = True
             try:
                 utils.remove(dst)
             except OSError as e:
@@ -188,7 +190,7 @@ class Installer:
         # re-check in case action created the file
         if os.path.lexists(dst):
             msg = 'Remove "{}" for link creation?'.format(dst)
-            if self.safe and not self.log.ask(msg):
+            if self.safe and not overwrite and not self.log.ask(msg):
                 msg = 'ignoring "{}", link was not created'
                 self.log.warn(msg.format(dst))
                 return []
@@ -268,6 +270,7 @@ class Installer:
         return  0 for success,
                 1 when already exists
                -1 when error"""
+        overwrite = not self.safe
         if self.dry:
             self.log.dry('would install {}'.format(dst))
             return 0
@@ -285,6 +288,7 @@ class Installer:
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1
+                overwrite = True
         if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
@@ -295,7 +299,7 @@ class Installer:
             self.log.dbg('write content to {}'.format(dst))
         self._exec_pre_actions(actions)
         # re-check in case action created the file
-        if os.path.lexists(dst) and self.safe:
+        if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring {}'.format(dst))
                 return 1
