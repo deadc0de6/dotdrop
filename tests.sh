@@ -23,8 +23,9 @@ set -e
 
 # execute tests with coverage
 PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
+#PYTHONPATH=dotdrop python3 -m pytest tests
 
-# execute bash script tests
+## execute bash script tests
 for scr in tests-ng/*.sh; do
   ${scr}
 done

@@ -193,7 +193,7 @@ content=`cat ${tmpy}/a/somefile`
 [ ! -e ${tmps}/dotfiles/def ] && exit 1
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${tmpx} ${tmpy}
 
 echo "OK"
 exit 0

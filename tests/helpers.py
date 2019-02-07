@@ -32,7 +32,8 @@ def clean(path):
 def get_string(length):
     """Get a random string of length 'length'"""
     alpha = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(alpha) for _ in range(length))
+    temp = ''.join(random.choice(alpha) for _ in range(length))
+    return 'dotdrop-tests-{}'.format(temp)
 
 
 def get_tempdir():

@@ -150,6 +150,7 @@ exec bspwm
         # to test actions
         value = get_string(12)
         fact = '/tmp/action'
+        self.addCleanup(clean, fact)
         act1 = Action('testaction', 'post', 'echo "{}" > {}'.format(value,
                                                                     fact))
         f8, c8 = create_random_file(tmp)

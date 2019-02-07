@@ -57,6 +57,7 @@ class TestUpdate(unittest.TestCase):
         dpath = os.path.join(fold_config, get_string(5))
         dir1 = create_dir(dpath)
         dirf1, _ = create_random_file(dpath)
+        self.addCleanup(clean, dir1)
 
         # create the config file
         profile = get_string(5)
