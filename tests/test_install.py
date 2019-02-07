@@ -68,8 +68,9 @@ exec bspwm
                     f.write('    trans: {}\n'.format(d.trans_r.key))
             f.write('profiles:\n')
             f.write('  {}:\n'.format(profile))
+            f.write('    dotfiles:\n')
             for d in dotfiles:
-                f.write('  - {}\n'.format(d.key))
+                f.write('    - {}\n'.format(d.key))
         return path
 
     def test_install(self):

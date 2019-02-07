@@ -153,19 +153,6 @@ class Cfg:
         if self.key_dotfiles not in self.content:
             self.log.err('missing \"{}\" in config'.format(self.key_dotfiles))
             return False
-        if self.content[self.key_profiles]:
-            # make sure dotfiles are in a sub called "dotfiles"
-            # and adapt if there are not
-            profiles = self.content[self.key_profiles]
-            changed = False
-            for k in profiles.keys():
-                if self.key_profiles_dots not in profiles[k] and \
-                        self.key_profiles_incl not in profiles[k]:
-                    profiles[k] = {self.key_profiles_dots: profiles[k]}
-                    changed = True
-            if changed:
-                # save the new config file
-                self._save(self.content, self.cfgpath)
         return True
 
     def _parse(self):
