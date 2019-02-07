@@ -50,10 +50,10 @@ tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d -p ${HOME}`
+tmpd=`mktemp -d -p ${HOME} --suffix='-dotdrop-tests'`
 echo "dotfiles destination: ${tmpd}"
 # the workdir
-tmpw=`mktemp -d -p ${HOME}`
+tmpw=`mktemp -d -p ${HOME} --suffix='-dotdrop-tests'`
 echo "workdir: ${tmpw}"
 
 
