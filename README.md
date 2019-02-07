@@ -767,13 +767,13 @@ For example:
 ```yaml
 profiles:
   host1:
-      dotfiles:
-        - f_xinitrc
-      include:
-        - host2
+    dotfiles:
+      - f_xinitrc
+    include:
+      - host2
   host2:
-      dotfiles:
-        - f_vimrc
+    dotfiles:
+      - f_vimrc
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
