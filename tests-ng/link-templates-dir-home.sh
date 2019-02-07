@@ -46,7 +46,7 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination

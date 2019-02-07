@@ -46,7 +46,7 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # dotdrop directory
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 dt="${tmps}/dotfiles"
 mkdir -p ${dt}
 mkdir -p ${dt}/a/{b,c}
@@ -54,7 +54,7 @@ echo 'a' > ${dt}/a/b/abfile
 echo 'a' > ${dt}/a/c/acfile
 
 # fs dotfiles
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 cp -r ${dt}/a ${tmpd}/
 
 # create the config file

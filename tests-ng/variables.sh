@@ -46,11 +46,11 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 #echo "dotfile source: ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 #echo "dotfile destination: ${tmpd}"
 
 # create the config file

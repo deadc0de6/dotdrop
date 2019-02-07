@@ -46,12 +46,12 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # the action temp
-tmpa=`mktemp -d`
+tmpa=`mktemp -d --suffix='-dotdrop-tests'`
 # the dotfile source
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 
 # create the config file
 cfg="${tmps}/config.yaml"

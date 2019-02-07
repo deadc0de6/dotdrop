@@ -47,7 +47,7 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 string="blabla"
 
 # the dotfile source
-tmp=`mktemp -d`
+tmp=`mktemp -d --suffix='-dotdrop-tests'`
 
 tmpf="${tmp}/dotfiles"
 tmpw="${tmp}/workdir"
@@ -62,7 +62,7 @@ cfg="${tmp}/config.yaml"
 echo "config file: ${cfg}"
 
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 echo "dotfiles destination: ${tmpd}"
 
 ## RELATIVE
@@ -104,7 +104,7 @@ rm -rf ${tmp} ${tmpd}
 ## ABSOLUTE
 echo "RUNNING ABSOLUTE"
 # the dotfile source
-tmp=`mktemp -d`
+tmp=`mktemp -d --suffix='-dotdrop-tests'`
 
 tmpf="${tmp}/dotfiles"
 tmpw="${tmp}/workdir"
@@ -119,7 +119,7 @@ cfg="${tmp}/config.yaml"
 echo "config file: ${cfg}"
 
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 echo "dotfiles destination: ${tmpd}"
 
 cat > ${cfg} << _EOF
@@ -159,7 +159,7 @@ rm -rf ${tmp} ${tmpd}
 ## NONE
 echo "RUNNING UNDEFINED WORKDIR"
 # the dotfile source
-tmp=`mktemp -d`
+tmp=`mktemp -d --suffix='-dotdrop-tests'`
 
 tmpf="${tmp}/dotfiles"
 
@@ -171,7 +171,7 @@ cfg="${tmp}/config.yaml"
 echo "config file: ${cfg}"
 
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 echo "dotfiles destination: ${tmpd}"
 
 cat > ${cfg} << _EOF

@@ -48,11 +48,11 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 echo "dotfiles destination: ${tmpd}"
 
 # create the config file
@@ -98,7 +98,7 @@ _EOF
 cat ${cfg}
 
 # create the base64 dotfile
-tmpf=`mktemp`
+tmpf=`mktemp --suffix='-dotdrop-tests'`
 echo ${token} > ${tmpf}
 cat ${tmpf} | base64 > ${tmps}/dotfiles/abc
 rm -f ${tmpf}
@@ -107,7 +107,7 @@ rm -f ${tmpf}
 echo 'marker' > ${tmps}/dotfiles/def
 
 # create the compressed dotfile
-tmpx=`mktemp -d`
+tmpx=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmpx}/{a,b,c}
 mkdir -p ${tmpx}/a/{dir1,dir2}
 # ambiguous redirect ??
@@ -184,7 +184,7 @@ cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V d_ghi
 tar -tf ${tmps}/dotfiles/ghi | grep './b/newfile'
 tar -tf ${tmps}/dotfiles/ghi | grep './a/dir1/otherfile'
 
-tmpy=`mktemp -d`
+tmpy=`mktemp -d --suffix='-dotdrop-tests'`
 tar -xf ${tmps}/dotfiles/ghi -C ${tmpy}
 content=`cat ${tmpy}/a/somefile`
 [ "${content}" != "${touched}" ] && exit 1

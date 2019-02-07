@@ -37,7 +37,7 @@ def get_string(length):
 
 def get_tempdir():
     """Get a temporary directory"""
-    return tempfile.mkdtemp(suffix=TMPSUFFIX)
+    return tempfile.mkdtemp(prefix='dotdrop-tests-')
 
 
 def create_random_file(directory, content=None,

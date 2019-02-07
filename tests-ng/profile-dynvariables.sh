@@ -46,20 +46,20 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d`
+tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 #echo "dotfile destination: ${tmpd}"
 
 # create a shell script
 export TESTENV="this is my global testenv"
-scr=`mktemp`
+scr=`mktemp --suffix='-dotdrop-tests'`
 chmod +x ${scr}
 echo -e "#!/bin/bash\necho $TESTENV\n" >> ${scr}
 
 export TESTENV2="this is my profile testenv"
-scr2=`mktemp`
+scr2=`mktemp --suffix='-dotdrop-tests'`
 chmod +x ${scr2}
 echo -e "#!/bin/bash\necho $TESTENV2\n" >> ${scr2}
 

@@ -46,12 +46,12 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d`
+basedir=`mktemp -d --suffix='-dotdrop-tests'`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
 # the dotfile to be imported
-tmpd=`mktemp -d`
+tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 
 # single file
 echo 'unique' > ${tmpd}/uniquefile
