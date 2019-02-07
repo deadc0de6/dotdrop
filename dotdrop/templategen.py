@@ -87,11 +87,8 @@ class Templategen:
             content = template.render()
         except UnicodeDecodeError:
             data = self._read_bad_encoded_text(src)
-            template = self.env.from_string(data)
-            content = template.render()
-
-        content = content.encode('UTF-8')
-        return content
+            content = self.generate_string(data)
+        return content.encode('utf-8')
 
     def _handle_bin_file(self, src):
         """write binary to file"""
