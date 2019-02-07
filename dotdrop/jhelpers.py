@@ -9,5 +9,5 @@ import os
 
 
 def exists(path):
-    '''return true when path exists'''
+    """return true when path exists"""
     return os.path.exists(path)

@@ -26,7 +26,7 @@ class TestListings(unittest.TestCase):
     CONFIG_NAME = 'config.yaml'
 
     def test_listings(self):
-        '''Test the compare function'''
+        """Test the compare function"""
         # setup some directories
         fold_config = os.path.join(os.path.expanduser('~'), '.config')
         create_dir(fold_config)

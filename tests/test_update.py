@@ -23,7 +23,7 @@ class TestUpdate(unittest.TestCase):
     CONFIG_NAME = 'config.yaml'
 
     def test_update(self):
-        '''Test the update function'''
+        """Test the update function"""
         # setup some directories
         fold_config = os.path.join(os.path.expanduser('~'), '.config')
         create_dir(fold_config)

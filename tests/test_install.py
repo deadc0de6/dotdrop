@@ -39,7 +39,7 @@ exec bspwm
 
     def fake_config(self, path, dotfiles, profile,
                     dotpath, actions, trans):
-        '''Create a fake config file'''
+        """Create a fake config file"""
         with open(path, 'w') as f:
             f.write('actions:\n')
             for action in actions:
@@ -74,7 +74,7 @@ exec bspwm
         return path
 
     def test_install(self):
-        '''Test the install function'''
+        """Test the install function"""
 
         # dotpath location
         tmp = get_tempdir()

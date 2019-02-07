@@ -33,7 +33,7 @@ Features:
 * Handle files and directories
 * Allow to symlink dotfiles
 * Associate an action to the deployment of specific dotfiles
-* Associate transformations that allow to store encrypted dotfiles
+* Associate transformations for storing encrypted dotfiles
 * Provide different solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html), the [example](#example) or how [people are using dotdrop](#people-using-dotdrop) for more.

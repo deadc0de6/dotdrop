@@ -24,6 +24,11 @@ COMMENT_END = '@@#}'
 class Templategen:
 
     def __init__(self, base='.', variables={}, debug=False):
+        """constructor
+        @base: directory path where to search for templates
+        @variables: dictionary of variables for templates
+        @debug: enable debug
+        """
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger()

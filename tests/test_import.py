@@ -27,7 +27,7 @@ class TestImport(unittest.TestCase):
     CONFIG_NAME = 'config.yaml'
 
     def load_yaml(self, path):
-        '''Load yaml to dict'''
+        """Load yaml to dict"""
         self.assertTrue(os.path.exists(path))
         content = ''
         with open(path, 'r') as f:
@@ -35,14 +35,14 @@ class TestImport(unittest.TestCase):
         return content
 
     def assert_file(self, path, conf, profile):
-        '''Make sure "path" has been inserted in "conf" for "profile"'''
+        """Make sure path has been inserted in conf for profile"""
         strip = get_path_strip_version(path)
         self.assertTrue(strip in [x.src for x in conf.get_dotfiles(profile)])
         dsts = [os.path.expanduser(x.dst) for x in conf.get_dotfiles(profile)]
         self.assertTrue(path in dsts)
 
     def assert_in_yaml(self, path, dic, link=False):
-        '''Make sure "path" is in the "dic" representing the yaml file'''
+        """Make sure "path" is in the "dic" representing the yaml file"""
         strip = get_path_strip_version(path)
         self.assertTrue(strip in [x['src'] for x in dic['dotfiles'].values()])
         dsts = [os.path.expanduser(x['dst']) for x in dic['dotfiles'].values()]
@@ -51,7 +51,7 @@ class TestImport(unittest.TestCase):
         self.assertTrue(path in dsts)
 
     def test_import(self):
-        '''Test the import function'''
+        """Test the import function"""
         # on filesystem
         src = get_tempdir()
         self.assertTrue(os.path.exists(src))

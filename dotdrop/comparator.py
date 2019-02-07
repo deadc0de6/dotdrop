@@ -16,6 +16,10 @@ import dotdrop.utils as utils
 class Comparator:
 
     def __init__(self, diffopts='', debug=False):
+        """constructor
+        @diffopts: cli switches to pass to unix diff
+        @debug: enable debug
+        """
         self.diffopts = diffopts
         self.debug = debug
         self.log = Logger()

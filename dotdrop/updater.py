@@ -22,6 +22,18 @@ class Updater:
 
     def __init__(self, conf, dotpath, profile, variables, dry, safe,
                  iskey=False, debug=False, ignore=[], showpatch=False):
+        """constructor
+        @conf: configuration
+        @dotpath: path where dotfiles are stored
+        @profile: profile selected
+        @variables: dictionary of variables for the templates
+        @dry: simulate
+        @safe: ask for overwrite if True
+        @iskey: will the update be called on keys or path
+        @debug: enable debug
+        @ignore: pattern to ignore when updating
+        @showpatch: show patch if dotfile to update is a template
+        """
         self.conf = conf
         self.dotpath = dotpath
         self.profile = profile

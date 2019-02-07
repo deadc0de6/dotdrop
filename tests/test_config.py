@@ -24,7 +24,7 @@ class TestConfig(unittest.TestCase):
     CONFIG_NAME = 'config.yaml'
 
     def test_config(self):
-        '''Test the config class'''
+        """Test the config class"""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)

@@ -14,25 +14,27 @@ class Dotfile:
                  actions={}, trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, cmpignore=[], noempty=False,
                  upignore=[]):
-        # key of dotfile in the config
+        """constructor
+        @key: dotfile key
+        @dst: dotfile dst (in user's home usually)
+        @src: dotfile src (in dotpath)
+        @actions: dictionary of actions to execute for this dotfile
+        @trans_r: transformation to change dotfile before it is installed
+        @trans_w: transformation to change dotfile before updating it
+        @link: link behavior
+        @cmpignore: patterns to ignore when comparing
+        @noempty: ignore empty template if True
+        @upignore: patterns to ignore when updating
+        """
         self.key = key
-        # path where to install this dotfile
         self.dst = dst
-        # path where this dotfile is stored in dotdrop
         self.src = src
-        # if it is a link
         self.link = link
-        # list of actions
         self.actions = actions
-        # read transformation
         self.trans_r = trans_r
-        # write transformation
         self.trans_w = trans_w
-        # pattern to ignore when comparing
         self.cmpignore = cmpignore
-        # do not deploy empty file
         self.noempty = noempty
-        # pattern to ignore when updating
         self.upignore = upignore
 
     def __str__(self):

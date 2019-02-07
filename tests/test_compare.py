@@ -50,7 +50,7 @@ class TestCompare(unittest.TestCase):
         return results
 
     def test_compare(self):
-        '''Test the compare function'''
+        """Test the compare function"""
         # setup some directories
         fold_config = os.path.join(os.path.expanduser('~'), '.config')
         create_dir(fold_config)

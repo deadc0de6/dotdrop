@@ -430,7 +430,8 @@ def main():
     args = docopt(USAGE, version=VERSION)
 
     try:
-        conf = Cfg(os.path.expanduser(args['--cfg']))
+        conf = Cfg(os.path.expanduser(args['--cfg']),
+                   debug=args['--verbose'])
     except ValueError as e:
         LOG.err('Config format error: {}'.format(str(e)))
         return False
@@ -439,6 +440,7 @@ def main():
     opts['dry'] = args['--dry']
     opts['profile'] = args['--profile']
     opts['safe'] = not args['--force']
+    opts['debug'] = args['--verbose']
     opts['installdiff'] = not args['--nodiff']
     opts['link'] = LinkTypes.NOLINK
     if opts['link_by_default']:
@@ -450,7 +452,6 @@ def main():
     if args['--inv-link'] and opts['link'] == LinkTypes.PARENTS:
         opts['link'] = LinkTypes.NOLINK
 
-    opts['debug'] = args['--verbose']
     opts['variables'] = conf.get_variables(opts['profile'],
                                            debug=opts['debug'])
     opts['showdiff'] = opts['showdiff'] or args['--showdiff']

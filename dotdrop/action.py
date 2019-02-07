@@ -16,6 +16,10 @@ from dotdrop.logger import Logger
 class Cmd:
 
     def __init__(self, key, action):
+        """constructor
+        @key: action key
+        @action: action string
+        """
         self.key = key
         self.action = action
         self.log = Logger()
@@ -33,6 +37,12 @@ class Cmd:
 class Action(Cmd):
 
     def __init__(self, key, kind, action, *args):
+        """constructor
+        @key: action key
+        @kind: type of action (pre or post)
+        @action: action string
+        @args: action arguments
+        """
         super(Action, self).__init__(key, action)
         self.kind = kind
         self.args = args

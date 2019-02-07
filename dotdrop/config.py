@@ -78,11 +78,16 @@ class Cfg:
     default_link_by_default = False
     default_workdir = '~/.config/dotdrop'
 
-    def __init__(self, cfgpath):
+    def __init__(self, cfgpath, debug=False):
+        """constructor
+        @cfgpath: path to the config file
+        @debug: enable debug
+        """
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist: {}'.format(cfgpath))
         # make sure to have an absolute path to config file
         self.cfgpath = os.path.abspath(cfgpath)
+        self.debug = debug
 
         # init the logger
         self.log = Logger()

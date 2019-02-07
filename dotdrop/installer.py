@@ -21,6 +21,18 @@ class Installer:
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
                  debug=False, diff=True, totemp=None, showdiff=False):
+        """constructor
+        @base: directory path where to search for templates
+        @create: create directory hierarchy if missing when installing
+        @backup: backup existing dotfile when installing
+        @dry: just simulate
+        @safe: ask for any overwrite
+        @workdir: where to install template before symlinking
+        @debug: enable debug
+        @diff: diff when installing if True
+        @totemp: deploy to this path instead of dotfile dst if not None
+        @showdiff: show the diff before overwriting (or asking for)
+        """
         self.create = create
         self.backup = backup
         self.dry = dry
