@@ -12,7 +12,7 @@ from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, create_fake_config, load_config, edit_content
+    create_random_file, create_fake_config, load_options, edit_content
 
 
 class TestUpdate(unittest.TestCase):
@@ -67,12 +67,13 @@ class TestUpdate(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, profile)
+        o = load_options(confpath, profile)
         dfiles = [d1, dir1, d2]
 
         # import the files
-        cmd_importer(opts, conf, dfiles)
-        conf, opts = load_config(confpath, profile)
+        o.import_path = dfiles
+        cmd_importer(o)
+        o = load_options(confpath, profile)
 
         # edit the files
         edit_content(d1, 'newcontent')
@@ -87,9 +88,10 @@ class TestUpdate(unittest.TestCase):
         create_random_file(dpath)
 
         # update it
-        opts['safe'] = False
-        opts['debug'] = True
-        cmd_update(opts, conf, [d1, dir1])
+        o.safe = False
+        o.debug = True
+        o.update_path = [d1, dir1]
+        cmd_update(o)
 
         # test content
         newcontent = open(d1, 'r').read()
@@ -100,7 +102,7 @@ class TestUpdate(unittest.TestCase):
         edit_content(d2, 'newcontentbykey')
 
         # update it by key
-        dfiles = conf.get_dotfiles(profile)
+        dfiles = o.dotfiles
         d2key = ''
         for ds in dfiles:
             t = os.path.expanduser(ds.dst)
@@ -108,9 +110,11 @@ class TestUpdate(unittest.TestCase):
                 d2key = ds.key
                 break
         self.assertTrue(d2key != '')
-        opts['safe'] = False
-        opts['debug'] = True
-        cmd_update(opts, conf, [d2key], iskey=True)
+        o.safe = False
+        o.debug = True
+        o.update_path = [d2key]
+        o.iskey = True
+        cmd_update(o)
 
         # test content
         newcontent = open(d2, 'r').read()

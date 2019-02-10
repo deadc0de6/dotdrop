@@ -74,22 +74,26 @@ class TestListings(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, profile)
+        o = load_options(confpath, profile)
         dfiles = [d1, d2, d3, d4, d5]
 
         # import the files
-        cmd_importer(opts, conf, dfiles)
-        conf, opts = load_config(confpath, profile)
+        o.import_path = dfiles
+        cmd_importer(o)
+        o = load_options(confpath, profile)
 
         # listfiles
-        cmd_list_profiles(conf)
+        cmd_list_profiles(o)
 
         # list files
-        cmd_list_files(opts, conf, templateonly=False)
-        cmd_list_files(opts, conf, templateonly=True)
+        o.listfiles_templateonly = False
+        cmd_list_files(o)
+        o.listfiles_templateonly = True
+        cmd_list_files(o)
 
         # details
-        cmd_detail(opts, conf, keys=None)
+        o.detail_keys = None
+        cmd_detail(o)
 
 
 def main():

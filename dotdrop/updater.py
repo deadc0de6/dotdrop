@@ -20,12 +20,11 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, conf, dotpath, profile, variables, dry, safe,
+    def __init__(self, dotpath, dotfiles, variables, dry, safe,
                  iskey=False, debug=False, ignore=[], showpatch=False):
         """constructor
-        @conf: configuration
         @dotpath: path where dotfiles are stored
-        @profile: profile selected
+        @dotfiles: dotfiles for this profile
         @variables: dictionary of variables for the templates
         @dry: simulate
         @safe: ask for overwrite if True
@@ -34,9 +33,8 @@ class Updater:
         @ignore: pattern to ignore when updating
         @showpatch: show patch if dotfile to update is a template
         """
-        self.conf = conf
         self.dotpath = dotpath
-        self.profile = profile
+        self.dotfiles = dotfiles
         self.variables = variables
         self.dry = dry
         self.safe = safe
@@ -79,7 +77,7 @@ class Updater:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
         left = os.path.expanduser(path)
-        right = os.path.join(self.conf.abs_or_rel(self.dotpath), dotfile.src)
+        right = os.path.join(self.dotpath, dotfile.src)
         right = os.path.expanduser(right)
 
         if self._ignore([left, right]):
@@ -128,7 +126,7 @@ class Updater:
 
     def _get_dotfile_by_key(self, key):
         """get the dotfile matching this key"""
-        dotfiles = self.conf.get_dotfiles(self.profile)
+        dotfiles = self.dotfiles
         subs = [d for d in dotfiles if d.key == key]
         if not subs:
             self.log.err('key \"{}\" not found!'.format(key))
@@ -141,7 +139,7 @@ class Updater:
 
     def _get_dotfile_by_path(self, path):
         """get the dotfile matching this path"""
-        dotfiles = self.conf.get_dotfiles(self.profile)
+        dotfiles = self.dotfiles
         subs = [d for d in dotfiles if d.dst == path]
         if not subs:
             self.log.err('\"{}\" is not managed!'.format(path))

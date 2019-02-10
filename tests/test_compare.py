@@ -16,7 +16,7 @@ from dotdrop.templategen import Templategen
 
 # from tests.helpers import *
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, create_fake_config, load_config, edit_content
+    create_random_file, create_fake_config, load_options, edit_content
 
 
 class TestCompare(unittest.TestCase):
@@ -26,12 +26,12 @@ class TestCompare(unittest.TestCase):
     CONFIG_DOTPATH = 'dotfiles'
     CONFIG_NAME = 'config.yaml'
 
-    def compare(self, opts, conf, tmp, nbdotfiles):
-        dotfiles = conf.get_dotfiles(opts['profile'])
+    def compare(self, o, tmp, nbdotfiles):
+        dotfiles = o.dotfiles
         self.assertTrue(len(dotfiles) == nbdotfiles)
-        t = Templategen(base=opts['dotpath'], debug=True)
-        inst = Installer(create=opts['create'], backup=opts['backup'],
-                         dry=opts['dry'], base=opts['dotpath'], debug=True)
+        t = Templategen(base=o.dotpath, debug=True)
+        inst = Installer(create=o.create, backup=o.backup,
+                         dry=o.dry, base=o.dotpath, debug=True)
         comp = Comparator()
         results = {}
         for dotfile in dotfiles:
@@ -98,50 +98,53 @@ class TestCompare(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, profile)
-        opts['longkey'] = True
+        o = load_options(confpath, profile)
+        o.longkey = True
         dfiles = [d1, d2, d3, d4, d5]
 
         # import the files
-        cmd_importer(opts, conf, dfiles)
-        conf, opts = load_config(confpath, profile)
+        o.import_path = dfiles
+        cmd_importer(o)
+        o = load_options(confpath, profile)
 
         # compare the files
         expected = {d1: True, d2: True, d3: True, d4: True, d5: True}
-        results = self.compare(opts, conf, tmp, len(dfiles))
+        results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify file
         edit_content(d1, get_string(20))
         expected = {d1: False, d2: True, d3: True, d4: True, d5: True}
-        results = self.compare(opts, conf, tmp, len(dfiles))
+        results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify binary file
         edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
         expected = {d1: False, d2: True, d3: True, d4: False, d5: True}
-        results = self.compare(opts, conf, tmp, len(dfiles))
+        results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # add file in directory
         d7, _ = create_random_file(d5)
         self.assertTrue(os.path.exists(d7))
         expected = {d1: False, d2: True, d3: True, d4: False, d5: False}
-        results = self.compare(opts, conf, tmp, len(dfiles))
+        results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify all files
         edit_content(d2, get_string(20))
         edit_content(d3, get_string(21))
         expected = {d1: False, d2: False, d3: False, d4: False, d5: False}
-        results = self.compare(opts, conf, tmp, len(dfiles))
+        results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # test compare from dotdrop
-        self.assertFalse(cmd_compare(opts, conf, tmp))
+        self.assertFalse(cmd_compare(o, tmp))
         # test focus
-        self.assertFalse(cmd_compare(opts, conf, tmp, focus=d4))
-        self.assertFalse(cmd_compare(opts, conf, tmp, focus='/tmp/fake'))
+        o.focus = d4
+        self.assertFalse(cmd_compare(o, tmp))
+        o.focus = '/tmp/fake'
+        self.assertFalse(cmd_compare(o, tmp))
 
 
 def main():

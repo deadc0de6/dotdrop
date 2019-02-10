@@ -138,6 +138,7 @@ class Cfg:
             if self.key_actions_post in d.actions:
                 for action in d.actions[self.key_actions_post]:
                     action.action = t.generate_string(action.action)
+        return self.get_dotfiles(profile)
 
     def _load_file(self):
         """load the yaml file"""
@@ -335,13 +336,23 @@ class Cfg:
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = self.abs_or_rel(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = \
+            self._abs_path(self.curdotpath)
 
         # make sure we have an absolute workdir
         self.curworkdir = self.lnk_settings[self.key_workdir]
-        self.lnk_settings[self.key_workdir] = self.abs_or_rel(self.curworkdir)
+        self.lnk_settings[self.key_workdir] = \
+            self._abs_path(self.curworkdir)
 
         return True
+
+    def _abs_path(self, path):
+        """return absolute path of path relative to the confpath"""
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            d = os.path.dirname(self.cfgpath)
+            return os.path.join(d, path)
+        return path
 
     def _get_included_dotfiles(self, profile):
         """find all dotfiles for a specific profile
@@ -426,15 +437,6 @@ class Cfg:
             self.lnk_settings[self.key_showdiff] = self.default_showdiff
         if self.key_ignoreempty not in self.lnk_settings:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
-
-    def abs_or_rel(self, path):
-        """path is either absolute or relative to the config path"""
-        path = os.path.expanduser(path)
-        if not os.path.isabs(path):
-            absconf = os.path.join(os.path.dirname(
-                self.cfgpath), path)
-            return absconf
-        return path
 
     def _save(self, content, path):
         """writes the config to file"""

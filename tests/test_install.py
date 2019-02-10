@@ -11,7 +11,7 @@ import filecmp
 
 from dotdrop.config import Cfg
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, load_config
+    create_random_file, load_options
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
@@ -181,12 +181,12 @@ exec bspwm
         self.assertTrue(conf is not None)
 
         # install them
-        conf, opts = load_config(confpath, profile)
-        opts['safe'] = False
-        opts['debug'] = True
-        opts['showdiff'] = True
-        opts['variables'] = {}
-        cmd_install(opts, conf)
+        o = load_options(confpath, profile)
+        o.safe = False
+        o.debug = True
+        o.showdiff = True
+        o.variables = {}
+        cmd_install(o)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(dst1))
@@ -233,7 +233,7 @@ exec bspwm
         self.assertTrue(tempcontent == header())
 
     def test_link_children(self):
-
+        """test the link children"""
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
@@ -257,6 +257,7 @@ exec bspwm
             self.assertEqual(os.path.realpath(dst), src)
 
     def test_fails_without_src(self):
+        """test fails without src"""
         src = '/some/non/existant/file'
 
         installer = Installer()
@@ -272,7 +273,7 @@ exec bspwm
                                   .format(src))
 
     def test_fails_when_src_file(self):
-
+        """test fails when src file"""
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
@@ -296,6 +297,7 @@ exec bspwm
                                   .format(src))
 
     def test_creates_dst(self):
+        """test creates dst"""
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
         self.addCleanup(clean, src_dir)
@@ -316,7 +318,7 @@ exec bspwm
         self.assertTrue(os.path.exists(dst_dir))
 
     def test_prompts_to_replace_dst(self):
-
+        """test prompts to replace dst"""
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
@@ -354,7 +356,7 @@ exec bspwm
 
     @patch('dotdrop.installer.Templategen')
     def test_runs_templater(self, mocked_templategen):
-
+        """test runs templater"""
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
