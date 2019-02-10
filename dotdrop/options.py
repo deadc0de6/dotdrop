@@ -92,7 +92,7 @@ class Options:
         if self.debug:
             self._print_attr()
 
-    def _header():
+    def _header(self):
         """print the header"""
         self.log.log(BANNER)
         self.log.log('')

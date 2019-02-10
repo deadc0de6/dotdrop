@@ -42,9 +42,6 @@ class TestCompare(unittest.TestCase):
                 continue
             diff = comp.compare(insttmp, dotfile.dst,
                                 ignore=['whatever', 'whatelse'])
-            print('XXXX diff for {} and {}:\n{}'.format(dotfile.src,
-                                                        dotfile.dst,
-                                                        diff))
             path = os.path.expanduser(dotfile.dst)
             results[path] = diff == ''
         return results
