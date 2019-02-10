@@ -94,10 +94,10 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(pf2key in profiles)
 
         # test dotfiles
-        dotfiles = conf.get_dotfiles(pf1key)
+        dotfiles = conf._get_dotfiles(pf1key)
         self.assertTrue(df1key in [x.key for x in dotfiles])
         self.assertTrue(df2key in [x.key for x in dotfiles])
-        dotfiles = conf.get_dotfiles(pf2key)
+        dotfiles = conf._get_dotfiles(pf2key)
         self.assertTrue(df1key in [x.key for x in dotfiles])
         self.assertFalse(df2key in [x.key for x in dotfiles])
 

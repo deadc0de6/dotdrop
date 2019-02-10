@@ -126,7 +126,8 @@ class Cfg:
     def eval_dotfiles(self, profile, variables, debug=False):
         """resolve dotfiles src/dst/actions templating for this profile"""
         t = Templategen(variables=variables)
-        for d in self.get_dotfiles(profile):
+        dotfiles = self._get_dotfiles(profile)
+        for d in dotfiles:
             # src and dst path
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
@@ -138,7 +139,7 @@ class Cfg:
             if self.key_actions_post in d.actions:
                 for action in d.actions[self.key_actions_post]:
                     action.action = t.generate_string(action.action)
-        return self.get_dotfiles(profile)
+        return dotfiles
 
     def _load_file(self):
         """load the yaml file"""
@@ -611,7 +612,7 @@ class Cfg:
 
         return True, dotfile
 
-    def get_dotfiles(self, profile):
+    def _get_dotfiles(self, profile):
         """return a list of dotfiles for a specific profile"""
         if profile not in self.prodots:
             return []
