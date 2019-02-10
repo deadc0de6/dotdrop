@@ -71,8 +71,7 @@ class Options:
 
     def __init__(self, args=None):
         """constructor
-        @key: action key
-        @action: action string
+        @args: argument dictionary (if non use sys)
         """
         self.args = args
         if not args:
@@ -89,8 +88,7 @@ class Options:
            and self.banner \
            and not self.args['--no-banner']:
             self._header()
-        if self.debug:
-            self._print_attr()
+        self._print_attr()
 
     def _header(self):
         """print the header"""
@@ -98,12 +96,14 @@ class Options:
         self.log.log('')
 
     def _read_config(self):
+        """read the config file"""
         self.conf = Cfg(self.confpath, debug=self.debug)
         # transform the configs in attribute
         for k, v in self.conf.get_settings().items():
             setattr(self, k, v)
 
     def _apply_args(self):
+        """apply cli args as attribute"""
         # the commands
         self.cmd_list = self.args['list']
         self.cmd_listfiles = self.args['listfiles']
@@ -150,6 +150,7 @@ class Options:
         self.detail_keys = self.args['<key>']
 
     def _fill_attr(self):
+        """create attributes from conf"""
         # variables
         self.variables = self.conf.get_variables(self.profile,
                                                  debug=self.debug).copy()
@@ -159,6 +160,9 @@ class Options:
         self.profiles = self.conf.get_profiles()
 
     def _print_attr(self):
+        """print all of this class attributes"""
+        if not self.debug:
+            return
         self.log.dbg('options:')
         for att in dir(self):
             if att.startswith('_'):
