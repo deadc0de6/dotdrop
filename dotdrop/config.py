@@ -504,37 +504,6 @@ class Cfg:
             cnt += 1
         return key
 
-    def short_to_long(self):
-        """transform all short keys to long keys"""
-        if not self.content[self.key_dotfiles]:
-            return
-        match = {}
-        new = {}
-        # handle the entries in dotfiles
-        for oldkey, v in self.content[self.key_dotfiles].items():
-            path = v[self.key_dotfiles_dst]
-            path = os.path.expanduser(path)
-            newkey = self._get_long_key(path)
-            new[newkey] = v
-            match[oldkey] = newkey
-        # replace with new keys
-        self.content[self.key_dotfiles] = new
-
-        # handle the entries in profiles
-        for k, v in self.lnk_profiles.items():
-            if self.key_profiles_dots not in v:
-                continue
-            if not v[self.key_profiles_dots]:
-                continue
-            new = []
-            for oldkey in v[self.key_profiles_dots]:
-                if oldkey == self.key_all:
-                    continue
-                newkey = match[oldkey]
-                new.append(newkey)
-            # replace with new keys
-            v[self.key_profiles_dots] = new
-
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
         if it already exists, False and a new unique key otherwise"""
