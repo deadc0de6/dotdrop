@@ -13,9 +13,12 @@ from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotdrop import cmd_list_profiles
 from dotdrop.dotdrop import cmd_list_files
 from dotdrop.dotdrop import cmd_update
-from dotdrop.config import Cfg
+from dotdrop.linktypes import LinkTypes
 
-from tests.helpers import *
+from tests.helpers import get_path_strip_version, edit_content, \
+                          load_options, create_random_file, \
+                          clean, get_string, get_dotfile_from_yaml, \
+                          get_tempdir, create_fake_config, create_dir
 
 
 class TestImport(unittest.TestCase):

@@ -10,8 +10,6 @@ import tempfile
 import os
 import uuid
 import shlex
-import functools
-import operator
 import fnmatch
 from shutil import rmtree
 

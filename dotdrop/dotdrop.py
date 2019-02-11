@@ -173,7 +173,7 @@ def cmd_update(o):
     showpatch = o.update_showpatch
 
     updater = Updater(o.dotpath, o.dotfiles, o.variables,
-                      o.dry, o.safe, iskey=iskey, debug=o.debug,
+                      dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=ignore, showpatch=showpatch)
     if not iskey:
         # update paths

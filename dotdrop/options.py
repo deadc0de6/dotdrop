@@ -157,6 +157,7 @@ class Options:
         # the dotfiles
         self.dotfiles = self.conf.eval_dotfiles(self.profile, self.variables,
                                                 debug=self.debug).copy()
+        # the profiles
         self.profiles = self.conf.get_profiles()
 
     def _print_attr(self):

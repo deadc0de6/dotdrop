@@ -12,7 +12,7 @@ import tempfile
 
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import *
+from dotdrop.utils import strip_home
 
 TMPSUFFIX = '.dotdrop'
 

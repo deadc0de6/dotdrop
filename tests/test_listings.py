@@ -7,15 +7,15 @@ basic unittest for the compare function
 
 import unittest
 import os
-import yaml
 
-from dotdrop.config import Cfg
 from dotdrop.dotdrop import cmd_list_profiles
 from dotdrop.dotdrop import cmd_list_files
 from dotdrop.dotdrop import cmd_detail
 from dotdrop.dotdrop import cmd_importer
 
-from tests.helpers import *
+from tests.helpers import create_dir, get_string, get_tempdir, \
+                          create_random_file, load_options, \
+                          create_fake_config, clean
 
 
 class TestListings(unittest.TestCase):

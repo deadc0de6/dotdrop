@@ -35,6 +35,7 @@ class TestCompare(unittest.TestCase):
         comp = Comparator()
         results = {}
         for dotfile in dotfiles:
+            path = os.path.expanduser(dotfile.dst)
             ret, insttmp = inst.install_to_temp(t, tmp, dotfile.src,
                                                 dotfile.dst)
             if not ret:
@@ -42,7 +43,6 @@ class TestCompare(unittest.TestCase):
                 continue
             diff = comp.compare(insttmp, dotfile.dst,
                                 ignore=['whatever', 'whatelse'])
-            path = os.path.expanduser(dotfile.dst)
             results[path] = diff == ''
         return results
 

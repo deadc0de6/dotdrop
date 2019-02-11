@@ -8,11 +8,9 @@ basic unittest for the config parser
 import unittest
 import os
 import yaml
-import tempfile
-import shutil
 
 from dotdrop.config import Cfg
-from tests.helpers import *
+from tests.helpers import get_tempdir, clean, create_fake_config
 
 
 class TestConfig(unittest.TestCase):
@@ -88,7 +86,6 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(conf is not None)
 
         # test profile
-        opts = conf.get_settings()
         profiles = conf.get_profiles()
         self.assertTrue(pf1key in profiles)
         self.assertTrue(pf2key in profiles)

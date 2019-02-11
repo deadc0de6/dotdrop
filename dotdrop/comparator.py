@@ -109,6 +109,5 @@ class Comparator:
                           opts=self.diffopts, debug=self.debug)
         if header:
             lshort = os.path.basename(left)
-            rshort = os.path.basename(right)
             diff = '=> diff \"{}\":\n{}'.format(lshort, diff)
         return diff

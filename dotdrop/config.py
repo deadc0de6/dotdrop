@@ -14,7 +14,7 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
-from dotdrop.utils import *
+from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
 

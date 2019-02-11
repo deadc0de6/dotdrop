@@ -12,8 +12,8 @@ class Dotfile:
 
     def __init__(self, key, dst, src,
                  actions={}, trans_r=None, trans_w=None,
-                 link=LinkTypes.NOLINK, cmpignore=[], noempty=False,
-                 upignore=[]):
+                 link=LinkTypes.NOLINK, cmpignore=[],
+                 noempty=False, upignore=[]):
         """constructor
         @key: dotfile key
         @dst: dotfile dst (in user's home usually)

@@ -20,15 +20,14 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, dotpath, dotfiles, variables, dry, safe,
-                 iskey=False, debug=False, ignore=[], showpatch=False):
+    def __init__(self, dotpath, dotfiles, variables, dry=False, safe=True,
+                 debug=False, ignore=[], showpatch=False):
         """constructor
         @dotpath: path where dotfiles are stored
         @dotfiles: dotfiles for this profile
         @variables: dictionary of variables for the templates
         @dry: simulate
         @safe: ask for overwrite if True
-        @iskey: will the update be called on keys or path
         @debug: enable debug
         @ignore: pattern to ignore when updating
         @showpatch: show patch if dotfile to update is a template
@@ -38,7 +37,6 @@ class Updater:
         self.variables = variables
         self.dry = dry
         self.safe = safe
-        self.iskey = iskey
         self.debug = debug
         self.ignore = ignore
         self.showpatch = showpatch
