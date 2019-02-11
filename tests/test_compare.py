@@ -72,20 +72,32 @@ class TestCompare(unittest.TestCase):
         d1, c1 = create_random_file(fold_config)
         self.assertTrue(os.path.exists(d1))
         self.addCleanup(clean, d1)
+
         d2, c2 = create_random_file(fold_subcfg)
         self.assertTrue(os.path.exists(d2))
         self.addCleanup(clean, d2)
+
         d3, c3 = create_random_file(fold_tmp)
         self.assertTrue(os.path.exists(d3))
         self.addCleanup(clean, d3)
+
         d4, c4 = create_random_file(fold_tmp, binary=True)
         self.assertTrue(os.path.exists(d4))
         self.addCleanup(clean, d4)
+
         d5 = get_tempdir()
         self.assertTrue(os.path.exists(d5))
         self.addCleanup(clean, d5)
+
         d6, _ = create_random_file(d5)
         self.assertTrue(os.path.exists(d6))
+
+        d9 = get_tempdir()
+        self.assertTrue(os.path.exists(d9))
+        self.addCleanup(clean, d9)
+        d9sub = os.path.join(d9, get_string(5))
+        create_dir(d9sub)
+        d9f1, _ = create_random_file(d9sub)
 
         # create the config file
         profile = get_string(5)
@@ -97,7 +109,7 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(os.path.exists(confpath))
         o = load_options(confpath, profile)
         o.longkey = True
-        dfiles = [d1, d2, d3, d4, d5]
+        dfiles = [d1, d2, d3, d4, d5, d9]
 
         # import the files
         o.import_path = dfiles
@@ -105,33 +117,45 @@ class TestCompare(unittest.TestCase):
         o = load_options(confpath, profile)
 
         # compare the files
-        expected = {d1: True, d2: True, d3: True, d4: True, d5: True}
+        expected = {d1: True, d2: True, d3: True, d4: True,
+                    d5: True, d9: True}
         results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify file
         edit_content(d1, get_string(20))
-        expected = {d1: False, d2: True, d3: True, d4: True, d5: True}
+        expected = {d1: False, d2: True, d3: True, d4: True,
+                    d5: True, d9: True}
         results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify binary file
         edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
-        expected = {d1: False, d2: True, d3: True, d4: False, d5: True}
+        expected = {d1: False, d2: True, d3: True, d4: False,
+                    d5: True, d9: True}
         results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # add file in directory
         d7, _ = create_random_file(d5)
         self.assertTrue(os.path.exists(d7))
-        expected = {d1: False, d2: True, d3: True, d4: False, d5: False}
+        expected = {d1: False, d2: True, d3: True, d4: False,
+                    d5: False, d9: True}
         results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify all files
         edit_content(d2, get_string(20))
         edit_content(d3, get_string(21))
-        expected = {d1: False, d2: False, d3: False, d4: False, d5: False}
+        expected = {d1: False, d2: False, d3: False, d4: False,
+                    d5: False, d9: True}
+        results = self.compare(o, tmp, len(dfiles))
+        self.assertTrue(results == expected)
+
+        # edit sub file
+        edit_content(d9f1, get_string(12))
+        expected = {d1: False, d2: False, d3: False, d4: False,
+                    d5: False, d9: False}
         results = self.compare(o, tmp, len(dfiles))
         self.assertTrue(results == expected)
 

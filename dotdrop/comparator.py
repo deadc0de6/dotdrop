@@ -32,11 +32,15 @@ class Comparator:
             self.log.dbg('comparing {} and {}'.format(left, right))
             self.log.dbg('ignore pattern(s): {}'.format(ignore))
         if not os.path.isdir(left):
+            if self.debug:
+                self.log.dbg('is file')
             return self._comp_file(left, right, ignore)
         return self._comp_dir(left, right, ignore)
 
     def _comp_file(self, left, right, ignore):
         """compare a file"""
+        if self.debug:
+            self.log.dbg('compare file {} with {}'.format(left, right))
         if utils.must_ignore([left, right], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
@@ -45,6 +49,8 @@ class Comparator:
 
     def _comp_dir(self, left, right, ignore):
         """compare a directory"""
+        if self.debug:
+            self.log.dbg('compare directory {} with {}'.format(left, right))
         if not os.path.exists(right):
             return ''
         if utils.must_ignore([left, right], ignore, debug=self.debug):
@@ -61,6 +67,7 @@ class Comparator:
                                  ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist on local\n'.format(i))
+        # handle files only in dotpath file
         for i in comp.right_only:
             if utils.must_ignore([os.path.join(right, i)],
                                  ignore, debug=self.debug):
@@ -85,6 +92,12 @@ class Comparator:
             rfile = os.path.join(right, i)
             diff = self._diff(lfile, rfile, header=True)
             ret.append(diff)
+
+        # recursively compare subdirs
+        for i in comp.common_dirs:
+            subleft = os.path.join(left, i)
+            subright = os.path.join(right, i)
+            ret.extend(self._comp_dir(subleft, subright, ignore))
 
         return ''.join(ret)
 
