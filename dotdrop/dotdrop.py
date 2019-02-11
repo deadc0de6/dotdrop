@@ -47,8 +47,9 @@ def cmd_install(o):
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, safe=o.safe,
                      base=o.dotpath, workdir=o.workdir,
-                     diff=o.installdiff, debug=o.debug,
-                     totemp=tmpdir, showdiff=o.showdiff)
+                     diff=o.install_diff, debug=o.debug,
+                     totemp=tmpdir,
+                     showdiff=o.install_showdiff)
     installed = []
     for dotfile in dotfiles:
         preactions = []

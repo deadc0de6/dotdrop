@@ -32,13 +32,13 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-tfndVbD] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-ldVb]    [-c <path>] [-p <profile>] <path>...
+  dotdrop install   [-VbtfndD] [-c <path>] [-p <profile>] [<key>...]
+  dotdrop import    [-Vbld]    [-c <path>] [-p <profile>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-fdVbkP]  [-c <path>] [-p <profile>]
+  dotdrop update    [-VbfdkP]  [-c <path>] [-p <profile>]
                                [-i <pattern>...] [<path>...]
-  dotdrop listfiles [-VTb]     [-c <path>] [-p <profile>]
+  dotdrop listfiles [-VbT]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]      [-c <path>]
   dotdrop --help
@@ -71,7 +71,7 @@ class Options:
 
     def __init__(self, args=None):
         """constructor
-        @args: argument dictionary (if non use sys)
+        @args: argument dictionary (if None use sys)
         """
         self.args = args
         if not args:
@@ -117,8 +117,6 @@ class Options:
         self.dry = self.args['--dry']
         self.profile = self.args['--profile']
         self.safe = not self.args['--force']
-        self.installdiff = not self.args['--nodiff']
-        self.showdiff = self.showdiff or self.args['--showdiff']
         self.link = LinkTypes.NOLINK
         if self.link_by_default:
             self.link = LinkTypes.PARENTS
@@ -135,6 +133,8 @@ class Options:
         # "install" specifics
         self.install_temporary = self.args['--temp']
         self.install_keys = self.args['<key>']
+        self.install_diff = not self.args['--nodiff']
+        self.install_showdiff = self.showdiff or self.args['--showdiff']
         # "compare" specifics
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']

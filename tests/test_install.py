@@ -184,7 +184,7 @@ exec bspwm
         o = load_options(confpath, profile)
         o.safe = False
         o.debug = True
-        o.showdiff = True
+        o.install_showdiff = True
         o.variables = {}
         cmd_install(o)
 

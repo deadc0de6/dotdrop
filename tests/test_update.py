@@ -68,6 +68,7 @@ class TestUpdate(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         o = load_options(confpath, profile)
+        o.debug = True
         dfiles = [d1, dir1, d2]
 
         # import the files
