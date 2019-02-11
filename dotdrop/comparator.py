@@ -2,7 +2,7 @@
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2017, deadc0de6
 
-handle the comparison of dotfiles and local deployment
+handle the comparison of two dotfiles
 """
 
 import os
@@ -17,7 +17,7 @@ class Comparator:
 
     def __init__(self, diffopts='', debug=False):
         """constructor
-        @diffopts: cli switches to pass to unix diff
+        @diffopts: switches to pass to unix diff
         @debug: enable debug
         """
         self.diffopts = diffopts
@@ -61,12 +61,14 @@ class Comparator:
             self.log.dbg('compare {} and {}'.format(left, right))
         ret = []
         comp = filecmp.dircmp(left, right)
+
         # handle files only in deployed file
         for i in comp.left_only:
             if utils.must_ignore([os.path.join(left, i)],
                                  ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist on local\n'.format(i))
+
         # handle files only in dotpath file
         for i in comp.right_only:
             if utils.must_ignore([os.path.join(right, i)],
