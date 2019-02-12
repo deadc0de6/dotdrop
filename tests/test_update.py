@@ -10,6 +10,7 @@ import os
 
 from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
+from dotdrop.action import Transform
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
     create_random_file, create_fake_config, load_options, edit_content
@@ -53,6 +54,7 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d2))
         self.addCleanup(clean, d2)
 
+        # template
         d3t, c3t = create_random_file(fold_config)
         self.assertTrue(os.path.exists(d3t))
         self.addCleanup(clean, d3t)
@@ -82,6 +84,21 @@ class TestUpdate(unittest.TestCase):
 
         # get new config
         o = load_options(confpath, profile)
+        o.safe = False
+        o.debug = True
+        o.update_showpatch = True
+        trans = Transform('trans', 'cp -r {0} {1}')
+        d3tb = os.path.basename(d3t)
+        for dotfile in o.dotfiles:
+            if os.path.basename(dotfile.dst) == d3tb:
+                src = os.path.join(o.dotpath, dotfile.src)
+                src = os.path.expanduser(src)
+                edit_content(src, '{{@@ profile @@}}')
+            dotfile.trans_w = trans
+
+        # update template
+        o.update_path = [d3t]
+        self.assertFalse(cmd_update(o))
 
         # edit the files
         edit_content(d1, 'newcontent')
@@ -96,10 +113,7 @@ class TestUpdate(unittest.TestCase):
         create_random_file(dpath)
 
         # update it
-        o.safe = False
-        o.debug = True
         o.update_path = [d1, dir1]
-        o.update_showpatch = True
         cmd_update(o)
 
         # test content
@@ -119,8 +133,6 @@ class TestUpdate(unittest.TestCase):
                 d2key = ds.key
                 break
         self.assertTrue(d2key != '')
-        o.safe = False
-        o.debug = True
         o.update_path = [d2key]
         o.update_iskey = True
         cmd_update(o)
