@@ -93,7 +93,8 @@ class Options(AttrMonitor):
         self.log = Logger()
         self.debug = self.args['--verbose']
         self.confpath = os.path.expanduser(self.args['--cfg'])
-        self.log.dbg('config file: {}'.format(self.confpath))
+        if self.debug:
+            self.log.dbg('config file: {}'.format(self.confpath))
 
         self._read_config()
         self._apply_args()
