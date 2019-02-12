@@ -14,7 +14,7 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
-from dotdrop.utils import *
+from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
 
@@ -126,7 +126,8 @@ class Cfg:
     def eval_dotfiles(self, profile, variables, debug=False):
         """resolve dotfiles src/dst/actions templating for this profile"""
         t = Templategen(variables=variables)
-        for d in self.get_dotfiles(profile):
+        dotfiles = self._get_dotfiles(profile)
+        for d in dotfiles:
             # src and dst path
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
@@ -138,6 +139,7 @@ class Cfg:
             if self.key_actions_post in d.actions:
                 for action in d.actions[self.key_actions_post]:
                     action.action = t.generate_string(action.action)
+        return dotfiles
 
     def _load_file(self):
         """load the yaml file"""
@@ -335,13 +337,23 @@ class Cfg:
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = self.abs_or_rel(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = \
+            self._abs_path(self.curdotpath)
 
         # make sure we have an absolute workdir
         self.curworkdir = self.lnk_settings[self.key_workdir]
-        self.lnk_settings[self.key_workdir] = self.abs_or_rel(self.curworkdir)
+        self.lnk_settings[self.key_workdir] = \
+            self._abs_path(self.curworkdir)
 
         return True
+
+    def _abs_path(self, path):
+        """return absolute path of path relative to the confpath"""
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            d = os.path.dirname(self.cfgpath)
+            return os.path.join(d, path)
+        return path
 
     def _get_included_dotfiles(self, profile):
         """find all dotfiles for a specific profile
@@ -427,15 +439,6 @@ class Cfg:
         if self.key_ignoreempty not in self.lnk_settings:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
 
-    def abs_or_rel(self, path):
-        """path is either absolute or relative to the config path"""
-        path = os.path.expanduser(path)
-        if not os.path.isabs(path):
-            absconf = os.path.join(os.path.dirname(
-                self.cfgpath), path)
-            return absconf
-        return path
-
     def _save(self, content, path):
         """writes the config to file"""
         ret = False
@@ -500,37 +503,6 @@ class Cfg:
             key = '{}_{}'.format(okey, cnt)
             cnt += 1
         return key
-
-    def short_to_long(self):
-        """transform all short keys to long keys"""
-        if not self.content[self.key_dotfiles]:
-            return
-        match = {}
-        new = {}
-        # handle the entries in dotfiles
-        for oldkey, v in self.content[self.key_dotfiles].items():
-            path = v[self.key_dotfiles_dst]
-            path = os.path.expanduser(path)
-            newkey = self._get_long_key(path)
-            new[newkey] = v
-            match[oldkey] = newkey
-        # replace with new keys
-        self.content[self.key_dotfiles] = new
-
-        # handle the entries in profiles
-        for k, v in self.lnk_profiles.items():
-            if self.key_profiles_dots not in v:
-                continue
-            if not v[self.key_profiles_dots]:
-                continue
-            new = []
-            for oldkey in v[self.key_profiles_dots]:
-                if oldkey == self.key_all:
-                    continue
-                newkey = match[oldkey]
-                new.append(newkey)
-            # replace with new keys
-            v[self.key_profiles_dots] = new
 
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
@@ -609,7 +581,7 @@ class Cfg:
 
         return True, dotfile
 
-    def get_dotfiles(self, profile):
+    def _get_dotfiles(self, profile):
         """return a list of dotfiles for a specific profile"""
         if profile not in self.prodots:
             return []

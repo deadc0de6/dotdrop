@@ -12,6 +12,10 @@ pycodestyle --ignore=W605 dotdrop/
 pycodestyle tests/
 pycodestyle scripts/
 
+# pyflakes tests
+pyflakes dotdrop/
+pyflakes tests/
+
 # retrieve the nosetests binary
 set +e
 nosebin="nosetests"

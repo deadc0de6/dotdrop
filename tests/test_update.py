@@ -10,9 +10,10 @@ import os
 
 from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
+from dotdrop.action import Transform
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, create_fake_config, load_config, edit_content
+    create_random_file, create_fake_config, load_options, edit_content
 
 
 class TestUpdate(unittest.TestCase):
@@ -53,6 +54,31 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d2))
         self.addCleanup(clean, d2)
 
+        # template
+        d3t, c3t = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(d3t))
+        self.addCleanup(clean, d3t)
+
+        # sub dirs
+        dsubstmp = get_tempdir()
+        self.assertTrue(os.path.exists(dsubstmp))
+        self.addCleanup(clean, dsubstmp)
+        dirsubs = os.path.basename(dsubstmp)
+
+        dir1string = 'somedir'
+        dir1 = os.path.join(dsubstmp, dir1string)
+        create_dir(dir1)
+        dir1sub1str = 'sub1'
+        sub1 = os.path.join(dir1, dir1sub1str)
+        create_dir(sub1)
+        dir1sub2str = 'sub2'
+        sub2 = os.path.join(dir1, dir1sub2str)
+        create_dir(sub2)
+        f1s1, f1s1c1 = create_random_file(sub1)
+        self.assertTrue(os.path.exists(f1s1))
+        f1s2, f1s2c1 = create_random_file(sub2)
+        self.assertTrue(os.path.exists(f1s2))
+
         # create the directory to test
         dpath = os.path.join(fold_config, get_string(5))
         dir1 = create_dir(dpath)
@@ -67,12 +93,47 @@ class TestUpdate(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, profile)
-        dfiles = [d1, dir1, d2]
+        o = load_options(confpath, profile)
+        o.debug = True
+        o.update_showpatch = True
+        dfiles = [d1, dir1, d2, d3t, dsubstmp]
 
         # import the files
-        cmd_importer(opts, conf, dfiles)
-        conf, opts = load_config(confpath, profile)
+        o.import_path = dfiles
+        cmd_importer(o)
+
+        # get new config
+        o = load_options(confpath, profile)
+        o.safe = False
+        o.debug = True
+        o.update_showpatch = True
+        trans = Transform('trans', 'cp -r {0} {1}')
+        d3tb = os.path.basename(d3t)
+        for dotfile in o.dotfiles:
+            if os.path.basename(dotfile.dst) == d3tb:
+                # patch the template
+                src = os.path.join(o.dotpath, dotfile.src)
+                src = os.path.expanduser(src)
+                edit_content(src, '{{@@ profile @@}}')
+            if os.path.basename(dotfile.dst) == dirsubs:
+                # retrieve the path of the sub in the dotpath
+                d1indotpath = os.path.join(o.dotpath, dotfile.src)
+                d1indotpath = os.path.expanduser(d1indotpath)
+            dotfile.trans_w = trans
+
+        # update template
+        o.update_path = [d3t]
+        self.assertFalse(cmd_update(o))
+
+        # update sub dirs
+        gone = os.path.join(d1indotpath, dir1string)
+        gone = os.path.join(gone, dir1sub1str)
+        self.assertTrue(os.path.exists(gone))
+        clean(sub1)  # dir1sub1str
+        self.assertTrue(os.path.exists(gone))
+        o.update_path = [dsubstmp]
+        cmd_update(o)
+        self.assertFalse(os.path.exists(gone))
 
         # edit the files
         edit_content(d1, 'newcontent')
@@ -87,9 +148,8 @@ class TestUpdate(unittest.TestCase):
         create_random_file(dpath)
 
         # update it
-        opts['safe'] = False
-        opts['debug'] = True
-        cmd_update(opts, conf, [d1, dir1])
+        o.update_path = [d1, dir1]
+        cmd_update(o)
 
         # test content
         newcontent = open(d1, 'r').read()
@@ -100,7 +160,7 @@ class TestUpdate(unittest.TestCase):
         edit_content(d2, 'newcontentbykey')
 
         # update it by key
-        dfiles = conf.get_dotfiles(profile)
+        dfiles = o.dotfiles
         d2key = ''
         for ds in dfiles:
             t = os.path.expanduser(ds.dst)
@@ -108,9 +168,9 @@ class TestUpdate(unittest.TestCase):
                 d2key = ds.key
                 break
         self.assertTrue(d2key != '')
-        opts['safe'] = False
-        opts['debug'] = True
-        cmd_update(opts, conf, [d2key], iskey=True)
+        o.update_path = [d2key]
+        o.update_iskey = True
+        cmd_update(o)
 
         # test content
         newcontent = open(d2, 'r').read()

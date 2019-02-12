@@ -12,11 +12,13 @@ import yaml
 from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotdrop import cmd_list_profiles
 from dotdrop.dotdrop import cmd_list_files
-from dotdrop.dotdrop import _header
 from dotdrop.dotdrop import cmd_update
-from dotdrop.config import Cfg
+from dotdrop.linktypes import LinkTypes
 
-from tests.helpers import *
+from tests.helpers import get_path_strip_version, edit_content, \
+                          load_options, create_random_file, \
+                          clean, get_string, get_dotfile_from_yaml, \
+                          get_tempdir, create_fake_config, create_dir
 
 
 class TestImport(unittest.TestCase):
@@ -34,11 +36,11 @@ class TestImport(unittest.TestCase):
             content = yaml.load(f)
         return content
 
-    def assert_file(self, path, conf, profile):
+    def assert_file(self, path, o, profile):
         """Make sure path has been inserted in conf for profile"""
         strip = get_path_strip_version(path)
-        self.assertTrue(strip in [x.src for x in conf.get_dotfiles(profile)])
-        dsts = [os.path.expanduser(x.dst) for x in conf.get_dotfiles(profile)]
+        self.assertTrue(strip in [x.src for x in o.dotfiles])
+        dsts = [os.path.expanduser(x.dst) for x in o.dotfiles]
         self.assertTrue(path in dsts)
 
     def assert_in_yaml(self, path, dic, link=False):
@@ -69,7 +71,7 @@ class TestImport(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        conf, opts = load_config(confpath, profile)
+        o = load_options(confpath, profile)
 
         # create some random dotfiles
         dotfile1, content1 = create_random_file(src)
@@ -107,25 +109,27 @@ class TestImport(unittest.TestCase):
 
         # import the dotfiles
         dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
-        cmd_importer(opts, conf, dfiles)
+        o.import_path = dfiles
+        cmd_importer(o)
         # import symlink
-        opts[Cfg.key_dotfiles_link] = True
+        o.link = LinkTypes.PARENTS
         sfiles = [dotfile6, dotfile7]
-        cmd_importer(opts, conf, sfiles)
-        opts[Cfg.key_dotfiles_link] = False
+        o.import_path = sfiles
+        cmd_importer(o)
+        o.link = LinkTypes.NOLINK
 
         # reload the config
-        conf, opts = load_config(confpath, profile)
+        o = load_options(confpath, profile)
 
         # test dotfiles in config class
-        self.assertTrue(profile in conf.get_profiles())
-        self.assert_file(dotfile1, conf, profile)
-        self.assert_file(dotfile2, conf, profile)
-        self.assert_file(dotfile3, conf, profile)
-        self.assert_file(dotfile4, conf, profile)
-        self.assert_file(dotfile5, conf, profile)
-        self.assert_file(dotfile6, conf, profile)
-        self.assert_file(dotfile7, conf, profile)
+        self.assertTrue(profile in o.profiles)
+        self.assert_file(dotfile1, o, profile)
+        self.assert_file(dotfile2, o, profile)
+        self.assert_file(dotfile3, o, profile)
+        self.assert_file(dotfile4, o, profile)
+        self.assert_file(dotfile5, o, profile)
+        self.assert_file(dotfile6, o, profile)
+        self.assert_file(dotfile7, o, profile)
 
         # test dotfiles in yaml file
         y = self.load_yaml(confpath)
@@ -193,15 +197,15 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.islink(dotfile7))
         self.assertTrue(os.path.realpath(dotfile7) == indt7)
 
-        cmd_list_profiles(conf)
-        cmd_list_files(opts, conf)
-        _header()
+        cmd_list_profiles(o)
+        cmd_list_files(o)
 
         # fake test update
         editcontent = 'edited'
         edit_content(dotfile1, editcontent)
-        opts['safe'] = False
-        cmd_update(opts, conf, [dotfile1])
+        o.safe = False
+        o.update_path = [dotfile1]
+        cmd_update(o)
         c2 = open(indt1, 'r').read()
         self.assertTrue(editcontent == c2)
 

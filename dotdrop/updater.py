@@ -20,27 +20,23 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, conf, dotpath, profile, variables, dry, safe,
-                 iskey=False, debug=False, ignore=[], showpatch=False):
+    def __init__(self, dotpath, dotfiles, variables, dry=False, safe=True,
+                 debug=False, ignore=[], showpatch=False):
         """constructor
-        @conf: configuration
         @dotpath: path where dotfiles are stored
-        @profile: profile selected
+        @dotfiles: dotfiles for this profile
         @variables: dictionary of variables for the templates
         @dry: simulate
         @safe: ask for overwrite if True
-        @iskey: will the update be called on keys or path
         @debug: enable debug
         @ignore: pattern to ignore when updating
         @showpatch: show patch if dotfile to update is a template
         """
-        self.conf = conf
         self.dotpath = dotpath
-        self.profile = profile
+        self.dotfiles = dotfiles
         self.variables = variables
         self.dry = dry
         self.safe = safe
-        self.iskey = iskey
         self.debug = debug
         self.ignore = ignore
         self.showpatch = showpatch
@@ -78,22 +74,22 @@ class Updater:
         if self.debug:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
-        left = os.path.expanduser(path)
-        right = os.path.join(self.conf.abs_or_rel(self.dotpath), dotfile.src)
-        right = os.path.expanduser(right)
+        path = os.path.expanduser(path)
+        dtpath = os.path.join(self.dotpath, dotfile.src)
+        dtpath = os.path.expanduser(dtpath)
 
-        if self._ignore([left, right]):
+        if self._ignore([path, dtpath]):
             return True
         if dotfile.trans_w:
             # apply write transformation if any
             new_path = self._apply_trans_w(path, dotfile)
             if not new_path:
                 return False
-            left = new_path
-        if os.path.isdir(left):
-            ret = self._handle_dir(left, right)
+            path = new_path
+        if os.path.isdir(path):
+            ret = self._handle_dir(path, dtpath)
         else:
-            ret = self._handle_file(left, right)
+            ret = self._handle_file(path, dtpath)
         # clean temporary files
         if new_path and os.path.exists(new_path):
             utils.remove(new_path)
@@ -128,7 +124,7 @@ class Updater:
 
     def _get_dotfile_by_key(self, key):
         """get the dotfile matching this key"""
-        dotfiles = self.conf.get_dotfiles(self.profile)
+        dotfiles = self.dotfiles
         subs = [d for d in dotfiles if d.key == key]
         if not subs:
             self.log.err('key \"{}\" not found!'.format(key))
@@ -141,7 +137,7 @@ class Updater:
 
     def _get_dotfile_by_path(self, path):
         """get the dotfile matching this path"""
-        dotfiles = self.conf.get_dotfiles(self.profile)
+        dotfiles = self.dotfiles
         subs = [d for d in dotfiles if d.dst == path]
         if not subs:
             self.log.err('\"{}\" is not managed!'.format(path))
@@ -154,11 +150,13 @@ class Updater:
 
     def _is_template(self, path):
         if not Templategen.is_template(path):
+            if self.debug:
+                self.log.dbg('{} is NO template'.format(path))
             return False
         self.log.warn('{} uses template, update manually'.format(path))
         return True
 
-    def _show_patch(self, tpath, fpath):
+    def _show_patch(self, fpath, tpath):
         """provide a way to manually patch the template"""
         content = self._resolve_template(tpath)
         tmp = utils.write_to_tmpfile(content)
@@ -172,49 +170,49 @@ class Updater:
                         debug=self.debug)
         return t.generate(tpath)
 
-    def _handle_file(self, left, right, compare=True):
-        """sync left (deployed file) and right (dotdrop dotfile)"""
-        if self._ignore([left, right]):
+    def _handle_file(self, path, dtpath, compare=True):
+        """sync path (deployed file) and dtpath (dotdrop dotfile path)"""
+        if self._ignore([path, dtpath]):
             return True
         if self.debug:
-            self.log.dbg('update for file {} and {}'.format(left, right))
-        if self._is_template(right):
+            self.log.dbg('update for file {} and {}'.format(path, dtpath))
+        if self._is_template(dtpath):
             # dotfile is a template
             if self.debug:
-                self.log.dbg('{} is a template'.format(right))
+                self.log.dbg('{} is a template'.format(dtpath))
             if self.showpatch:
-                self._show_patch(right, left)
+                self._show_patch(path, dtpath)
             return False
-        if compare and filecmp.cmp(left, right, shallow=True):
+        if compare and filecmp.cmp(path, dtpath, shallow=True):
             # no difference
             if self.debug:
-                self.log.dbg('identical files: {} and {}'.format(left, right))
+                self.log.dbg('identical files: {} and {}'.format(path, dtpath))
             return True
-        if not self._overwrite(left, right):
+        if not self._overwrite(path, dtpath):
             return False
         try:
             if self.dry:
-                self.log.dry('would cp {} {}'.format(left, right))
+                self.log.dry('would cp {} {}'.format(path, dtpath))
             else:
                 if self.debug:
-                    self.log.dbg('cp {} {}'.format(left, right))
-                shutil.copyfile(left, right)
+                    self.log.dbg('cp {} {}'.format(path, dtpath))
+                shutil.copyfile(path, dtpath)
         except IOError as e:
-            self.log.warn('{} update failed, do manually: {}'.format(left, e))
+            self.log.warn('{} update failed, do manually: {}'.format(path, e))
             return False
         return True
 
-    def _handle_dir(self, left, right):
-        """sync left (deployed dir) and right (dotdrop dir)"""
+    def _handle_dir(self, path, dtpath):
+        """sync path (deployed dir) and dtpath (dotdrop dir path)"""
         if self.debug:
-            self.log.dbg('handle update for dir {} to {}'.format(left, right))
+            self.log.dbg('handle update for dir {} to {}'.format(path, dtpath))
         # paths must be absolute (no tildes)
-        left = os.path.expanduser(left)
-        right = os.path.expanduser(right)
-        if self._ignore([left, right]):
+        path = os.path.expanduser(path)
+        dtpath = os.path.expanduser(dtpath)
+        if self._ignore([path, dtpath]):
             return True
         # find the differences
-        diff = filecmp.dircmp(left, right, ignore=None)
+        diff = filecmp.dircmp(path, dtpath, ignore=None)
         # handle directories diff
         return self._merge_dirs(diff)
 

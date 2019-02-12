@@ -10,9 +10,9 @@ import string
 import random
 import tempfile
 
-from dotdrop.config import Cfg
-from dotdrop.utils import *
+from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
+from dotdrop.utils import strip_home
 
 TMPSUFFIX = '.dotdrop'
 
@@ -81,20 +81,56 @@ def create_dir(path):
     return path
 
 
-def load_config(confpath, profile):
+def _fake_args():
+    args = {}
+    args['--verbose'] = False
+    args['--no-banner'] = False
+    args['--dry'] = False
+    args['--force'] = False
+    args['--nodiff'] = False
+    args['--showdiff'] = True
+    args['--inv-link'] = False
+    args['--template'] = False
+    args['--temp'] = False
+    args['<key>'] = []
+    args['--dopts'] = ''
+    args['--file'] = []
+    args['--ignore'] = []
+    args['<path>'] = []
+    args['--key'] = False
+    args['--ignore'] = []
+    args['--show-patch'] = False
+    # cmds
+    args['list'] = False
+    args['listfiles'] = False
+    args['install'] = False
+    args['compare'] = False
+    args['import'] = False
+    args['update'] = False
+    args['detail'] = False
+    return args
+
+
+def load_options(confpath, profile):
     """Load the config file from path"""
-    conf = Cfg(confpath)
-    opts = conf.get_settings()
-    opts['dry'] = False
-    opts['profile'] = profile
-    opts['safe'] = True
-    opts['installdiff'] = True
-    opts['link'] = LinkTypes.NOLINK.value
-    opts['showdiff'] = True
-    opts['debug'] = True
-    opts['dopts'] = ''
-    opts['variables'] = {}
-    return conf, opts
+    # create the fake args (bypass docopt)
+    args = _fake_args()
+    args['--cfg'] = confpath
+    args['--profile'] = profile
+    # and get the options
+    # TODO need to patch options
+    o = Options(args=args)
+    o.profile = profile
+    o.dry = False
+    o.profile = profile
+    o.safe = True
+    o.install_diff = True
+    o.link = LinkTypes.NOLINK.value
+    o.install_showdiff = True
+    o.debug = True
+    o.compare_dopts = ''
+    o.variables = {}
+    return o
 
 
 def get_path_strip_version(path):
