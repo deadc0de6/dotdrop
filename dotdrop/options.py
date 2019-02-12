@@ -67,7 +67,21 @@ Options:
 """.format(BANNER, PROFILE)
 
 
-class Options:
+class AttrMonitor:
+    _set_attr_err = False
+
+    def __setattr__(self, key, value):
+        """monitor attribute setting"""
+        if not hasattr(self, key) and self._set_attr_err:
+            self._attr_change(key)
+        super(AttrMonitor, self).__setattr__(key, value)
+
+    def _attr_set(self, attr):
+        """do something when unexistent attr is set"""
+        pass
+
+
+class Options(AttrMonitor):
 
     def __init__(self, args=None):
         """constructor
@@ -89,6 +103,8 @@ class Options:
            and not self.args['--no-banner']:
             self._header()
         self._print_attr()
+        # start monitoring for bad attribute
+        self._set_attr_err = True
 
     def _header(self):
         """print the header"""
@@ -172,3 +188,7 @@ class Options:
             if callable(val):
                 continue
             self.log.dbg('- {}: \"{}\"'.format(att, val))
+
+    def _attr_set(self, attr):
+        """error when some inexistent attr is set"""
+        raise Exception('bad option: {}'.format(attr))

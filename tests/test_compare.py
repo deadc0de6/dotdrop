@@ -162,9 +162,9 @@ class TestCompare(unittest.TestCase):
         # test compare from dotdrop
         self.assertFalse(cmd_compare(o, tmp))
         # test focus
-        o.focus = d4
+        o.compare_focus = d4
         self.assertFalse(cmd_compare(o, tmp))
-        o.focus = '/tmp/fake'
+        o.compare_focus = '/tmp/fake'
         self.assertFalse(cmd_compare(o, tmp))
 
 

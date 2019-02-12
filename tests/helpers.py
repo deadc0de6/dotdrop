@@ -128,7 +128,7 @@ def load_options(confpath, profile):
     o.link = LinkTypes.NOLINK.value
     o.install_showdiff = True
     o.debug = True
-    o.dopts = ''
+    o.compare_dopts = ''
     o.variables = {}
     return o
 

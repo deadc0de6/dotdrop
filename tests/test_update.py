@@ -53,6 +53,10 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d2))
         self.addCleanup(clean, d2)
 
+        d3t, c3t = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(d3t))
+        self.addCleanup(clean, d3t)
+
         # create the directory to test
         dpath = os.path.join(fold_config, get_string(5))
         dir1 = create_dir(dpath)
@@ -69,11 +73,14 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(confpath))
         o = load_options(confpath, profile)
         o.debug = True
-        dfiles = [d1, dir1, d2]
+        o.update_showpatch = True
+        dfiles = [d1, dir1, d2, d3t]
 
         # import the files
         o.import_path = dfiles
         cmd_importer(o)
+
+        # get new config
         o = load_options(confpath, profile)
 
         # edit the files
@@ -92,6 +99,7 @@ class TestUpdate(unittest.TestCase):
         o.safe = False
         o.debug = True
         o.update_path = [d1, dir1]
+        o.update_showpatch = True
         cmd_update(o)
 
         # test content
@@ -114,7 +122,7 @@ class TestUpdate(unittest.TestCase):
         o.safe = False
         o.debug = True
         o.update_path = [d2key]
-        o.iskey = True
+        o.update_iskey = True
         cmd_update(o)
 
         # test content
