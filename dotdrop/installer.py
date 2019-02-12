@@ -6,6 +6,7 @@ handle the installation of dotfiles
 """
 
 import os
+import errno
 
 # local imports
 from dotdrop.logger import Logger
@@ -287,7 +288,14 @@ class Installer:
             self.log.dry('would install {}'.format(dst))
             return 0
         if os.path.lexists(dst):
-            samerights = os.stat(dst).st_mode == rights
+            samerights = False
+            try:
+                samerights = os.stat(dst).st_mode == rights
+            except OSError as e:
+                if e.errno == errno.ENOENT:
+                    # broken symlink
+                    self.log.err('broken symlink {}'.format(dst))
+                    return -1
             if self.diff and self._fake_diff(dst, content) and samerights:
                 if self.debug:
                     self.log.dbg('{} is the same'.format(dst))
