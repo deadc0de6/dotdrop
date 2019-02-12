@@ -59,6 +59,26 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(d3t))
         self.addCleanup(clean, d3t)
 
+        # sub dirs
+        dsubstmp = get_tempdir()
+        self.assertTrue(os.path.exists(dsubstmp))
+        self.addCleanup(clean, dsubstmp)
+        dirsubs = os.path.basename(dsubstmp)
+
+        dir1string = 'somedir'
+        dir1 = os.path.join(dsubstmp, dir1string)
+        create_dir(dir1)
+        dir1sub1str = 'sub1'
+        sub1 = os.path.join(dir1, dir1sub1str)
+        create_dir(sub1)
+        dir1sub2str = 'sub2'
+        sub2 = os.path.join(dir1, dir1sub2str)
+        create_dir(sub2)
+        f1s1, f1s1c1 = create_random_file(sub1)
+        self.assertTrue(os.path.exists(f1s1))
+        f1s2, f1s2c1 = create_random_file(sub2)
+        self.assertTrue(os.path.exists(f1s2))
+
         # create the directory to test
         dpath = os.path.join(fold_config, get_string(5))
         dir1 = create_dir(dpath)
@@ -76,7 +96,7 @@ class TestUpdate(unittest.TestCase):
         o = load_options(confpath, profile)
         o.debug = True
         o.update_showpatch = True
-        dfiles = [d1, dir1, d2, d3t]
+        dfiles = [d1, dir1, d2, d3t, dsubstmp]
 
         # import the files
         o.import_path = dfiles
@@ -91,14 +111,29 @@ class TestUpdate(unittest.TestCase):
         d3tb = os.path.basename(d3t)
         for dotfile in o.dotfiles:
             if os.path.basename(dotfile.dst) == d3tb:
+                # patch the template
                 src = os.path.join(o.dotpath, dotfile.src)
                 src = os.path.expanduser(src)
                 edit_content(src, '{{@@ profile @@}}')
+            if os.path.basename(dotfile.dst) == dirsubs:
+                # retrieve the path of the sub in the dotpath
+                d1indotpath = os.path.join(o.dotpath, dotfile.src)
+                d1indotpath = os.path.expanduser(d1indotpath)
             dotfile.trans_w = trans
 
         # update template
         o.update_path = [d3t]
         self.assertFalse(cmd_update(o))
+
+        # update sub dirs
+        gone = os.path.join(d1indotpath, dir1string)
+        gone = os.path.join(gone, dir1sub1str)
+        self.assertTrue(os.path.exists(gone))
+        clean(sub1)  # dir1sub1str
+        self.assertTrue(os.path.exists(gone))
+        o.update_path = [dsubstmp]
+        cmd_update(o)
+        self.assertFalse(os.path.exists(gone))
 
         # edit the files
         edit_content(d1, 'newcontent')
