@@ -9,7 +9,7 @@
 
 *Save your dotfiles once, deploy them everywhere*
 
-[Dotdrop](https://github.com/deadc0de6/dotdrop)  makes the management of dotfiles between different hosts easy.
+[Dotdrop](https://github.com/deadc0de6/dotdrop) makes the management of dotfiles between different hosts easy.
 It allows to store your dotfiles on git and automagically deploy
 different versions of the same file on different setups.
 
@@ -26,17 +26,18 @@ Features:
 
 * Sync once every dotfile on git for different usages
 * Allow dotfiles templating by leveraging [jinja2](http://jinja.pocoo.org/)
-* Dynamically generated dotfile content with variables
-* Comparison between local and stored dotfiles
+* Dynamically generated dotfile contents with pre-defined variables
+* Comparison between deployed and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
-* Easy import dotfiles
+* Easy import and update dotfiles
 * Handle files and directories
-* Allow to symlink dotfiles
+* Support symlink of dotfiles
 * Associate an action to the deployment of specific dotfiles
 * Associate transformations for storing encrypted dotfiles
 * Provide different solutions for handling dotfiles containing sensitive information
 
-Check also the [blog post](https://deadc0de.re/articles/dotfiles.html), the [example](#example) or how [people are using dotdrop](#people-using-dotdrop) for more.
+Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
+the [example](#example) or how [people are using dotdrop](#people-using-dotdrop) for more.
 
 Quick start:
 ```bash
