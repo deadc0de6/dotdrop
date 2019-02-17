@@ -77,12 +77,23 @@ class Templategen:
         filetype = filetype.strip()
         if self.debug:
             self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
-        istext = 'text' in filetype or 'empty' in filetype
+        istext = self._is_text(filetype)
         if self.debug:
             self.log.dbg('\"{}\" is text: {}'.format(src, istext))
         if not istext:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
+
+    def _is_text(self, fileoutput):
+        """return if `file -b` output is ascii text"""
+        out = fileoutput.lower()
+        if 'text' in out:
+            return True
+        if 'empty' in out:
+            return True
+        if 'json' in out:
+            return True
+        return False
 
     def _handle_text_file(self, src):
         """write text to file"""
