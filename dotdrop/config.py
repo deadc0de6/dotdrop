@@ -144,7 +144,7 @@ class Cfg:
     def _load_file(self):
         """load the yaml file"""
         with open(self.cfgpath, 'r') as f:
-            self.content = yaml.load(f)
+            self.content = yaml.safe_load(f)
         if not self._is_valid():
             return False
         return self._parse()
@@ -565,9 +565,12 @@ class Cfg:
             self.key_dotfiles_dst: dotfile.dst,
             self.key_dotfiles_src: dotfile.src,
         }
-        if link != LinkTypes.NOLINK:
-            # set the link flag
-            dots[dotfile.key][self.key_dotfiles_link] = link
+
+        # set the link flag
+        if link == LinkTypes.PARENTS:
+            dots[dotfile.key][self.key_dotfiles_link] = True
+        elif link == LinkTypes.CHILDREN:
+            dots[dotfile.key][self.key_dotfiles_link_children] = True
 
         # link it to this profile in the yaml file
         pro = self.content[self.key_profiles][profile]
