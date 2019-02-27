@@ -255,8 +255,6 @@ class Cfg:
                     self.log.err(msg.format(k))
                     msg = 'Please modify your config file to: \"trans: {}\"'
                     self.log.err(msg.format(itstrans_r[0]))
-                    msg = 'see https://github.com/deadc0de6/dotdrop/wiki/transformations#config-error-with-transformation-list'  # noqa
-                    self.log.err(msg)
                     return False
                 trans_r = self._parse_trans(itstrans_r, read=True)
                 if not trans_r:
@@ -275,8 +273,6 @@ class Cfg:
                     self.log.err(msg.format(k))
                     msg = 'Please modify your config file: \"trans_write: {}\"'
                     self.log.err(msg.format(itstrans_w[0]))
-                    msg = 'see https://github.com/deadc0de6/dotdrop/wiki/transformations#config-error-with-transformation-list'  # noqa
-                    self.log.err(msg)
                     return False
                 trans_w = self._parse_trans(itstrans_w, read=False)
                 if not trans_w:

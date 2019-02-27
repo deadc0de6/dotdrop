@@ -80,6 +80,8 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
   * [Store sensitive dotfiles](#store-sensitive-dotfiles)
   * [Symlink dotfiles](#symlink-dotfiles)
 * [Config](#config)
+  * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
+  * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
 * [Templating](#templating)
   * [Available variables](#available-variables)
   * [Available methods](#available-methods)
