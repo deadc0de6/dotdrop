@@ -6,6 +6,8 @@ layout: default
 that provides efficient ways of managing your dotfiles. It is especially powerful when
 it comes to managing those across different hosts.
 
+The main idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different content on different hosts/setups. To achieve this, it uses jinja2 which is a templating engine that allows to specify, during the dotfile installation with dotdrop, based on a selected profile, how (with what content) each dotfile will be installed.
+
 * [✔] **VERSIONED**
 
   Be it on github, gitlab, gitolite or your own git solution, make
