@@ -780,6 +780,30 @@ profiles:
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
+For more advanced use-cases variables (`variables` and `dynvariables`) can be used
+to specify the profile to include in a profile
+
+For example:
+```yaml
+variables:
+  var1: "john"
+dynvariables:
+  d_user: "echo $USER"
+profiles:
+  profile_john:
+    dotfiles:
+    - f_john_dotfile
+  profile_bill:
+    dotfiles:
+    - f_bill_dotfile
+  p1:
+    include:
+    - "profile_{{@@ d_user @@}}"
+  p2:
+    include:
+    - "profile_{{@@ var1 @@}}"
+```
+
 ## Ignore empty template
 
 It is possible to avoid having an empty rendered template being
