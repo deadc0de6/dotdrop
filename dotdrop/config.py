@@ -365,7 +365,11 @@ class Cfg:
         if not self.lnk_profiles[profile][self.key_profiles_incl]:
             # empty include found
             return included
+        variables = self.get_variables(profile, debug=self.debug)
+        t = Templategen(variables=variables)
         for other in self.lnk_profiles[profile][self.key_profiles_incl]:
+            # resolve include value
+            other = t.generate_string(other)
             if other not in self.prodots:
                 # no such profile
                 self.log.warn('unknown included profile \"{}\"'.format(other))
