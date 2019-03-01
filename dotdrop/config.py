@@ -33,7 +33,7 @@ class Cfg:
     key_showdiff = 'showdiff'
     key_deflink = 'link_by_default'
     key_workdir = 'workdir'
-    key_include_vars = 'include_variables'
+    key_include_vars = 'import_variables'
 
     # actions keys
     key_actions = 'actions'

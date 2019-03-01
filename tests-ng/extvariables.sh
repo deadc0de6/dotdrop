@@ -60,7 +60,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  include_variables:
+  import_variables:
   - $(basename ${extvars})
 variables:
   var1: "var1"
@@ -123,7 +123,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  include_variables:
+  import_variables:
   - $(basename ${extvars})
 dotfiles:
   f_abc:
