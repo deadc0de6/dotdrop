@@ -326,10 +326,19 @@ class Cfg:
 
         # handle "include" for each profile
         for k in self.lnk_profiles.keys():
-            dots = self._get_included_dotfiles(k)
+            ret, dots = self._get_included_dotfiles(k)
+            if not ret:
+                return False
             self.prodots[k].extend(dots)
-            # remove duplicates if any
+
+        # remove duplicates if any
+        for k in self.lnk_profiles.keys():
             self.prodots[k] = list(set(self.prodots[k]))
+
+        if self.debug:
+            for k in self.lnk_profiles.keys():
+                df = ','.join([d.key for d in self.prodots[k]])
+                self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
@@ -351,18 +360,23 @@ class Cfg:
             return os.path.join(d, path)
         return path
 
-    def _get_included_dotfiles(self, profile):
+    def _get_included_dotfiles(self, profile, seen=[]):
         """find all dotfiles for a specific profile
         when using the include keyword"""
-        included = []
+        if profile in seen:
+            self.log.err('cyclic include in profile \"{}\"'.format(profile))
+            return False, []
+        dotfiles = self.prodots[profile]
         if self.key_profiles_incl not in self.lnk_profiles[profile]:
             # no include found
-            return included
+            return True, dotfiles
         if not self.lnk_profiles[profile][self.key_profiles_incl]:
             # empty include found
-            return included
+            return True, dotfiles
         variables = self.get_variables(profile, debug=self.debug)
         t = Templategen(variables=variables)
+        if self.debug:
+            self.log.dbg('handle includes for profile \"{}\"'.format(profile))
         for other in self.lnk_profiles[profile][self.key_profiles_incl]:
             # resolve include value
             other = t.generate_string(other)
@@ -370,8 +384,17 @@ class Cfg:
                 # no such profile
                 self.log.warn('unknown included profile \"{}\"'.format(other))
                 continue
-            included.extend(self.prodots[other])
-        return included
+            if self.debug:
+                msg = 'include dotfiles from \"{}\" into \"{}\"'
+                self.log.dbg(msg.format(other, profile))
+            lseen = seen.copy()
+            lseen.append(profile)
+            ret, recincludes = self._get_included_dotfiles(other, seen=lseen)
+            if not ret:
+                return False, []
+            dotfiles.extend(recincludes)
+            dotfiles.extend(self.prodots[other])
+        return True, dotfiles
 
     def _parse_actions(self, entries):
         """parse actions specified for an element
