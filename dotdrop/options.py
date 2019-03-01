@@ -15,12 +15,17 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
 from dotdrop.config import Cfg
 
+ENV_PROFILE = 'DOTDROP_PROFILE'
+ENV_CONFIG = 'DOTDROP_CONFIG'
+ENV_NOBANNER = 'DOTDROP_NOBANNER'
 
 PROFILE = socket.gethostname()
-ENV_PROFILE = 'DOTDROP_PROFILE'
-ENV_NOBANNER = 'DOTDROP_NOBANNER'
 if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
+
+CONFIG = 'config.yaml'
+if ENV_CONFIG in os.environ:
+    CONFIG = os.environ[ENV_CONFIG]
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -46,7 +51,7 @@ Usage:
 
 Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
-  -c --cfg=<path>         Path to the config [default: config.yaml].
+  -c --cfg=<path>         Path to the config [default: {}].
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
@@ -64,7 +69,7 @@ Options:
   -v --version            Show version.
   -h --help               Show this screen.
 
-""".format(BANNER, PROFILE)
+""".format(BANNER, PROFILE, CONFIG)
 
 
 class AttrMonitor:

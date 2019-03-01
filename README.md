@@ -192,7 +192,11 @@ For more options see `dotdrop --help`.
 
 For easy deployment the default profile used by dotdrop reflects the
 hostname of the host on which it runs. It can be changed either with the
-`--profile` switch or by defining the `DOTDROP_PROFILE` environment variable.
+`-p --profile` switch or by defining the `DOTDROP_PROFILE` environment variable.
+
+The config file is per default `config.yaml` and can be changed either
+using the `-c --cfg` cli switch or by defining the `DOTDROP_CONFIG` environment
+variable.
 
 ## Install dotfiles
 
