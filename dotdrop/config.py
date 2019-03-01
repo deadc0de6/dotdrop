@@ -33,6 +33,7 @@ class Cfg:
     key_showdiff = 'showdiff'
     key_deflink = 'link_by_default'
     key_workdir = 'workdir'
+    key_include_vars = 'import_variables'
 
     # actions keys
     key_actions = 'actions'
@@ -120,7 +121,11 @@ class Cfg:
         # NOT linked inside the yaml dict (self.content)
         self.prodots = {}
 
-        if not self._load_file():
+        # represents all variables from external files
+        self.ext_variables = {}
+        self.ext_dynvariables = {}
+
+        if not self._load_config():
             raise ValueError('config is not valid')
 
     def eval_dotfiles(self, profile, variables, debug=False):
@@ -141,13 +146,25 @@ class Cfg:
                     action.action = t.generate_string(action.action)
         return dotfiles
 
-    def _load_file(self):
+    def _load_config(self):
         """load the yaml file"""
-        with open(self.cfgpath, 'r') as f:
-            self.content = yaml.safe_load(f)
+        self.content = self._load_yaml(self.cfgpath)
         if not self._is_valid():
             return False
         return self._parse()
+
+    def _load_yaml(self, path):
+        """load a yaml file to a dict"""
+        content = {}
+        if not os.path.exists(path):
+            return content
+        with open(path, 'r') as f:
+            try:
+                content = yaml.safe_load(f)
+            except Exception as e:
+                self.log.err(e)
+                return {}
+        return content
 
     def _is_valid(self):
         """test the yaml dict (self.content) is valid"""
@@ -350,7 +367,37 @@ class Cfg:
         self.lnk_settings[self.key_workdir] = \
             self._abs_path(self.curworkdir)
 
+        # load external variables/dynvariables
+        if self.key_include_vars in self.lnk_settings:
+            paths = self.lnk_settings[self.key_include_vars]
+            self._load_ext_variables(paths)
+
         return True
+
+    def _load_ext_variables(self, paths):
+        """load external variables"""
+        variables = {}
+        dvariables = {}
+        for path in paths:
+            path = self._abs_path(path)
+            if self.debug:
+                self.log.dbg('loading variables from {}'.format(path))
+            content = self._load_yaml(path)
+            if not content:
+                self.log.warn('\"{}\" does not exist'.format(path))
+                continue
+            # variables
+            if self.key_variables in content:
+                variables.update(content[self.key_variables])
+            # dynamic variables
+            if self.key_dynvariables in content:
+                dvariables.update(content[self.key_dynvariables])
+        self.ext_variables = variables
+        if self.debug:
+            self.log.dbg('loaded ext variables: {}'.format(variables))
+        self.ext_dynvariables = dvariables
+        if self.debug:
+            self.log.dbg('loaded ext dynvariables: {}'.format(dvariables))
 
     def _abs_path(self, path):
         """return absolute path of path relative to the confpath"""
@@ -669,6 +716,9 @@ class Cfg:
         if self.key_variables in self.content:
             variables.update(self.content[self.key_variables])
 
+        # external variables
+        variables.update(self.ext_variables)
+
         if profile not in self.lnk_profiles:
             return variables
 
@@ -688,6 +738,9 @@ class Cfg:
         if self.key_dynvariables in self.content:
             # interpret dynamic variables
             variables.update(self.content[self.key_dynvariables])
+
+        # external variables
+        variables.update(self.ext_dynvariables)
 
         if profile not in self.lnk_profiles:
             return variables

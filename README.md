@@ -84,6 +84,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
   * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
 * [Templating](#templating)
   * [Available variables](#available-variables)
+  * [Variables from file](#variables-from-file)
   * [Available methods](#available-methods)
   * [Dynamic dotfile paths](#dynamic-dotfile-paths)
   * [Dynamic actions](#dynamic-actions)
@@ -655,6 +656,8 @@ the following entries:
     (absolute path or relative to the config file location, defaults to *~/.config/dotdrop*)
   * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
   * `ignoreempty`: do not deploy template if empty (default *false*)
+  * `import_variables`: list of paths to load variables from
+    (absolute path or relative to the config file location).
 
 * **dotfiles** entry: a list of dotfiles
   * `dst`: where this dotfile needs to be deployed (can use `variables` and `dynvariables`, make sure to quote).
@@ -858,7 +861,7 @@ will result in the following available variables
 * var4: `echo var1 var2 var3`
 * dvar4: `var1 var2 var3`
 
-## Variables
+### Variables
 
 Variables can be added in the config file under the `variables` entry.
 The variables added there are directly reachable in any templates.
@@ -895,7 +898,7 @@ profiles:
     - f_gitconfig
 ```
 
-## Interpreted variables
+### Interpreted variables
 
 It is also possible to have *dynamic* variables in the sense that their
 content will be interpreted by the shell before being replaced in the templates.
@@ -916,7 +919,7 @@ These can be used as any variables in the templates
 As for variables (see [Variables](#variables)) profile dynvariables will take
 precedence over globally defined dynvariables.
 
-## Environment variables
+### Environment variables
 
 It's possible to access environment variables inside the templates.
 ```
@@ -947,6 +950,35 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
+
+## Variables from file
+
+Variables can be loaded from external files by specifying their
+paths in the config entry `import_variables`.
+
+`config.yaml`
+```yaml
+config:
+  import_variables:
+  - variables.yaml
+variables:
+  v1: var2
+```
+
+`variables.yaml`
+```yaml
+variables:
+  v1: var1
+  v2: var2
+dynvariables:
+  dv1: "echo test"
+```
+
+External variables will take precedence over variables defined within
+the source config file.
+
+This can be useful for example if you have sensitive information stored in variables
+and want those to be encrypted when versioned.
 
 ## Available methods
 
