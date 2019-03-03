@@ -64,9 +64,11 @@ class Installer:
             # symlink loop
             self.log.err('dotfile points to itself: {}'.format(dst))
             return []
+        isdir = os.path.isdir(src)
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
-        if os.path.isdir(src):
+            self.log.dbg('is \"{}\" a directory: {}'.format(src, isdir))
+        if isdir:
             return self._handle_dir(templater, src, dst, actions=actions,
                                     noempty=noempty)
         return self._handle_file(templater, src, dst,

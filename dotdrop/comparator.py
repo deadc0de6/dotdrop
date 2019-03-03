@@ -35,6 +35,8 @@ class Comparator:
             if self.debug:
                 self.log.dbg('is file')
             return self._comp_file(left, right, ignore)
+        if self.debug:
+            self.log.dbg('is directory')
         return self._comp_dir(left, right, ignore)
 
     def _comp_file(self, left, right, ignore):
@@ -57,6 +59,8 @@ class Comparator:
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
             return ''
+        if not os.path.isdir(right):
+            return '\"{}\" is a file\n'.format(right)
         if self.debug:
             self.log.dbg('compare {} and {}'.format(left, right))
         ret = []
@@ -83,7 +87,7 @@ class Comparator:
             rfile = os.path.join(right, i)
             short = os.path.basename(lfile)
             # file vs dir
-            ret.append('different type: \"{}\"\n'.format(short))
+            ret.append('=> different type: \"{}\"\n'.format(short))
 
         # content is different
         funny = comp.diff_files
