@@ -66,6 +66,7 @@ class Cfg:
     key_profiles = 'profiles'
     key_profiles_dots = 'dotfiles'
     key_profiles_incl = 'include'
+    key_profiles_imp = 'import'
 
     # settings defaults
     default_backup = True
@@ -353,10 +354,21 @@ class Cfg:
                 return False
             self.prodots[k].extend(dots)
 
+        # handle "import" for each profile
+        for k in self.lnk_profiles.keys():
+            dots = self._get_imported_dotfiles_keys(k)
+            for d in dots:
+                if d not in self.dotfiles:
+                    msg = '(i) unknown dotfile \"{}\" for {}'.format(d, k)
+                    self.log.err(msg)
+                    continue
+                self.prodots[k].append(self.dotfiles[d])
+
         # remove duplicates if any
         for k in self.lnk_profiles.keys():
             self.prodots[k] = list(set(self.prodots[k]))
 
+        # print dotfiles for each profile
         if self.debug:
             for k in self.lnk_profiles.keys():
                 df = ','.join([d.key for d in self.prodots[k]])
@@ -406,6 +418,29 @@ class Cfg:
             d = os.path.dirname(self.cfgpath)
             return os.path.join(d, path)
         return path
+
+    def _get_imported_dotfiles_keys(self, profile):
+        """import dotfiles from external file"""
+        keys = []
+        if self.key_profiles_imp not in self.lnk_profiles[profile]:
+            return keys
+        paths = self.lnk_profiles[profile][self.key_profiles_imp]
+        for path in paths:
+            path = self._abs_path(path)
+            if self.debug:
+                self.log.dbg('loading dotfiles from {}'.format(path))
+            content = self._load_yaml(path)
+            if not content:
+                self.log.warn('\"{}\" does not exist'.format(path))
+                continue
+            if self.key_profiles_dots not in content:
+                self.log.warn('not dotfiles in \"{}\"'.format(path))
+                continue
+            df = content[self.key_profiles_dots]
+            if self.debug:
+                self.log.dbg('imported dotfiles keys: {}'.format(df))
+            keys.extend(df)
+        return keys
 
     def _get_included_dotfiles(self, profile, seen=[]):
         """find all dotfiles for a specific profile
