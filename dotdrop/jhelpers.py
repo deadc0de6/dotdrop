@@ -10,4 +10,4 @@ import os
 
 def exists(path):
     """return true when path exists"""
-    return os.path.exists(path)
+    return os.path.exists(os.path.expandvars(path))
