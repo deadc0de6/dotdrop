@@ -1166,6 +1166,9 @@ For more examples, see how people are using dotdrop
 * [https://gitlab.com/lyze237/dotfiles-public](https://gitlab.com/lyze237/dotfiles-public)
 * [https://github.com/whitelynx/dotfiles](https://github.com/whitelynx/dotfiles)
 
+Or search directly on [github](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code)
+for config examples.
+
 # Related projects
 
 See [github does dotfiles](https://dotfiles.github.io/)
