@@ -181,6 +181,15 @@ class Cfg:
 
     def _parse(self):
         """parse config file"""
+        # parse the settings
+        self.lnk_settings = self.content[self.key_settings]
+        self._complete_settings()
+
+        # load external variables/dynvariables
+        if self.key_include_vars in self.lnk_settings:
+            paths = self.lnk_settings[self.key_include_vars]
+            self._load_ext_variables(paths)
+
         # parse all actions
         if self.key_actions in self.content:
             if self.content[self.key_actions] is not None:
@@ -225,10 +234,6 @@ class Cfg:
                 # if has the dotfiles entry but is empty
                 # ensures it's an empty list
                 v[self.key_profiles_dots] = []
-
-        # parse the settings
-        self.lnk_settings = self.content[self.key_settings]
-        self._complete_settings()
 
         # parse the dotfiles
         # and construct the dict of objects per dotfile key
@@ -366,11 +371,6 @@ class Cfg:
         self.curworkdir = self.lnk_settings[self.key_workdir]
         self.lnk_settings[self.key_workdir] = \
             self._abs_path(self.curworkdir)
-
-        # load external variables/dynvariables
-        if self.key_include_vars in self.lnk_settings:
-            paths = self.lnk_settings[self.key_include_vars]
-            self._load_ext_variables(paths)
 
         return True
 
