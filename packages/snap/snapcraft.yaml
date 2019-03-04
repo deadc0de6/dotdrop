@@ -1,19 +1,21 @@
 name:           dotdrop
 version:        latest
 version-script: cat $SNAPCRAFT_STAGE/bin/dotdrop | grep '__requires__' | sed "s/.*'dotdrop==\(.*\)'/\1/"
-summary:        It makes the management of dotfiles between different hosts easy.
-description: >
+summary:        Save your dotfiles once, deploy them everywhere
+description: |
+  Dotdrop makes the management of dotfiles between different hosts easy.
+  It allows to store your dotfiles on git and automagically deploy different versions
+  of the same file on different setups.
+
+  It also allows to manage different sets of dotfiles.
+  For example you can have a set of dotfiles for your home laptop and a different
+  set for your office desktop. Those sets may overlap and different versions of
+  the same dotfiles can be deployed on different predefined profiles.
+  Or you may have a main set of dotfiles for your everyday's host and a sub-set you
+  only need to deploy to temporary hosts (cloud VM, etc) that may be using a slightly
+  different version of some of the dotfiles.
   It allows to store your dotfiles on git and automagically deploy
   different versions of the same file on different setups.
-
-  It also allows to manage different *sets* of dotfiles.
-  For example you can have a set of dotfiles for your home laptop and
-  a different set for your office desktop. Those sets may overlap and different
-  versions of the same dotfiles can be deployed on different predefined *profiles*.
-  Or you may have a main set of dotfiles for your
-  everyday's host and a sub-set you only need to deploy to temporary
-  hosts (cloud VM, etc) that may be using
-  a slightly different version of some of the dotfiles.
 confinement:    strict
 grade:          stable
 
@@ -27,6 +29,6 @@ parts:
   dotdrop:
     plugin:     python
     python-version: python3
-    source: ../
+    source: ../../
     stage-packages:
       - file
