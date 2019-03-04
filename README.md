@@ -109,6 +109,8 @@ Dotdrop is also available on aur:
 * stable: https://aur.archlinux.org/packages/dotdrop/
 * git version: https://aur.archlinux.org/packages/dotdrop-git/
 
+And as a snap package: https://snapcraft.io/dotdrop
+
 ## As a submodule
 
 The following will create a git repository for your dotfiles and
