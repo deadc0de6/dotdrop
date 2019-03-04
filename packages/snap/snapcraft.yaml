@@ -16,6 +16,9 @@ description: |
   different version of some of the dotfiles.
   It allows to store your dotfiles on git and automagically deploy
   different versions of the same file on different setups.
+
+  Project page: https://github.com/deadc0de6/dotdrop
+
 confinement:    strict
 grade:          stable
 
