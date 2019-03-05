@@ -424,9 +424,12 @@ class Cfg:
         keys = []
         if self.key_profiles_imp not in self.lnk_profiles[profile]:
             return keys
+        variables = self.get_variables(profile, debug=self.debug)
+        t = Templategen(variables=variables)
         paths = self.lnk_profiles[profile][self.key_profiles_imp]
         for path in paths:
             path = self._abs_path(path)
+            path = t.generate_string(path)
             if self.debug:
                 self.log.dbg('loading dotfiles from {}'.format(path))
             content = self._load_yaml(path)

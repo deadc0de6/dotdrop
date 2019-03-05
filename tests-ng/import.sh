@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 extdotfiles="${tmps}/df_p1.yaml"
 
+dynextdotfiles_name="d_uid_dynvar"
+dynextdotfiles="${tmps}/ext_${dynextdotfiles_name}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -60,6 +63,8 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+dynvariables:
+  d_uid: "echo ${dynextdotfiles_name}"
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -70,12 +75,16 @@ dotfiles:
   f_xyz:
     dst: ${tmpd}/xyz
     src: xyz
+  f_dyn:
+    dst: ${tmpd}/dyn
+    src: dyn
 profiles:
   p1:
     dotfiles:
     - f_abc
     import:
     - $(basename ${extdotfiles})
+    - "ext_{{@@ d_uid @@}}"
 _EOF
 
 # create the external dotfile file
@@ -85,11 +94,17 @@ dotfiles:
   - f_xyz
 _EOF
 
+cat > ${dynextdotfiles} << _EOF
+dotfiles:
+  - f_dyn
+_EOF
+
 # create the source
 mkdir -p ${tmps}/dotfiles/
 echo "abc" > ${tmps}/dotfiles/abc
 echo "def" > ${tmps}/dotfiles/def
 echo "xyz" > ${tmps}/dotfiles/xyz
+echo "dyn" > ${tmps}/dotfiles/dyn
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
@@ -98,9 +113,11 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -e ${tmpd}/abc ] && exit 1
 [ ! -e ${tmpd}/def ] && exit 1
 [ ! -e ${tmpd}/xyz ] && exit 1
+[ ! -e ${tmpd}/dyn ] && exit 1
 grep 'abc' ${tmpd}/abc
 grep 'def' ${tmpd}/def
 grep 'xyz' ${tmpd}/xyz
+grep 'dyn' ${tmpd}/dyn
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
