@@ -14,8 +14,7 @@ Source the file
 
 # zsh
 
-Copy the file `_dotdrop.sh-completion.zsh`
-in a path within `${fpath}`
+Copy the file in a path within `${fpath}`
 
 * if using `dotdrop.sh`: [_dotdrop.sh-completion.zsh](_dotdrop.sh-completion.zsh)
 * if using `dotdrop`: [_dotdrop-completion.zsh](_dotdrop-completion.zsh)
