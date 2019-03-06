@@ -9,8 +9,8 @@ Those files are generated using
 
 Source the file
 
-* if using `dotdrop.sh` [dotdrop.sh-completion.bash](completion/dotdrop.sh-completion.bash)
-* if using `dotdrop`: [dotdrop-completion.bash](completion/dotdrop-completion.bash)
+* if using `dotdrop.sh` [dotdrop.sh-completion.bash](dotdrop.sh-completion.bash)
+* if using `dotdrop`: [dotdrop-completion.bash](dotdrop-completion.bash)
 
 # zsh
 
