@@ -205,7 +205,7 @@ def cmd_importer(o):
     for path in paths:
         if o.debug:
             LOG.dbg('trying to import {}'.format(path))
-        if not os.path.lexists(path):
+        if not os.path.exists(path):
             LOG.err('\"{}\" does not exist, ignored!'.format(path))
             ret = False
             continue
