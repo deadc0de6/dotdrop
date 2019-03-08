@@ -68,6 +68,7 @@ class Cfg:
     key_profiles_incl = 'include'
 
     # settings defaults
+    default_dotpath = 'dotfiles'
     default_backup = True
     default_create = True
     default_banner = True
@@ -229,6 +230,9 @@ class Cfg:
             self.content[self.key_profiles] = {}
             self.lnk_profiles = self.content[self.key_profiles]
         for k, v in self.lnk_profiles.items():
+            if not v:
+                self.lnk_profiles[k] = {}
+                continue
             if self.key_profiles_dots in v and \
                     v[self.key_profiles_dots] is None:
                 # if has the dotfiles entry but is empty
@@ -328,6 +332,8 @@ class Cfg:
         # assign dotfiles to each profile
         for k, v in self.lnk_profiles.items():
             self.prodots[k] = []
+            if not v:
+                continue
             if self.key_profiles_dots not in v:
                 # ensures is a list
                 v[self.key_profiles_dots] = []
@@ -490,6 +496,8 @@ class Cfg:
 
     def _complete_settings(self):
         """set settings defaults if not present"""
+        if self.key_dotpath not in self.lnk_settings:
+            self.lnk_settings[self.key_dotpath] = self.default_dotpath
         if self.key_backup not in self.lnk_settings:
             self.lnk_settings[self.key_backup] = self.default_backup
         if self.key_create not in self.lnk_settings:
