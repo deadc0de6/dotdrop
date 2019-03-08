@@ -646,15 +646,15 @@ For example
 
 # Config
 
-The config file (defaults to *config.yaml*) is a yaml file containing
+The config file (which defaults to *config.yaml*) is a yaml file containing
 the following entries:
 
-* **config** entry: contains settings for the deployment
+* **config** entry (mandatory): contains settings for the deployment
   * `backup`: create a backup of the dotfile in case it differs from the
     one that will be installed by dotdrop (default *true*)
   * `create`: create directory hierarchy when installing dotfiles if
     it doesn't exist (default *true*)
-  * `dotpath`: path to the directory containing the dotfiles to be managed
+  * `dotpath`: path to the directory containing the dotfiles to be managed (default `dotfiles`)
     by dotdrop (absolute path or relative to the config file location)
   * `banner`: display the banner (default *true*)
   * `longkey`: use long keys for dotfiles when importing (default *false*)
@@ -667,7 +667,7 @@ the following entries:
   * `import_variables`: list of paths to load variables from
     (absolute path or relative to the config file location).
 
-* **dotfiles** entry: a list of dotfiles
+* **dotfiles** entry (mandatory): a list of dotfiles
   * `dst`: where this dotfile needs to be deployed (can use `variables` and `dynvariables`, make sure to quote).
   * `src`: dotfile path within the `dotpath` (can use `variables` and `dynvariables`, make sure to quote).
   * `link`: if true dotdrop will create a symlink instead of copying (default *false*).
@@ -696,7 +696,7 @@ the following entries:
     trans_write: <transformation-key>
 ```
 
-* **profiles** entry: a list of profiles with the different dotfiles that
+* **profiles** entry (mandatory): a list of profiles with the different dotfiles that
   need to be managed
   * `dotfiles`: the dotfiles associated to this profile
   * `include`: include all dotfiles from another profile (optional)
