@@ -231,7 +231,6 @@ class Cfg:
             self.lnk_profiles = self.content[self.key_profiles]
         for k, v in self.lnk_profiles.items():
             if not v:
-                self.lnk_profiles[k] = {}
                 continue
             if self.key_profiles_dots in v and \
                     v[self.key_profiles_dots] is None:
@@ -419,6 +418,8 @@ class Cfg:
         if profile in seen:
             self.log.err('cyclic include in profile \"{}\"'.format(profile))
             return False, []
+        if not self.lnk_profiles[profile]:
+            return True, []
         dotfiles = self.prodots[profile]
         if self.key_profiles_incl not in self.lnk_profiles[profile]:
             # no include found
