@@ -97,11 +97,12 @@ class Options(AttrMonitor):
             self.args = docopt(USAGE, version=VERSION)
         self.log = Logger()
         self.debug = self.args['--verbose']
+        self.profile = self.args['--profile']
         self.confpath = os.path.expanduser(self.args['--cfg'])
         if self.debug:
             self.log.dbg('config file: {}'.format(self.confpath))
 
-        self._read_config()
+        self._read_config(self.profile)
         self._apply_args()
         self._fill_attr()
         if ENV_NOBANNER not in os.environ \
@@ -117,9 +118,9 @@ class Options(AttrMonitor):
         self.log.log(BANNER)
         self.log.log('')
 
-    def _read_config(self):
+    def _read_config(self, profile=None):
         """read the config file"""
-        self.conf = Cfg(self.confpath, debug=self.debug)
+        self.conf = Cfg(self.confpath, profile=profile, debug=self.debug)
         # transform the configs in attribute
         for k, v in self.conf.get_settings().items():
             setattr(self, k, v)
@@ -137,7 +138,6 @@ class Options(AttrMonitor):
 
         # adapt attributes based on arguments
         self.dry = self.args['--dry']
-        self.profile = self.args['--profile']
         self.safe = not self.args['--force']
         self.link = LinkTypes.NOLINK
         if self.link_by_default:

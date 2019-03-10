@@ -80,9 +80,10 @@ class Cfg:
     default_link_by_default = False
     default_workdir = '~/.config/dotdrop'
 
-    def __init__(self, cfgpath, debug=False):
+    def __init__(self, cfgpath, profile=None, debug=False):
         """constructor
         @cfgpath: path to the config file
+        @profile: chosen profile
         @debug: enable debug
         """
         if not os.path.exists(cfgpath):
@@ -126,7 +127,7 @@ class Cfg:
         self.ext_variables = {}
         self.ext_dynvariables = {}
 
-        if not self._load_config():
+        if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
 
     def eval_dotfiles(self, profile, variables, debug=False):
@@ -147,12 +148,12 @@ class Cfg:
                     action.action = t.generate_string(action.action)
         return dotfiles
 
-    def _load_config(self):
+    def _load_config(self, profile=None):
         """load the yaml file"""
         self.content = self._load_yaml(self.cfgpath)
         if not self._is_valid():
             return False
-        return self._parse()
+        return self._parse(profile=profile)
 
     def _load_yaml(self, path):
         """load a yaml file to a dict"""
@@ -180,7 +181,7 @@ class Cfg:
             return False
         return True
 
-    def _parse(self):
+    def _parse(self, profile=None):
         """parse config file"""
         # parse the settings
         self.lnk_settings = self.content[self.key_settings]
@@ -189,7 +190,7 @@ class Cfg:
         # load external variables/dynvariables
         if self.key_include_vars in self.lnk_settings:
             paths = self.lnk_settings[self.key_include_vars]
-            self._load_ext_variables(paths)
+            self._load_ext_variables(paths, profile=profile)
 
         # parse all actions
         if self.key_actions in self.content:
@@ -379,12 +380,15 @@ class Cfg:
 
         return True
 
-    def _load_ext_variables(self, paths):
+    def _load_ext_variables(self, paths, profile=None):
         """load external variables"""
         variables = {}
         dvariables = {}
+        cur_vars = self.get_variables(profile, debug=self.debug)
+        t = Templategen(variables=cur_vars)
         for path in paths:
             path = self._abs_path(path)
+            path = t.generate_string(path)
             if self.debug:
                 self.log.dbg('loading variables from {}'.format(path))
             content = self._load_yaml(path)
@@ -686,7 +690,7 @@ class Cfg:
     def get_variables(self, profile, debug=False):
         """return the variables for this profile"""
         # get flat variables
-        variables = self._get_variables(profile)
+        variables = self._get_variables(profile=profile)
 
         # get interpreted variables
         dvariables = self._get_dynvariables(profile)
@@ -719,12 +723,13 @@ class Cfg:
                 t.update_variables(variables)
         return variables
 
-    def _get_variables(self, profile):
-        """return the flat variables"""
+    def _get_variables(self, profile=None):
+        """return the un-interpreted variables"""
         variables = {}
 
         # profile variable
-        variables['profile'] = profile
+        if profile:
+            variables['profile'] = profile
 
         # global variables
         if self.key_variables in self.content:
@@ -733,7 +738,7 @@ class Cfg:
         # external variables
         variables.update(self.ext_variables)
 
-        if profile not in self.lnk_profiles:
+        if not profile or profile not in self.lnk_profiles:
             return variables
 
         # profile variables
