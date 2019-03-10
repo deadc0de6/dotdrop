@@ -37,7 +37,7 @@ Features:
 * Provide different solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
-the [example](#example) or
+the [example](#example), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
 how [people are using dotdrop](https://github.com/deadc0de6/dotdrop/wiki/people-using-dotdrop)
 for more.
 
@@ -83,10 +83,11 @@ Below instructions show how to install dotdrop as a submodule. For alternative
 installation instructions (with virtualenv, pypi, aur, snap, etc), see the
 [wiki installation page](https://github.com/deadc0de6/dotdrop/wiki/installation).
 
-Dotdrop is also available on aur:
-* [aur](https://aur.archlinux.org/) (stable): https://aur.archlinux.org/packages/dotdrop/
-* [aur](https://aur.archlinux.org/) (git version): https://aur.archlinux.org/packages/dotdrop-git/
-* [snapcraft](https://snapcraft.io): https://snapcraft.io/dotdrop
+Dotdrop is also available on
+* pypi: https://pypi.org/project/dotdrop/
+* aur (stable): https://aur.archlinux.org/packages/dotdrop/
+* aur (git version): https://aur.archlinux.org/packages/dotdrop-git/
+* snapcraft: https://snapcraft.io/dotdrop
 
 ## As a submodule
 
@@ -142,8 +143,8 @@ $ dotdrop list
 $ dotdrop compare --profile=<other-host-profile>
 ```
 
-Then adapt any dotfile using the [template](#template) feature (if needed)
-and set a new profile for the current host by simply adding lines in
+Then adapt any dotfile using the [template](https://github.com/deadc0de6/dotdrop/wiki/templating)
+feature (if needed) and set a new profile for the current host by simply adding lines in
 the config files, for example:
 
 ```yaml
