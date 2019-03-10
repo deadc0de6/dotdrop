@@ -491,6 +491,8 @@ $ dotdrop update ~/.vimrc
 $ dotdrop update --key f_vimrc
 ```
 
+If not argument is provided, all dotfiles for the selected profile are updated.
+
 It is possible to ignore files to update using unix patterns by providing those
 either through the switch `-i --ignore` or as part of the dotfile under the
 key `upignore` (see [Config](#config)).
