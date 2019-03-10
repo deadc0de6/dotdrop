@@ -79,7 +79,7 @@ class Updater:
         dtpath = os.path.expanduser(dtpath)
 
         if self._ignore([path, dtpath]):
-            self.log.sub('{} ignored'.format(dotfile.key))
+            self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
         if dotfile.trans_w:
             # apply write transformation if any
@@ -174,7 +174,7 @@ class Updater:
     def _handle_file(self, path, dtpath, compare=True):
         """sync path (deployed file) and dtpath (dotdrop dotfile path)"""
         if self._ignore([path, dtpath]):
-            self.log.sub('{} ignored'.format(dtpath))
+            self.log.sub('\"{}\" ignored'.format(dtpath))
             return True
         if self.debug:
             self.log.dbg('update for file {} and {}'.format(path, dtpath))
@@ -199,7 +199,7 @@ class Updater:
                 if self.debug:
                     self.log.dbg('cp {} {}'.format(path, dtpath))
                 shutil.copyfile(path, dtpath)
-                self.log.sub('{} updated'.format(dtpath))
+                self.log.sub('\"{}\" updated'.format(dtpath))
         except IOError as e:
             self.log.warn('{} update failed, do manually: {}'.format(path, e))
             return False
@@ -213,7 +213,7 @@ class Updater:
         path = os.path.expanduser(path)
         dtpath = os.path.expanduser(dtpath)
         if self._ignore([path, dtpath]):
-            self.log.sub('{} ignored'.format(dtpath))
+            self.log.sub('\"{}\" ignored'.format(dtpath))
             return True
         # find the differences
         diff = filecmp.dircmp(path, dtpath, ignore=None)
@@ -237,7 +237,7 @@ class Updater:
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
             if self._ignore([exist, new]):
-                self.log.sub('{} ignored'.format(exist))
+                self.log.sub('\"{}\" ignored'.format(exist))
                 continue
             if self.dry:
                 self.log.dry('would cp -r {} {}'.format(exist, new))
@@ -246,7 +246,7 @@ class Updater:
                 self.log.dbg('cp -r {} {}'.format(exist, new))
             # Newly created directory should be copied as is (for efficiency).
             shutil.copytree(exist, new)
-            self.log.sub('{} updated'.format(exist))
+            self.log.sub('\"{}\" dir added'.format(new))
 
         # remove dirs that don't exist in deployed version
         for toremove in diff.right_only:
@@ -264,7 +264,7 @@ class Updater:
             if not self._confirm_rm_r(old):
                 continue
             utils.remove(old)
-            self.log.sub('{} removed'.format(old))
+            self.log.sub('\"{}\" dir removed'.format(old))
 
         # handle files diff
         # sync files that exist in both but are different
@@ -298,7 +298,7 @@ class Updater:
             if self.debug:
                 self.log.dbg('cp {} {}'.format(exist, new))
             shutil.copyfile(exist, new)
-            self.log.sub('{} added'.format(exist))
+            self.log.sub('\"{}\" added'.format(new))
 
         # remove files that don't exist in deployed version
         for toremove in diff.right_only:
@@ -316,7 +316,7 @@ class Updater:
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
             utils.remove(new)
-            self.log.sub('{} removed'.format(new))
+            self.log.sub('\"{}\" removed'.format(new))
 
         # Recursively decent into common subdirectories.
         for subdir in diff.subdirs.values():
