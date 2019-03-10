@@ -61,4 +61,5 @@ For more check
 * [A small example](https://github.com/deadc0de6/dotdrop#example)
 * [How people are using dotdrop](https://github.com/deadc0de6/dotdrop#people-using-dotdrop)
 * [The blog post](https://deadc0de.re/articles/dotfiles.html)
+* [The wiki](https://github.com/deadc0de6/dotdrop/wiki)
 
