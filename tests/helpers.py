@@ -14,7 +14,7 @@ from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import strip_home
 
-TMPSUFFIX = '.dotdrop'
+TMPSUFFIX = '-dotdrop-tests'
 
 
 def clean(path):
@@ -33,12 +33,12 @@ def get_string(length):
     """Get a random string of length 'length'"""
     alpha = string.ascii_uppercase + string.digits
     temp = ''.join(random.choice(alpha) for _ in range(length))
-    return 'dotdrop-tests-{}'.format(temp)
+    return 'tmp.{}{}'.format(temp, TMPSUFFIX)
 
 
 def get_tempdir():
     """Get a temporary directory"""
-    return tempfile.mkdtemp(prefix='dotdrop-tests-')
+    return tempfile.mkdtemp(suffix=TMPSUFFIX)
 
 
 def create_random_file(directory, content=None,

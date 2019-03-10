@@ -114,10 +114,10 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -e ${tmpd}/def ] && exit 1
 [ ! -e ${tmpd}/xyz ] && exit 1
 [ ! -e ${tmpd}/dyn ] && exit 1
-grep 'abc' ${tmpd}/abc
-grep 'def' ${tmpd}/def
-grep 'xyz' ${tmpd}/xyz
-grep 'dyn' ${tmpd}/dyn
+grep 'abc' ${tmpd}/abc >/dev/null 2>&1
+grep 'def' ${tmpd}/def >/dev/null 2>&1
+grep 'xyz' ${tmpd}/xyz >/dev/null 2>&1
+grep 'dyn' ${tmpd}/dyn >/dev/null 2>&1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
