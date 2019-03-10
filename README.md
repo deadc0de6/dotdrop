@@ -82,6 +82,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 * [Config](#config)
   * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
   * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
+  * [Profile dotfiles from file](profile-dotfiles-from-file)
 * [Templating](#templating)
   * [Available variables](#available-variables)
   * [Variables from file](#variables-from-file)
@@ -702,6 +703,8 @@ the following entries:
   * `include`: include all dotfiles from another profile (optional)
   * `variables`: profile specific variables (see [Variables](#variables))
   * `dynvariables`: profile specific interpreted variables (see [Interpreted variables](#interpreted-variables))
+  * `import`: list of paths containing dotfiles keys for this profile
+    (absolute path or relative to the config file location).
 
 ```yaml
   <some-name-usually-the-hostname>:
@@ -717,6 +720,9 @@ the following entries:
       <name>: <value>
     dynvariables:
       <name>: <value>
+    import:
+    - <some-path>
+    - ...
 ```
 
 * **actions** entry (optional): a list of action (see [Use actions](#use-actions))
@@ -813,6 +819,44 @@ profiles:
   p2:
     include:
     - "profile_{{@@ var1 @@}}"
+```
+
+## Profile dotfiles from file
+
+Profile's dotfiles list can be loaded from external files
+by specifying their paths in the config entry `import` under the specific profile.
+
+`config.yaml`
+```yaml
+dotfiles:
+  f_abc:
+    dst: ~/.abc
+    src: abc
+  f_def:
+    dst: ~/.def
+    src: def
+  f_xyz:
+    dst: ~/.xyz
+    src: xyz
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+    import:
+    - somedotfiles.yaml
+```
+
+`somedotfiles.yaml`
+```
+dotfiles:
+  - f_def
+  - f_xyz
+```
+
+Variables can be used in `import` and would allow to do something like
+```yaml
+import:
+- profiles.d/{{@@ profile @@}}.yaml
 ```
 
 ## Ignore empty template
@@ -987,6 +1031,12 @@ the source config file.
 
 This can be useful for example if you have sensitive information stored in variables
 and want those to be encrypted when versioned.
+
+Variables can be used in `import_variables` and would allow to do something like
+```yaml
+import_variables:
+- profiles.d/{{@@ profile @@}}.yaml
+```
 
 ## Available methods
 
