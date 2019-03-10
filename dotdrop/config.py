@@ -548,8 +548,8 @@ class Cfg:
         dirs = list(map(self._norm_key_elem, dirs))
         return dirs
 
-    def _get_long_key(self, path):
-        """return a long key representing the
+    def _get_long_key(self, path, keys):
+        """return a unique long key representing the
         absolute path of path"""
         dirs = self._get_paths(path)
         # prepend with indicator
@@ -557,7 +557,7 @@ class Cfg:
             key = 'd_{}'.format('_'.join(dirs))
         else:
             key = 'f_{}'.format('_'.join(dirs))
-        return key
+        return self._get_unique_key(key, keys)
 
     def _get_short_key(self, path, keys):
         """return a unique key where path
@@ -574,14 +574,18 @@ class Cfg:
             key = '{}_{}'.format(pre, key)
             if key not in keys:
                 return key
-        okey = key
+        return self._get_unique_key(key, keys)
+
+    def _get_unique_key(self, key, keys):
+        """return a unique dotfile key"""
+        newkey = key
         cnt = 1
-        while key in keys:
+        while newkey in keys:
             # if unable to get a unique path
             # get a random one
-            key = '{}_{}'.format(okey, cnt)
+            newkey = '{}_{}'.format(key, cnt)
             cnt += 1
-        return key
+        return newkey
 
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
@@ -591,9 +595,10 @@ class Cfg:
             return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
         # return key for this new dotfile
         path = os.path.expanduser(dotfile.dst)
+        keys = self.dotfiles.keys()
         if self.lnk_settings[self.key_long]:
-            return False, self._get_long_key(path)
-        return False, self._get_short_key(path, self.dotfiles.keys())
+            return False, self._get_long_key(path, keys)
+        return False, self._get_short_key(path, keys)
 
     def new(self, dotfile, profile, link=LinkTypes.NOLINK, debug=False):
         """import new dotfile
