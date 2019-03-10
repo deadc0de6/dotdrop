@@ -44,6 +44,7 @@ class Updater:
 
     def update_path(self, path):
         """update the dotfile installed on path"""
+        path = os.path.expanduser(path)
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
@@ -51,7 +52,6 @@ class Updater:
         dotfile = self._get_dotfile_by_path(path)
         if not dotfile:
             return False
-        path = os.path.expanduser(path)
         if self.debug:
             self.log.dbg('updating {} from path \"{}\"'.format(dotfile, path))
         return self._update(path, dotfile)

@@ -173,6 +173,22 @@ def cmd_update(o):
     ignore = o.update_ignore
     showpatch = o.update_showpatch
 
+    if not paths:
+        # update the entire profile
+        if iskey:
+            paths = [d.key for d in o.dotfiles]
+        else:
+            paths = [d.dst for d in o.dotfiles]
+        msg = 'Update all dotfiles for profile {}'.format(o.profile)
+        if o.safe and not LOG.ask(msg):
+            return False
+
+    if not paths:
+        LOG.log('no dotfile to update')
+        return True
+    if o.debug:
+        LOG.dbg('dotfile to update: {}'.format(paths))
+
     updater = Updater(o.dotpath, o.dotfiles, o.variables,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=ignore, showpatch=showpatch)
