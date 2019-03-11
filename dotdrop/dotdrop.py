@@ -179,7 +179,7 @@ def cmd_update(o):
             paths = [d.key for d in o.dotfiles]
         else:
             paths = [d.dst for d in o.dotfiles]
-        msg = 'Update all dotfiles for profile {}'.format(o.profile)
+        msg = 'Update all dotfiles for profile \"{}\"'.format(o.profile)
         if o.safe and not LOG.ask(msg):
             return False
 
