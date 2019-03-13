@@ -57,10 +57,12 @@ exec bspwm
                 f.write('  {}:\n'.format(d.key))
                 f.write('    dst: {}\n'.format(d.dst))
                 f.write('    src: {}\n'.format(d.src))
-                f.write('    link: {}\n'
-                        .format(str(d.link == LinkTypes.PARENTS).lower()))
-                f.write('    link_children: {}\n'
-                        .format(str(d.link == LinkTypes.CHILDREN).lower()))
+                if d.link == LinkTypes.CHILDREN:
+                    f.write('    link_children: {}\n'
+                            .format(str(d.link == LinkTypes.CHILDREN).lower()))
+                else:
+                    f.write('    link: {}\n'
+                            .format(str(d.link == LinkTypes.PARENTS).lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
@@ -249,8 +251,8 @@ exec bspwm
         srcs = [create_random_file(src_dir)[0] for _ in range(3)]
 
         installer = Installer()
-        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst_dir,
-                          actions=[])
+        installer.link_children(templater=MagicMock(), src=src_dir,
+                                dst=dst_dir, actions=[])
 
         # Ensure all destination files point to source
         for src in srcs:
@@ -265,9 +267,8 @@ exec bspwm
         logger = MagicMock()
         installer.log.err = logger
 
-        res = installer.linkall(templater=MagicMock(),
-                                src=src,
-                                dst='/dev/null', actions=[])
+        res = installer.link_children(templater=MagicMock(), src=src,
+                                      dst='/dev/null', actions=[])
 
         self.assertEqual(res, [])
         logger.assert_called_with('source dotfile does not exist: {}'
@@ -288,8 +289,8 @@ exec bspwm
         installer.log.err = logger
 
         # pass src file not src dir
-        res = installer.linkall(templater=templater, src=src, dst='/dev/null',
-                                actions=[])
+        res = installer.link_children(templater=templater, src=src,
+                                      dst='/dev/null', actions=[])
 
         # ensure nothing performed
         self.assertEqual(res, [])
@@ -312,8 +313,8 @@ exec bspwm
         self.assertFalse(os.path.exists(dst_dir))
 
         installer = Installer()
-        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst_dir,
-                          actions=[])
+        installer.link_children(templater=MagicMock(), src=src_dir,
+                                dst=dst_dir, actions=[])
 
         # ensure dst dir created
         self.assertTrue(os.path.exists(dst_dir))
@@ -344,8 +345,8 @@ exec bspwm
         installer.safe = True
         installer.log.ask = ask
 
-        installer.linkall(templater=MagicMock(), src=src_dir, dst=dst,
-                          actions=[])
+        installer.link_children(templater=MagicMock(), src=src_dir, dst=dst,
+                                actions=[])
 
         # ensure destination now a directory
         self.assertTrue(os.path.isdir(dst))
@@ -378,8 +379,8 @@ exec bspwm
         # make templategen treat everything as a template
         mocked_templategen.is_template.return_value = True
 
-        installer.linkall(templater=templater, src=src_dir, dst=dst_dir,
-                          actions=[])
+        installer.link_children(templater=templater, src=src_dir, dst=dst_dir,
+                                actions=[])
 
         for src in srcs:
             dst = os.path.join(dst_dir, os.path.basename(src))

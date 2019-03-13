@@ -63,7 +63,8 @@ def cmd_install(o):
         if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENTS:
             r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
         elif hasattr(dotfile, 'link') and dotfile.link == LinkTypes.CHILDREN:
-            r = inst.linkall(t, dotfile.src, dotfile.dst, actions=preactions)
+            r = inst.link_children(t, dotfile.src, dotfile.dst,
+                                   actions=preactions)
         else:
             src = dotfile.src
             tmp = None

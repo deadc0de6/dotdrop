@@ -101,10 +101,10 @@ class Installer:
             src = tmp
         return self._link(src, dst, actions=actions)
 
-    def linkall(self, templater, src, dst, actions=[]):
+    def link_children(self, templater, src, dst, actions=[]):
         """link all dotfiles in a given directory"""
         if self.debug:
-            self.log.dbg('linkall {} to {}'.format(src, dst))
+            self.log.dbg('link_children {} to {}'.format(src, dst))
         self.action_executed = False
         parent = os.path.join(self.base, os.path.expanduser(src))
 
