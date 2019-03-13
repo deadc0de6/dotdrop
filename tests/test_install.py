@@ -16,6 +16,7 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
 from dotdrop.dotdrop import cmd_install
+from dotdrop.options import BACKUP_SUFFIX
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import header
 
@@ -208,7 +209,7 @@ exec bspwm
         self.assertTrue(os.path.realpath(dst7) == os.path.realpath(dir2))
 
         # make sure backup is there
-        b = dst4 + Installer.BACKUP_SUFFIX
+        b = dst4 + BACKUP_SUFFIX
         self.assertTrue(os.path.exists(b))
 
         self.assertTrue(filecmp.cmp(f1, dst1, shallow=True))

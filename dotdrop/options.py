@@ -18,6 +18,7 @@ from dotdrop.config import Cfg
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
 ENV_NOBANNER = 'DOTDROP_NOBANNER'
+BACKUP_SUFFIX = '.dotdropbak'
 
 PROFILE = socket.gethostname()
 if ENV_PROFILE in os.environ:
@@ -157,16 +158,19 @@ class Options(AttrMonitor):
         self.install_keys = self.args['<key>']
         self.install_diff = not self.args['--nodiff']
         self.install_showdiff = self.showdiff or self.args['--showdiff']
+        self.install_backup_suffix = BACKUP_SUFFIX
         # "compare" specifics
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
+        self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
         # "import" specifics
         self.import_path = self.args['<path>']
         # "update" specifics
         self.update_path = self.args['<path>']
         self.update_iskey = self.args['--key']
         self.update_ignore = self.args['--ignore']
+        self.update_ignore.append('*{}'.format(self.install_backup_suffix))
         self.update_showpatch = self.args['--show-patch']
         # "detail" specifics
         self.detail_keys = self.args['<key>']

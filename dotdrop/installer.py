@@ -17,11 +17,10 @@ import dotdrop.utils as utils
 
 class Installer:
 
-    BACKUP_SUFFIX = '.dotdropbak'
-
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
-                 debug=False, diff=True, totemp=None, showdiff=False):
+                 debug=False, diff=True, totemp=None, showdiff=False,
+                 backup_suffix='.dotdropbak'):
         """constructor
         @base: directory path where to search for templates
         @create: create directory hierarchy if missing when installing
@@ -33,6 +32,7 @@ class Installer:
         @diff: diff when installing if True
         @totemp: deploy to this path instead of dotfile dst if not None
         @showdiff: show the diff before overwriting (or asking for)
+        @backup_suffix: suffix for dotfile backup file
         """
         self.create = create
         self.backup = backup
@@ -44,6 +44,7 @@ class Installer:
         self.diff = diff
         self.totemp = totemp
         self.showdiff = showdiff
+        self.backup_suffix = backup_suffix
         self.comparing = False
         self.action_executed = False
         self.log = Logger()
@@ -367,7 +368,7 @@ class Installer:
         """backup file pointed by path"""
         if self.dry:
             return
-        dst = path.rstrip(os.sep) + self.BACKUP_SUFFIX
+        dst = path.rstrip(os.sep) + self.backup_suffix
         self.log.log('backup {} to {}'.format(path, dst))
         os.rename(path, dst)
 

@@ -49,7 +49,8 @@ def cmd_install(o):
                      base=o.dotpath, workdir=o.workdir,
                      diff=o.install_diff, debug=o.debug,
                      totemp=tmpdir,
-                     showdiff=o.install_showdiff)
+                     showdiff=o.install_showdiff,
+                     backup_suffix=o.install_backup_suffix)
     installed = []
     for dotfile in dotfiles:
         preactions = []
@@ -116,7 +117,8 @@ def cmd_compare(o, tmp):
                     debug=o.debug)
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
-                     workdir=o.workdir, debug=o.debug)
+                     workdir=o.workdir, debug=o.debug,
+                     backup_suffix=o.install_backup_suffix)
     comp = Comparator(diffopts=o.compare_dopts, debug=o.debug)
 
     for dotfile in selected:
