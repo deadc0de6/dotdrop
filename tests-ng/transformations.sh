@@ -95,7 +95,7 @@ profiles:
     - f_def
     - d_ghi
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the base64 dotfile
 tmpf=`mktemp --suffix='-dotdrop-tests'`

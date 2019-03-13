@@ -68,7 +68,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the imported one
 mkdir -p ${tmps}/dotfiles/${tmpd}

@@ -25,6 +25,9 @@ which ${nosebin} 2>/dev/null
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
 set -e
 
+# comment this to get debug info
+export DOTDROP_FORCE_NODEBUG=
+
 # execute tests with coverage
 PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m pytest tests

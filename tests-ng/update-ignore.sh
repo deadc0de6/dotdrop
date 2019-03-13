@@ -77,7 +77,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 #tree ${dt}
 

@@ -106,7 +106,7 @@ profiles:
     - d_dir
     - d_dlink
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo 'test' > ${tmps}/dotfiles/abc

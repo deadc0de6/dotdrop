@@ -84,7 +84,7 @@ profiles:
     include:
     - profile{{@@ dvar1 @@}}
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 c1="content:abc"

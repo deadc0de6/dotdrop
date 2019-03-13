@@ -94,7 +94,6 @@ class TestUpdate(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
         o = load_options(confpath, profile)
-        o.debug = True
         o.update_showpatch = True
         dfiles = [d1, dir1, d2, d3t, dsubstmp]
 
@@ -105,7 +104,6 @@ class TestUpdate(unittest.TestCase):
         # get new config
         o = load_options(confpath, profile)
         o.safe = False
-        o.debug = True
         o.update_showpatch = True
         trans = Transform('trans', 'cp -r {0} {1}')
         d3tb = os.path.basename(d3t)

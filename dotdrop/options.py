@@ -18,6 +18,8 @@ from dotdrop.config import Cfg
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
 ENV_NOBANNER = 'DOTDROP_NOBANNER'
+ENV_DEBUG = 'DOTDROP_DEBUG'
+ENV_NODEBUG = 'DOTDROP_FORCE_NODEBUG'
 BACKUP_SUFFIX = '.dotdropbak'
 
 PROFILE = socket.gethostname()
@@ -98,6 +100,10 @@ class Options(AttrMonitor):
             self.args = docopt(USAGE, version=VERSION)
         self.log = Logger()
         self.debug = self.args['--verbose']
+        if not self.debug and ENV_DEBUG in os.environ:
+            self.debug = True
+        if ENV_NODEBUG in os.environ:
+            self.debug = False
         self.profile = self.args['--profile']
         self.confpath = os.path.expanduser(self.args['--cfg'])
         if self.debug:

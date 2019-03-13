@@ -76,7 +76,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "{{@@ profile @@}}" > ${tmps}/dotfiles/abc

@@ -96,7 +96,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "test" > ${tmps}/dotfiles/abc

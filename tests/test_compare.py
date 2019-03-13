@@ -29,9 +29,9 @@ class TestCompare(unittest.TestCase):
     def compare(self, o, tmp, nbdotfiles):
         dotfiles = o.dotfiles
         self.assertTrue(len(dotfiles) == nbdotfiles)
-        t = Templategen(base=o.dotpath, debug=True)
+        t = Templategen(base=o.dotpath, debug=o.debug)
         inst = Installer(create=o.create, backup=o.backup,
-                         dry=o.dry, base=o.dotpath, debug=True)
+                         dry=o.dry, base=o.dotpath, debug=o.debug)
         comp = Comparator()
         results = {}
         for dotfile in dotfiles:

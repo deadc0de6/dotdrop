@@ -103,12 +103,12 @@ cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
 [ "$?" = "0" ] && exit 1
 set -e
 
-cat ${cfg}
+#cat ${cfg}
 
 # adding ignore in dotfile
 cfg2="${basedir}/config2.yaml"
 sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
-cat ${cfg2}
+#cat ${cfg2}
 
 # expects one diff
 echo "[+] comparing with ignore in dotfile - 1 diff"
@@ -121,7 +121,7 @@ set -e
 cfg2="${basedir}/config2.yaml"
 sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
 sed -i '/d_program:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg2}
-cat ${cfg2}
+#cat ${cfg2}
 
 # expects no diff
 patt="*b"

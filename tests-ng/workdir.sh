@@ -83,7 +83,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "{{@@ profile @@}}" > ${tmpf}/abc
@@ -138,7 +138,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "{{@@ profile @@}}" > ${tmpf}/abc
@@ -189,7 +189,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "{{@@ profile @@}}" > ${tmpf}/abc

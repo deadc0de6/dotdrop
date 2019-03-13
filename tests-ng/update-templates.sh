@@ -75,7 +75,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "head" > ${tmps}/dotfiles/abc
@@ -92,14 +92,14 @@ echo "is p1" >> ${tmpd}/abc
 echo "tail" >> ${tmpd}/abc
 
 # update
-cat ${tmps}/dotfiles/abc
+#cat ${tmps}/dotfiles/abc
 set +e
 patch=`cd ${ddpath} | ${bin} update -P -p p1 -k f_abc --cfg ${cfg} 2>&1 | grep 'try patching with' | sed 's/"//g'`
 set -e
 patch=`echo ${patch} | sed 's/^.*: //g'`
 echo "patching with: ${patch}"
 eval ${patch}
-cat ${tmps}/dotfiles/abc
+#cat ${tmps}/dotfiles/abc
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpw}

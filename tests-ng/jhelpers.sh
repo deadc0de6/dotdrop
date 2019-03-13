@@ -69,7 +69,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+#cat ${cfg}
 
 # create the dotfile
 echo "this is the test dotfile" > ${tmps}/dotfiles/abc
@@ -83,12 +83,12 @@ echo "{%@@ if exists('/dev/abcdef') @@%}" >> ${tmps}/dotfiles/abc
 echo "this should not exist" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
-cat ${tmps}/dotfiles/abc
+#cat ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-cat ${tmpd}/abc
+#cat ${tmpd}/abc
 
 grep '^this should exist' ${tmpd}/abc >/dev/null
 grep -v '^this should not exist' ${tmpd}/abc >/dev/null

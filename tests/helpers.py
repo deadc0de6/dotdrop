@@ -10,7 +10,7 @@ import string
 import random
 import tempfile
 
-from dotdrop.options import Options
+from dotdrop.options import Options, ENV_NODEBUG
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import strip_home
 
@@ -128,6 +128,8 @@ def load_options(confpath, profile):
     o.link = LinkTypes.NOLINK.value
     o.install_showdiff = True
     o.debug = True
+    if ENV_NODEBUG in os.environ:
+        o.debug = False
     o.compare_dopts = ''
     o.variables = {}
     return o
