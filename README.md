@@ -94,11 +94,16 @@ Dotdrop is also available on
 The following will create a git repository for your dotfiles and
 keep dotdrop as a submodule:
 ```bash
+## create the repository
 $ mkdir dotfiles; cd dotfiles
 $ git init
+
+## install dotdrop as a submodule
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
 $ sudo pip3 install -r dotdrop/requirements.txt
 $ ./dotdrop/bootstrap.sh
+
+## use dotdrop
 $ ./dotdrop.sh --help
 ```
 
@@ -119,64 +124,117 @@ For bash and zsh completion scripts see [the related doc](completion/README.md).
 
 # Getting started
 
-If starting fresh, the `import` command of dotdrop
-allows to easily and quickly get a running setup.
+Create a new repository to store your dotfiles with dotdrop. *Init* or *clone*
+that new repository and
+[install dotdrop](https://github.com/deadc0de6/dotdrop/wiki/installation#as-a-submodule).
 
-Install dotdrop on one of your host and then import any dotfiles you want dotdrop to
-manage (be it a file or a directory):
+Then import any dotfiles (file or directory) you want to manage with dotdrop.
+You can either use the default profile (which resolves to the *hostname* of the host
+your running dotdrop on) or provide it specifically using the switch `-p --profile`.
+
+Import dotfiles on host *hostname1*
 ```bash
-$ dotdrop import ~/.vimrc ~/.xinitrc
+$ dotdrop import ~/.vimrc ~/.xinitrc ~/.config/polybar
 ```
 
 Dotdrop does two things:
 
-* Copy the dotfiles in the *dotpath* directory
-* Create the entries in the *config.yaml* file
+* Copy the dotfiles in the *dotpath* directory (defined in `config.yaml`, defaults to *dotfiles*)
+* Create the entries in the `config.yaml` file
+
+Your config file will look something similar to this
+```yaml
+config:
+  backup: true
+  banner: true
+  create: true
+  dotpath: dotfiles
+  ignoreempty: false
+  keepdot: false
+  link_by_default: false
+  longkey: false
+  showdiff: false
+  workdir: ~/.config/dotdrop
+dotfiles:
+  d_polybar:
+    dst: ~/.config/polybar
+    src: config/polybar
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+profiles:
+  hostname1:
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
+    - d_polybar
+```
+For a description of the different fields and their use,
+see the [config doc](https://github.com/deadc0de6/dotdrop/wiki/config).
 
 Commit and push your changes.
 
 Then go to another host where your dotfiles need to be managed as well,
-clone the previously setup git tree
-and compare local dotfiles with the ones stored by dotdrop:
+clone the previously setup repository
+and compare the local dotfiles with the ones stored by dotdrop:
 ```bash
-$ dotdrop list
-$ dotdrop compare --profile=<other-host-profile>
+$ dotdrop compare --profile=hostname1
 ```
 
-Then adapt any dotfile using the [template](https://github.com/deadc0de6/dotdrop/wiki/templating)
-feature (if needed) and set a new profile for the current host by simply adding lines in
-the config files, for example:
-
+Now you might want to adapt the `config.yaml` file to your likings on
+that second host. Let's say for example that you only want `d_polybar` and
+`f_xinitrc` to be deployed on that second host. You would then change your config
+to something like this (considering that second host's hostname is *hostname2*):
 ```yaml
-...
+…
 profiles:
-  host1:
+  hostname1:
     dotfiles:
     - f_vimrc
     - f_xinitrc
-  host2:
+    - d_polybar
+  hostname2:
     dotfiles:
-    - f_vimrc
-...
+    - f_xinitrc
+    - d_polybar
+```
+
+Then adapt any dotfile using the [templating](https://github.com/deadc0de6/dotdrop/wiki/templating)
+feature (if needed). For example you might want different fonts sizes on polybar for the different
+hosts:
+
+`<dotpath>/config/polybar/config`
+```bash
+…
+{%@@ if profile == "hostname1" @@%}
+font0 = sans:size=10;0
+{%@@ elif profile == "hostname2" @@%}
+font0 = sans:size=14;0
+{%@@ endif @@%}
+font1 = "Material Design Icons:style=Regular:size=14;0"
+font2 = "unifont:size=6;0"
+…
 ```
 
 When done, you can install your dotfiles using
-
 ```bash
 $ dotdrop install
 ```
+If you are unsure, you can always run `dotdrop compare` to see
+how your local dotfiles would be updated by dotdrop before running
+`install`.
 
 That's it, a single repository with all your dotfiles for your different hosts.
 
+You can then create [actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions),
+use [transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations),
+[symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles),
+[etc](https://github.com/deadc0de6/dotdrop/wiki).
+
 For more options see `dotdrop --help` and the [wiki](https://github.com/deadc0de6/dotdrop/wiki).
-
-For easy deployment the default profile used by dotdrop reflects the
-*hostname* of the host on which it runs. It can be changed either with the
-`-p --profile` switch or by defining the `DOTDROP_PROFILE` environment variable.
-
-The config file is per default `config.yaml` and can be changed either
-using the `-c --cfg` cli switch or by defining the `DOTDROP_CONFIG` environment
-variable.
 
 # Documentation
 
@@ -192,13 +250,12 @@ Let's consider two hosts:
 The home computer is running [awesomeWM](https://awesomewm.org/)
 and the office computer [bspwm](https://github.com/baskerville/bspwm).
 The *.xinitrc* file will therefore be different while still sharing some lines.
-Dotdrop allows to store only one single *.xinitrc* but
-to deploy different versions depending on where it is run from.
+Dotdrop allows to store only one single *.xinitrc* file but
+to deploy different versions of it depending on where it is run from.
 
 The following file is the dotfile stored in dotdrop containing
 [jinja2](http://jinja.pocoo.org/) directives for the deployment based on the profile used.
 
-Dotfile `<dotpath>/xinitrc`:
 ```bash
 #!/bin/bash
 
@@ -245,21 +302,19 @@ profiles:
 Installing the dotfiles (the `--profile` switch is not needed if
 the hostname matches the *profile* entry in the config file):
 ```bash
-# on home computer
+## on home computer
 $ dotdrop install --profile=home
 
-# on office computer
+## on office computer
 $ dotdrop install --profile=office
 ```
 
 Comparing the dotfiles:
 ```bash
-# on home computer
-$ dotdrop compare
-
-# on office computer
 $ dotdrop compare
 ```
+
+For more see [the wiki](https://github.com/deadc0de6/dotdrop/wiki).
 
 # Contribution
 
