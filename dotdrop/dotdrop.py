@@ -446,7 +446,7 @@ def main():
         elif o.cmd_detail:
             # detail files
             if o.debug:
-                LOG.dbg('running cmd: update')
+                LOG.dbg('running cmd: detail')
             cmd_detail(o)
 
     except KeyboardInterrupt:
