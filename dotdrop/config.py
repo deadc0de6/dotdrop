@@ -188,6 +188,21 @@ class Cfg:
         self.lnk_settings = self.content[self.key_settings]
         self._complete_settings()
 
+        # parse the profiles
+        self.lnk_profiles = self.content[self.key_profiles]
+        if self.lnk_profiles is None:
+            # ensures self.lnk_profiles is a dict
+            self.content[self.key_profiles] = {}
+            self.lnk_profiles = self.content[self.key_profiles]
+        for k, v in self.lnk_profiles.items():
+            if not v:
+                continue
+            if self.key_profiles_dots in v and \
+                    v[self.key_profiles_dots] is None:
+                # if has the dotfiles entry but is empty
+                # ensures it's an empty list
+                v[self.key_profiles_dots] = []
+
         # load external variables/dynvariables
         if self.key_include_vars in self.lnk_settings:
             paths = self.lnk_settings[self.key_include_vars]
@@ -224,21 +239,6 @@ class Cfg:
             if self.content[self.key_trans_w] is not None:
                 for k, v in self.content[self.key_trans_w].items():
                     self.trans_w[k] = Transform(k, v)
-
-        # parse the profiles
-        self.lnk_profiles = self.content[self.key_profiles]
-        if self.lnk_profiles is None:
-            # ensures self.lnk_profiles is a dict
-            self.content[self.key_profiles] = {}
-            self.lnk_profiles = self.content[self.key_profiles]
-        for k, v in self.lnk_profiles.items():
-            if not v:
-                continue
-            if self.key_profiles_dots in v and \
-                    v[self.key_profiles_dots] is None:
-                # if has the dotfiles entry but is empty
-                # ensures it's an empty list
-                v[self.key_profiles_dots] = []
 
         # parse the dotfiles
         # and construct the dict of objects per dotfile key

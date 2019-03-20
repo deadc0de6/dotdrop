@@ -56,6 +56,8 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 extvars="${tmps}/variables.yaml"
 extdvars="${tmps}/dynvariables.yaml"
 pvars="${tmps}/p1_vars.yaml"
+pvarin="${tmps}/inprofile_vars.yaml"
+pvarout="${tmps}/outprofile_vars.yaml"
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
 config:
@@ -66,8 +68,10 @@ config:
   - "{{@@ var1 @@}}iables.yaml"
   - "{{@@ dvar1 @@}}iables.yaml"
   - "{{@@ profile @@}}_vars.yaml"
+  - "{{@@ xvar @@}}_vars.yaml"
 variables:
   var1: "var"
+  xvar: outprofile
 dynvariables:
   dvar1: "echo dynvar"
 dotfiles:
@@ -78,6 +82,8 @@ profiles:
   p1:
     dotfiles:
     - f_abc
+    variables:
+      xvar: inprofile
 _EOF
 #cat ${cfg}
 
@@ -100,6 +106,14 @@ variables:
 dynvariables:
   pdvar: "echo pdvar1"
 _EOF
+cat > ${pvarin} << _EOF
+variables:
+  test: profileok
+_EOF
+cat > ${pvarout} << _EOF
+variables:
+  test: profilenotok
+_EOF
 
 # create the dotfile
 echo "var1: {{@@ var1 @@}}" > ${tmps}/dotfiles/abc
@@ -113,6 +127,8 @@ echo "dvarb: {{@@ dvarb @@}}" >> ${tmps}/dotfiles/abc
 # from var file 3
 echo "pvar: {{@@ pvar @@}}" >> ${tmps}/dotfiles/abc
 echo "pdvar: {{@@ pdvar @@}}" >> ${tmps}/dotfiles/abc
+# from profile variable
+echo "test: {{@@ test @@}}" >> ${tmps}/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
@@ -129,6 +145,7 @@ grep '^varb: extvar2' ${tmpd}/abc >/dev/null
 grep '^dvarb: extdvar2' ${tmpd}/abc >/dev/null
 grep '^pvar: pvar1' ${tmpd}/abc >/dev/null
 grep '^pdvar: pdvar1' ${tmpd}/abc >/dev/null
+grep '^test: profileok' ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
