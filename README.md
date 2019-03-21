@@ -32,9 +32,9 @@ Features:
 * Easy import and update dotfiles
 * Handle files and directories
 * Support symlink of dotfiles
-* Associate an action to the deployment of specific dotfiles
-* Associate transformations for storing encrypted dotfiles
-* Provide different solutions for handling dotfiles containing sensitive information
+* Associate actions to the deployment of specific dotfiles
+* Associate transformations for storing encrypted/compressed dotfiles
+* Provide solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
 the [example](#example), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
@@ -46,7 +46,7 @@ Quick start:
 mkdir dotfiles && cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
-sudo pip3 install -r dotdrop/requirements.txt
+pip3 install -r dotdrop/requirements.txt --user
 ./dotdrop/bootstrap.sh
 ./dotdrop.sh --help
 ```
@@ -80,7 +80,7 @@ to your dotfiles git tree. Having dotdrop as a submodule guarantees that anywher
 you are cloning your dotfiles git tree from you'll have dotdrop shipped with it.
 
 Below instructions show how to install dotdrop as a submodule. For alternative
-installation instructions (with virtualenv, pypi, aur, snap, etc), see the
+installation instructions (with virtualenv, pypi, aur, snap, etc) see the
 [wiki installation page](https://github.com/deadc0de6/dotdrop/wiki/installation).
 
 Dotdrop is also available on
@@ -100,7 +100,7 @@ $ git init
 
 ## install dotdrop as a submodule
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
-$ sudo pip3 install -r dotdrop/requirements.txt
+$ pip3 install -r dotdrop/requirements.txt --user
 $ ./dotdrop/bootstrap.sh
 
 ## use dotdrop
@@ -110,14 +110,14 @@ $ ./dotdrop.sh --help
 For MacOS users, make sure to install `realpath` through homebrew
 (part of *coreutils*).
 
-Using this solution will need you to work with dotdrop by
+Using dotdrop as a submodule will need you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
 of your dotfiles repository.
 
 To ease the use of dotdrop, it is recommended to add an alias to it in your
-shell with the config file path, for example
+shell (*~/.bashrc*, *~/.zshrc*, etc) with the config file path, for example
 ```
-alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
+alias dotdrop='<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
 For bash and zsh completion scripts see [the related doc](completion/README.md).
@@ -128,7 +128,7 @@ Create a new repository to store your dotfiles with dotdrop. *Init* or *clone*
 that new repository and
 [install dotdrop](https://github.com/deadc0de6/dotdrop/wiki/installation#as-a-submodule).
 
-Then import any dotfiles (file or directory) you want to manage with dotdrop.
+Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
 your running dotdrop on) or provide it specifically using the switch `-p --profile`.
 
@@ -139,8 +139,10 @@ $ dotdrop import ~/.vimrc ~/.xinitrc ~/.config/polybar
 
 Dotdrop does two things:
 
-* Copy the dotfiles in the *dotpath* directory (defined in `config.yaml`, defaults to *dotfiles*)
-* Create the entries in the `config.yaml` file
+* Copy the dotfiles in the *dotpath* directory
+  (defined in `config.yaml`, defaults to *dotfiles*)
+* Create the associated entries in the `config.yaml` file
+  (in `dotfiles` and in `profiles`)
 
 Your config file will look something similar to this
 ```yaml
@@ -231,6 +233,7 @@ That's it, a single repository with all your dotfiles for your different hosts.
 
 You can then create [actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions),
 use [transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations),
+[use variables](https://github.com/deadc0de6/dotdrop/wiki/templating#available-variables),
 [symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles),
 [etc](https://github.com/deadc0de6/dotdrop/wiki).
 
@@ -249,11 +252,12 @@ Let's consider two hosts:
 
 The home computer is running [awesomeWM](https://awesomewm.org/)
 and the office computer [bspwm](https://github.com/baskerville/bspwm).
-The *.xinitrc* file will therefore be different while still sharing some lines.
-Dotdrop allows to store only one single *.xinitrc* file but
-to deploy different versions of it depending on where it is run from.
+The `~/.xinitrc` file will therefore be different while still sharing some lines.
+Dotdrop allows to store only one single `.xinitrc` file but
+deploy different versions of it depending on where it is run from
+(for which *profile*: home or office).
 
-The following file is the dotfile stored in dotdrop containing
+Below is the `.xinitrc` file stored in dotdrop containing
 [jinja2](http://jinja.pocoo.org/) directives for the deployment based on the profile used.
 
 ```bash
@@ -274,13 +278,13 @@ exec bspwm
 ```
 
 The *if branch* will define which part is deployed based on the
-hostname of the host on which dotdrop is run from.
+hostname of the host on which dotdrop is run from (the selected profile).
 
 And here's how the config file looks like with this setup.
 Of course any combination of the dotfiles (different sets)
-can be done if more dotfiles have to be deployed.
+can be done if more dotfiles are deployed.
 
-`config.yaml` file:
+`config.yaml`
 ```yaml
 config:
   backup: true
@@ -299,7 +303,7 @@ profiles:
     - f_xinitrc
 ```
 
-Installing the dotfiles (the `--profile` switch is not needed if
+Installing the dotfiles (the `-p --profile` switch is not needed if
 the hostname matches the *profile* entry in the config file):
 ```bash
 ## on home computer
