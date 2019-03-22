@@ -203,6 +203,16 @@ class Cfg:
                 # ensures it's an empty list
                 v[self.key_profiles_dots] = []
 
+        # make sure we have an absolute dotpath
+        self.curdotpath = self.lnk_settings[self.key_dotpath]
+        self.lnk_settings[self.key_dotpath] = \
+            self._abs_path(self.curdotpath)
+
+        # make sure we have an absolute workdir
+        self.curworkdir = self.lnk_settings[self.key_workdir]
+        self.lnk_settings[self.key_workdir] = \
+            self._abs_path(self.curworkdir)
+
         # load external variables/dynvariables
         if self.key_include_vars in self.lnk_settings:
             paths = self.lnk_settings[self.key_include_vars]
@@ -379,17 +389,6 @@ class Cfg:
             for k in self.lnk_profiles.keys():
                 df = ','.join([d.key for d in self.prodots[k]])
                 self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
-
-        # make sure we have an absolute dotpath
-        self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = \
-            self._abs_path(self.curdotpath)
-
-        # make sure we have an absolute workdir
-        self.curworkdir = self.lnk_settings[self.key_workdir]
-        self.lnk_settings[self.key_workdir] = \
-            self._abs_path(self.curworkdir)
-
         return True
 
     def _load_ext_variables(self, paths, profile=None):
@@ -768,6 +767,11 @@ class Cfg:
         # profile variable
         if profile:
             variables['profile'] = profile
+
+        # add paths variables
+        variables['_dotdrop_dotpath'] = self.lnk_settings[self.key_dotpath]
+        variables['_dotdrop_cfgpath'] = self.cfgpath
+        variables['_dotdrop_workdir'] = self.lnk_settings[self.key_workdir]
 
         # global variables
         if self.key_variables in self.content:
