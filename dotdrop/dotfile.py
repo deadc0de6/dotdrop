@@ -41,6 +41,9 @@ class Dotfile:
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
         return msg.format(self.key, self.src, self.dst, self.link.name.lower())
 
+    def __repr__(self):
+        return 'dotfile({})'.format(self.__str__())
+
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 

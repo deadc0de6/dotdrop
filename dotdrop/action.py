@@ -27,6 +27,9 @@ class Cmd:
     def __str__(self):
         return 'key:{} -> \"{}\"'.format(self.key, self.action)
 
+    def __repr__(self):
+        return 'cmd({})'.format(self.__str__())
+
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
@@ -50,6 +53,9 @@ class Action(Cmd):
     def __str__(self):
         out = '{}: \"{}\" with args: {}'
         return out.format(self.key, self.action, self.args)
+
+    def __repr__(self):
+        return 'action({})'.format(self.__str__())
 
     def execute(self):
         """execute the action in the shell"""
