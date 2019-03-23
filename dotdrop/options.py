@@ -20,6 +20,7 @@ ENV_CONFIG = 'DOTDROP_CONFIG'
 ENV_NOBANNER = 'DOTDROP_NOBANNER'
 ENV_DEBUG = 'DOTDROP_DEBUG'
 ENV_NODEBUG = 'DOTDROP_FORCE_NODEBUG'
+ENV_XDG = 'XDG_CONFIG_HOME'
 BACKUP_SUFFIX = '.dotdropbak'
 
 PROFILE = socket.gethostname()
@@ -27,8 +28,7 @@ if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
 
 CONFIG = 'config.yaml'
-if ENV_CONFIG in os.environ:
-    CONFIG = os.environ[ENV_CONFIG]
+HOMECFG = '~/.config/dotdrop'
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -54,7 +54,7 @@ Usage:
 
 Options:
   -p --profile=<profile>  Specify the profile to use [default: {}].
-  -c --cfg=<path>         Path to the config [default: {}].
+  -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
@@ -72,7 +72,7 @@ Options:
   -v --version            Show version.
   -h --help               Show this screen.
 
-""".format(BANNER, PROFILE, CONFIG)
+""".format(BANNER, PROFILE)
 
 
 class AttrMonitor:
@@ -105,7 +105,7 @@ class Options(AttrMonitor):
         if ENV_NODEBUG in os.environ:
             self.debug = False
         self.profile = self.args['--profile']
-        self.confpath = os.path.expanduser(self.args['--cfg'])
+        self.confpath = self._get_config_path()
         if self.debug:
             self.log.dbg('config file: {}'.format(self.confpath))
 
@@ -119,6 +119,35 @@ class Options(AttrMonitor):
         self._print_attr()
         # start monitoring for bad attribute
         self._set_attr_err = True
+
+    def _get_config_path(self):
+        """get the config path"""
+        # cli provided
+        if self.args['--cfg']:
+            return os.path.expanduser(self.args['--cfg'])
+
+        # environment variable provided
+        if ENV_CONFIG in os.environ:
+            return os.path.expanduser(os.environ[ENV_CONFIG])
+
+        # look in current directory
+        if os.path.exists(CONFIG):
+            return CONFIG
+
+        # look in XDG_CONFIG_HOME
+        if ENV_XDG in os.environ:
+            cfg = os.path.expanduser(os.environ[ENV_XDG])
+            path = os.path.join(cfg, CONFIG)
+            if os.path.exists(path):
+                return path
+
+        # look in home .config/dotdrop directory
+        cfg = os.path.expanduser(HOMECFG)
+        path = os.path.join(cfg, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        return None
 
     def _header(self):
         """print the header"""

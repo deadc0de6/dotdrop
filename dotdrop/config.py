@@ -87,6 +87,8 @@ class Cfg:
         @profile: chosen profile
         @debug: enable debug
         """
+        if not cfgpath:
+            raise ValueError('config file path undefined')
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist: {}'.format(cfgpath))
         # make sure to have an absolute path to config file
