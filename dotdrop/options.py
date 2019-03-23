@@ -27,8 +27,9 @@ PROFILE = socket.gethostname()
 if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
 
+NAME = 'dotdrop'
 CONFIG = 'config.yaml'
-HOMECFG = '~/.config/dotdrop'
+HOMECFG = '~/.config/{}'.format(NAME)
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -137,7 +138,7 @@ class Options(AttrMonitor):
         # look in XDG_CONFIG_HOME
         if ENV_XDG in os.environ:
             cfg = os.path.expanduser(os.environ[ENV_XDG])
-            path = os.path.join(cfg, CONFIG)
+            path = os.path.join(cfg, NAME, CONFIG)
             if os.path.exists(path):
                 return path
 
