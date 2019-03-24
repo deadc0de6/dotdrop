@@ -83,6 +83,19 @@ echo "{%@@ if exists('/dev/abcdef') @@%}" >> ${tmps}/dotfiles/abc
 echo "this should not exist" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
+# test exists_in_path
+cat >> ${tmps}/dotfiles/abc << _EOF
+{%@@ if exists_in_path('cat') @@%}
+this should exist too
+{%@@ endif @@%}
+_EOF
+
+cat >> ${tmps}/dotfiles/abc << _EOF
+{%@@ if exists_in_path('a_name_that_is_unlikely_to_be_chosen_for_an_executable') @@%}
+this should not exist either
+{%@@ endif @@%}
+_EOF
+
 #cat ${tmps}/dotfiles/abc
 
 # install
@@ -92,6 +105,8 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 grep '^this should exist' ${tmpd}/abc >/dev/null
 grep -v '^this should not exist' ${tmpd}/abc >/dev/null
+grep '^this should exist too' ${tmpd}/abc >/dev/null
+grep -v '^this should not exist either' ${tmpd}/abc >/dev/null
 
 #cat ${tmpd}/abc
 
