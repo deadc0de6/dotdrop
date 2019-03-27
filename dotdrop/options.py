@@ -178,13 +178,13 @@ class Options(AttrMonitor):
         self.safe = not self.args['--force']
         self.link = LinkTypes.NOLINK
         if self.link_by_default:
-            self.link = LinkTypes.PARENTS
+            self.link = LinkTypes.PARENT
 
         if self.args['--inv-link']:
-            # Only invert link type from NOLINK to PARENTS and vice-versa
+            # Only invert link type from NOLINK to PARENT and vice-versa
             if self.link == LinkTypes.NOLINK:
-                self.link = LinkTypes.PARENTS
-            elif self.link == LinkTypes.PARENTS:
+                self.link = LinkTypes.PARENT
+            elif self.link == LinkTypes.PARENT:
                 self.link = LinkTypes.NOLINK
 
         # "listfiles" specifics

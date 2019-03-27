@@ -60,7 +60,7 @@ def cmd_install(o):
                 preactions.append(action)
         if o.debug:
             LOG.dbg('installing {}'.format(dotfile))
-        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENTS:
+        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENT:
             r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
         elif hasattr(dotfile, 'link') and dotfile.link == LinkTypes.CHILDREN:
             r = inst.link_children(t, dotfile.src, dotfile.dst,
@@ -259,7 +259,7 @@ def cmd_importer(o):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if linktype == LinkTypes.PARENTS:
+                if linktype == LinkTypes.PARENT:
                     LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 r, _ = run(cmd, raw=False, debug=o.debug, checkerr=True)
@@ -267,7 +267,7 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-                if linktype == LinkTypes.PARENTS:
+                if linktype == LinkTypes.PARENT:
                     remove(dst)
                     os.symlink(srcf, dst)
         retconf, dotfile = o.conf.new(dotfile, o.profile,

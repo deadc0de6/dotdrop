@@ -31,7 +31,8 @@ class Cfg:
     key_keepdot = 'keepdot'
     key_ignoreempty = 'ignoreempty'
     key_showdiff = 'showdiff'
-    key_deflink = 'link_by_default'
+    key_imp_link = 'link_by_default'
+    key_inst_link = 'link_install_default'
     key_workdir = 'workdir'
     key_include_vars = 'import_variables'
 
@@ -68,17 +69,22 @@ class Cfg:
     key_profiles_incl = 'include'
     key_profiles_imp = 'import'
 
+    # link values
+    lnk_parent = 'link'
+    lnk_nolink = 'nolink'
+    lnk_children = 'link_children'
+
     # settings defaults
     default_dotpath = 'dotfiles'
     default_backup = True
     default_create = True
     default_banner = True
-    default_link = LinkTypes.NOLINK
     default_longkey = False
     default_keepdot = False
     default_showdiff = False
     default_ignoreempty = False
-    default_link_by_default = False
+    default_link_imp = False
+    default_link_inst = 'nolink'
     default_workdir = '~/.config/dotdrop'
 
     def __init__(self, cfgpath, profile=None, debug=False):
@@ -184,6 +190,15 @@ class Cfg:
             return False
         return True
 
+    def _get_def_inst_link(self):
+        """get dotfile link entry when not specified"""
+        string = self.lnk_settings[self.key_inst_link].lower()
+        if string == self.lnk_parent.lower():
+            return LinkTypes.PARENT
+        elif string == self.lnk_children.lower():
+            return LinkTypes.CHILDREN
+        return LinkTypes.NOLINK
+
     def _parse(self, profile=None):
         """parse config file"""
         # parse the settings
@@ -257,6 +272,7 @@ class Cfg:
         if not self.content[self.key_dotfiles]:
             # ensures the dotfiles entry is a dict
             self.content[self.key_dotfiles] = {}
+        def_link_val = self._get_def_inst_link()
         for k, v in self.content[self.key_dotfiles].items():
             src = os.path.normpath(v[self.key_dotfiles_src])
             dst = os.path.normpath(v[self.key_dotfiles_dst])
@@ -267,11 +283,12 @@ class Cfg:
                 msg = 'only one of `link` or `link_children` allowed per'
                 msg += ' dotfile, error on dotfile "{}".'
                 self.log.err(msg.format(k))
+                return False
 
             # Otherwise, get link type
-            link = LinkTypes.NOLINK
+            link = def_link_val
             if self.key_dotfiles_link in v and v[self.key_dotfiles_link]:
-                link = LinkTypes.PARENTS
+                link = LinkTypes.PARENT
             if self.key_dotfiles_link_children in v \
                     and v[self.key_dotfiles_link_children]:
                 link = LinkTypes.CHILDREN
@@ -322,7 +339,7 @@ class Cfg:
             # disable transformation when link is true
             if link != LinkTypes.NOLINK and (trans_r or trans_w):
                 msg = 'transformations disabled for \"{}\"'.format(dst)
-                msg += ' because link is True'
+                msg += ' because link|link_children is enabled'
                 self.log.warn(msg)
                 trans_r = None
                 trans_w = None
@@ -552,14 +569,16 @@ class Cfg:
             self.lnk_settings[self.key_long] = self.default_longkey
         if self.key_keepdot not in self.lnk_settings:
             self.lnk_settings[self.key_keepdot] = self.default_keepdot
-        if self.key_deflink not in self.lnk_settings:
-            self.lnk_settings[self.key_deflink] = self.default_link_by_default
+        if self.key_imp_link not in self.lnk_settings:
+            self.lnk_settings[self.key_imp_link] = self.default_link_imp
         if self.key_workdir not in self.lnk_settings:
             self.lnk_settings[self.key_workdir] = self.default_workdir
         if self.key_showdiff not in self.lnk_settings:
             self.lnk_settings[self.key_showdiff] = self.default_showdiff
         if self.key_ignoreempty not in self.lnk_settings:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
+        if self.key_inst_link not in self.lnk_settings:
+            self.lnk_settings[self.key_inst_link] = self.default_link_inst
 
     def _save(self, content, path):
         """writes the config to file"""
@@ -694,7 +713,7 @@ class Cfg:
         }
 
         # set the link flag
-        if link == LinkTypes.PARENTS:
+        if link == LinkTypes.PARENT:
             dots[dotfile.key][self.key_dotfiles_link] = True
         elif link == LinkTypes.CHILDREN:
             dots[dotfile.key][self.key_dotfiles_link_children] = True

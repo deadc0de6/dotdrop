@@ -112,7 +112,7 @@ class TestImport(unittest.TestCase):
         o.import_path = dfiles
         cmd_importer(o)
         # import symlink
-        o.link = LinkTypes.PARENTS
+        o.link = LinkTypes.PARENT
         sfiles = [dotfile6, dotfile7]
         o.import_path = sfiles
         cmd_importer(o)

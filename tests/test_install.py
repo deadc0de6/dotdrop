@@ -62,7 +62,7 @@ exec bspwm
                             .format(str(d.link == LinkTypes.CHILDREN).lower()))
                 else:
                     f.write('    link: {}\n'
-                            .format(str(d.link == LinkTypes.PARENTS).lower()))
+                            .format(str(d.link == LinkTypes.PARENT).lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
