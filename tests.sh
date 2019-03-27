@@ -27,6 +27,7 @@ set -e
 
 # comment this to get debug info
 export DOTDROP_FORCE_NODEBUG=
+export DOTDROP_NOBANNER=
 
 # execute tests with coverage
 PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
