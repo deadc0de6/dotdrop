@@ -141,7 +141,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 #cat ${cfg}
 
 # ensure exists and children are links
-tree ${tmpd}
 [ ! -e ${tmpd}/abc ] && echo "not exist" && exit 1
 [ -h ${tmpd}/abc ] && echo "not a regular file" && exit 1
 [ ! -e ${tmpd}/abc/file1 ] && echo "not exist" && exit 1
