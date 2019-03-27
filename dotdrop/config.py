@@ -31,10 +31,16 @@ class Cfg:
     key_keepdot = 'keepdot'
     key_ignoreempty = 'ignoreempty'
     key_showdiff = 'showdiff'
-    key_imp_link = 'link_by_default'
+    key_imp_link = 'link_import_default'
     key_inst_link = 'link_install_default'
     key_workdir = 'workdir'
     key_include_vars = 'import_variables'
+
+    # below entries will be automatically transformed
+    # to their new counterpart
+    key_deprecated = {
+        'link_by_default': key_imp_link,
+    }
 
     # actions keys
     key_actions = 'actions'
@@ -557,6 +563,7 @@ class Cfg:
 
     def _complete_settings(self):
         """set settings defaults if not present"""
+        self._deprecated()
         if self.key_dotpath not in self.lnk_settings:
             self.lnk_settings[self.key_dotpath] = self.default_dotpath
         if self.key_backup not in self.lnk_settings:
@@ -579,6 +586,15 @@ class Cfg:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
         if self.key_inst_link not in self.lnk_settings:
             self.lnk_settings[self.key_inst_link] = self.default_link_inst
+
+    def _deprecated(self):
+        """fix deprecated entries"""
+        for k, v in self.key_deprecated.items():
+            if k in self.lnk_settings:
+                # replace
+                entry = self.lnk_settings[k]
+                self.lnk_settings[v] = entry
+                del self.lnk_settings[k]
 
     def _save(self, content, path):
         """writes the config to file"""

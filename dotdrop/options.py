@@ -63,7 +63,7 @@ Options:
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --inv-link           Invert the value of "link_by_default" when importing.
+  -l --inv-link           Invert "link_import_default" when importing.
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
@@ -177,7 +177,7 @@ class Options(AttrMonitor):
         self.dry = self.args['--dry']
         self.safe = not self.args['--force']
         self.link = LinkTypes.NOLINK
-        if self.link_by_default:
+        if self.link_import_default:
             self.link = LinkTypes.PARENT
 
         if self.args['--inv-link']:

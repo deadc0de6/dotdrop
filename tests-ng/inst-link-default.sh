@@ -80,7 +80,7 @@ _EOF
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-cat ${cfg}
+#cat ${cfg}
 
 # ensure exists and is not link
 [ ! -d ${tmpd}/abc ] && echo "not a directory" && exit 1
@@ -109,7 +109,7 @@ _EOF
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-cat ${cfg}
+#cat ${cfg}
 
 # ensure exists and parent is a link
 [ ! -e ${tmpd}/abc ] && echo "not exist" && exit 1
@@ -138,7 +138,7 @@ _EOF
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-cat ${cfg}
+#cat ${cfg}
 
 # ensure exists and children are links
 tree ${tmpd}
