@@ -72,6 +72,8 @@ class Action(Cmd):
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
             self.log.warn('action interrupted')
+        if ret != 0:
+            self.log.warn('action returned code {}'.format(ret))
         return ret == 0
 
 
@@ -92,4 +94,6 @@ class Transform(Cmd):
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
             self.log.warn('transformation interrupted')
+        if ret != 0:
+            self.log.warn('transformation returned code {}'.format(ret))
         return ret == 0
