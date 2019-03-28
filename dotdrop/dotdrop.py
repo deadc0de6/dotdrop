@@ -83,7 +83,7 @@ def cmd_install(o):
             if not o.install_temporary and \
                     Cfg.key_actions_post in dotfile.actions:
                 actions = dotfile.actions[Cfg.key_actions_post]
-                # execute action
+                # execute post action
                 for action in actions:
                     if o.dry:
                         LOG.dry('would execute action: {}'.format(action))

@@ -202,7 +202,8 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for {}'.format(dst))
             return []
-        self._exec_pre_actions(actions)
+        if not self._exec_pre_actions(actions):
+            return []
         # re-check in case action created the file
         if os.path.lexists(dst):
             msg = 'Remove "{}" for link creation?'.format(dst)
@@ -320,7 +321,8 @@ class Installer:
             return -1
         if self.debug:
             self.log.dbg('write content to {}'.format(dst))
-        self._exec_pre_actions(actions)
+        if not self._exec_pre_actions(actions):
+            return -1
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
@@ -388,15 +390,18 @@ class Installer:
     def _exec_pre_actions(self, actions):
         """execute pre-actions if any"""
         if self.action_executed:
-            return
+            return True
         for action in actions:
             if self.dry:
                 self.log.dry('would execute action: {}'.format(action))
             else:
                 if self.debug:
                     self.log.dbg('executing pre action {}'.format(action))
-                action.execute()
+                if not action.execute():
+                    self.log.err('pre-action {} failed'.format(action.key))
+                    return False
         self.action_executed = True
+        return True
 
     def _install_to_temp(self, templater, src, dst, tmpdir):
         """install a dotfile to a tempdir"""
