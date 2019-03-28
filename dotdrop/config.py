@@ -365,14 +365,7 @@ class Cfg:
                         continue
                     self.prodots[k].append(self.dotfiles[d])
 
-        # handle "include" for each profile
-        for k in self.lnk_profiles.keys():
-            ret, dots = self._get_included_dotfiles(k)
-            if not ret:
-                return False
-            self.prodots[k].extend(dots)
-
-        # handle "import" for each profile
+        # handle "import" (from file) for each profile
         for k in self.lnk_profiles.keys():
             dots = self._get_imported_dotfiles_keys(k)
             for d in dots:
@@ -381,6 +374,13 @@ class Cfg:
                     self.log.err(msg)
                     continue
                 self.prodots[k].append(self.dotfiles[d])
+
+        # handle "include" (from other profile) for each profile
+        for k in self.lnk_profiles.keys():
+            ret, dots = self._get_included_dotfiles(k)
+            if not ret:
+                return False
+            self.prodots[k].extend(dots)
 
         # remove duplicates if any
         for k in self.lnk_profiles.keys():
