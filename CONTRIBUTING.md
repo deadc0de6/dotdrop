@@ -36,13 +36,22 @@ Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.
 * run the unittest available in [tests directory](/tests)
 * run the bash script tests in [tests-ng directory](tests-ng)
 
-## How to implement unittest
+## testing with unittest
 
-**TODO**
+All unittests are available in [tests directory](/tests)
+and use [python unittest](https://docs.python.org/3/library/unittest.html).
 
-## How to implement bash script tests
+The file [helpers.py](/tests/helpers.py) provides different helper methods
+for the tests.
 
-**TODO**
+## testing with bash scripts
+
+The bash scripts are available in [tests-ng directory](tests-ng).
+These test entire workflows by simulating the use of dotdrop from end to end
+for different use-cases (usually described in their filename).
+
+Each script starts with the same boiler plate code that you can paste at the
+start of your new test (see the head of the file down to `# this is the test`).
 
 # Documentation
 
