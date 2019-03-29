@@ -231,14 +231,16 @@ class Cfg:
                         for k2, v2 in items:
                             if k not in self.actions:
                                 self.actions[k] = {}
-                            self.actions[k][k2] = Action(k2, k, v2)
+                            a = Action(k2, k, v2)
+                            self.actions[k][k2] = a
+                            self.log.dbg('new action: {}'.format(a))
                     else:
                         # parse naked actions as post actions
                         if self.key_actions_post not in self.actions:
                             self.actions[self.key_actions_post] = {}
-                        self.actions[self.key_actions_post][k] = Action(k,
-                                                                        '',
-                                                                        v)
+                        a = Action(k, '', v)
+                        self.actions[self.key_actions_post][k] = a
+                        self.log.dbg('new action: {}'.format(a))
 
         # parse read transformations
         if self.key_trans_r in self.content:
