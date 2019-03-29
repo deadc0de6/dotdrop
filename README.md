@@ -68,7 +68,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 **Table of Contents**
 
 * [Installation](#installation)
-* [Getting started](#gettins-started)
+* [Getting started](#getting-started)
 * [Documentation](#documentation)
 * [Example](#example)
 
