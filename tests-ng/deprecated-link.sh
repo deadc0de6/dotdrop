@@ -112,10 +112,6 @@ cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
 
 cat ${cfg}
 
-# TODO test settings
-# TODO change to safe_dump
-# TODO yaml order
-
 # fail if find some of these entries
 set +e
 grep 'link_children: true' ${cfg} >/dev/null && exit 1
