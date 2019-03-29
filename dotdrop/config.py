@@ -224,6 +224,7 @@ class Cfg:
         # parse external actions
         if self.key_import_actions in self.lnk_settings:
             for path in self.lnk_settings[self.key_import_actions]:
+                path = self._abs_path(path)
                 if self.debug:
                     self.log.dbg('loading actions from {}'.format(path))
                 content = self._load_yaml(path)
