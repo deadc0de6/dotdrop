@@ -30,6 +30,8 @@ if ENV_PROFILE in os.environ:
 NAME = 'dotdrop'
 CONFIG = 'config.yaml'
 HOMECFG = '~/.config/{}'.format(NAME)
+ETCXDGCFG = '/etc/xdg/{}'.format(NAME)
+ETCCFG = '/etc/{}'.format(NAME)
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -142,12 +144,29 @@ class Options(AttrMonitor):
             if os.path.exists(path):
                 return path
 
-        # look in home .config/dotdrop directory
+        # look in ~/.config/dotdrop
         cfg = os.path.expanduser(HOMECFG)
         path = os.path.join(cfg, CONFIG)
         if os.path.exists(path):
             return path
 
+        # look in /etc/xdg/dotdrop
+        path = os.path.join(ETCXDGCFG, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        # look in /etc/dotdrop
+        path = os.path.join(ETCCFG, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        return None
+
+    def _find_cfg(self, paths):
+        """try to find the config in the paths list"""
+        for path in paths:
+            if os.path.exists(path):
+                return path
         return None
 
     def _header(self):
