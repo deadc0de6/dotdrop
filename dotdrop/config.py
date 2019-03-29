@@ -204,6 +204,16 @@ class Cfg:
             return LinkTypes.CHILDREN
         return LinkTypes.NOLINK
 
+    def _linktype_to_string(self, link):
+        """translate linktype to string"""
+        if link == LinkTypes.PARENT:
+            return self.lnk_parent
+        elif link == LinkTypes.CHILDREN:
+            return self.lnk_children
+        elif link == LinkTypes.NOLINK:
+            return self.lnk_nolink
+        return self.lnk_nolink
+
     def _parse(self, profile=None):
         """parse config file"""
         # parse the settings
@@ -801,7 +811,9 @@ class Cfg:
         }
 
         # set the link flag
-        dots[dotfile.key][self.key_dotfiles_link] = link.name
+        if link != LinkTypes.NOLINK:
+            val = self._linktype_to_string(link)
+            dots[dotfile.key][self.key_dotfiles_link] = val
 
         # link it to this profile in the yaml file
         pro = self.content[self.key_profiles][profile]
