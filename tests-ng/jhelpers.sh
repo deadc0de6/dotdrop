@@ -104,9 +104,11 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 #cat ${tmpd}/abc
 
 grep '^this should exist' ${tmpd}/abc >/dev/null
-grep -v '^this should not exist' ${tmpd}/abc >/dev/null
 grep '^this should exist too' ${tmpd}/abc >/dev/null
-grep -v '^this should not exist either' ${tmpd}/abc >/dev/null
+set +e
+grep '^this should not exist' ${tmpd}/abc >/dev/null && exit 1
+grep '^this should not exist either' ${tmpd}/abc >/dev/null && exit 1
+set -e
 
 #cat ${tmpd}/abc
 
