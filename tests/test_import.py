@@ -112,11 +112,11 @@ class TestImport(unittest.TestCase):
         o.import_path = dfiles
         cmd_importer(o)
         # import symlink
-        o.link = LinkTypes.PARENT
+        o.import_link = LinkTypes.PARENT
         sfiles = [dotfile6, dotfile7]
         o.import_path = sfiles
         cmd_importer(o)
-        o.link = LinkTypes.NOLINK
+        o.import_link = LinkTypes.NOLINK
 
         # reload the config
         o = load_options(confpath, profile)

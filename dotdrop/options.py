@@ -63,7 +63,7 @@ Options:
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --inv-link           Invert "link_import_default" when importing.
+  -l --inv-link           Invert "link_import_default".
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
@@ -160,6 +160,8 @@ class Options(AttrMonitor):
         self.conf = Cfg(self.confpath, profile=profile, debug=self.debug)
         # transform the configs in attribute
         for k, v in self.conf.get_settings().items():
+            if self.debug:
+                self.log.dbg('setting: {}={}'.format(k, v))
             setattr(self, k, v)
 
     def _apply_args(self):
@@ -176,16 +178,16 @@ class Options(AttrMonitor):
         # adapt attributes based on arguments
         self.dry = self.args['--dry']
         self.safe = not self.args['--force']
-        self.link = LinkTypes.NOLINK
-        if self.link_import_default:
-            self.link = LinkTypes.PARENT
 
+        # import link default value
+        self.import_link = self.link_import_default
         if self.args['--inv-link']:
-            # Only invert link type from NOLINK to PARENT and vice-versa
-            if self.link == LinkTypes.NOLINK:
-                self.link = LinkTypes.PARENT
-            elif self.link == LinkTypes.PARENT:
-                self.link = LinkTypes.NOLINK
+            if self.import_link == LinkTypes.NOLINK:
+                self.import_link = LinkTypes.PARENT
+            elif self.import_link == LinkTypes.PARENT:
+                self.import_link = LinkTypes.NOLINK
+            elif self.import_link == LinkTypes.CHILDREN:
+                self.import_link = LinkTypes.NOLINK
 
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']

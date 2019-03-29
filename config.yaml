@@ -5,7 +5,7 @@ config:
   banner: true
   longkey: false
   keepdot: false
-  link_import_default: false
-  link_install_default: nolink
+  link_import_default: nolink
+  link_dotfile_default: nolink
 dotfiles:
 profiles:

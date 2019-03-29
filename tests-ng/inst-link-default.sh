@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 #
-# test link_install_default
+# test link_dotfile_default
 # returns 1 in case of error
 #
 
@@ -54,8 +54,8 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 
 # create the dotfile
 mkdir -p ${tmps}/dotfiles/abc
-echo "test link_install_default 1" > ${tmps}/dotfiles/abc/file1
-echo "test link_install_default 2" > ${tmps}/dotfiles/abc/file2
+echo "test link_dotfile_default 1" > ${tmps}/dotfiles/abc/file1
+echo "test link_dotfile_default 2" > ${tmps}/dotfiles/abc/file2
 
 # create a shell script
 # create the config file
@@ -66,7 +66,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_install_default: nolink
+  link_dotfile_default: nolink
 dotfiles:
   d_abc:
     dst: ${tmpd}/abc
@@ -96,7 +96,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_install_default: link
+  link_dotfile_default: link
 dotfiles:
   d_abc:
     dst: ${tmpd}/abc
@@ -125,7 +125,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_install_default: link_children
+  link_dotfile_default: link_children
 dotfiles:
   d_abc:
     dst: ${tmpd}/abc

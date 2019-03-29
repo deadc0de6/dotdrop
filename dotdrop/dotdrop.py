@@ -239,7 +239,7 @@ def cmd_importer(o):
         # create a new dotfile
         dotfile = Dotfile('', dst, src)
 
-        linktype = LinkTypes(o.link)
+        linktype = LinkTypes(o.import_link)
 
         if o.debug:
             LOG.dbg('new dotfile: {}'.format(dotfile))
@@ -452,6 +452,10 @@ def main():
     except KeyboardInterrupt:
         LOG.err('interrupted')
         ret = False
+
+    if ret and o.conf.is_modified():
+        LOG.log('config file updated')
+        o.conf.save()
 
     return ret
 

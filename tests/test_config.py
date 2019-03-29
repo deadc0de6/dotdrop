@@ -6,11 +6,15 @@ basic unittest for the config parser
 
 
 import unittest
+from unittest.mock import patch
 import os
 import yaml
 
 from dotdrop.config import Cfg
-from tests.helpers import get_tempdir, clean, create_fake_config
+from dotdrop.options import Options
+from dotdrop.linktypes import LinkTypes
+from tests.helpers import get_tempdir, clean, \
+        create_fake_config, _fake_args
 
 
 class TestConfig(unittest.TestCase):
@@ -44,6 +48,76 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(opts['dotpath'] == dotpath)
         self.assertTrue(conf._is_valid())
         self.assertTrue(conf.dump() != '')
+
+    def test_def_link(self):
+        self._test_link_import('nolink', LinkTypes.NOLINK, False)
+        self._test_link_import('link', LinkTypes.PARENT, False)
+        self._test_link_import('nolink', LinkTypes.PARENT, True)
+        self._test_link_import('link', LinkTypes.NOLINK, True)
+        self._test_link_import_fail('whatever')
+        self._test_link_import_fail('link_children')
+
+    @patch('dotdrop.config.open', create=True)
+    @patch('dotdrop.config.os.path.exists', create=True)
+    def _test_link_import(self, cfgstring, expected,
+                          invert, mock_exists, mock_open):
+        data = '''
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  banner: true
+  longkey: false
+  keepdot: false
+  link_import_default: {}
+  link_dotfile_default: nolink
+dotfiles:
+profiles:
+        '''.format(cfgstring)
+
+        mock_open.side_effect = [
+                unittest.mock.mock_open(read_data=data).return_value
+                ]
+        mock_exists.return_value = True
+
+        args = _fake_args()
+        args['--profile'] = 'p1'
+        args['--cfg'] = 'mocked'
+        if invert:
+            args['--inv-link'] = True
+        o = Options(args=args)
+
+        self.assertTrue(o.import_link == expected)
+
+    @patch('dotdrop.config.open', create=True)
+    @patch('dotdrop.config.os.path.exists', create=True)
+    def _test_link_import_fail(self, value, mock_exists, mock_open):
+        data = '''
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  banner: true
+  longkey: false
+  keepdot: false
+  link_import_default: {}
+  link_dotfile_default: nolink
+dotfiles:
+profiles:
+        '''.format(value)
+
+        mock_open.side_effect = [
+                unittest.mock.mock_open(read_data=data).return_value
+                ]
+        mock_exists.return_value = True
+
+        args = _fake_args()
+        args['--profile'] = 'p1'
+        args['--cfg'] = 'mocked'
+
+        with self.assertRaisesRegex(ValueError, 'config is not valid'):
+            o = Options(args=args)
+            print(o.import_link)
 
     def test_include(self):
         tmp = get_tempdir()

@@ -32,15 +32,9 @@ class Cfg:
     key_ignoreempty = 'ignoreempty'
     key_showdiff = 'showdiff'
     key_imp_link = 'link_import_default'
-    key_inst_link = 'link_install_default'
+    key_dotfile_link = 'link_dotfile_default'
     key_workdir = 'workdir'
     key_include_vars = 'import_variables'
-
-    # below entries will be automatically transformed
-    # to their new counterpart
-    key_deprecated = {
-        'link_by_default': key_imp_link,
-    }
 
     # actions keys
     key_actions = 'actions'
@@ -89,8 +83,8 @@ class Cfg:
     default_keepdot = False
     default_showdiff = False
     default_ignoreempty = False
-    default_link_imp = False
-    default_link_inst = 'nolink'
+    default_link_imp = lnk_nolink
+    default_link = lnk_nolink
     default_workdir = '~/.config/dotdrop'
 
     def __init__(self, cfgpath, profile=None, debug=False):
@@ -106,6 +100,7 @@ class Cfg:
         # make sure to have an absolute path to config file
         self.cfgpath = os.path.abspath(cfgpath)
         self.debug = debug
+        self._modified = False
 
         # init the logger
         self.log = Logger()
@@ -196,9 +191,13 @@ class Cfg:
             return False
         return True
 
-    def _get_def_inst_link(self):
+    def _get_def_link(self):
         """get dotfile link entry when not specified"""
-        string = self.lnk_settings[self.key_inst_link].lower()
+        string = self.lnk_settings[self.key_dotfile_link].lower()
+        return self._string_to_linktype(string)
+
+    def _string_to_linktype(self, string):
+        """translate string to linktype"""
         if string == self.lnk_parent.lower():
             return LinkTypes.PARENT
         elif string == self.lnk_children.lower():
@@ -209,7 +208,8 @@ class Cfg:
         """parse config file"""
         # parse the settings
         self.lnk_settings = self.content[self.key_settings]
-        self._complete_settings()
+        if not self._complete_settings():
+            return False
 
         # parse the profiles
         self.lnk_profiles = self.content[self.key_profiles]
@@ -278,8 +278,9 @@ class Cfg:
         if not self.content[self.key_dotfiles]:
             # ensures the dotfiles entry is a dict
             self.content[self.key_dotfiles] = {}
-        def_link_val = self._get_def_inst_link()
-        for k, v in self.content[self.key_dotfiles].items():
+
+        for k in self.content[self.key_dotfiles].keys():
+            v = self.content[self.key_dotfiles][k]
             src = os.path.normpath(v[self.key_dotfiles_src])
             dst = os.path.normpath(v[self.key_dotfiles_dst])
 
@@ -291,17 +292,21 @@ class Cfg:
                 self.log.err(msg.format(k))
                 return False
 
-            # Otherwise, get link type
-            link = def_link_val
-            if self.key_dotfiles_link in v and v[self.key_dotfiles_link]:
-                link = LinkTypes.PARENT
-            if self.key_dotfiles_link_children in v \
-                    and v[self.key_dotfiles_link_children]:
-                link = LinkTypes.CHILDREN
+            # fix it
+            v = self._fix_dotfile_link(k, v)
+            self.content[self.key_dotfiles][k] = v
 
+            # get link type
+            link = self._get_def_link()
+            if self.key_dotfiles_link in v:
+                link = self._string_to_linktype(v[self.key_dotfiles_link])
+
+            # get ignore empty
             noempty = v[self.key_dotfiles_noempty] if \
                 self.key_dotfiles_noempty \
                 in v else self.lnk_settings[self.key_ignoreempty]
+
+            # parse actions
             itsactions = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
             actions = self._parse_actions(itsactions)
@@ -563,7 +568,7 @@ class Cfg:
 
     def _complete_settings(self):
         """set settings defaults if not present"""
-        self._deprecated()
+        self._fix_deprecated()
         if self.key_dotpath not in self.lnk_settings:
             self.lnk_settings[self.key_dotpath] = self.default_dotpath
         if self.key_backup not in self.lnk_settings:
@@ -576,32 +581,99 @@ class Cfg:
             self.lnk_settings[self.key_long] = self.default_longkey
         if self.key_keepdot not in self.lnk_settings:
             self.lnk_settings[self.key_keepdot] = self.default_keepdot
-        if self.key_imp_link not in self.lnk_settings:
-            self.lnk_settings[self.key_imp_link] = self.default_link_imp
         if self.key_workdir not in self.lnk_settings:
             self.lnk_settings[self.key_workdir] = self.default_workdir
         if self.key_showdiff not in self.lnk_settings:
             self.lnk_settings[self.key_showdiff] = self.default_showdiff
         if self.key_ignoreempty not in self.lnk_settings:
             self.lnk_settings[self.key_ignoreempty] = self.default_ignoreempty
-        if self.key_inst_link not in self.lnk_settings:
-            self.lnk_settings[self.key_inst_link] = self.default_link_inst
 
-    def _deprecated(self):
+        if self.key_dotfile_link not in self.lnk_settings:
+            self.lnk_settings[self.key_dotfile_link] = self.default_link
+        else:
+            key = self.lnk_settings[self.key_dotfile_link]
+            if key != self.lnk_parent and \
+                    key != self.lnk_children and \
+                    key != self.lnk_nolink:
+                self.log.err('bad value for {}'.format(self.key_dotfile_link))
+                return False
+
+        if self.key_imp_link not in self.lnk_settings:
+            self.lnk_settings[self.key_imp_link] = self.default_link_imp
+        elif self.lnk_settings[self.key_imp_link] == self.lnk_children:
+            msg = '\"{}\" not supported in {}'.format(self.lnk_children,
+                                                      self.key_imp_link)
+            self.log.err(msg)
+            return False
+        else:
+            key = self.lnk_settings[self.key_imp_link]
+            if key != self.lnk_parent and \
+                    key != self.lnk_children and \
+                    key != self.lnk_nolink:
+                self.log.err('bad value for {}'.format(self.key_dotfile_link))
+                return False
+        return True
+
+    def _fix_deprecated(self):
         """fix deprecated entries"""
-        for k, v in self.key_deprecated.items():
-            if k in self.lnk_settings:
-                # replace
-                entry = self.lnk_settings[k]
-                self.lnk_settings[v] = entry
-                del self.lnk_settings[k]
+        # link_by_default
+        key = 'link_by_default'
+        newkey = self.key_imp_link
+        if key in self.lnk_settings:
+            if self.lnk_settings[key]:
+                self.lnk_settings[newkey] = self.lnk_parent
+            else:
+                self.lnk_settings[newkey] = self.lnk_nolink
+            del self.lnk_settings[key]
+            self._modified = True
+
+    def _fix_dotfile_link(self, key, entry):
+        """fix deprecated link usage in dotfile entry"""
+        v = entry
+
+        if self.key_dotfiles_link not in v \
+                and self.key_dotfiles_link_children not in v:
+            # nothing defined
+            return v
+
+        new = self.lnk_nolink
+        if self.key_dotfiles_link in v \
+                and type(v[self.key_dotfiles_link]) is bool:
+            # patch link: <bool>
+            if v[self.key_dotfiles_link]:
+                new = self.lnk_parent
+            else:
+                new = self.lnk_nolink
+            self._modified = True
+            if self.debug:
+                self.log.dbg('link updated for {} to {}'.format(key, new))
+        elif self.key_dotfiles_link_children in v \
+                and type(v[self.key_dotfiles_link_children]) is bool:
+            # patch link_children: <bool>
+            if v[self.key_dotfiles_link_children]:
+                new = self.lnk_children
+            else:
+                new = self.lnk_nolink
+            del v[self.key_dotfiles_link_children]
+            self._modified = True
+            if self.debug:
+                self.log.dbg('link updated for {} to {}'.format(key, new))
+        else:
+            # no change
+            new = v[self.key_dotfiles_link]
+
+        v[self.key_dotfiles_link] = new
+        return v
 
     def _save(self, content, path):
         """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
             ret = yaml.dump(content, f,
-                            default_flow_style=False, indent=2)
+                            default_flow_style=False,
+                            indent=2)
+        if ret:
+            self._modified = False
         return ret
 
     def _norm_key_elem(self, elem):
@@ -729,10 +801,7 @@ class Cfg:
         }
 
         # set the link flag
-        if link == LinkTypes.PARENT:
-            dots[dotfile.key][self.key_dotfiles_link] = True
-        elif link == LinkTypes.CHILDREN:
-            dots[dotfile.key][self.key_dotfiles_link_children] = True
+        dots[dotfile.key][self.key_dotfiles_link] = link.name
 
         # link it to this profile in the yaml file
         pro = self.content[self.key_profiles][profile]
@@ -759,7 +828,13 @@ class Cfg:
 
     def get_settings(self):
         """return all defined settings"""
-        return self.lnk_settings.copy()
+        settings = self.lnk_settings.copy()
+        # patch link entries
+        key = self.key_imp_link
+        settings[key] = self._string_to_linktype(settings[key])
+        key = self.key_dotfile_link
+        settings[key] = self._string_to_linktype(settings[key])
+        return settings
 
     def get_variables(self, profile, debug=False):
         """return the variables for this profile"""
@@ -864,6 +939,10 @@ class Cfg:
         self.lnk_settings[self.key_dotpath] = dotpath
         self.lnk_settings[self.key_workdir] = workdir
         return ret
+
+    def is_modified(self):
+        """need the db to be saved"""
+        return self._modified
 
     def save(self):
         """save the config to file"""
