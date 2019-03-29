@@ -319,10 +319,10 @@ class Installer:
         if not self._create_dirs(base):
             self.log.err('creating directory for {}'.format(dst))
             return -1
-        if self.debug:
-            self.log.dbg('write content to {}'.format(dst))
         if not self._exec_pre_actions(actions):
             return -1
+        if self.debug:
+            self.log.dbg('write content to {}'.format(dst))
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
