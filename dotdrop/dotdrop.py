@@ -398,7 +398,7 @@ def main():
     try:
         o = Options()
     except ValueError as e:
-        LOG.err('Config format error: {}'.format(str(e)))
+        LOG.err('Config error: {}'.format(str(e)))
         return False
 
     ret = True
