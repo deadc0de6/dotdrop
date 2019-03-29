@@ -59,6 +59,7 @@ cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
 actions:
   pre:
+    failpre: "false"
     preaction: echo 'pre' > ${tmpa}/pre
     preaction2: echo 'pre2' > ${tmpa}/pre2
     preaction3: echo 'pre3' > ${tmpa}/pre3
@@ -78,6 +79,11 @@ dotfiles:
     actions:
       - preaction
       - nakedaction
+  f_fail:
+    dst: ${tmpd}/fail
+    src: fail
+    actions:
+      - failpre
   f_link:
     dst: ${tmpd}/link
     src: link
@@ -105,12 +111,16 @@ profiles:
     - f_link
     - d_dir
     - d_dlink
+  p2:
+    dotfiles:
+    - f_fail
 _EOF
 #cat ${cfg}
 
 # create the dotfile
 echo 'test' > ${tmps}/dotfiles/abc
 echo 'link' > ${tmps}/dotfiles/link
+echo 'fail' > ${tmps}/dotfiles/fail
 
 mkdir -p ${tmps}/dotfiles/dir
 echo 'test1' > ${tmps}/dotfiles/dir/file1
@@ -150,6 +160,13 @@ rm ${tmpa}/pre
 
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
 [ -e ${tmpa}/pre ] && exit 1
+
+# ensure failing actions make the installation fail
+# install
+set +e
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p2 -V
+set -e
+[ -e ${tmpd}/fail ] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}
