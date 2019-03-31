@@ -83,8 +83,8 @@ echo "not empty" >> ${tmps}/dotfiles/d1/notempty
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # test existence
-[ -e ${tmpd}/d1/empty ] && exit 1
-[ ! -e ${tmpd}/d1/notempty ] && exit 1
+[ -e ${tmpd}/d1/empty ] && echo 'empty should not exist' && exit 1
+[ ! -e ${tmpd}/d1/notempty ] && echo 'not empty should exist' && exit 1
 
 # through the dotfile
 cat > ${cfg} << _EOF
@@ -112,8 +112,8 @@ rm -rf ${tmpd}/*
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # test existence
-[ -e ${tmpd}/d1/empty ] && exit 1
-[ ! -e ${tmpd}/d1/notempty ] && exit 1
+[ -e ${tmpd}/d1/empty ] && echo 'empty should not exist' && exit 1
+[ ! -e ${tmpd}/d1/notempty ] && echo 'not empty should exist' && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
