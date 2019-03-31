@@ -273,7 +273,8 @@ class Installer:
         if self.debug:
             self.log.dbg('install dir {}'.format(src))
             self.log.dbg('ignore empty: {}'.format(noempty))
-        ret = True, None
+        # default to nothing installed and no error
+        ret = False, None
         if not self._create_dirs(dst):
             err = 'creating directory for {}'.format(dst)
             return False, err
@@ -281,21 +282,31 @@ class Installer:
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
+                # is file
                 res, err = self._handle_file(templater, f,
                                              os.path.join(dst, entry),
                                              actions=actions,
                                              noempty=noempty)
                 if not res and err:
+                    # error occured
                     ret = res, err
                     break
+                elif res:
+                    # something got installed
+                    ret = True, None
             else:
+                # is directory
                 res, err = self._handle_dir(templater, f,
                                             os.path.join(dst, entry),
                                             actions=actions,
                                             noempty=noempty)
                 if not res and err:
+                    # error occured
                     ret = res, err
                     break
+                elif res:
+                    # something got installed
+                    ret = True, None
         return ret
 
     def _fake_diff(self, dst, content):
