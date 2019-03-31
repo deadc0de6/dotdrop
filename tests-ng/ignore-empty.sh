@@ -77,7 +77,7 @@ _EOF
 # create the dotfile
 mkdir -p ${tmps}/dotfiles/d1
 echo "{{@@ var1 @@}}" > ${tmps}/dotfiles/d1/empty
-echo "not empty" >> ${tmps}/dotfiles/d1/notempty
+echo "not empty" > ${tmps}/dotfiles/d1/notempty
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
