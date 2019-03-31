@@ -175,8 +175,8 @@ class Installer:
                     self.log.dbg('install to {} and symlink'
                                  .format(self.workdir))
                 tmp = self._pivot_path(dst, self.workdir, striphome=True)
-                i = self.install(templater, src, tmp, actions=actions)
-                if not i and not os.path.exists(tmp):
+                r, e = self.install(templater, src, tmp, actions=actions)
+                if not r and e and not os.path.exists(tmp):
                     continue
                 src = tmp
 
@@ -285,7 +285,7 @@ class Installer:
                                              os.path.join(dst, entry),
                                              actions=actions,
                                              noempty=noempty)
-                if not res:
+                if not res and err:
                     ret = res, err
                     break
             else:
@@ -293,7 +293,7 @@ class Installer:
                                             os.path.join(dst, entry),
                                             actions=actions,
                                             noempty=noempty)
-                if not res:
+                if not res and err:
                     ret = res, err
                     break
         return ret
