@@ -569,8 +569,9 @@ class Cfg:
         """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
-            ret = yaml.dump(content, f,
-                            default_flow_style=False, indent=2)
+            ret = yaml.safe_dump(content, f,
+                                 default_flow_style=False,
+                                 indent=2)
         return ret
 
     def _norm_key_elem(self, elem):
@@ -827,7 +828,9 @@ class Cfg:
         self.lnk_settings[self.key_dotpath] = self.curdotpath
         self.lnk_settings[self.key_workdir] = self.curworkdir
         # dump
-        ret = yaml.dump(self.content, default_flow_style=False, indent=2)
+        ret = yaml.safe_dump(self.content,
+                             default_flow_style=False,
+                             indent=2)
         ret = ret.replace('{}', '')
         # restore paths
         self.lnk_settings[self.key_dotpath] = dotpath

@@ -79,7 +79,8 @@ class TestConfig(unittest.TestCase):
 
         # save the new config
         with open(confpath, 'w') as f:
-            yaml.dump(content, f, default_flow_style=False, indent=2)
+            yaml.safe_dump(content, f, default_flow_style=False,
+                           indent=2)
 
         # do the tests
         conf = Cfg(confpath)
@@ -109,7 +110,8 @@ class TestConfig(unittest.TestCase):
 
         # save the new config
         with open(confpath, 'w') as f:
-            yaml.dump(content, f, default_flow_style=False, indent=2)
+            yaml.safe_dump(content, f, default_flow_style=False,
+                           indent=2)
 
         # do the tests
         conf = Cfg(confpath)
