@@ -50,7 +50,7 @@ _dotdropsh_import()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -l --inv-link -d --dry -c= --cfg= -p= --profile= ' -- $cur) )
+        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -d --dry -c= --cfg= -p= --profile= -l= --link= ' -- $cur) )
     fi
 }
 

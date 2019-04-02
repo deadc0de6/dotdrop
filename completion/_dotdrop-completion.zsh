@@ -119,14 +119,14 @@ _dotdrop-import ()
 		'(--verbose)--verbose' \
 		'(-b)-b' \
 		'(--no-banner)--no-banner' \
-		'(-l)-l' \
-		'(--inv-link)--inv-link' \
 		'(-d)-d' \
 		'(--dry)--dry' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
 		'(--profile=-)--profile=-' \
+		'(-l=-)-l=-' \
+		'(--link=-)--link=-' \
 
     else
         myargs=('<path>')
