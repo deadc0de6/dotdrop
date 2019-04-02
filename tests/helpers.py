@@ -89,7 +89,7 @@ def _fake_args():
     args['--force'] = False
     args['--nodiff'] = False
     args['--showdiff'] = True
-    args['--inv-link'] = False
+    args['--link'] = 'nolink'
     args['--template'] = False
     args['--temp'] = False
     args['<key>'] = []

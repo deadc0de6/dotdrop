@@ -6,6 +6,7 @@ stores all options to use across dotdrop
 """
 
 import os
+import sys
 import socket
 from docopt import docopt
 
@@ -31,6 +32,11 @@ NAME = 'dotdrop'
 CONFIG = 'config.yaml'
 HOMECFG = '~/.config/{}'.format(NAME)
 
+OPT_LINK = {
+    'nolink': LinkTypes.NOLINK,
+    'link': LinkTypes.PARENT,
+    'link_children': LinkTypes.CHILDREN}
+
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
@@ -42,7 +48,7 @@ USAGE = """
 
 Usage:
   dotdrop install   [-VbtfndD] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-Vbld]    [-c <path>] [-p <profile>] <path>...
+  dotdrop import    [-Vbd]     [-c <path>] [-p <profile>] [-l <link>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]  [-c <path>] [-p <profile>]
@@ -59,11 +65,11 @@ Options:
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
+  -l --link=<link>        "link_import_default" (nolink|link|link_children).
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --inv-link           Invert "link_import_default".
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
@@ -72,7 +78,6 @@ Options:
   -b --no-banner          Do not display the banner.
   -v --version            Show version.
   -h --help               Show this screen.
-
 """.format(BANNER, PROFILE)
 
 
@@ -181,13 +186,12 @@ class Options(AttrMonitor):
 
         # import link default value
         self.import_link = self.link_import_default
-        if self.args['--inv-link']:
-            if self.import_link == LinkTypes.NOLINK:
-                self.import_link = LinkTypes.PARENT
-            elif self.import_link == LinkTypes.PARENT:
-                self.import_link = LinkTypes.NOLINK
-            elif self.import_link == LinkTypes.CHILDREN:
-                self.import_link = LinkTypes.NOLINK
+        link = self.args['--link']
+        if link:
+            if link not in OPT_LINK.keys():
+                self.log.err('bad option for --link: {}'.format(link))
+                sys.exit(USAGE)
+            self.import_link = OPT_LINK[link]
 
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']

@@ -50,17 +50,22 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(conf.dump() != '')
 
     def test_def_link(self):
-        self._test_link_import('nolink', LinkTypes.NOLINK, False)
-        self._test_link_import('link', LinkTypes.PARENT, False)
-        self._test_link_import('nolink', LinkTypes.PARENT, True)
-        self._test_link_import('link', LinkTypes.NOLINK, True)
+        self._test_link_import('nolink', LinkTypes.PARENT, 'link')
+        self._test_link_import('nolink', LinkTypes.NOLINK, 'nolink')
+        self._test_link_import('nolink', LinkTypes.CHILDREN, 'link_children')
+        self._test_link_import('link', LinkTypes.PARENT, 'link')
+        self._test_link_import('link', LinkTypes.NOLINK, 'nolink')
+        self._test_link_import('link', LinkTypes.CHILDREN, 'link_children')
+        self._test_link_import('link_children', LinkTypes.PARENT, 'link')
+        self._test_link_import('link_children', LinkTypes.NOLINK, 'nolink')
+        self._test_link_import('link_children', LinkTypes.CHILDREN,
+                               'link_children')
         self._test_link_import_fail('whatever')
-        self._test_link_import_fail('link_children')
 
     @patch('dotdrop.config.open', create=True)
     @patch('dotdrop.config.os.path.exists', create=True)
     def _test_link_import(self, cfgstring, expected,
-                          invert, mock_exists, mock_open):
+                          cliargs, mock_exists, mock_open):
         data = '''
 config:
   backup: true
@@ -83,8 +88,7 @@ profiles:
         args = _fake_args()
         args['--profile'] = 'p1'
         args['--cfg'] = 'mocked'
-        if invert:
-            args['--inv-link'] = True
+        args['--link'] = cliargs
         o = Options(args=args)
 
         self.assertTrue(o.import_link == expected)

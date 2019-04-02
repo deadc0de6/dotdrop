@@ -610,11 +610,6 @@ class Cfg:
 
         if self.key_imp_link not in self.lnk_settings:
             self.lnk_settings[self.key_imp_link] = self.default_link_imp
-        elif self.lnk_settings[self.key_imp_link] == self.lnk_children:
-            msg = '\"{}\" not supported in {}'.format(self.lnk_children,
-                                                      self.key_imp_link)
-            self.log.err(msg)
-            return False
         else:
             key = self.lnk_settings[self.key_imp_link]
             if key != self.lnk_parent and \
