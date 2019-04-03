@@ -65,7 +65,7 @@ Options:
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
-  -l --link=<link>        "link_import_default" (nolink|link|link_children).
+  -l --link=<link>        "link_on_import" (nolink|link|link_children).
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
@@ -185,7 +185,7 @@ class Options(AttrMonitor):
         self.safe = not self.args['--force']
 
         # import link default value
-        self.import_link = self.link_import_default
+        self.import_link = self.link_on_import
         link = self.args['--link']
         if link:
             if link not in OPT_LINK.keys():

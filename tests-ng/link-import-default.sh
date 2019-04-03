@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test the use of the keyword "link_import_default"
+# test the use of the keyword "link_on_import"
 # returns 1 in case of error
 #
 
@@ -63,7 +63,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_import_default: nolink
+  link_on_import: nolink
 dotfiles:
 profiles:
 _EOF
@@ -85,7 +85,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_import_default: link
+  link_on_import: link
 dotfiles:
 profiles:
 _EOF

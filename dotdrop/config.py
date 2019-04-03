@@ -31,7 +31,7 @@ class Cfg:
     key_keepdot = 'keepdot'
     key_ignoreempty = 'ignoreempty'
     key_showdiff = 'showdiff'
-    key_imp_link = 'link_import_default'
+    key_imp_link = 'link_on_import'
     key_dotfile_link = 'link_dotfile_default'
     key_workdir = 'workdir'
     key_include_vars = 'import_variables'

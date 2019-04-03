@@ -74,7 +74,7 @@ config:
   banner: true
   longkey: false
   keepdot: false
-  link_import_default: {}
+  link_on_import: {}
   link_dotfile_default: nolink
 dotfiles:
 profiles:
@@ -104,7 +104,7 @@ config:
   banner: true
   longkey: false
   keepdot: false
-  link_import_default: {}
+  link_on_import: {}
   link_dotfile_default: nolink
 dotfiles:
 profiles:
