@@ -115,7 +115,6 @@ echo ${line} | grep 'link: link_children'
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks file have correct type in fs
-file ${f1}
 [ ! -h ${f1} ] && echo "f1 is not a symlink" && exit 1
 [ -h ${subf1} ] && echo "subf1 is not a regular file" && exit 1
 [ -h ${subf2} ] && echo "subf2 is not a regular file" && exit 1
@@ -123,11 +122,6 @@ file ${f1}
 [ ! -h ${dtsub1} ] && echo "dtsub1 is not a symlink" && exit 1
 [ ! -h ${dtsub2} ] && echo "dtsub2 is not a symlink" && exit 1
 [ -h ${dtsub3} ] && echo "dtsub3 is not a regular directory" && exit 1
-
-echo "DOTPATH"
-tree ${tmps}/dotfiles
-echo "FILESYSTEM"
-tree ${dt}
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
