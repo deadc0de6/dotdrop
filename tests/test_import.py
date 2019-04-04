@@ -112,7 +112,7 @@ class TestImport(unittest.TestCase):
         o.import_path = dfiles
         cmd_importer(o)
         # import symlink
-        o.import_link = LinkTypes.PARENT
+        o.import_link = LinkTypes.LINK
         sfiles = [dotfile6, dotfile7]
         o.import_path = sfiles
         cmd_importer(o)
@@ -190,12 +190,6 @@ class TestImport(unittest.TestCase):
                           get_path_strip_version(dotfile7),
                           sub4)
         self.assertTrue(os.path.exists(s4))
-
-        # test symlink on filesystem
-        self.assertTrue(os.path.islink(dotfile6))
-        self.assertTrue(os.path.realpath(dotfile6) == indt6)
-        self.assertTrue(os.path.islink(dotfile7))
-        self.assertTrue(os.path.realpath(dotfile7) == indt7)
 
         cmd_list_profiles(o)
         cmd_list_files(o)

@@ -50,15 +50,19 @@ class TestConfig(unittest.TestCase):
         self.assertTrue(conf.dump() != '')
 
     def test_def_link(self):
-        self._test_link_import('nolink', LinkTypes.PARENT, 'link')
+        self._test_link_import('nolink', LinkTypes.LINK, 'link')
         self._test_link_import('nolink', LinkTypes.NOLINK, 'nolink')
-        self._test_link_import('nolink', LinkTypes.CHILDREN, 'link_children')
-        self._test_link_import('link', LinkTypes.PARENT, 'link')
+        self._test_link_import('nolink',
+                               LinkTypes.LINK_CHILDREN,
+                               'link_children')
+        self._test_link_import('link', LinkTypes.LINK, 'link')
         self._test_link_import('link', LinkTypes.NOLINK, 'nolink')
-        self._test_link_import('link', LinkTypes.CHILDREN, 'link_children')
-        self._test_link_import('link_children', LinkTypes.PARENT, 'link')
+        self._test_link_import('link',
+                               LinkTypes.LINK_CHILDREN,
+                               'link_children')
+        self._test_link_import('link_children', LinkTypes.LINK, 'link')
         self._test_link_import('link_children', LinkTypes.NOLINK, 'nolink')
-        self._test_link_import('link_children', LinkTypes.CHILDREN,
+        self._test_link_import('link_children', LinkTypes.LINK_CHILDREN,
                                'link_children')
         self._test_link_import_fail('whatever')
 

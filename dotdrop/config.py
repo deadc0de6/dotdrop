@@ -70,9 +70,9 @@ class Cfg:
     key_profiles_imp = 'import'
 
     # link values
-    lnk_parent = 'link'
-    lnk_nolink = 'nolink'
-    lnk_children = 'link_children'
+    lnk_nolink = LinkTypes.NOLINK.name.lower()
+    lnk_link = LinkTypes.LINK.name.lower()
+    lnk_children = LinkTypes.LINK_CHILDREN.name.lower()
 
     # settings defaults
     default_dotpath = 'dotfiles'
@@ -198,21 +198,11 @@ class Cfg:
 
     def _string_to_linktype(self, string):
         """translate string to linktype"""
-        if string == self.lnk_parent.lower():
-            return LinkTypes.PARENT
+        if string == self.lnk_link.lower():
+            return LinkTypes.LINK
         elif string == self.lnk_children.lower():
-            return LinkTypes.CHILDREN
+            return LinkTypes.LINK_CHILDREN
         return LinkTypes.NOLINK
-
-    def _linktype_to_string(self, link):
-        """translate linktype to string"""
-        if link == LinkTypes.PARENT:
-            return self.lnk_parent
-        elif link == LinkTypes.CHILDREN:
-            return self.lnk_children
-        elif link == LinkTypes.NOLINK:
-            return self.lnk_nolink
-        return self.lnk_nolink
 
     def _parse(self, profile=None):
         """parse config file"""
@@ -602,7 +592,7 @@ class Cfg:
             self.lnk_settings[self.key_dotfile_link] = self.default_link
         else:
             key = self.lnk_settings[self.key_dotfile_link]
-            if key != self.lnk_parent and \
+            if key != self.lnk_link and \
                     key != self.lnk_children and \
                     key != self.lnk_nolink:
                 self.log.err('bad value for {}'.format(self.key_dotfile_link))
@@ -612,7 +602,7 @@ class Cfg:
             self.lnk_settings[self.key_imp_link] = self.default_link_imp
         else:
             key = self.lnk_settings[self.key_imp_link]
-            if key != self.lnk_parent and \
+            if key != self.lnk_link and \
                     key != self.lnk_children and \
                     key != self.lnk_nolink:
                 self.log.err('bad value for {}'.format(self.key_dotfile_link))
@@ -626,7 +616,7 @@ class Cfg:
         newkey = self.key_imp_link
         if key in self.lnk_settings:
             if self.lnk_settings[key]:
-                self.lnk_settings[newkey] = self.lnk_parent
+                self.lnk_settings[newkey] = self.lnk_link
             else:
                 self.lnk_settings[newkey] = self.lnk_nolink
             del self.lnk_settings[key]
@@ -646,7 +636,7 @@ class Cfg:
                 and type(v[self.key_dotfiles_link]) is bool:
             # patch link: <bool>
             if v[self.key_dotfiles_link]:
-                new = self.lnk_parent
+                new = self.lnk_link
             else:
                 new = self.lnk_nolink
             self._modified = True
@@ -755,12 +745,12 @@ class Cfg:
             return False, self._get_long_key(path, keys)
         return False, self._get_short_key(path, keys)
 
-    def new(self, dotfile, profile, link=LinkTypes.NOLINK, debug=False):
-        """import new dotfile
-        dotfile key will change and can be empty"""
+    def new(self, src, dst, profile, link, debug=False):
+        """import new dotfile"""
         # keep it short
         home = os.path.expanduser('~')
-        dotfile.dst = dotfile.dst.replace(home, '~', 1)
+        dst = dst.replace(home, '~', 1)
+        dotfile = Dotfile('', dst, src)
 
         # adding new profile if doesn't exist
         if profile not in self.lnk_profiles:
@@ -806,8 +796,8 @@ class Cfg:
         }
 
         # set the link flag
-        if link != LinkTypes.NOLINK:
-            val = self._linktype_to_string(link)
+        if link != self._get_def_link():
+            val = link.name.lower()
             dots[dotfile.key][self.key_dotfiles_link] = val
 
         # link it to this profile in the yaml file

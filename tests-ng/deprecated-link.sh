@@ -113,6 +113,7 @@ cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
 cat ${cfg}
 
 # fail if find some of these entries
+echo "========> test for bad entries"
 set +e
 grep 'link_children: true' ${cfg} >/dev/null && exit 1
 grep 'link_children: false' ${cfg} >/dev/null && exit 1
@@ -123,12 +124,13 @@ grep 'link_by_default: false' ${cfg} >/dev/null && exit 1
 set -e
 
 # test values have been correctly updated
+echo "========> test for updated entries"
 dotfiles=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 | grep -v '^ '`
-echo "${dotfiles}" | grep '^f_link ' | grep ', link: parent)'
+echo "${dotfiles}" | grep '^f_link ' | grep ', link: link)'
 echo "${dotfiles}" | grep '^f_nolink ' | grep ', link: nolink)'
 echo "${dotfiles}" | grep '^f_nolink1 ' | grep ', link: nolink)'
-echo "${dotfiles}" | grep '^f_children ' | grep ', link: children)'
-echo "${dotfiles}" | grep '^f_children2 ' | grep ', link: children)'
+echo "${dotfiles}" | grep '^f_children ' | grep ', link: link_children)'
+echo "${dotfiles}" | grep '^f_children2 ' | grep ', link: link_children)'
 echo "${dotfiles}" | grep '^f_children3 ' | grep ', link: nolink)'
 
 ## CLEANING

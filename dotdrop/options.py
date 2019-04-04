@@ -33,9 +33,9 @@ CONFIG = 'config.yaml'
 HOMECFG = '~/.config/{}'.format(NAME)
 
 OPT_LINK = {
-    'nolink': LinkTypes.NOLINK,
-    'link': LinkTypes.PARENT,
-    'link_children': LinkTypes.CHILDREN}
+    LinkTypes.NOLINK.name.lower(): LinkTypes.NOLINK,
+    LinkTypes.LINK.name.lower(): LinkTypes.LINK,
+    LinkTypes.LINK_CHILDREN.name.lower(): LinkTypes.LINK_CHILDREN}
 
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
@@ -186,12 +186,15 @@ class Options(AttrMonitor):
 
         # import link default value
         self.import_link = self.link_on_import
-        link = self.args['--link']
-        if link:
+        if self.args['--link']:
+            # overwrite default import link with cli switch
+            link = self.args['--link']
             if link not in OPT_LINK.keys():
                 self.log.err('bad option for --link: {}'.format(link))
                 sys.exit(USAGE)
             self.import_link = OPT_LINK[link]
+        if self.debug:
+            self.log.dbg('link_import value: {}'.format(self.import_link))
 
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']
