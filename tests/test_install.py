@@ -266,12 +266,12 @@ exec bspwm
         logger = MagicMock()
         installer.log.err = logger
 
-        res = installer.link_children(templater=MagicMock(), src=src,
-                                      dst='/dev/null', actions=[])
+        res, err = installer.link_children(templater=MagicMock(), src=src,
+                                           dst='/dev/null', actions=[])
 
-        self.assertEqual(res, [])
-        logger.assert_called_with('source dotfile does not exist: {}'
-                                  .format(src))
+        self.assertFalse(res)
+        e = 'source dotfile does not exist: {}'.format(src)
+        self.assertEqual(err, e)
 
     def test_fails_when_src_file(self):
         """test fails when src file"""
@@ -288,14 +288,13 @@ exec bspwm
         installer.log.err = logger
 
         # pass src file not src dir
-        res = installer.link_children(templater=templater, src=src,
-                                      dst='/dev/null', actions=[])
+        res, err = installer.link_children(templater=templater, src=src,
+                                           dst='/dev/null', actions=[])
 
         # ensure nothing performed
-        self.assertEqual(res, [])
-        # ensure logger logged error
-        logger.assert_called_with('source dotfile is not a directory: {}'
-                                  .format(src))
+        self.assertFalse(res)
+        e = 'source dotfile is not a directory: {}'.format(src)
+        self.assertEqual(err, e)
 
     def test_creates_dst(self):
         """test creates dst"""

@@ -33,7 +33,8 @@ class Cfg:
     key_showdiff = 'showdiff'
     key_deflink = 'link_by_default'
     key_workdir = 'workdir'
-    key_include_vars = 'import_variables'
+    key_import_vars = 'import_variables'
+    key_import_actions = 'import_actions'
 
     # actions keys
     key_actions = 'actions'
@@ -216,45 +217,37 @@ class Cfg:
             self._abs_path(self.curworkdir)
 
         # load external variables/dynvariables
-        if self.key_include_vars in self.lnk_settings:
-            paths = self.lnk_settings[self.key_include_vars]
+        if self.key_import_vars in self.lnk_settings:
+            paths = self.lnk_settings[self.key_import_vars]
             self._load_ext_variables(paths, profile=profile)
 
-        # parse all actions
-        if self.key_actions in self.content:
-            if self.content[self.key_actions] is not None:
-                for k, v in self.content[self.key_actions].items():
-                    # loop through all actions
-                    if k in [self.key_actions_pre, self.key_actions_post]:
-                        # parse pre/post actions
-                        items = self.content[self.key_actions][k].items()
-                        for k2, v2 in items:
-                            if k not in self.actions:
-                                self.actions[k] = {}
-                            a = Action(k2, k, v2)
-                            self.actions[k][k2] = a
-                            if self.debug:
-                                self.log.dbg('new action: {}'.format(a))
-                    else:
-                        # parse naked actions as post actions
-                        if self.key_actions_post not in self.actions:
-                            self.actions[self.key_actions_post] = {}
-                        a = Action(k, '', v)
-                        self.actions[self.key_actions_post][k] = a
-                        if self.debug:
-                            self.log.dbg('new action: {}'.format(a))
+        # parse external actions
+        if self.key_import_actions in self.lnk_settings:
+            for path in self.lnk_settings[self.key_import_actions]:
+                path = self._abs_path(path)
+                if self.debug:
+                    self.log.dbg('loading actions from {}'.format(path))
+                content = self._load_yaml(path)
+                if self.key_actions in content and \
+                        content[self.key_actions] is not None:
+                    self._load_actions(content[self.key_actions])
+
+        # parse local actions
+        if self.key_actions in self.content and \
+                self.content[self.key_actions] is not None:
+            self._load_actions(self.content[self.key_actions])
 
         # parse read transformations
-        if self.key_trans_r in self.content:
-            if self.content[self.key_trans_r] is not None:
-                for k, v in self.content[self.key_trans_r].items():
-                    self.trans_r[k] = Transform(k, v)
+        if self.key_trans_r in self.content and \
+                self.content[self.key_trans_r] is not None:
+            for k, v in self.content[self.key_trans_r].items():
+                self.trans_r[k] = Transform(k, v)
 
         # parse write transformations
-        if self.key_trans_w in self.content:
-            if self.content[self.key_trans_w] is not None:
-                for k, v in self.content[self.key_trans_w].items():
-                    self.trans_w[k] = Transform(k, v)
+        if self.key_trans_w in self.content and \
+                self.content[self.key_trans_w] is not None:
+            for k, v in self.content[self.key_trans_w].items():
+                self.trans_w[k] = Transform(k, v)
 
         # parse the dotfiles
         # and construct the dict of objects per dotfile key
@@ -425,6 +418,28 @@ class Cfg:
         if self.debug:
             self.log.dbg('loaded ext dynvariables: {}'.format(dvariables))
 
+    def _load_actions(self, dic):
+        for k, v in dic.items():
+            # loop through all actions
+            if k in [self.key_actions_pre, self.key_actions_post]:
+                # parse pre/post actions
+                items = dic[k].items()
+                for k2, v2 in items:
+                    if k not in self.actions:
+                        self.actions[k] = {}
+                    a = Action(k2, k, v2)
+                    self.actions[k][k2] = a
+                    if self.debug:
+                        self.log.dbg('new action: {}'.format(a))
+            else:
+                # parse naked actions as post actions
+                if self.key_actions_post not in self.actions:
+                    self.actions[self.key_actions_post] = {}
+                a = Action(k, '', v)
+                self.actions[self.key_actions_post][k] = a
+                if self.debug:
+                    self.log.dbg('new action: {}'.format(a))
+
     def _abs_path(self, path):
         """return absolute path of path relative to the confpath"""
         path = os.path.expanduser(path)
@@ -569,8 +584,9 @@ class Cfg:
         """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
-            ret = yaml.dump(content, f,
-                            default_flow_style=False, indent=2)
+            ret = yaml.safe_dump(content, f,
+                                 default_flow_style=False,
+                                 indent=2)
         return ret
 
     def _norm_key_elem(self, elem):
@@ -827,7 +843,9 @@ class Cfg:
         self.lnk_settings[self.key_dotpath] = self.curdotpath
         self.lnk_settings[self.key_workdir] = self.curworkdir
         # dump
-        ret = yaml.dump(self.content, default_flow_style=False, indent=2)
+        ret = yaml.safe_dump(self.content,
+                             default_flow_style=False,
+                             indent=2)
         ret = ret.replace('{}', '')
         # restore paths
         self.lnk_settings[self.key_dotpath] = dotpath

@@ -51,7 +51,7 @@ def cmd_install(o):
                      totemp=tmpdir,
                      showdiff=o.install_showdiff,
                      backup_suffix=o.install_backup_suffix)
-    installed = []
+    installed = 0
     for dotfile in dotfiles:
         preactions = []
         if not o.install_temporary and dotfile.actions \
@@ -73,13 +73,13 @@ def cmd_install(o):
                 if not tmp:
                     continue
                 src = tmp
-            r = inst.install(t, src, dotfile.dst, actions=preactions,
-                             noempty=dotfile.noempty)
+            r, err = inst.install(t, src, dotfile.dst, actions=preactions,
+                                  noempty=dotfile.noempty)
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
                 if os.path.exists(tmp):
                     remove(tmp)
-        if len(r) > 0:
+        if r:
             if not o.install_temporary and \
                     Cfg.key_actions_post in dotfile.actions:
                 actions = dotfile.actions[Cfg.key_actions_post]
@@ -91,10 +91,12 @@ def cmd_install(o):
                         if o.debug:
                             LOG.dbg('executing post action {}'.format(action))
                         action.execute()
-        installed.extend(r)
+            installed += 1
+        elif not r and err:
+            LOG.err('installing \"{}\" failed: {}'.format(dotfile.key, err))
     if o.install_temporary:
-        LOG.log('\nInstalled to tmp \"{}\".'.format(tmpdir))
-    LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
+        LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
+    LOG.log('\n{} dotfile(s) installed.'.format(installed))
     return True
 
 

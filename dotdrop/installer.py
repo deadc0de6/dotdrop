@@ -50,21 +50,27 @@ class Installer:
         self.log = Logger()
 
     def install(self, templater, src, dst, actions=[], noempty=False):
-        """install the src to dst using a template"""
+        """
+        install src to dst using a template
+        return
+        - True, None: success
+        - False, error_msg: error
+        - False, None, ignored
+        """
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
-            self.log.err('source dotfile does not exist: {}'.format(src))
-            return []
+            err = 'source dotfile does not exist: {}'.format(src)
+            return False, err
         dst = os.path.expanduser(dst)
         if self.totemp:
             dst = self._pivot_path(dst, self.totemp)
         if utils.samefile(src, dst):
             # symlink loop
-            self.log.err('dotfile points to itself: {}'.format(dst))
-            return []
+            err = 'dotfile points to itself: {}'.format(dst)
+            return False, err
         isdir = os.path.isdir(src)
         if self.debug:
             self.log.dbg('install {} to {}'.format(src, dst))
@@ -76,15 +82,21 @@ class Installer:
                                  actions=actions, noempty=noempty)
 
     def link(self, templater, src, dst, actions=[]):
-        """set src as the link target of dst"""
+        """
+        set src as the link target of dst
+        return
+        - True, None: success
+        - False, error_msg: error
+        - False, None, ignored
+        """
         if self.debug:
             self.log.dbg('link {} to {}'.format(src, dst))
         self.action_executed = False
         src = os.path.normpath(os.path.join(self.base,
                                             os.path.expanduser(src)))
         if not os.path.exists(src):
-            self.log.err('source dotfile does not exist: {}'.format(src))
-            return []
+            err = 'source dotfile does not exist: {}'.format(src)
+            return False, err
         dst = os.path.normpath(os.path.expanduser(dst))
         if self.totemp:
             # ignore actions
@@ -95,14 +107,20 @@ class Installer:
                 self.log.dbg('dotfile is a template')
                 self.log.dbg('install to {} and symlink'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
-            i = self.install(templater, src, tmp, actions=actions)
+            i, err = self.install(templater, src, tmp, actions=actions)
             if not i and not os.path.exists(tmp):
-                return []
+                return i, err
             src = tmp
         return self._link(src, dst, actions=actions)
 
     def link_children(self, templater, src, dst, actions=[]):
-        """link all dotfiles in a given directory"""
+        """
+        link all dotfiles in a given directory
+        return
+        - True, None: success
+        - False, error_msg: error
+        - False, None, ignored
+        """
         if self.debug:
             self.log.dbg('link_children {} to {}'.format(src, dst))
         self.action_executed = False
@@ -110,17 +128,16 @@ class Installer:
 
         # Fail if source doesn't exist
         if not os.path.exists(parent):
-            self.log.err('source dotfile does not exist: {}'.format(parent))
-            return []
+            err = 'source dotfile does not exist: {}'.format(parent)
+            return False, err
 
         # Fail if source not a directory
         if not os.path.isdir(parent):
             if self.debug:
                 self.log.dbg('symlink children of {} to {}'.format(src, dst))
 
-            self.log.err('source dotfile is not a directory: {}'
-                         .format(parent))
-            return []
+            err = 'source dotfile is not a directory: {}'.format(parent)
+            return False, err
 
         dst = os.path.normpath(os.path.expanduser(dst))
         if not os.path.lexists(dst):
@@ -134,9 +151,8 @@ class Installer:
             ]).format(dst)
 
             if self.safe and not self.log.ask(msg):
-                msg = 'ignoring "{}", nothing installed'
-                self.log.warn(msg.format(dst))
-                return []
+                err = 'ignoring "{}", nothing installed'.format(dst)
+                return False, err
             os.unlink(dst)
             os.mkdir(dst)
 
@@ -159,8 +175,8 @@ class Installer:
                     self.log.dbg('install to {} and symlink'
                                  .format(self.workdir))
                 tmp = self._pivot_path(dst, self.workdir, striphome=True)
-                i = self.install(templater, src, tmp, actions=actions)
-                if not i and not os.path.exists(tmp):
+                r, e = self.install(templater, src, tmp, actions=actions)
+                if not r and e and not os.path.exists(tmp):
                     continue
                 src = tmp
 
@@ -171,54 +187,52 @@ class Installer:
             if len(result):
                 actions = []
 
-        return (src, dst)
+        return True, None
 
     def _link(self, src, dst, actions=[]):
         """set src as a link target of dst"""
         overwrite = not self.safe
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                if self.debug:
-                    self.log.dbg('ignoring "{}", link exists'.format(dst))
-                return []
+                err = 'ignoring "{}", link exists'.format(dst)
+                return False, err
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
-                return []
+                return True, None
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
-                msg = 'ignoring "{}", link was not created'
-                self.log.warn(msg.format(dst))
-                return []
+                err = 'ignoring "{}", link was not created'.format(dst)
+                return False, err
             overwrite = True
             try:
                 utils.remove(dst)
             except OSError as e:
-                self.log.err('something went wrong with {}: {}'.format(src, e))
-                return []
+                err = 'something went wrong with {}: {}'.format(src, e)
+                return False, err
         if self.dry:
             self.log.dry('would link {} to {}'.format(dst, src))
-            return []
+            return True, None
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for {}'.format(dst))
-            return []
-        if not self._exec_pre_actions(actions):
-            return []
+            err = 'creating directory for {}'.format(dst)
+            return False, err
+        r, e = self._exec_pre_actions(actions)
+        if not r:
+            return False, e
         # re-check in case action created the file
         if os.path.lexists(dst):
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not overwrite and not self.log.ask(msg):
-                msg = 'ignoring "{}", link was not created'
-                self.log.warn(msg.format(dst))
-                return []
+                err = 'ignoring "{}", link was not created'.format(dst)
+                return False, err
             try:
                 utils.remove(dst)
             except OSError as e:
-                self.log.err('something went wrong with {}: {}'.format(src, e))
-                return []
+                err = 'something went wrong with {}: {}'.format(src, e)
+                return False, err
         os.symlink(src, dst)
         self.log.sub('linked {} to {}'.format(dst, src))
-        return [(src, dst)]
+        return True, None
 
     def _handle_file(self, templater, src, dst, actions=[], noempty=False):
         """install src to dst when is a file"""
@@ -227,52 +241,72 @@ class Installer:
             self.log.dbg('ignore empty: {}'.format(noempty))
         if utils.samefile(src, dst):
             # symlink loop
-            self.log.err('dotfile points to itself: {}'.format(dst))
-            return []
+            err = 'dotfile points to itself: {}'.format(dst)
+            return False, err
         content = templater.generate(src)
         if noempty and utils.content_empty(content):
-            self.log.warn('ignoring empty template: {}'.format(src))
-            return []
+            self.log.dbg('ignoring empty template: {}'.format(src))
+            return False, None
         if content is None:
-            self.log.err('generate from template {}'.format(src))
-            return []
+            err = 'empty template {}'.format(src)
+            return False, err
         if not os.path.exists(src):
-            self.log.err('source dotfile does not exist: {}'.format(src))
-            return []
+            err = 'source dotfile does not exist: {}'.format(src)
+            return False, err
         st = os.stat(src)
-        ret = self._write(src, dst, content, st.st_mode, actions=actions)
+        ret, err = self._write(src, dst, content, st.st_mode, actions=actions)
         if ret < 0:
-            self.log.err('installing {} to {}'.format(src, dst))
-            return []
+            return False, err
         if ret > 0:
             if self.debug:
                 self.log.dbg('ignoring {}'.format(dst))
-            return []
+            return False, None
         if ret == 0:
             if not self.dry and not self.comparing:
                 self.log.sub('copied {} to {}'.format(src, dst))
-            return [(src, dst)]
-        return []
+            return True, None
+        err = 'installing {} to {}'.format(src, dst)
+        return False, err
 
     def _handle_dir(self, templater, src, dst, actions=[], noempty=False):
         """install src to dst when is a directory"""
         if self.debug:
             self.log.dbg('install dir {}'.format(src))
             self.log.dbg('ignore empty: {}'.format(noempty))
-        ret = []
+        # default to nothing installed and no error
+        ret = False, None
         if not self._create_dirs(dst):
-            return []
+            err = 'creating directory for {}'.format(dst)
+            return False, err
         # handle all files in dir
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
-                res = self._handle_file(templater, f, os.path.join(dst, entry),
-                                        actions=actions, noempty=noempty)
-                ret.extend(res)
+                # is file
+                res, err = self._handle_file(templater, f,
+                                             os.path.join(dst, entry),
+                                             actions=actions,
+                                             noempty=noempty)
+                if not res and err:
+                    # error occured
+                    ret = res, err
+                    break
+                elif res:
+                    # something got installed
+                    ret = True, None
             else:
-                res = self._handle_dir(templater, f, os.path.join(dst, entry),
-                                       actions=actions, noempty=noempty)
-                ret.extend(res)
+                # is directory
+                res, err = self._handle_dir(templater, f,
+                                            os.path.join(dst, entry),
+                                            actions=actions,
+                                            noempty=noempty)
+                if not res and err:
+                    # error occured
+                    ret = res, err
+                    break
+                elif res:
+                    # something got installed
+                    ret = True, None
         return ret
 
     def _fake_diff(self, dst, content):
@@ -284,13 +318,13 @@ class Installer:
 
     def _write(self, src, dst, content, rights, actions=[]):
         """write content to file
-        return  0 for success,
-                1 when already exists
-               -1 when error"""
+        return  0, None:  for success,
+                1, None:  when already exists
+               -1, err: when error"""
         overwrite = not self.safe
         if self.dry:
             self.log.dry('would install {}'.format(dst))
-            return 0
+            return 0, None
         if os.path.lexists(dst):
             samerights = False
             try:
@@ -298,12 +332,12 @@ class Installer:
             except OSError as e:
                 if e.errno == errno.ENOENT:
                     # broken symlink
-                    self.log.err('broken symlink {}'.format(dst))
-                    return -1
+                    err = 'broken symlink {}'.format(dst)
+                    return -1, err
             if self.diff and self._fake_diff(dst, content) and samerights:
                 if self.debug:
                     self.log.dbg('{} is the same'.format(dst))
-                return 1
+                return 1, None
             if self.safe:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
@@ -311,32 +345,33 @@ class Installer:
                     self._diff_before_write(src, dst, content)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
-                    return 1
+                    return 1, None
                 overwrite = True
         if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            self.log.err('creating directory for {}'.format(dst))
-            return -1
-        if not self._exec_pre_actions(actions):
-            return -1
+            err = 'creating directory for {}'.format(dst)
+            return -1, err
+        r, e = self._exec_pre_actions(actions)
+        if not r:
+            return -1, e
         if self.debug:
             self.log.dbg('write content to {}'.format(dst))
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring {}'.format(dst))
-                return 1
+                return 1, None
         # write the file
         try:
             with open(dst, 'wb') as f:
                 f.write(content)
         except NotADirectoryError as e:
-            self.log.err('opening dest file: {}'.format(e))
-            return -1
+            err = 'opening dest file: {}'.format(e)
+            return -1, err
         os.chmod(dst, rights)
-        return 0
+        return 0, None
 
     def _diff_before_write(self, src, dst, src_content):
         """diff before writing when using --showdiff - not efficient"""
@@ -355,7 +390,7 @@ class Installer:
     def _create_dirs(self, directory):
         """mkdir -p <directory>"""
         if not self.create and not os.path.exists(directory):
-            return False
+            return False,
         if os.path.exists(directory):
             return True
         if self.dry:
@@ -390,7 +425,7 @@ class Installer:
     def _exec_pre_actions(self, actions):
         """execute pre-actions if any"""
         if self.action_executed:
-            return True
+            return True, None
         for action in actions:
             if self.dry:
                 self.log.dry('would execute action: {}'.format(action))
@@ -398,10 +433,10 @@ class Installer:
                 if self.debug:
                     self.log.dbg('executing pre action {}'.format(action))
                 if not action.execute():
-                    self.log.err('pre-action {} failed'.format(action.key))
-                    return False
+                    err = 'pre-action \"{}\" failed'.format(action.key)
+                    return False, err
         self.action_executed = True
-        return True
+        return True, None
 
     def _install_to_temp(self, templater, src, dst, tmpdir):
         """install a dotfile to a tempdir"""
