@@ -37,7 +37,7 @@ Features:
 * Provide solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
-the [example](#example), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
+the [example](#getting-started), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
 how [people are using dotdrop](https://github.com/deadc0de6/dotdrop/wiki/people-using-dotdrop)
 for more.
 
@@ -60,7 +60,7 @@ many allow to deploy different versions of the same dotfile
 on different hosts. Moreover dotdrop allows to specify the
 set of dotfiles that need to be deployed on a specific profile.
 
-See the [example](#example) for a concrete example on
+See the [example](#getting-started) for a concrete example on
 why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 
 ---
@@ -207,12 +207,12 @@ Then adapt any dotfile using the [templating](https://github.com/deadc0de6/dotdr
 feature (if needed). For example you might want different fonts sizes on polybar for the different
 hosts:
 
-`<dotpath>/config/polybar/config`
+edit `<dotpath>/config/polybar/config`
 ```bash
 …
-{%@@ if profile == "hostname1" @@%}
+{%@@ if profile == "home" @@%}
 font0 = sans:size=10;0
-{%@@ elif profile == "hostname2" @@%}
+{%@@ elif profile == "office" @@%}
 font0 = sans:size=14;0
 {%@@ endif @@%}
 font1 = "Material Design Icons:style=Regular:size=14;0"
@@ -224,7 +224,7 @@ Also the home computer is running [awesomeWM](https://awesomewm.org/)
 and the office computer [bspwm](https://github.com/baskerville/bspwm).
 The `~/.xinitrc` file will therefore be different while still sharing some lines.
 
-`<dotpath>/xinitrc`
+edit `<dotpath>/xinitrc`
 ```bash
 #!/bin/bash
 
@@ -244,7 +244,8 @@ exec bspwm
 
 The *if branch* on above template examples will define
 which part is deployed based on the
-hostname of the host (or the selected profile) on which dotdrop is run from.
+hostname of the host on which dotdrop is run from.
+(or the selected profile).
 
 When done, you can install your dotfiles using
 ```bash
@@ -252,15 +253,17 @@ $ dotdrop install
 ```
 If you are unsure, you can always run `dotdrop compare` to see
 how your local dotfiles would be updated by dotdrop before running
-`install`.
+`install` or run install with `--dry`.
 
 That's it, a single repository with all your dotfiles for your different hosts.
 
-You can then create [actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions),
-use [transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations),
-[use variables](https://github.com/deadc0de6/dotdrop/wiki/templating#available-variables),
-[symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles),
-[etc](https://github.com/deadc0de6/dotdrop/wiki).
+You can then
+
+* [create actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions)
+* [use transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations)
+* [use variables](https://github.com/deadc0de6/dotdrop/wiki/templating#available-variables)
+* [symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles)
+* [and more](https://github.com/deadc0de6/dotdrop/wiki)
 
 For more options see `dotdrop --help` and the [wiki](https://github.com/deadc0de6/dotdrop/wiki).
 
