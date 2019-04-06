@@ -70,7 +70,6 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 * [Installation](#installation)
 * [Getting started](#getting-started)
 * [Documentation](#documentation)
-* [Example](#example)
 
 # Installation
 
@@ -132,7 +131,7 @@ Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
 your running dotdrop on) or provide it specifically using the switch `-p --profile`.
 
-Import dotfiles on host *hostname1*
+Import dotfiles on host *home*
 ```bash
 $ dotdrop import ~/.vimrc ~/.xinitrc ~/.config/polybar
 ```
@@ -168,7 +167,7 @@ dotfiles:
     dst: ~/.xinitrc
     src: xinitrc
 profiles:
-  hostname1:
+  home:
     dotfiles:
     - f_vimrc
     - f_xinitrc
@@ -181,24 +180,24 @@ Commit and push your changes.
 
 Then go to another host where your dotfiles need to be managed as well,
 clone the previously setup repository
-and compare the local dotfiles with the ones stored by dotdrop:
+and compare the local dotfiles with the ones stored in dotdrop:
 ```bash
-$ dotdrop compare --profile=hostname1
+$ dotdrop compare --profile=home
 ```
 
 Now you might want to adapt the `config.yaml` file to your likings on
 that second host. Let's say for example that you only want `d_polybar` and
 `f_xinitrc` to be deployed on that second host. You would then change your config
-to something like this (considering that second host's hostname is *hostname2*):
+to something like this (considering that second host's hostname is *office*):
 ```yaml
 …
 profiles:
-  hostname1:
+  home:
     dotfiles:
     - f_vimrc
     - f_xinitrc
     - d_polybar
-  hostname2:
+  office:
     dotfiles:
     - f_xinitrc
     - d_polybar
@@ -220,6 +219,32 @@ font1 = "Material Design Icons:style=Regular:size=14;0"
 font2 = "unifont:size=6;0"
 …
 ```
+
+Also the home computer is running [awesomeWM](https://awesomewm.org/)
+and the office computer [bspwm](https://github.com/baskerville/bspwm).
+The `~/.xinitrc` file will therefore be different while still sharing some lines.
+
+`<dotpath>/xinitrc`
+```bash
+#!/bin/bash
+
+# load Xresources
+userresources=$HOME/.Xresources
+if [ -f "$userresources" ]; then
+      xrdb -merge "$userresources" &
+fi
+
+# launch the wm
+{%@@ if profile == "home" @@%}
+exec awesome
+{%@@ elif profile == "office" @@%}
+exec bspwm
+{%@@ endif @@%}
+```
+
+The *if branch* on above template examples will define
+which part is deployed based on the
+hostname of the host (or the selected profile) on which dotdrop is run from.
 
 When done, you can install your dotfiles using
 ```bash
@@ -243,89 +268,14 @@ For more options see `dotdrop --help` and the [wiki](https://github.com/deadc0de
 
 Dotdrop's documentation is hosted on [its wiki](https://github.com/deadc0de6/dotdrop/wiki).
 
-# Example
-
-Let's consider two hosts:
-
-* **home**: home computer with hostname *home*
-* **office**: office computer with hostname *office*
-
-The home computer is running [awesomeWM](https://awesomewm.org/)
-and the office computer [bspwm](https://github.com/baskerville/bspwm).
-The `~/.xinitrc` file will therefore be different while still sharing some lines.
-Dotdrop allows to store only one single `.xinitrc` file but
-deploy different versions of it depending on where it is run from
-(for which *profile*: home or office).
-
-Below is the `.xinitrc` file stored in dotdrop containing
-[jinja2](http://jinja.pocoo.org/) directives for the deployment based on the profile used.
-
-```bash
-#!/bin/bash
-
-# load Xresources
-userresources=$HOME/.Xresources
-if [ -f "$userresources" ]; then
-      xrdb -merge "$userresources" &
-fi
-
-# launch the wm
-{%@@ if profile == "home" @@%}
-exec awesome
-{%@@ elif profile == "office" @@%}
-exec bspwm
-{%@@ endif @@%}
-```
-
-The *if branch* will define which part is deployed based on the
-hostname of the host on which dotdrop is run from (the selected profile).
-
-And here's how the config file looks like with this setup.
-Of course any combination of the dotfiles (different sets)
-can be done if more dotfiles are deployed.
-
-`config.yaml`
-```yaml
-config:
-  backup: true
-  create: true
-  dotpath: dotfiles
-dotfiles:
-  f_xinitrc:
-    dst: ~/.xinitrc
-    src: xinitrc
-profiles:
-  home:
-    dotfiles:
-    - f_xinitrc
-  office:
-    dotfiles:
-    - f_xinitrc
-```
-
-Installing the dotfiles (the `-p --profile` switch is not needed if
-the hostname matches the *profile* entry in the config file):
-```bash
-## on home computer
-$ dotdrop install --profile=home
-
-## on office computer
-$ dotdrop install --profile=office
-```
-
-Comparing the dotfiles:
-```bash
-$ dotdrop compare
-```
-
-For more see [the wiki](https://github.com/deadc0de6/dotdrop/wiki).
-
 # Contribution
 
 If you are having trouble installing or using dotdrop,
 [open an issue](https://github.com/deadc0de6/dotdrop/issues).
 
 If you want to contribute, feel free to do a PR (please follow PEP8).
+Have a look at the
+[contribution guidelines](https://github.com/deadc0de6/dotdrop/blob/master/CONTRIBUTING.md)
 
 # License
 
