@@ -15,7 +15,6 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.dotfile import Dotfile
 from dotdrop.config import Cfg
 from dotdrop.utils import get_tmpdir, remove, strip_home, run
 from dotdrop.linktypes import LinkTypes
@@ -60,9 +59,10 @@ def cmd_install(o):
                 preactions.append(action)
         if o.debug:
             LOG.dbg('installing {}'.format(dotfile))
-        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.PARENTS:
+        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
             r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
-        elif hasattr(dotfile, 'link') and dotfile.link == LinkTypes.CHILDREN:
+        elif hasattr(dotfile, 'link') and \
+                dotfile.link == LinkTypes.LINK_CHILDREN:
             r = inst.link_children(t, dotfile.src, dotfile.dst,
                                    actions=preactions)
         else:
@@ -238,13 +238,16 @@ def cmd_importer(o):
             strip = os.sep
         src = src.lstrip(strip)
 
-        # create a new dotfile
-        dotfile = Dotfile('', dst, src)
-
-        linktype = LinkTypes(o.link)
+        # set the link attribute
+        linktype = o.import_link
+        if linktype == LinkTypes.LINK_CHILDREN and \
+                not os.path.isdir(path):
+            LOG.err('importing \"{}\" failed!'.format(path))
+            ret = False
+            continue
 
         if o.debug:
-            LOG.dbg('new dotfile: {}'.format(dotfile))
+            LOG.dbg('new dotfile: src:{} dst:{}'.format(src, dst))
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(o.dotpath, src)
@@ -261,19 +264,14 @@ def cmd_importer(o):
             cmd = ['cp', '-R', '-L', dst, srcf]
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
-                if linktype == LinkTypes.PARENTS:
-                    LOG.dry('would symlink {} to {}'.format(srcf, dst))
             else:
                 r, _ = run(cmd, raw=False, debug=o.debug, checkerr=True)
                 if not r:
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-                if linktype == LinkTypes.PARENTS:
-                    remove(dst)
-                    os.symlink(srcf, dst)
-        retconf, dotfile = o.conf.new(dotfile, o.profile,
-                                      link=linktype, debug=o.debug)
+        retconf, dotfile = o.conf.new(src, dst, o.profile,
+                                      linktype, debug=o.debug)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
@@ -454,6 +452,10 @@ def main():
     except KeyboardInterrupt:
         LOG.err('interrupted')
         ret = False
+
+    if ret and o.conf.is_modified():
+        LOG.log('config file updated')
+        o.conf.save()
 
     return ret
 

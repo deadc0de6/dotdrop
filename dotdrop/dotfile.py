@@ -30,6 +30,9 @@ class Dotfile:
         self.dst = dst
         self.src = src
         self.link = link
+        # ensure link of right type
+        if type(link) != LinkTypes:
+            raise Exception('bad value for link: {}'.format(link))
         self.actions = actions
         self.trans_r = trans_r
         self.trans_w = trans_w

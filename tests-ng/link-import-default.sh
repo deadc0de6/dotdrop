@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2019, deadc0de6
 #
-# test jinja2 helpers from jhelpers
+# test the use of the keyword "link_on_import"
 # returns 1 in case of error
 #
 
@@ -50,70 +50,58 @@ tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
+# create the source
+echo "abc" > ${tmpd}/abc
+
+# import with nolink by default
 cat > ${cfg} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
+  link_on_import: nolink
 dotfiles:
-  f_abc:
-    dst: ${tmpd}/abc
-    src: abc
 profiles:
-  p1:
-    dotfiles:
-    - f_abc
-_EOF
-#cat ${cfg}
-
-# create the dotfile
-echo "this is the test dotfile" > ${tmps}/dotfiles/abc
-
-# test exists
-echo "{%@@ if exists('/dev/null') @@%}" >> ${tmps}/dotfiles/abc
-echo "this should exist" >> ${tmps}/dotfiles/abc
-echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
-
-echo "{%@@ if exists('/dev/abcdef') @@%}" >> ${tmps}/dotfiles/abc
-echo "this should not exist" >> ${tmps}/dotfiles/abc
-echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
-
-# test exists_in_path
-cat >> ${tmps}/dotfiles/abc << _EOF
-{%@@ if exists_in_path('cat') @@%}
-this should exist too
-{%@@ endif @@%}
 _EOF
 
-cat >> ${tmps}/dotfiles/abc << _EOF
-{%@@ if exists_in_path('a_name_that_is_unlikely_to_be_chosen_for_an_executable') @@%}
-this should not exist either
-{%@@ endif @@%}
-_EOF
+# import
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/abc
 
-#cat ${tmps}/dotfiles/abc
+# checks
+inside="${tmps}/dotfiles/${tmpd}/abc"
+[ ! -e ${inside} ] && exit 1
 
-# install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-
-#cat ${tmpd}/abc
-
-grep '^this should exist' ${tmpd}/abc >/dev/null
-grep '^this should exist too' ${tmpd}/abc >/dev/null
 set +e
-grep '^this should not exist' ${tmpd}/abc >/dev/null && exit 1
-grep '^this should not exist either' ${tmpd}/abc >/dev/null && exit 1
+cat ${cfg} | grep 'link:' && exit 1
 set -e
 
-#cat ${tmpd}/abc
+# import with parent by default
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  link_on_import: link
+dotfiles:
+profiles:
+_EOF
+
+# import
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/abc
+
+# checks
+inside="${tmps}/dotfiles/${tmpd}/abc"
+[ ! -e ${inside} ] && exit 1
+
+cat ${cfg}
+cat ${cfg} | grep 'link: link' >/dev/null
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

@@ -89,7 +89,7 @@ def _fake_args():
     args['--force'] = False
     args['--nodiff'] = False
     args['--showdiff'] = True
-    args['--inv-link'] = False
+    args['--link'] = 'nolink'
     args['--template'] = False
     args['--temp'] = False
     args['<key>'] = []
@@ -118,14 +118,13 @@ def load_options(confpath, profile):
     args['--cfg'] = confpath
     args['--profile'] = profile
     # and get the options
-    # TODO need to patch options
     o = Options(args=args)
     o.profile = profile
     o.dry = False
     o.profile = profile
     o.safe = True
     o.install_diff = True
-    o.link = LinkTypes.NOLINK.value
+    o.import_link = LinkTypes.NOLINK
     o.install_showdiff = True
     o.debug = True
     if ENV_NODEBUG in os.environ:

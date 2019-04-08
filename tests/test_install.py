@@ -17,8 +17,8 @@ from dotdrop.installer import Installer
 from dotdrop.action import Action
 from dotdrop.dotdrop import cmd_install
 from dotdrop.options import BACKUP_SUFFIX
-from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import header
+from dotdrop.linktypes import LinkTypes
 
 
 class TestInstall(unittest.TestCase):
@@ -57,12 +57,7 @@ exec bspwm
                 f.write('  {}:\n'.format(d.key))
                 f.write('    dst: {}\n'.format(d.dst))
                 f.write('    src: {}\n'.format(d.src))
-                if d.link == LinkTypes.CHILDREN:
-                    f.write('    link_children: {}\n'
-                            .format(str(d.link == LinkTypes.CHILDREN).lower()))
-                else:
-                    f.write('    link: {}\n'
-                            .format(str(d.link == LinkTypes.PARENTS).lower()))
+                f.write('    link: {}\n'.format(d.link.name.lower()))
                 if len(d.actions) > 0:
                     f.write('    actions:\n')
                     for action in d.actions:
@@ -122,7 +117,8 @@ exec bspwm
         f5, c5 = create_random_file(tmp)
         dst5 = os.path.join(dst, get_string(6))
         self.addCleanup(clean, dst5)
-        d5 = Dotfile(get_string(6), dst5, os.path.basename(f5), link=True)
+        d5 = Dotfile(get_string(6), dst5,
+                     os.path.basename(f5), link=LinkTypes.LINK)
 
         # create the dotfile directories in dotdrop
         dir1 = create_dir(os.path.join(tmp, get_string(6)))
@@ -148,7 +144,8 @@ exec bspwm
         sub4, _ = create_random_file(dir2)
         self.assertTrue(os.path.exists(sub4))
         # make up the dotfile
-        d7 = Dotfile(get_string(6), dst7, os.path.basename(dir2), link=True)
+        d7 = Dotfile(get_string(6), dst7,
+                     os.path.basename(dir2), link=LinkTypes.LINK)
 
         # to test actions
         value = get_string(12)

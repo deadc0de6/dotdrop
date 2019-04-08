@@ -6,6 +6,7 @@ stores all options to use across dotdrop
 """
 
 import os
+import sys
 import socket
 from docopt import docopt
 
@@ -33,6 +34,11 @@ HOMECFG = '~/.config/{}'.format(NAME)
 ETCXDGCFG = '/etc/xdg/{}'.format(NAME)
 ETCCFG = '/etc/{}'.format(NAME)
 
+OPT_LINK = {
+    LinkTypes.NOLINK.name.lower(): LinkTypes.NOLINK,
+    LinkTypes.LINK.name.lower(): LinkTypes.LINK,
+    LinkTypes.LINK_CHILDREN.name.lower(): LinkTypes.LINK_CHILDREN}
+
 BANNER = """     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
@@ -44,7 +50,7 @@ USAGE = """
 
 Usage:
   dotdrop install   [-VbtfndD] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-Vbld]    [-c <path>] [-p <profile>] <path>...
+  dotdrop import    [-Vbd]     [-c <path>] [-p <profile>] [-l <link>] <path>...
   dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
                                [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]  [-c <path>] [-p <profile>]
@@ -61,11 +67,11 @@ Options:
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -o --dopts=<opts>       Diff options [default: ].
+  -l --link=<link>        "link_on_import" (nolink|link|link_children).
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
-  -l --inv-link           Invert the value of "link_by_default" when importing.
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not warn if exists.
   -k --key                Treat <path> as a dotfile key.
@@ -74,7 +80,6 @@ Options:
   -b --no-banner          Do not display the banner.
   -v --version            Show version.
   -h --help               Show this screen.
-
 """.format(BANNER, PROFILE)
 
 
@@ -179,6 +184,8 @@ class Options(AttrMonitor):
         self.conf = Cfg(self.confpath, profile=profile, debug=self.debug)
         # transform the configs in attribute
         for k, v in self.conf.get_settings().items():
+            if self.debug:
+                self.log.dbg('setting: {}={}'.format(k, v))
             setattr(self, k, v)
 
     def _apply_args(self):
@@ -195,16 +202,18 @@ class Options(AttrMonitor):
         # adapt attributes based on arguments
         self.dry = self.args['--dry']
         self.safe = not self.args['--force']
-        self.link = LinkTypes.NOLINK
-        if self.link_by_default:
-            self.link = LinkTypes.PARENTS
 
-        if self.args['--inv-link']:
-            # Only invert link type from NOLINK to PARENTS and vice-versa
-            if self.link == LinkTypes.NOLINK:
-                self.link = LinkTypes.PARENTS
-            elif self.link == LinkTypes.PARENTS:
-                self.link = LinkTypes.NOLINK
+        # import link default value
+        self.import_link = self.link_on_import
+        if self.args['--link']:
+            # overwrite default import link with cli switch
+            link = self.args['--link']
+            if link not in OPT_LINK.keys():
+                self.log.err('bad option for --link: {}'.format(link))
+                sys.exit(USAGE)
+            self.import_link = OPT_LINK[link]
+        if self.debug:
+            self.log.dbg('link_import value: {}'.format(self.import_link))
 
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']
