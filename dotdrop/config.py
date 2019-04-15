@@ -34,12 +34,13 @@ class Cfg:
     key_imp_link = 'link_on_import'
     key_dotfile_link = 'link_dotfile_default'
     key_workdir = 'workdir'
+    key_cmpignore = 'cmpignore'
+    key_upignore = 'upignore'
 
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
-    key_cmpignore = 'cmpignore'
-    key_upignore = 'upignore'
+    key_import_profiles = 'import_profiles'
 
     # actions keys
     key_actions = 'actions'
@@ -271,6 +272,18 @@ class Cfg:
                     self._load_actions(external_actions)
                 except KeyError:
                     pass
+        except KeyError:
+            pass
+
+        # parse external profiles
+        try:
+            ext_configs = self.lnk_settings[self.key_import_profiles]
+            for config in ext_configs:
+                ext_config = Cfg(config)
+                self.dotfiles.update(ext_config.dotfiles)
+                self.lnk_profiles.update(ext_config.lnk_profiles)
+                self.prodots.update(ext_config.prodots)
+                # need variables, actions and so on
         except KeyError:
             pass
 
@@ -786,9 +799,12 @@ class Cfg:
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
         if it already exists, False and a new unique key otherwise"""
-        dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
-        if dotfile.dst in [x[1] for x in dsts]:
-            return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
+        try:
+            return True, next(key
+                              for key, d in self.dotfiles.items()
+                              if d.dst == dotfile.dst)
+        except StopIteration:
+            pass
         # return key for this new dotfile
         path = os.path.expanduser(dotfile.dst)
         keys = self.dotfiles.keys()

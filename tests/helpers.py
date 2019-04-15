@@ -9,6 +9,7 @@ import shutil
 import string
 import random
 import tempfile
+import yaml
 
 from dotdrop.options import Options, ENV_NODEBUG
 from dotdrop.linktypes import LinkTypes
@@ -149,8 +150,14 @@ def get_dotfile_from_yaml(dic, path):
     return [d for d in dotfiles.values() if d['src'] == src][0]
 
 
+def yaml_dashed_list(items, indent=0):
+    return ('\n'.join('{}- {}'.format(' ' * indent, item) for item in items)
+            + '\n')
+
+
 def create_fake_config(directory, configname='config.yaml',
-                       dotpath='dotfiles', backup=True, create=True):
+                       dotpath='dotfiles', backup=True, create=True,
+                       import_profiles=()):
     """Create a fake config file"""
     path = os.path.join(directory, configname)
     workdir = os.path.join(directory, 'workdir')
@@ -160,7 +167,27 @@ def create_fake_config(directory, configname='config.yaml',
         f.write('  create: {}\n'.format(str(create)))
         f.write('  dotpath: {}\n'.format(dotpath))
         f.write('  workdir: {}\n'.format(workdir))
+        if import_profiles:
+            f.write('  import_profiles:\n')
+            f.write(yaml_dashed_list(import_profiles, 4))
         f.write('dotfiles:\n')
         f.write('profiles:\n')
         f.write('actions:\n')
     return path
+
+
+def populate_fake_config(config, dotfiles=(), profiles=()):
+    """Adds some juicy content to config files"""
+    is_path = isinstance(config, str)
+    if is_path:
+        config_path = config
+        with open(config_path) as config_file:
+            config = yaml.safe_load(config_file)
+
+    config['dotfiles'] = dotfiles
+    config['profiles'] = profiles
+
+    if is_path:
+        with open(config_path, 'w') as config_file:
+            yaml.safe_dump(config, config_file, default_flow_style=False,
+                           indent=2)

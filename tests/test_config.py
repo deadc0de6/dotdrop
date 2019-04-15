@@ -14,7 +14,7 @@ from dotdrop.config import Cfg
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from tests.helpers import get_tempdir, clean, \
-        create_fake_config, _fake_args
+        create_fake_config, _fake_args, populate_fake_config
 
 
 class TestConfig(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestConfig(unittest.TestCase):
     CONFIG_DOTPATH = 'dotfiles'
     TMPSUFFIX = '.dotdrop'
     CONFIG_NAME = 'config.yaml'
+    CONFIG_NAME_2 = 'config-2.yaml'
 
     def test_config(self):
         """Test the config class"""
@@ -198,6 +199,79 @@ profiles:
         # do the tests
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
+
+    def test_include_profiles(self):
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        # create the imported base config file
+        imported = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME_2,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        # create the importing base config file
+        importing = create_fake_config(tmp,
+                                       configname=self.CONFIG_NAME,
+                                       dotpath=self.CONFIG_DOTPATH,
+                                       backup=self.CONFIG_BACKUP,
+                                       create=self.CONFIG_CREATE,
+                                       import_profiles=(imported,))
+
+        # keys
+        keys = {
+            'dotfile1': 'f_vimrc',
+            'dotfile2': 'f_xinitrc',
+            'profile1': 'host1',
+            'profile2': 'host2',
+            }
+
+        # edit the imported config
+        dotfiles_imported = {
+                keys['dotfile1']: {'dst': '~/.vimrc', 'src': 'vimrc'},
+                }
+        profiles_imported = {
+            keys['profile1']: {'dotfiles': [keys['dotfile1']]},
+        }
+        populate_fake_config(imported,
+                             dotfiles=dotfiles_imported,
+                             profiles=profiles_imported)
+
+        # edit the importing config
+        dotfiles_importing = {
+                keys['dotfile2']: {'dst': '~/.vimrc', 'src': 'vimrc'},
+                }
+        profiles_importing = {
+                keys['profile2']: {
+                    'dotfiles': [keys['dotfile2']],
+                    'include': [keys['profile1']],
+                    }
+                }
+        populate_fake_config(importing,
+                             dotfiles=dotfiles_importing,
+                             profiles=profiles_importing)
+
+        # do the tests
+        importing_cfg = Cfg(importing)
+        self.assertIsNotNone(importing_cfg)
+
+        # test profile
+        profiles = importing_cfg.get_profiles()
+        self.assertIn(keys['profile2'], profiles)
+
+        # test dotfiles
+        importing_cfg_dotfiles = [
+            (dotfile.key, {'src': dotfile.src, 'dst': dotfile.dst})
+            for dotfile in importing_cfg.prodots[keys['profile2']]
+            ]
+
+        self.assertIn(
+            (keys['dotfile2'], dotfiles_importing[keys['dotfile2']]),
+            importing_cfg_dotfiles)
+        self.assertIn(
+            (keys['dotfile1'], dotfiles_imported[keys['dotfile1']]),
+            importing_cfg_dotfiles)
 
 
 def main():
