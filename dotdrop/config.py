@@ -5,16 +5,18 @@ Copyright (c) 2017, deadc0de6
 yaml config file manager
 """
 
-import yaml
+import inspect
 import os
 import shlex
+
+import yaml
 
 # local import
 from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
-from dotdrop.utils import strip_home, shell
+from dotdrop.utils import is_dict, is_not_magic, strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
 
@@ -40,7 +42,7 @@ class Cfg:
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
-    key_import_profiles = 'import_profiles'
+    key_import_configs = 'import_configs'
 
     # actions keys
     key_actions = 'actions'
@@ -277,13 +279,9 @@ class Cfg:
 
         # parse external profiles
         try:
-            ext_configs = self.lnk_settings[self.key_import_profiles]
+            ext_configs = self.lnk_settings[self.key_import_configs] or ()
             for config in ext_configs:
-                ext_config = Cfg(config)
-                self.dotfiles.update(ext_config.dotfiles)
-                self.lnk_profiles.update(ext_config.lnk_profiles)
-                self.prodots.update(ext_config.prodots)
-                # need variables, actions and so on
+                self._merge_cfg(config)
         except KeyError:
             pass
 
@@ -456,6 +454,23 @@ class Cfg:
                 df = ','.join(d.key for d in self.prodots[k])
                 self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
         return True
+
+    def _merge_cfg(self, config_path):
+        try:
+            ext_config = Cfg(self._abs_path(config_path))
+        except ValueError:
+            raise ValueError(
+                'external config file not found: {}'.format(config_path))
+
+        ext_members = (
+            (name, member)
+            for name, member in inspect.getmembers(ext_config, is_dict)
+            if name != 'content' and is_not_magic(name)
+        )
+        for name, ext_member in ext_members:
+            self_member = getattr(self, name, {})
+            ext_member.update(self_member)
+            setattr(self, name, ext_member)
 
     def _load_ext_variables(self, paths, profile=None):
         """load external variables"""

@@ -130,3 +130,11 @@ def must_ignore(paths, ignores, debug=False):
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
     return False
+
+
+def is_dict(obj):
+    return isinstance(obj, dict)
+
+
+def is_not_magic(name):
+    return (name[0:2], name[-2:]) != ('__', '__')

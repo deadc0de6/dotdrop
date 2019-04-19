@@ -157,7 +157,7 @@ def yaml_dashed_list(items, indent=0):
 
 def create_fake_config(directory, configname='config.yaml',
                        dotpath='dotfiles', backup=True, create=True,
-                       import_profiles=()):
+                       import_configs=()):
     """Create a fake config file"""
     path = os.path.join(directory, configname)
     workdir = os.path.join(directory, 'workdir')
@@ -167,9 +167,9 @@ def create_fake_config(directory, configname='config.yaml',
         f.write('  create: {}\n'.format(str(create)))
         f.write('  dotpath: {}\n'.format(dotpath))
         f.write('  workdir: {}\n'.format(workdir))
-        if import_profiles:
-            f.write('  import_profiles:\n')
-            f.write(yaml_dashed_list(import_profiles, 4))
+        if import_configs:
+            f.write('  import_configs:\n')
+            f.write(yaml_dashed_list(import_configs, 4))
         f.write('dotfiles:\n')
         f.write('profiles:\n')
         f.write('actions:\n')
