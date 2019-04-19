@@ -217,7 +217,7 @@ profiles:
                                        dotpath=self.CONFIG_DOTPATH,
                                        backup=self.CONFIG_BACKUP,
                                        create=self.CONFIG_CREATE,
-                                       import_profiles=(imported,))
+                                       import_configs=(imported,))
 
         # keys
         keys = {
