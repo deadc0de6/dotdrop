@@ -34,6 +34,8 @@ class Cfg:
     key_imp_link = 'link_on_import'
     key_dotfile_link = 'link_dotfile_default'
     key_workdir = 'workdir'
+
+    # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
     key_cmpignore = 'cmpignore'
@@ -100,6 +102,7 @@ class Cfg:
             raise ValueError('config file path undefined')
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist: {}'.format(cfgpath))
+
         # make sure to have an absolute path to config file
         self.cfgpath = os.path.abspath(cfgpath)
         self.debug = debug
@@ -220,29 +223,25 @@ class Cfg:
             return False
 
         # parse the profiles
-        self.lnk_profiles = self.content[self.key_profiles]
-        if self.lnk_profiles is None:
-            # ensures self.lnk_profiles is a dict
+        # ensures self.lnk_profiles is a dict
+        if not isinstance(self.content[self.key_profiles], dict):
             self.content[self.key_profiles] = {}
-            self.lnk_profiles = self.content[self.key_profiles]
-        for k, v in self.lnk_profiles.items():
-            if not v:
-                continue
-            if self.key_profiles_dots in v and \
-                    v[self.key_profiles_dots] is None:
-                # if has the dotfiles entry but is empty
-                # ensures it's an empty list
-                v[self.key_profiles_dots] = []
+
+        self.lnk_profiles = self.content[self.key_profiles]
+        for p in filter(bool, self.lnk_profiles.values()):
+            # Ensures that the dotfiles entry is an empty list when not given
+            # or none
+            p.setdefault(self.key_profiles_dots, [])
+            if p[self.key_profiles_dots] is None:
+                p[self.key_profiles_dots] = []
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = \
-            self._abs_path(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = self._abs_path(self.curdotpath)
 
         # make sure we have an absolute workdir
         self.curworkdir = self.lnk_settings[self.key_workdir]
-        self.lnk_settings[self.key_workdir] = \
-            self._abs_path(self.curworkdir)
+        self.lnk_settings[self.key_workdir] = self._abs_path(self.curworkdir)
 
         # load external variables/dynvariables
         if self.key_import_vars in self.lnk_settings:
@@ -258,7 +257,7 @@ class Cfg:
             self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
 
         # parse external actions
-        if self.key_import_actions in self.lnk_settings:
+        try:
             for path in self.lnk_settings[self.key_import_actions]:
                 path = self._abs_path(path)
                 if self.debug:
@@ -267,6 +266,8 @@ class Cfg:
                 if self.key_actions in content and \
                         content[self.key_actions] is not None:
                     self._load_actions(content[self.key_actions])
+        except KeyError:
+            pass
 
         # parse local actions
         if self.key_actions in self.content and \
@@ -285,14 +286,14 @@ class Cfg:
             for k, v in self.content[self.key_trans_w].items():
                 self.trans_w[k] = Transform(k, v)
 
-        # parse the dotfiles
-        # and construct the dict of objects per dotfile key
-        if not self.content[self.key_dotfiles]:
-            # ensures the dotfiles entry is a dict
+        # parse the dotfiles and construct the dict of objects per dotfile key
+        # ensures the dotfiles entry is a dict
+        if not isinstance(self.content[self.key_dotfiles], dict):
             self.content[self.key_dotfiles] = {}
 
-        for k in self.content[self.key_dotfiles].keys():
-            v = self.content[self.key_dotfiles][k]
+        dotfiles = self.content[self.key_dotfiles]
+        noempty_default = self.lnk_settings[self.key_ignoreempty]
+        for k, v in dotfiles.items():
             src = os.path.normpath(v[self.key_dotfiles_src])
             dst = os.path.normpath(v[self.key_dotfiles_dst])
 
@@ -306,7 +307,7 @@ class Cfg:
 
             # fix it
             v = self._fix_dotfile_link(k, v)
-            self.content[self.key_dotfiles][k] = v
+            dotfiles[k] = v
 
             # get link type
             link = self._get_def_link()
@@ -314,13 +315,10 @@ class Cfg:
                 link = self._string_to_linktype(v[self.key_dotfiles_link])
 
             # get ignore empty
-            noempty = v[self.key_dotfiles_noempty] if \
-                self.key_dotfiles_noempty \
-                in v else self.lnk_settings[self.key_ignoreempty]
+            noempty = v.get(self.key_dotfiles_noempty, noempty_default)
 
             # parse actions
-            itsactions = v[self.key_dotfiles_actions] if \
-                self.key_dotfiles_actions in v else []
+            itsactions = v.get(self.key_dotfiles_actions, [])
             actions = self._parse_actions(itsactions, profile=profile)
             if self.debug:
                 self.log.dbg('action for {}'.format(k))
@@ -329,8 +327,7 @@ class Cfg:
                         self.log.dbg('- {}: {}'.format(t, action))
 
             # parse read transformation
-            itstrans_r = v[self.key_dotfiles_trans_r] if \
-                self.key_dotfiles_trans_r in v else None
+            itstrans_r = v.get(self.key_dotfiles_trans_r)
             trans_r = None
             if itstrans_r:
                 if type(itstrans_r) is list:
@@ -347,8 +344,7 @@ class Cfg:
                     return False
 
             # parse write transformation
-            itstrans_w = v[self.key_dotfiles_trans_w] if \
-                self.key_dotfiles_trans_w in v else None
+            itstrans_w = v.get(self.key_dotfiles_trans_w)
             trans_w = None
             if itstrans_w:
                 if type(itstrans_w) is list:
@@ -373,13 +369,11 @@ class Cfg:
                 trans_w = None
 
             # parse cmpignore pattern
-            cmpignores = v[self.key_dotfiles_cmpignore] if \
-                self.key_dotfiles_cmpignore in v else []
+            cmpignores = v.get(self.key_dotfiles_cmpignore, [])
             cmpignores.extend(self.cmpignores)
 
             # parse upignore pattern
-            upignores = v[self.key_dotfiles_upignore] if \
-                self.key_dotfiles_upignore in v else []
+            upignores = v.get(self.key_dotfiles_upignore, [])
             upignores.extend(self.upignores)
 
             # create new dotfile
@@ -390,16 +384,14 @@ class Cfg:
                                        upignore=upignores)
 
         # assign dotfiles to each profile
-        for k, v in self.lnk_profiles.items():
-            self.prodots[k] = []
-            if not v:
+        self.prodots = {k: [] for k in self.lnk_profiles.keys()}
+        for name, profile in self.lnk_profiles.items():
+            if not profile:
                 continue
-            if self.key_profiles_dots not in v:
-                # ensures is a list
-                v[self.key_profiles_dots] = []
-            if not v[self.key_profiles_dots]:
+            dots = profile[self.key_profiles_dots]
+            if not dots:
                 continue
-            dots = v[self.key_profiles_dots]
+
             if self.key_all in dots:
                 # add all if key ALL is used
                 self.prodots[k] = list(self.dotfiles.values())
@@ -410,10 +402,11 @@ class Cfg:
                         msg = 'unknown dotfile \"{}\" for {}'.format(d, k)
                         self.log.err(msg)
                         continue
-                    self.prodots[k].append(self.dotfiles[d])
+                    self.prodots[name].append(self.dotfiles[d])
 
+        profile_names = self.lnk_profiles.keys()
         # handle "import" (from file) for each profile
-        for k in self.lnk_profiles.keys():
+        for k in profile_names:
             dots = self._get_imported_dotfiles_keys(k)
             for d in dots:
                 if d not in self.dotfiles:
@@ -423,20 +416,19 @@ class Cfg:
                 self.prodots[k].append(self.dotfiles[d])
 
         # handle "include" (from other profile) for each profile
-        for k in self.lnk_profiles.keys():
+        for k in profile_names:
             ret, dots = self._get_included_dotfiles(k)
             if not ret:
                 return False
             self.prodots[k].extend(dots)
 
         # remove duplicates if any
-        for k in self.lnk_profiles.keys():
-            self.prodots[k] = list(set(self.prodots[k]))
+        self.prodots = {k: list(set(v)) for k, v in self.prodots.items()}
 
         # print dotfiles for each profile
         if self.debug:
             for k in self.lnk_profiles.keys():
-                df = ','.join([d.key for d in self.prodots[k]])
+                df = ','.join(d.key for d in self.prodots[k])
                 self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
         return True
 
