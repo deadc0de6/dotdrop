@@ -237,9 +237,11 @@ class Cfg:
         self.lnk_settings[self.key_workdir] = self._abs_path(self.curworkdir)
 
         # load external variables/dynvariables
-        if self.key_import_vars in self.lnk_settings:
-            paths = self.lnk_settings[self.key_import_vars]
+        try:
+            paths = self.lnk_settings[self.key_import_vars] or []
             self._load_ext_variables(paths, profile=profile)
+        except KeyError:
+            pass
 
         # parse external actions
         try:
@@ -248,28 +250,38 @@ class Cfg:
                 if self.debug:
                     self.log.dbg('loading actions from {}'.format(path))
                 content = self._load_yaml(path)
-                if self.key_actions in content and \
-                        content[self.key_actions] is not None:
-                    self._load_actions(content[self.key_actions])
+                # If external actions are None, replaces them with empty dict
+                try:
+                    external_actions = content[self.key_actions] or {}
+                    self._load_actions(external_actions)
+                except KeyError:
+                    pass
         except KeyError:
             pass
 
         # parse local actions
-        if self.key_actions in self.content and \
-                self.content[self.key_actions] is not None:
-            self._load_actions(self.content[self.key_actions])
+        # If local actions are None, replaces them with empty dict
+        try:
+            local_actions = self.content[self.key_actions] or {}
+            self._load_actions(local_actions)
+        except KeyError:
+            pass
 
         # parse read transformations
-        if self.key_trans_r in self.content and \
-                self.content[self.key_trans_r] is not None:
-            for k, v in self.content[self.key_trans_r].items():
-                self.trans_r[k] = Transform(k, v)
+        # If read transformations are None, replaces them with empty dict
+        try:
+            read_trans = self.content[self.key_trans_r] or {}
+            self.trans_r = {k: Transform(k, v) for k, v in read_trans.items()}
+        except KeyError:
+            pass
 
         # parse write transformations
-        if self.key_trans_w in self.content and \
-                self.content[self.key_trans_w] is not None:
-            for k, v in self.content[self.key_trans_w].items():
-                self.trans_w[k] = Transform(k, v)
+        # If write transformations are None, replaces them with empty dict
+        try:
+            read_trans = self.content[self.key_trans_w] or {}
+            self.trans_w = {k: Transform(k, v) for k, v in read_trans.items()}
+        except KeyError:
+            pass
 
         # parse the dotfiles and construct the dict of objects per dotfile key
         # ensures the dotfiles entry is a dict
