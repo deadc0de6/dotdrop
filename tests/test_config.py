@@ -13,11 +13,12 @@ import yaml
 from dotdrop.config import Cfg
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
-from tests.helpers import get_tempdir, clean, \
-        create_fake_config, _fake_args, populate_fake_config
+from tests.helpers import (SubsetTestCase, _fake_args, clean,
+                           create_fake_config, create_yaml_keyval, get_tempdir,
+                           populate_fake_config)
 
 
-class TestConfig(unittest.TestCase):
+class TestConfig(SubsetTestCase):
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
@@ -200,78 +201,235 @@ profiles:
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
-    def test_include_profiles(self):
+    def test_import_configs_merge(self):
+        """Test import_configs when all config keys merge."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
-        # create the imported base config file
-        imported = create_fake_config(tmp,
-                                      configname=self.CONFIG_NAME_2,
-                                      dotpath=self.CONFIG_DOTPATH,
-                                      backup=self.CONFIG_BACKUP,
-                                      create=self.CONFIG_CREATE)
-        # create the importing base config file
-        importing = create_fake_config(tmp,
-                                       configname=self.CONFIG_NAME,
-                                       dotpath=self.CONFIG_DOTPATH,
-                                       backup=self.CONFIG_BACKUP,
-                                       create=self.CONFIG_CREATE,
-                                       import_configs=(imported,))
+        vars_ed = {
+            'variables': {
+                'a_var_ed': '33',
+            },
+            'dynvariables': {
+                'a_dynvar_ed': 'echo 33',
+            },
+        }
+        vars_ing = {
+            'variables': {
+                'a_var_ing': 'dd',
+            },
+            'dynvariables': {
+                'a_dynvar_ing': 'echo dd',
+            },
+        }
+        vars_ed_file = create_yaml_keyval(vars_ed, tmp)
+        vars_ing_file = create_yaml_keyval(vars_ing, tmp)
 
-        # keys
-        keys = {
-            'dotfile1': 'f_vimrc',
-            'dotfile2': 'f_xinitrc',
-            'profile1': 'host1',
-            'profile2': 'host2',
-            }
+        imported = {
+            'config': {
+                'dotpath': 'importing',
+                'import_variables': [vars_ed_file],
+            },
+            'dotfiles': {
+                'f_vimrc': {'dst': '~/.vimrc', 'src': 'vimrc'},
+            },
+            'profiles': {
+                'host1': {
+                    'dotfiles': ['f_vimrc'],
+                },
+            },
+            'actions': {
+                'pre': {
+                    'a_pre_log_ed': 'echo pre 2',
+                },
+                'post': {
+                    'a_post_log_ed': 'echo post 2',
+                },
+                'a_log_ed': 'echo 2',
+            },
+            'trans': {
+                't_log_ed': 'echo 3',
+            },
+            'trans_write': {
+                'tw_log_ed': 'echo 4',
+            },
+            'variables': {
+                'v_log_ed': '42',
+            },
+            'dynvariables': {
+                'dv_log_ed': 'echo 5',
+            },
+        }
+        importing = {
+            'config': {
+                'dotpath': 'importing',
+                'import_variables': [vars_ing_file],
+            },
+            'dotfiles': {
+                'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc'},
+            },
+            'profiles': {
+                'host2': {
+                    'dotfiles': ['f_xinitrc'],
+                    'include': ['host1'],
+                },
+            },
+            'actions': {
+                'pre': {
+                    'a_pre_log_ing': 'echo pre a',
+                },
+                'post': {
+                    'a_post_log_ing': 'echo post a',
+                },
+                'a_log_ing': 'echo a',
+            },
+            'trans': {
+                't_log_ing': 'echo b',
+            },
+            'trans_write': {
+                'tw_log_ing': 'echo c',
+            },
+            'variables': {
+                'v_log_ing': 'd',
+            },
+            'dynvariables': {
+                'dv_log_ing': 'echo e',
+            },
+        }
+
+        # create the imported base config file
+        imported_path = create_fake_config(tmp,
+                                           configname=self.CONFIG_NAME_2,
+                                           **imported['config'])
+        # create the importing base config file
+        importing_path = create_fake_config(tmp,
+                                            configname=self.CONFIG_NAME,
+                                            import_configs=(imported_path,),
+                                            **importing['config'])
 
         # edit the imported config
-        dotfiles_imported = {
-                keys['dotfile1']: {'dst': '~/.vimrc', 'src': 'vimrc'},
-                }
-        profiles_imported = {
-            keys['profile1']: {'dotfiles': [keys['dotfile1']]},
-        }
-        populate_fake_config(imported,
-                             dotfiles=dotfiles_imported,
-                             profiles=profiles_imported)
+        populate_fake_config(imported_path, **{
+            k: v
+            for k, v in imported.items()
+            if k != 'config'
+        })
 
         # edit the importing config
-        dotfiles_importing = {
-                keys['dotfile2']: {'dst': '~/.vimrc', 'src': 'vimrc'},
-                }
-        profiles_importing = {
-                keys['profile2']: {
-                    'dotfiles': [keys['dotfile2']],
-                    'include': [keys['profile1']],
-                    }
-                }
-        populate_fake_config(importing,
-                             dotfiles=dotfiles_importing,
-                             profiles=profiles_importing)
+        populate_fake_config(importing_path, **{
+            k: v
+            for k, v in importing.items()
+            if k != 'config'
+        })
 
         # do the tests
-        importing_cfg = Cfg(importing)
+        importing_cfg = Cfg(importing_path)
+        imported_cfg = Cfg(imported_path)
         self.assertIsNotNone(importing_cfg)
+        self.assertIsNotNone(imported_cfg)
 
-        # test profile
-        profiles = importing_cfg.get_profiles()
-        self.assertIn(keys['profile2'], profiles)
+        # test settings
+        self.assertIsSubset(imported_cfg.lnk_settings,
+                            importing_cfg.lnk_settings)
+
+        # test profiles
+        self.assertIsSubset(imported_cfg.lnk_profiles,
+                            importing_cfg.lnk_profiles)
 
         # test dotfiles
-        importing_cfg_dotfiles = [
-            (dotfile.key, {'src': dotfile.src, 'dst': dotfile.dst})
-            for dotfile in importing_cfg.prodots[keys['profile2']]
-            ]
+        self.assertIsSubset(imported_cfg.dotfiles,
+                            importing_cfg.dotfiles)
 
-        self.assertIn(
-            (keys['dotfile2'], dotfiles_importing[keys['dotfile2']]),
-            importing_cfg_dotfiles)
-        self.assertIn(
-            (keys['dotfile1'], dotfiles_imported[keys['dotfile1']]),
-            importing_cfg_dotfiles)
+        # test actions
+        self.assertIsSubset(imported_cfg.actions['pre'],
+                            importing_cfg.actions['pre'])
+        self.assertIsSubset(imported_cfg.actions['post'],
+                            importing_cfg.actions['post'])
+
+        # test transactions
+        self.assertIsSubset(imported_cfg.trans_r,
+                            importing_cfg.trans_r)
+        self.assertIsSubset(imported_cfg.trans_w,
+                            importing_cfg.trans_w)
+
+        # test transactions
+        self.assertIsSubset(imported_cfg.trans_r,
+                            importing_cfg.trans_r)
+        self.assertIsSubset(imported_cfg.trans_w,
+                            importing_cfg.trans_w)
+
+        # test prodots
+        self.assertIsSubset(imported_cfg.prodots,
+                            importing_cfg.prodots)
+
+        # test ext_variables
+        self.assertIsSubset(imported_cfg.ext_variables,
+                            importing_cfg.ext_variables)
+
+        # test ext_dynvariables
+        self.assertIsSubset(imported_cfg.ext_dynvariables,
+                            importing_cfg.ext_dynvariables)
+
+    def test_import_configs_override(self):
+        imported = {
+            'config': {
+                'dotpath': 'imported',
+                'backup': False,
+            },
+            'dotfiles': {
+                'f_vimrc': {'dst': '~/.vimrc', 'src': 'vimrc'},
+            },
+            'profiles': {
+                'host1': {
+                    'dotfiles': ['f_vimrc'],
+                },
+            },
+            'actions': {
+                'a_log': 'echo 2',
+            },
+            'trans': {
+                't_log': 'echo 3',
+            },
+            'trans_write': {
+                'tw_log': 'echo 4',
+            },
+            'variables': {
+                'v_log': '42',
+            },
+            'dynvariables': {
+                'dv_log': 'echo 5',
+            },
+        }
+        importing = {
+            'config': {
+                'dotpath': 'importing',
+                'backup': True,
+            },
+            'dotfiles': {
+                'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc'},
+            },
+            'profiles': {
+                'host2': {
+                    'dotfiles': ['f_xinitrc'],
+                    'include': ['host1'],
+                },
+            },
+            'actions': {
+                'a_log': 'echo a',
+            },
+            'trans': {
+                't_log': 'echo b',
+            },
+            'trans_write': {
+                'tw_log': 'echo c',
+            },
+            'variables': {
+                'v_log': 'd',
+            },
+            'dynvariables': {
+                'dv_log': 'echo e',
+            },
+        }
 
 
 def main():
