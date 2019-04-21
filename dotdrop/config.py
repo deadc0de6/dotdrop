@@ -147,6 +147,9 @@ class Cfg:
         if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
 
+    def __eq__(self, other):
+        return self.cfgpath == other.cfgpath
+
     def eval_dotfiles(self, profile, variables, debug=False):
         """resolve dotfiles src/dst/actions templating for this profile"""
         t = Templategen(variables=variables)
@@ -282,7 +285,11 @@ class Cfg:
         # If read transformations are None, replaces them with empty dict
         try:
             read_trans = self.content[self.key_trans_r] or {}
-            self.trans_r = {k: Transform(k, v) for k, v in read_trans.items()}
+            self.trans_r.update({
+                k: Transform(k, v)
+                for k, v
+                in read_trans.items()
+            })
         except KeyError:
             pass
 
@@ -290,7 +297,11 @@ class Cfg:
         # If write transformations are None, replaces them with empty dict
         try:
             read_trans = self.content[self.key_trans_w] or {}
-            self.trans_w = {k: Transform(k, v) for k, v in read_trans.items()}
+            self.trans_w.update({
+                k: Transform(k, v)
+                for k, v
+                in read_trans.items()
+            })
         except KeyError:
             pass
 
@@ -439,6 +450,14 @@ class Cfg:
         except ValueError:
             raise ValueError(
                 'external config file not found: {}'.format(config_path))
+
+        list_settings = (
+            (k, v)
+            for k, v in ext_config.lnk_settings.items()
+            if isinstance(v, list)
+        )
+        for k, v in list_settings:
+            self.lnk_settings[k] += v
 
         ext_members = (
             (name, member)
