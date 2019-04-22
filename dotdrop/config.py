@@ -5,7 +5,6 @@ Copyright (c) 2017, deadc0de6
 yaml config file manager
 """
 
-import inspect
 import itertools
 import os
 import shlex
@@ -19,7 +18,7 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
 from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
-from dotdrop.utils import is_dict, is_not_magic, strip_home, shell
+from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
 
@@ -254,7 +253,8 @@ class Cfg:
 
         # parse external actions
         try:
-            for path in self.lnk_settings[self.key_import_actions]:
+            ext_actions = self.lnk_settings[self.key_import_actions] or ()
+            for path in ext_actions:
                 path = self._abs_path(path)
                 if self.debug:
                     self.log.dbg('loading actions from {}'.format(path))
@@ -469,6 +469,27 @@ class Cfg:
                 self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
         return True
 
+    def _merge_dict(self, ext_config, warning_prefix, self_member,
+                    ext_member=None):
+        if ext_member is None:
+            member_name = self_member
+            self_member = getattr(self, member_name)
+            ext_member = getattr(ext_config, member_name)
+
+        common_keys = (set(self_member.keys())
+                       .intersection(set(ext_member.keys())))
+        warning_msg = ('%s {} defined both in %s and %s: {} in %s used'
+                       % (warning_prefix, self.cfgpath, ext_config.cfgpath,
+                          self.cfgpath))
+        for key in common_keys:
+            self.log.warn(warning_msg.format(key, key))
+
+        merged = ext_member.copy()
+        merged.update(self_member)
+        self_member.update(merged)
+
+        return self_member
+
     def _merge_cfg(self, config_path):
         # Parsing external config file
         try:
@@ -477,35 +498,22 @@ class Cfg:
             raise ValueError(
                 'external config file not found: {}'.format(config_path))
 
-        # Merging lists in config settings
-        list_settings = (
-            (k, v)
-            for k, v in ext_config.lnk_settings.items()
-            if isinstance(v, list)
-        )
-        for k, v in list_settings:
-            self.lnk_settings[k] += v
+        # Merging in members from the external config file
+        self._merge_dict(ext_config, 'Dotfile', 'dotfiles')
+        self._merge_dict(ext_config, 'Profile', 'lnk_profiles')
+        self._merge_dict(ext_config, 'Action', 'actions')
+        self._merge_dict(ext_config, 'Transformation', 'trans_r')
+        self._merge_dict(ext_config, 'Write transformation', 'trans_w')
+        self._merge_dict(ext_config, 'Profile', 'prodots')
 
-        # Merging dictionaries
-        ext_members = (
-            (name, member)
-            for name, member in inspect.getmembers(ext_config, is_dict)
-            if name != 'content' and is_not_magic(name)
-        )
-        for name, ext_member in ext_members:
-            self_member = getattr(self, name, {})
-            ext_member.update(self_member)
-            setattr(self, name, ext_member)
-
-        # Merging variables
-        self_content, ext_content = self.content, ext_config.content
-        (ext_content[self.key_variables]
-            .update(self_content[self.key_variables]))
-        self.content[self.key_variables] = ext_content[self.key_variables]
-        (ext_content[self.key_dynvariables]
-            .update(self_content[self.key_dynvariables]))
-        self.content[self.key_dynvariables] = \
-            ext_content[self.key_dynvariables]
+        # variables need to be merged differently
+        merged_variables = self._merge_dict(ext_config, 'Variable',
+                                            self.get_variables(None),
+                                            ext_config.get_variables(None))
+        self.content.setdefault(self.key_variables, {})
+        self.content[self.key_variables] = self.content[self.key_variables] \
+            or {}
+        self.content[self.key_variables].update(merged_variables)
 
     def _load_ext_variables(self, paths, profile=None):
         """load external variables"""

@@ -226,10 +226,32 @@ profiles:
         vars_ed_file = create_yaml_keyval(vars_ed, tmp)
         vars_ing_file = create_yaml_keyval(vars_ing, tmp)
 
+        actions_ed = {
+            'pre': {
+                'a_pre_action_ed': 'echo pre 22',
+            },
+            'post': {
+                'a_post_action_ed': 'echo post 22',
+            },
+            'a_action_ed': 'echo 22',
+        }
+        actions_ing = {
+            'pre': {
+                'a_pre_action_ing': 'echo pre aa',
+            },
+            'post': {
+                'a_post_action_ing': 'echo post aa',
+            },
+            'a_action_ing': 'echo aa',
+        }
+        actions_ed_file = create_yaml_keyval(actions_ed, tmp)
+        actions_ing_file = create_yaml_keyval(actions_ing, tmp)
+
         imported = {
             'config': {
                 'dotpath': 'importing',
                 'import_variables': [vars_ed_file],
+                'import_actions': [actions_ed_file],
             },
             'dotfiles': {
                 'f_vimrc': {'dst': '~/.vimrc', 'src': 'vimrc'},
@@ -265,6 +287,7 @@ profiles:
             'config': {
                 'dotpath': 'importing',
                 'import_variables': [vars_ing_file],
+                'import_actions': [actions_ing_file],
             },
             'dotfiles': {
                 'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc'},
@@ -328,10 +351,6 @@ profiles:
         self.assertIsNotNone(importing_cfg)
         self.assertIsNotNone(imported_cfg)
 
-        # test settings
-        self.assertIsSubset(imported_cfg.lnk_settings,
-                            importing_cfg.lnk_settings)
-
         # test profiles
         self.assertIsSubset(imported_cfg.lnk_profiles,
                             importing_cfg.lnk_profiles)
@@ -365,14 +384,6 @@ profiles:
         # test prodots
         self.assertIsSubset(imported_cfg.prodots, importing_cfg.prodots)
 
-        # test ext_variables (reduntant, but still)
-        self.assertIsSubset(imported_cfg.ext_variables,
-                            importing_cfg.ext_variables)
-
-        # test ext_dynvariables (reduntant, but still)
-        self.assertIsSubset(imported_cfg.ext_dynvariables,
-                            importing_cfg.ext_dynvariables)
-
     def test_import_configs_override(self):
         """Test import_configs when some config keys overlap."""
         tmp = get_tempdir()
@@ -398,11 +409,33 @@ profiles:
         vars_ed_file = create_yaml_keyval(vars_ed, tmp)
         vars_ing_file = create_yaml_keyval(vars_ing, tmp)
 
+        actions_ed = {
+            'pre': {
+                'a_pre_action': 'echo pre 22',
+            },
+            'post': {
+                'a_post_action': 'echo post 22',
+            },
+            'a_action': 'echo 22',
+        }
+        actions_ing = {
+            'pre': {
+                'a_pre_action': 'echo pre aa',
+            },
+            'post': {
+                'a_post_action': 'echo post aa',
+            },
+            'a_action': 'echo aa',
+        }
+        actions_ed_file = create_yaml_keyval(actions_ed, tmp)
+        actions_ing_file = create_yaml_keyval(actions_ing, tmp)
+
         imported = {
             'config': {
                 'dotpath': 'imported',
                 'backup': False,
                 'import_variables': [vars_ed_file],
+                'import_actions': [actions_ed_file],
             },
             'dotfiles': {
                 'f_vimrc': {'dst': '~/.vimrc', 'src': 'vimrc'},
@@ -444,6 +477,7 @@ profiles:
                 'dotpath': 'importing',
                 'backup': True,
                 'import_variables': [vars_ing_file],
+                'import_actions': [actions_ing_file],
             },
             'dotfiles': {
                 'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc'},
@@ -507,12 +541,6 @@ profiles:
         self.assertIsNotNone(importing_cfg)
         self.assertIsNotNone(imported_cfg)
 
-        # test settings
-        self.assertTrue(importing_cfg.lnk_settings['dotpath']
-                        .endswith(importing['config']['dotpath']))
-        self.assertEqual(importing_cfg.lnk_settings['backup'],
-                         importing['config']['backup'])
-
         # test profiles
         self.assertIsSubset(imported_cfg.lnk_profiles,
                             importing_cfg.lnk_profiles)
@@ -560,19 +588,6 @@ profiles:
                             importing_cfg.prodots['host2'])
         self.assertTrue(set(imported_cfg.prodots['host1'])
                         < set(importing_cfg.prodots['host2']))
-
-        # test ext_variables (reduntant, but still)
-        self.assertFalse(any(
-            imported_cfg.ext_variables[key] == importing_cfg.ext_variables[key]
-            for key in imported_cfg.ext_variables
-        ))
-
-        # test ext_dynvariables (reduntant, but still)
-        self.assertFalse(any(
-            (imported_cfg.ext_dynvariables[key]
-                == importing_cfg.ext_dynvariables[key])
-            for key in imported_cfg.ext_dynvariables
-        ))
 
 
 def main():
