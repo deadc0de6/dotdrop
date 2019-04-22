@@ -305,7 +305,7 @@ profiles:
         # create the importing base config file
         importing_path = create_fake_config(tmp,
                                             configname=self.CONFIG_NAME,
-                                            import_configs=(imported_path,),
+                                            import_configs=('config-*.yaml',),
                                             **importing['config'])
 
         # edit the imported config
