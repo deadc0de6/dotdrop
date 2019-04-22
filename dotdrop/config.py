@@ -6,8 +6,10 @@ yaml config file manager
 """
 
 import inspect
+import itertools
 import os
 import shlex
+from glob import iglob
 
 import yaml
 
@@ -283,6 +285,10 @@ class Cfg:
         # parse external profiles
         try:
             ext_configs = self.lnk_settings[self.key_import_configs] or ()
+            ext_configs = itertools.chain.from_iterable(
+                iglob(self._abs_path(config), recursive=True)
+                for config in ext_configs
+            )
             for config in ext_configs:
                 self._merge_cfg(config)
         except KeyError:
@@ -469,7 +475,7 @@ class Cfg:
     def _merge_cfg(self, config_path):
         # Parsing external config file
         try:
-            ext_config = Cfg(self._abs_path(config_path))
+            ext_config = Cfg(config_path)
         except ValueError:
             raise ValueError(
                 'external config file not found: {}'.format(config_path))
