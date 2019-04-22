@@ -337,8 +337,7 @@ profiles:
                             importing_cfg.lnk_profiles)
 
         # test dotfiles
-        self.assertIsSubset(imported_cfg.dotfiles,
-                            importing_cfg.dotfiles)
+        self.assertIsSubset(imported_cfg.dotfiles, importing_cfg.dotfiles)
 
         # test actions
         self.assertIsSubset(imported_cfg.actions['pre'],
@@ -347,44 +346,84 @@ profiles:
                             importing_cfg.actions['post'])
 
         # test transactions
-        self.assertIsSubset(imported_cfg.trans_r,
-                            importing_cfg.trans_r)
-        self.assertIsSubset(imported_cfg.trans_w,
-                            importing_cfg.trans_w)
+        self.assertIsSubset(imported_cfg.trans_r, importing_cfg.trans_r)
+        self.assertIsSubset(imported_cfg.trans_w, importing_cfg.trans_w)
 
-        # test transactions
-        self.assertIsSubset(imported_cfg.trans_r,
-                            importing_cfg.trans_r)
-        self.assertIsSubset(imported_cfg.trans_w,
-                            importing_cfg.trans_w)
+        # test variables
+        imported_vars = {
+            k: v
+            for k, v in imported_cfg.get_variables(None).items()
+            if not k.startswith('_')
+        }
+        importing_vars = {
+            k: v
+            for k, v in importing_cfg.get_variables(None).items()
+            if not k.startswith('_')
+        }
+        self.assertIsSubset(imported_vars, importing_vars)
 
         # test prodots
-        self.assertIsSubset(imported_cfg.prodots,
-                            importing_cfg.prodots)
+        self.assertIsSubset(imported_cfg.prodots, importing_cfg.prodots)
 
-        # test ext_variables
+        # test ext_variables (reduntant, but still)
         self.assertIsSubset(imported_cfg.ext_variables,
                             importing_cfg.ext_variables)
 
-        # test ext_dynvariables
+        # test ext_dynvariables (reduntant, but still)
         self.assertIsSubset(imported_cfg.ext_dynvariables,
                             importing_cfg.ext_dynvariables)
 
     def test_import_configs_override(self):
+        """Test import_configs when some config keys overlap."""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        vars_ed = {
+            'variables': {
+                'a_var': '33',
+            },
+            'dynvariables': {
+                'a_dynvar': 'echo 33',
+            },
+        }
+        vars_ing = {
+            'variables': {
+                'a_var': 'dd',
+            },
+            'dynvariables': {
+                'a_dynvar': 'echo dd',
+            },
+        }
+        vars_ed_file = create_yaml_keyval(vars_ed, tmp)
+        vars_ing_file = create_yaml_keyval(vars_ing, tmp)
+
         imported = {
             'config': {
                 'dotpath': 'imported',
                 'backup': False,
+                'import_variables': [vars_ed_file],
             },
             'dotfiles': {
                 'f_vimrc': {'dst': '~/.vimrc', 'src': 'vimrc'},
+                'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc',
+                              'link': 'link'},
             },
             'profiles': {
                 'host1': {
                     'dotfiles': ['f_vimrc'],
                 },
+                'host2': {
+                    'dotfiles': ['f_xinitrc'],
+                },
             },
             'actions': {
+                'pre': {
+                    'a_pre_log': 'echo pre 2',
+                },
+                'post': {
+                    'a_post_log': 'echo post 2',
+                },
                 'a_log': 'echo 2',
             },
             'trans': {
@@ -404,6 +443,7 @@ profiles:
             'config': {
                 'dotpath': 'importing',
                 'backup': True,
+                'import_variables': [vars_ing_file],
             },
             'dotfiles': {
                 'f_xinitrc': {'dst': '~/.xinitrc', 'src': 'xinitrc'},
@@ -415,6 +455,12 @@ profiles:
                 },
             },
             'actions': {
+                'pre': {
+                    'a_pre_log': 'echo pre a',
+                },
+                'post': {
+                    'a_post_log': 'echo post a',
+                },
                 'a_log': 'echo a',
             },
             'trans': {
@@ -430,6 +476,103 @@ profiles:
                 'dv_log': 'echo e',
             },
         }
+
+        # create the imported base config file
+        imported_path = create_fake_config(tmp,
+                                           configname=self.CONFIG_NAME_2,
+                                           **imported['config'])
+        # create the importing base config file
+        importing_path = create_fake_config(tmp,
+                                            configname=self.CONFIG_NAME,
+                                            import_configs=(imported_path,),
+                                            **importing['config'])
+
+        # edit the imported config
+        populate_fake_config(imported_path, **{
+            k: v
+            for k, v in imported.items()
+            if k != 'config'
+        })
+
+        # edit the importing config
+        populate_fake_config(importing_path, **{
+            k: v
+            for k, v in importing.items()
+            if k != 'config'
+        })
+
+        # do the tests
+        importing_cfg = Cfg(importing_path)
+        imported_cfg = Cfg(imported_path)
+        self.assertIsNotNone(importing_cfg)
+        self.assertIsNotNone(imported_cfg)
+
+        # test settings
+        self.assertTrue(importing_cfg.lnk_settings['dotpath']
+                        .endswith(importing['config']['dotpath']))
+        self.assertEqual(importing_cfg.lnk_settings['backup'],
+                         importing['config']['backup'])
+
+        # test profiles
+        self.assertIsSubset(imported_cfg.lnk_profiles,
+                            importing_cfg.lnk_profiles)
+
+        # test dotfiles
+        self.assertEqual(importing_cfg.dotfiles['f_vimrc'],
+                         imported_cfg.dotfiles['f_vimrc'])
+        self.assertNotEqual(importing_cfg.dotfiles['f_xinitrc'],
+                            imported_cfg.dotfiles['f_xinitrc'])
+
+        # test actions
+        self.assertFalse(any(
+            (imported_cfg.actions['pre'][key]
+                == importing_cfg.actions['pre'][key])
+            for key in imported_cfg.actions['pre']
+        ))
+        self.assertFalse(any(
+            (imported_cfg.actions['post'][key]
+                == importing_cfg.actions['post'][key])
+            for key in imported_cfg.actions['post']
+        ))
+
+        # test transactions
+        self.assertFalse(any(
+            imported_cfg.trans_r[key] == importing_cfg.trans_r[key]
+            for key in imported_cfg.trans_r
+        ))
+        self.assertFalse(any(
+            imported_cfg.trans_w[key] == importing_cfg.trans_w[key]
+            for key in imported_cfg.trans_w
+        ))
+
+        # test variables
+        imported_vars = imported_cfg.get_variables(None)
+        self.assertFalse(any(
+            imported_vars[k] == v
+            for k, v in importing_cfg.get_variables(None).items()
+            if not k.startswith('_')
+        ))
+
+        # test prodots
+        self.assertEqual(imported_cfg.prodots['host1'],
+                         importing_cfg.prodots['host1'])
+        self.assertNotEqual(imported_cfg.prodots['host2'],
+                            importing_cfg.prodots['host2'])
+        self.assertTrue(set(imported_cfg.prodots['host1'])
+                        < set(importing_cfg.prodots['host2']))
+
+        # test ext_variables (reduntant, but still)
+        self.assertFalse(any(
+            imported_cfg.ext_variables[key] == importing_cfg.ext_variables[key]
+            for key in imported_cfg.ext_variables
+        ))
+
+        # test ext_dynvariables (reduntant, but still)
+        self.assertFalse(any(
+            (imported_cfg.ext_dynvariables[key]
+                == importing_cfg.ext_dynvariables[key])
+            for key in imported_cfg.ext_dynvariables
+        ))
 
 
 def main():
