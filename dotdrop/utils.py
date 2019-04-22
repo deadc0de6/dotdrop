@@ -133,8 +133,10 @@ def must_ignore(paths, ignores, debug=False):
 
 
 def is_dict(obj):
+    """Return true if obj is dict."""
     return isinstance(obj, dict)
 
 
 def is_not_magic(name):
+    """Return true if name is not a magic method name."""
     return (name[0:2], name[-2:]) != ('__', '__')
