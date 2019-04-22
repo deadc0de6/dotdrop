@@ -27,7 +27,7 @@ class SubsetTestCase(TestCase):
             supValue = sup[subKey]
 
             if isinstance(subValue, str):
-                self.assertEquals(subValue, supValue)
+                self.assertEqual(subValue, supValue)
                 continue
 
             if isinstance(subValue, dict):
@@ -41,7 +41,7 @@ class SubsetTestCase(TestCase):
                     for subItem in subValue
                 ))
             except TypeError:
-                self.assertEquals(subValue, supValue)
+                self.assertEqual(subValue, supValue)
 
 
 def clean(path):

@@ -467,12 +467,14 @@ class Cfg:
         return True
 
     def _merge_cfg(self, config_path):
+        # Parsing external config file
         try:
             ext_config = Cfg(self._abs_path(config_path))
         except ValueError:
             raise ValueError(
                 'external config file not found: {}'.format(config_path))
 
+        # Merging lists in config settings
         list_settings = (
             (k, v)
             for k, v in ext_config.lnk_settings.items()
@@ -481,6 +483,7 @@ class Cfg:
         for k, v in list_settings:
             self.lnk_settings[k] += v
 
+        # Merging dictionaries
         ext_members = (
             (name, member)
             for name, member in inspect.getmembers(ext_config, is_dict)
@@ -490,6 +493,16 @@ class Cfg:
             self_member = getattr(self, name, {})
             ext_member.update(self_member)
             setattr(self, name, ext_member)
+
+        # Merging variables
+        self_content, ext_content = self.content, ext_config.content
+        (ext_content[self.key_variables]
+            .update(self_content[self.key_variables]))
+        self.content[self.key_variables] = ext_content[self.key_variables]
+        (ext_content[self.key_dynvariables]
+            .update(self_content[self.key_dynvariables]))
+        self.content[self.key_dynvariables] = \
+            ext_content[self.key_dynvariables]
 
     def _load_ext_variables(self, paths, profile=None):
         """load external variables"""
