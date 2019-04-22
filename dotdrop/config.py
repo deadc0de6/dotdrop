@@ -9,6 +9,7 @@ import inspect
 import itertools
 import os
 import shlex
+from functools import partial
 from glob import iglob
 
 import yaml
@@ -282,11 +283,29 @@ class Cfg:
         except KeyError:
             pass
 
-        # parse external profiles
+        # parse external configs
         try:
             ext_configs = self.lnk_settings[self.key_import_configs] or ()
+
+            try:
+                iglob('./*', recursive=True)
+                find_glob = partial(iglob, recursive=True)
+            except TypeError:
+                from platform import python_version
+
+                msg = ('Recursive globbing is not available on Python {}: '
+                       .format(python_version()))
+                if any('**' in config for config in ext_configs):
+                    msg += "import_configs won't work"
+                    self.log.err(msg)
+                    return False
+
+                msg = 'upgrade to version >3.5 if you want to use this feature'
+                self.log.warn(msg)
+                find_glob = iglob
+
             ext_configs = itertools.chain.from_iterable(
-                iglob(self._abs_path(config), recursive=True)
+                find_glob(self._abs_path(config))
                 for config in ext_configs
             )
             for config in ext_configs:
