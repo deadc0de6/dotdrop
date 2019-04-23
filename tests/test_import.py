@@ -39,8 +39,8 @@ class TestImport(unittest.TestCase):
     def assert_file(self, path, o, profile):
         """Make sure path has been inserted in conf for profile"""
         strip = get_path_strip_version(path)
-        self.assertTrue(strip in [x.src for x in o.dotfiles])
-        dsts = [os.path.expanduser(x.dst) for x in o.dotfiles]
+        self.assertTrue(any(x.src.endswith(strip) for x in o.dotfiles))
+        dsts = (os.path.expanduser(x.dst) for x in o.dotfiles)
         self.assertTrue(path in dsts)
 
     def assert_in_yaml(self, path, dic, link=False):
