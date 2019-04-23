@@ -502,8 +502,12 @@ class Cfg:
             self_member = getattr(self, member_name)
             ext_member = getattr(ext_config, member_name)
 
-        common_keys = (set(self_member.keys())
-                       .intersection(set(ext_member.keys())))
+        common_keys = (
+            key
+            for key in (set(self_member.keys())
+                        .intersection(set(ext_member.keys())))
+            if not key.startswith('_')
+        )
         warning_msg = ('%s {} defined both in %s and %s: {} in %s used'
                        % (warning_prefix, self.cfgpath, ext_config.cfgpath,
                           self.cfgpath))
