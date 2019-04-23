@@ -337,8 +337,12 @@ class Cfg:
 
         dotfiles = self.content[self.key_dotfiles]
         noempty_default = self.lnk_settings[self.key_ignoreempty]
+        dotpath = self.content['config']['dotpath']
         for k, v in dotfiles.items():
-            src = os.path.normpath(v[self.key_dotfiles_src])
+            src = v[self.key_dotfiles_src]
+            if dotpath not in src:
+                src = os.path.join(dotpath, src)
+            src = os.path.normpath(self._abs_path(src))
             dst = os.path.normpath(v[self.key_dotfiles_dst])
 
             # Fail if both `link` and `link_children` present

@@ -148,7 +148,6 @@ def load_options(confpath, profile):
     o = Options(args=args)
     o.profile = profile
     o.dry = False
-    o.profile = profile
     o.safe = True
     o.install_diff = True
     o.import_link = LinkTypes.NOLINK
@@ -221,9 +220,9 @@ def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
     return file_name
 
 
-def populate_fake_config(config, dotfiles=(), profiles=(), actions=(),
-                         trans=(), trans_write=(), variables=(),
-                         dynvariables=()):
+def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
+                         trans={}, trans_write={}, variables={},
+                         dynvariables={}):
     """Adds some juicy content to config files"""
     is_path = isinstance(config, str)
     if is_path:
