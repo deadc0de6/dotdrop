@@ -474,7 +474,7 @@ class Cfg:
         return True
 
     def _merge_dict(self, ext_config, warning_prefix, self_member,
-                    ext_member=None):
+                    ext_member=None, traceback=False):
         if ext_member is None:
             member_name = self_member
             self_member = getattr(self, member_name)
@@ -492,7 +492,13 @@ class Cfg:
         for key in common_keys:
             self.log.warn(warning_msg.format(key, key))
 
-        merged = ext_member.copy()
+        if traceback:
+            merged = {
+                k: dict(v, own=False)
+                for k, v in ext_member.items()
+            }
+        else:
+            merged = ext_member.copy()
         merged.update(self_member)
         self_member.update(merged)
 
@@ -507,21 +513,41 @@ class Cfg:
                 'external config file not found: {}'.format(config_path))
 
         # Merging in members from the external config file
-        self._merge_dict(ext_config, 'Dotfile', 'dotfiles')
-        self._merge_dict(ext_config, 'Profile', 'lnk_profiles')
-        self._merge_dict(ext_config, 'Action', 'actions')
-        self._merge_dict(ext_config, 'Transformation', 'trans_r')
-        self._merge_dict(ext_config, 'Write transformation', 'trans_w')
-        self._merge_dict(ext_config, 'Profile', 'prodots')
+        self._merge_dict(ext_config=ext_config, warning_prefix='Dotfile',
+                         self_member='dotfiles')
+        self._merge_dict(ext_config=ext_config, warning_prefix='Profile',
+                         self_member='lnk_profiles', traceback=True)
+        self._merge_dict(ext_config=ext_config, warning_prefix='Action',
+                         self_member='actions')
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Transformation',
+                         self_member='trans_r')
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Write transformation',
+                         self_member='trans_w')
+        self._merge_dict(ext_config=ext_config, warning_prefix='Profile',
+                         self_member='prodots')
 
-        # variables need to be merged differently
-        merged_variables = self._merge_dict(ext_config, 'Variable',
-                                            self.get_variables(None),
-                                            ext_config.get_variables(None))
-        self.content.setdefault(self.key_variables, {})
-        self.content[self.key_variables] = self.content[self.key_variables] \
-            or {}
-        self.content[self.key_variables].update(merged_variables)
+        # variables are merged in ext_*variables so as not to be added in
+        # self.content. This needs an additional step to account for imported
+        # variables sharing a key with the ones defined in self.content.
+        variables = {
+            k: v
+            for k, v in ext_config._get_variables(None).items()
+            if k not in self.content[self.key_variables]
+        }
+        dyn_variables = {
+            k: v
+            for k, v in ext_config._get_dynvariables(None).items()
+            if k not in self.content[self.key_dynvariables]
+        }
+        self._merge_dict(ext_config=ext_config, warning_prefix='Variable',
+                         self_member=self.ext_variables,
+                         ext_member=variables)
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Dynamic variable',
+                         self_member=self.ext_dynvariables,
+                         ext_member=dyn_variables)
 
     def _load_ext_variables(self, paths, profile=None):
         """load external variables"""
@@ -784,11 +810,19 @@ class Cfg:
         v[self.key_dotfiles_link] = new
         return v
 
+    @classmethod
+    def _filter_not_own(cls, content):
+        return {
+            k: cls._filter_not_own(v) if isinstance(v, dict) else v
+            for k, v in content.items()
+            if not isinstance(v, dict) or v.get('own', True)
+        }
+
     def _save(self, content, path):
         """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
-            ret = yaml.safe_dump(content, f,
+            ret = yaml.safe_dump(self._filter_not_own(content), f,
                                  default_flow_style=False,
                                  indent=2)
         if ret:
