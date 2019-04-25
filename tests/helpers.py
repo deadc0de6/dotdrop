@@ -242,3 +242,24 @@ def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
         with open(config_path, 'w') as config_file:
             yaml.safe_dump(config, config_file, default_flow_style=False,
                            indent=2)
+
+
+def file_in_yaml(yaml_file, path, link=False):
+    """Return whether path is in the given yaml file as a dotfile."""
+    strip = get_path_strip_version(path)
+
+    if isinstance(yaml_file, str):
+        with open(yaml_file) as f:
+            yaml_conf = yaml.safe_load(f)
+    else:
+        yaml_conf = yaml_file
+
+    dotfiles = yaml_conf['dotfiles'].values()
+
+    in_src = strip in (x['src'] for x in dotfiles)
+    in_dst = path in (os.path.expanduser(x['dst']) for x in dotfiles)
+
+    if link:
+        has_link = get_dotfile_from_yaml(yaml_conf, path)['link']
+        return in_src and in_dst and has_link
+    return in_src and in_dst
