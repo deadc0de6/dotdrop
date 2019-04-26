@@ -475,6 +475,29 @@ class Cfg:
 
     def _merge_dict(self, ext_config, warning_prefix, self_member,
                     ext_member=None, traceback=False):
+        """Merge into self a dictionary instance members from an external Cfg.
+
+        This method merges instance members of another Cfg instance into self.
+        It issues a warning for any key shared between self and the other Cfg.
+        It can adds an own=False porperty to any dictionary in the external
+        instance member before merging.
+
+        :param ext_config: The other Cfg to merge from.
+        :type ext_config: Cfg
+        :param warnign_prefix: The prefix to th warning messages.
+        :type warning_prefix: str
+        :param self_member: The member of self which will be augmented by the
+            external member. Or the self_member name as a string.
+        :type self_member: dict or str
+        :param ext_member: The member of ext_config which wil be merged in
+            self_member. When not given, self_member is assumed to be a string,
+            and self_member and ext_member are supposed to have the same name.
+        :type ext_member: dict or None
+        :param traceback: Whether to add own=False to ext_member dict values
+            before merging in.
+        :type traceback: bool
+
+        """
         if ext_member is None:
             member_name = self_member
             self_member = getattr(self, member_name)
@@ -484,7 +507,7 @@ class Cfg:
             key
             for key in (set(self_member.keys())
                         .intersection(set(ext_member.keys())))
-            if not key.startswith('_')
+            if not key.startswith('_')  # filtering out internal variables
         )
         warning_msg = ('%s {} defined both in %s and %s: {} in %s used'
                        % (warning_prefix, self.cfgpath, ext_config.cfgpath,
@@ -493,6 +516,8 @@ class Cfg:
             self.log.warn(warning_msg.format(key, key))
 
         if traceback:
+            # Assumes v to be a dict. So far it's only used for profiles,
+            # that are in fact dicts
             merged = {
                 k: dict(v, own=False)
                 for k, v in ext_member.items()
@@ -505,6 +530,7 @@ class Cfg:
         return self_member
 
     def _merge_cfg(self, config_path):
+        """Merge an external config.yaml file into self."""
         # Parsing external config file
         try:
             ext_config = Cfg(config_path)
@@ -812,6 +838,9 @@ class Cfg:
 
     @classmethod
     def _filter_not_own(cls, content):
+        """Filters out from a dict its dict values with own=False."""
+        # This way it recursively explores only dicts. Since own=False is used
+        # only in profiles, which are in fact dicts, this is fine for now.
         return {
             k: cls._filter_not_own(v) if isinstance(v, dict) else v
             for k, v in content.items()
