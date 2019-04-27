@@ -306,7 +306,12 @@ class Cfg:
             # parse actions
             itsactions = v[self.key_dotfiles_actions] if \
                 self.key_dotfiles_actions in v else []
-            actions = self._parse_actions(itsactions)
+            actions = self._parse_actions(itsactions, profile=profile)
+            if self.debug:
+                self.log.dbg('action for {}'.format(k))
+                for t in [self.key_actions_pre, self.key_actions_post]:
+                    for action in actions[t]:
+                        self.log.dbg('- {}: {}'.format(t, action))
 
             # parse read transformation
             itstrans_r = v[self.key_dotfiles_trans_r] if \
@@ -540,19 +545,25 @@ class Cfg:
             dotfiles.extend(self.prodots[other])
         return True, dotfiles
 
-    def _parse_actions(self, entries):
+    def _parse_actions(self, entries, profile=None):
         """parse actions specified for an element
         where entries are the ones defined for this dotfile"""
         res = {
             self.key_actions_pre: [],
             self.key_actions_post: [],
         }
+        vars = self.get_variables(profile, debug=self.debug)
+        t = Templategen(variables=vars)
         for line in entries:
             fields = shlex.split(line)
             entry = fields[0]
             args = []
             if len(fields) > 1:
-                args = fields[1:]
+                tmpargs = fields[1:]
+                args = []
+                # template args
+                for arg in tmpargs:
+                    args.append(t.generate_string(arg))
             action = None
             if self.key_actions_pre in self.actions and \
                     entry in self.actions[self.key_actions_pre]:
