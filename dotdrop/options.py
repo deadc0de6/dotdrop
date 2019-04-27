@@ -73,7 +73,7 @@ Options:
   -T --template           Only template dotfiles.
   -D --showdiff           Show a diff before overwriting.
   -P --show-patch         Provide a one-liner to manually patch template.
-  -f --force              Do not warn if exists.
+  -f --force              Do not ask user confirmation for anything.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
   -d --dry                Dry run.
