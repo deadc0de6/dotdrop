@@ -34,8 +34,6 @@ PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m pytest tests
 
 ## execute bash script tests
-[ "$1" = '--python-only' ] || {
-    for scr in tests-ng/*.sh; do
-        ${scr}
-    done
-}
+for scr in tests-ng/*.sh; do
+  ${scr}
+done
