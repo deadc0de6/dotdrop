@@ -267,6 +267,14 @@ class Cfg:
         if self.key_cmpignore in self.lnk_settings:
             self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
 
+        # load global upignore
+        if self.key_upignore in self.lnk_settings:
+            self.upignores = self.lnk_settings[self.key_upignore] or []
+
+        # load global cmpignore
+        if self.key_cmpignore in self.lnk_settings:
+            self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
+
         # parse external actions
         try:
             ext_actions = self.lnk_settings[self.key_import_actions] or ()
