@@ -42,6 +42,9 @@ class Cfg:
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
+    key_cmpignore = 'cmpignore'
+    key_upignore = 'upignore'
+
     key_import_configs = 'import_configs'
 
     # actions keys
@@ -145,6 +148,11 @@ class Cfg:
         # represents all variables from external files
         self.ext_variables = {}
         self.ext_dynvariables = {}
+
+        # cmpignore patterns
+        self.cmpignores = []
+        # upignore patterns
+        self.upignores = []
 
         if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
@@ -250,6 +258,14 @@ class Cfg:
             self._load_ext_variables(paths, profile=profile)
         except KeyError:
             pass
+
+        # load global upignore
+        if self.key_upignore in self.lnk_settings:
+            self.upignores = self.lnk_settings[self.key_upignore] or []
+
+        # load global cmpignore
+        if self.key_cmpignore in self.lnk_settings:
+            self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
 
         # parse external actions
         try:
@@ -367,7 +383,12 @@ class Cfg:
 
             # parse actions
             itsactions = v.get(self.key_dotfiles_actions, [])
-            actions = self._parse_actions(itsactions)
+            actions = self._parse_actions(itsactions, profile=profile)
+            if self.debug:
+                self.log.dbg('action for {}'.format(k))
+                for t in [self.key_actions_pre, self.key_actions_post]:
+                    for action in actions[t]:
+                        self.log.dbg('- {}: {}'.format(t, action))
 
             # parse read transformation
             itstrans_r = v.get(self.key_dotfiles_trans_r)
@@ -413,9 +434,11 @@ class Cfg:
 
             # parse cmpignore pattern
             cmpignores = v.get(self.key_dotfiles_cmpignore, [])
+            cmpignores.extend(self.cmpignores)
 
             # parse upignore pattern
             upignores = v.get(self.key_dotfiles_upignore, [])
+            upignores.extend(self.upignores)
 
             # create new dotfile
             self.dotfiles[k] = Dotfile(k, dst, src,
@@ -697,19 +720,25 @@ class Cfg:
             dotfiles.extend(self.prodots[other])
         return True, dotfiles
 
-    def _parse_actions(self, entries):
+    def _parse_actions(self, entries, profile=None):
         """parse actions specified for an element
         where entries are the ones defined for this dotfile"""
         res = {
             self.key_actions_pre: [],
             self.key_actions_post: [],
         }
+        vars = self.get_variables(profile, debug=self.debug)
+        t = Templategen(variables=vars)
         for line in entries:
             fields = shlex.split(line)
             entry = fields[0]
             args = []
             if len(fields) > 1:
-                args = fields[1:]
+                tmpargs = fields[1:]
+                args = []
+                # template args
+                for arg in tmpargs:
+                    args.append(t.generate_string(arg))
             action = None
             if self.key_actions_pre in self.actions and \
                     entry in self.actions[self.key_actions_pre]:
