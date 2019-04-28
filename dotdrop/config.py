@@ -36,6 +36,8 @@ class Cfg:
     key_workdir = 'workdir'
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
+    key_cmpignore = 'cmpignore'
+    key_upignore = 'upignore'
 
     # actions keys
     key_actions = 'actions'
@@ -137,6 +139,11 @@ class Cfg:
         # represents all variables from external files
         self.ext_variables = {}
         self.ext_dynvariables = {}
+
+        # cmpignore patterns
+        self.cmpignores = []
+        # upignore patterns
+        self.upignores = []
 
         if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
@@ -241,6 +248,14 @@ class Cfg:
         if self.key_import_vars in self.lnk_settings:
             paths = self.lnk_settings[self.key_import_vars]
             self._load_ext_variables(paths, profile=profile)
+
+        # load global upignore
+        if self.key_upignore in self.lnk_settings:
+            self.upignores = self.lnk_settings[self.key_upignore] or []
+
+        # load global cmpignore
+        if self.key_cmpignore in self.lnk_settings:
+            self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
 
         # parse external actions
         if self.key_import_actions in self.lnk_settings:
@@ -360,10 +375,12 @@ class Cfg:
             # parse cmpignore pattern
             cmpignores = v[self.key_dotfiles_cmpignore] if \
                 self.key_dotfiles_cmpignore in v else []
+            cmpignores.extend(self.cmpignores)
 
             # parse upignore pattern
             upignores = v[self.key_dotfiles_upignore] if \
                 self.key_dotfiles_upignore in v else []
+            upignores.extend(self.upignores)
 
             # create new dotfile
             self.dotfiles[k] = Dotfile(k, dst, src,
