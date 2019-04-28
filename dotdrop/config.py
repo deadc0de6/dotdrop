@@ -460,7 +460,7 @@ class Cfg:
 
             if self.key_all in dots:
                 # add all if key ALL is used
-                self.prodots[k] = list(self.dotfiles.values())
+                self.prodots[name] = list(self.dotfiles.values())
             else:
                 # add the dotfiles
                 for d in dots:
