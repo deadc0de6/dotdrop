@@ -14,6 +14,7 @@ from dotdrop.logger import Logger
 
 
 class Cmd:
+    eq_ignore = ('log',)
 
     def __init__(self, key, action):
         """constructor
@@ -31,7 +32,17 @@ class Cmd:
         return 'cmd({})'.format(self.__str__())
 
     def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+        self_dict = {
+            k: v
+            for k, v in self.__dict__.items()
+            if k not in self.eq_ignore
+        }
+        other_dict = {
+            k: v
+            for k, v in other.__dict__.items()
+            if k not in self.eq_ignore
+        }
+        return self_dict == other_dict
 
     def __hash__(self):
         return hash(self.key) ^ hash(self.action)

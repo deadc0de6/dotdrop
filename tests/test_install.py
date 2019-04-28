@@ -10,8 +10,9 @@ from unittest.mock import MagicMock, patch
 import filecmp
 
 from dotdrop.config import Cfg
-from tests.helpers import create_dir, get_string, get_tempdir, clean, \
-    create_random_file, load_options
+from tests.helpers import (clean, create_dir, create_fake_config,
+                           create_random_file, get_string, get_tempdir,
+                           load_options, populate_fake_config)
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
@@ -230,6 +231,107 @@ exec bspwm
         self.assertTrue(os.path.exists(dst10))
         tempcontent = open(dst10, 'r').read().rstrip()
         self.assertTrue(tempcontent == header())
+
+    def test_install_import_configs(self):
+        """Test the install function with imported configs"""
+        # dotpath location
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        os.mkdir(os.path.join(tmp, 'importing'))
+        os.mkdir(os.path.join(tmp, 'imported'))
+
+        # where dotfiles will be installed
+        dst = get_tempdir()
+        self.assertTrue(os.path.exists(dst))
+        self.addCleanup(clean, dst)
+
+        # creating random dotfiles
+        imported_dotfile, _ = create_random_file(os.path.join(tmp, 'imported'))
+        imported_dotfile = {
+            'dst': os.path.join(dst, imported_dotfile),
+            'key': 'f_{}'.format(imported_dotfile),
+            'name': imported_dotfile,
+            'src': os.path.join(tmp, 'imported', imported_dotfile),
+        }
+        importing_dotfile, _ = \
+            create_random_file(os.path.join(tmp, 'importing'))
+        importing_dotfile = {
+            'dst': os.path.join(dst, importing_dotfile),
+            'key': 'f_{}'.format(importing_dotfile),
+            'name': importing_dotfile,
+            'src': os.path.join(tmp, 'imported', importing_dotfile),
+        }
+
+        imported = {
+            'config': {
+                'dotpath': 'imported',
+            },
+            'dotfiles': {
+                imported_dotfile['key']: {
+                    'dst': imported_dotfile['dst'],
+                    'src': imported_dotfile['name'],
+                },
+            },
+            'profiles': {
+                'host1': {
+                    'dotfiles': [imported_dotfile['key']],
+                },
+            },
+        }
+        importing = {
+            'config': {
+                'dotpath': 'importing',
+            },
+            'dotfiles': {
+                importing_dotfile['key']: {
+                    'dst': importing_dotfile['dst'],
+                    'src': importing_dotfile['src'],
+                },
+            },
+            'profiles': {
+                'host2': {
+                    'dotfiles': [importing_dotfile['key']],
+                    'include': ['host1'],
+                },
+            },
+        }
+
+        # create the imported base config file
+        imported_path = create_fake_config(tmp,
+                                           configname='config-2.yaml',
+                                           **imported['config'])
+        # create the importing base config file
+        importing_path = create_fake_config(tmp,
+                                            configname='config.yaml',
+                                            import_configs=('config-*.yaml',),
+                                            **importing['config'])
+
+        # edit the imported config
+        populate_fake_config(imported_path, **{
+            k: v
+            for k, v in imported.items()
+            if k != 'config'
+        })
+
+        # edit the importing config
+        populate_fake_config(importing_path, **{
+            k: v
+            for k, v in importing.items()
+            if k != 'config'
+        })
+
+        # install them
+        o = load_options(importing_path, 'host2')
+        o.safe = False
+        o.install_showdiff = True
+        o.variables = {}
+        cmd_install(o)
+
+        # now compare the generated files
+        self.assertTrue(os.path.exists(importing_dotfile['dst']))
+        self.assertTrue(os.path.exists(imported_dotfile['dst']))
 
     def test_link_children(self):
         """test the link children"""

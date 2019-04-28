@@ -15,10 +15,10 @@ from dotdrop.dotdrop import cmd_list_files
 from dotdrop.dotdrop import cmd_update
 from dotdrop.linktypes import LinkTypes
 
-from tests.helpers import get_path_strip_version, edit_content, \
-                          load_options, create_random_file, \
-                          clean, get_string, get_dotfile_from_yaml, \
-                          get_tempdir, create_fake_config, create_dir
+from tests.helpers import (clean, create_dir, create_fake_config,
+                           create_random_file, edit_content, file_in_yaml,
+                           get_path_strip_version, get_string, get_tempdir,
+                           load_options, populate_fake_config)
 
 
 class TestImport(unittest.TestCase):
@@ -39,18 +39,13 @@ class TestImport(unittest.TestCase):
     def assert_file(self, path, o, profile):
         """Make sure path has been inserted in conf for profile"""
         strip = get_path_strip_version(path)
-        self.assertTrue(strip in [x.src for x in o.dotfiles])
-        dsts = [os.path.expanduser(x.dst) for x in o.dotfiles]
+        self.assertTrue(any(x.src.endswith(strip) for x in o.dotfiles))
+        dsts = (os.path.expanduser(x.dst) for x in o.dotfiles)
         self.assertTrue(path in dsts)
 
     def assert_in_yaml(self, path, dic, link=False):
         """Make sure "path" is in the "dic" representing the yaml file"""
-        strip = get_path_strip_version(path)
-        self.assertTrue(strip in [x['src'] for x in dic['dotfiles'].values()])
-        dsts = [os.path.expanduser(x['dst']) for x in dic['dotfiles'].values()]
-        if link:
-            self.assertTrue(get_dotfile_from_yaml(dic, path)['link'])
-        self.assertTrue(path in dsts)
+        self.assertTrue(file_in_yaml(dic, path, link))
 
     def test_import(self):
         """Test the import function"""
@@ -202,6 +197,210 @@ class TestImport(unittest.TestCase):
         cmd_update(o)
         c2 = open(indt1, 'r').read()
         self.assertTrue(editcontent == c2)
+
+    def test_ext_config_yaml_not_mix(self):
+        """Test whether the import_configs mixes yaml files upon importing."""
+        # dotfiles on filesystem
+        src = get_tempdir()
+        self.assertTrue(os.path.exists(src))
+        self.addCleanup(clean, src)
+
+        # create some random dotfiles
+        dotfiles = []
+        for _ in range(3):
+            dotfile, _ = create_random_file(src)
+            dotfiles.append(dotfile)
+            self.addCleanup(clean, dotfile)
+        self.assertTrue(all(map(os.path.exists, dotfiles)))
+
+        # create dotdrop home
+        dotdrop_home = get_tempdir()
+        self.assertTrue(os.path.exists(dotdrop_home))
+        self.addCleanup(clean, dotdrop_home)
+
+        imported = {
+            'config': {
+                'dotpath': 'imported',
+            },
+            'dotfiles': {},
+            'profiles': {
+                'host1': {
+                    'dotfiles': [],
+                },
+            },
+            'actions': {
+                'pre': {
+                    'a_pre_log_ed': 'echo pre 2',
+                },
+                'post': {
+                    'a_post_log_ed': 'echo post 2',
+                },
+                'a_log_ed': 'echo 2',
+            },
+            'trans': {
+                't_log_ed': 'echo 3',
+            },
+            'trans_write': {
+                'tw_log_ed': 'echo 4',
+            },
+            'variables': {
+                'v_log_ed': '42',
+            },
+            'dynvariables': {
+                'dv_log_ed': 'echo 5',
+            },
+        }
+        importing = {
+            'config': {
+                'dotpath': 'importing',
+            },
+            'dotfiles': {},
+            'profiles': {
+                'host2': {
+                    'dotfiles': [],
+                    'include': ['host1'],
+                },
+            },
+            'actions': {
+                'pre': {
+                    'a_pre_log_ing': 'echo pre a',
+                },
+                'post': {
+                    'a_post_log_ing': 'echo post a',
+                },
+                'a_log_ing': 'echo a',
+            },
+            'trans': {
+                't_log_ing': 'echo b',
+            },
+            'trans_write': {
+                'tw_log_ing': 'echo c',
+            },
+            'variables': {
+                'v_log_ing': 'd',
+            },
+            'dynvariables': {
+                'dv_log_ing': 'echo e',
+            },
+        }
+
+        dotfiles_ing, dotfiles_ed = dotfiles[:-1], dotfiles[-1:]
+
+        # create the imported base config file
+        imported_path = create_fake_config(dotdrop_home,
+                                           configname='config-2.yaml',
+                                           **imported['config'])
+        # create the importing base config file
+        importing_path = create_fake_config(dotdrop_home,
+                                            configname='config.yaml',
+                                            import_configs=('config-*.yaml',),
+                                            **importing['config'])
+
+        # edit the imported config
+        populate_fake_config(imported_path, **{
+            k: v
+            for k, v in imported.items()
+            if k != 'config'
+        })
+
+        # edit the importing config
+        populate_fake_config(importing_path, **{
+            k: v
+            for k, v in importing.items()
+            if k != 'config'
+        })
+
+        # import the dotfiles
+        o = load_options(imported_path, 'host1')
+        o.import_path = dotfiles_ed
+        cmd_importer(o)
+
+        o = load_options(importing_path, 'host2')
+        o.import_path = dotfiles_ing
+        cmd_importer(o)
+
+        # reload the config
+        o = load_options(importing_path, 'host2')
+
+        # test imported config
+        y = self.load_yaml(imported_path)
+
+        # testing dotfiles
+        self.assertTrue(all(file_in_yaml(y, df) for df in dotfiles_ed))
+        self.assertFalse(any(file_in_yaml(y, df) for df in dotfiles_ing))
+
+        # testing profiles
+        profiles = y['profiles'].keys()
+        self.assertTrue('host1' in profiles)
+        self.assertFalse('host2' in profiles)
+
+        # testing actions
+        actions = y['actions']['pre']
+        actions.update(y['actions']['post'])
+        actions.update({
+            k: v
+            for k, v in y['actions'].items()
+            if k not in ('pre', 'post')
+        })
+        actions = actions.keys()
+        self.assertTrue(all(a.endswith('ed') for a in actions))
+        self.assertFalse(any(a.endswith('ing') for a in actions))
+
+        # testing transformations
+        transformations = y['trans'].keys()
+        self.assertTrue(all(t.endswith('ed') for t in transformations))
+        self.assertFalse(any(t.endswith('ing') for t in transformations))
+        transformations = y['trans_write'].keys()
+        self.assertTrue(all(t.endswith('ed') for t in transformations))
+        self.assertFalse(any(t.endswith('ing') for t in transformations))
+
+        # testing variables
+        variables = y['variables'].keys()
+        self.assertTrue(all(v.endswith('ed') for v in variables))
+        self.assertFalse(any(v.endswith('ing') for v in variables))
+        dyn_variables = y['dynvariables'].keys()
+        self.assertTrue(all(dv.endswith('ed') for dv in dyn_variables))
+        self.assertFalse(any(dv.endswith('ing') for dv in dyn_variables))
+
+        # test importing config
+        y = self.load_yaml(importing_path)
+
+        # testing dotfiles
+        self.assertTrue(all(file_in_yaml(y, df) for df in dotfiles_ing))
+        self.assertFalse(any(file_in_yaml(y, df) for df in dotfiles_ed))
+
+        # testing profiles
+        profiles = y['profiles'].keys()
+        self.assertTrue('host2' in profiles)
+        self.assertFalse('host1' in profiles)
+
+        # testing actions
+        actions = y['actions']['pre']
+        actions.update(y['actions']['post'])
+        actions.update({
+            k: v
+            for k, v in y['actions'].items()
+            if k not in ('pre', 'post')
+        })
+        actions = actions.keys()
+        self.assertTrue(all(action.endswith('ing') for action in actions))
+        self.assertFalse(any(action.endswith('ed') for action in actions))
+
+        # testing transformations
+        transformations = y['trans'].keys()
+        self.assertTrue(all(t.endswith('ing') for t in transformations))
+        self.assertFalse(any(t.endswith('ed') for t in transformations))
+        transformations = y['trans_write'].keys()
+        self.assertTrue(all(t.endswith('ing') for t in transformations))
+        self.assertFalse(any(t.endswith('ed') for t in transformations))
+
+        # testing variables
+        variables = y['variables'].keys()
+        self.assertTrue(all(v.endswith('ing') for v in variables))
+        self.assertFalse(any(v.endswith('ed') for v in variables))
+        dyn_variables = y['dynvariables'].keys()
+        self.assertTrue(all(dv.endswith('ing') for dv in dyn_variables))
+        self.assertFalse(any(dv.endswith('ed') for dv in dyn_variables))
 
 
 def main():
