@@ -5,9 +5,13 @@ Copyright (c) 2017, deadc0de6
 yaml config file manager
 """
 
-import yaml
+import itertools
 import os
 import shlex
+from functools import partial
+from glob import iglob
+
+import yaml
 
 # local import
 from dotdrop.dotfile import Dotfile
@@ -34,10 +38,16 @@ class Cfg:
     key_imp_link = 'link_on_import'
     key_dotfile_link = 'link_dotfile_default'
     key_workdir = 'workdir'
+    key_cmpignore = 'cmpignore'
+    key_upignore = 'upignore'
+
+    # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
     key_cmpignore = 'cmpignore'
     key_upignore = 'upignore'
+
+    key_import_configs = 'import_configs'
 
     # actions keys
     key_actions = 'actions'
@@ -100,6 +110,7 @@ class Cfg:
             raise ValueError('config file path undefined')
         if not os.path.exists(cfgpath):
             raise ValueError('config file does not exist: {}'.format(cfgpath))
+
         # make sure to have an absolute path to config file
         self.cfgpath = os.path.abspath(cfgpath)
         self.debug = debug
@@ -147,6 +158,9 @@ class Cfg:
 
         if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
+
+    def __eq__(self, other):
+        return self.cfgpath == other.cfgpath
 
     def eval_dotfiles(self, profile, variables, debug=False):
         """resolve dotfiles src/dst/actions templating for this profile"""
@@ -220,34 +234,32 @@ class Cfg:
             return False
 
         # parse the profiles
-        self.lnk_profiles = self.content[self.key_profiles]
-        if self.lnk_profiles is None:
-            # ensures self.lnk_profiles is a dict
+        # ensures self.lnk_profiles is a dict
+        if not isinstance(self.content[self.key_profiles], dict):
             self.content[self.key_profiles] = {}
-            self.lnk_profiles = self.content[self.key_profiles]
-        for k, v in self.lnk_profiles.items():
-            if not v:
-                continue
-            if self.key_profiles_dots in v and \
-                    v[self.key_profiles_dots] is None:
-                # if has the dotfiles entry but is empty
-                # ensures it's an empty list
-                v[self.key_profiles_dots] = []
+
+        self.lnk_profiles = self.content[self.key_profiles]
+        for p in filter(bool, self.lnk_profiles.values()):
+            # Ensures that the dotfiles entry is an empty list when not given
+            # or none
+            p.setdefault(self.key_profiles_dots, [])
+            if p[self.key_profiles_dots] is None:
+                p[self.key_profiles_dots] = []
 
         # make sure we have an absolute dotpath
         self.curdotpath = self.lnk_settings[self.key_dotpath]
-        self.lnk_settings[self.key_dotpath] = \
-            self._abs_path(self.curdotpath)
+        self.lnk_settings[self.key_dotpath] = self._abs_path(self.curdotpath)
 
         # make sure we have an absolute workdir
         self.curworkdir = self.lnk_settings[self.key_workdir]
-        self.lnk_settings[self.key_workdir] = \
-            self._abs_path(self.curworkdir)
+        self.lnk_settings[self.key_workdir] = self._abs_path(self.curworkdir)
 
         # load external variables/dynvariables
-        if self.key_import_vars in self.lnk_settings:
-            paths = self.lnk_settings[self.key_import_vars]
+        try:
+            paths = self.lnk_settings[self.key_import_vars] or []
             self._load_ext_variables(paths, profile=profile)
+        except KeyError:
+            pass
 
         # load global upignore
         if self.key_upignore in self.lnk_settings:
@@ -258,42 +270,97 @@ class Cfg:
             self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
 
         # parse external actions
-        if self.key_import_actions in self.lnk_settings:
-            for path in self.lnk_settings[self.key_import_actions]:
+        try:
+            ext_actions = self.lnk_settings[self.key_import_actions] or ()
+            for path in ext_actions:
                 path = self._abs_path(path)
                 if self.debug:
                     self.log.dbg('loading actions from {}'.format(path))
                 content = self._load_yaml(path)
-                if self.key_actions in content and \
-                        content[self.key_actions] is not None:
-                    self._load_actions(content[self.key_actions])
+                # If external actions are None, replaces them with empty dict
+                try:
+                    external_actions = content[self.key_actions] or {}
+                    self._load_actions(external_actions)
+                except KeyError:
+                    pass
+        except KeyError:
+            pass
+
+        # parse external configs
+        try:
+            ext_configs = self.lnk_settings[self.key_import_configs] or ()
+
+            try:
+                iglob('./*', recursive=True)
+                find_glob = partial(iglob, recursive=True)
+            except TypeError:
+                from platform import python_version
+
+                msg = ('Recursive globbing is not available on Python {}: '
+                       .format(python_version()))
+                if any('**' in config for config in ext_configs):
+                    msg += "import_configs won't work"
+                    self.log.err(msg)
+                    return False
+
+                msg = 'upgrade to version >3.5 if you want to use this feature'
+                self.log.warn(msg)
+                find_glob = iglob
+
+            ext_configs = itertools.chain.from_iterable(
+                find_glob(self._abs_path(config))
+                for config in ext_configs
+            )
+            for config in ext_configs:
+                self._merge_cfg(config)
+        except KeyError:
+            pass
 
         # parse local actions
-        if self.key_actions in self.content and \
-                self.content[self.key_actions] is not None:
-            self._load_actions(self.content[self.key_actions])
+        # If local actions are None, replaces them with empty dict
+        try:
+            local_actions = self.content[self.key_actions] or {}
+            self._load_actions(local_actions)
+        except KeyError:
+            pass
 
         # parse read transformations
-        if self.key_trans_r in self.content and \
-                self.content[self.key_trans_r] is not None:
-            for k, v in self.content[self.key_trans_r].items():
-                self.trans_r[k] = Transform(k, v)
+        # If read transformations are None, replaces them with empty dict
+        try:
+            read_trans = self.content[self.key_trans_r] or {}
+            self.trans_r.update({
+                k: Transform(k, v)
+                for k, v
+                in read_trans.items()
+            })
+        except KeyError:
+            pass
 
         # parse write transformations
-        if self.key_trans_w in self.content and \
-                self.content[self.key_trans_w] is not None:
-            for k, v in self.content[self.key_trans_w].items():
-                self.trans_w[k] = Transform(k, v)
+        # If write transformations are None, replaces them with empty dict
+        try:
+            read_trans = self.content[self.key_trans_w] or {}
+            self.trans_w.update({
+                k: Transform(k, v)
+                for k, v
+                in read_trans.items()
+            })
+        except KeyError:
+            pass
 
-        # parse the dotfiles
-        # and construct the dict of objects per dotfile key
-        if not self.content[self.key_dotfiles]:
-            # ensures the dotfiles entry is a dict
+        # parse the dotfiles and construct the dict of objects per dotfile key
+        # ensures the dotfiles entry is a dict
+        if not isinstance(self.content[self.key_dotfiles], dict):
             self.content[self.key_dotfiles] = {}
 
-        for k in self.content[self.key_dotfiles].keys():
-            v = self.content[self.key_dotfiles][k]
-            src = os.path.normpath(v[self.key_dotfiles_src])
+        dotfiles = self.content[self.key_dotfiles]
+        noempty_default = self.lnk_settings[self.key_ignoreempty]
+        dotpath = self.content['config']['dotpath']
+        for k, v in dotfiles.items():
+            src = v[self.key_dotfiles_src]
+            if dotpath not in src:
+                src = os.path.join(dotpath, src)
+            src = os.path.normpath(self._abs_path(src))
             dst = os.path.normpath(v[self.key_dotfiles_dst])
 
             # Fail if both `link` and `link_children` present
@@ -306,7 +373,7 @@ class Cfg:
 
             # fix it
             v = self._fix_dotfile_link(k, v)
-            self.content[self.key_dotfiles][k] = v
+            dotfiles[k] = v
 
             # get link type
             link = self._get_def_link()
@@ -314,13 +381,10 @@ class Cfg:
                 link = self._string_to_linktype(v[self.key_dotfiles_link])
 
             # get ignore empty
-            noempty = v[self.key_dotfiles_noempty] if \
-                self.key_dotfiles_noempty \
-                in v else self.lnk_settings[self.key_ignoreempty]
+            noempty = v.get(self.key_dotfiles_noempty, noempty_default)
 
             # parse actions
-            itsactions = v[self.key_dotfiles_actions] if \
-                self.key_dotfiles_actions in v else []
+            itsactions = v.get(self.key_dotfiles_actions, [])
             actions = self._parse_actions(itsactions, profile=profile)
             if self.debug:
                 self.log.dbg('action for {}'.format(k))
@@ -329,8 +393,7 @@ class Cfg:
                         self.log.dbg('- {}: {}'.format(t, action))
 
             # parse read transformation
-            itstrans_r = v[self.key_dotfiles_trans_r] if \
-                self.key_dotfiles_trans_r in v else None
+            itstrans_r = v.get(self.key_dotfiles_trans_r)
             trans_r = None
             if itstrans_r:
                 if type(itstrans_r) is list:
@@ -347,8 +410,7 @@ class Cfg:
                     return False
 
             # parse write transformation
-            itstrans_w = v[self.key_dotfiles_trans_w] if \
-                self.key_dotfiles_trans_w in v else None
+            itstrans_w = v.get(self.key_dotfiles_trans_w)
             trans_w = None
             if itstrans_w:
                 if type(itstrans_w) is list:
@@ -373,13 +435,11 @@ class Cfg:
                 trans_w = None
 
             # parse cmpignore pattern
-            cmpignores = v[self.key_dotfiles_cmpignore] if \
-                self.key_dotfiles_cmpignore in v else []
+            cmpignores = v.get(self.key_dotfiles_cmpignore, [])
             cmpignores.extend(self.cmpignores)
 
             # parse upignore pattern
-            upignores = v[self.key_dotfiles_upignore] if \
-                self.key_dotfiles_upignore in v else []
+            upignores = v.get(self.key_dotfiles_upignore, [])
             upignores.extend(self.upignores)
 
             # create new dotfile
@@ -390,19 +450,17 @@ class Cfg:
                                        upignore=upignores)
 
         # assign dotfiles to each profile
-        for k, v in self.lnk_profiles.items():
-            self.prodots[k] = []
-            if not v:
+        self.prodots = {k: [] for k in self.lnk_profiles.keys()}
+        for name, profile in self.lnk_profiles.items():
+            if not profile:
                 continue
-            if self.key_profiles_dots not in v:
-                # ensures is a list
-                v[self.key_profiles_dots] = []
-            if not v[self.key_profiles_dots]:
+            dots = profile[self.key_profiles_dots]
+            if not dots:
                 continue
-            dots = v[self.key_profiles_dots]
+
             if self.key_all in dots:
                 # add all if key ALL is used
-                self.prodots[k] = list(self.dotfiles.values())
+                self.prodots[name] = list(self.dotfiles.values())
             else:
                 # add the dotfiles
                 for d in dots:
@@ -410,10 +468,11 @@ class Cfg:
                         msg = 'unknown dotfile \"{}\" for {}'.format(d, k)
                         self.log.err(msg)
                         continue
-                    self.prodots[k].append(self.dotfiles[d])
+                    self.prodots[name].append(self.dotfiles[d])
 
+        profile_names = self.lnk_profiles.keys()
         # handle "import" (from file) for each profile
-        for k in self.lnk_profiles.keys():
+        for k in profile_names:
             dots = self._get_imported_dotfiles_keys(k)
             for d in dots:
                 if d not in self.dotfiles:
@@ -423,22 +482,123 @@ class Cfg:
                 self.prodots[k].append(self.dotfiles[d])
 
         # handle "include" (from other profile) for each profile
-        for k in self.lnk_profiles.keys():
+        for k in profile_names:
             ret, dots = self._get_included_dotfiles(k)
             if not ret:
                 return False
             self.prodots[k].extend(dots)
 
         # remove duplicates if any
-        for k in self.lnk_profiles.keys():
-            self.prodots[k] = list(set(self.prodots[k]))
+        self.prodots = {k: list(set(v)) for k, v in self.prodots.items()}
 
         # print dotfiles for each profile
         if self.debug:
             for k in self.lnk_profiles.keys():
-                df = ','.join([d.key for d in self.prodots[k]])
+                df = ','.join(d.key for d in self.prodots[k])
                 self.log.dbg('dotfiles for \"{}\": {}'.format(k, df))
         return True
+
+    def _merge_dict(self, ext_config, warning_prefix, self_member,
+                    ext_member=None, traceback=False):
+        """Merge into self a dictionary instance members from an external Cfg.
+
+        This method merges instance members of another Cfg instance into self.
+        It issues a warning for any key shared between self and the other Cfg.
+        It can adds an own=False porperty to any dictionary in the external
+        instance member before merging.
+
+        :param ext_config: The other Cfg to merge from.
+        :type ext_config: Cfg
+        :param warnign_prefix: The prefix to th warning messages.
+        :type warning_prefix: str
+        :param self_member: The member of self which will be augmented by the
+            external member. Or the self_member name as a string.
+        :type self_member: dict or str
+        :param ext_member: The member of ext_config which wil be merged in
+            self_member. When not given, self_member is assumed to be a string,
+            and self_member and ext_member are supposed to have the same name.
+        :type ext_member: dict or None
+        :param traceback: Whether to add own=False to ext_member dict values
+            before merging in.
+        :type traceback: bool
+
+        """
+        if ext_member is None:
+            member_name = self_member
+            self_member = getattr(self, member_name)
+            ext_member = getattr(ext_config, member_name)
+
+        common_keys = (
+            key
+            for key in (set(self_member.keys())
+                        .intersection(set(ext_member.keys())))
+            if not key.startswith('_')  # filtering out internal variables
+        )
+        warning_msg = ('%s {} defined both in %s and %s: {} in %s used'
+                       % (warning_prefix, self.cfgpath, ext_config.cfgpath,
+                          self.cfgpath))
+        for key in common_keys:
+            self.log.warn(warning_msg.format(key, key))
+
+        if traceback:
+            # Assumes v to be a dict. So far it's only used for profiles,
+            # that are in fact dicts
+            merged = {
+                k: dict(v, own=False)
+                for k, v in ext_member.items()
+            }
+        else:
+            merged = ext_member.copy()
+        merged.update(self_member)
+        self_member.update(merged)
+
+        return self_member
+
+    def _merge_cfg(self, config_path):
+        """Merge an external config.yaml file into self."""
+        # Parsing external config file
+        try:
+            ext_config = Cfg(config_path)
+        except ValueError:
+            raise ValueError(
+                'external config file not found: {}'.format(config_path))
+
+        # Merging in members from the external config file
+        self._merge_dict(ext_config=ext_config, warning_prefix='Dotfile',
+                         self_member='dotfiles')
+        self._merge_dict(ext_config=ext_config, warning_prefix='Profile',
+                         self_member='lnk_profiles', traceback=True)
+        self._merge_dict(ext_config=ext_config, warning_prefix='Action',
+                         self_member='actions')
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Transformation',
+                         self_member='trans_r')
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Write transformation',
+                         self_member='trans_w')
+        self._merge_dict(ext_config=ext_config, warning_prefix='Profile',
+                         self_member='prodots')
+
+        # variables are merged in ext_*variables so as not to be added in
+        # self.content. This needs an additional step to account for imported
+        # variables sharing a key with the ones defined in self.content.
+        variables = {
+            k: v
+            for k, v in ext_config._get_variables(None).items()
+            if k not in self.content[self.key_variables]
+        }
+        dyn_variables = {
+            k: v
+            for k, v in ext_config._get_dynvariables(None).items()
+            if k not in self.content[self.key_dynvariables]
+        }
+        self._merge_dict(ext_config=ext_config, warning_prefix='Variable',
+                         self_member=self.ext_variables,
+                         ext_member=variables)
+        self._merge_dict(ext_config=ext_config,
+                         warning_prefix='Dynamic variable',
+                         self_member=self.ext_dynvariables,
+                         ext_member=dyn_variables)
 
     def _load_ext_variables(self, paths, profile=None):
         """load external variables"""
@@ -707,11 +867,22 @@ class Cfg:
         v[self.key_dotfiles_link] = new
         return v
 
+    @classmethod
+    def _filter_not_own(cls, content):
+        """Filters out from a dict its dict values with own=False."""
+        # This way it recursively explores only dicts. Since own=False is used
+        # only in profiles, which are in fact dicts, this is fine for now.
+        return {
+            k: cls._filter_not_own(v) if isinstance(v, dict) else v
+            for k, v in content.items()
+            if not isinstance(v, dict) or v.get('own', True)
+        }
+
     def _save(self, content, path):
         """writes the config to file"""
         ret = False
         with open(path, 'w') as f:
-            ret = yaml.safe_dump(content, f,
+            ret = yaml.safe_dump(self._filter_not_own(content), f,
                                  default_flow_style=False,
                                  indent=2)
         if ret:
@@ -782,9 +953,12 @@ class Cfg:
     def _dotfile_exists(self, dotfile):
         """return True and the existing dotfile key
         if it already exists, False and a new unique key otherwise"""
-        dsts = [(k, d.dst) for k, d in self.dotfiles.items()]
-        if dotfile.dst in [x[1] for x in dsts]:
-            return True, [x[0] for x in dsts if x[1] == dotfile.dst][0]
+        try:
+            return True, next(key
+                              for key, d in self.dotfiles.items()
+                              if d.dst == dotfile.dst)
+        except StopIteration:
+            pass
         # return key for this new dotfile
         path = os.path.expanduser(dotfile.dst)
         keys = self.dotfiles.keys()
