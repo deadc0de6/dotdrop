@@ -182,7 +182,7 @@ class Options(AttrMonitor):
     def _read_config(self, profile=None):
         """read the config file"""
         self.conf = Cfg(self.confpath, profile=profile, debug=self.debug)
-        # transform the configs in attribute
+        # transform the config settings to self attribute
         for k, v in self.conf.get_settings().items():
             if self.debug:
                 self.log.dbg('setting: {}={}'.format(k, v))
@@ -223,6 +223,7 @@ class Options(AttrMonitor):
         self.install_diff = not self.args['--nodiff']
         self.install_showdiff = self.showdiff or self.args['--showdiff']
         self.install_backup_suffix = BACKUP_SUFFIX
+        self.install_default_actions = self.default_actions
         # "compare" specifics
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']

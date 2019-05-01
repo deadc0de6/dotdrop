@@ -68,13 +68,16 @@ class Action(Cmd):
     def __repr__(self):
         return 'action({})'.format(self.__str__())
 
-    def execute(self):
+    def execute(self, templater=None, newvars={}):
         """execute the action in the shell"""
         ret = 1
+        action = self.action
+        if templater:
+            action = templater.generate_string(self.action, tmpvars=newvars)
         try:
-            cmd = self.action.format(*self.args)
+            cmd = action.format(*self.args)
         except IndexError:
-            err = 'bad action: \"{}\"'.format(self.action)
+            err = 'bad action: \"{}\"'.format(action)
             err += ' with \"{}\"'.format(self.args)
             self.log.warn(err)
             return False

@@ -40,6 +40,7 @@ class Cfg:
     key_workdir = 'workdir'
     key_cmpignore = 'cmpignore'
     key_upignore = 'upignore'
+    key_defactions = 'default_actions'
 
     # import keys
     key_import_vars = 'import_variables'
@@ -148,13 +149,21 @@ class Cfg:
         self.prodots = {}
 
         # represents all variables from external files
+        # NOT linked inside the yaml dict (self.content)
         self.ext_variables = {}
         self.ext_dynvariables = {}
 
         # cmpignore patterns
+        # NOT linked inside the yaml dict (self.content)
         self.cmpignores = []
+
         # upignore patterns
+        # NOT linked inside the yaml dict (self.content)
         self.upignores = []
+
+        # default actions
+        # NOT linked inside the yaml dict (self.content)
+        self.defactions = {}
 
         if not self._load_config(profile=profile):
             raise ValueError('config is not valid')
@@ -171,13 +180,16 @@ class Cfg:
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
             # pre actions
+            var = d.get_vars()
             if self.key_actions_pre in d.actions:
                 for action in d.actions[self.key_actions_pre]:
-                    action.action = t.generate_string(action.action)
+                    action.action = t.generate_string(action.action,
+                                                      tmpvars=var)
             # post actions
             if self.key_actions_post in d.actions:
                 for action in d.actions[self.key_actions_post]:
-                    action.action = t.generate_string(action.action)
+                    action.action = t.generate_string(action.action,
+                                                      tmpvars=var)
         return dotfiles
 
     def _load_config(self, profile=None):
@@ -263,11 +275,13 @@ class Cfg:
 
         # load global upignore
         if self.key_upignore in self.lnk_settings:
-            self.upignores = self.lnk_settings[self.key_upignore] or []
+            key = self.key_upignore
+            self.upignores = self.lnk_settings[key].copy() or []
 
         # load global cmpignore
         if self.key_cmpignore in self.lnk_settings:
-            self.cmpignores = self.lnk_settings[self.key_cmpignore] or []
+            key = self.key_cmpignore
+            self.cmpignores = self.lnk_settings[key].copy() or []
 
         # parse external actions
         try:
@@ -323,6 +337,17 @@ class Cfg:
             self._load_actions(local_actions)
         except KeyError:
             pass
+
+        # load default actions
+        try:
+            dactions = self.lnk_settings[self.key_defactions].copy() or []
+            self.defactions = self._parse_actions_list(dactions,
+                                                       profile=profile)
+        except KeyError:
+            self.defactions = {
+                self.key_actions_pre: [],
+                self.key_actions_post: [],
+            }
 
         # parse read transformations
         # If read transformations are None, replaces them with empty dict
@@ -385,7 +410,7 @@ class Cfg:
 
             # parse actions
             itsactions = v.get(self.key_dotfiles_actions, [])
-            actions = self._parse_actions(itsactions, profile=profile)
+            actions = self._parse_actions_list(itsactions, profile=profile)
             if self.debug:
                 self.log.dbg('action for {}'.format(k))
                 for t in [self.key_actions_pre, self.key_actions_post]:
@@ -722,7 +747,7 @@ class Cfg:
             dotfiles.extend(self.prodots[other])
         return True, dotfiles
 
-    def _parse_actions(self, entries, profile=None):
+    def _parse_actions_list(self, entries, profile=None):
         """parse actions specified for an element
         where entries are the ones defined for this dotfile"""
         res = {
@@ -1052,6 +1077,9 @@ class Cfg:
         settings[key] = self._string_to_linktype(settings[key])
         key = self.key_dotfile_link
         settings[key] = self._string_to_linktype(settings[key])
+        # patch defactions
+        key = self.key_defactions
+        settings[key] = self.defactions
         return settings
 
     def get_variables(self, profile, debug=False):

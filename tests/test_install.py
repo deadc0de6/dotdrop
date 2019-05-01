@@ -350,7 +350,7 @@ exec bspwm
 
         installer = Installer()
         installer.link_children(templater=MagicMock(), src=src_dir,
-                                dst=dst_dir, actions=[])
+                                dst=dst_dir, actionexec=None)
 
         # Ensure all destination files point to source
         for src in srcs:
@@ -366,7 +366,7 @@ exec bspwm
         installer.log.err = logger
 
         res, err = installer.link_children(templater=MagicMock(), src=src,
-                                           dst='/dev/null', actions=[])
+                                           dst='/dev/null', actionexec=None)
 
         self.assertFalse(res)
         e = 'source dotfile does not exist: {}'.format(src)
@@ -388,7 +388,7 @@ exec bspwm
 
         # pass src file not src dir
         res, err = installer.link_children(templater=templater, src=src,
-                                           dst='/dev/null', actions=[])
+                                           dst='/dev/null', actionexec=None)
 
         # ensure nothing performed
         self.assertFalse(res)
@@ -411,7 +411,7 @@ exec bspwm
 
         installer = Installer()
         installer.link_children(templater=MagicMock(), src=src_dir,
-                                dst=dst_dir, actions=[])
+                                dst=dst_dir, actionexec=None)
 
         # ensure dst dir created
         self.assertTrue(os.path.exists(dst_dir))
@@ -443,7 +443,7 @@ exec bspwm
         installer.log.ask = ask
 
         installer.link_children(templater=MagicMock(), src=src_dir, dst=dst,
-                                actions=[])
+                                actionexec=None)
 
         # ensure destination now a directory
         self.assertTrue(os.path.isdir(dst))
@@ -477,7 +477,7 @@ exec bspwm
         mocked_templategen.is_template.return_value = True
 
         installer.link_children(templater=templater, src=src_dir, dst=dst_dir,
-                                actions=[])
+                                actionexec=None)
 
         for src in srcs:
             dst = os.path.join(dst_dir, os.path.basename(src))

@@ -51,17 +51,37 @@ class Templategen:
         self.env.globals['exists'] = jhelpers.exists
         self.env.globals['exists_in_path'] = jhelpers.exists_in_path
 
-    def generate(self, src):
+    def generate(self, src, tmpvars={}):
         """render template from path"""
         if not os.path.exists(src):
             return ''
-        return self._handle_file(src)
+        saved = self._patch_globals(tmpvars)
+        ret = self._handle_file(src)
+        self._restore_globals(saved)
+        return ret
 
-    def generate_string(self, string):
+    def generate_string(self, string, tmpvars={}):
         """render template from string"""
         if not string:
             return ''
-        return self.env.from_string(string).render()
+        saved = self._patch_globals(tmpvars)
+        if self.debug:
+            self.log.dbg('new vars: {}'.format(tmpvars))
+        ret = self.env.from_string(string).render()
+        self._restore_globals(saved)
+        return ret
+
+    def _patch_globals(self, newvars={}):
+        """add vars to the globals, make sure to call _restore_globals"""
+        saved_globals = self.env.globals.copy()
+        if not newvars:
+            return saved_globals
+        self.env.globals.update(newvars)
+        return saved_globals
+
+    def _restore_globals(self, saved_globals):
+        """restore globals from _patch_globals"""
+        self.env.globals = saved_globals.copy()
 
     def update_variables(self, variables):
         """update variables"""

@@ -27,6 +27,48 @@ TRANS_SUFFIX = 'trans'
 ###########################################################
 
 
+def action_executor(o, dotfile, actions, defactions, templater, post=False):
+    """closure for action execution"""
+    def execute():
+        """
+        execute actions and return
+        True, None if ok
+        False, errstring if issue
+        """
+        s = 'pre' if not post else 'post'
+
+        # execute default actions
+        for action in defactions:
+            if o.dry:
+                LOG.dry('would execute def-{}-action: {}'.format(s,
+                                                                 action))
+                continue
+            if o.debug:
+                LOG.dbg('executing def-{}-action {}'.format(s, action))
+            newvars = dotfile.get_vars()
+            ret = action.execute(templater=templater, newvars=newvars)
+            if not ret:
+                err = 'def-{}-action \"{}\" failed'.format(s, action.key)
+                LOG.err(err)
+                return False, err
+
+        # execute actions
+        for action in actions:
+            if o.dry:
+                LOG.dry('would execute {}-action: {}'.format(s, action))
+                continue
+            if o.debug:
+                LOG.dbg('executing {}-action {}'.format(s, action))
+            newvars = dotfile.get_vars()
+            ret = action.execute(templater=templater, newvars=newvars)
+            if not ret:
+                err = '{}-action \"{}\" failed'.format(s, action.key)
+                LOG.err(err)
+                return False, err
+        return True, None
+    return execute
+
+
 def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
@@ -57,14 +99,19 @@ def cmd_install(o):
                 and Cfg.key_actions_pre in dotfile.actions:
             for action in dotfile.actions[Cfg.key_actions_pre]:
                 preactions.append(action)
+        defactions = o.install_default_actions[Cfg.key_actions_pre]
+        pre_actions_exec = action_executor(o, dotfile, preactions,
+                                           defactions, t, post=False)
+
         if o.debug:
             LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
-            r = inst.link(t, dotfile.src, dotfile.dst, actions=preactions)
+            r = inst.link(t, dotfile.src, dotfile.dst,
+                          actionexec=pre_actions_exec)
         elif hasattr(dotfile, 'link') and \
                 dotfile.link == LinkTypes.LINK_CHILDREN:
             r = inst.link_children(t, dotfile.src, dotfile.dst,
-                                   actions=preactions)
+                                   actionexec=pre_actions_exec)
         else:
             src = dotfile.src
             tmp = None
@@ -73,7 +120,8 @@ def cmd_install(o):
                 if not tmp:
                     continue
                 src = tmp
-            r, err = inst.install(t, src, dotfile.dst, actions=preactions,
+            r, err = inst.install(t, src, dotfile.dst,
+                                  actionexec=pre_actions_exec,
                                   noempty=dotfile.noempty)
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
@@ -82,15 +130,11 @@ def cmd_install(o):
         if r:
             if not o.install_temporary and \
                     Cfg.key_actions_post in dotfile.actions:
-                actions = dotfile.actions[Cfg.key_actions_post]
-                # execute post action
-                for action in actions:
-                    if o.dry:
-                        LOG.dry('would execute action: {}'.format(action))
-                    else:
-                        if o.debug:
-                            LOG.dbg('executing post action {}'.format(action))
-                        action.execute()
+                defactions = o.install_default_actions[Cfg.key_actions_post]
+                postactions = dotfile.actions[Cfg.key_actions_post]
+                post_actions_exec = action_executor(o, dotfile, postactions,
+                                                    defactions, t, post=True)
+                post_actions_exec()
             installed += 1
         elif not r and err:
             LOG.err('installing \"{}\" failed: {}'.format(dotfile.key, err))
