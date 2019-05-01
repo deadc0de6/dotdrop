@@ -59,7 +59,7 @@ cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
 actions:
   pre:
-    preaction: "echo {{@@ _dotfile_src @@}} > ${tmpa}/pre"
+    preaction: "echo {{@@ _dotfile_src @@}} > {0}"
   post:
     postaction: "echo {{@@ _dotfile_src @@}} > ${tmpa}/post"
   nakedaction: "echo {{@@ _dotfile_src @@}} > ${tmpa}/naked"
@@ -68,7 +68,7 @@ config:
   create: true
   dotpath: dotfiles
   default_actions:
-  - preaction
+  - preaction "${tmpa}/pre"
   - postaction
   - nakedaction
 dotfiles:
