@@ -43,8 +43,8 @@ class Dotfile:
     def get_vars(self):
         """return this dotfile templating vars"""
         _vars = {}
-        _vars['_dotfile_src'] = self.src
-        _vars['_dotfile_dst'] = self.dst
+        _vars['_dotfile_abs_src'] = self.src
+        _vars['_dotfile_abs_dst'] = self.dst
         return _vars
 
     def __str__(self):

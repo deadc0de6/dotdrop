@@ -175,21 +175,23 @@ class Cfg:
         """resolve dotfiles src/dst/actions templating for this profile"""
         t = Templategen(variables=variables)
         dotfiles = self._get_dotfiles(profile)
+        tvars = t.add_tmp_vars()
         for d in dotfiles:
+            # add dotfile variables
+            t.restore_vars(tvars)
+            newvar = d.get_vars()
+            t.add_tmp_vars(newvars=newvar)
             # src and dst path
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
             # pre actions
-            var = d.get_vars()
             if self.key_actions_pre in d.actions:
                 for action in d.actions[self.key_actions_pre]:
-                    action.action = t.generate_string(action.action,
-                                                      tmpvars=var)
+                    action.action = t.generate_string(action.action)
             # post actions
             if self.key_actions_post in d.actions:
                 for action in d.actions[self.key_actions_post]:
-                    action.action = t.generate_string(action.action,
-                                                      tmpvars=var)
+                    action.action = t.generate_string(action.action)
         return dotfiles
 
     def _load_config(self, profile=None):

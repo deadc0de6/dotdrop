@@ -59,10 +59,10 @@ cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
 actions:
   pre:
-    preaction: "echo {{@@ _dotfile_src @@}} > {0}"
+    preaction: "echo {{@@ _dotfile_abs_src @@}} > {0}"
   post:
-    postaction: "echo {{@@ _dotfile_src @@}} > ${tmpa}/post"
-  nakedaction: "echo {{@@ _dotfile_src @@}} > ${tmpa}/naked"
+    postaction: "echo {{@@ _dotfile_abs_src @@}} > ${tmpa}/post"
+  nakedaction: "echo {{@@ _dotfile_abs_src @@}} > ${tmpa}/naked"
 config:
   backup: true
   create: true
@@ -102,10 +102,10 @@ rm -f ${tmpa}/naked* ${tmpa}/pre* ${tmpa}/post* ${tmpd}/abc
 cat > ${cfg} << _EOF
 actions:
   pre:
-    preaction: "echo {{@@ _dotfile_dst @@}} > ${tmpa}/pre"
+    preaction: "echo {{@@ _dotfile_abs_dst @@}} > ${tmpa}/pre"
   post:
-    postaction: "echo {{@@ _dotfile_dst @@}} > ${tmpa}/post"
-  nakedaction: "echo {{@@ _dotfile_dst @@}} > ${tmpa}/naked"
+    postaction: "echo {{@@ _dotfile_abs_dst @@}} > ${tmpa}/post"
+  nakedaction: "echo {{@@ _dotfile_abs_dst @@}} > ${tmpa}/naked"
 config:
   backup: true
   create: true

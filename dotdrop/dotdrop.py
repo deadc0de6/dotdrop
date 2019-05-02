@@ -45,8 +45,7 @@ def action_executor(o, dotfile, actions, defactions, templater, post=False):
                 continue
             if o.debug:
                 LOG.dbg('executing def-{}-action {}'.format(s, action))
-            newvars = dotfile.get_vars()
-            ret = action.execute(templater=templater, newvars=newvars)
+            ret = action.execute(templater=templater)
             if not ret:
                 err = 'def-{}-action \"{}\" failed'.format(s, action.key)
                 LOG.err(err)
@@ -59,8 +58,7 @@ def action_executor(o, dotfile, actions, defactions, templater, post=False):
                 continue
             if o.debug:
                 LOG.dbg('executing {}-action {}'.format(s, action))
-            newvars = dotfile.get_vars()
-            ret = action.execute(templater=templater, newvars=newvars)
+            ret = action.execute(templater=templater)
             if not ret:
                 err = '{}-action \"{}\" failed'.format(s, action.key)
                 LOG.err(err)
@@ -93,7 +91,13 @@ def cmd_install(o):
                      showdiff=o.install_showdiff,
                      backup_suffix=o.install_backup_suffix)
     installed = 0
+    tvars = t.add_tmp_vars()
     for dotfile in dotfiles:
+        # add dotfile variables
+        t.restore_vars(tvars)
+        newvars = dotfile.get_vars()
+        t.add_tmp_vars(newvars=newvars)
+
         preactions = []
         if not o.install_temporary and dotfile.actions \
                 and Cfg.key_actions_pre in dotfile.actions:

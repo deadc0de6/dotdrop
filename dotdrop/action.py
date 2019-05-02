@@ -68,12 +68,12 @@ class Action(Cmd):
     def __repr__(self):
         return 'action({})'.format(self.__str__())
 
-    def execute(self, templater=None, newvars={}):
+    def execute(self, templater=None):
         """execute the action in the shell"""
         ret = 1
         action = self.action
         if templater:
-            action = templater.generate_string(self.action, tmpvars=newvars)
+            action = templater.generate_string(self.action)
         try:
             cmd = action.format(*self.args)
         except IndexError:
