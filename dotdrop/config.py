@@ -243,7 +243,7 @@ class Cfg:
     def _parse(self, profile=None):
         """parse config file"""
         # parse the settings
-        self.lnk_settings = self.content[self.key_settings]
+        self.lnk_settings = self.content[self.key_settings] or {}
         if not self._complete_settings():
             return False
 
@@ -382,7 +382,7 @@ class Cfg:
 
         dotfiles = self.content[self.key_dotfiles]
         noempty_default = self.lnk_settings[self.key_ignoreempty]
-        dotpath = self.content['config']['dotpath']
+        dotpath = self.lnk_settings[self.key_dotpath]
         for k, v in dotfiles.items():
             src = v[self.key_dotfiles_src]
             if dotpath not in src:
