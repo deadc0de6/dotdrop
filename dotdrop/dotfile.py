@@ -45,6 +45,9 @@ class Dotfile:
         _vars = {}
         _vars['_dotfile_abs_src'] = self.src
         _vars['_dotfile_abs_dst'] = self.dst
+        _vars['_dotfile_key'] = self.key
+        _vars['_dotfile_link'] = self.link.name.lower()
+
         return _vars
 
     def __str__(self):
