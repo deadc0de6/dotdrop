@@ -73,14 +73,19 @@ _EOF
 # create the dotfile
 echo 'src:{{@@ _dotfile_abs_src @@}}' > ${tmps}/dotfiles/abc
 echo 'dst:{{@@ _dotfile_abs_dst @@}}' >> ${tmps}/dotfiles/abc
+echo 'key:{{@@ _dotfile_key @@}}' >> ${tmps}/dotfiles/abc
+echo 'link:{{@@ _dotfile_link @@}}' >> ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
 [ ! -e ${tmpd}/abc ] && echo 'dotfile not installed' && exit 1
+#cat ${tmpd}/abc
 grep "src:${tmps}/dotfiles/abc" ${tmpd}/abc >/dev/null
 grep "dst:${tmpd}/abc" ${tmpd}/abc >/dev/null
+grep "key:f_abc" ${tmpd}/abc >/dev/null
+grep "link:nolink" ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

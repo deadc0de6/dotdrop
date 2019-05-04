@@ -50,6 +50,8 @@ class Templategen:
         # adding helper methods
         self.env.globals['exists'] = jhelpers.exists
         self.env.globals['exists_in_path'] = jhelpers.exists_in_path
+        self.env.globals['basename'] = jhelpers.basename
+        self.env.globals['dirname'] = jhelpers.dirname
 
     def generate(self, src):
         """render template from path"""

@@ -64,10 +64,14 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: ${tmpd}/def
+    src: def
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - f_def
 _EOF
 #cat ${cfg}
 
@@ -98,6 +102,22 @@ _EOF
 
 #cat ${tmps}/dotfiles/abc
 
+echo "this is def" > ${tmps}/dotfiles/def
+
+# test basename
+cat >> ${tmps}/dotfiles/def << _EOF
+{%@@ set dotfile_filename = basename( _dotfile_abs_dst ) @@%}
+dotfile dst filename: {{@@ dotfile_filename @@}}
+_EOF
+
+# test dirname
+cat >> ${tmps}/dotfiles/def << _EOF
+{%@@ set dotfile_dirname= dirname( _dotfile_abs_dst ) @@%}
+dotfile dst dirname: {{@@ dotfile_dirname @@}}
+_EOF
+
+#cat ${tmps}/dotfiles/def
+
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
@@ -111,6 +131,10 @@ grep '^this should not exist either' ${tmpd}/abc >/dev/null && exit 1
 set -e
 
 #cat ${tmpd}/abc
+
+# test def
+grep "dotfile dst filename: `basename ${tmpd}/def`" ${tmpd}/def
+grep "dotfile dst dirname: `dirname ${tmpd}/def`" ${tmpd}/def
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${scr}
