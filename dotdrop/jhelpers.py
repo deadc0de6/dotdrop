@@ -17,3 +17,13 @@ def exists(path):
 def exists_in_path(name, path=None):
     """return true when executable exists in os path"""
     return shutil.which(name, os.F_OK | os.X_OK, path) is not None
+
+
+def basename(path):
+    """return basename"""
+    return os.path.basename(path)
+
+
+def dirname(path):
+    """return dirname"""
+    return os.path.dirname(path)
