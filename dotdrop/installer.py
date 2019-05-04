@@ -251,6 +251,12 @@ class Installer:
         self.log.sub('linked {} to {}'.format(dst, src))
         return True, None
 
+    def _get_tmp_file_vars(self, src, dst):
+        tmp = {}
+        tmp['_dotfile_sub_abs_src'] = src
+        tmp['_dotfile_sub_abs_dst'] = dst
+        return tmp
+
     def _handle_file(self, templater, src, dst,
                      actionexec=None, noempty=False):
         """install src to dst when is a file"""
@@ -261,7 +267,9 @@ class Installer:
             # symlink loop
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
+        saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
         content = templater.generate(src)
+        templater.restore_vars(saved)
         if noempty and utils.content_empty(content):
             self.log.dbg('ignoring empty template: {}'.format(src))
             return False, None
