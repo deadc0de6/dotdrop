@@ -191,6 +191,17 @@ def cmd_compare(o, tmp):
                 same = False
                 continue
             src = tmpsrc
+
+        # is a symlink pointing to itself
+        asrc = os.path.join(o.dotpath, os.path.expanduser(src))
+        adst = os.path.expanduser(dotfile.dst)
+        if os.path.samefile(asrc, adst):
+            if o.debug:
+                line = '=> compare {}: diffing with \"{}\"'
+                LOG.dbg(line.format(dotfile.key, dotfile.dst))
+                LOG.dbg('points to itself')
+            return True
+
         # install dotfile to temporary dir
         ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
         if not ret:
