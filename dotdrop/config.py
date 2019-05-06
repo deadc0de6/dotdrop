@@ -45,8 +45,6 @@ class Cfg:
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
-    key_cmpignore = 'cmpignore'
-    key_upignore = 'upignore'
 
     key_import_configs = 'import_configs'
 
@@ -462,11 +460,11 @@ class Cfg:
                 trans_w = None
 
             # parse cmpignore pattern
-            cmpignores = v.get(self.key_dotfiles_cmpignore, [])
+            cmpignores = v.get(self.key_dotfiles_cmpignore, []).copy()
             cmpignores.extend(self.cmpignores)
 
             # parse upignore pattern
-            upignores = v.get(self.key_dotfiles_upignore, [])
+            upignores = v.get(self.key_dotfiles_upignore, []).copy()
             upignores.extend(self.upignores)
 
             # create new dotfile
