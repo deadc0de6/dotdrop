@@ -200,7 +200,7 @@ def cmd_compare(o, tmp):
                 line = '=> compare {}: diffing with \"{}\"'
                 LOG.dbg(line.format(dotfile.key, dotfile.dst))
                 LOG.dbg('points to itself')
-            return True
+            continue
 
         # install dotfile to temporary dir
         ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
