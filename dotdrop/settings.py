@@ -24,7 +24,9 @@ class Settings:
     # settings item keys
     key_backup = 'backup'
     key_banner = 'banner'
+    key_cmpignore = 'cmpignore'
     key_create = 'create'
+    key_default_actions = 'default_actions'
     key_dotpath = 'dotpath'
     key_ignoreempty = 'ignoreempty'
     key_keepdot = 'keepdot'
@@ -32,10 +34,12 @@ class Settings:
     key_link_dotfile_default = 'link_dotfile_default'
     key_link_on_import = 'link_on_import'
     key_showdiff = 'showdiff'
+    key_upignore = 'upignore'
     key_workdir = 'workdir'
 
     # import keys
     key_import_actions = 'import_actions'
+    key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
 
     @classmethod
@@ -43,23 +47,28 @@ class Settings:
     def parse(cls, yaml_dict, cfg):
         return cls(cfg, **yaml_dict)
 
-    def __init__(self, cfg, backup=True, banner=True, create=True,
-                 dotpath='dotfiles', ignoreempty=True, import_actions=(),
+    def __init__(self, cfg, backup=True, banner=True, cmpignore=(),
+                 create=True, default_actions=(), dotpath='dotfiles',
+                 ignoreempty=True, import_actions=(), import_configs=(),
                  import_variables=(), keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
-                 showdiff=False, workdir='~/.config/dotdrop'):
+                 showdiff=False, upignore=(), workdir='~/.config/dotdrop'):
         self.cfg = cfg
         self.backup = backup
         self.banner = banner
         self.create = create
+        self.cmpignore = cmpignore
+        self.default_actions = default_actions
         self.dotpath = dotpath
         self.ignoreempty = ignoreempty
         self.import_actions = import_actions
+        self.import_configs = import_configs
         self.import_variables = import_variables
         self.keepdot = keepdot
         self.longkey = longkey
         self.showdiff = showdiff
+        self.upignore = upignore
         self.workdir = workdir
 
         self.link_dotfile_default = (
@@ -72,6 +81,13 @@ class Settings:
             if isinstance(link_dotfile_default, self.LinkTypes)
             else self.LinkTypes[link_on_import.upper()]
         )
+
+    def _add_seq(self, dic, name):
+        key_name = 'key_{}'.format(name)
+        attr = getattr(self, name)
+
+        if attr:
+            dic[key_name] = attr
 
     def serialize(self):
         dic = {
@@ -88,10 +104,11 @@ class Settings:
             self.key_workdir: self.workdir,
         }
 
-        if self.import_actions:
-            dic[self.key_import_actions] = self.import_actions
-
-        if self.import_variables:
-            dic[self.key_import_variables] = self.import_variables
+        self._add_seq(dic, 'cmpignore')
+        self._add_seq(dic, 'default_actions')
+        self._add_seq(dic, 'import_actions')
+        self._add_seq(dic, 'import_configs')
+        self._add_seq(dic, 'import_variables')
+        self._add_seq(dic, 'upignore')
 
         return dic

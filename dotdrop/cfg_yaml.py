@@ -45,7 +45,6 @@ class Cfg:
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
-
     key_import_configs = 'import_configs'
 
     # actions keys
