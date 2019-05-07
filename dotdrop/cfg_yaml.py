@@ -16,32 +16,47 @@ import yaml
 # local import
 from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
-from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
 from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
+from .logger import Logger
 from .settings import Settings
 from .utils import with_yaml_parser
 
 
 class CfgYaml:
 
-    def __init__(self, yaml_dict, file_name, settings=None):
+    def __init__(self, yaml_dict, file_name, *, settings=None, debug=False):
+        """constructor
+        @file_name: path to the config file
+        @debug: enable debug
+        """
+        if not file_name:
+            raise ValueError('config file path undefined')
+
+        if not os.path.exists(file_name):
+            raise ValueError("config file doesn't exist: {}".format(file_name))
+
+        self._dirty = False
+
+        self.debug = debug
+        self.log = Logger()
+
+        self.file_name = os.path.abspath(file_name)
         self.yaml_dict = yaml_dict
-        self.file_name = file_name
 
         self.settings = settings
 
     @classmethod
     @with_yaml_parser
-    def parse(cls, yaml_dict, file_name=None):
+    def parse(cls, yaml_dict, file_name=None, *, debug=False):
         """Parse a yaml configuration file to a class instance."""
 
         settings = Settings.parse(yaml_dict, file_name)
 
         return cls(yaml_dict=yaml_dict, file_name=file_name,
-                   settings=settings)
+                   settings=settings, debug=debug)
 
 
 class Cfg:
