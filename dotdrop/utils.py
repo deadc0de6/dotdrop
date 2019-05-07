@@ -5,13 +5,16 @@ Copyright (c) 2017, deadc0de6
 utilities
 """
 
+import fnmatch
+import os
+import shlex
 import subprocess
 import tempfile
-import os
 import uuid
-import shlex
-import fnmatch
+from functools import wraps
 from shutil import rmtree
+
+import yaml
 
 # local import
 from dotdrop.logger import Logger
@@ -130,3 +133,16 @@ def must_ignore(paths, ignores, debug=False):
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
     return False
+
+
+def with_yaml_parser(funct):
+    @wraps(funct)
+    def wrapper(first, yaml_dict, *args, **kwargs):
+        if isinstance(yaml_dict, str):
+            yaml_file_name = yaml_dict
+            with open(yaml_file_name, 'r') as yaml_file:
+                yaml_dict = yaml.safe_load(yaml_file)
+
+        return funct(first, yaml_dict, *args, **kwargs)
+
+    return wrapper
