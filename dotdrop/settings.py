@@ -44,17 +44,21 @@ class Settings:
 
     @classmethod
     @with_yaml_parser
-    def parse(cls, yaml_dict, cfg):
-        return cls(cfg, **yaml_dict)
+    def parse(cls, yaml_dict, file_name=None):
+        try:
+            settings = yaml_dict[cls.key_yaml]
+        except KeyError:
+            raise ValueError('malformed file {}: missing key {}'
+                             .format(file_name, cls.key_yaml))
 
-    def __init__(self, cfg, backup=True, banner=True, cmpignore=(),
-                 create=True, default_actions=(), dotpath='dotfiles',
-                 ignoreempty=True, import_actions=(), import_configs=(),
-                 import_variables=(), keepdot=False,
-                 link_dotfile_default=LinkTypes.NOLINK,
+        return cls(**settings)
+
+    def __init__(self, backup=True, banner=True, cmpignore=(), create=True,
+                 default_actions=(), dotpath='dotfiles', ignoreempty=True,
+                 import_actions=(), import_configs=(), import_variables=(),
+                 keepdot=False, link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
                  showdiff=False, upignore=(), workdir='~/.config/dotdrop'):
-        self.cfg = cfg
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -73,13 +77,13 @@ class Settings:
 
         self.link_dotfile_default = (
             link_dotfile_default
-            if isinstance(link_dotfile_default, self.LinkTypes)
-            else self.LinkTypes[link_dotfile_default.upper()]
+            if isinstance(link_dotfile_default, LinkTypes)
+            else LinkTypes[link_dotfile_default.upper()]
         )
         self.link_on_import = (
             link_on_import
-            if isinstance(link_dotfile_default, self.LinkTypes)
-            else self.LinkTypes[link_on_import.upper()]
+            if isinstance(link_dotfile_default, LinkTypes)
+            else LinkTypes[link_on_import.upper()]
         )
 
     def _add_seq(self, dic, name):

@@ -21,6 +21,28 @@ from dotdrop.action import Action, Transform
 from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
+from .settings import Settings
+from .utils import with_yaml_parser
+
+
+class CfgYaml:
+
+    def __init__(self, yaml_dict, file_name, settings=None):
+        self.yaml_dict = yaml_dict
+        self.file_name = file_name
+
+        self.settings = settings
+
+    @classmethod
+    @with_yaml_parser
+    def parse(cls, yaml_dict, file_name=None):
+        """Parse a yaml configuration file to a class instance."""
+
+        settings = Settings.parse(yaml_dict, file_name)
+
+        return cls(yaml_dict=yaml_dict, file_name=file_name,
+                   settings=settings)
+
 
 class Cfg:
     key_all = 'ALL'

@@ -137,12 +137,12 @@ def must_ignore(paths, ignores, debug=False):
 
 def with_yaml_parser(funct):
     @wraps(funct)
-    def wrapper(first, yaml_dict, *args, **kwargs):
-        if isinstance(yaml_dict, str):
-            yaml_file_name = yaml_dict
-            with open(yaml_file_name, 'r') as yaml_file:
+    def wrapper(first, yaml_dict, file_name=None, *args, **kwargs):
+        if file_name is None:
+            file_name = yaml_dict
+            with open(file_name, 'r') as yaml_file:
                 yaml_dict = yaml.safe_load(yaml_file)
 
-        return funct(first, yaml_dict, *args, **kwargs)
+        return funct(first, yaml_dict, file_name, *args, **kwargs)
 
     return wrapper
