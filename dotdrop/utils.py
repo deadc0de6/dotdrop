@@ -11,13 +11,15 @@ import shlex
 import subprocess
 import tempfile
 import uuid
-from functools import wraps
+from functools import partial, wraps
+from glob import iglob
+from platform import python_version
 from shutil import rmtree
 
 import yaml
 
 # local import
-from dotdrop.logger import Logger
+from .logger import Logger
 
 LOG = Logger()
 
@@ -146,3 +148,20 @@ def with_yaml_parser(funct):
         return funct(first, yaml_dict, file_name, *args, **kwargs)
 
     return wrapper
+
+
+glob_msg_start = ('Recursive globbing is not available on Python {}: '
+                  .format(python_version()))
+try:
+    iglob('.', recursive=True)
+    glob = partial(iglob, recursive=True)
+except TypeError:
+    LOG.warn(glob_msg_start +
+             'upgrade to version >3.5 if you want to use this feature.')
+
+    def glob(glob_path):
+        if '**' in glob_path:
+            LOG.err('{}: "{}" will match nothing'
+                    .format(glob_msg_start, glob_path), throw=ValueError)
+
+        return iglob(glob_path)

@@ -3,6 +3,7 @@
 
 from enum import IntEnum
 
+from .logger import Logger
 from .utils import with_yaml_parser
 
 
@@ -42,16 +43,7 @@ class Settings:
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
 
-    @classmethod
-    @with_yaml_parser
-    def parse(cls, yaml_dict, file_name=None):
-        try:
-            settings = yaml_dict[cls.key_yaml]
-        except KeyError:
-            raise ValueError('malformed file {}: missing key {}'
-                             .format(file_name, cls.key_yaml))
-
-        return cls(**settings)
+    log = Logger()
 
     def __init__(self, backup=True, banner=True, cmpignore=(), create=True,
                  default_actions=(), dotpath='dotfiles', ignoreempty=True,
@@ -75,44 +67,29 @@ class Settings:
         self.upignore = upignore
         self.workdir = workdir
 
-        self.link_dotfile_default = (
-            link_dotfile_default
-            if isinstance(link_dotfile_default, LinkTypes)
-            else LinkTypes[link_dotfile_default.upper()]
-        )
-        self.link_on_import = (
-            link_on_import
-            if isinstance(link_dotfile_default, LinkTypes)
-            else LinkTypes[link_on_import.upper()]
-        )
+        self._init_link('link_dotfile_default', link_dotfile_default)
+        self._init_link('link_on_import', link_on_import)
 
-    def _add_seq(self, dic, name):
-        key_name = 'key_{}'.format(name)
-        attr = getattr(self, name)
+    @classmethod
+    @with_yaml_parser
+    def parse(cls, yaml_dict, file_name=None):
+        try:
+            settings = yaml_dict[cls.key_yaml]
+        except KeyError:
+            cls.log.err('malformed file {}: missing key {}'
+                        .format(file_name, cls.key_yaml), throw=ValueError)
 
-        if attr:
-            dic[key_name] = attr
+        return cls(**settings)
 
-    def serialize(self):
-        dic = {
-            self.key_backup: self.backup,
-            self.key_banner: self.banner,
-            self.key_create: self.create,
-            self.key_dotpath: self.dotpath,
-            self.key_ignoreempty: self.ignoreempty,
-            self.key_link_dotfile_default: str(self.link_dotfile_default),
-            self.key_link_on_import: str(self.link_on_import),
-            self.key_longkey: self.longkey,
-            self.key_keepdot: self.keepdot,
-            self.key_showdiff: self.showdiff,
-            self.key_workdir: self.workdir,
-        }
-
-        self._add_seq(dic, 'cmpignore')
-        self._add_seq(dic, 'default_actions')
-        self._add_seq(dic, 'import_actions')
-        self._add_seq(dic, 'import_configs')
-        self._add_seq(dic, 'import_variables')
-        self._add_seq(dic, 'upignore')
-
-        return dic
+    def _init_link(self, attr_name, link_value):
+        try:
+            attr_value = (
+                link_value
+                if isinstance(link_value, LinkTypes)
+                else LinkTypes[link_value.upper()]
+            )
+            setattr(self, attr_name, attr_value)
+        except KeyError:
+            attr_key = getattr(self, 'key_{}'.format(attr_name))
+            self.log.err('bad value for key "{}": {}'
+                         .format(attr_key, link_value), throw=ValueError)

@@ -8,8 +8,6 @@ yaml config file manager
 import itertools
 import os
 import shlex
-from functools import partial
-from glob import iglob
 
 import yaml
 
@@ -22,41 +20,38 @@ from dotdrop.linktypes import LinkTypes
 
 from .logger import Logger
 from .settings import Settings
-from .utils import with_yaml_parser
+from .utils import glob, with_yaml_parser
 
 
 class CfgYaml:
 
-    def __init__(self, yaml_dict, file_name, *, settings=None, debug=False):
+    log = Logger()
+
+    def __init__(self, yaml_dict, file_name, *, debug=False):
         """constructor
         @file_name: path to the config file
         @debug: enable debug
         """
-        if not file_name:
-            raise ValueError('config file path undefined')
-
-        if not os.path.exists(file_name):
-            raise ValueError("config file doesn't exist: {}".format(file_name))
-
         self._dirty = False
-
         self.debug = debug
-        self.log = Logger()
 
         self.file_name = os.path.abspath(file_name)
         self.yaml_dict = yaml_dict
 
-        self.settings = settings
+        self.settings = Settings.parse(yaml_dict, file_name)
 
     @classmethod
     @with_yaml_parser
     def parse(cls, yaml_dict, file_name=None, *, debug=False):
         """Parse a yaml configuration file to a class instance."""
+        if not file_name:
+            cls.log.err('config file path undefined', throw=ValueError)
 
-        settings = Settings.parse(yaml_dict, file_name)
+        if not os.path.exists(file_name):
+            cls.log.err("config file doesn't exist: {}".format(file_name),
+                        throw=ValueError)
 
-        return cls(yaml_dict=yaml_dict, file_name=file_name,
-                   settings=settings, debug=debug)
+        return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
 
 class Cfg:
@@ -339,28 +334,14 @@ class Cfg:
         # parse external configs
         try:
             ext_configs = self.lnk_settings[self.key_import_configs] or ()
-
             try:
-                iglob('./*', recursive=True)
-                find_glob = partial(iglob, recursive=True)
-            except TypeError:
-                from platform import python_version
+                ext_configs = itertools.chain.from_iterable(
+                    glob(self._abs_path(config))
+                    for config in ext_configs
+                )
+            except ValueError:
+                return False
 
-                msg = ('Recursive globbing is not available on Python {}: '
-                       .format(python_version()))
-                if any('**' in config for config in ext_configs):
-                    msg += "import_configs won't work"
-                    self.log.err(msg)
-                    return False
-
-                msg = 'upgrade to version >3.5 if you want to use this feature'
-                self.log.warn(msg)
-                find_glob = iglob
-
-            ext_configs = itertools.chain.from_iterable(
-                find_glob(self._abs_path(config))
-                for config in ext_configs
-            )
             for config in ext_configs:
                 self._merge_cfg(config)
         except KeyError:
