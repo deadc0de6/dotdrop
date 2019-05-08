@@ -71,7 +71,22 @@ class CfgYaml:
 
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
+    def new_dotfile(self, dotfile, profile=None):
+        """Add a dotfile to this config YAML file."""
+        self.dotfiles.append(dotfile)
+
+        dotfile_dict = {
+            Dotfile.key_src: dotfile.src,
+            Dotfile.key_dst: dotfile.dst,
+        }
+        if dotfile.link != self.settings.link_dotfile_default:
+            dotfile_dict[Dotfile.key_link] = str(dotfile.link)
+        self.yaml_dict[Dotfile.key_yaml][dotfile.key] = dotfile_dict
+
+        self._dirty = True
+
     def save(self, *, force=False):
+        """Save this instance to the original YAML file it was parsed from."""
         if not (self._dirty or force):
             return False
 

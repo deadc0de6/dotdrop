@@ -20,6 +20,7 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean,
 
 from dotdrop.cfg_yaml import CfgYaml
 from dotdrop.settings import LinkTypes
+from dotdrop.dotfile import Dotfile
 
 NOLINK = LinkTypes.NOLINK
 
@@ -695,28 +696,32 @@ profiles:
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
 
+        # creating dotfiles
+        dotfile_pairs = [
+            ('f_{}'.format(path), {
+                'src': path,
+                'dst': '~/.{}'.format(path),
+            })
+            for path in (create_random_file(tmp)[0] for _ in range(5))
+        ]
+        dotfiles_start, dotfiles_added = dotfile_pairs[:2], dotfile_pairs[2:]
+        dotfiles_dict = dict(dotfiles_start)
+        dotfile_objects = list(map(Dotfile.parse, dotfiles_added))
+
         # create base config file
         confpath = create_fake_config(tmp,
                                       configname=self.CONFIG_NAME,
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        dotfile_paths = [create_random_file(tmp)[0] for _ in range(5)]
-        dotfile_dicts = {
-            'f_{}'.format(path): {
-                'src': path,
-                'dst': '~/.{}'.format(path),
-            }
-            for path in dotfile_paths
-        }
-        populate_fake_config(confpath, dotfiles=dotfile_dicts)
+        populate_fake_config(confpath, dotfiles=dotfiles_dict)
 
         # parse
         config = CfgYaml.parse(confpath)
 
         # check members
         for dotfile in config.dotfiles:
-            dotfile_dict = dotfile_dicts.get(dotfile.key)
+            dotfile_dict = dotfiles_dict.get(dotfile.key)
             self.assertIsNotNone(dotfile_dict)
 
             self.assertEqual({}, dotfile.actions)
@@ -729,55 +734,36 @@ profiles:
             self.assertIsNone(dotfile.trans_w)
             self.assertEqual((), dotfile.upignore)
 
-        return
-
         # serialize
-        with open(confpath, 'w') as conf_file:
-            yaml.safe_dump(config.serialize(), conf_file)
+        config.save(force=True)
 
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
 
-        self.assertEqual(yaml_dict['config']['backup'], self.CONFIG_BACKUP)
-        self.assertTrue(yaml_dict['config']['banner'])
-        self.assertEqual(yaml_dict['config']['create'], self.CONFIG_CREATE)
-        self.assertEqual(yaml_dict['config']['dotpath'], self.CONFIG_DOTPATH)
-        self.assertTrue(yaml_dict['config']['ignoreempty'])
-        self.assertFalse(yaml_dict['config']['keepdot'])
-        self.assertEqual('nolink', yaml_dict['config']['link_dotfile_default'])
-        self.assertEqual('nolink', yaml_dict['config']['link_on_import'])
-        self.assertFalse(yaml_dict['config']['longkey'])
-        self.assertFalse(yaml_dict['config']['showdiff'])
-        self.assertEqual(os.path.join(tmp, 'workdir'),
-                         yaml_dict['config']['workdir'])
-        with self.assertRaises(KeyError):
-            yaml_dict['config']['import_actions']
-        with self.assertRaises(KeyError):
-            yaml_dict['config']['import_variables']
+        for key, dotfile_dict in dotfiles_dict.items():
+            config_dotfile = yaml_dict['dotfiles'].get(key)
+            self.assertIsNotNone(config_dotfile)
+            self.assertEqual(config_dotfile, dotfile_dict)
 
-        # changing a config value
-        yaml_dict['config']['banner'] = False
-        with open(confpath, 'w') as conf_file:
-            yaml.safe_dump(yaml_dict, conf_file)
+        # modify
+        for dotfile in dotfile_objects:
+            config.new_dotfile(dotfile)
+        config.save()
 
-        # parse again to check serialization consistency
-        # config = CfgYaml.parse(confpath)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
 
-        # check members
-        self.assertEqual(config.settings.cfg, config)
-        self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
-        self.assertFalse(config.settings.banner)
-        self.assertEqual(config.settings.create, self.CONFIG_CREATE)
-        self.assertEqual(config.settings.dotpath, self.CONFIG_DOTPATH)
-        self.assertTrue(config.settings.ignoreempty)
-        self.assertEqual((), config.settings.import_actions)
-        self.assertEqual((), config.settings.import_variables)
-        self.assertFalse(config.settings.keepdot)
-        self.assertEqual(NOLINK, config.settings.link_dotfile_default)
-        self.assertEqual(NOLINK, config.settings.link_on_import)
-        self.assertFalse(config.settings.longkey)
-        self.assertFalse(config.settings.showdiff)
-        self.assertEqual(os.path.join(tmp, 'workdir'), config.settings.workdir)
+        for key, dotfile_dict in dotfiles_dict.items():
+            config_dotfile = yaml_dict['dotfiles'].get(key)
+            self.assertIsNotNone(config_dotfile)
+            self.assertEqual(config_dotfile, dotfile_dict)
+
+        for dotfile in dotfile_objects:
+            config_dotfile = yaml_dict['dotfiles'].get(dotfile.key)
+            self.assertIsNotNone(config_dotfile)
+
+            self.assertEqual(dotfile.dst, config_dotfile['dst'])
+            self.assertEqual(dotfile.src, config_dotfile['src'])
 
 
 def main():

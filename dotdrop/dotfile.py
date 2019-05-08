@@ -81,12 +81,6 @@ class Dotfile:
 
         return list(map(cls.parse, dotfiles.items()))
 
-    @classmethod
-    def serialize_dict(cls, actions):
-        return {
-            cls.key_yaml: dict(map(cls.serialize, actions))
-        }
-
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
@@ -95,7 +89,7 @@ class Dotfile:
 
     def __str__(self):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
-        return msg.format(self.key, self.src, self.dst, self.link.name.lower())
+        return msg.format(self.key, self.src, self.dst, str(self.link))
 
     def __repr__(self):
         return 'dotfile({!s})'.format(self)
@@ -108,19 +102,3 @@ class Dotfile:
             '_dotfile_key': self.key,
             '_dotfile_link': str(self.link),
         }
-
-    def serialize(self, as_dic=False):
-        """Return key-value pair representation of this dotfile."""
-        # Tedious, but less error-prone than introspection
-        dic = {
-            self.key_actions: self.actions,
-            self.key_cmpignore: self.cmpignore,
-            self.key_dst: self.dst,
-            self.key_link: str(self.link),
-            self.key_noempty: self.noempty,
-            self.key_src: self.src,
-            self.key_trans_r: self.trans_r,
-            self.key_trans_w: self.trans_w,
-            self.key_upignore: self.upignore,
-        }
-        return {self.key: dic} if as_dic else (self.key, dic)
