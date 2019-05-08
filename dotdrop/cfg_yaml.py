@@ -25,6 +25,7 @@ from .utils import clear_none, glob, with_yaml_parser
 
 class CfgYaml:
 
+    default_settings = Settings()
     log = Logger()
 
     def __init__(self, yaml_dict, file_name, *, debug=False):
@@ -37,11 +38,25 @@ class CfgYaml:
         self.debug = debug
 
         self.file_name = os.path.abspath(file_name)
-
-        self.yaml_dict = clear_none(yaml_dict)
+        self.yaml_dict = self._sanitize_yaml(yaml_dict)
 
         self.settings = Settings.parse(self.yaml_dict, self.file_name)
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
+
+        self.yaml_dict.update(self.settings.serialize(as_dict=True))
+
+    @classmethod
+    def _sanitize_yaml(cls, yaml_dict):
+        """Remove None and set defaults for mandatory keys in YAML dicts."""
+        # Clearing None values, to preserve mental sanity when checking keys
+        yaml_dict = clear_none(yaml_dict)
+
+        # Setting default to mandatory config file keys
+        yaml_dict.setdefault(Settings.key_yaml,
+                             cls.default_settings.serialize())
+        yaml_dict.setdefault(Dotfile.key_yaml, {})
+
+        return yaml_dict
 
     @classmethod
     @with_yaml_parser
@@ -55,6 +70,16 @@ class CfgYaml:
                         throw=ValueError)
 
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
+
+    def save(self, *, force=False):
+        if not (self._dirty or force):
+            return False
+
+        with open(self.file_name, 'w') as cfg_file:
+            yaml.safe_dump(self.yaml_dict, cfg_file,
+                           default_flow_style=False, indent=2)
+        self._dirty = False
+        return True
 
 
 class Cfg:

@@ -600,6 +600,7 @@ profiles:
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
+        workdir = os.path.join(tmp, 'workdir')
 
         # create base config file
         confpath = create_fake_config(tmp,
@@ -615,22 +616,24 @@ profiles:
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
         self.assertTrue(config.settings.banner)
+        self.assertEqual((), config.settings.cmpignore)
         self.assertEqual(config.settings.create, self.CONFIG_CREATE)
+        self.assertEqual((), config.settings.default_actions)
         self.assertEqual(config.settings.dotpath, self.CONFIG_DOTPATH)
         self.assertTrue(config.settings.ignoreempty)
         self.assertEqual((), config.settings.import_actions)
+        self.assertEqual((), config.settings.import_configs)
         self.assertEqual((), config.settings.import_variables)
         self.assertFalse(config.settings.keepdot)
         self.assertEqual(NOLINK, config.settings.link_dotfile_default)
         self.assertEqual(NOLINK, config.settings.link_on_import)
         self.assertFalse(config.settings.longkey)
         self.assertFalse(config.settings.showdiff)
-        self.assertEqual(os.path.join(tmp, 'workdir'), config.settings.workdir)
+        self.assertEqual(workdir, config.settings.workdir)
+        self.assertEqual((), config.settings.upignore)
 
-        return
         # serialize
-        with open(confpath, 'w') as conf_file:
-            yaml.safe_dump(config.serialize(), conf_file)
+        config.save(force=True)
 
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
@@ -645,12 +648,19 @@ profiles:
         self.assertEqual('nolink', yaml_dict['config']['link_on_import'])
         self.assertFalse(yaml_dict['config']['longkey'])
         self.assertFalse(yaml_dict['config']['showdiff'])
-        self.assertEqual(os.path.join(tmp, 'workdir'),
-                         yaml_dict['config']['workdir'])
+        self.assertEqual(workdir, yaml_dict['config']['workdir'])
+        with self.assertRaises(KeyError):
+            yaml_dict['config']['cmpignore']
+        with self.assertRaises(KeyError):
+            yaml_dict['config']['default_actions']
         with self.assertRaises(KeyError):
             yaml_dict['config']['import_actions']
         with self.assertRaises(KeyError):
+            yaml_dict['config']['import_config']
+        with self.assertRaises(KeyError):
             yaml_dict['config']['import_variables']
+        with self.assertRaises(KeyError):
+            yaml_dict['config']['upignore']
 
         # changing a config value
         yaml_dict['config']['banner'] = False
@@ -658,23 +668,26 @@ profiles:
             yaml.safe_dump(yaml_dict, conf_file)
 
         # parse again to check serialization consistency
-        # config = CfgYaml.parse(confpath)
+        config = CfgYaml.parse(confpath)
 
         # check members
-        self.assertEqual(config.settings.cfg, config)
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
         self.assertFalse(config.settings.banner)
+        self.assertEqual((), config.settings.cmpignore)
         self.assertEqual(config.settings.create, self.CONFIG_CREATE)
+        self.assertEqual((), config.settings.default_actions)
         self.assertEqual(config.settings.dotpath, self.CONFIG_DOTPATH)
         self.assertTrue(config.settings.ignoreempty)
         self.assertEqual((), config.settings.import_actions)
+        self.assertEqual((), config.settings.import_configs)
         self.assertEqual((), config.settings.import_variables)
         self.assertFalse(config.settings.keepdot)
         self.assertEqual(NOLINK, config.settings.link_dotfile_default)
         self.assertEqual(NOLINK, config.settings.link_on_import)
         self.assertFalse(config.settings.longkey)
         self.assertFalse(config.settings.showdiff)
-        self.assertEqual(os.path.join(tmp, 'workdir'), config.settings.workdir)
+        self.assertEqual(workdir, config.settings.workdir)
+        self.assertEqual((), config.settings.upignore)
 
     def test_parse_serialize_dotfiles(self):
         """Test dotfiles parsing in CfgYaml."""

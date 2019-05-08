@@ -71,13 +71,39 @@ class Settings:
 
     def _init_link(self, attr_name, link_value):
         try:
-            attr_value = (
-                link_value
-                if isinstance(link_value, LinkTypes)
-                else LinkTypes[link_value.upper()]
-            )
-            setattr(self, attr_name, attr_value)
-        except KeyError:
+            setattr(self, attr_name, LinkTypes.get(link_value))
+        except ValueError:
             attr_key = getattr(self, 'key_{}'.format(attr_name))
             self.log.err('bad value for key "{}": {}'
                          .format(attr_key, link_value), throw=ValueError)
+
+    def _serialize_seq(self, name, dic):
+        seq = getattr(self, name)
+        if seq:
+            seq_key = getattr(self, 'key_{}'.format(name))
+            dic[seq_key] = seq
+
+    def serialize(self, as_dict=False):
+        """Return key-value pair representation of this settings."""
+        # Tedious, but less error-prone than introspection
+        dic = {
+            self.key_backup: self.backup,
+            self.key_banner: self.banner,
+            self.key_create: self.create,
+            self.key_dotpath: self.dotpath,
+            self.key_ignoreempty: self.ignoreempty,
+            self.key_keepdot: self.keepdot,
+            self.key_link_dotfile_default: str(self.link_dotfile_default),
+            self.key_link_on_import: str(self.link_on_import),
+            self.key_longkey: self.longkey,
+            self.key_showdiff: self.showdiff,
+            self.key_workdir: self.workdir,
+        }
+        self._serialize_seq('cmpignore', dic)
+        self._serialize_seq('default_actions', dic)
+        self._serialize_seq('import_actions', dic)
+        self._serialize_seq('import_configs', dic)
+        self._serialize_seq('import_variables', dic)
+        self._serialize_seq('upignore', dic)
+
+        return {self.key_yaml: dic} if as_dict else (self.key_yaml, dic)

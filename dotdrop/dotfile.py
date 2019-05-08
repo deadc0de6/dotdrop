@@ -5,8 +5,6 @@ Copyright (c) 2017, deadc0de6
 represents a dotfile in dotdrop
 """
 
-from inspect import getmembers, ismethod
-
 from .linktypes import LinkTypes
 from .logger import Logger
 from .utils import destructure_keyval, with_yaml_parser
@@ -111,10 +109,18 @@ class Dotfile:
             '_dotfile_link': str(self.link),
         }
 
-    def serialize(self, to_dic=False):
+    def serialize(self, as_dic=False):
+        """Return key-value pair representation of this dotfile."""
+        # Tedious, but less error-prone than introspection
         dic = {
-            getattr(self, 'key_{}'.format(name)): member
-            for name, member in getmembers(self, lambda o: not ismethod(o))
-            if not name.startswith('_')
+            self.key_actions: self.actions,
+            self.key_cmpignore: self.cmpignore,
+            self.key_dst: self.dst,
+            self.key_link: str(self.link),
+            self.key_noempty: self.noempty,
+            self.key_src: self.src,
+            self.key_trans_r: self.trans_r,
+            self.key_trans_w: self.trans_w,
+            self.key_upignore: self.upignore,
         }
-        return {self.key: dic} if to_dic else (self.key, dic)
+        return {self.key: dic} if as_dic else (self.key, dic)
