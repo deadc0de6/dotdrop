@@ -20,7 +20,7 @@ from dotdrop.linktypes import LinkTypes
 
 from .logger import Logger
 from .settings import Settings
-from .utils import glob, with_yaml_parser
+from .utils import clear_none, glob, with_yaml_parser
 
 
 class CfgYaml:
@@ -32,13 +32,16 @@ class CfgYaml:
         @file_name: path to the config file
         @debug: enable debug
         """
+
         self._dirty = False
         self.debug = debug
 
         self.file_name = os.path.abspath(file_name)
-        self.yaml_dict = yaml_dict
 
-        self.settings = Settings.parse(yaml_dict, file_name)
+        self.yaml_dict = clear_none(yaml_dict)
+
+        self.settings = Settings.parse(self.yaml_dict, self.file_name)
+        self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
 
     @classmethod
     @with_yaml_parser

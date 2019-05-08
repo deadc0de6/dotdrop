@@ -5,15 +5,35 @@ Copyright (c) 2017, deadc0de6
 represents a dotfile in dotdrop
 """
 
-from dotdrop.linktypes import LinkTypes
+from inspect import getmembers, ismethod
+
+from .linktypes import LinkTypes
+from .logger import Logger
+from .utils import destructure_keyval, with_yaml_parser
 
 
 class Dotfile:
+    # key in yaml file
+    key_yaml = 'dotfiles'
+
+    # dotfile keys
+    key_actions = 'actions'
+    key_cmpignore = 'cmpignore'
+    key_dst = 'dst'
+    key_noempty = 'ignoreempty'
+    key_link = 'link'
+    key_link_children = 'link_children'
+    key_src = 'src'
+    key_trans_r = 'trans'
+    key_trans_w = 'trans_write'
+    key_upignore = 'upignore'
+
+    log = Logger()
 
     def __init__(self, key, dst, src,
-                 actions={}, trans_r=None, trans_w=None,
-                 link=LinkTypes.NOLINK, cmpignore=[],
-                 noempty=False, upignore=[]):
+                 actions=None, trans_r=None, trans_w=None,
+                 link=LinkTypes.NOLINK, cmpignore=(),
+                 noempty=False, upignore=()):
         """constructor
         @key: dotfile key
         @dst: dotfile dst (in user's home usually)
@@ -26,39 +46,75 @@ class Dotfile:
         @noempty: ignore empty template if True
         @upignore: patterns to ignore when updating
         """
-        self.key = key
+        self.actions = actions or {}
+        self.cmpignore = cmpignore
         self.dst = dst
+        self.key = key
+        self.link = LinkTypes.get(link)
+        self.noempty = noempty
         self.src = src
-        self.link = link
-        # ensure link of right type
-        if type(link) != LinkTypes:
-            raise Exception('bad value for link: {}'.format(link))
-        self.actions = actions
         self.trans_r = trans_r
         self.trans_w = trans_w
-        self.cmpignore = cmpignore
-        self.noempty = noempty
         self.upignore = upignore
 
-    def get_vars(self):
-        """return this dotfile templating vars"""
-        _vars = {}
-        _vars['_dotfile_abs_src'] = self.src
-        _vars['_dotfile_abs_dst'] = self.dst
-        _vars['_dotfile_key'] = self.key
-        _vars['_dotfile_link'] = self.link.name.lower()
+    @classmethod
+    @destructure_keyval
+    def parse(cls, key, value):
+        value = value.copy()
+        value['noempty'] = value.get(cls.key_noempty, False)
+        value['trans_r'] = value.get(cls.key_trans_r)
+        value['trans_w'] = value.get(cls.key_trans_w)
+        try:
+            del (value[cls.key_noempty], value[cls.key_trans_r],
+                 value[cls.key_trans_w])
+        except KeyError:
+            pass
 
-        return _vars
+        return cls(key=key, **value)
 
-    def __str__(self):
-        msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
-        return msg.format(self.key, self.src, self.dst, self.link.name.lower())
+    @classmethod
+    @with_yaml_parser
+    def parse_dict(cls, yaml_dict, file_name=None):
+        try:
+            dotfiles = yaml_dict[cls.key_yaml]
+        except KeyError:
+            cls.log.err('malformed file {}: missing key "{}"'
+                        .format(file_name, cls.key_yaml), throw=ValueError)
 
-    def __repr__(self):
-        return 'dotfile({})'.format(self.__str__())
+        return list(map(cls.parse, dotfiles.items()))
+
+    @classmethod
+    def serialize_dict(cls, actions):
+        return {
+            cls.key_yaml: dict(map(cls.serialize, actions))
+        }
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
     def __hash__(self):
         return hash(self.dst) ^ hash(self.src) ^ hash(self.key)
+
+    def __str__(self):
+        msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
+        return msg.format(self.key, self.src, self.dst, self.link.name.lower())
+
+    def __repr__(self):
+        return 'dotfile({!s})'.format(self)
+
+    def get_vars(self):
+        """return this dotfile templating vars"""
+        return {
+            '_dotfile_abs_src': self.src,
+            '_dotfile_abs_dst': self.dst,
+            '_dotfile_key': self.key,
+            '_dotfile_link': str(self.link),
+        }
+
+    def serialize(self, to_dic=False):
+        dic = {
+            getattr(self, 'key_{}'.format(name)): member
+            for name, member in getmembers(self, lambda o: not ismethod(o))
+            if not name.startswith('_')
+        }
+        return {self.key: dic} if to_dic else (self.key, dic)

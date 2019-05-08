@@ -1,24 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from enum import IntEnum
-
+from .linktypes import LinkTypes
 from .logger import Logger
 from .utils import with_yaml_parser
 
 
-class LinkTypes(IntEnum):
-
-    NOLINK = 0
-    LINK = 1
-    LINK_CHILDREN = 2
-
-    def __str__(self):
-        return self.name.lower()
-
-
 class Settings:
-
     # key in yaml file
     key_yaml = 'config'
 
@@ -76,7 +64,7 @@ class Settings:
         try:
             settings = yaml_dict[cls.key_yaml]
         except KeyError:
-            cls.log.err('malformed file {}: missing key {}'
+            cls.log.err('malformed file {}: missing key "{}"'
                         .format(file_name, cls.key_yaml), throw=ValueError)
 
         return cls(**settings)
