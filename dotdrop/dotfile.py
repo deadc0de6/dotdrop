@@ -11,6 +11,7 @@ from .utils import destructure_keyval, with_yaml_parser
 
 
 class Dotfile:
+    """Represent a dotfile."""
     # key in yaml file
     key_yaml = 'dotfiles'
 

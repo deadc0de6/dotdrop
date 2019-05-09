@@ -12,13 +12,14 @@ import shlex
 import yaml
 
 # local import
-from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
 from dotdrop.action import Action, Transform
 from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
 
+from .dotfile import Dotfile
 from .logger import Logger
+from .profile import Profile
 from .settings import Settings
 from .utils import clear_none, glob, with_yaml_parser
 
@@ -42,6 +43,7 @@ class CfgYaml:
 
         self.settings = Settings.parse(self.yaml_dict, self.file_name)
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
+        self.profiles = Profile.parse_dict(self.yaml_dict, self.file_name)
 
         self.yaml_dict.update(self.settings.serialize(as_dict=True))
 
@@ -55,6 +57,7 @@ class CfgYaml:
         yaml_dict.setdefault(Settings.key_yaml,
                              cls.default_settings.serialize())
         yaml_dict.setdefault(Dotfile.key_yaml, {})
+        yaml_dict.setdefault(Profile.key_yaml, {})
 
         return yaml_dict
 
@@ -62,17 +65,25 @@ class CfgYaml:
     @with_yaml_parser
     def parse(cls, yaml_dict, file_name=None, *, debug=False):
         """Parse a yaml configuration file to a class instance."""
-        if not file_name:
-            cls.log.err('config file path undefined', throw=ValueError)
-
-        if not os.path.exists(file_name):
-            cls.log.err("config file doesn't exist: {}".format(file_name),
-                        throw=ValueError)
-
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
     def new_dotfile(self, dotfile, profile=None):
         """Add a dotfile to this config YAML file."""
+
+        # add dotfile to profile
+        if profile is not None:
+            try:
+                profile = next(p for p in self.profiles if p == profile)
+            except StopIteration:
+                self.log.err('Profile not found: "{!s}" in config file "{}"'
+                             .format(profile, self.file_name))
+
+            profile.dotfiles.append(dotfile.key)
+
+            yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
+            yaml_profile[Profile.key_dotfiles].append(dotfile.key)
+
+        # add dotfile to dotfiles
         self.dotfiles.append(dotfile)
 
         dotfile_dict = {
@@ -81,6 +92,7 @@ class CfgYaml:
         }
         if dotfile.link != self.settings.link_dotfile_default:
             dotfile_dict[Dotfile.key_link] = str(dotfile.link)
+
         self.yaml_dict[Dotfile.key_yaml][dotfile.key] = dotfile_dict
 
         self._dirty = True
