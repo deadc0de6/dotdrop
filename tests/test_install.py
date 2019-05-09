@@ -88,24 +88,24 @@ exec bspwm
         # create the dotfile in dotdrop
         f1, c1 = create_random_file(tmp)
         dst1 = os.path.join(dst, get_string(6))
-        d1 = Dotfile(get_string(5), dst1, os.path.basename(f1))
+        d1 = Dotfile(dst1, os.path.basename(f1), get_string(5))
         # fake a print
         self.assertTrue(str(d1) != '')
         f2, c2 = create_random_file(tmp)
         dst2 = os.path.join(dst, get_string(6))
-        d2 = Dotfile(get_string(5), dst2, os.path.basename(f2))
+        d2 = Dotfile(dst2, os.path.basename(f2), get_string(5))
         with open(f2, 'w') as f:
             f.write(self.TEMPLATE)
         f3, _ = create_random_file(tmp, binary=True)
         dst3 = os.path.join(dst, get_string(6))
-        d3 = Dotfile(get_string(5), dst3, os.path.basename(f3))
+        d3 = Dotfile(dst3, os.path.basename(f3), get_string(5))
 
         # create a directory dotfile
         dir1 = os.path.join(tmp, 'somedir')
         create_dir(dir1)
         fd, _ = create_random_file(dir1)
         dstd = os.path.join(dst, get_string(6))
-        ddot = Dotfile(get_string(5), dstd, os.path.basename(dir1))
+        ddot = Dotfile(dstd, os.path.basename(dir1), get_string(5))
 
         # to test backup
         f4, c4 = create_random_file(tmp)
@@ -118,8 +118,8 @@ exec bspwm
         f5, c5 = create_random_file(tmp)
         dst5 = os.path.join(dst, get_string(6))
         self.addCleanup(clean, dst5)
-        d5 = Dotfile(get_string(6), dst5,
-                     os.path.basename(f5), link=LinkTypes.LINK)
+        d5 = Dotfile(key=get_string(6), dst=dst5,
+                     src=os.path.basename(f5), link=LinkTypes.LINK)
 
         # create the dotfile directories in dotdrop
         dir1 = create_dir(os.path.join(tmp, get_string(6)))
@@ -132,7 +132,7 @@ exec bspwm
         sub2, _ = create_random_file(dir1)
         self.assertTrue(os.path.exists(sub2))
         # make up the dotfile
-        d6 = Dotfile(get_string(6), dst6, os.path.basename(dir1))
+        d6 = Dotfile(dst6, os.path.basename(dir1), get_string(6))
 
         # to test symlink directories
         dir2 = create_dir(os.path.join(tmp, get_string(6)))
@@ -145,8 +145,8 @@ exec bspwm
         sub4, _ = create_random_file(dir2)
         self.assertTrue(os.path.exists(sub4))
         # make up the dotfile
-        d7 = Dotfile(get_string(6), dst7,
-                     os.path.basename(dir2), link=LinkTypes.LINK)
+        d7 = Dotfile(key=get_string(6), dst=dst7,
+                     src=os.path.basename(dir2), link=LinkTypes.LINK)
 
         # to test actions
         value = get_string(12)
@@ -156,7 +156,7 @@ exec bspwm
                                                                     fact))
         f8, c8 = create_random_file(tmp)
         dst8 = os.path.join(dst, get_string(6))
-        d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])
+        d8 = Dotfile(dst8, os.path.basename(f8), get_string(6), actions=[act1])
 
         # to test transformations
         trans1 = 'trans1'
@@ -165,12 +165,12 @@ exec bspwm
         tr = Action('testtrans', 'post', cmd)
         f9, c9 = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
-        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=tr)
+        d9 = Dotfile(dst9, os.path.basename(f9), get_string(6), trans_r=tr)
 
         # to test template
         f10, _ = create_random_file(tmp, content='{{@@ header() @@}}')
         dst10 = os.path.join(dst, get_string(6))
-        d10 = Dotfile(get_string(6), dst10, os.path.basename(f10))
+        d10 = Dotfile(dst10, os.path.basename(f10), get_string(6))
 
         # generate the config and stuff
         profile = get_string(5)

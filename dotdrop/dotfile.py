@@ -29,14 +29,14 @@ class Dotfile(DictParser):
 
     log = Logger()
 
-    def __init__(self, key, dst, src,
+    def __init__(self, dst, src, key=None,
                  actions=None, trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, cmpignore=(),
                  noempty=False, upignore=()):
         """constructor
-        @key: dotfile key
         @dst: dotfile dst (in user's home usually)
         @src: dotfile src (in dotpath)
+        @key: dotfile key
         @actions: dictionary of actions to execute for this dotfile
         @trans_r: transformation to change dotfile before it is installed
         @trans_w: transformation to change dotfile before updating it
