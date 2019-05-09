@@ -7,10 +7,10 @@ represents a dotfile in dotdrop
 
 from .linktypes import LinkTypes
 from .logger import Logger
-from .utils import destructure_keyval, with_yaml_parser
+from .utils import DictParser
 
 
-class Dotfile:
+class Dotfile(DictParser):
     """Represent a dotfile."""
     # key in yaml file
     key_yaml = 'dotfiles'
@@ -57,9 +57,7 @@ class Dotfile:
         self.upignore = upignore
 
     @classmethod
-    @destructure_keyval
-    def parse(cls, key, value):
-        value = value.copy()
+    def _adjust_yaml_keys(cls, value):
         value['noempty'] = value.get(cls.key_noempty, False)
         value['trans_r'] = value.get(cls.key_trans_r)
         value['trans_w'] = value.get(cls.key_trans_w)
@@ -69,18 +67,7 @@ class Dotfile:
         except KeyError:
             pass
 
-        return cls(key=key, **value)
-
-    @classmethod
-    @with_yaml_parser
-    def parse_dict(cls, yaml_dict, file_name=None):
-        try:
-            dotfiles = yaml_dict[cls.key_yaml]
-        except KeyError:
-            cls.log.err('malformed file {}: missing key "{}"'
-                        .format(file_name, cls.key_yaml), throw=ValueError)
-
-        return list(map(cls.parse, dotfiles.items()))
+        return value
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

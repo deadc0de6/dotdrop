@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from .logger import Logger
-from .utils import destructure_keyval, with_yaml_parser
+from .utils import DictParser
 
 
-class Profile:
+class Profile(DictParser):
     """Represent a profile."""
     # key in yaml file
     key_yaml = 'profiles'
@@ -29,27 +29,14 @@ class Profile:
         self.dynvariables = dynvariables or {}
 
     @classmethod
-    @destructure_keyval
-    def parse(cls, key, value):
-        value = value.copy()
+    def _adjust_yaml_keys(cls, value):
         value['imported_dotfiles'] = value.get(cls.key_import, ())
         try:
             del value[cls.key_import]
         except KeyError:
             pass
 
-        return cls(key=key, **value)
-
-    @classmethod
-    @with_yaml_parser
-    def parse_dict(cls, yaml_dict, file_name=None):
-        try:
-            profiles = yaml_dict[cls.key_yaml]
-        except KeyError:
-            cls.log.err('malformed file {}: missing key "{}"'
-                        .format(file_name, cls.key_yaml), throw=ValueError)
-
-        return list(map(cls.parse, profiles.items()))
+        return value
 
     def __eq__(self, other):
         if isinstance(other, str):

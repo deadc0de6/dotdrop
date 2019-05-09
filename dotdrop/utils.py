@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import tempfile
 import uuid
+from abc import ABC, abstractclassmethod
 from functools import partial, wraps
 from glob import iglob
 from platform import python_version
@@ -21,7 +22,16 @@ import yaml
 # local import
 from .logger import Logger
 
+#######################################
+# Variables
+#######################################
+
 LOG = Logger()
+
+
+#######################################
+# Functions
+#######################################
 
 
 def clear_none(dic):
@@ -214,3 +224,36 @@ def write_to_tmpfile(content):
     with open(path, 'wb') as f:
         f.write(content)
     return path
+
+
+#######################################
+# Classes
+#######################################
+
+
+class DictParser(ABC):
+    @property
+    @abstractclassmethod
+    def key_yaml(self):
+        pass
+
+    @classmethod
+    def _adjust_yaml_keys(cls, yaml_dict):
+        return yaml_dict
+
+    @classmethod
+    @destructure_keyval
+    def parse(cls, key, value):
+        value = cls._adjust_yaml_keys(value.copy())
+        return cls(key=key, **value)
+
+    @classmethod
+    @with_yaml_parser
+    def parse_dict(cls, yaml_dict, file_name=None):
+        try:
+            items = yaml_dict[cls.key_yaml]
+        except KeyError:
+            cls.log.err('malformed file {}: missing key "{}"'
+                        .format(file_name, cls.key_yaml), throw=ValueError)
+
+        return list(map(cls.parse, items.items()))
