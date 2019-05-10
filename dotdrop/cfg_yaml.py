@@ -67,35 +67,82 @@ class CfgYaml:
         """Parse a yaml configuration file to a class instance."""
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
-    def new_dotfile(self, dotfile, profile=None):
-        """Add a dotfile to this config YAML file."""
+    def _add_dotfile_to_profile(self, dotfile, profile):
+        """Add dotfile to profile."""
+        # Skipping if profile already has dotfile
+        if dotfile.key in profile.dotfiles:
+            self.log.warn('Profile {!s} already has dotfile {!s}'
+                          .format(profile, dotfile))
+            return False
 
-        # add dotfile to profile
-        if profile is not None:
-            try:
-                profile = next(p for p in self.profiles if p == profile)
-            except StopIteration:
-                self.log.err('Profile not found: "{!s}" in config file "{}"'
-                             .format(profile, self.file_name))
+        # Adding dotfile to profile dotfiles
+        profile.dotfiles.append(dotfile.key)
 
-            profile.dotfiles.append(dotfile.key)
+        # Adding dotfile to profile dotfiles in YAML dictionary
+        yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
+        yaml_profile[Profile.key_dotfiles].append(dotfile.key)
 
-            yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
-            yaml_profile[Profile.key_dotfiles].append(dotfile.key)
+        self._dirty = True
 
-        # add dotfile to dotfiles
+        return True
+
+    def _add_dotfile(self, dotfile):
+        """Add dotfile to dotfiles."""
+        # Skipping if a dotfile with the same dst exists
+        if dotfile.dst in self.dotfiles:
+            return
+
+        # Adding dotfile to Dotfile objects list
         self.dotfiles.append(dotfile)
 
+        # Adding dotfile to YAML dictionary
         dotfile_dict = {
             Dotfile.key_src: dotfile.src,
             Dotfile.key_dst: dotfile.dst,
         }
         if dotfile.link != self.settings.link_dotfile_default:
             dotfile_dict[Dotfile.key_link] = str(dotfile.link)
-
         self.yaml_dict[Dotfile.key_yaml][dotfile.key] = dotfile_dict
 
         self._dirty = True
+
+    def _add_profile(self, profile):
+        """Add a profile to this YAML config file."""
+        # Creating profile object when just the key is passed
+        if isinstance(profile, str):
+            profile = Profile(key=profile)
+
+        # Adding profile to profile objects
+        self.profiles.append(profile)
+
+        # Adding profile to YAML dictionary
+        profile_dict = {
+            Profile.key_dotfiles: profile.dotfiles,
+        }
+        self.yaml_dict[Profile.key_yaml][profile.key] = profile_dict
+
+        self._dirty = True
+
+        return profile
+
+    def get_profile(self, profile):
+        """Get a profile from this YAML config file. Add it if not there."""
+        # Checking profile existence, and getting object if profile is a string
+        try:
+            return next(p for p in self.profiles if p == profile)
+        except StopIteration:
+            self.log.warn('Porfile {!s} not found, adding it'.format(profile))
+            return self._add_profile(profile)
+
+    def new_dotfile(self, dotfile, profile=None):
+        """Add a dotfile to this config YAML file."""
+        self._add_dotfile(dotfile)
+
+        # add dotfile to profile
+        if profile is not None:
+            profile = self.get_profile(profile)
+            return self._add_dotfile_to_profile(dotfile, profile)
+        return True
 
     def save(self, *, force=False):
         """Save this instance to the original YAML file it was parsed from."""

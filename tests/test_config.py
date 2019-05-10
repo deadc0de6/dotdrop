@@ -20,6 +20,7 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean,
 
 from dotdrop.cfg_yaml import CfgYaml
 from dotdrop.dotfile import Dotfile
+from dotdrop.profile import Profile
 from dotdrop.settings import LinkTypes
 
 NOLINK = LinkTypes.NOLINK
@@ -847,6 +848,155 @@ profiles:
         for dotfile_key, _ in dotfiles_added:
             self.assertIn(dotfile_key, modified_profile_dict['dotfiles'])
             self.assertIn(dotfile_key, modified_profile.dotfiles)
+
+    def test_new_dotfile(self):
+        """Test CfgYaml:new_method() corner cases."""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        # creating dotfiles
+        dotfile_pairs = [
+            ('f_{}'.format(path), {
+                'src': path,
+                'dst': '~/.{}'.format(path),
+            })
+            for path in (create_random_file(tmp)[0] for _ in range(5))
+        ]
+        dotfile_keys = [key for key, _ in dotfile_pairs]
+        dotfiles_start, dotfiles_added = dotfile_keys[:2], dotfile_pairs[2:]
+        dotfiles_dict = dict(dotfile_pairs)
+        dotfile_objects = list(map(Dotfile.parse, dotfiles_added))
+
+        # creating profiles
+        profiles = {
+            'object-test': {
+                'dotfiles': dotfiles_start,
+            },
+            'string-test': {
+                'dotfiles': dotfiles_start,
+            }
+        }
+
+        # create base config file
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        populate_fake_config(confpath, dotfiles=dotfiles_dict,
+                             profiles=profiles)
+
+        # parse
+        config = CfgYaml.parse(confpath)
+
+        ###################################################
+        # dotfile already exists
+        ###################################################
+
+        existing_dotfile = dotfiles_start[0]
+        existing_dotfile = Dotfile(key=existing_dotfile,
+                                   **dotfiles_dict[existing_dotfile])
+        prev_dotfiles = config.dotfiles
+        config.new_dotfile(existing_dotfile)
+
+        # model-layer test
+        self.assertEqual(prev_dotfiles, config.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        self.assertEqual(yaml_dict['dotfiles'], dotfiles_dict)
+
+        ###################################################
+        # new dotfile
+        ###################################################
+
+        new_dotfile = dotfile_objects[0]
+        config.new_dotfile(existing_dotfile)
+
+        # model-layer test
+        self.assertIn(new_dotfile, config.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        self.assertEqual(yaml_dict['dotfiles'][new_dotfile.key],
+                         dotfiles_dict[new_dotfile.key])
+
+        ###################################################
+        # profile found (object)
+        ###################################################
+
+        existing_profile = config.profiles[0]
+        config.new_dotfile(existing_dotfile, existing_profile)
+
+        # model-layer test
+        self.assertIn(existing_dotfile.key, existing_profile.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        existing_profile_dict = yaml_dict['profiles'][existing_profile.key]
+        self.assertIn(existing_dotfile.key, existing_profile_dict['dotfiles'])
+
+        ###################################################
+        # profile found (string)
+        ###################################################
+
+        existing_profile = config.profiles[1]
+        config.new_dotfile(existing_dotfile, existing_profile.key)
+
+        # model-layer test
+        self.assertIn(existing_dotfile.key, existing_profile.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        existing_profile_dict = yaml_dict['profiles'][existing_profile.key]
+        self.assertIn(existing_dotfile.key, existing_profile_dict['dotfiles'])
+
+        ###################################################
+        # profile not found (object)
+        ###################################################
+
+        new_profile = Profile(key='this-host')
+        prev_dotfiles = config.dotfiles
+
+        config.new_dotfile(existing_dotfile, new_profile)
+
+        # model-layer test
+        self.assertIn(existing_dotfile.key, new_profile.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        new_profile_dict = yaml_dict['profiles'][new_profile.key]
+        self.assertIn(existing_dotfile.key, new_profile_dict['dotfiles'])
+
+        ###################################################
+        # profile not found (object)
+        ###################################################
+
+        new_profile = 'this-host-string'
+        prev_dotfiles = config.dotfiles
+        config.new_dotfile(existing_dotfile, new_profile)
+        new_profile = config.get_profile(new_profile)
+
+        # model-layer test
+        self.assertIn(existing_dotfile.key, new_profile.dotfiles)
+
+        # filesystem test
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        new_profile_dict = yaml_dict['profiles'][new_profile.key]
+        self.assertIn(existing_dotfile.key, new_profile_dict['dotfiles'])
 
 
 def main():
