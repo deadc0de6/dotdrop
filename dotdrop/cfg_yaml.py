@@ -125,14 +125,22 @@ class CfgYaml:
 
         return profile
 
-    def get_profile(self, profile):
-        """Get a profile from this YAML config file. Add it if not there."""
+    def get_profile(self, profile, default=None, *, add=False):
+        """Get a profile, by name or object, from this YAML config file."""
         # Checking profile existence, and getting object if profile is a string
         try:
             return next(p for p in self.profiles if p == profile)
         except StopIteration:
-            self.log.warn('Porfile {!s} not found, adding it'.format(profile))
-            return self._add_profile(profile)
+            if add:
+                self.log.warn('Porfile {!s} not found, adding it'
+                              .format(profile))
+                return self._add_profile(profile)
+
+            if default is not None:
+                return default
+
+            raise ValueError('Profile {!s} not found in config file {}'
+                             .format(profile, self.file_name))
 
     def new_dotfile(self, dotfile, profile=None):
         """Add a dotfile to this config YAML file."""
@@ -140,7 +148,7 @@ class CfgYaml:
 
         # add dotfile to profile
         if profile is not None:
-            profile = self.get_profile(profile)
+            profile = self.get_profile(profile, add=True)
             return self._add_dotfile_to_profile(dotfile, profile)
         return True
 
