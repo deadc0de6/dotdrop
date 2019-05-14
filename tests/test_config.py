@@ -6,15 +6,16 @@ basic unittest for the config parser
 
 
 import unittest
-from unittest.mock import patch
 import os
+from unittest.mock import patch
+
 import yaml
 
 from dotdrop.cfg_yaml import Cfg
 from dotdrop.options import Options
-from tests.helpers import (SubsetTestCase, _fake_args, clean,
+from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
                            create_fake_config, create_random_file,
-                           create_yaml_keyval, get_tempdir,
+                           create_yaml_keyval, get_string, get_tempdir,
                            populate_fake_config)
 
 
@@ -597,6 +598,16 @@ profiles:
         self.assertTrue(set(imported_cfg.prodots['host1'])
                         < set(importing_cfg.prodots['host2']))
 
+
+class TestCfgYaml(unittest.TestCase):
+
+    CONFIG_BACKUP = False
+    CONFIG_CREATE = True
+    CONFIG_DOTPATH = 'dotfiles'
+    TMPSUFFIX = '.dotdrop'
+    CONFIG_NAME = 'config.yaml'
+    CONFIG_NAME_2 = 'config-2.yaml'
+
     def test_parse_serialize_settings(self):
         """Test settings parsing in CfgYaml."""
         tmp = get_tempdir()
@@ -849,6 +860,112 @@ profiles:
             self.assertIn(dotfile_key, modified_profile_dict['dotfiles'])
             self.assertIn(dotfile_key, modified_profile.dotfiles)
 
+    def test_get_profile(self):
+        """Test CfgYaml:get_method."""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        # creating profiles
+        profiles = {
+            'object-test': {
+                'dotfiles': [],
+            },
+            'string-test': {
+                'dotfiles': [],
+            }
+        }
+
+        # create base config file
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        populate_fake_config(confpath, profiles=profiles)
+
+        # parse
+        config = CfgYaml.parse(confpath)
+
+        ###################################################
+        # profile not found (object)
+        ###################################################
+
+        missing_profile = Profile(key='missing')
+        self.assertRaises(ValueError, config.get_profile, missing_profile)
+
+        ###################################################
+        # profile not found (string)
+        ###################################################
+
+        self.assertRaises(ValueError, config.get_profile, missing_profile.key)
+
+        ###################################################
+        # profile not found with default (object)
+        ###################################################
+
+        default_profile = config.profiles[0]
+        found_profile = config.get_profile(missing_profile, default_profile)
+        self.assertEqual(default_profile, found_profile)
+
+        ###################################################
+        # profile not found with default (string)
+        ###################################################
+
+        found_profile = config.get_profile(missing_profile.key,
+                                           default_profile)
+        self.assertEqual(default_profile, found_profile)
+
+        ###################################################
+        # profile not found with add (object)
+        ###################################################
+
+        found_profile = config.get_profile(missing_profile, add=True)
+        self.assertIs(missing_profile, found_profile)
+
+        config.save()
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        self.assertIn(found_profile.key, yaml_dict['profiles'])
+
+        ###################################################
+        # profile not found with add (string)
+        ###################################################
+
+        missing_profile_key = 'missing-2'
+        found_profile = config.get_profile(missing_profile_key, add=True)
+        self.assertEqual(missing_profile_key, found_profile.key)
+
+        config.save(force=True)
+        with open(confpath, 'r') as conf_file:
+            yaml_dict = yaml.safe_load(conf_file)
+        self.assertIn(found_profile.key, yaml_dict['profiles'])
+
+        ###################################################
+        # profile found (same object)
+        ###################################################
+
+        searched_profile = config.profiles[0]
+        found_profile = config.get_profile(searched_profile)
+        self.assertIs(searched_profile, found_profile)
+
+        ###################################################
+        # profile found (equal object)
+        ###################################################
+
+        searched_profile = Profile(key=config.profiles[0].key)
+        found_profile = config.get_profile(searched_profile)
+        self.assertIsNot(searched_profile, found_profile)
+        self.assertEqual(searched_profile, found_profile)
+
+        ###################################################
+        # profile found (string)
+        ###################################################
+
+        searched_profile = config.profiles[0]
+        found_profile = config.get_profile(searched_profile.key)
+        self.assertIs(searched_profile, found_profile)
+
     def test_new_dotfile(self):
         """Test CfgYaml:new_method() corner cases."""
         tmp = get_tempdir()
@@ -962,21 +1079,13 @@ profiles:
         new_profile_dict = yaml_dict['profiles'][new_profile.key]
         self.assertIn(existing_dotfile.key, new_profile_dict['dotfiles'])
 
-    def test_get_profile(self):
-        """Test CfgYaml:get_method."""
+    def test_new_dotfile_keys(self):
+        """Test new dotfile key creation in CfgYaml:new_dotfile()."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
+        inner_tmp = create_dir(os.path.join(tmp, get_string(5)))
+        self.assertTrue(os.path.exists(inner_tmp))
         self.addCleanup(clean, tmp)
-
-        # creating profiles
-        profiles = {
-            'object-test': {
-                'dotfiles': [],
-            },
-            'string-test': {
-                'dotfiles': [],
-            }
-        }
 
         # create base config file
         confpath = create_fake_config(tmp,
@@ -984,89 +1093,79 @@ profiles:
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        populate_fake_config(confpath, profiles=profiles)
-
-        # parse
         config = CfgYaml.parse(confpath)
 
         ###################################################
-        # profile not found (object)
+        # Brand new key (empty dotfiles)
         ###################################################
 
-        missing_profile = Profile(key='missing')
-        self.assertRaises(ValueError, config.get_profile, missing_profile)
+        dst0, _ = create_random_file(tmp)
+        src0 = os.path.relpath(dst0, start=tmp)
+        dotfile0 = Dotfile(src=src0, dst=dst0)
+        expected_key = 'f_{}'.format(src0.replace(os.path.sep, '_').lower())
+
+        config.new_dotfile(dotfile0)
+        self.assertEqual(expected_key, dotfile0.key)
 
         ###################################################
-        # profile not found (string)
+        # No key (dotfile already exists)
         ###################################################
 
-        self.assertRaises(ValueError, config.get_profile, missing_profile.key)
+        dotfile1 = Dotfile(src=dotfile0.src, dst=dotfile0.dst)
+
+        config.new_dotfile(dotfile1)
+        self.assertIsNone(dotfile1.key)
 
         ###################################################
-        # profile not found with default (object)
+        # No key suffix
         ###################################################
 
-        default_profile = config.profiles[0]
-        found_profile = config.get_profile(missing_profile, default_profile)
-        self.assertEqual(default_profile, found_profile)
+        dst2, _ = create_random_file(tmp)
+        src2 = os.path.relpath(dst2, start=tmp)
+        dotfile2 = Dotfile(src=src2, dst=dst2)
+        expected_key = 'f_{}'.format(src2.replace(os.path.sep, '_').lower())
+
+        config.new_dotfile(dotfile2)
+        self.assertEqual(expected_key, dotfile2.key)
 
         ###################################################
-        # profile not found with default (string)
+        # Common key suffix
         ###################################################
 
-        found_profile = config.get_profile(missing_profile.key,
-                                           default_profile)
-        self.assertEqual(default_profile, found_profile)
+        dst3 = os.path.join(inner_tmp, os.path.basename(dotfile0.dst))
+        with open(dst3, 'w') as dst_file:
+            dst_file.write('aaaaa')
+        src3 = os.path.relpath(dst3, start=tmp)
+        dotfile3 = Dotfile(src=src3, dst=dst3)
+        expected_key = 'f_{}'.format(src3.replace(os.path.sep, '_').lower())
+
+        config.new_dotfile(dotfile3)
+        self.assertEqual(expected_key, dotfile3.key)
 
         ###################################################
-        # profile not found with add (object)
+        # Unique key
         ###################################################
 
-        found_profile = config.get_profile(missing_profile, add=True)
-        self.assertIs(missing_profile, found_profile)
+        base_dir = os.path.expanduser('~')
+        dst4_dir = create_dir(os.path.join(base_dir, '.dotdrop-test'))
+        dst4, _ = create_random_file(dst4_dir)
+        dst5 = os.path.normpath(os.path.join(dst4_dir, '..',
+                                             os.path.basename(dst4)))
+        with open(dst5, 'w') as dst_file:
+            dst_file.write('aaaaa')
+        self.addCleanup(clean, dst4_dir)
+        self.addCleanup(clean, dst5)
+        src4 = os.path.basename(dst4)
+        src5 = os.path.relpath(dst5, start=base_dir)
+        dotfile4 = Dotfile(src=src4, dst=dst4)
+        dotfile5 = Dotfile(src=src5, dst=dst5)
+        expected_key4 = 'f_{}'.format(src4.replace(os.path.sep, '_').lower())
+        expected_key5 = 'f_{}_1'.format(src5.replace(os.path.sep, '_').lower())
 
-        config.save()
-        with open(confpath, 'r') as conf_file:
-            yaml_dict = yaml.safe_load(conf_file)
-        self.assertIn(found_profile.key, yaml_dict['profiles'])
-
-        ###################################################
-        # profile not found with add (string)
-        ###################################################
-
-        missing_profile_key = 'missing-2'
-        found_profile = config.get_profile(missing_profile_key, add=True)
-        self.assertEqual(missing_profile_key, found_profile.key)
-
-        config.save(force=True)
-        with open(confpath, 'r') as conf_file:
-            yaml_dict = yaml.safe_load(conf_file)
-        self.assertIn(found_profile.key, yaml_dict['profiles'])
-
-        ###################################################
-        # profile found (same object)
-        ###################################################
-
-        searched_profile = config.profiles[0]
-        found_profile = config.get_profile(searched_profile)
-        self.assertIs(searched_profile, found_profile)
-
-        ###################################################
-        # profile found (equal object)
-        ###################################################
-
-        searched_profile = Profile(key=config.profiles[0].key)
-        found_profile = config.get_profile(searched_profile)
-        self.assertIsNot(searched_profile, found_profile)
-        self.assertEqual(searched_profile, found_profile)
-
-        ###################################################
-        # profile found (string)
-        ###################################################
-
-        searched_profile = config.profiles[0]
-        found_profile = config.get_profile(searched_profile.key)
-        self.assertIs(searched_profile, found_profile)
+        config.new_dotfile(dotfile4)
+        config.new_dotfile(dotfile5)
+        self.assertEqual(expected_key4, dotfile4.key)
+        self.assertEqual(expected_key5, dotfile5.key)
 
 
 def main():

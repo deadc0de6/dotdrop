@@ -8,6 +8,7 @@ yaml config file manager
 import itertools
 import os
 import shlex
+from operator import attrgetter
 
 import yaml
 
@@ -25,6 +26,9 @@ from .utils import clear_none, glob, with_yaml_parser
 
 
 class CfgYaml:
+
+    dotfile_key_file_prefix = 'f'
+    dotfile_key_directory_prefix = 'd'
 
     default_settings = Settings()
     log = Logger()
@@ -47,6 +51,28 @@ class CfgYaml:
 
         self.yaml_dict.update(self.settings.serialize(as_dict=True))
 
+    @property
+    def _dotfile_keys(self):
+        return map(attrgetter('key'), self.dotfiles)
+
+    @staticmethod
+    def _make_long_dotfile_key(path):
+        return '_'.join(path)
+
+    @classmethod
+    def _path_to_key_splits(cls, path):
+        prefix = (cls.dotfile_key_file_prefix
+                  if os.path.isfile(path)
+                  else cls.dotfile_key_directory_prefix)
+
+        path = strip_home(os.path.normpath(os.path.expanduser(path)))
+        path = path.replace(' ', '-').strip(os.path.sep).lower()
+
+        splits = [elem.lstrip('.') for elem in path.split(os.path.sep)]
+        splits.insert(0, prefix)
+
+        return splits
+
     @classmethod
     def _sanitize_yaml(cls, yaml_dict):
         """Remove None and set defaults for mandatory keys in YAML dicts."""
@@ -67,30 +93,13 @@ class CfgYaml:
         """Parse a yaml configuration file to a class instance."""
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
-    def _add_dotfile_to_profile(self, dotfile, profile):
-        """Add dotfile to profile."""
-        # Skipping if profile already has dotfile
-        if dotfile.key in profile.dotfiles:
-            self.log.warn('Profile {!s} already has dotfile {!s}'
-                          .format(profile, dotfile))
-            return False
-
-        # Adding dotfile to profile dotfiles
-        profile.dotfiles.append(dotfile.key)
-
-        # Adding dotfile to profile dotfiles in YAML dictionary
-        yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
-        yaml_profile[Profile.key_dotfiles].append(dotfile.key)
-
-        self._dirty = True
-
-        return True
-
     def _add_dotfile(self, dotfile):
         """Add dotfile to dotfiles."""
         # Skipping if a dotfile with the same dst exists
         if dotfile.dst in self.dotfiles:
             return
+
+        dotfile.key = self._make_new_dotfile_key(dotfile.dst)
 
         # Adding dotfile to Dotfile objects list
         self.dotfiles.append(dotfile)
@@ -105,6 +114,25 @@ class CfgYaml:
         self.yaml_dict[Dotfile.key_yaml][dotfile.key] = dotfile_dict
 
         self._dirty = True
+
+    def _add_dotfile_to_profile(self, dotfile, profile):
+        """Add dotfile to profile."""
+        # Skipping if profile already has dotfile
+        if dotfile.key in profile.dotfiles:
+            self.log.warn('Profile {!s} already has dotfile {!s}'
+                          .format(profile, dotfile))
+            return False
+
+        # Adding dotfile key to profile dotfiles
+        profile.dotfiles.append(dotfile.key)
+
+        # Adding dotfile key to profile dotfiles in YAML dictionary
+        yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
+        yaml_profile[Profile.key_dotfiles].append(dotfile.key)
+
+        self._dirty = True
+
+        return True
 
     def _add_profile(self, profile):
         """Add a profile to this YAML config file."""
@@ -124,6 +152,37 @@ class CfgYaml:
         self._dirty = True
 
         return profile
+
+    def _make_new_dotfile_key(self, path):
+        splits = self._path_to_key_splits(path)
+
+        key = (self._make_long_dotfile_key(splits)
+               if self.settings.longkey
+               else self._make_short_dotfile_key(splits))
+        return self._make_unique_dotfile_key(key)
+
+    def _make_short_dotfile_key(self, key_splits):
+        key_paths = reversed(key_splits[1:])
+        key_pieces = key_splits[:1]
+        current_keys = tuple(self._dotfile_keys)
+
+        try:
+            # This runs at least once: key_splits has at least two items:
+            # the prefix and a file name
+            while True:
+                key_pieces.insert(1, next(key_paths))
+                key = '_'.join(key_pieces)
+                if key not in current_keys:
+                    return key
+        except StopIteration:
+            # Key can't be unique: returning key from last while iteration
+            return key
+
+    def _make_unique_dotfile_key(self, key):
+        existing_keys = tuple(self._dotfile_keys)
+        if key not in existing_keys:
+            return key
+        return '{}_{}'.format(key, existing_keys.count(key))
 
     def get_profile(self, profile, default=None, *, add=False):
         """Get a profile, by name or object, from this YAML config file."""
