@@ -53,18 +53,22 @@ class CfgYaml:
 
     @property
     def _dotfile_keys(self):
+        """Return the keys of all dotfiles in this instance."""
         return map(attrgetter('key'), self.dotfiles)
 
     @staticmethod
     def _make_long_dotfile_key(path):
+        """Return the long key of a dotfile, given its path splits."""
         return '_'.join(path)
 
     @classmethod
     def _path_to_key_splits(cls, path):
+        """Split a path into dotfile key components."""
         prefix = (cls.dotfile_key_file_prefix
                   if os.path.isfile(path)
                   else cls.dotfile_key_directory_prefix)
 
+        # normpath and strip(os.path.sep) prevent empty string when splitting
         path = strip_home(os.path.normpath(os.path.expanduser(path)))
         path = path.replace(' ', '-').strip(os.path.sep).lower()
 
@@ -154,6 +158,7 @@ class CfgYaml:
         return profile
 
     def _make_new_dotfile_key(self, path):
+        """Return the key for a new dotfile."""
         splits = self._path_to_key_splits(path)
 
         key = (self._make_long_dotfile_key(splits)
@@ -162,12 +167,13 @@ class CfgYaml:
         return self._make_unique_dotfile_key(key)
 
     def _make_short_dotfile_key(self, key_splits):
+        """Return the short key of a dotfile, given its path splits."""
         key_paths = reversed(key_splits[1:])
         key_pieces = key_splits[:1]
         current_keys = tuple(self._dotfile_keys)
 
         try:
-            # This runs at least once: key_splits has at least two items:
+            # This runs at least once, as key_splits has at least two items:
             # the prefix and a file name
             while True:
                 key_pieces.insert(1, next(key_paths))
@@ -175,10 +181,13 @@ class CfgYaml:
                 if key not in current_keys:
                     return key
         except StopIteration:
-            # Key can't be unique: returning key from last while iteration
+            # This is raised by next(key_paths): the whole dotfile path was
+            # consumed wuthut finding a key not already in the current key set:
+            # returning the key from last while iteration
             return key
 
     def _make_unique_dotfile_key(self, key):
+        """Make a dotfile key unique by appending an incremental number."""
         existing_keys = tuple(self._dotfile_keys)
         if key not in existing_keys:
             return key
