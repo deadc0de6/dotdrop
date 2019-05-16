@@ -21,7 +21,6 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
 
 from dotdrop.cfg_yaml import CfgYaml
 from dotdrop.dotfile import Dotfile
-from dotdrop.profile import Profile
 from dotdrop.settings import LinkTypes
 
 NOLINK = LinkTypes.NOLINK
@@ -839,11 +838,8 @@ class TestCfgYaml(unittest.TestCase):
 
         # modify
         modified_profile = config.profiles[0]
-        for k, dotfile in enumerate(dotfile_objects):
-            if k % 2:
-                config.new_dotfile(dotfile, modified_profile.key)
-            else:
-                config.new_dotfile(dotfile, modified_profile)
+        for dotfile in dotfile_objects:
+            config.new_dotfile(dotfile, modified_profile.key)
         config.save()
 
         with open(confpath, 'r') as conf_file:
@@ -868,10 +864,7 @@ class TestCfgYaml(unittest.TestCase):
 
         # creating profiles
         profiles = {
-            'object-test': {
-                'dotfiles': [],
-            },
-            'string-test': {
+            'test-profile': {
                 'dotfiles': [],
             }
         }
@@ -888,20 +881,14 @@ class TestCfgYaml(unittest.TestCase):
         config = CfgYaml.parse(confpath)
 
         ###################################################
-        # profile not found (object)
+        # profile not found
         ###################################################
 
-        missing_profile = Profile(key='missing')
+        missing_profile = 'missing'
         self.assertRaises(ValueError, config.get_profile, missing_profile)
 
         ###################################################
-        # profile not found (string)
-        ###################################################
-
-        self.assertRaises(ValueError, config.get_profile, missing_profile.key)
-
-        ###################################################
-        # profile not found with default (object)
+        # profile not found with default
         ###################################################
 
         default_profile = config.profiles[0]
@@ -909,57 +896,19 @@ class TestCfgYaml(unittest.TestCase):
         self.assertEqual(default_profile, found_profile)
 
         ###################################################
-        # profile not found with default (string)
-        ###################################################
-
-        found_profile = config.get_profile(missing_profile.key,
-                                           default_profile)
-        self.assertEqual(default_profile, found_profile)
-
-        ###################################################
-        # profile not found with add (object)
+        # profile not found with add
         ###################################################
 
         found_profile = config.get_profile(missing_profile, add=True)
-        self.assertIs(missing_profile, found_profile)
+        self.assertEqual(missing_profile, found_profile.key)
 
         config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
-        self.assertIn(found_profile.key, yaml_dict['profiles'])
+        self.assertIn(missing_profile, yaml_dict['profiles'])
 
         ###################################################
-        # profile not found with add (string)
-        ###################################################
-
-        missing_profile_key = 'missing-2'
-        found_profile = config.get_profile(missing_profile_key, add=True)
-        self.assertEqual(missing_profile_key, found_profile.key)
-
-        config.save(force=True)
-        with open(confpath, 'r') as conf_file:
-            yaml_dict = yaml.safe_load(conf_file)
-        self.assertIn(found_profile.key, yaml_dict['profiles'])
-
-        ###################################################
-        # profile found (same object)
-        ###################################################
-
-        searched_profile = config.profiles[0]
-        found_profile = config.get_profile(searched_profile)
-        self.assertIs(searched_profile, found_profile)
-
-        ###################################################
-        # profile found (equal object)
-        ###################################################
-
-        searched_profile = Profile(key=config.profiles[0].key)
-        found_profile = config.get_profile(searched_profile)
-        self.assertIsNot(searched_profile, found_profile)
-        self.assertEqual(searched_profile, found_profile)
-
-        ###################################################
-        # profile found (string)
+        # profile found
         ###################################################
 
         searched_profile = config.profiles[0]
@@ -1044,28 +993,27 @@ class TestCfgYaml(unittest.TestCase):
                          dotfiles_dict[new_dotfile.key])
 
         ###################################################
-        # profile found (object)
+        # profile found
         ###################################################
 
         existing_profile = config.profiles[0]
-        config.new_dotfile(existing_dotfile, existing_profile)
+        config.new_dotfile(existing_dotfile, existing_profile.key)
 
         # model-layer test
         self.assertIn(existing_dotfile.key, existing_profile.dotfiles)
 
         # filesystem test
-        config.save(force=True)
+        config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
         existing_profile_dict = yaml_dict['profiles'][existing_profile.key]
         self.assertIn(existing_dotfile.key, existing_profile_dict['dotfiles'])
 
         ###################################################
-        # profile not found (string)
+        # profile not found
         ###################################################
 
-        new_profile = 'this-host-string'
-        prev_dotfiles = config.dotfiles
+        new_profile = 'new-profile'
         config.new_dotfile(existing_dotfile, new_profile)
         new_profile = config.get_profile(new_profile)
 
@@ -1073,7 +1021,7 @@ class TestCfgYaml(unittest.TestCase):
         self.assertIn(existing_dotfile.key, new_profile.dotfiles)
 
         # filesystem test
-        config.save(force=True)
+        config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
         new_profile_dict = yaml_dict['profiles'][new_profile.key]

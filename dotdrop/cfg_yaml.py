@@ -194,10 +194,9 @@ class CfgYaml:
         return '{}_{}'.format(key, existing_keys.count(key))
 
     def get_profile(self, profile, default=None, *, add=False):
-        """Get a profile, by name or object, from this YAML config file."""
-        # Checking profile existence, and getting object if profile is a string
+        """Get a profile by key from this YAML config file."""
         try:
-            return next(p for p in self.profiles if p == profile)
+            return next(p for p in self.profiles if p.key == profile)
         except StopIteration:
             if add:
                 self.log.warn('Porfile {!s} not found, adding it'

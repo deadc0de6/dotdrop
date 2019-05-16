@@ -39,8 +39,6 @@ class Profile(DictParser):
         return value
 
     def __eq__(self, other):
-        if isinstance(other, str):
-            return self.key == other
         return self.__dict__ == other.__dict__
 
     def __hash__(self):
