@@ -21,9 +21,8 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
 
 from dotdrop.cfg_yaml import CfgYaml
 from dotdrop.dotfile import Dotfile
-from dotdrop.settings import LinkTypes
-
-NOLINK = LinkTypes.NOLINK
+from dotdrop.profile import Profile
+from dotdrop.settings import LinkTypes, Settings
 
 
 class TestConfig(SubsetTestCase):
@@ -613,6 +612,7 @@ class TestCfgYaml(unittest.TestCase):
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
         workdir = os.path.join(tmp, 'workdir')
+        default_settings = Settings()
 
         # create base config file
         confpath = create_fake_config(tmp,
@@ -620,29 +620,35 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        populate_fake_config(confpath, dotfiles={})
 
         # parse
         config = CfgYaml.parse(confpath)
 
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
-        self.assertTrue(config.settings.banner)
-        self.assertEqual((), config.settings.cmpignore)
+        self.assertEqual(config.settings.banner, default_settings.banner)
+        self.assertEqual(config.settings.cmpignore, default_settings.cmpignore)
         self.assertEqual(config.settings.create, self.CONFIG_CREATE)
-        self.assertEqual((), config.settings.default_actions)
+        self.assertEqual(config.settings.default_actions,
+                         default_settings.default_actions)
         self.assertEqual(config.settings.dotpath, self.CONFIG_DOTPATH)
-        self.assertTrue(config.settings.ignoreempty)
-        self.assertEqual((), config.settings.import_actions)
-        self.assertEqual((), config.settings.import_configs)
-        self.assertEqual((), config.settings.import_variables)
-        self.assertFalse(config.settings.keepdot)
-        self.assertEqual(NOLINK, config.settings.link_dotfile_default)
-        self.assertEqual(NOLINK, config.settings.link_on_import)
-        self.assertFalse(config.settings.longkey)
-        self.assertFalse(config.settings.showdiff)
-        self.assertEqual(workdir, config.settings.workdir)
-        self.assertEqual((), config.settings.upignore)
+        self.assertEqual(config.settings.ignoreempty,
+                         default_settings.ignoreempty)
+        self.assertEqual(config.settings.import_actions,
+                         default_settings.import_actions)
+        self.assertEqual(config.settings.import_configs,
+                         default_settings.import_configs)
+        self.assertEqual(config.settings.import_variables,
+                         default_settings.import_variables)
+        self.assertEqual(config.settings.keepdot, default_settings.keepdot)
+        self.assertEqual(config.settings.link_dotfile_default,
+                         default_settings.link_dotfile_default)
+        self.assertEqual(config.settings.link_on_import,
+                         default_settings.link_on_import)
+        self.assertEqual(config.settings.longkey, default_settings.longkey)
+        self.assertEqual(config.settings.showdiff, default_settings.showdiff)
+        self.assertEqual(config.settings.workdir, workdir)
+        self.assertEqual(config.settings.upignore, default_settings.upignore)
 
         # serialize
         config.save(force=True)
@@ -651,16 +657,23 @@ class TestCfgYaml(unittest.TestCase):
             yaml_dict = yaml.safe_load(conf_file)
 
         self.assertEqual(yaml_dict['config']['backup'], self.CONFIG_BACKUP)
-        self.assertTrue(yaml_dict['config']['banner'])
+        self.assertEqual(yaml_dict['config']['banner'],
+                         default_settings.banner)
         self.assertEqual(yaml_dict['config']['create'], self.CONFIG_CREATE)
         self.assertEqual(yaml_dict['config']['dotpath'], self.CONFIG_DOTPATH)
-        self.assertTrue(yaml_dict['config']['ignoreempty'])
-        self.assertFalse(yaml_dict['config']['keepdot'])
-        self.assertEqual('nolink', yaml_dict['config']['link_dotfile_default'])
-        self.assertEqual('nolink', yaml_dict['config']['link_on_import'])
-        self.assertFalse(yaml_dict['config']['longkey'])
-        self.assertFalse(yaml_dict['config']['showdiff'])
-        self.assertEqual(workdir, yaml_dict['config']['workdir'])
+        self.assertTrue(yaml_dict['config']['ignoreempty'],
+                        default_settings.ignoreempty)
+        self.assertFalse(yaml_dict['config']['keepdot'],
+                         default_settings.keepdot)
+        self.assertEqual(yaml_dict['config']['link_dotfile_default'],
+                         str(default_settings.link_dotfile_default))
+        self.assertEqual('nolink', yaml_dict['config']['link_on_import'],
+                         str(default_settings.link_on_import))
+        self.assertFalse(yaml_dict['config']['longkey'],
+                         default_settings.longkey)
+        self.assertFalse(yaml_dict['config']['showdiff'],
+                         default_settings.showdiff)
+        self.assertEqual(yaml_dict['config']['workdir'], workdir)
         with self.assertRaises(KeyError):
             yaml_dict['config']['cmpignore']
         with self.assertRaises(KeyError):
@@ -685,39 +698,51 @@ class TestCfgYaml(unittest.TestCase):
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
         self.assertFalse(config.settings.banner)
-        self.assertEqual((), config.settings.cmpignore)
+        self.assertEqual(config.settings.cmpignore, default_settings.cmpignore)
         self.assertEqual(config.settings.create, self.CONFIG_CREATE)
-        self.assertEqual((), config.settings.default_actions)
+        self.assertEqual(config.settings.default_actions,
+                         default_settings.default_actions)
         self.assertEqual(config.settings.dotpath, self.CONFIG_DOTPATH)
-        self.assertTrue(config.settings.ignoreempty)
-        self.assertEqual((), config.settings.import_actions)
-        self.assertEqual((), config.settings.import_configs)
-        self.assertEqual((), config.settings.import_variables)
-        self.assertFalse(config.settings.keepdot)
-        self.assertEqual(NOLINK, config.settings.link_dotfile_default)
-        self.assertEqual(NOLINK, config.settings.link_on_import)
-        self.assertFalse(config.settings.longkey)
-        self.assertFalse(config.settings.showdiff)
-        self.assertEqual(workdir, config.settings.workdir)
-        self.assertEqual((), config.settings.upignore)
+        self.assertEqual(config.settings.ignoreempty,
+                         default_settings.ignoreempty)
+        self.assertEqual(config.settings.import_actions,
+                         default_settings.import_actions)
+        self.assertEqual(config.settings.import_configs,
+                         default_settings.import_configs)
+        self.assertEqual(config.settings.import_variables,
+                         default_settings.import_variables)
+        self.assertEqual(config.settings.keepdot, default_settings.keepdot)
+        self.assertEqual(config.settings.link_dotfile_default,
+                         default_settings.link_dotfile_default)
+        self.assertEqual(config.settings.link_on_import,
+                         default_settings.link_on_import)
+        self.assertEqual(config.settings.longkey, default_settings.longkey)
+        self.assertEqual(config.settings.showdiff, default_settings.showdiff)
+        self.assertEqual(config.settings.workdir, workdir)
+        self.assertEqual(config.settings.upignore, default_settings.upignore)
 
     def test_parse_serialize_dotfiles(self):
         """Test dotfiles parsing in CfgYaml."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
+        default_dotfile = Dotfile(key=None, src=None, dst=None)
 
         # creating dotfiles
-        dotfile_pairs = [
-            ('f_{}'.format(path), {
+        dotfiles_start = {
+            'f_{}'.format(path): {
                 'src': path,
                 'dst': '~/.{}'.format(path),
-            })
+            }
+            for path in (create_random_file(tmp)[0] for _ in range(5))
+        }
+        dotfiles_added = [
+            {
+                'src': path,
+                'dst': '~/.{}'.format(path),
+            }
             for path in (create_random_file(tmp)[0] for _ in range(5))
         ]
-        dotfiles_start, dotfiles_added = dotfile_pairs[:2], dotfile_pairs[2:]
-        dotfiles_dict = dict(dotfiles_start)
-        dotfile_objects = list(map(Dotfile.parse, dotfiles_added))
 
         # create base config file
         confpath = create_fake_config(tmp,
@@ -725,25 +750,25 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        populate_fake_config(confpath, dotfiles=dotfiles_dict)
+        populate_fake_config(confpath, dotfiles=dotfiles_start)
 
         # parse
         config = CfgYaml.parse(confpath)
 
         # check members
         for dotfile in config.dotfiles:
-            dotfile_dict = dotfiles_dict.get(dotfile.key)
+            dotfile_dict = dotfiles_start.get(dotfile.key)
             self.assertIsNotNone(dotfile_dict)
 
-            self.assertEqual({}, dotfile.actions)
-            self.assertEqual((), dotfile.cmpignore)
+            self.assertEqual(dotfile.actions, default_dotfile.actions)
+            self.assertEqual(dotfile.cmpignore, default_dotfile.cmpignore)
             self.assertEqual(dotfile.dst, dotfile_dict['dst'])
-            self.assertEqual(NOLINK, dotfile.link)
-            self.assertFalse(dotfile.noempty)
+            self.assertEqual(dotfile.link, default_dotfile.link)
+            self.assertEqual(dotfile.noempty, default_dotfile.noempty)
             self.assertEqual(dotfile.src, dotfile_dict['src'])
-            self.assertIsNone(dotfile.trans_r)
-            self.assertIsNone(dotfile.trans_w)
-            self.assertEqual((), dotfile.upignore)
+            self.assertEqual(dotfile.trans_r, default_dotfile.trans_r)
+            self.assertEqual(dotfile.trans_w, default_dotfile.trans_w)
+            self.assertEqual(dotfile.upignore, default_dotfile.upignore)
 
         # serialize
         config.save(force=True)
@@ -751,54 +776,59 @@ class TestCfgYaml(unittest.TestCase):
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
 
-        for key, dotfile_dict in dotfiles_dict.items():
+        for key, dotfile_dict in dotfiles_start.items():
             config_dotfile = yaml_dict['dotfiles'].get(key)
             self.assertIsNotNone(config_dotfile)
             self.assertEqual(config_dotfile, dotfile_dict)
 
         # modify
-        for dotfile in dotfile_objects:
-            config.new_dotfile(dotfile)
+        for dotfile_args in dotfiles_added:
+            config.new_dotfile(dotfile_args)
         config.save()
 
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
 
-        for key, dotfile_dict in dotfiles_dict.items():
+        for key, dotfile_dict in dotfiles_start.items():
             config_dotfile = yaml_dict['dotfiles'].get(key)
             self.assertIsNotNone(config_dotfile)
             self.assertEqual(config_dotfile, dotfile_dict)
 
-        for dotfile in dotfile_objects:
-            config_dotfile = yaml_dict['dotfiles'].get(dotfile.key)
-            self.assertIsNotNone(config_dotfile)
-
-            self.assertEqual(dotfile.dst, config_dotfile['dst'])
-            self.assertEqual(dotfile.src, config_dotfile['src'])
+        for dotfile_args in dotfiles_added:
+            config_dotfile = next(
+                dotfile_dict
+                for dotfile_dict in yaml_dict['dotfiles'].values()
+                if dotfile_args['dst'] == dotfile_dict['dst']
+            )
+            self.assertEqual(dotfile_args, config_dotfile)
 
     def test_parse_serialize_profiles(self):
-        """Test dotfiles parsing in CfgYaml."""
+        """Test profiles parsing in CfgYaml."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
+        default_profile = Profile(key=None)
 
         # creating dotfiles
-        dotfile_pairs = [
-            ('f_{}'.format(path), {
+        dotfiles_start = {
+            'f_{}'.format(path): {
                 'src': path,
                 'dst': '~/.{}'.format(path),
-            })
+            }
+            for path in (create_random_file(tmp)[0] for _ in range(5))
+        }
+        dotfiles_added = [
+            {
+                'src': path,
+                'dst': '~/.{}'.format(path),
+            }
             for path in (create_random_file(tmp)[0] for _ in range(5))
         ]
-        dotfile_keys = [key for key, _ in dotfile_pairs]
-        dotfiles_start, dotfiles_added = dotfile_keys[:2], dotfile_pairs[2:]
-        dotfiles_dict = dict(dotfile_pairs)
-        dotfile_objects = list(map(Dotfile.parse, dotfiles_added))
 
         # creating profiles
         profiles = {
             'host1': {
-                'dotfiles': dotfiles_start,
+                'dotfiles': list(dotfiles_start.keys()),
             },
         }
 
@@ -808,7 +838,7 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        populate_fake_config(confpath, dotfiles=dotfiles_dict,
+        populate_fake_config(confpath, dotfiles=dotfiles_start,
                              profiles=profiles)
 
         # parse
@@ -820,10 +850,13 @@ class TestCfgYaml(unittest.TestCase):
             self.assertIsNotNone(profile_dict)
 
             self.assertEqual(profile_dict['dotfiles'], profile.dotfiles)
-            self.assertEqual((), profile.imported_dotfiles)
-            self.assertEqual((), profile.included_profiles)
-            self.assertEqual({}, profile.variables)
-            self.assertEqual({}, profile.dynvariables)
+            self.assertEqual(profile.imported_dotfiles,
+                             default_profile.imported_dotfiles)
+            self.assertEqual(profile.included_profiles,
+                             default_profile.included_profiles)
+            self.assertEqual(profile.variables, default_profile.variables)
+            self.assertEqual(profile.dynvariables,
+                             default_profile.dynvariables)
 
         # serialize
         config.save(force=True)
@@ -838,8 +871,8 @@ class TestCfgYaml(unittest.TestCase):
 
         # modify
         modified_profile = config.profiles[0]
-        for dotfile in dotfile_objects:
-            config.new_dotfile(dotfile, modified_profile.key)
+        for dotfile_args in dotfiles_added:
+            config.new_dotfile(dotfile_args, modified_profile.key)
         config.save()
 
         with open(confpath, 'r') as conf_file:
@@ -848,11 +881,16 @@ class TestCfgYaml(unittest.TestCase):
         modified_profile_dict = yaml_dict['profiles'][modified_profile.key]
         self.assertIsNotNone(modified_profile_dict)
 
-        for dotfile_key in dotfiles_start:
+        for dotfile_key in dotfiles_start.keys():
             self.assertIn(dotfile_key, modified_profile_dict['dotfiles'])
             self.assertIn(dotfile_key, modified_profile.dotfiles)
 
-        for dotfile_key, _ in dotfiles_added:
+        for dotfile_args in dotfiles_added:
+            dotfile_key = next(
+                dotfile_key
+                for dotfile_key, dotfile_dict in yaml_dict['dotfiles'].items()
+                if dotfile_args['dst'] == dotfile_dict['dst']
+            )
             self.assertIn(dotfile_key, modified_profile_dict['dotfiles'])
             self.assertIn(dotfile_key, modified_profile.dotfiles)
 
@@ -922,26 +960,26 @@ class TestCfgYaml(unittest.TestCase):
         self.addCleanup(clean, tmp)
 
         # creating dotfiles
-        dotfile_pairs = [
-            ('f_{}'.format(path), {
+        dotfiles_start = {
+            'f_{}'.format(path): {
                 'src': path,
                 'dst': '~/.{}'.format(path),
-            })
+            }
+            for path in (create_random_file(tmp)[0] for _ in range(5))
+        }
+        dotfiles_added = [
+            {
+                'src': path,
+                'dst': '~/.{}'.format(path),
+            }
             for path in (create_random_file(tmp)[0] for _ in range(5))
         ]
-        dotfile_keys = [key for key, _ in dotfile_pairs]
-        dotfiles_start, dotfiles_added = dotfile_keys[:2], dotfile_pairs[2:]
-        dotfiles_dict = dict(dotfile_pairs)
-        dotfile_objects = list(map(Dotfile.parse, dotfiles_added))
 
         # creating profiles
         profiles = {
-            'object-test': {
-                'dotfiles': dotfiles_start,
+            'host1': {
+                'dotfiles': list(dotfiles_start.keys()),
             },
-            'string-test': {
-                'dotfiles': dotfiles_start,
-            }
         }
 
         # create base config file
@@ -950,7 +988,7 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        populate_fake_config(confpath, dotfiles=dotfiles_dict,
+        populate_fake_config(confpath, dotfiles=dotfiles_start,
                              profiles=profiles)
 
         # parse
@@ -960,9 +998,7 @@ class TestCfgYaml(unittest.TestCase):
         # dotfile already exists
         ###################################################
 
-        existing_dotfile = dotfiles_start[0]
-        existing_dotfile = Dotfile(key=existing_dotfile,
-                                   **dotfiles_dict[existing_dotfile])
+        existing_dotfile = dotfiles_start[next(iter(dotfiles_start.keys()))]
         prev_dotfiles = config.dotfiles
         config.new_dotfile(existing_dotfile)
 
@@ -973,41 +1009,43 @@ class TestCfgYaml(unittest.TestCase):
         config.save(force=True)
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
-        self.assertEqual(yaml_dict['dotfiles'], dotfiles_dict)
+        self.assertEqual(yaml_dict['dotfiles'], dotfiles_start)
 
         ###################################################
         # new dotfile
         ###################################################
 
-        new_dotfile = dotfile_objects[0]
-        config.new_dotfile(existing_dotfile)
+        new_dotfile_args = dotfiles_added[0]
+        new_dotfile = config.new_dotfile(new_dotfile_args)
 
         # model-layer test
         self.assertIn(new_dotfile, config.dotfiles)
 
         # filesystem test
-        config.save(force=True)
+        config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
         self.assertEqual(yaml_dict['dotfiles'][new_dotfile.key],
-                         dotfiles_dict[new_dotfile.key])
+                         new_dotfile_args)
 
         ###################################################
         # profile found
         ###################################################
 
         existing_profile = config.profiles[0]
-        config.new_dotfile(existing_dotfile, existing_profile.key)
+        existing_dotfile_obj = config.new_dotfile(existing_dotfile,
+                                                  existing_profile.key)
 
         # model-layer test
-        self.assertIn(existing_dotfile.key, existing_profile.dotfiles)
+        self.assertIn(existing_dotfile_obj.key, existing_profile.dotfiles)
 
         # filesystem test
         config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
         existing_profile_dict = yaml_dict['profiles'][existing_profile.key]
-        self.assertIn(existing_dotfile.key, existing_profile_dict['dotfiles'])
+        self.assertIn(existing_dotfile_obj.key,
+                      existing_profile_dict['dotfiles'])
 
         ###################################################
         # profile not found
@@ -1018,14 +1056,14 @@ class TestCfgYaml(unittest.TestCase):
         new_profile = config.get_profile(new_profile)
 
         # model-layer test
-        self.assertIn(existing_dotfile.key, new_profile.dotfiles)
+        self.assertIn(existing_dotfile_obj.key, new_profile.dotfiles)
 
         # filesystem test
         config.save()
         with open(confpath, 'r') as conf_file:
             yaml_dict = yaml.safe_load(conf_file)
         new_profile_dict = yaml_dict['profiles'][new_profile.key]
-        self.assertIn(existing_dotfile.key, new_profile_dict['dotfiles'])
+        self.assertIn(existing_dotfile_obj.key, new_profile_dict['dotfiles'])
 
     def test_new_dotfile_keys(self):
         """Test new dotfile key creation in CfgYaml:new_dotfile()."""
@@ -1049,71 +1087,62 @@ class TestCfgYaml(unittest.TestCase):
 
         dst0, _ = create_random_file(tmp)
         src0 = os.path.relpath(dst0, start=tmp)
-        dotfile0 = Dotfile(src=src0, dst=dst0)
+        dotfile0 = {'src': src0, 'dst': dst0, }
         expected_key = 'f_{}'.format(src0.replace(os.path.sep, '_').lower())
 
-        config.new_dotfile(dotfile0)
-        self.assertEqual(expected_key, dotfile0.key)
-
-        ###################################################
-        # No key (dotfile already exists)
-        ###################################################
-
-        dotfile1 = Dotfile(src=dotfile0.src, dst=dotfile0.dst)
-
-        config.new_dotfile(dotfile1)
-        self.assertIsNone(dotfile1.key)
+        new_dotfile0 = config.new_dotfile(dotfile0)
+        self.assertEqual(expected_key, new_dotfile0.key)
 
         ###################################################
         # No key suffix
         ###################################################
 
-        dst2, _ = create_random_file(tmp)
-        src2 = os.path.relpath(dst2, start=tmp)
-        dotfile2 = Dotfile(src=src2, dst=dst2)
-        expected_key = 'f_{}'.format(src2.replace(os.path.sep, '_').lower())
+        dst1, _ = create_random_file(tmp)
+        src1 = os.path.relpath(dst1, start=tmp)
+        dotfile1 = {'src': src1, 'dst': dst1, }
+        expected_key = 'f_{}'.format(src1.replace(os.path.sep, '_').lower())
 
-        config.new_dotfile(dotfile2)
-        self.assertEqual(expected_key, dotfile2.key)
+        new_dotfile1 = config.new_dotfile(dotfile1)
+        self.assertEqual(expected_key, new_dotfile1.key)
 
         ###################################################
         # Common key suffix
         ###################################################
 
-        dst3 = os.path.join(inner_tmp, os.path.basename(dotfile0.dst))
-        with open(dst3, 'w') as dst_file:
+        dst2 = os.path.join(inner_tmp, os.path.basename(dotfile0['dst']))
+        with open(dst2, 'w') as dst_file:
             dst_file.write('aaaaa')
-        src3 = os.path.relpath(dst3, start=tmp)
-        dotfile3 = Dotfile(src=src3, dst=dst3)
-        expected_key = 'f_{}'.format(src3.replace(os.path.sep, '_').lower())
+        src2 = os.path.relpath(dst2, start=tmp)
+        dotfile2 = {'src': src2, 'dst': dst2, }
+        expected_key = 'f_{}'.format(src2.replace(os.path.sep, '_').lower())
 
-        config.new_dotfile(dotfile3)
-        self.assertEqual(expected_key, dotfile3.key)
+        new_dotfile2 = config.new_dotfile(dotfile2)
+        self.assertEqual(expected_key, new_dotfile2.key)
 
         ###################################################
         # Unique key
         ###################################################
 
         base_dir = os.path.expanduser('~')
-        dst4_dir = create_dir(os.path.join(base_dir, '.dotdrop-test'))
-        dst4, _ = create_random_file(dst4_dir)
-        dst5 = os.path.normpath(os.path.join(dst4_dir, '..',
-                                             os.path.basename(dst4)))
-        with open(dst5, 'w') as dst_file:
+        dst3_dir = create_dir(os.path.join(base_dir, '.dotdrop-test'))
+        dst3, _ = create_random_file(dst3_dir)
+        dst4 = os.path.normpath(os.path.join(dst3_dir, '..',
+                                             os.path.basename(dst3)))
+        with open(dst4, 'w') as dst_file:
             dst_file.write('aaaaa')
-        self.addCleanup(clean, dst4_dir)
-        self.addCleanup(clean, dst5)
-        src4 = os.path.basename(dst4)
-        src5 = os.path.relpath(dst5, start=base_dir)
-        dotfile4 = Dotfile(src=src4, dst=dst4)
-        dotfile5 = Dotfile(src=src5, dst=dst5)
-        expected_key4 = 'f_{}'.format(src4.replace(os.path.sep, '_').lower())
-        expected_key5 = 'f_{}_1'.format(src5.replace(os.path.sep, '_').lower())
+        self.addCleanup(clean, dst3_dir)
+        self.addCleanup(clean, dst4)
+        src3 = os.path.basename(dst3)
+        src4 = os.path.relpath(dst4, start=base_dir)
+        dotfile3 = {'src': src3, 'dst': dst3, }
+        dotfile4 = {'src': src4, 'dst': dst4, }
+        expected_key3 = 'f_{}'.format(src3.replace(os.path.sep, '_').lower())
+        expected_key4 = 'f_{}_1'.format(src4.replace(os.path.sep, '_').lower())
 
-        config.new_dotfile(dotfile4)
-        config.new_dotfile(dotfile5)
-        self.assertEqual(expected_key4, dotfile4.key)
-        self.assertEqual(expected_key5, dotfile5.key)
+        new_dotfile3 = config.new_dotfile(dotfile3)
+        new_dotfile4 = config.new_dotfile(dotfile4)
+        self.assertEqual(expected_key3, new_dotfile3.key)
+        self.assertEqual(expected_key4, new_dotfile4.key)
 
 
 def main():

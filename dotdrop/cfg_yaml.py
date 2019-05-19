@@ -99,11 +99,9 @@ class CfgYaml:
 
     def _add_dotfile(self, dotfile):
         """Add dotfile to dotfiles."""
-        # Skipping if a dotfile with the same dst exists
-        if dotfile.dst in self.dotfiles:
+        # Skipping if the dotfile already exists
+        if dotfile in self.dotfiles:
             return
-
-        dotfile.key = self._make_new_dotfile_key(dotfile.dst)
 
         # Adding dotfile to Dotfile objects list
         self.dotfiles.append(dotfile)
@@ -157,6 +155,17 @@ class CfgYaml:
 
         return profile
 
+    def _create_dotfile(self, dotfile_args):
+        dst = dotfile_args['dst']
+
+        try:
+            return next(d for d in self.dotfiles if d.dst == dst), False
+        except StopIteration:
+            pass
+
+        key = self._make_new_dotfile_key(dst)
+        return Dotfile(key=key, **dotfile_args), True
+
     def _make_new_dotfile_key(self, path):
         """Return the key for a new dotfile."""
         splits = self._path_to_key_splits(path)
@@ -209,15 +218,18 @@ class CfgYaml:
             raise ValueError('Profile {!s} not found in config file {}'
                              .format(profile, self.file_name))
 
-    def new_dotfile(self, dotfile, profile=None):
+    def new_dotfile(self, dotfile_args, profile=None):
         """Add a dotfile to this config YAML file."""
-        self._add_dotfile(dotfile)
+        dotfile, is_new = self._create_dotfile(dotfile_args)
+        if is_new:
+            self._add_dotfile(dotfile)
 
         # add dotfile to profile
         if profile is not None:
             profile = self.get_profile(profile, add=True)
-            return self._add_dotfile_to_profile(dotfile, profile)
-        return True
+            self._add_dotfile_to_profile(dotfile, profile)
+
+        return dotfile
 
     def save(self, *, force=False):
         """Save this instance to the original YAML file it was parsed from."""
