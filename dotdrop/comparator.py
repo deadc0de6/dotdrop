@@ -66,14 +66,14 @@ class Comparator:
         ret = []
         comp = filecmp.dircmp(left, right)
 
-        # handle files only in deployed file
+        # handle files only in deployed dir
         for i in comp.left_only:
             if utils.must_ignore([os.path.join(left, i)],
                                  ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist on local\n'.format(i))
 
-        # handle files only in dotpath file
+        # handle files only in dotpath dir
         for i in comp.right_only:
             if utils.must_ignore([os.path.join(right, i)],
                                  ignore, debug=self.debug):
@@ -85,6 +85,9 @@ class Comparator:
         for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
+            if utils.must_ignore([lfile, rfile],
+                                 ignore, debug=self.debug):
+                continue
             short = os.path.basename(lfile)
             # file vs dir
             ret.append('=> different type: \"{}\"\n'.format(short))
@@ -96,6 +99,9 @@ class Comparator:
         for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
+            if utils.must_ignore([lfile, rfile],
+                                 ignore, debug=self.debug):
+                continue
             diff = self._diff(lfile, rfile, header=True)
             ret.append(diff)
 

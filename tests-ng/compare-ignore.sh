@@ -57,6 +57,9 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmpd}/{program,config}
 touch ${tmpd}/program/a
 touch ${tmpd}/config/a
+mkdir ${tmpd}/vscode
+touch ${tmpd}/vscode/extensions.txt
+touch ${tmpd}/vscode/keybindings.json
 
 # create the config file
 cfg="${basedir}/config.yaml"
@@ -66,6 +69,7 @@ create_conf ${cfg} # sets token
 echo "[+] import"
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
+cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/vscode
 
 # add files
 echo "[+] add files"
@@ -128,6 +132,23 @@ patt="*b"
 echo "[+] comparing with ignore in dotfile - 0 diff"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
+[ "$?" != "0" ] && exit 1
+set -e
+
+# update files
+echo touched > ${tmpd}/vscode/extensions.txt
+echo touched > ${tmpd}/vscode/keybindings.json
+
+# expect two diffs
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -C ${tmpd}/vscode
+[ "$?" = "0" ] && exit 1
+set -e
+
+# expects no diff
+sed '/d_vscode:/a \ \ \ \ cmpignore:\n\ \ \ \ - "*extensions.txt"\n\ \ \ \ - "*keybindings.json"' ${cfg} > ${cfg2}
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose -C ${tmpd}/vscode
 [ "$?" != "0" ] && exit 1
 set -e
 
