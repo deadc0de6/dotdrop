@@ -658,7 +658,7 @@ class Cfg:
             upignores.extend(self.upignores)
 
             # create new dotfile
-            self.dotfiles[k] = Dotfile(dst, src, k,
+            self.dotfiles[k] = Dotfile(k, dst, src,
                                        link=link, actions=actions,
                                        trans_r=trans_r, trans_w=trans_w,
                                        cmpignore=cmpignores, noempty=noempty,
@@ -1186,7 +1186,7 @@ class Cfg:
         # keep it short
         home = os.path.expanduser('~')
         dst = dst.replace(home, '~', 1)
-        dotfile = Dotfile(dst, src)
+        dotfile = Dotfile('', dst, src)
 
         # adding new profile if doesn't exist
         if profile not in self.lnk_profiles:
