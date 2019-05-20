@@ -8,7 +8,7 @@ set -ev
 # PEP8 tests
 which pycodestyle 2>/dev/null
 [ "$?" != "0" ] && echo "Install pycodestyle" && exit 1
-pycodestyle --ignore=W605 dotdrop/
+pycodestyle --ignore=W503,W504,W605 dotdrop/
 pycodestyle tests/
 pycodestyle scripts/
 

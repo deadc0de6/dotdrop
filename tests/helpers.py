@@ -223,7 +223,7 @@ def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
 def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
                          trans={}, trans_write={}, variables={},
                          dynvariables={}):
-    """Adds some juicy content to config files"""
+    """Add some juicy content to config files"""
     is_path = isinstance(config, str)
     if is_path:
         config_path = config

@@ -8,18 +8,223 @@ yaml config file manager
 import itertools
 import os
 import shlex
-from functools import partial
-from glob import iglob
+from operator import attrgetter
 
 import yaml
 
 # local import
-from dotdrop.dotfile import Dotfile
 from dotdrop.templategen import Templategen
-from dotdrop.logger import Logger
 from dotdrop.action import Action, Transform
 from dotdrop.utils import strip_home, shell
 from dotdrop.linktypes import LinkTypes
+
+from .dotfile import Dotfile
+from .logger import Logger
+from .profile import Profile
+from .settings import Settings
+from .utils import clear_none, glob, with_yaml_parser
+
+
+class CfgYaml:
+
+    dotfile_key_file_prefix = 'f'
+    dotfile_key_directory_prefix = 'd'
+
+    default_settings = Settings()
+    log = Logger()
+
+    def __init__(self, yaml_dict, file_name, *, debug=False):
+        """constructor
+        @file_name: path to the config file
+        @debug: enable debug
+        """
+
+        self._dirty = False
+        self.debug = debug
+
+        self.file_name = os.path.abspath(file_name)
+        self.yaml_dict = self._sanitize_yaml(yaml_dict)
+
+        self.settings = Settings.parse(self.yaml_dict, self.file_name)
+        self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
+        self.profiles = Profile.parse_dict(self.yaml_dict, self.file_name)
+
+        self.yaml_dict.update(self.settings.serialize(as_dict=True))
+
+    @property
+    def _dotfile_keys(self):
+        """Return the keys of all dotfiles in this instance."""
+        return map(attrgetter('key'), self.dotfiles)
+
+    @staticmethod
+    def _make_long_dotfile_key(path):
+        """Return the long key of a dotfile, given its path splits."""
+        return '_'.join(path)
+
+    @classmethod
+    def _path_to_key_splits(cls, path):
+        """Split a path into dotfile key components."""
+        prefix = (cls.dotfile_key_file_prefix
+                  if os.path.isfile(path)
+                  else cls.dotfile_key_directory_prefix)
+
+        # normpath and strip(os.path.sep) prevent empty string when splitting
+        path = strip_home(os.path.normpath(os.path.expanduser(path)))
+        path = path.replace(' ', '-').strip(os.path.sep).lower()
+
+        splits = [elem.lstrip('.') for elem in path.split(os.path.sep)]
+        splits.insert(0, prefix)
+
+        return splits
+
+    @classmethod
+    def _sanitize_yaml(cls, yaml_dict):
+        """Remove None and set defaults for mandatory keys in YAML dicts."""
+        # Clearing None values, to preserve mental sanity when checking keys
+        yaml_dict = clear_none(yaml_dict)
+
+        # Setting default to mandatory config file keys
+        yaml_dict.setdefault(Settings.key_yaml,
+                             cls.default_settings.serialize())
+        yaml_dict.setdefault(Dotfile.key_yaml, {})
+        yaml_dict.setdefault(Profile.key_yaml, {})
+
+        return yaml_dict
+
+    @classmethod
+    @with_yaml_parser
+    def parse(cls, yaml_dict, file_name=None, *, debug=False):
+        """Parse a yaml configuration file to a class instance."""
+        return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
+
+    def _add_dotfile(self, dotfile):
+        """Add dotfile to dotfiles."""
+        # Adding dotfile to Dotfile objects list
+        self.dotfiles.append(dotfile)
+
+        # Adding dotfile to YAML dictionary
+        dotfile_dict = {
+            Dotfile.key_src: dotfile.src,
+            Dotfile.key_dst: dotfile.dst,
+        }
+        if dotfile.link != self.settings.link_dotfile_default:
+            dotfile_dict[Dotfile.key_link] = str(dotfile.link)
+        self.yaml_dict[Dotfile.key_yaml][dotfile.key] = dotfile_dict
+
+        self._dirty = True
+
+    def _add_dotfile_to_profile(self, dotfile, profile):
+        """Add dotfile to profile."""
+        # Skipping if profile already has dotfile
+        if dotfile.key in profile.dotfiles:
+            self.log.warn('Profile {!s} already has dotfile {!s}'
+                          .format(profile, dotfile))
+            return False
+
+        # Adding dotfile key to profile dotfiles
+        profile.dotfiles.append(dotfile.key)
+
+        # Adding dotfile key to profile dotfiles in YAML dictionary
+        yaml_profile = self.yaml_dict[Profile.key_yaml][profile.key]
+        yaml_profile[Profile.key_dotfiles].append(dotfile.key)
+
+        self._dirty = True
+
+        return True
+
+    def _add_profile(self, profile):
+        """Add a profile to this YAML config file."""
+        # Adding profile to profile objects
+        self.profiles.append(profile)
+
+        # Adding profile to YAML dictionary
+        profile_dict = {
+            Profile.key_dotfiles: profile.dotfiles,
+        }
+        self.yaml_dict[Profile.key_yaml][profile.key] = profile_dict
+
+        self._dirty = True
+
+    def _make_new_dotfile_key(self, path):
+        """Return the key for a new dotfile."""
+        splits = self._path_to_key_splits(path)
+
+        key = (self._make_long_dotfile_key(splits)
+               if self.settings.longkey
+               else self._make_short_dotfile_key(splits))
+        return self._make_unique_dotfile_key(key)
+
+    def _make_short_dotfile_key(self, key_splits):
+        """Return the short key of a dotfile, given its path splits."""
+        key_paths = reversed(key_splits[1:])
+        key_pieces = key_splits[:1]
+        current_keys = tuple(self._dotfile_keys)
+
+        try:
+            # This runs at least once, as key_splits has at least two items:
+            # the prefix and a file name
+            while True:
+                key_pieces.insert(1, next(key_paths))
+                key = '_'.join(key_pieces)
+                if key not in current_keys:
+                    return key
+        except StopIteration:
+            # This is raised by next(key_paths): the whole dotfile path was
+            # consumed wuthut finding a key not already in the current key set:
+            # returning the key from last while iteration
+            return key
+
+    def _make_unique_dotfile_key(self, key):
+        """Make a dotfile key unique by appending an incremental number."""
+        existing_keys = tuple(self._dotfile_keys)
+        if key not in existing_keys:
+            return key
+        return '{}_{}'.format(key, existing_keys.count(key))
+
+    def get_dotfile(self, dst):
+        """Get a dotfile by dst from this YAML config file."""
+        try:
+            return next(d for d in self.dotfiles if d.dst == dst)
+        except StopIteration:
+            return None
+
+    def get_profile(self, key):
+        """Get a profile by key from this YAML config file."""
+        try:
+            return next(p for p in self.profiles if p.key == key)
+        except StopIteration:
+            return None
+
+    def new_dotfile(self, dotfile_args, profile_key=None):
+        """Add a dotfile to this config YAML file."""
+        dotfile = self.get_dotfile(dotfile_args['dst'])
+        if dotfile is None:
+            key = self._make_new_dotfile_key(dotfile_args['dst'])
+            dotfile = Dotfile(key=key, **dotfile_args)
+            self._add_dotfile(dotfile)
+
+        # add dotfile to profile
+        if profile_key is not None:
+            profile = self.get_profile(profile_key)
+            if profile is None:
+                self.log.warn('Profile {} not found, adding it'
+                              .format(profile_key))
+                profile = Profile(key=profile_key)
+                self._add_profile(profile)
+            self._add_dotfile_to_profile(dotfile, profile)
+
+        return dotfile
+
+    def save(self, *, force=False):
+        """Save this instance to the original YAML file it was parsed from."""
+        if not (self._dirty or force):
+            return False
+
+        with open(self.file_name, 'w') as cfg_file:
+            yaml.safe_dump(self.yaml_dict, cfg_file,
+                           default_flow_style=False, indent=2)
+        self._dirty = False
+        return True
 
 
 class Cfg:
@@ -45,7 +250,6 @@ class Cfg:
     # import keys
     key_import_vars = 'import_variables'
     key_import_actions = 'import_actions'
-
     key_import_configs = 'import_configs'
 
     # actions keys
@@ -303,28 +507,14 @@ class Cfg:
         # parse external configs
         try:
             ext_configs = self.lnk_settings[self.key_import_configs] or ()
-
             try:
-                iglob('./*', recursive=True)
-                find_glob = partial(iglob, recursive=True)
-            except TypeError:
-                from platform import python_version
+                ext_configs = itertools.chain.from_iterable(
+                    glob(self._abs_path(config))
+                    for config in ext_configs
+                )
+            except ValueError:
+                return False
 
-                msg = ('Recursive globbing is not available on Python {}: '
-                       .format(python_version()))
-                if any('**' in config for config in ext_configs):
-                    msg += "import_configs won't work"
-                    self.log.err(msg)
-                    return False
-
-                msg = 'upgrade to version >3.5 if you want to use this feature'
-                self.log.warn(msg)
-                find_glob = iglob
-
-            ext_configs = itertools.chain.from_iterable(
-                find_glob(self._abs_path(config))
-                for config in ext_configs
-            )
             for config in ext_configs:
                 self._merge_cfg(config)
         except KeyError:

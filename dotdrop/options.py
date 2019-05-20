@@ -14,7 +14,7 @@ from docopt import docopt
 from dotdrop.version import __version__ as VERSION
 from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
-from dotdrop.config import Cfg
+from dotdrop.cfg_yaml import Cfg
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
