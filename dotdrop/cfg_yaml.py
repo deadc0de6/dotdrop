@@ -99,10 +99,6 @@ class CfgYaml:
 
     def _add_dotfile(self, dotfile):
         """Add dotfile to dotfiles."""
-        # Skipping if the dotfile already exists
-        if dotfile in self.dotfiles:
-            return
-
         # Adding dotfile to Dotfile objects list
         self.dotfiles.append(dotfile)
 
@@ -138,10 +134,6 @@ class CfgYaml:
 
     def _add_profile(self, profile):
         """Add a profile to this YAML config file."""
-        # Creating profile object when just the key is passed
-        if isinstance(profile, str):
-            profile = Profile(key=profile)
-
         # Adding profile to profile objects
         self.profiles.append(profile)
 
@@ -152,19 +144,6 @@ class CfgYaml:
         self.yaml_dict[Profile.key_yaml][profile.key] = profile_dict
 
         self._dirty = True
-
-        return profile
-
-    def _create_dotfile(self, dotfile_args):
-        dst = dotfile_args['dst']
-
-        try:
-            return next(d for d in self.dotfiles if d.dst == dst), False
-        except StopIteration:
-            pass
-
-        key = self._make_new_dotfile_key(dst)
-        return Dotfile(key=key, **dotfile_args), True
 
     def _make_new_dotfile_key(self, path):
         """Return the key for a new dotfile."""
@@ -202,31 +181,36 @@ class CfgYaml:
             return key
         return '{}_{}'.format(key, existing_keys.count(key))
 
-    def get_profile(self, profile, default=None, *, add=False):
+    def get_dotfile(self, dst):
+        """Get a dotfile by dst from this YAML config file."""
+        try:
+            return next(d for d in self.dotfiles if d.dst == dst)
+        except StopIteration:
+            return None
+
+    def get_profile(self, key):
         """Get a profile by key from this YAML config file."""
         try:
-            return next(p for p in self.profiles if p.key == profile)
+            return next(p for p in self.profiles if p.key == key)
         except StopIteration:
-            if add:
-                self.log.warn('Porfile {!s} not found, adding it'
-                              .format(profile))
-                return self._add_profile(profile)
+            return None
 
-            if default is not None:
-                return default
-
-            raise ValueError('Profile {!s} not found in config file {}'
-                             .format(profile, self.file_name))
-
-    def new_dotfile(self, dotfile_args, profile=None):
+    def new_dotfile(self, dotfile_args, profile_key=None):
         """Add a dotfile to this config YAML file."""
-        dotfile, is_new = self._create_dotfile(dotfile_args)
-        if is_new:
+        dotfile = self.get_dotfile(dotfile_args['dst'])
+        if dotfile is None:
+            key = self._make_new_dotfile_key(dotfile_args['dst'])
+            dotfile = Dotfile(key=key, **dotfile_args)
             self._add_dotfile(dotfile)
 
         # add dotfile to profile
-        if profile is not None:
-            profile = self.get_profile(profile, add=True)
+        if profile_key is not None:
+            profile = self.get_profile(profile_key)
+            if profile is None:
+                self.log.warn('Profile {} not found, adding it'
+                              .format(profile_key))
+                profile = Profile(key=profile_key)
+                self._add_profile(profile)
             self._add_dotfile_to_profile(dotfile, profile)
 
         return dotfile

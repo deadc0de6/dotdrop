@@ -894,8 +894,49 @@ class TestCfgYaml(unittest.TestCase):
             self.assertIn(dotfile_key, modified_profile_dict['dotfiles'])
             self.assertIn(dotfile_key, modified_profile.dotfiles)
 
+    def test_get_dotfile(self):
+        """Test CfgYaml:get_dotfile method."""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+
+        # creating profiles
+        dotfiles = {
+            'test-dotfile': {
+                'src': 'dotfile',
+                'dst': '~/.dotfile',
+            }
+        }
+
+        # create base config file
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        populate_fake_config(confpath, dotfiles=dotfiles)
+
+        # parse
+        config = CfgYaml.parse(confpath)
+
+        ###################################################
+        # dotfile not found
+        ###################################################
+
+        missing_dotfile = 'missing'
+        found_dotfile = config.get_dotfile(missing_dotfile)
+        self.assertIsNone(found_dotfile)
+
+        ###################################################
+        # profile found
+        ###################################################
+
+        searched_dotfile = config.dotfiles[0]
+        found_dotfile = config.get_dotfile(searched_dotfile.dst)
+        self.assertIs(searched_dotfile, found_dotfile)
+
     def test_get_profile(self):
-        """Test CfgYaml:get_method."""
+        """Test CfgYaml:get_profile method."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
@@ -923,27 +964,8 @@ class TestCfgYaml(unittest.TestCase):
         ###################################################
 
         missing_profile = 'missing'
-        self.assertRaises(ValueError, config.get_profile, missing_profile)
-
-        ###################################################
-        # profile not found with default
-        ###################################################
-
-        default_profile = config.profiles[0]
-        found_profile = config.get_profile(missing_profile, default_profile)
-        self.assertEqual(default_profile, found_profile)
-
-        ###################################################
-        # profile not found with add
-        ###################################################
-
-        found_profile = config.get_profile(missing_profile, add=True)
-        self.assertEqual(missing_profile, found_profile.key)
-
-        config.save()
-        with open(confpath, 'r') as conf_file:
-            yaml_dict = yaml.safe_load(conf_file)
-        self.assertIn(missing_profile, yaml_dict['profiles'])
+        found_profile = config.get_profile(missing_profile)
+        self.assertIsNone(found_profile)
 
         ###################################################
         # profile found
@@ -954,7 +976,7 @@ class TestCfgYaml(unittest.TestCase):
         self.assertIs(searched_profile, found_profile)
 
     def test_new_dotfile(self):
-        """Test CfgYaml:new_method() corner cases."""
+        """Test CfgYaml:new_dotfile() corner cases."""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
