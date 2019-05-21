@@ -610,12 +610,12 @@ class Cfg:
         variables = {
             k: v
             for k, v in ext_config._get_variables(None).items()
-            if k not in self.content[self.key_variables]
+            if k not in self._get_variables(None).keys()
         }
         dyn_variables = {
             k: v
             for k, v in ext_config._get_dynvariables(None).items()
-            if k not in self.content[self.key_dynvariables]
+            if k not in self._get_dynvariables(None).keys()
         }
         self._merge_dict(ext_config=ext_config, warning_prefix='Variable',
                          self_member=self.ext_variables,
