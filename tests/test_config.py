@@ -849,6 +849,7 @@ class TestCfgYaml(unittest.TestCase):
             profile_dict = profiles.get(profile.key)
             self.assertIsNotNone(profile_dict)
 
+            self.assertEqual(profile.actions, default_profile.actions)
             self.assertEqual(profile_dict['dotfiles'], profile.dotfiles)
             self.assertEqual(profile.imported_dotfiles,
                              default_profile.imported_dotfiles)
