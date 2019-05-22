@@ -14,7 +14,7 @@ from docopt import docopt
 from dotdrop.version import __version__ as VERSION
 from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
-from dotdrop.cfg_yaml import Cfg
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -246,8 +246,8 @@ class Options(AttrMonitor):
         self.variables = self.conf.get_variables(self.profile,
                                                  debug=self.debug).copy()
         # the dotfiles
-        self.dotfiles = self.conf.eval_dotfiles(self.profile, self.variables,
-                                                debug=self.debug).copy()
+        self.dotfiles = self.conf.get_dotfiles(self.profile, self.variables,
+                                               debug=self.debug).copy()
         # the profiles
         self.profiles = self.conf.get_profiles()
 
