@@ -5,9 +5,9 @@ Copyright (c) 2017, deadc0de6
 represents a dotfile in dotdrop
 """
 
-from .linktypes import LinkTypes
-from .logger import Logger
-from .utils import DictParser
+from dotdrop.linktypes import LinkTypes
+from dotdrop.logger import Logger
+from dotdrop.utils import DictParser
 
 
 class Dotfile(DictParser):

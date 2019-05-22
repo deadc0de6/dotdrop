@@ -7,28 +7,26 @@ yaml config file manager
 
 import itertools
 import os
+import yaml
 import shlex
 from operator import attrgetter
-
-import yaml
 
 # local import
 from dotdrop.templategen import Templategen
 from dotdrop.action import Action, Transform
-from dotdrop.utils import strip_home, shell
+from dotdrop.utils import strip_home, shell, \
+    clear_none, glob, with_yaml_parser
 from dotdrop.linktypes import LinkTypes
-
-from .dotfile import Dotfile
-from .logger import Logger
-from .profile import Profile
-from .settings import Settings
-from .utils import clear_none, glob, with_yaml_parser
+from dotdrop.dotfile import Dotfile
+from dotdrop.logger import Logger
+from dotdrop.profile import Profile
+from dotdrop.settings import Settings
 
 
 class CfgYaml:
 
-    dotfile_key_file_prefix = 'f'
-    dotfile_key_directory_prefix = 'd'
+    dotfile_key_file_prefix = 'f_'
+    dotfile_key_directory_prefix = 'd_'
 
     default_settings = Settings()
     log = Logger()

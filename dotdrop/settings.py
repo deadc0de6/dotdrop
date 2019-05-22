@@ -1,9 +1,13 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+author: deadc0de6 (https://github.com/deadc0de6)
+Copyright (c) 2019, deadc0de6
 
-from .linktypes import LinkTypes
-from .logger import Logger
-from .utils import with_yaml_parser
+settings block
+"""
+
+from dotdrop.linktypes import LinkTypes
+from dotdrop.logger import Logger
+from dotdrop.utils import with_yaml_parser
 
 
 class Settings:

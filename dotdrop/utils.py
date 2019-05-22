@@ -20,7 +20,7 @@ from shutil import rmtree
 import yaml
 
 # local import
-from .logger import Logger
+from dotdrop.logger import Logger
 
 #######################################
 # Variables

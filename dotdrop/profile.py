@@ -1,8 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+"""
+author: deadc0de6 (https://github.com/deadc0de6)
+Copyright (c) 2019, deadc0de6
 
-from .logger import Logger
-from .utils import DictParser
+represent a profile in dotdrop
+"""
+
+from dotdrop.logger import Logger
+from dotdrop.utils import DictParser
 
 
 class Profile(DictParser):
