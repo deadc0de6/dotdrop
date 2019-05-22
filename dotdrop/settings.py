@@ -108,4 +108,4 @@ class Settings:
         self._serialize_seq(self.key_import_variables, dic)
         self._serialize_seq(self.key_upignore, dic)
 
-        return dic
+        return {self.key_yaml: dic}

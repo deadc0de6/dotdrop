@@ -82,8 +82,8 @@ class CfgYaml:
         yaml_dict = clear_none(yaml_dict)
 
         # Setting default to mandatory config file keys
-        yaml_dict.setdefault(Settings.key_yaml,
-                             cls.default_settings.serialize())
+        entries = cls.default_settings.serialize()[Settings.key_yaml]
+        yaml_dict.setdefault(Settings.key_yaml, entries)
         yaml_dict.setdefault(Dotfile.key_yaml, {})
         yaml_dict.setdefault(Profile.key_yaml, {})
 
