@@ -26,7 +26,7 @@ class CfgAggregator:
 
     def _load(self):
         """load lower level config"""
-        self.cfgyaml = CfgYaml(yaml_dict=None, file_name=self.path,
+        self.cfgyaml = CfgYaml(path=self.path,
                                debug=self.debug)
 
         # match dotfiles to profiles

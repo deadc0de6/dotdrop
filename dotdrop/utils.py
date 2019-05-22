@@ -226,14 +226,14 @@ class DictParser(ABC):
         return cls(key=key, **value)
 
     @classmethod
-    def parse_dict(cls, yaml_dict, file_name=None, mandatory=True):
+    def parse_dict(cls, yaml_dict, mandatory=True):
         items = None
         try:
             items = yaml_dict[cls.key_yaml]
         except KeyError:
             if mandatory:
-                cls.log.err('malformed file {}: missing key "{}"'
-                            .format(file_name, cls.key_yaml), throw=ValueError)
+                cls.log.err('malformed config file missing key "{}"'
+                            .format(cls.key_yaml), throw=ValueError)
 
         if not items:
             return []

@@ -150,7 +150,7 @@ profiles:
 
         # edit the config
         with open(confpath, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
 
         # adding dotfiles
         df1key = 'f_vimrc'
@@ -193,7 +193,7 @@ profiles:
         # test not existing included profile
         # edit the config
         with open(confpath, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
         content['profiles'] = {
                 pf1key: {'dotfiles': [df2key], 'include': ['host2']},
                 pf2key: {'dotfiles': [df1key], 'include': ['host3']}
@@ -622,7 +622,7 @@ class TestCfgYaml(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
@@ -693,7 +693,7 @@ class TestCfgYaml(unittest.TestCase):
             yaml.safe_dump(yaml_dict, conf_file)
 
         # parse again to check serialization consistency
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
@@ -754,7 +754,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, dotfiles=dotfiles_start)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         # check members
         for dotfile in config.dotfiles:
@@ -843,7 +843,7 @@ class TestCfgYaml(unittest.TestCase):
                              profiles=profiles)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         # check members
         for profile in config.profiles:
@@ -919,7 +919,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, dotfiles=dotfiles)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         ###################################################
         # dotfile not found
@@ -959,7 +959,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, profiles=profiles)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         ###################################################
         # profile not found
@@ -1017,7 +1017,7 @@ class TestCfgYaml(unittest.TestCase):
                              profiles=profiles)
 
         # parse
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
 
         ###################################################
         # dotfile already exists
@@ -1104,7 +1104,7 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        config = CfgYaml.parse(confpath)
+        config = CfgYaml(confpath)
         profile_name = 'testprofile'
 
         ###################################################

@@ -31,27 +31,41 @@ class CfgYaml:
     default_settings = Settings()
     log = Logger()
 
-    def __init__(self, yaml_dict, file_name, *, debug=False):
+    def __init__(self, path, debug=False):
         """constructor
-        @file_name: path to the config file
+        @path: path to the config file
         @debug: enable debug
         """
 
         self._dirty = False
         self.debug = debug
 
-        self.file_name = os.path.abspath(file_name)
-        self.yaml_dict = self._sanitize_yaml(yaml_dict)
+        self.path = os.path.abspath(path)
+        self.yaml_dict = self._load_yaml(self.path)
+        self.yaml_dict = self._sanitize_yaml(self.yaml_dict)
 
-        self.settings = Settings.parse(self.yaml_dict, self.file_name)
-        self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
-        self.profiles = Profile.parse_dict(self.yaml_dict, self.file_name)
-        self.actions = Action.parse_dict(self.yaml_dict, self.file_name,
+        self.settings = Settings.parse(self.yaml_dict)
+        self.dotfiles = Dotfile.parse_dict(self.yaml_dict)
+        self.profiles = Profile.parse_dict(self.yaml_dict)
+        self.actions = Action.parse_dict(self.yaml_dict,
                                          mandatory=False)
-        self.transforms = Transform.parse_dict(self.yaml_dict, self.file_name,
+        self.transforms = Transform.parse_dict(self.yaml_dict,
                                                mandatory=False)
 
         self.yaml_dict.update(self.settings.serialize())
+
+    def _load_yaml(self, path):
+        """load a yaml file to a dict"""
+        content = {}
+        if not os.path.exists(path):
+            return content
+        with open(path, 'r') as f:
+            try:
+                content = yaml.safe_load(f)
+            except Exception as e:
+                self.log.err(e)
+                return {}
+        return content
 
     @property
     def _dotfile_keys(self):
@@ -79,24 +93,18 @@ class CfgYaml:
 
         return splits
 
-    @classmethod
-    def _sanitize_yaml(cls, yaml_dict):
+    def _sanitize_yaml(self, yaml_dict):
         """Remove None and set defaults for mandatory keys in YAML dicts."""
         # Clearing None values, to preserve mental sanity when checking keys
         yaml_dict = clear_none(yaml_dict)
 
         # Setting default to mandatory config file keys
-        entries = cls.default_settings.serialize()[Settings.key_yaml]
+        entries = self.default_settings.serialize()[Settings.key_yaml]
         yaml_dict.setdefault(Settings.key_yaml, entries)
         yaml_dict.setdefault(Dotfile.key_yaml, {})
         yaml_dict.setdefault(Profile.key_yaml, {})
 
         return yaml_dict
-
-    @classmethod
-    def parse(cls, yaml_dict, file_name=None, *, debug=False):
-        """Parse a yaml configuration file to a class instance."""
-        return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
 
     def _add_dotfile(self, dotfile):
         """Add dotfile to dotfiles."""
@@ -222,7 +230,7 @@ class CfgYaml:
         if not (self._dirty or force):
             return False
 
-        with open(self.file_name, 'w') as cfg_file:
+        with open(self.path, 'w') as cfg_file:
             yaml.safe_dump(self.yaml_dict, cfg_file,
                            default_flow_style=False, indent=2)
         self._dirty = False
