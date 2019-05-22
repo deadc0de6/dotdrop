@@ -234,6 +234,9 @@ def write_to_tmpfile(content):
 
 
 class DictParser(ABC):
+
+    log = Logger()
+
     @property
     @abstractclassmethod
     def key_yaml(self):

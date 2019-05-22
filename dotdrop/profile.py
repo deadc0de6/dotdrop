@@ -5,7 +5,6 @@ Copyright (c) 2019, deadc0de6
 represent a profile in dotdrop
 """
 
-from dotdrop.logger import Logger
 from dotdrop.utils import DictParser
 
 
@@ -21,8 +20,6 @@ class Profile(DictParser):
     key_import = 'import'
     key_variables = 'variables'
     key_dynvariables = 'dynvariables'
-
-    log = Logger()
 
     def __init__(self, key, actions=(), dotfiles=None, imported_dotfiles=(),
                  include=(), variables=None, dynvariables=None):

@@ -6,7 +6,6 @@ represents a dotfile in dotdrop
 """
 
 from dotdrop.linktypes import LinkTypes
-from dotdrop.logger import Logger
 from dotdrop.utils import DictParser
 
 
@@ -26,8 +25,6 @@ class Dotfile(DictParser):
     key_trans_r = 'trans'
     key_trans_w = 'trans_write'
     key_upignore = 'upignore'
-
-    log = Logger()
 
     def __init__(self, key, dst, src,
                  actions=None, trans_r=None, trans_w=None,

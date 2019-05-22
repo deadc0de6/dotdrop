@@ -6,11 +6,10 @@ settings block
 """
 
 from dotdrop.linktypes import LinkTypes
-from dotdrop.logger import Logger
-from dotdrop.utils import with_yaml_parser
+from dotdrop.utils import with_yaml_parser, DictParser
 
 
-class Settings:
+class Settings(DictParser):
     # key in yaml file
     key_yaml = 'config'
 
@@ -34,8 +33,6 @@ class Settings:
     key_import_actions = 'import_actions'
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
-
-    log = Logger()
 
     def __init__(self, backup=True, banner=True, cmpignore=(), create=True,
                  default_actions=(), dotpath='dotfiles', ignoreempty=True,
