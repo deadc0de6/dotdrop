@@ -83,9 +83,7 @@ class Settings:
 
     def _serialize_seq(self, name, dic):
         seq = getattr(self, name)
-        if seq:
-            seq_key = getattr(self, 'key_{}'.format(name))
-            dic[seq_key] = seq
+        dic[name] = seq
 
     def serialize(self):
         """Return key-value pair representation of this settings."""
@@ -103,11 +101,11 @@ class Settings:
             self.key_showdiff: self.showdiff,
             self.key_workdir: self.workdir,
         }
-        self._serialize_seq('cmpignore', dic)
-        self._serialize_seq('default_actions', dic)
-        self._serialize_seq('import_actions', dic)
-        self._serialize_seq('import_configs', dic)
-        self._serialize_seq('import_variables', dic)
-        self._serialize_seq('upignore', dic)
+        self._serialize_seq(self.key_cmpignore, dic)
+        self._serialize_seq(self.key_default_actions, dic)
+        self._serialize_seq(self.key_import_actions, dic)
+        self._serialize_seq(self.key_import_configs, dic)
+        self._serialize_seq(self.key_import_variables, dic)
+        self._serialize_seq(self.key_upignore, dic)
 
         return dic
