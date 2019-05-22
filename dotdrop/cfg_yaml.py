@@ -193,8 +193,10 @@ class CfgYaml:
         except StopIteration:
             return None
 
-    def new_dotfile(self, dotfile_args, profile_key=None):
+    def new_dotfile(self, dotfile_args, profile_key):
         """Add a dotfile to this config YAML file."""
+        if not profile_key:
+            raise Exception('bad profile key: None')
         dotfile = self.get_dotfile(dotfile_args['dst'])
         if dotfile is None:
             key = self._make_new_dotfile_key(dotfile_args['dst'])
@@ -202,14 +204,13 @@ class CfgYaml:
             self._add_dotfile(dotfile)
 
         # add dotfile to profile
-        if profile_key is not None:
-            profile = self.get_profile(profile_key)
-            if profile is None:
-                self.log.warn('Profile {} not found, adding it'
-                              .format(profile_key))
-                profile = Profile(key=profile_key)
-                self._add_profile(profile)
-            self._add_dotfile_to_profile(dotfile, profile)
+        profile = self.get_profile(profile_key)
+        if profile is None:
+            self.log.warn('Profile {} not found, adding it'
+                          .format(profile_key))
+            profile = Profile(key=profile_key)
+            self._add_profile(profile)
+        self._add_dotfile_to_profile(dotfile, profile)
 
         return dotfile
 
