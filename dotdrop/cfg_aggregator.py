@@ -29,8 +29,11 @@ class CfgAggregator:
         self.cfgyaml = CfgYaml(path=self.path,
                                debug=self.debug)
 
-        # match dotfiles to profiles
         # TODO
+        # match dotfiles to profiles
+        # match action to actions
+        # match trans to trans
+        # match trans_w to trans_w
 
     def new(self, src, dst, profile, link, debug=False):
         """import new dotfile"""

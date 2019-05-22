@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 import yaml
 
-from dotdrop.cfg_yaml import Cfg
 from dotdrop.options import Options
 from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
                            create_fake_config, create_random_file,
@@ -19,6 +18,7 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
                            populate_fake_config)
 
 
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.cfg_yaml import CfgYaml
 from dotdrop.dotfile import Dotfile
 from dotdrop.profile import Profile
@@ -359,11 +359,11 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.lnk_profiles,
-                            importing_cfg.lnk_profiles)
+        self.assertIsSubset(imported_cfg.get_profiles(),
+                            importing_cfg.get_profiles())
 
         # test dotfiles
-        self.assertIsSubset(imported_cfg.dotfiles, importing_cfg.dotfiles)
+        self.assertIsSubset(imported_cfg.get_dotfiles, importing_cfg.dotfiles)
 
         # test actions
         self.assertIsSubset(imported_cfg.actions['pre'],
@@ -549,8 +549,8 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.lnk_profiles,
-                            importing_cfg.lnk_profiles)
+        self.assertIsSubset(imported_cfg.get_profiles(),
+                            importing_cfg.get_profiles())
 
         # test dotfiles
         self.assertEqual(importing_cfg.dotfiles['f_vimrc'],

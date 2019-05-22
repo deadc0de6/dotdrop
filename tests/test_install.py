@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import filecmp
 
-from dotdrop.cfg_yaml import Cfg
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from tests.helpers import (clean, create_dir, create_fake_config,
                            create_random_file, get_string, get_tempdir,
                            load_options, populate_fake_config)

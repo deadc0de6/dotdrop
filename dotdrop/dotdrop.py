@@ -15,7 +15,7 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.cfg_yaml import Cfg
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.utils import get_tmpdir, remove, strip_home, run
 from dotdrop.linktypes import LinkTypes
 
