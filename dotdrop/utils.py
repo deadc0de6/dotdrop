@@ -36,6 +36,8 @@ LOG = Logger()
 
 def clear_none(dic):
     """Recursively delete all None values in a dictionary."""
+    if not dic:
+        return {}
     return {
         key: clear_none(value) if isinstance(value, dict) else value
         for key, value in dic.items()
