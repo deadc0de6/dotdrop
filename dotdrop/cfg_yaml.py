@@ -212,7 +212,7 @@ class CfgYaml:
             self._add_profile(profile)
         self._add_dotfile_to_profile(dotfile, profile)
 
-        return dotfile
+        return True, dotfile
 
     def save(self, *, force=False):
         """Save this instance to the original YAML file it was parsed from."""

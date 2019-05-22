@@ -999,8 +999,9 @@ class TestCfgYaml(unittest.TestCase):
         ]
 
         # creating profiles
+        profile_name = 'host1'
         profiles = {
-            'host1': {
+            profile_name: {
                 'dotfiles': list(dotfiles_start.keys()),
             },
         }
@@ -1023,7 +1024,7 @@ class TestCfgYaml(unittest.TestCase):
 
         existing_dotfile = dotfiles_start[next(iter(dotfiles_start.keys()))]
         prev_dotfiles = config.dotfiles
-        config.new_dotfile(existing_dotfile)
+        config.new_dotfile(existing_dotfile, profile_name)
 
         # model-layer test
         self.assertEqual(prev_dotfiles, config.dotfiles)
@@ -1039,7 +1040,7 @@ class TestCfgYaml(unittest.TestCase):
         ###################################################
 
         new_dotfile_args = dotfiles_added[0]
-        new_dotfile = config.new_dotfile(new_dotfile_args)
+        new_dotfile = config.new_dotfile(new_dotfile_args, profile_name)
 
         # model-layer test
         self.assertIn(new_dotfile, config.dotfiles)
