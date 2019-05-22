@@ -33,7 +33,7 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
         content = ''
         with open(path, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
         return content
 
     def assert_file(self, path, o, profile):
