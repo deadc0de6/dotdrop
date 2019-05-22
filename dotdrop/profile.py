@@ -11,6 +11,7 @@ class Profile(DictParser):
     key_yaml = 'profiles'
 
     # profile keys
+    key_actions = 'actions'
     key_dotfiles = 'dotfiles'
     key_include = 'include'
     key_import = 'import'
@@ -19,8 +20,9 @@ class Profile(DictParser):
 
     log = Logger()
 
-    def __init__(self, key, dotfiles=None, imported_dotfiles=(), include=(),
-                 variables=None, dynvariables=None):
+    def __init__(self, key, actions=(), dotfiles=None, imported_dotfiles=(),
+                 include=(), variables=None, dynvariables=None):
+        self.actions = actions
         self.dotfiles = dotfiles or []
         self.key = key
         self.imported_dotfiles = imported_dotfiles
