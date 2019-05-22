@@ -25,8 +25,8 @@ from dotdrop.settings import Settings
 
 class CfgYaml:
 
-    dotfile_key_file_prefix = 'f_'
-    dotfile_key_directory_prefix = 'd_'
+    dotfile_key_file_prefix = 'f'
+    dotfile_key_directory_prefix = 'd'
 
     default_settings = Settings()
     log = Logger()
