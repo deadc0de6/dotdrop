@@ -724,6 +724,7 @@ class TestCfgYaml(unittest.TestCase):
     def test_parse_serialize_dotfiles(self):
         """Test dotfiles parsing in CfgYaml."""
         tmp = get_tempdir()
+        profile_name = 'profiletest'
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
         default_dotfile = Dotfile(key=None, src=None, dst=None)
@@ -783,7 +784,7 @@ class TestCfgYaml(unittest.TestCase):
 
         # modify
         for dotfile_args in dotfiles_added:
-            config.new_dotfile(dotfile_args)
+            config.new_dotfile(dotfile_args, profile_name)
         config.save()
 
         with open(confpath, 'r') as conf_file:
@@ -1040,7 +1041,7 @@ class TestCfgYaml(unittest.TestCase):
         ###################################################
 
         new_dotfile_args = dotfiles_added[0]
-        new_dotfile = config.new_dotfile(new_dotfile_args, profile_name)
+        _, new_dotfile = config.new_dotfile(new_dotfile_args, profile_name)
 
         # model-layer test
         self.assertIn(new_dotfile, config.dotfiles)
@@ -1057,8 +1058,8 @@ class TestCfgYaml(unittest.TestCase):
         ###################################################
 
         existing_profile = config.profiles[0]
-        existing_dotfile_obj = config.new_dotfile(existing_dotfile,
-                                                  existing_profile.key)
+        _, existing_dotfile_obj = config.new_dotfile(existing_dotfile,
+                                                     existing_profile.key)
 
         # model-layer test
         self.assertIn(existing_dotfile_obj.key, existing_profile.dotfiles)
@@ -1104,6 +1105,7 @@ class TestCfgYaml(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         config = CfgYaml.parse(confpath)
+        profile_name = 'testprofile'
 
         ###################################################
         # Brand new key (empty dotfiles)
@@ -1114,7 +1116,7 @@ class TestCfgYaml(unittest.TestCase):
         dotfile0 = {'src': src0, 'dst': dst0, }
         expected_key = 'f_{}'.format(src0.replace(os.path.sep, '_').lower())
 
-        new_dotfile0 = config.new_dotfile(dotfile0)
+        _, new_dotfile0 = config.new_dotfile(dotfile0, profile_name)
         self.assertEqual(expected_key, new_dotfile0.key)
 
         ###################################################
@@ -1126,7 +1128,7 @@ class TestCfgYaml(unittest.TestCase):
         dotfile1 = {'src': src1, 'dst': dst1, }
         expected_key = 'f_{}'.format(src1.replace(os.path.sep, '_').lower())
 
-        new_dotfile1 = config.new_dotfile(dotfile1)
+        _, new_dotfile1 = config.new_dotfile(dotfile1, profile_name)
         self.assertEqual(expected_key, new_dotfile1.key)
 
         ###################################################
@@ -1140,7 +1142,7 @@ class TestCfgYaml(unittest.TestCase):
         dotfile2 = {'src': src2, 'dst': dst2, }
         expected_key = 'f_{}'.format(src2.replace(os.path.sep, '_').lower())
 
-        new_dotfile2 = config.new_dotfile(dotfile2)
+        _, new_dotfile2 = config.new_dotfile(dotfile2, profile_name)
         self.assertEqual(expected_key, new_dotfile2.key)
 
         ###################################################
@@ -1163,8 +1165,8 @@ class TestCfgYaml(unittest.TestCase):
         expected_key3 = 'f_{}'.format(src3.replace(os.path.sep, '_').lower())
         expected_key4 = 'f_{}_1'.format(src4.replace(os.path.sep, '_').lower())
 
-        new_dotfile3 = config.new_dotfile(dotfile3)
-        new_dotfile4 = config.new_dotfile(dotfile4)
+        _, new_dotfile3 = config.new_dotfile(dotfile3, profile_name)
+        _, new_dotfile4 = config.new_dotfile(dotfile4, profile_name)
         self.assertEqual(expected_key3, new_dotfile3.key)
         self.assertEqual(expected_key4, new_dotfile4.key)
 
