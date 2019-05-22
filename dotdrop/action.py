@@ -11,6 +11,7 @@ import os
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.utils import DictParser
 
 
 class Cmd:
@@ -48,7 +49,7 @@ class Cmd:
         return hash(self.key) ^ hash(self.action)
 
 
-class Action(Cmd):
+class Action(Cmd, DictParser):
 
     def __init__(self, key, kind, action, *args):
         """constructor
@@ -91,7 +92,7 @@ class Action(Cmd):
         return ret == 0
 
 
-class Transform(Cmd):
+class Transform(Cmd, DictParser):
 
     def transform(self, arg0, arg1):
         """execute transformation with {0} and {1}
