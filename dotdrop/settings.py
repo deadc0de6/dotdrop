@@ -6,7 +6,7 @@ settings block
 """
 
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import with_yaml_parser, DictParser
+from dotdrop.utils import DictParser
 
 
 class Settings(DictParser):
@@ -60,7 +60,6 @@ class Settings(DictParser):
         self._init_link('link_on_import', link_on_import)
 
     @classmethod
-    @with_yaml_parser
     def parse(cls, yaml_dict, file_name=None):
         try:
             settings = yaml_dict[cls.key_yaml]

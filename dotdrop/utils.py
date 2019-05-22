@@ -17,8 +17,6 @@ from glob import iglob
 from platform import python_version
 from shutil import rmtree
 
-import yaml
-
 # local import
 from dotdrop.logger import Logger
 
@@ -195,31 +193,6 @@ def strip_home(path):
     return path
 
 
-def with_yaml_parser(funct):
-    """
-    Decorator. Add YAML parsing of a file, but only when no already-parsed
-    dictionary is passed.
-
-    :param func: The method being decorated.
-    :type func: (first :any, yaml_dict :dict, file_name :str, *args, **kwargs)
-        -> any
-    :return func: The same method, but it can now parse a YAML file if the
-        parsed dict is not passed.
-    :type return: (first :any, yaml_dict :(dict|str), file_name=None :str,
-        *args, **kwargs) -> any
-    """
-    @wraps(funct)
-    def wrapper(first, yaml_dict, file_name=None, *args, **kwargs):
-        if file_name is None:
-            file_name = yaml_dict
-            with open(file_name, 'r') as yaml_file:
-                yaml_dict = yaml.safe_load(yaml_file)
-
-        return funct(first, yaml_dict, file_name, *args, **kwargs)
-
-    return wrapper
-
-
 def write_to_tmpfile(content):
     """write some content to a tmp file"""
     path = get_tmpfile()
@@ -253,12 +226,15 @@ class DictParser(ABC):
         return cls(key=key, **value)
 
     @classmethod
-    @with_yaml_parser
-    def parse_dict(cls, yaml_dict, file_name=None):
+    def parse_dict(cls, yaml_dict, file_name=None, mandatory=True):
+        items = None
         try:
             items = yaml_dict[cls.key_yaml]
         except KeyError:
-            cls.log.err('malformed file {}: missing key "{}"'
-                        .format(file_name, cls.key_yaml), throw=ValueError)
+            if mandatory:
+                cls.log.err('malformed file {}: missing key "{}"'
+                            .format(file_name, cls.key_yaml), throw=ValueError)
 
+        if not items:
+            return []
         return list(map(cls.parse, items.items()))

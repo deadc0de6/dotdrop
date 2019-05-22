@@ -15,7 +15,7 @@ from operator import attrgetter
 from dotdrop.templategen import Templategen
 from dotdrop.action import Action, Transform
 from dotdrop.utils import strip_home, shell, \
-    clear_none, glob, with_yaml_parser
+    clear_none, glob
 from dotdrop.linktypes import LinkTypes
 from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
@@ -46,6 +46,10 @@ class CfgYaml:
         self.settings = Settings.parse(self.yaml_dict, self.file_name)
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
         self.profiles = Profile.parse_dict(self.yaml_dict, self.file_name)
+        self.actions = Action.parse_dict(self.yaml_dict, self.file_name,
+                                         mandatory=False)
+        self.transforms = Transform.parse_dict(self.yaml_dict, self.file_name,
+                                               mandatory=False)
 
         self.yaml_dict.update(self.settings.serialize())
 
@@ -90,7 +94,6 @@ class CfgYaml:
         return yaml_dict
 
     @classmethod
-    @with_yaml_parser
     def parse(cls, yaml_dict, file_name=None, *, debug=False):
         """Parse a yaml configuration file to a class instance."""
         return cls(yaml_dict=yaml_dict, file_name=file_name, debug=debug)
