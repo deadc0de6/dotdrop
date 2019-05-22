@@ -47,7 +47,7 @@ class CfgYaml:
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict, self.file_name)
         self.profiles = Profile.parse_dict(self.yaml_dict, self.file_name)
 
-        self.yaml_dict.update(self.settings.serialize(as_dict=True))
+        self.yaml_dict.update(self.settings.serialize())
 
     @property
     def _dotfile_keys(self):

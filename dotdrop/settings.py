@@ -87,7 +87,7 @@ class Settings:
             seq_key = getattr(self, 'key_{}'.format(name))
             dic[seq_key] = seq
 
-    def serialize(self, as_dict=False):
+    def serialize(self):
         """Return key-value pair representation of this settings."""
         # Tedious, but less error-prone than introspection
         dic = {
@@ -110,4 +110,4 @@ class Settings:
         self._serialize_seq('import_variables', dic)
         self._serialize_seq('upignore', dic)
 
-        return {self.key_yaml: dic} if as_dict else (self.key_yaml, dic)
+        return dic
