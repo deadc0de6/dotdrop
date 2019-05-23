@@ -1118,31 +1118,39 @@ class Cfg:
                 t.update_variables(variables)
         return variables
 
-    def _get_variables(self, profile=None):
+    def _get_variables(self, profile=None, sub=False):
         """return the un-interpreted variables"""
         variables = {}
 
-        # profile variable
-        if profile:
-            variables['profile'] = profile
+        if not sub:
+            # profile variable
+            if profile:
+                variables['profile'] = profile
 
-        # add paths variables
-        variables['_dotdrop_dotpath'] = self.lnk_settings[self.key_dotpath]
-        variables['_dotdrop_cfgpath'] = self.cfgpath
-        variables['_dotdrop_workdir'] = self.lnk_settings[self.key_workdir]
+            # add paths variables
+            variables['_dotdrop_dotpath'] = self.lnk_settings[self.key_dotpath]
+            variables['_dotdrop_cfgpath'] = self.cfgpath
+            variables['_dotdrop_workdir'] = self.lnk_settings[self.key_workdir]
 
-        # global variables
-        if self.key_variables in self.content:
-            variables.update(self.content[self.key_variables])
+            # global variables
+            if self.key_variables in self.content:
+                variables.update(self.content[self.key_variables])
 
-        # external variables
-        variables.update(self.ext_variables)
+            # external variables
+            variables.update(self.ext_variables)
 
         if not profile or profile not in self.lnk_profiles:
             return variables
 
-        # profile variables
         var = self.lnk_profiles[profile]
+
+        # inherited profile variables
+        if self.key_profiles_incl in var.keys():
+            for inherited_profile in var[self.key_profiles_incl]:
+                inherited_vars = self._get_variables(inherited_profile, True)
+                variables.update(inherited_vars)
+
+        # finally we override with profile variables
         if self.key_variables in var.keys():
             for k, v in var[self.key_variables].items():
                 variables[k] = v
