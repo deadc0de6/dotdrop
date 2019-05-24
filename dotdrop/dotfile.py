@@ -42,7 +42,7 @@ class Dotfile(DictParser):
         @noempty: ignore empty template if True
         @upignore: patterns to ignore when updating
         """
-        self.actions = actions or {}
+        self.actions = actions or []
         self.cmpignore = cmpignore
         self.dst = dst
         self.key = key
@@ -54,17 +54,15 @@ class Dotfile(DictParser):
         self.upignore = upignore
 
     @classmethod
-    def _adjust_yaml_keys(cls, value):
+    def _adjust_yaml_keys(cls, key, value):
         value['noempty'] = value.get(cls.key_noempty, False)
         value['trans_r'] = value.get(cls.key_trans_r)
         value['trans_w'] = value.get(cls.key_trans_w)
-        try:
-            del (value[cls.key_noempty], value[cls.key_trans_r],
-                 value[cls.key_trans_w])
-        except KeyError:
-            pass
-
-        return value
+        # remove old entries
+        value.pop(cls.key_noempty, None)
+        value.pop(cls.key_trans_r, None)
+        value.pop(cls.key_trans_w, None)
+        return key, value
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

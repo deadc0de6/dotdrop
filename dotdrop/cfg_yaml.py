@@ -15,6 +15,8 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
 from dotdrop.profile import Profile
 from dotdrop.settings import Settings
+from dotdrop.action import Action, Trans_r, Trans_w
+from dotdrop.variable import Variable, DynVariable
 
 
 class CfgYaml:
@@ -42,7 +44,12 @@ class CfgYaml:
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict)
         self.profiles = Profile.parse_dict(self.yaml_dict)
         # TODO
-        # add actions, transformations, variables, etc
+        self.actions = Action.parse_dict(self.yaml_dict, mandatory=False)
+        self.trans_r = Trans_r.parse_dict(self.yaml_dict, mandatory=False)
+        self.trans_w = Trans_w.parse_dict(self.yaml_dict, mandatory=False)
+        self.variables = Variable.parse_dict(self.yaml_dict, mandatory=False)
+        self.dvariables = DynVariable.parse_dict(self.yaml_dict,
+                                                 mandatory=False)
 
         self.yaml_dict.update(self.settings.serialize())
 

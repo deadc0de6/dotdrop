@@ -31,9 +31,36 @@ class CfgAggregator:
 
         # TODO
         # match dotfiles to profiles
+        self._match_keys_to_obj(self.cfgyaml.profiles,
+                                "dotfiles", self.get_dotfile)
         # match action to actions
+        self._match_keys_to_obj(self.cfgyaml.dotfiles,
+                                "actions", self.get_action,
+                                copy=True)
+        self._match_keys_to_obj(self.cfgyaml.profiles,
+                                "actions", self.get_action,
+                                copy=True)
         # match trans to trans
         # match trans_w to trans_w
+
+    def _match_keys_to_obj(self, containers, keys, getter,
+                           copy=False):
+        """
+        add a new attribute to containers class
+        containing the object returned by getter
+        for each key in keys
+        """
+        for c in containers:
+            objects = []
+            for k in getattr(c, keys):
+                o = getter(k)
+                if not o:
+                    err = 'bad key for \"{}\": {}'.format(c.key, k)
+                    raise Exception(err)
+                if copy:
+                    o = copy(o)
+                objects.append(o)
+            setattr(c, '{}_obj'.format(keys), objects)
 
     def new(self, src, dst, profile, link, debug=False):
         """import new dotfile"""
@@ -58,15 +85,17 @@ class CfgAggregator:
         # TODO
         return {}
 
-    def _get_dotfiles(self, profile):
-        """return all dotfiles for this profile"""
-        # TODO
-        # dfs = self.cfgyaml.dotfiles
-        return []
+    def _get_dotfiles(self, profile=None):
+        """return dotfiles for this profile key"""
+        if not profile:
+            return self.cfgyaml.dotfiles
+        p = self.get_profile(profile)
+        if not p:
+            return []
+        return p.dotfiles_obj
 
-    def get_dotfiles(self, profile, variables, debug=False):
-        """resolve dotfiles src/dst/actions templating for this profile"""
-        # TODO
+    def get_dotfiles(self, profile=None, variables=[], debug=False):
+        """resolve dotfiles src/dst/actions templating for this profile key"""
         t = Templategen(variables=variables)
         dotfiles = self._get_dotfiles(profile)
         tvars = t.add_tmp_vars()
@@ -78,12 +107,28 @@ class CfgAggregator:
             # src and dst path
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
-            # pre actions
-            if self.key_actions_pre in d.actions:
-                for action in d.actions[self.key_actions_pre]:
-                    action.action = t.generate_string(action.action)
-            # post actions
-            if self.key_actions_post in d.actions:
-                for action in d.actions[self.key_actions_post]:
-                    action.action = t.generate_string(action.action)
+            # actions
+            for action in d.actions_obj:
+                action.action = t.generate_string(action.action)
         return dotfiles
+
+    def get_dotfile(self, key):
+        """get dotfile by key"""
+        try:
+            return next(d for d in self.cfgyaml.dotfiles if d.key == key)
+        except StopIteration:
+            return None
+
+    def get_profile(self, key):
+        """get profile by key"""
+        try:
+            return next(p for p in self.cfgyaml.profiles if p.key == key)
+        except StopIteration:
+            return None
+
+    def get_action(self, key):
+        """get action by key"""
+        try:
+            return next(p for p in self.cfgyaml.actions if p.key == key)
+        except StopIteration:
+            return None

@@ -26,6 +26,12 @@ class Cmd:
         self.action = action
         self.log = Logger()
 
+    @classmethod
+    def _adjust_yaml_keys(cls, key, value):
+        v = {}
+        v['action'] = value
+        return key, v
+
     def __str__(self):
         return 'key:{} -> \"{}\"'.format(self.key, self.action)
 
@@ -50,36 +56,51 @@ class Cmd:
 
 
 class Action(Cmd, DictParser):
+    key_yaml = 'actions'
+    key_actions_pre = 'pre'
+    key_actions_post = 'post'
 
-    def __init__(self, key, kind, action, *args):
+    def __init__(self, key, kind, action):
         """constructor
         @key: action key
         @kind: type of action (pre or post)
         @action: action string
-        @args: action arguments
         """
         super(Action, self).__init__(key, action)
         self.kind = kind
-        self.args = args
+
+    @classmethod
+    def _adjust_yaml_keys(cls, key, value):
+        v = {}
+        if type(value) == str:
+            # here we are sure we have a pre-action
+            # no "pre" or "post"
+            v['kind'] = cls.key_actions_pre
+            v['action'] = value
+        else:
+            v['kind'] = key
+            key = next(iter(value))
+            v['action'] = value[key]
+        return key, v
 
     def __str__(self):
-        out = '{}: \"{}\" with args: {}'
-        return out.format(self.key, self.action, self.args)
+        out = '{}: \"{}\"'
+        return out.format(self.key, self.action)
 
     def __repr__(self):
         return 'action({})'.format(self.__str__())
 
-    def execute(self, templater=None):
+    def execute(self, templater=None, *args):
         """execute the action in the shell"""
         ret = 1
         action = self.action
         if templater:
             action = templater.generate_string(self.action)
         try:
-            cmd = action.format(*self.args)
+            cmd = action.format(*args)
         except IndexError:
             err = 'bad action: \"{}\"'.format(action)
-            err += ' with \"{}\"'.format(self.args)
+            err += ' with \"{}\"'.format(*args)
             self.log.warn(err)
             return False
         self.log.sub('executing \"{}\"'.format(cmd))
@@ -112,3 +133,11 @@ class Transform(Cmd, DictParser):
         if ret != 0:
             self.log.warn('transformation returned code {}'.format(ret))
         return ret == 0
+
+
+class Trans_r(Transform, DictParser):
+    key_yaml = 'trans'
+
+
+class Trans_w(Transform, DictParser):
+    key_yaml = 'trans_write'

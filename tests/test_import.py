@@ -231,9 +231,11 @@ class TestImport(unittest.TestCase):
             'actions': {
                 'pre': {
                     'a_pre_log_ed': 'echo pre 2',
+                    'second_pre': 'echo pre a 2',
                 },
                 'post': {
                     'a_post_log_ed': 'echo post 2',
+                    'second_post': 'echo post a 2',
                 },
                 'a_log_ed': 'echo 2',
             },

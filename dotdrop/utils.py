@@ -216,14 +216,18 @@ class DictParser(ABC):
         pass
 
     @classmethod
-    def _adjust_yaml_keys(cls, yaml_dict):
-        return yaml_dict
+    def _adjust_yaml_keys(cls, key, yaml_dict):
+        return key, yaml_dict
 
     @classmethod
     @destructure_keyval
     def parse(cls, key, value):
-        value = cls._adjust_yaml_keys(value.copy())
-        return cls(key=key, **value)
+        try:
+            v = value.copy()
+        except AttributeError:
+            v = value
+        newkey, newvalue = cls._adjust_yaml_keys(key, v)
+        return cls(key=newkey, **newvalue)
 
     @classmethod
     def parse_dict(cls, yaml_dict, mandatory=True):

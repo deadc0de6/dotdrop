@@ -32,14 +32,13 @@ class Profile(DictParser):
         self.dynvariables = dynvariables or {}
 
     @classmethod
-    def _adjust_yaml_keys(cls, value):
+    def _adjust_yaml_keys(cls, key, value):
         value['imported_dotfiles'] = value.get(cls.key_import, ())
         try:
             del value[cls.key_import]
         except KeyError:
             pass
-
-        return value
+        return key, value
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

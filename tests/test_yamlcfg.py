@@ -18,14 +18,13 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean, create_dir,
                            populate_fake_config)
 
 
-from dotdrop.cfg_aggregator import CfgAggregator as Cfg
-from dotdrop.cfg_yaml import CfgYaml
+from dotdrop.cfg_yaml import CfgYaml as Cfg
 from dotdrop.dotfile import Dotfile
 from dotdrop.profile import Profile
 from dotdrop.settings import LinkTypes, Settings
 
 
-class TestConfig(SubsetTestCase):
+class TestYamlConfig(SubsetTestCase):
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
@@ -48,7 +47,7 @@ class TestConfig(SubsetTestCase):
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
-        opts = conf.get_settings()
+        opts = conf.settings.serialize()[Settings.key_yaml]
         self.assertTrue(opts is not None)
         self.assertTrue(opts != {})
         self.assertTrue(opts['backup'] == self.CONFIG_BACKUP)
@@ -134,7 +133,7 @@ profiles:
 
         with self.assertRaisesRegex(ValueError, 'config is not valid'):
             o = Options(args=args)
-            print(o.import_link)
+            print(o)
 
     def test_include(self):
         tmp = get_tempdir()
@@ -178,7 +177,7 @@ profiles:
         self.assertTrue(conf is not None)
 
         # test profile
-        profiles = conf.get_profiles()
+        profiles = conf.profiles
         self.assertTrue(pf1key in profiles)
         self.assertTrue(pf2key in profiles)
 
@@ -359,11 +358,12 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.get_profiles(),
-                            importing_cfg.get_profiles())
+        self.assertIsSubset(imported_cfg.profiles,
+                            importing_cfg.profiles)
 
         # test dotfiles
-        self.assertIsSubset(imported_cfg.get_dotfiles, importing_cfg.dotfiles)
+        self.assertIsSubset([d.key for d in imported_cfg.get_dotfiles()],
+                            [d.key for d in importing_cfg.get_dotfiles()])
 
         # test actions
         self.assertIsSubset(imported_cfg.actions['pre'],
@@ -549,8 +549,8 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.get_profiles(),
-                            importing_cfg.get_profiles())
+        self.assertIsSubset(imported_cfg.profiles,
+                            importing_cfg.profiles)
 
         # test dotfiles
         self.assertEqual(importing_cfg.dotfiles['f_vimrc'],
@@ -622,7 +622,7 @@ class TestCfgYaml(unittest.TestCase):
                                       create=self.CONFIG_CREATE)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
@@ -693,7 +693,7 @@ class TestCfgYaml(unittest.TestCase):
             yaml.safe_dump(yaml_dict, conf_file)
 
         # parse again to check serialization consistency
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         # check members
         self.assertEqual(config.settings.backup, self.CONFIG_BACKUP)
@@ -754,7 +754,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, dotfiles=dotfiles_start)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         # check members
         for dotfile in config.dotfiles:
@@ -843,7 +843,7 @@ class TestCfgYaml(unittest.TestCase):
                              profiles=profiles)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         # check members
         for profile in config.profiles:
@@ -919,7 +919,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, dotfiles=dotfiles)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         ###################################################
         # dotfile not found
@@ -959,7 +959,7 @@ class TestCfgYaml(unittest.TestCase):
         populate_fake_config(confpath, profiles=profiles)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         ###################################################
         # profile not found
@@ -1017,7 +1017,7 @@ class TestCfgYaml(unittest.TestCase):
                              profiles=profiles)
 
         # parse
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
 
         ###################################################
         # dotfile already exists
@@ -1104,7 +1104,7 @@ class TestCfgYaml(unittest.TestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        config = CfgYaml(confpath)
+        config = Cfg(confpath)
         profile_name = 'testprofile'
 
         ###################################################
