@@ -131,7 +131,7 @@ profiles:
         args['--profile'] = 'p1'
         args['--cfg'] = 'mocked'
 
-        with self.assertRaisesRegex(ValueError, 'config is not valid'):
+        with self.assertRaisesRegex(ValueError):
             o = Options(args=args)
             print(o)
 

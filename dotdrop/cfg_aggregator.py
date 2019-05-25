@@ -30,37 +30,44 @@ class CfgAggregator:
                                debug=self.debug)
 
         # TODO
-        # match dotfiles to profiles
-        self._match_keys_to_obj(self.cfgyaml.profiles,
-                                "dotfiles", self.get_dotfile)
-        # match action to actions
-        self._match_keys_to_obj(self.cfgyaml.dotfiles,
-                                "actions", self.get_action,
-                                copy=True)
-        self._match_keys_to_obj(self.cfgyaml.profiles,
-                                "actions", self.get_action,
-                                copy=True)
-        # match trans to trans
-        # match trans_w to trans_w
+        # patch dotfiles in profiles
+        self._patch_keys_to_objs(self.cfgyaml.profiles,
+                                 "dotfiles", self.get_dotfile)
+        # patch action in actions
+        self._patch_keys_to_objs(self.cfgyaml.dotfiles,
+                                 "actions", self.get_action)
+        self._patch_keys_to_objs(self.cfgyaml.profiles,
+                                 "actions", self.get_action)
+        # patch default actions in settings
+        self._patch_keys_to_objs([self.cfgyaml.settings],
+                                 "default_actions", self.get_action)
+        # patch trans in trans
+        self._patch_keys_to_objs(self.cfgyaml.dotfiles,
+                                 "trans_r", self.get_trans_r)
+        self._patch_keys_to_objs(self.cfgyaml.dotfiles,
+                                 "trans_w", self.get_trans_w)
+        # patch trans_w in trans_w
 
-    def _match_keys_to_obj(self, containers, keys, getter,
-                           copy=False):
+    def _patch_keys_to_objs(self, containers, keys, get_by_key):
         """
-        add a new attribute to containers class
-        containing the object returned by getter
-        for each key in keys
+        patch each object in containers containing
+        a list of keys in the attribute "keys" with
+        the returned object of the function "get_by_key"
         """
+        if not containers:
+            return
         for c in containers:
             objects = []
-            for k in getattr(c, keys):
-                o = getter(k)
+            okeys = getattr(c, keys)
+            if not okeys:
+                continue
+            for k in okeys:
+                o = get_by_key(k)
                 if not o:
                     err = 'bad key for \"{}\": {}'.format(c.key, k)
                     raise Exception(err)
-                if copy:
-                    o = copy(o)
                 objects.append(o)
-            setattr(c, '{}_obj'.format(keys), objects)
+            setattr(c, keys, objects)
 
     def new(self, src, dst, profile, link, debug=False):
         """import new dotfile"""
@@ -92,7 +99,7 @@ class CfgAggregator:
         p = self.get_profile(profile)
         if not p:
             return []
-        return p.dotfiles_obj
+        return p.dotfiles
 
     def get_dotfiles(self, profile=None, variables=[], debug=False):
         """resolve dotfiles src/dst/actions templating for this profile key"""
@@ -108,27 +115,41 @@ class CfgAggregator:
             d.src = t.generate_string(d.src)
             d.dst = t.generate_string(d.dst)
             # actions
-            for action in d.actions_obj:
+            for action in d.actions:
                 action.action = t.generate_string(action.action)
         return dotfiles
 
     def get_dotfile(self, key):
         """get dotfile by key"""
         try:
-            return next(d for d in self.cfgyaml.dotfiles if d.key == key)
+            return next(x for x in self.cfgyaml.dotfiles if x.key == key)
         except StopIteration:
             return None
 
     def get_profile(self, key):
         """get profile by key"""
         try:
-            return next(p for p in self.cfgyaml.profiles if p.key == key)
+            return next(x for x in self.cfgyaml.profiles if x.key == key)
         except StopIteration:
             return None
 
     def get_action(self, key):
         """get action by key"""
         try:
-            return next(p for p in self.cfgyaml.actions if p.key == key)
+            return next(x for x in self.cfgyaml.actions if x.key == key)
+        except StopIteration:
+            return None
+
+    def get_trans_r(self, key):
+        """get trans_r by key"""
+        try:
+            return next(x for x in self.cfgyaml.trans_r if x.key == key)
+        except StopIteration:
+            return None
+
+    def get_trans_w(self, key):
+        """get trans_w by key"""
+        try:
+            return next(x for x in self.cfgyaml.trans_w if x.key == key)
         except StopIteration:
             return None

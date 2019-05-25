@@ -69,6 +69,9 @@ class Action(Cmd, DictParser):
         super(Action, self).__init__(key, action)
         self.kind = kind
 
+    def is_pre(self):
+        return self.kind == self.key_actions_pre
+
     @classmethod
     def _adjust_yaml_keys(cls, key, value):
         v = {}

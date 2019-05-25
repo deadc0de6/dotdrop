@@ -24,7 +24,7 @@ class CfgYaml:
     dotfile_key_file_prefix = 'f'
     dotfile_key_directory_prefix = 'd'
 
-    default_settings = Settings()
+    default_settings = Settings(None)
     log = Logger()
 
     def __init__(self, path, debug=False):
@@ -40,7 +40,7 @@ class CfgYaml:
         self.yaml_dict = self._load_yaml(self.path)
         self.yaml_dict = self._sanitize_yaml(self.yaml_dict)
 
-        self.settings = Settings.parse(self.yaml_dict)
+        self.settings = Settings.parse(self.yaml_dict, self.path)
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict)
         self.profiles = Profile.parse_dict(self.yaml_dict)
         # TODO
@@ -71,17 +71,15 @@ class CfgYaml:
         """Return the keys of all dotfiles in this instance."""
         return map(attrgetter('key'), self.dotfiles)
 
-    @staticmethod
-    def _make_long_dotfile_key(path):
+    def _make_long_dotfile_key(self, path):
         """Return the long key of a dotfile, given its path splits."""
         return '_'.join(path)
 
-    @classmethod
-    def _path_to_key_splits(cls, path):
+    def _path_to_key_splits(self, path):
         """Split a path into dotfile key components."""
-        prefix = (cls.dotfile_key_file_prefix
+        prefix = (self.dotfile_key_file_prefix
                   if os.path.isfile(path)
-                  else cls.dotfile_key_directory_prefix)
+                  else self.dotfile_key_directory_prefix)
 
         # normpath and strip(os.path.sep) prevent empty string when splitting
         path = strip_home(os.path.normpath(os.path.expanduser(path)))

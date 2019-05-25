@@ -15,7 +15,6 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.utils import get_tmpdir, remove, strip_home, run
 from dotdrop.linktypes import LinkTypes
 
@@ -99,11 +98,9 @@ def cmd_install(o):
         t.add_tmp_vars(newvars=newvars)
 
         preactions = []
-        if not o.install_temporary and dotfile.actions \
-                and Cfg.key_actions_pre in dotfile.actions:
-            for action in dotfile.actions[Cfg.key_actions_pre]:
-                preactions.append(action)
-        defactions = o.install_default_actions[Cfg.key_actions_pre]
+        if not o.install_temporary and dotfile.actions:
+            preactions = [a for a in dotfile.actions if a.is_pre()]
+        defactions = [a for a in o.install_default_actions if a.is_pre()]
         pre_actions_exec = action_executor(o, dotfile, preactions,
                                            defactions, t, post=False)
 
@@ -132,10 +129,10 @@ def cmd_install(o):
                 if os.path.exists(tmp):
                     remove(tmp)
         if r:
-            if not o.install_temporary and \
-                    Cfg.key_actions_post in dotfile.actions:
-                defactions = o.install_default_actions[Cfg.key_actions_post]
-                postactions = dotfile.actions[Cfg.key_actions_post]
+            if not o.install_temporary:
+                defactions = [a for a in o.install_default_actions
+                              if not a.is_pre()]
+                postactions = [a for a in dotfile.actions if not a.is_pre()]
                 post_actions_exec = action_executor(o, dotfile, postactions,
                                                     defactions, t, post=True)
                 post_actions_exec()

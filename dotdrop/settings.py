@@ -5,6 +5,9 @@ Copyright (c) 2019, deadc0de6
 settings block
 """
 
+import os
+
+# local imports
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import DictParser
 
@@ -34,18 +37,20 @@ class Settings(DictParser):
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
 
-    def __init__(self, backup=True, banner=True, cmpignore=(), create=True,
-                 default_actions=(), dotpath='dotfiles', ignoreempty=True,
-                 import_actions=(), import_configs=(), import_variables=(),
-                 keepdot=False, link_dotfile_default=LinkTypes.NOLINK,
+    def __init__(self, cfgpath, backup=True, banner=True, cmpignore=(),
+                 create=True, default_actions=(), dotpath='dotfiles',
+                 ignoreempty=True, import_actions=(), import_configs=(),
+                 import_variables=(), keepdot=False,
+                 link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
                  showdiff=False, upignore=(), workdir='~/.config/dotdrop'):
+        self.cfgpath = cfgpath
         self.backup = backup
         self.banner = banner
         self.create = create
         self.cmpignore = cmpignore
         self.default_actions = default_actions
-        self.dotpath = dotpath
+        self.dotpath = self._abs_path(dotpath)
         self.ignoreempty = ignoreempty
         self.import_actions = import_actions
         self.import_configs = import_configs
@@ -54,20 +59,19 @@ class Settings(DictParser):
         self.longkey = longkey
         self.showdiff = showdiff
         self.upignore = upignore
-        self.workdir = workdir
+        self.workdir = self._abs_path(workdir)
 
         self._init_link('link_dotfile_default', link_dotfile_default)
         self._init_link('link_on_import', link_on_import)
 
     @classmethod
-    def parse(cls, yaml_dict, file_name=None):
+    def parse(cls, yaml_dict, cfgpath):
         try:
             settings = yaml_dict[cls.key_yaml]
         except KeyError:
-            cls.log.err('malformed file {}: missing key "{}"'
-                        .format(file_name, cls.key_yaml), throw=ValueError)
-
-        return cls(**settings)
+            cls.log.err('malformed config file missing key "{}"'
+                        .format(cls.key_yaml), throw=ValueError)
+        return cls(cfgpath, **settings)
 
     def _init_link(self, attr_name, link_value):
         try:
@@ -105,3 +109,13 @@ class Settings(DictParser):
         self._serialize_seq(self.key_upignore, dic)
 
         return {self.key_yaml: dic}
+
+    def _abs_path(self, path):
+        """return absolute path of path relative to the confpath"""
+        if not self.cfgpath:
+            return path
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            d = os.path.dirname(self.cfgpath)
+            return os.path.join(d, path)
+        return path
