@@ -50,7 +50,8 @@ class Settings(DictParser):
         self.create = create
         self.cmpignore = cmpignore
         self.default_actions = default_actions
-        self.dotpath = self._abs_path(dotpath)
+        self.dotpath = dotpath
+        self.dotpath_abs = self._abs_path(dotpath)
         self.ignoreempty = ignoreempty
         self.import_actions = import_actions
         self.import_configs = import_configs
@@ -59,7 +60,8 @@ class Settings(DictParser):
         self.longkey = longkey
         self.showdiff = showdiff
         self.upignore = upignore
-        self.workdir = self._abs_path(workdir)
+        self.workdir = workdir
+        self.workdir_abs = self._abs_path(workdir)
 
         self._init_link('link_dotfile_default', link_dotfile_default)
         self._init_link('link_on_import', link_on_import)
@@ -86,7 +88,7 @@ class Settings(DictParser):
         dic[name] = seq
 
     def serialize(self):
-        """Return key-value pair representation of this settings."""
+        """Return key-value pair representation of the settings"""
         # Tedious, but less error-prone than introspection
         dic = {
             self.key_backup: self.backup,

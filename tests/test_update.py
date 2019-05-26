@@ -10,7 +10,7 @@ import os
 
 from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
-from dotdrop.action import Transform
+from dotdrop.action import Trans_r
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
     create_random_file, create_fake_config, load_options, edit_content
@@ -105,7 +105,7 @@ class TestUpdate(unittest.TestCase):
         o = load_options(confpath, profile)
         o.safe = False
         o.update_showpatch = True
-        trans = Transform('trans', 'cp -r {0} {1}')
+        trans = Trans_r('trans', 'cp -r {0} {1}')
         d3tb = os.path.basename(d3t)
         for dotfile in o.dotfiles:
             if os.path.basename(dotfile.dst) == d3tb:

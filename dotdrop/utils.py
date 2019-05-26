@@ -32,17 +32,6 @@ LOG = Logger()
 #######################################
 
 
-def clear_none(dic):
-    """Recursively delete all None values in a dictionary."""
-    if not dic:
-        return {}
-    return {
-        key: clear_none(value) if isinstance(value, dict) else value
-        for key, value in dic.items()
-        if value is not None
-    }
-
-
 def content_empty(string):
     """return True if is empty or only one CRLF"""
     if not string:

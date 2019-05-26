@@ -10,13 +10,12 @@ import yaml
 from operator import attrgetter
 
 # local import
-from dotdrop.utils import strip_home, clear_none
+from dotdrop.utils import strip_home
 from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
 from dotdrop.profile import Profile
 from dotdrop.settings import Settings
 from dotdrop.action import Action, Trans_r, Trans_w
-from dotdrop.variable import Variable, DynVariable
 
 
 class CfgYaml:
@@ -43,13 +42,12 @@ class CfgYaml:
         self.settings = Settings.parse(self.yaml_dict, self.path)
         self.dotfiles = Dotfile.parse_dict(self.yaml_dict)
         self.profiles = Profile.parse_dict(self.yaml_dict)
-        # TODO
         self.actions = Action.parse_dict(self.yaml_dict, mandatory=False)
         self.trans_r = Trans_r.parse_dict(self.yaml_dict, mandatory=False)
         self.trans_w = Trans_w.parse_dict(self.yaml_dict, mandatory=False)
-        self.variables = Variable.parse_dict(self.yaml_dict, mandatory=False)
-        self.dvariables = DynVariable.parse_dict(self.yaml_dict,
-                                                 mandatory=False)
+        # raw dicts
+        self.variables = self.yaml_dict.get('variables', {})
+        self.dvariables = self.yaml_dict.get('dynvariables', {})
 
         self.yaml_dict.update(self.settings.serialize())
 
@@ -93,7 +91,7 @@ class CfgYaml:
     def _sanitize_yaml(self, yaml_dict):
         """Remove None and set defaults for mandatory keys in YAML dicts."""
         # Clearing None values, to preserve mental sanity when checking keys
-        yaml_dict = clear_none(yaml_dict)
+        yaml_dict = self._clear_none(yaml_dict)
 
         # Setting default to mandatory config file keys
         entries = self.default_settings.serialize()[Settings.key_yaml]
@@ -187,14 +185,14 @@ class CfgYaml:
             return key
         return '{}_{}'.format(key, existing_keys.count(key))
 
-    def get_dotfile(self, dst):
+    def _get_dotfile_by_dst(self, dst):
         """Get a dotfile by dst from this YAML config file."""
         try:
             return next(d for d in self.dotfiles if d.dst == dst)
         except StopIteration:
             return None
 
-    def get_profile(self, key):
+    def _get_profile_by_key(self, key):
         """Get a profile by key from this YAML config file."""
         try:
             return next(p for p in self.profiles if p.key == key)
@@ -205,14 +203,14 @@ class CfgYaml:
         """Add a dotfile to this config YAML file."""
         if not profile_key:
             raise Exception('bad profile key: None')
-        dotfile = self.get_dotfile(dotfile_args['dst'])
+        dotfile = self._get_dotfile_by_dst(dotfile_args['dst'])
         if dotfile is None:
             key = self._make_new_dotfile_key(dotfile_args['dst'])
             dotfile = Dotfile(key=key, **dotfile_args)
             self._add_dotfile(dotfile)
 
         # add dotfile to profile
-        profile = self.get_profile(profile_key)
+        profile = self._get_profile_by_key(profile_key)
         if profile is None:
             self.log.warn('Profile {} not found, adding it'
                           .format(profile_key))
@@ -227,8 +225,27 @@ class CfgYaml:
         if not (self._dirty or force):
             return False
 
+        content = self.dump()
+
         with open(self.path, 'w') as cfg_file:
-            yaml.safe_dump(self.yaml_dict, cfg_file,
+            yaml.safe_dump(content, cfg_file,
                            default_flow_style=False, indent=2)
         self._dirty = False
         return True
+
+    def dump(self):
+        """Dump this instance to the original YAML file it was parsed from."""
+        yaml_dict = self.yaml_dict.copy()
+        cleared_settings = self._clear_none(yaml_dict[Settings.key_yaml])
+        yaml_dict[Settings.key_yaml] = cleared_settings
+        return yaml_dict
+
+    def _clear_none(self, dic):
+        """Recursively delete all None values in a dictionary."""
+        if not dic:
+            return {}
+        return {
+            key: self._clear_none(value) if isinstance(value, dict) else value
+            for key, value in dic.items()
+            if value is not None
+        }

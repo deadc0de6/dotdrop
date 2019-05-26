@@ -117,7 +117,7 @@ class TestImport(unittest.TestCase):
         o = load_options(confpath, profile)
 
         # test dotfiles in config class
-        self.assertTrue(profile in o.profiles)
+        self.assertTrue(profile in [x.key for x in o.profiles])
         self.assert_file(dotfile1, o, profile)
         self.assert_file(dotfile2, o, profile)
         self.assert_file(dotfile3, o, profile)

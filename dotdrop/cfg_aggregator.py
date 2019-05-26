@@ -29,7 +29,6 @@ class CfgAggregator:
         self.cfgyaml = CfgYaml(path=self.path,
                                debug=self.debug)
 
-        # TODO
         # patch dotfiles in profiles
         self._patch_keys_to_objs(self.cfgyaml.profiles,
                                  "dotfiles", self.get_dotfile)
@@ -41,12 +40,11 @@ class CfgAggregator:
         # patch default actions in settings
         self._patch_keys_to_objs([self.cfgyaml.settings],
                                  "default_actions", self.get_action)
-        # patch trans in trans
+        # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.cfgyaml.dotfiles,
                                  "trans_r", self.get_trans_r)
         self._patch_keys_to_objs(self.cfgyaml.dotfiles,
                                  "trans_w", self.get_trans_w)
-        # patch trans_w in trans_w
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key):
         """
@@ -76,7 +74,11 @@ class CfgAggregator:
 
     def save(self):
         """save the config"""
-        self.cfgyaml.save()
+        return self.cfgyaml.save()
+
+    def dump(self):
+        """dump the config dictionary"""
+        return self.cfgyaml.dump()
 
     def get_settings(self):
         """return a list of configs as a dict"""
@@ -84,13 +86,11 @@ class CfgAggregator:
 
     def get_variables(self, profile, debug=False):
         """return a list of variables as dict"""
-        # TODO
-        return {}
+        return self.cfgyaml.variables
 
     def get_profiles(self, debug=False):
         """return a list of profiles"""
-        # TODO
-        return {}
+        return self.cfgyaml.profiles
 
     def _get_dotfiles(self, profile=None):
         """return dotfiles for this profile key"""

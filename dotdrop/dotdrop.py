@@ -338,6 +338,9 @@ def cmd_importer(o):
         LOG.raw(o.conf.dump())
     else:
         o.conf.save()
+    if o.debug:
+        LOG.dbg('new config file is:')
+        LOG.raw(o.conf.dump())
     LOG.log('\n{} file(s) imported.'.format(cnt))
     return ret
 
@@ -352,7 +355,7 @@ def cmd_list_profiles(o):
 
 def cmd_list_files(o):
     """list all dotfiles for a specific profile"""
-    if o.profile not in o.profiles:
+    if o.profile not in [x.key for x in o.profiles]:
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
         return
     what = 'Dotfile(s)'
@@ -372,7 +375,7 @@ def cmd_list_files(o):
 
 def cmd_detail(o):
     """list details on all files for all dotfile entries"""
-    if o.profile not in o.profiles:
+    if o.profile not in [x.key for x in o.profiles]:
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
         return
     dotfiles = o.dotfiles
@@ -509,9 +512,8 @@ def main():
         LOG.err('interrupted')
         ret = False
 
-    if ret and o.conf.is_modified():
+    if ret and o.conf.save():
         LOG.log('config file updated')
-        o.conf.save()
 
     return ret
 
