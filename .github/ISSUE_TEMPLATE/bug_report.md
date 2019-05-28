@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 Dotdrop version: v0.xxx
+Using dotdrop: as a submodule, from pypi, '...'
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -18,8 +19,9 @@ Steps to reproduce the behavior:
 2. '...'
 4. See error
 
-Provider below the output of dotdrop's command with debug logs (`--verbose`)
-```
+Provide below the output of dotdrop's command with debug logs (`--verbose`)
+```bash
+$ dotdrop --verbose ...
 here
 ```
 
