@@ -260,7 +260,7 @@ You can then
 
 * [create actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions)
 * [use transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations)
-* [use variables](https://github.com/deadc0de6/dotdrop/wiki/templating#available-variables)
+* [use variables](https://github.com/deadc0de6/dotdrop/wiki/config-variables)
 * [symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles)
 * [and more](https://github.com/deadc0de6/dotdrop/wiki)
 
