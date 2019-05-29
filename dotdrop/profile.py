@@ -34,10 +34,7 @@ class Profile(DictParser):
     @classmethod
     def _adjust_yaml_keys(cls, key, value):
         value['imported_dotfiles'] = value.get(cls.key_import, ())
-        try:
-            del value[cls.key_import]
-        except KeyError:
-            pass
+        value.pop(cls.key_import)
         return key, value
 
     def __eq__(self, other):

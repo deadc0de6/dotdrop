@@ -202,7 +202,8 @@ class CfgYaml:
     def new_dotfile(self, dotfile_args, profile_key):
         """Add a dotfile to this config YAML file."""
         if not profile_key:
-            raise Exception('bad profile key: None')
+            raise ValueError('bad profile key: None')
+
         dotfile = self._get_dotfile_by_dst(dotfile_args['dst'])
         if dotfile is None:
             key = self._make_new_dotfile_key(dotfile_args['dst'])
@@ -242,8 +243,6 @@ class CfgYaml:
 
     def _clear_none(self, dic):
         """Recursively delete all None values in a dictionary."""
-        if not dic:
-            return {}
         return {
             key: self._clear_none(value) if isinstance(value, dict) else value
             for key, value in dic.items()
