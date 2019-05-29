@@ -115,6 +115,20 @@ def header():
     return 'This dotfile is managed using dotdrop'
 
 
+def _load_yaml(self, path):
+    """load a yaml file to a dict"""
+    content = {}
+    if not os.path.exists(path):
+        return content
+    with open(path, 'r') as f:
+        try:
+            content = yaml.safe_load(f)
+        except Exception as e:
+            LOG.err(e)
+            return {}
+    return content
+
+
 def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
     if not ignores:
@@ -230,3 +244,7 @@ class DictParser(ABC):
                         .format(cls.key_yaml), throw=ValueError)
 
         return list(map(cls.parse, items.items()))
+
+    @classmethod
+    def parse_dict_from_file(cls, path, mandatory=False):
+        return cls.parse_dict(load_yaml(path), mandatory)

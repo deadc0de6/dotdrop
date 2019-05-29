@@ -10,7 +10,7 @@ import yaml
 from operator import attrgetter
 
 # local import
-from dotdrop.utils import strip_home
+from dotdrop.utils import strip_home, load_yaml
 from dotdrop.dotfile import Dotfile
 from dotdrop.logger import Logger
 from dotdrop.profile import Profile
@@ -36,7 +36,7 @@ class CfgYaml:
         self.debug = debug
 
         self.path = os.path.abspath(path)
-        self.yaml_dict = self._load_yaml(self.path)
+        self.yaml_dict = load_yaml(self.path)
         self.yaml_dict = self._sanitize_yaml(self.yaml_dict)
 
         self.settings = Settings.parse(self.yaml_dict, self.path)
@@ -50,19 +50,6 @@ class CfgYaml:
         self.dvariables = self.yaml_dict.get('dynvariables', {})
 
         self.yaml_dict.update(self.settings.serialize())
-
-    def _load_yaml(self, path):
-        """load a yaml file to a dict"""
-        content = {}
-        if not os.path.exists(path):
-            return content
-        with open(path, 'r') as f:
-            try:
-                content = yaml.safe_load(f)
-            except Exception as e:
-                self.log.err(e)
-                return {}
-        return content
 
     @property
     def _dotfile_keys(self):
