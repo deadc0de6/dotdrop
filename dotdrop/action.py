@@ -138,9 +138,9 @@ class Transform(Cmd, DictParser):
         return ret == 0
 
 
-class Trans_r(Transform, DictParser):
+class Trans_r(Transform):
     key_yaml = 'trans'
 
 
-class Trans_w(Transform, DictParser):
+class Trans_w(Transform):
     key_yaml = 'trans_write'

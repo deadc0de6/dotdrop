@@ -9,10 +9,9 @@ import os
 
 # local imports
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import DictParser
 
 
-class Settings(DictParser):
+class Settings:
     # key in yaml file
     key_yaml = 'config'
 
