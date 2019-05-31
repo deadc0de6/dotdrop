@@ -144,6 +144,7 @@ def load_options(confpath, profile):
     args = _fake_args()
     args['--cfg'] = confpath
     args['--profile'] = profile
+    args['--debug'] = True
     # and get the options
     o = Options(args=args)
     o.profile = profile

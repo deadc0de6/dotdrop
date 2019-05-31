@@ -38,7 +38,7 @@ class TestConfig(SubsetTestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        conf = Cfg(confpath)
+        conf = Cfg(confpath, debug=True)
         self.assertTrue(conf is not None)
 
         opts = conf.settings
@@ -93,6 +93,7 @@ profiles:
         args['--profile'] = 'p1'
         args['--cfg'] = 'mocked'
         args['--link'] = cliargs
+        args['--verbose'] = True
         o = Options(args=args)
 
         self.assertTrue(o.import_link == expected)
@@ -165,7 +166,7 @@ profiles:
                            indent=2)
 
         # do the tests
-        conf = Cfg(confpath)
+        conf = Cfg(confpath, debug=True)
         self.assertTrue(conf is not None)
 
         # test profile
@@ -196,7 +197,7 @@ profiles:
                            indent=2)
 
         # do the tests
-        conf = Cfg(confpath)
+        conf = Cfg(confpath, debug=True)
         self.assertTrue(conf is not None)
 
     def test_import_configs_merge(self):
@@ -350,8 +351,8 @@ profiles:
         })
 
         # do the tests
-        importing_cfg = Cfg(importing_path)
-        imported_cfg = Cfg(imported_path)
+        importing_cfg = Cfg(importing_path, debug=True)
+        imported_cfg = Cfg(imported_path, debug=True)
         self.assertIsNotNone(importing_cfg)
         self.assertIsNotNone(imported_cfg)
 
@@ -555,8 +556,8 @@ profiles:
         })
 
         # do the tests
-        importing_cfg = Cfg(importing_path)
-        imported_cfg = Cfg(imported_path)
+        importing_cfg = Cfg(importing_path, debug=True)
+        imported_cfg = Cfg(imported_path, debug=True)
         self.assertIsNotNone(importing_cfg)
         self.assertIsNotNone(imported_cfg)
 
