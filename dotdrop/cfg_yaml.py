@@ -7,6 +7,7 @@ handle lower level of the config file
 
 import os
 import yaml
+import glob
 
 # local imports
 from dotdrop.settings import Settings
@@ -85,7 +86,7 @@ class CfgYaml:
         allvars = self._merge_and_apply_variables()
         self.variables.update(allvars)
         # process imported configs
-        self._resolve_import_configs()
+        self._import_configs()
         # process other imports
         self._resolve_imports()
         # process diverse options
@@ -342,31 +343,64 @@ class CfgYaml:
 
         return variables
 
+    def _is_glob(self, path):
+        """quick test if path is a glob"""
+        return '*' in path or '?' in path
+
+    def _glob_paths(self, paths):
+        """glob a list of paths"""
+        if not isinstance(paths, list):
+            paths = [paths]
+        res = []
+        for p in paths:
+            if not self._is_glob(p):
+                res.extend([p])
+                continue
+            p = os.path.expanduser(p)
+            new = glob.glob(p)
+            if not new:
+                raise Exception('bad path: {}'.format(p))
+            res.extend(glob.glob(p))
+        return res
+
+    def _import_variables(self, paths):
+        """import external variables from paths"""
+        if not paths:
+            return
+        paths = self._glob_paths(paths)
+        for p in paths:
+            path = self.resolve_path(p)
+            if self.debug:
+                self.log.dbg('import variables from {}'.format(path))
+            self.variables = self._import_sub(path, self.key_variables,
+                                              self.variables,
+                                              mandatory=False)
+            self.dvariables = self._import_sub(path, self.key_dvariables,
+                                               self.dvariables,
+                                               mandatory=False)
+
+    def _import_actions(self, paths):
+        """import external actions from paths"""
+        if not paths:
+            return
+        paths = self._glob_paths(paths)
+        for p in paths:
+            path = self.resolve_path(p)
+            if self.debug:
+                self.log.dbg('import actions from {}'.format(path))
+            self.actions = self._import_sub(path, self.key_actions,
+                                            self.actions, mandatory=False,
+                                            patch_func=self._norm_actions)
+
     def _resolve_imports(self):
         """handle all the imports"""
         # settings -> import_variables
         imp = self.settings.get(self.key_import_variables, None)
-        if imp:
-            for p in imp:
-                path = self.resolve_path(p)
-                if self.debug:
-                    self.log.dbg('import variables from {}'.format(path))
-                self.variables = self._import_sub(path, self.key_variables,
-                                                  self.variables,
-                                                  mandatory=False)
-                self.dvariables = self._import_sub(path, self.key_dvariables,
-                                                   self.dvariables,
-                                                   mandatory=False)
+        self._import_variables(imp)
+
         # settings -> import_actions
         imp = self.settings.get(self.key_import_actions, None)
-        if imp:
-            for p in imp:
-                path = self.resolve_path(p)
-                if self.debug:
-                    self.log.dbg('import actions from {}'.format(path))
-                self.actions = self._import_sub(path, self.key_actions,
-                                                self.actions, mandatory=False,
-                                                patch_func=self._norm_actions)
+        self._import_actions(imp)
 
         # profiles -> import
         for k, v in self.profiles.items():
@@ -375,7 +409,8 @@ class CfgYaml:
                 continue
             if self.debug:
                 self.log.dbg('import dotfiles for profile {}'.format(k))
-            for p in imp:
+            paths = self._glob_paths(imp)
+            for p in paths:
                 current = v.get(self.key_dotfiles, [])
                 path = self.resolve_path(p)
                 current = self._import_sub(path, self.key_dotfiles,
@@ -383,14 +418,15 @@ class CfgYaml:
                                            path_func=self._norm_dotfiles)
                 v[self.key_dotfiles] = current
 
-    def _resolve_import_configs(self):
-        """resolve import_configs"""
+    def _import_configs(self):
+        """import configs from external file"""
         # settings -> import_configs
         imp = self.settings.get(self.key_import_configs, None)
         if not imp:
             return
-        for p in imp:
-            path = self.resolve_path(p)
+        paths = self._glob_paths(imp)
+        for path in paths:
+            path = self.resolve_path(path)
             if self.debug:
                 self.log.dbg('import config from {}'.format(path))
             sub = CfgYaml(path, debug=self.debug)
@@ -400,8 +436,10 @@ class CfgYaml:
             self.actions = self._merge_dict(self.actions, sub.actions)
             self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
             self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
-            self.variables = self._merge_dict(self.variables, sub.variables)
-            self.dvariables = self._merge_dict(self.dvariables, sub.dvariables)
+            self.variables = self._merge_dict(self.variables,
+                                              sub.variables)
+            self.dvariables = self._merge_dict(self.dvariables,
+                                               sub.dvariables)
 
     def _resolve_rest(self):
         """resolve some other parts of the config"""
