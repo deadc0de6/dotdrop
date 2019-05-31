@@ -56,7 +56,7 @@ does the following:
   * clear empty entries
 
 In the end it makes sure the dictionary (or parts of it) accessed
-by the higher layer is clean and normalize.
+by the higher layer is clean and normalized.
 
 The higher layer will transform the dictionary parsed by the lower layer
 into objects (profiles, dotfiles, actions, etc).
