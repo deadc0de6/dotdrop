@@ -198,7 +198,7 @@ class CfgAggregator:
         """
         dirs = self._split_path_for_key(path)
         prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
-        key = self.key_sep.join([prefix, *dirs])
+        key = self.key_sep.join([prefix] + dirs)
         return self._uniq_key(key, keys)
 
     def _get_short_key(self, path, keys):
