@@ -103,6 +103,7 @@ class CfgYaml:
 
         # dotfiles
         self.dotfiles = self._get_entry(self.yaml_dict, self.key_dotfiles)
+        self.dotfiles = self._norm_dotfiles(self.dotfiles)
         if self.debug:
             self.log.dbg('dotfiles: {}'.format(self.dotfiles))
 
@@ -114,7 +115,7 @@ class CfgYaml:
         # actions
         self.actions = self._get_entry(self.yaml_dict, self.key_actions,
                                        mandatory=False)
-        self.actions = self._patch_actions(self.actions)
+        self.actions = self._norm_actions(self.actions)
         if self.debug:
             self.log.dbg('actions: {}'.format(self.actions))
 
@@ -246,7 +247,7 @@ class CfgYaml:
 
         return allvars
 
-    def _patch_actions(self, actions):
+    def _norm_actions(self, actions):
         """
         ensure each action is either pre or post explicitely
         action entry of the form {action_key: (pre|post, action)}
@@ -260,6 +261,19 @@ class CfgYaml:
                     new[key] = (k, action)
             else:
                 new[k] = (self.action_pre, v)
+        return new
+
+    def _norm_dotfiles(self, dotfiles):
+        """add 'src' as 'key if not present"""
+        if not dotfiles:
+            return dotfiles
+        new = {}
+        for k, v in dotfiles.items():
+            if self.key_dotfile_src not in v:
+                v[self.key_dotfile_src] = k
+                new[k] = v
+            else:
+                new[k] = v
         return new
 
     def _get_variables_dict(self, profile, seen, sub=False):
@@ -352,7 +366,7 @@ class CfgYaml:
                     self.log.dbg('import actions from {}'.format(path))
                 self.actions = self._import_sub(path, self.key_actions,
                                                 self.actions, mandatory=False,
-                                                patch_func=self._patch_actions)
+                                                patch_func=self._norm_actions)
 
         # profiles -> import
         for k, v in self.profiles.items():
@@ -365,7 +379,8 @@ class CfgYaml:
                 current = v.get(self.key_dotfiles, [])
                 path = self.resolve_path(p)
                 current = self._import_sub(path, self.key_dotfiles,
-                                           current, mandatory=False)
+                                           current, mandatory=False,
+                                           path_func=self._norm_dotfiles)
                 v[self.key_dotfiles] = current
 
     def _resolve_import_configs(self):
