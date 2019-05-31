@@ -171,8 +171,9 @@ def get_dotfile_from_yaml(dic, path):
     """Return the dotfile from the yaml dictionary"""
     # path is not the file in dotpath but on the FS
     dotfiles = dic['dotfiles']
-    src = get_path_strip_version(path)
-    return [d for d in dotfiles.values() if d['src'] == src][0]
+    # src = get_path_strip_version(path)
+    dotfile = [d for d in dotfiles.values() if d['dst'] == path][0]
+    return dotfile
 
 
 def yaml_dashed_list(items, indent=0):
@@ -256,10 +257,10 @@ def file_in_yaml(yaml_file, path, link=False):
 
     dotfiles = yaml_conf['dotfiles'].values()
 
-    in_src = strip in (x['src'] for x in dotfiles)
+    in_src = any([x['src'].endswith(strip) for x in dotfiles])
     in_dst = path in (os.path.expanduser(x['dst']) for x in dotfiles)
 
     if link:
-        has_link = get_dotfile_from_yaml(yaml_conf, path)['link']
+        has_link = 'link' in get_dotfile_from_yaml(yaml_conf, path)
         return in_src and in_dst and has_link
     return in_src and in_dst

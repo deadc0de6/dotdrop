@@ -66,7 +66,7 @@ def get_tmpdir():
 
 def get_tmpfile():
     """create a temporary file"""
-    (fd, path) = tempfile.mkstemp(prefix='dotdrop-')
+    (_, path) = tempfile.mkstemp(prefix='dotdrop-')
     return path
 
 

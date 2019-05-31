@@ -10,10 +10,10 @@ import subprocess
 import os
 
 # local imports
-from dotdrop.logger import Logger
+from dotdrop.dictparser import DictParser
 
 
-class Cmd:
+class Cmd(DictParser):
     eq_ignore = ('log',)
 
     def __init__(self, key, action):
@@ -23,7 +23,10 @@ class Cmd:
         """
         self.key = key
         self.action = action
-        self.log = Logger()
+
+    @classmethod
+    def _adjust_yaml_keys(cls, value):
+        return {'action': value}
 
     def __str__(self):
         return 'key:{} -> \"{}\"'.format(self.key, self.action)
@@ -50,20 +53,35 @@ class Cmd:
 
 class Action(Cmd):
 
-    def __init__(self, key, kind, action, *args):
+    pre = 'pre'
+    post = 'post'
+
+    def __init__(self, key, kind, action):
         """constructor
         @key: action key
         @kind: type of action (pre or post)
         @action: action string
-        @args: action arguments
         """
         super(Action, self).__init__(key, action)
         self.kind = kind
-        self.args = args
+        self.args = []
+
+    @classmethod
+    def parse(cls, key, value):
+        """parse key value into object"""
+        v = {}
+        v['kind'], v['action'] = value
+        return cls(key=key, **v)
+
+    def copy(self, args):
+        """return a copy of this object with arguments"""
+        action = Action(self.key, self.kind, self.action)
+        action.args = args
+        return action
 
     def __str__(self):
-        out = '{}: \"{}\" with args: {}'
-        return out.format(self.key, self.action, self.args)
+        out = '{}: \"{}\" ({})'
+        return out.format(self.key, self.action, self.kind)
 
     def __repr__(self):
         return 'action({})'.format(self.__str__())
@@ -74,6 +92,7 @@ class Action(Cmd):
         action = self.action
         if templater:
             action = templater.generate_string(self.action)
+        cmd = action
         try:
             cmd = action.format(*self.args)
         except IndexError:
@@ -94,9 +113,11 @@ class Action(Cmd):
 class Transform(Cmd):
 
     def transform(self, arg0, arg1):
-        """execute transformation with {0} and {1}
-        where {0} is the file to transform and
-        {1} is the result file"""
+        """
+        execute transformation with {0} and {1}
+        where {0} is the file to transform
+        and {1} is the result file
+        """
         ret = 1
         cmd = self.action.format(arg0, arg1)
         if os.path.exists(arg1):

@@ -10,7 +10,7 @@ from unittest.mock import patch
 import os
 import yaml
 
-from dotdrop.config import Cfg
+from dotdrop.cfg_yaml import CfgYaml as Cfg
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from tests.helpers import (SubsetTestCase, _fake_args, clean,
@@ -41,14 +41,12 @@ class TestConfig(SubsetTestCase):
         conf = Cfg(confpath)
         self.assertTrue(conf is not None)
 
-        opts = conf.get_settings()
+        opts = conf.settings
         self.assertTrue(opts is not None)
         self.assertTrue(opts != {})
         self.assertTrue(opts['backup'] == self.CONFIG_BACKUP)
         self.assertTrue(opts['create'] == self.CONFIG_CREATE)
-        dotpath = os.path.join(tmp, self.CONFIG_DOTPATH)
-        self.assertTrue(opts['dotpath'] == dotpath)
-        self.assertTrue(conf._is_valid())
+        self.assertTrue(opts['dotpath'] == self.CONFIG_DOTPATH)
         self.assertTrue(conf.dump() != '')
 
     def test_def_link(self):
@@ -68,8 +66,8 @@ class TestConfig(SubsetTestCase):
                                'link_children')
         self._test_link_import_fail('whatever')
 
-    @patch('dotdrop.config.open', create=True)
-    @patch('dotdrop.config.os.path.exists', create=True)
+    @patch('dotdrop.cfg_yaml.open', create=True)
+    @patch('dotdrop.cfg_yaml.os.path.exists', create=True)
     def _test_link_import(self, cfgstring, expected,
                           cliargs, mock_exists, mock_open):
         data = '''
@@ -99,8 +97,8 @@ profiles:
 
         self.assertTrue(o.import_link == expected)
 
-    @patch('dotdrop.config.open', create=True)
-    @patch('dotdrop.config.os.path.exists', create=True)
+    @patch('dotdrop.cfg_yaml.open', create=True)
+    @patch('dotdrop.cfg_yaml.os.path.exists', create=True)
     def _test_link_import_fail(self, value, mock_exists, mock_open):
         data = '''
 config:
@@ -125,7 +123,7 @@ profiles:
         args['--profile'] = 'p1'
         args['--cfg'] = 'mocked'
 
-        with self.assertRaisesRegex(ValueError, 'config is not valid'):
+        with self.assertRaises(ValueError):
             o = Options(args=args)
             print(o.import_link)
 
@@ -143,7 +141,7 @@ profiles:
 
         # edit the config
         with open(confpath, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
 
         # adding dotfiles
         df1key = 'f_vimrc'
@@ -171,22 +169,22 @@ profiles:
         self.assertTrue(conf is not None)
 
         # test profile
-        profiles = conf.get_profiles()
+        profiles = conf.profiles
         self.assertTrue(pf1key in profiles)
         self.assertTrue(pf2key in profiles)
 
         # test dotfiles
-        dotfiles = conf._get_dotfiles(pf1key)
-        self.assertTrue(df1key in [x.key for x in dotfiles])
-        self.assertTrue(df2key in [x.key for x in dotfiles])
-        dotfiles = conf._get_dotfiles(pf2key)
-        self.assertTrue(df1key in [x.key for x in dotfiles])
-        self.assertFalse(df2key in [x.key for x in dotfiles])
+        dotfiles = conf.profiles[pf1key]['dotfiles']
+        self.assertTrue(df1key in dotfiles)
+        self.assertTrue(df2key in dotfiles)
+        dotfiles = conf.profiles[pf2key]['dotfiles']
+        self.assertTrue(df1key in dotfiles)
+        self.assertFalse(df2key in dotfiles)
 
         # test not existing included profile
         # edit the config
         with open(confpath, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
         content['profiles'] = {
                 pf1key: {'dotfiles': [df2key], 'include': ['host2']},
                 pf2key: {'dotfiles': [df1key], 'include': ['host3']}
@@ -227,22 +225,26 @@ profiles:
         vars_ing_file = create_yaml_keyval(vars_ing, tmp)
 
         actions_ed = {
-            'pre': {
-                'a_pre_action_ed': 'echo pre 22',
-            },
-            'post': {
-                'a_post_action_ed': 'echo post 22',
-            },
-            'a_action_ed': 'echo 22',
+            'actions': {
+                'pre': {
+                    'a_pre_action_ed': 'echo pre 22',
+                },
+                'post': {
+                    'a_post_action_ed': 'echo post 22',
+                },
+                'a_action_ed': 'echo 22',
+            }
         }
         actions_ing = {
-            'pre': {
-                'a_pre_action_ing': 'echo pre aa',
-            },
-            'post': {
-                'a_post_action_ing': 'echo post aa',
-            },
-            'a_action_ing': 'echo aa',
+            'actions': {
+                'pre': {
+                    'a_pre_action_ing': 'echo pre aa',
+                },
+                'post': {
+                    'a_post_action_ing': 'echo post aa',
+                },
+                'a_action_ing': 'echo aa',
+            }
         }
         actions_ed_file = create_yaml_keyval(actions_ed, tmp)
         actions_ing_file = create_yaml_keyval(actions_ing, tmp)
@@ -328,7 +330,9 @@ profiles:
         # create the importing base config file
         importing_path = create_fake_config(tmp,
                                             configname=self.CONFIG_NAME,
-                                            import_configs=('config-*.yaml',),
+                                            import_configs=[
+                                                self.CONFIG_NAME_2
+                                            ],
                                             **importing['config'])
 
         # edit the imported config
@@ -352,17 +356,28 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.lnk_profiles,
-                            importing_cfg.lnk_profiles)
+        self.assertIsSubset(imported_cfg.profiles,
+                            importing_cfg.profiles)
 
         # test dotfiles
         self.assertIsSubset(imported_cfg.dotfiles, importing_cfg.dotfiles)
 
         # test actions
-        self.assertIsSubset(imported_cfg.actions['pre'],
-                            importing_cfg.actions['pre'])
-        self.assertIsSubset(imported_cfg.actions['post'],
-                            importing_cfg.actions['post'])
+        pre_ed = post_ed = pre_ing = post_ing = {}
+        for k, v in imported_cfg.actions.items():
+            kind, _ = v
+            if kind == 'pre':
+                pre_ed[k] = v
+            elif kind == 'post':
+                post_ed[k] = v
+        for k, v in importing_cfg.actions.items():
+            kind, _ = v
+            if kind == 'pre':
+                pre_ing[k] = v
+            elif kind == 'post':
+                post_ing[k] = v
+        self.assertIsSubset(pre_ed, pre_ing)
+        self.assertIsSubset(post_ed, post_ing)
 
         # test transactions
         self.assertIsSubset(imported_cfg.trans_r, importing_cfg.trans_r)
@@ -371,18 +386,18 @@ profiles:
         # test variables
         imported_vars = {
             k: v
-            for k, v in imported_cfg.get_variables(None).items()
+            for k, v in imported_cfg.variables.items()
             if not k.startswith('_')
         }
         importing_vars = {
             k: v
-            for k, v in importing_cfg.get_variables(None).items()
+            for k, v in importing_cfg.variables.items()
             if not k.startswith('_')
         }
         self.assertIsSubset(imported_vars, importing_vars)
 
         # test prodots
-        self.assertIsSubset(imported_cfg.prodots, importing_cfg.prodots)
+        self.assertIsSubset(imported_cfg.profiles, importing_cfg.profiles)
 
     def test_import_configs_override(self):
         """Test import_configs when some config keys overlap."""
@@ -410,22 +425,26 @@ profiles:
         vars_ing_file = create_yaml_keyval(vars_ing, tmp)
 
         actions_ed = {
-            'pre': {
-                'a_pre_action': 'echo pre 22',
-            },
-            'post': {
-                'a_post_action': 'echo post 22',
-            },
-            'a_action': 'echo 22',
+            'actions': {
+                'pre': {
+                    'a_pre_action': 'echo pre 22',
+                },
+                'post': {
+                    'a_post_action': 'echo post 22',
+                },
+                'a_action': 'echo 22',
+            }
         }
         actions_ing = {
-            'pre': {
-                'a_pre_action': 'echo pre aa',
-            },
-            'post': {
-                'a_post_action': 'echo post aa',
-            },
-            'a_action': 'echo aa',
+            'actions': {
+                'pre': {
+                    'a_pre_action': 'echo pre aa',
+                },
+                'post': {
+                    'a_post_action': 'echo post aa',
+                },
+                'a_action': 'echo aa',
+            }
         }
         actions_ed_file = create_yaml_keyval(actions_ed, tmp)
         actions_ing_file = create_yaml_keyval(actions_ing, tmp)
@@ -542,8 +561,8 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.lnk_profiles,
-                            importing_cfg.lnk_profiles)
+        self.assertIsSubset(imported_cfg.profiles,
+                            importing_cfg.profiles)
 
         # test dotfiles
         self.assertEqual(importing_cfg.dotfiles['f_vimrc'],
@@ -553,14 +572,9 @@ profiles:
 
         # test actions
         self.assertFalse(any(
-            (imported_cfg.actions['pre'][key]
-                == importing_cfg.actions['pre'][key])
-            for key in imported_cfg.actions['pre']
-        ))
-        self.assertFalse(any(
-            (imported_cfg.actions['post'][key]
-                == importing_cfg.actions['post'][key])
-            for key in imported_cfg.actions['post']
+            (imported_cfg.actions[key]
+                == importing_cfg.actions[key])
+            for key in imported_cfg.actions
         ))
 
         # test transactions
@@ -574,20 +588,20 @@ profiles:
         ))
 
         # test variables
-        imported_vars = imported_cfg.get_variables(None)
+        imported_vars = imported_cfg.variables
         self.assertFalse(any(
             imported_vars[k] == v
-            for k, v in importing_cfg.get_variables(None).items()
+            for k, v in importing_cfg.variables.items()
             if not k.startswith('_')
         ))
 
-        # test prodots
-        self.assertEqual(imported_cfg.prodots['host1'],
-                         importing_cfg.prodots['host1'])
-        self.assertNotEqual(imported_cfg.prodots['host2'],
-                            importing_cfg.prodots['host2'])
-        self.assertTrue(set(imported_cfg.prodots['host1'])
-                        < set(importing_cfg.prodots['host2']))
+        # test profiles dotfiles
+        self.assertEqual(imported_cfg.profiles['host1']['dotfiles'],
+                         importing_cfg.profiles['host1']['dotfiles'])
+        self.assertNotEqual(imported_cfg.profiles['host2']['dotfiles'],
+                            importing_cfg.profiles['host2']['dotfiles'])
+        self.assertTrue(set(imported_cfg.profiles['host1']['dotfiles'])
+                        < set(importing_cfg.profiles['host2']['dotfiles']))
 
 
 def main():

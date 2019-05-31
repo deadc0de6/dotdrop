@@ -42,7 +42,7 @@ def main():
     ignores = args['--ignore']
 
     with open(path, 'r') as f:
-        content = yaml.load(f)
+        content = yaml.safe_load(f)
     for k, v in content[key].items():
         if k in ignores:
             continue

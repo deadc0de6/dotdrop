@@ -15,7 +15,6 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.config import Cfg
 from dotdrop.utils import get_tmpdir, remove, strip_home, run
 from dotdrop.linktypes import LinkTypes
 
@@ -95,15 +94,13 @@ def cmd_install(o):
     for dotfile in dotfiles:
         # add dotfile variables
         t.restore_vars(tvars)
-        newvars = dotfile.get_vars()
+        newvars = dotfile.get_dotfile_variables()
         t.add_tmp_vars(newvars=newvars)
 
         preactions = []
-        if not o.install_temporary and dotfile.actions \
-                and Cfg.key_actions_pre in dotfile.actions:
-            for action in dotfile.actions[Cfg.key_actions_pre]:
-                preactions.append(action)
-        defactions = o.install_default_actions[Cfg.key_actions_pre]
+        if not o.install_temporary:
+            preactions.extend(dotfile.get_pre_actions())
+        defactions = o.install_default_actions_pre
         pre_actions_exec = action_executor(o, dotfile, preactions,
                                            defactions, t, post=False)
 
@@ -132,10 +129,9 @@ def cmd_install(o):
                 if os.path.exists(tmp):
                     remove(tmp)
         if r:
-            if not o.install_temporary and \
-                    Cfg.key_actions_post in dotfile.actions:
-                defactions = o.install_default_actions[Cfg.key_actions_post]
-                postactions = dotfile.actions[Cfg.key_actions_post]
+            if not o.install_temporary:
+                defactions = o.install_default_actions_post
+                postactions = dotfile.get_post_actions()
                 post_actions_exec = action_executor(o, dotfile, postactions,
                                                     defactions, t, post=True)
                 post_actions_exec()
@@ -329,8 +325,7 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-        retconf, dotfile = o.conf.new(src, dst, o.profile,
-                                      linktype, debug=o.debug)
+        retconf = o.conf.new(src, dst, linktype, o.profile)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
@@ -355,7 +350,7 @@ def cmd_list_profiles(o):
 
 def cmd_list_files(o):
     """list all dotfiles for a specific profile"""
-    if o.profile not in o.profiles:
+    if o.profile not in [p.key for p in o.profiles]:
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
         return
     what = 'Dotfile(s)'
@@ -375,7 +370,7 @@ def cmd_list_files(o):
 
 def cmd_detail(o):
     """list details on all files for all dotfile entries"""
-    if o.profile not in o.profiles:
+    if o.profile not in [p.key for p in o.profiles]:
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
         return
     dotfiles = o.dotfiles
@@ -394,7 +389,7 @@ def cmd_detail(o):
 
 
 def _detail(dotpath, dotfile):
-    """print details on all files under a dotfile entry"""
+    """display details on all files under a dotfile entry"""
     LOG.log('{} (dst: \"{}\", link: {})'.format(dotfile.key, dotfile.dst,
                                                 dotfile.link.name.lower()))
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
@@ -404,7 +399,7 @@ def _detail(dotpath, dotfile):
             template = 'yes'
         LOG.sub('{} (template:{})'.format(path, template))
     else:
-        for root, dir, files in os.walk(path):
+        for root, _, files in os.walk(path):
             for f in files:
                 p = os.path.join(root, f)
                 template = 'no'
@@ -433,17 +428,17 @@ def apply_trans(dotpath, dotfile, debug=False):
     return None if fails and new source if succeed"""
     src = dotfile.src
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
-    trans = dotfile.trans_r
-    if debug:
-        LOG.dbg('executing transformation {}'.format(trans))
-    s = os.path.join(dotpath, src)
-    temp = os.path.join(dotpath, new_src)
-    if not trans.transform(s, temp):
-        msg = 'transformation \"{}\" failed for {}'
-        LOG.err(msg.format(trans.key, dotfile.key))
-        if new_src and os.path.exists(new_src):
-            remove(new_src)
-        return None
+    for trans in dotfile.trans_r:
+        if debug:
+            LOG.dbg('executing transformation {}'.format(trans))
+        s = os.path.join(dotpath, src)
+        temp = os.path.join(dotpath, new_src)
+        if not trans.transform(s, temp):
+            msg = 'transformation \"{}\" failed for {}'
+            LOG.err(msg.format(trans.key, dotfile.key))
+            if new_src and os.path.exists(new_src):
+                remove(new_src)
+            return None
     return new_src
 
 
@@ -456,8 +451,8 @@ def main():
     """entry point"""
     try:
         o = Options()
-    except ValueError as e:
-        LOG.err('Config error: {}'.format(str(e)))
+    except Exception as e:
+        LOG.err('options error: {}'.format(str(e)))
         return False
 
     ret = True
@@ -512,9 +507,8 @@ def main():
         LOG.err('interrupted')
         ret = False
 
-    if ret and o.conf.is_modified():
+    if ret and o.conf.save():
         LOG.log('config file updated')
-        o.conf.save()
 
     return ret
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2019, deadc0de6
+# Copyright (c) 2017, deadc0de6
 #
-# test dotdrop auto-added variables
+# test the use of the keyword "import" in profiles
 # returns 1 in case of error
 #
 
@@ -48,10 +48,12 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
+extdotfiles="${tmps}/df_p1.yaml"
+
+dynextdotfiles_name="d_uid_dynvar"
+dynextdotfiles="${tmps}/ext_${dynextdotfiles_name}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -61,31 +63,62 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
+dynvariables:
+  d_uid: "echo ${dynextdotfiles_name}"
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: ${tmpd}/def
+    src: def
+  f_xyz:
+    dst: ${tmpd}/xyz
+    src: xyz
+  f_dyn:
+    dst: ${tmpd}/dyn
+    src: dyn
 profiles:
   p1:
     dotfiles:
     - f_abc
+    import:
+    - $(basename ${extdotfiles})
+    - "ext_{{@@ d_uid @@}}"
 _EOF
-#cat ${cfg}
 
-# create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+# create the external dotfile file
+cat > ${extdotfiles} << _EOF
+dotfiles:
+  - f_def
+  - f_xyz
+_EOF
+
+cat > ${dynextdotfiles} << _EOF
+dotfiles:
+  - f_dyn
+_EOF
+
+# create the source
+mkdir -p ${tmps}/dotfiles/
+echo "abc" > ${tmps}/dotfiles/abc
+echo "def" > ${tmps}/dotfiles/def
+echo "xyz" > ${tmps}/dotfiles/xyz
+echo "dyn" > ${tmps}/dotfiles/dyn
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-cat ${tmpd}/abc
-
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+# checks
+[ ! -e ${tmpd}/abc ] && exit 1
+[ ! -e ${tmpd}/def ] && exit 1
+[ ! -e ${tmpd}/xyz ] && exit 1
+[ ! -e ${tmpd}/dyn ] && exit 1
+echo 'file found'
+grep 'abc' ${tmpd}/abc >/dev/null 2>&1
+grep 'def' ${tmpd}/def >/dev/null 2>&1
+grep 'xyz' ${tmpd}/xyz >/dev/null 2>&1
+grep 'dyn' ${tmpd}/dyn >/dev/null 2>&1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

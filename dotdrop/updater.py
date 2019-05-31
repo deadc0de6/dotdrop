@@ -81,12 +81,11 @@ class Updater:
         if self._ignore([path, dtpath]):
             self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
-        if dotfile.trans_w:
-            # apply write transformation if any
-            new_path = self._apply_trans_w(path, dotfile)
-            if not new_path:
-                return False
-            path = new_path
+        # apply write transformation if any
+        new_path = self._apply_trans_w(path, dotfile)
+        if not new_path:
+            return False
+        path = new_path
         if os.path.isdir(path):
             ret = self._handle_dir(path, dtpath)
         else:
@@ -98,7 +97,9 @@ class Updater:
 
     def _apply_trans_w(self, path, dotfile):
         """apply write transformation to dotfile"""
-        trans = dotfile.trans_w
+        trans = dotfile.get_trans_w()
+        if not trans:
+            return path
         if self.debug:
             self.log.dbg('executing write transformation {}'.format(trans))
         tmp = utils.get_unique_tmp_name()

@@ -33,7 +33,7 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
         content = ''
         with open(path, 'r') as f:
-            content = yaml.load(f)
+            content = yaml.safe_load(f)
         return content
 
     def assert_file(self, path, o, profile):
@@ -45,7 +45,7 @@ class TestImport(unittest.TestCase):
 
     def assert_in_yaml(self, path, dic, link=False):
         """Make sure "path" is in the "dic" representing the yaml file"""
-        self.assertTrue(file_in_yaml(dic, path, link))
+        self.assertTrue(file_in_yaml(dic, path, link=link))
 
     def test_import(self):
         """Test the import function"""
@@ -117,7 +117,7 @@ class TestImport(unittest.TestCase):
         o = load_options(confpath, profile)
 
         # test dotfiles in config class
-        self.assertTrue(profile in o.profiles)
+        self.assertTrue(profile in [p.key for p in o.profiles])
         self.assert_file(dotfile1, o, profile)
         self.assert_file(dotfile2, o, profile)
         self.assert_file(dotfile3, o, profile)
@@ -218,9 +218,10 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(dotdrop_home))
         self.addCleanup(clean, dotdrop_home)
 
+        dotpath_ed = 'imported'
         imported = {
             'config': {
-                'dotpath': 'imported',
+                'dotpath': dotpath_ed,
             },
             'dotfiles': {},
             'profiles': {
@@ -250,9 +251,10 @@ class TestImport(unittest.TestCase):
                 'dv_log_ed': 'echo 5',
             },
         }
+        dotpath_ing = 'importing'
         importing = {
             'config': {
-                'dotpath': 'importing',
+                'dotpath': dotpath_ing,
             },
             'dotfiles': {},
             'profiles': {
@@ -293,7 +295,7 @@ class TestImport(unittest.TestCase):
         # create the importing base config file
         importing_path = create_fake_config(dotdrop_home,
                                             configname='config.yaml',
-                                            import_configs=('config-*.yaml',),
+                                            import_configs=['config-2.yaml'],
                                             **importing['config'])
 
         # edit the imported config
@@ -326,8 +328,10 @@ class TestImport(unittest.TestCase):
         y = self.load_yaml(imported_path)
 
         # testing dotfiles
-        self.assertTrue(all(file_in_yaml(y, df) for df in dotfiles_ed))
-        self.assertFalse(any(file_in_yaml(y, df) for df in dotfiles_ing))
+        self.assertTrue(all(file_in_yaml(y, df)
+                            for df in dotfiles_ed))
+        self.assertFalse(any(file_in_yaml(y, df)
+                             for df in dotfiles_ing))
 
         # testing profiles
         profiles = y['profiles'].keys()
@@ -355,7 +359,7 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(t.endswith('ing') for t in transformations))
 
         # testing variables
-        variables = y['variables'].keys()
+        variables = self._remove_priv_vars(y['variables'].keys())
         self.assertTrue(all(v.endswith('ed') for v in variables))
         self.assertFalse(any(v.endswith('ing') for v in variables))
         dyn_variables = y['dynvariables'].keys()
@@ -366,8 +370,10 @@ class TestImport(unittest.TestCase):
         y = self.load_yaml(importing_path)
 
         # testing dotfiles
-        self.assertTrue(all(file_in_yaml(y, df) for df in dotfiles_ing))
-        self.assertFalse(any(file_in_yaml(y, df) for df in dotfiles_ed))
+        self.assertTrue(all(file_in_yaml(y, df)
+                            for df in dotfiles_ing))
+        self.assertFalse(any(file_in_yaml(y, df)
+                             for df in dotfiles_ed))
 
         # testing profiles
         profiles = y['profiles'].keys()
@@ -395,12 +401,18 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(t.endswith('ed') for t in transformations))
 
         # testing variables
-        variables = y['variables'].keys()
+        variables = self._remove_priv_vars(y['variables'].keys())
         self.assertTrue(all(v.endswith('ing') for v in variables))
         self.assertFalse(any(v.endswith('ed') for v in variables))
         dyn_variables = y['dynvariables'].keys()
         self.assertTrue(all(dv.endswith('ing') for dv in dyn_variables))
         self.assertFalse(any(dv.endswith('ed') for dv in dyn_variables))
+
+    def _remove_priv_vars(self, variables_keys):
+        variables = [v for v in variables_keys if not v.startswith('_')]
+        if 'profile' in variables:
+            variables.remove('profile')
+        return variables
 
 
 def main():

@@ -2,8 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test dotdrop auto-added variables
-# returns 1 in case of error
+# import config testing
 #
 
 # exit on first error
@@ -48,44 +47,81 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
 
 # create the config file
-cfg="${tmps}/config.yaml"
+cfg1="${tmps}/config1.yaml"
+cfg2="${tmps}/config2.yaml"
 
-cat > ${cfg} << _EOF
+cat > ${cfg1} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
+  import_configs:
+  - ${cfg2}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_zzz:
+    dst: ${tmpd}/zzz
+    src: zzz
+  f_sub:
+    dst: ${tmpd}/sub
+    src: sub
 profiles:
+  p0:
+    include:
+    - p2
   p1:
     dotfiles:
     - f_abc
+  p3:
+    dotfiles:
+    - f_zzz
+  pup:
+    include:
+    - psubsub
 _EOF
-#cat ${cfg}
 
-# create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+cat > ${cfg2} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+  f_def:
+    dst: ${tmpd}/def
+    src: def
+  f_ghi:
+    dst: ${tmpd}/ghi
+    src: ghi
+profiles:
+  p2:
+    dotfiles:
+    - f_def
+  psubsub:
+    dotfiles:
+    - f_sub
+_EOF
+
+# create the source
+mkdir -p ${tmps}/dotfiles/
+echo "abc" > ${tmps}/dotfiles/abc
+echo "def" > ${tmps}/dotfiles/def
+echo "ghi" > ${tmps}/dotfiles/ghi
+echo "zzz" > ${tmps}/dotfiles/zzz
+echo "sub" > ${tmps}/dotfiles/sub
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-
-cat ${tmpd}/abc
-
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p0 -V | grep f_def
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p1 -V | grep f_abc
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p2 -V | grep f_def
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p3 -V | grep f_zzz
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p pup -V | grep f_sub
+cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p psubsub -V | grep f_sub
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
