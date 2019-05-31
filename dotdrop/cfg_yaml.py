@@ -457,9 +457,9 @@ class CfgYaml:
             self.log.dbg('found: {}'.format(new))
         if isinstance(current, dict) and isinstance(new, dict):
             # imported entries get more priority than current
-            current = {**current, **new}
+            current = self._merge_dict(new, current)
         elif isinstance(current, list) and isinstance(new, list):
-            current = [*current, *new]
+            current = current + new
         else:
             raise Exception('invalid import {} from {}'.format(key, path))
         if self.debug:
@@ -468,7 +468,11 @@ class CfgYaml:
 
     def _merge_dict(self, high, low):
         """merge low into high"""
-        return {**low, **high}
+        # won't work in python3.4
+        # return {**low, **high}
+        new = low.copy()
+        new.update(high)
+        return new
 
     def _get_entry(self, yaml_dict, key, mandatory=True):
         """return entry from yaml dictionary"""
