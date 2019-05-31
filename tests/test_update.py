@@ -105,6 +105,7 @@ class TestUpdate(unittest.TestCase):
         o = load_options(confpath, profile)
         o.safe = False
         o.update_showpatch = True
+        o.debug = True
         trans = Transform('trans', 'cp -r {0} {1}')
         d3tb = os.path.basename(d3t)
         for dotfile in o.dotfiles:

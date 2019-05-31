@@ -13,7 +13,7 @@ from unittest import TestCase
 
 import yaml
 
-from dotdrop.options import Options, ENV_NODEBUG
+from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import strip_home
 
@@ -144,7 +144,7 @@ def load_options(confpath, profile):
     args = _fake_args()
     args['--cfg'] = confpath
     args['--profile'] = profile
-    args['--debug'] = True
+    args['--verbose'] = True
     # and get the options
     o = Options(args=args)
     o.profile = profile
@@ -154,8 +154,6 @@ def load_options(confpath, profile):
     o.import_link = LinkTypes.NOLINK
     o.install_showdiff = True
     o.debug = True
-    if ENV_NODEBUG in os.environ:
-        o.debug = False
     o.compare_dopts = ''
     o.variables = {}
     return o

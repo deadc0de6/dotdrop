@@ -194,6 +194,7 @@ class TestImport(unittest.TestCase):
         edit_content(dotfile1, editcontent)
         o.safe = False
         o.update_path = [dotfile1]
+        o.debug = True
         cmd_update(o)
         c2 = open(indt1, 'r').read()
         self.assertTrue(editcontent == c2)
