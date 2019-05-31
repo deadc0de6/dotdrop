@@ -212,7 +212,7 @@ class CfgAggregator:
         entries = []
         for d in dirs:
             entries.insert(0, d)
-            key = self.key_sep.join([prefix, *entries])
+            key = self.key_sep.join([prefix] + entries)
             if key not in keys:
                 return key
         return self._uniq_key(key, keys)
