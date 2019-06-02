@@ -8,6 +8,7 @@ handle lower level of the config file
 import os
 import yaml
 import glob
+from copy import deepcopy
 
 # local imports
 from dotdrop.settings import Settings
@@ -97,9 +98,10 @@ class CfgYaml:
 
     def _parse_main_yaml(self, dic):
         """parse the different blocks"""
-        self.ori_settings = self._get_entry(self.yaml_dict, self.key_settings)
+        self.ori_settings = self._get_entry(dic, self.key_settings)
         self.settings = Settings(None).serialize().get(self.key_settings)
         self.settings.update(self.ori_settings)
+
         # resolve settings paths
         p = self._resolve_path(self.settings[self.key_settings_dotpath])
         self.settings[self.key_settings_dotpath] = p
@@ -109,50 +111,60 @@ class CfgYaml:
             self.log.dbg('settings: {}'.format(self.settings))
 
         # dotfiles
-        self.dotfiles = self._get_entry(self.yaml_dict, self.key_dotfiles)
+        self.ori_dotfiles = self._get_entry(dic, self.key_dotfiles)
+        self.dotfiles = deepcopy(self.ori_dotfiles)
+        keys = self.dotfiles.keys()
+        if len(keys) != len(list(set(keys))):
+            dups = [x for x in keys if x not in list(set(keys))]
+            raise Exception('duplicate dotfile keys found: {}'.format(dups))
         self.dotfiles = self._norm_dotfiles(self.dotfiles)
         if self.debug:
             self.log.dbg('dotfiles: {}'.format(self.dotfiles))
 
         # profiles
-        self.profiles = self._get_entry(self.yaml_dict, self.key_profiles)
+        self.ori_profiles = self._get_entry(dic, self.key_profiles)
+        self.profiles = deepcopy(self.ori_profiles)
         if self.debug:
             self.log.dbg('profiles: {}'.format(self.profiles))
 
         # actions
-        self.actions = self._get_entry(self.yaml_dict, self.key_actions,
-                                       mandatory=False)
+        self.ori_actions = self._get_entry(dic, self.key_actions,
+                                           mandatory=False)
+        self.actions = deepcopy(self.ori_actions)
         self.actions = self._norm_actions(self.actions)
         if self.debug:
             self.log.dbg('actions: {}'.format(self.actions))
 
         # trans_r
-        if self.old_key_trans_r in self.yaml_dict:
+        key = self.key_trans_r
+        if self.old_key_trans_r in dic:
             self.log.warn('\"trans\" is deprecated, please use \"trans_read\"')
-            self.yaml_dict[self.key_trans_r] = self.yaml_dict.pop(
-                self.old_key_trans_r
-            )
-            self.dirty = True
-        self.trans_r = self._get_entry(self.yaml_dict, self.key_trans_r,
-                                       mandatory=False)
+            key = self.old_key_trans_r
+        self.ori_trans_r = self._get_entry(dic, key, mandatory=False)
+        self.trans_r = deepcopy(self.ori_trans_r)
         if self.debug:
             self.log.dbg('trans_r: {}'.format(self.trans_r))
 
         # trans_w
-        self.trans_w = self._get_entry(self.yaml_dict, self.key_trans_w,
-                                       mandatory=False)
+        self.ori_trans_w = self._get_entry(dic, self.key_trans_w,
+                                           mandatory=False)
+        self.trans_w = deepcopy(self.ori_trans_w)
         if self.debug:
             self.log.dbg('trans_w: {}'.format(self.trans_w))
 
         # variables
-        self.variables = self._get_entry(self.yaml_dict, self.key_variables,
-                                         mandatory=False)
+        self.ori_variables = self._get_entry(dic,
+                                             self.key_variables,
+                                             mandatory=False)
+        self.variables = deepcopy(self.ori_variables)
         if self.debug:
             self.log.dbg('variables: {}'.format(self.variables))
 
         # dynvariables
-        self.dvariables = self._get_entry(self.yaml_dict, self.key_dvariables,
-                                          mandatory=False)
+        self.ori_dvariables = self._get_entry(dic,
+                                              self.key_dvariables,
+                                              mandatory=False)
+        self.dvariables = deepcopy(self.ori_dvariables)
         if self.debug:
             self.log.dbg('dvariables: {}'.format(self.dvariables))
 
@@ -493,7 +505,7 @@ class CfgYaml:
         values[self.key_profiles_dotfiles] = uniq_list(current)
         if self.debug:
             dfs = values[self.key_profiles_dotfiles]
-            self.log.dbg('profile dfs after include: {}'.format(dfs))
+            self.log.dbg('{} dfs after include: {}'.format(profile, dfs))
         return values.get(self.key_profiles_dotfiles, [])
 
     def _resolve_path(self, path):
@@ -538,21 +550,21 @@ class CfgYaml:
         """merge low into high"""
         # won't work in python3.4
         # return {**low, **high}
-        new = low.copy()
+        new = deepcopy(low)
         new.update(high)
         return new
 
-    def _get_entry(self, yaml_dict, key, mandatory=True):
+    def _get_entry(self, dic, key, mandatory=True):
         """return entry from yaml dictionary"""
-        if key not in yaml_dict:
+        if key not in dic:
             if mandatory:
                 raise Exception('invalid config: no {} found'.format(key))
-            yaml_dict[key] = {}
-            return yaml_dict[key]
-        if mandatory and not yaml_dict[key]:
+            dic[key] = {}
+            return dic[key]
+        if mandatory and not dic[key]:
             # ensure is not none
-            yaml_dict[key] = {}
-        return yaml_dict[key]
+            dic[key] = {}
+        return dic[key]
 
     def _load_yaml(self, path):
         """load a yaml file to a dict"""
@@ -608,6 +620,40 @@ class CfgYaml:
             df_dict[self.key_dotfile_link] = str(link)
         self.yaml_dict[self.key_dotfiles][key] = df_dict
         self.dirty = True
+
+    def del_dotfile(self, key):
+        """remove this dotfile from config"""
+        if key not in self.yaml_dict[self.key_dotfiles]:
+            self.log.err('key not in dotfiles: {}'.format(key))
+            return False
+        if self.debug:
+            self.log.dbg('remove dotfile: {}'.format(key))
+        del self.yaml_dict[self.key_dotfiles][key]
+        if self.debug:
+            dfs = self.yaml_dict[self.key_dotfiles]
+            self.log.dbg('new dotfiles: {}'.format(dfs))
+        self.dirty = True
+        return True
+
+    def del_dotfile_from_profile(self, df_key, pro_key):
+        """remove this dotfile from that profile"""
+        if df_key not in self.dotfiles.keys():
+            self.log.err('key not in dotfiles: {}'.format(df_key))
+            return False
+        if pro_key not in self.profiles.keys():
+            self.log.err('key not in profiles: {}'.format(pro_key))
+            return False
+        profiles = self.yaml_dict[self.key_profiles][pro_key]
+        if self.debug:
+            dfs = profiles[self.key_profiles_dotfiles]
+            self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
+            self.log.dbg('remove {} from profile {}'.format(df_key, pro_key))
+        profiles[self.key_profiles_dotfiles].remove(df_key)
+        if self.debug:
+            dfs = profiles[self.key_profiles_dotfiles]
+            self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
+        self.dirty = True
+        return True
 
     def _fix_deprecated(self, yamldict):
         """fix deprecated entries"""
@@ -671,9 +717,9 @@ class CfgYaml:
             newv = v
             if isinstance(v, dict):
                 newv = self._clear_none(v)
-            if v is None:
+            if newv is None:
                 continue
-            if not v:
+            if not newv:
                 continue
             new[k] = newv
         return new

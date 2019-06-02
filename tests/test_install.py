@@ -486,7 +486,6 @@ exec bspwm
             # ensure dst is link
             self.assertTrue(os.path.islink(dst))
             # ensure dst not directly linked to src
-            # TODO: maybe check that its actually linked to template folder
             self.assertNotEqual(os.path.realpath(dst), src)
 
 

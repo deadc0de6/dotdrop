@@ -20,12 +20,17 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, dotpath, dotfiles, variables, dry=False, safe=True,
+    def __init__(self, dotpath, variables,
+                 dotfile_key_getter, dotfile_dst_getter,
+                 dotfile_path_normalizer,
+                 dry=False, safe=True,
                  debug=False, ignore=[], showpatch=False):
         """constructor
         @dotpath: path where dotfiles are stored
-        @dotfiles: dotfiles for this profile
         @variables: dictionary of variables for the templates
+        @dotfile_key_getter: func to get a dotfile by key
+        @dotfile_dst_getter: func to get a dotfile by dst
+        @dotfile_path_normalizer: func to normalize dotfile dst
         @dry: simulate
         @safe: ask for overwrite if True
         @debug: enable debug
@@ -33,8 +38,10 @@ class Updater:
         @showpatch: show patch if dotfile to update is a template
         """
         self.dotpath = dotpath
-        self.dotfiles = dotfiles
         self.variables = variables
+        self.dotfile_key_getter = dotfile_key_getter
+        self.dotfile_dst_getter = dotfile_dst_getter
+        self.dotfile_path_normalizer = dotfile_path_normalizer
         self.dry = dry
         self.safe = safe
         self.debug = debug
@@ -48,8 +55,7 @@ class Updater:
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
-        path = self._normalize(path)
-        dotfile = self._get_dotfile_by_path(path)
+        dotfile = self.dotfile_dst_getter(path)
         if not dotfile:
             return False
         if self.debug:
@@ -58,12 +64,12 @@ class Updater:
 
     def update_key(self, key):
         """update the dotfile referenced by key"""
-        dotfile = self._get_dotfile_by_key(key)
+        dotfile = self.dotfile_key_getter(key)
         if not dotfile:
             return False
         if self.debug:
             self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
-        path = self._normalize(dotfile.dst)
+        path = self.dotfile_path_normalizer(dotfile.dst)
         return self._update(path, dotfile)
 
     def _update(self, path, dotfile):
@@ -110,45 +116,6 @@ class Updater:
                 utils.remove(tmp)
             return None
         return tmp
-
-    def _normalize(self, path):
-        """normalize the path to match dotfile"""
-        path = os.path.expanduser(path)
-        path = os.path.expandvars(path)
-        path = os.path.abspath(path)
-        home = os.path.expanduser(TILD) + os.sep
-
-        # normalize the path
-        if path.startswith(home):
-            path = path[len(home):]
-            path = os.path.join(TILD, path)
-        return path
-
-    def _get_dotfile_by_key(self, key):
-        """get the dotfile matching this key"""
-        dotfiles = self.dotfiles
-        subs = [d for d in dotfiles if d.key == key]
-        if not subs:
-            self.log.err('key \"{}\" not found!'.format(key))
-            return None
-        if len(subs) > 1:
-            found = ','.join([d.src for d in dotfiles])
-            self.log.err('multiple dotfiles found: {}'.format(found))
-            return None
-        return subs[0]
-
-    def _get_dotfile_by_path(self, path):
-        """get the dotfile matching this path"""
-        dotfiles = self.dotfiles
-        subs = [d for d in dotfiles if d.dst == path]
-        if not subs:
-            self.log.err('\"{}\" is not managed!'.format(path))
-            return None
-        if len(subs) > 1:
-            found = ','.join([d.src for d in dotfiles])
-            self.log.err('multiple dotfiles found: {}'.format(found))
-            return None
-        return subs[0]
 
     def _is_template(self, path):
         if not Templategen.is_template(path):

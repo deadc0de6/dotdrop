@@ -19,6 +19,9 @@ from dotdrop.logger import Logger
 from dotdrop.utils import strip_home
 
 
+TILD = '~'
+
+
 class CfgAggregator:
 
     file_prefix = 'f'
@@ -99,9 +102,9 @@ class CfgAggregator:
 
         # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_r", self.get_trans_r)
+                                 "trans_r", self._get_trans_r)
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_w", self.get_trans_w)
+                                 "trans_w", self._get_trans_w)
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key):
         """
@@ -128,6 +131,14 @@ class CfgAggregator:
                 self.log.dbg('patching {}.{} with {}'.format(c, keys, objects))
             setattr(c, keys, objects)
 
+    def del_dotfile(self, dotfile):
+        """remove this dotfile from the config"""
+        return self.cfgyaml.del_dotfile(dotfile.key)
+
+    def del_dotfile_from_profile(self, dotfile, profile):
+        """remove this dotfile from this profile"""
+        return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
+
     def new(self, src, dst, link, profile_key):
         """
         import a new dotfile
@@ -136,10 +147,9 @@ class CfgAggregator:
         @link: LinkType
         @profile_key: to which profile
         """
-        home = os.path.expanduser('~')
-        dst = dst.replace(home, '~', 1)
+        dst = self.path_to_dotfile_dst(dst)
 
-        dotfile = self._get_dotfile_by_dst(dst)
+        dotfile = self.get_dotfile_by_dst(dst)
         if not dotfile:
             # get a new dotfile with a unique key
             key = self._get_new_dotfile_key(dst)
@@ -228,8 +238,22 @@ class CfgAggregator:
             cnt += 1
         return newkey
 
-    def _get_dotfile_by_dst(self, dst):
+    def path_to_dotfile_dst(self, path):
+        """normalize the path to match dotfile dst"""
+        path = os.path.expanduser(path)
+        path = os.path.expandvars(path)
+        path = os.path.abspath(path)
+        home = os.path.expanduser(TILD) + os.sep
+
+        # normalize the path
+        if path.startswith(home):
+            path = path[len(home):]
+            path = os.path.join(TILD, path)
+        return path
+
+    def get_dotfile_by_dst(self, dst):
         """get a dotfile by dst"""
+        dst = self.path_to_dotfile_dst(dst)
         try:
             return next(d for d in self.dotfiles if d.dst == dst)
         except StopIteration:
@@ -262,12 +286,24 @@ class CfgAggregator:
         except StopIteration:
             return None
 
+    def get_profiles_by_dotfile_key(self, key):
+        """return all profiles having this dotfile"""
+        res = []
+        for p in self.profiles:
+            keys = [d.key for d in p.dotfiles]
+            if key in keys:
+                res.append(p)
+        return res
+
     def get_dotfiles(self, profile=None):
         """return dotfiles dict for this profile key"""
         if not profile:
             return self.dotfiles
         try:
-            return next(x.dotfiles for x in self.profiles if x.key == profile)
+            pro = self.get_profile(profile)
+            if not pro:
+                return []
+            return pro.dotfiles
         except StopIteration:
             return []
 
@@ -278,7 +314,7 @@ class CfgAggregator:
         except StopIteration:
             return None
 
-    def get_action(self, key):
+    def _get_action(self, key):
         """return action by key"""
         try:
             return next(x for x in self.actions if x.key == key)
@@ -293,19 +329,19 @@ class CfgAggregator:
             key, *args = fields
             if self.debug:
                 self.log.dbg('action with parm: {} and {}'.format(key, args))
-            action = self.get_action(key).copy(args)
+            action = self._get_action(key).copy(args)
         else:
-            action = self.get_action(key)
+            action = self._get_action(key)
         return action
 
-    def get_trans_r(self, key):
+    def _get_trans_r(self, key):
         """return the trans_r with this key"""
         try:
             return next(x for x in self.trans_r if x.key == key)
         except StopIteration:
             return None
 
-    def get_trans_w(self, key):
+    def _get_trans_w(self, key):
         """return the trans_w with this key"""
         try:
             return next(x for x in self.trans_w if x.key == key)

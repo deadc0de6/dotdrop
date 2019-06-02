@@ -136,6 +136,7 @@ def _fake_args():
     args['import'] = False
     args['update'] = False
     args['detail'] = False
+    args['remove'] = False
     return args
 
 
@@ -172,8 +173,13 @@ def get_dotfile_from_yaml(dic, path):
     # path is not the file in dotpath but on the FS
     dotfiles = dic['dotfiles']
     # src = get_path_strip_version(path)
-    dotfile = [d for d in dotfiles.values() if d['dst'] == path][0]
-    return dotfile
+    home = os.path.expanduser('~')
+    if path.startswith(home):
+        path = path.replace(home, '~')
+    dotfile = [d for d in dotfiles.values() if d['dst'] == path]
+    if dotfile:
+        return dotfile[0]
+    return None
 
 
 def yaml_dashed_list(items, indent=0):
@@ -261,6 +267,11 @@ def file_in_yaml(yaml_file, path, link=False):
     in_dst = path in (os.path.expanduser(x['dst']) for x in dotfiles)
 
     if link:
-        has_link = 'link' in get_dotfile_from_yaml(yaml_conf, path)
+        df = get_dotfile_from_yaml(yaml_conf, path)
+        has_link = False
+        if df:
+            has_link = 'link' in df
+        else:
+            return False
         return in_src and in_dst and has_link
     return in_src and in_dst

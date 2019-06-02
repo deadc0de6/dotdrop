@@ -57,6 +57,7 @@ Usage:
                                 [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
   dotdrop listfiles [-VbT]      [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]       [-c <path>]
@@ -193,6 +194,7 @@ class Options(AttrMonitor):
         self.cmd_import = self.args['import']
         self.cmd_update = self.args['update']
         self.cmd_detail = self.args['detail']
+        self.cmd_remove = self.args['remove']
 
         # adapt attributes based on arguments
         self.dry = self.args['--dry']
@@ -236,6 +238,9 @@ class Options(AttrMonitor):
         self.update_showpatch = self.args['--show-patch']
         # "detail" specifics
         self.detail_keys = self.args['<key>']
+        # "remove" specifics
+        self.remove_path = self.args['<path>']
+        self.remove_iskey = self.args['--key']
 
     def _fill_attr(self):
         """create attributes from conf"""

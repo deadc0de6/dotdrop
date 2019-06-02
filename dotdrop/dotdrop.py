@@ -268,7 +268,10 @@ def cmd_update(o):
     if o.debug:
         LOG.dbg('dotfile to update: {}'.format(paths))
 
-    updater = Updater(o.dotpath, o.dotfiles, o.variables,
+    updater = Updater(o.dotpath, o.variables,
+                      o.conf.get_dotfile,
+                      o.conf.get_dotfile_by_dst,
+                      o.conf.path_to_dotfile_dst,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=ignore, showpatch=showpatch)
     if not iskey:
@@ -403,6 +406,67 @@ def cmd_detail(o):
     LOG.log('')
 
 
+def cmd_remove(o):
+    """remove dotfile from dotpath and from config"""
+    paths = o.remove_path
+    iskey = o.remove_iskey
+
+    if not paths:
+        LOG.log('no dotfile to remove')
+        return False
+    if o.debug:
+        LOG.dbg('dotfile to remove: {}'.format(paths))
+
+    removed = []
+    for key in paths:
+        if o.debug:
+            LOG.dbg('removing {}'.format(key))
+        if not iskey:
+            # by path
+            dotfile = o.conf.get_dotfile_by_dst(key)
+            if not dotfile:
+                LOG.warn('{} ignored, does not exist'.format(key))
+                continue
+            k = dotfile.key
+        else:
+            # by key
+            dotfile = o.conf.get_dotfile(key)
+            k = key
+        # make sure is part of the profile
+        if dotfile.key not in [d.key for d in o.dotfiles]:
+            LOG.warn('{} ignored, not associated to this profile'.format(key))
+            continue
+        profiles = o.conf.get_profiles_by_dotfile_key(k)
+        pkeys = ','.join([p.key for p in profiles])
+        if o.dry:
+            LOG.dry('would remove {} from {}'.format(dotfile, pkeys))
+            continue
+        msg = 'Remove dotfile from all these profiles: {}'.format(pkeys)
+        if o.safe and not LOG.ask(msg):
+            return False
+        if o.debug:
+            LOG.dbg('remove dotfile: {}'.format(dotfile))
+
+        for profile in profiles:
+            if not o.conf.del_dotfile_from_profile(dotfile, profile):
+                return False
+        if not o.conf.del_dotfile(dotfile):
+            return False
+
+        # remove dotfile from dotpath
+        dtpath = os.path.join(o.dotpath, dotfile.src)
+        remove(dtpath)
+        removed.append(dotfile.key)
+
+    if o.dry:
+        LOG.dry('new config file would be:')
+        LOG.raw(o.conf.dump())
+    else:
+        o.conf.save()
+    LOG.log('\ndotfile(s) removed: {}'.format(','.join(removed)))
+    return True
+
+
 ###########################################################
 # helpers
 ###########################################################
@@ -444,8 +508,10 @@ def _select(selections, dotfiles):
 
 
 def apply_trans(dotpath, dotfile, debug=False):
-    """apply the read transformation to the dotfile
-    return None if fails and new source if succeed"""
+    """
+    apply the read transformation to the dotfile
+    return None if fails and new source if succeed
+    """
     src = dotfile.src
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
     for trans in dotfile.trans_r:
@@ -522,6 +588,12 @@ def main():
             if o.debug:
                 LOG.dbg('running cmd: detail')
             cmd_detail(o)
+
+        elif o.cmd_remove:
+            # remove dotfile
+            if o.debug:
+                LOG.dbg('running cmd: remove')
+            cmd_remove(o)
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
