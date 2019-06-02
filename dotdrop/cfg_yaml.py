@@ -366,7 +366,7 @@ class CfgYaml:
         res = []
         for p in paths:
             if not self._is_glob(p):
-                res.extend([p])
+                res.append(p)
                 continue
             p = os.path.expanduser(p)
             new = glob.glob(p)
