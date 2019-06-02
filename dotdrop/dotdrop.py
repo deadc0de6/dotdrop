@@ -17,6 +17,7 @@ from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, remove, strip_home, run, uniq_list
 from dotdrop.linktypes import LinkTypes
+from dotdrop.exceptions import YamlException
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
@@ -423,7 +424,9 @@ def cmd_remove(o):
             LOG.dbg('removing {}'.format(key))
         if not iskey:
             # by path
+            print(key)
             dotfile = o.conf.get_dotfile_by_dst(key)
+            print(dotfile)
             if not dotfile:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
@@ -441,7 +444,7 @@ def cmd_remove(o):
         if o.dry:
             LOG.dry('would remove {} from {}'.format(dotfile, pkeys))
             continue
-        msg = 'Remove dotfile from all these profiles: {}'.format(pkeys)
+        msg = 'Remove \"{}\" from all these profiles: {}'.format(k, pkeys)
         if o.safe and not LOG.ask(msg):
             return False
         if o.debug:
@@ -537,8 +540,8 @@ def main():
     """entry point"""
     try:
         o = Options()
-    except Exception as e:
-        LOG.err('options error: {}'.format(str(e)))
+    except YamlException as e:
+        LOG.err('config file error: {}'.format(str(e)))
         return False
 
     ret = True

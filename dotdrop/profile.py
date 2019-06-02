@@ -15,18 +15,21 @@ class Profile(DictParser):
     key_include = 'include'
     key_import = 'import'
 
-    def __init__(self, key, actions=[], dotfiles=[], variables=[]):
+    def __init__(self, key, actions=[], dotfiles=[],
+                 variables=[], dynvariables=[]):
         """
         constructor
         @key: profile key
         @actions: list of action keys
         @dotfiles: list of dotfile keys
         @variables: list of variable keys
+        @dynvariables: list of interpreted variable keys
         """
         self.key = key
         self.actions = actions
         self.dotfiles = dotfiles
         self.variables = variables
+        self.dynvariables = dynvariables
 
     def get_pre_actions(self):
         """return all 'pre' actions"""

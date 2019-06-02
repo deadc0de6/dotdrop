@@ -253,7 +253,6 @@ class CfgAggregator:
 
     def get_dotfile_by_dst(self, dst):
         """get a dotfile by dst"""
-        dst = self.path_to_dotfile_dst(dst)
         try:
             return next(d for d in self.dotfiles if d.dst == dst)
         except StopIteration:

@@ -16,6 +16,7 @@ from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import shell, uniq_list
+from dotdrop.exceptions import YamlException
 
 
 class CfgYaml:
@@ -116,7 +117,8 @@ class CfgYaml:
         keys = self.dotfiles.keys()
         if len(keys) != len(list(set(keys))):
             dups = [x for x in keys if x not in list(set(keys))]
-            raise Exception('duplicate dotfile keys found: {}'.format(dups))
+            err = 'duplicate dotfile keys found: {}'.format(dups)
+            raise YamlException(err)
         self.dotfiles = self._norm_dotfiles(self.dotfiles)
         if self.debug:
             self.log.dbg('dotfiles: {}'.format(self.dotfiles))
@@ -329,7 +331,7 @@ class CfgYaml:
         # inherite profile variables
         for inherited_profile in pentry.get(self.key_profile_include, []):
             if inherited_profile == profile or inherited_profile in seen:
-                raise Exception('\"include\" loop')
+                raise YamlException('\"include\" loop')
             seen.append(inherited_profile)
             new = self._get_variables_dict(inherited_profile, seen, sub=True)
             variables.update(new)
@@ -356,7 +358,7 @@ class CfgYaml:
         # inherite profile dynvariables
         for inherited_profile in pentry.get(self.key_profile_include, []):
             if inherited_profile == profile or inherited_profile in seen:
-                raise Exception('\"include loop\"')
+                raise YamlException('\"include loop\"')
             seen.append(inherited_profile)
             new = self._get_dvariables_dict(inherited_profile, seen, sub=True)
             variables.update(new)
@@ -383,7 +385,7 @@ class CfgYaml:
             p = os.path.expanduser(p)
             new = glob.glob(p)
             if not new:
-                raise Exception('bad path: {}'.format(p))
+                raise YamlException('bad path: {}'.format(p))
             res.extend(glob.glob(p))
         return res
 
@@ -438,8 +440,7 @@ class CfgYaml:
                 current = v.get(self.key_dotfiles, [])
                 path = self._resolve_path(p)
                 current = self._import_sub(path, self.key_dotfiles,
-                                           current, mandatory=False,
-                                           path_func=self._norm_dotfiles)
+                                           current, mandatory=False)
                 v[self.key_dotfiles] = current
 
     def _import_configs(self):
@@ -491,7 +492,7 @@ class CfgYaml:
         seen = []
         for i in inc:
             if i in seen:
-                raise Exception('\"include loop\"')
+                raise YamlException('\"include loop\"')
             seen.append(i)
             if i not in self.profiles.keys():
                 self.log.warn('include unknown profile: {}'.format(i))
@@ -541,7 +542,7 @@ class CfgYaml:
         elif isinstance(current, list) and isinstance(new, list):
             current = current + new
         else:
-            raise Exception('invalid import {} from {}'.format(key, path))
+            raise YamlException('invalid import {} from {}'.format(key, path))
         if self.debug:
             self.log.dbg('new \"{}\": {}'.format(key, current))
         return current
@@ -558,7 +559,7 @@ class CfgYaml:
         """return entry from yaml dictionary"""
         if key not in dic:
             if mandatory:
-                raise Exception('invalid config: no {} found'.format(key))
+                raise YamlException('invalid config: no {} found'.format(key))
             dic[key] = {}
             return dic[key]
         if mandatory and not dic[key]:
@@ -570,13 +571,13 @@ class CfgYaml:
         """load a yaml file to a dict"""
         content = {}
         if not os.path.exists(path):
-            raise Exception('config path not found: {}'.format(path))
+            raise YamlException('config path not found: {}'.format(path))
         with open(path, 'r') as f:
             try:
                 content = yaml.safe_load(f)
             except Exception as e:
                 self.log.err(e)
-                raise Exception('invalid config: {}'.format(path))
+                raise YamlException('invalid config: {}'.format(path))
         return content
 
     def _new_profile(self, key):
@@ -718,8 +719,13 @@ class CfgYaml:
             if isinstance(v, dict):
                 newv = self._clear_none(v)
                 if not newv:
+                    # no empty dict
                     continue
             if newv is None:
+                # no None value
+                continue
+            if isinstance(newv, list) and not newv:
+                # no empty list
                 continue
             new[k] = newv
         return new
@@ -730,12 +736,27 @@ class CfgYaml:
             return False
 
         content = self._clear_none(self.dump())
+
+        # make sure we have the base entries
+        if self.key_settings not in content:
+            content[self.key_settings] = None
+        if self.key_dotfiles not in content:
+            content[self.key_dotfiles] = None
+        if self.key_profiles not in content:
+            content[self.key_profiles] = None
+
+        # ensure no null are displayed
+        data = yaml.safe_dump(content,
+                              default_flow_style=False,
+                              indent=2)
+        data = data.replace('null', '')
+
+        # save to file
         if self.debug:
             self.log.dbg('saving: {}'.format(content))
         with open(self.path, 'w') as f:
-            yaml.safe_dump(content, f,
-                           default_flow_style=False,
-                           indent=2)
+            f.write(data)
+
         self.dirty = False
         return True
 
