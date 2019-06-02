@@ -51,7 +51,8 @@ USAGE = """
 
 Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-Vbd]      [-c <path>] [-p <profile>] [-l <link>] <path>...
+  dotdrop import    [-Vbd]      [-c <path>] [-p <profile>]
+                                [-l <link>] <path>...
   dotdrop compare   [-Vb]       [-c <path>] [-p <profile>]
                                 [-o <opts>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]

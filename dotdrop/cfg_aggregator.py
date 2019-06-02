@@ -83,13 +83,14 @@ class CfgAggregator:
         self._patch_keys_to_objs(self.profiles,
                                  "dotfiles", self.get_dotfile)
 
-        # patch action in actions
+        # patch action in dotfiles actions
         self._patch_keys_to_objs(self.dotfiles,
                                  "actions", self._get_action_w_args)
+        # patch action in profiles actions
         self._patch_keys_to_objs(self.profiles,
                                  "actions", self._get_action_w_args)
 
-        # patch default actions in settings
+        # patch actions in settings default_actions
         self._patch_keys_to_objs([self.settings],
                                  "default_actions", self._get_action_w_args)
         if self.debug:
@@ -253,6 +254,13 @@ class CfgAggregator:
     def get_profiles(self):
         """return profiles"""
         return self.profiles
+
+    def get_profile(self, key):
+        """return profile by key"""
+        try:
+            return next(x for x in self.profiles if x.key == key)
+        except StopIteration:
+            return None
 
     def get_dotfiles(self, profile=None):
         """return dotfiles dict for this profile key"""

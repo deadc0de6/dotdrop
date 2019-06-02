@@ -6,6 +6,7 @@ represent a profile in dotdrop
 """
 
 from dotdrop.dictparser import DictParser
+from dotdrop.action import Action
 
 
 class Profile(DictParser):
@@ -26,6 +27,14 @@ class Profile(DictParser):
         self.actions = actions
         self.dotfiles = dotfiles
         self.variables = variables
+
+    def get_pre_actions(self):
+        """return all 'pre' actions"""
+        return [a for a in self.actions if a.kind == Action.pre]
+
+    def get_post_actions(self):
+        """return all 'post' actions"""
+        return [a for a in self.actions if a.kind == Action.post]
 
     @classmethod
     def _adjust_yaml_keys(cls, value):

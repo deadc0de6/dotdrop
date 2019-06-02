@@ -101,6 +101,8 @@ def cmd_install(o):
         preactions = []
         if not o.install_temporary:
             preactions.extend(dotfile.get_pre_actions())
+            prof = o.conf.get_profile(o.profile)
+            preactions.extend(prof.get_pre_actions())
         defactions = o.install_default_actions_pre
         pre_actions_exec = action_executor(o, dotfile, preactions,
                                            defactions, t, post=False)
@@ -134,6 +136,8 @@ def cmd_install(o):
             if not o.install_temporary:
                 defactions = o.install_default_actions_post
                 postactions = dotfile.get_post_actions()
+                prof = o.conf.get_profile(o.profile)
+                postactions.extend(prof.get_post_actions())
                 post_actions_exec = action_executor(o, dotfile, postactions,
                                                     defactions, t, post=True)
                 post_actions_exec()
@@ -145,6 +149,8 @@ def cmd_install(o):
                 pre_actions_exec()
                 LOG.dbg('force post pre action execution ...')
                 postactions = dotfile.get_post_actions()
+                prof = o.conf.get_profile(o.profile)
+                postactions.extend(prof.get_post_actions())
                 post_actions_exec = action_executor(o, dotfile, postactions,
                                                     defactions, t, post=True)
                 post_actions_exec()
