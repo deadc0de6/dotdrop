@@ -717,9 +717,9 @@ class CfgYaml:
             newv = v
             if isinstance(v, dict):
                 newv = self._clear_none(v)
+                if not newv:
+                    continue
             if newv is None:
-                continue
-            if not newv:
                 continue
             new[k] = newv
         return new

@@ -4,8 +4,8 @@ config:
   create: true
   dotpath: dotfiles
   keepdot: false
-  longkey: false
-  link_on_import: nolink
   link_dotfile_default: nolink
+  link_on_import: nolink
+  longkey: false
 dotfiles:
 profiles:
