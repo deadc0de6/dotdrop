@@ -95,7 +95,7 @@ class Comparator:
         # content is different
         funny = comp.diff_files
         funny.extend(comp.funny_files)
-        funny = list(set(funny))
+        funny = utils.uniq_list(funny)
         for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)

@@ -14,7 +14,7 @@ from dotdrop.settings import Settings
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import shell
+from dotdrop.utils import shell, uniq_list
 
 
 class CfgYaml:
@@ -490,7 +490,10 @@ class CfgYaml:
                 others.extend(self._rec_resolve_profile_include(i))
             current.extend(others)
         # unique them
-        values[self.key_profiles_dotfiles] = list(set(current))
+        values[self.key_profiles_dotfiles] = uniq_list(current)
+        if self.debug:
+            dfs = values[self.key_profiles_dotfiles]
+            self.log.dbg('profile dfs after include: {}'.format(dfs))
         return values.get(self.key_profiles_dotfiles, [])
 
     def _resolve_path(self, path):

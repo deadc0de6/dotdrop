@@ -130,3 +130,12 @@ def must_ignore(paths, ignores, debug=False):
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
     return False
+
+
+def uniq_list(a_list):
+    """unique elements of a list while preserving order"""
+    new = []
+    for a in a_list:
+        if a not in new:
+            new.append(a)
+    return new

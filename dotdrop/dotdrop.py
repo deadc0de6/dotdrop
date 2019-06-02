@@ -15,7 +15,7 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.utils import get_tmpdir, remove, strip_home, run
+from dotdrop.utils import get_tmpdir, remove, strip_home, run, uniq_list
 from dotdrop.linktypes import LinkTypes
 
 LOG = Logger()
@@ -71,7 +71,8 @@ def cmd_install(o):
     dotfiles = o.dotfiles
     if o.install_keys:
         # filtered dotfiles to install
-        dotfiles = [d for d in dotfiles if d.key in set(o.install_keys)]
+        uniq = uniq_list(o.install_keys)
+        dotfiles = [d for d in dotfiles if d.key in uniq]
     if not dotfiles:
         msg = 'no dotfile to install for this profile (\"{}\")'
         LOG.warn(msg.format(o.profile))
@@ -388,7 +389,8 @@ def cmd_detail(o):
     dotfiles = o.dotfiles
     if o.detail_keys:
         # filtered dotfiles to install
-        dotfiles = [d for d in dotfiles if d.key in set(o.details_keys)]
+        uniq = uniq_list(o.details_keys)
+        dotfiles = [d for d in dotfiles if d.key in uniq]
     LOG.emph('dotfiles details for profile \"{}\":\n'.format(o.profile))
     for d in dotfiles:
         _detail(o.dotpath, d)
