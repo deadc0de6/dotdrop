@@ -42,7 +42,11 @@ class Dotfile(DictParser):
         self.noempty = noempty
         self.src = src
         self.trans_r = trans_r
+        if trans_r and len(self.trans_r) > 1:
+            raise Exception('only one trans_read allowed')
         self.trans_w = trans_w
+        if trans_w and len(self.trans_w) > 1:
+            raise Exception('only one trans_write allowed')
         self.upignore = upignore
 
     def get_dotfile_variables(self):
