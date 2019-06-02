@@ -76,7 +76,7 @@ Options:
   -D --showdiff           Show a diff before overwriting.
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not ask user confirmation for anything.
-  -a --force-action       Execute all actions even if no dotfile is installed.
+  -a --force-actions      Execute all actions even if no dotfile is installed.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
   -d --dry                Dry run.
@@ -211,7 +211,7 @@ class Options(AttrMonitor):
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']
         # "install" specifics
-        self.install_force_action = self.args['--force-action']
+        self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']
         self.install_keys = self.args['<key>']
         self.install_diff = not self.args['--nodiff']

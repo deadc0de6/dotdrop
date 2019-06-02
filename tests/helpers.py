@@ -127,6 +127,7 @@ def _fake_args():
     args['--key'] = False
     args['--ignore'] = []
     args['--show-patch'] = False
+    args['--force-actions'] = False
     # cmds
     args['list'] = False
     args['listfiles'] = False
