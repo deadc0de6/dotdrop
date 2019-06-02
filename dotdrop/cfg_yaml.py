@@ -99,6 +99,11 @@ class CfgYaml:
         self.ori_settings = self._get_entry(self.yaml_dict, self.key_settings)
         self.settings = Settings(None).serialize().get(self.key_settings)
         self.settings.update(self.ori_settings)
+        # resolve settings paths
+        p = self._resolve_path(self.settings[self.key_settings_dotpath])
+        self.settings[self.key_settings_dotpath] = p
+        p = self._resolve_path(self.settings[self.key_settings_workdir])
+        self.settings[self.key_settings_workdir] = p
         if self.debug:
             self.log.dbg('settings: {}'.format(self.settings))
 
@@ -149,9 +154,9 @@ class CfgYaml:
         for dotfile in self.dotfiles.values():
             src = dotfile[self.key_dotfile_src]
             src = os.path.join(self.settings[self.key_settings_dotpath], src)
-            dotfile[self.key_dotfile_src] = self.resolve_path(src)
+            dotfile[self.key_dotfile_src] = self._resolve_path(src)
             dst = dotfile[self.key_dotfile_dst]
-            dotfile[self.key_dotfile_dst] = self.resolve_path(dst)
+            dotfile[self.key_dotfile_dst] = self._resolve_path(dst)
 
     def _merge_and_apply_variables(self):
         """
@@ -286,11 +291,11 @@ class CfgYaml:
                 variables['profile'] = profile
             # add some more variables
             p = self.settings.get(self.key_settings_dotpath)
-            p = self.resolve_path(p)
+            p = self._resolve_path(p)
             variables['_dotdrop_dotpath'] = p
-            variables['_dotdrop_cfgpath'] = self.resolve_path(self.path)
+            variables['_dotdrop_cfgpath'] = self._resolve_path(self.path)
             p = self.settings.get(self.key_settings_workdir)
-            p = self.resolve_path(p)
+            p = self._resolve_path(p)
             variables['_dotdrop_workdir'] = p
 
             # variables
@@ -369,7 +374,7 @@ class CfgYaml:
             return
         paths = self._glob_paths(paths)
         for p in paths:
-            path = self.resolve_path(p)
+            path = self._resolve_path(p)
             if self.debug:
                 self.log.dbg('import variables from {}'.format(path))
             self.variables = self._import_sub(path, self.key_variables,
@@ -385,7 +390,7 @@ class CfgYaml:
             return
         paths = self._glob_paths(paths)
         for p in paths:
-            path = self.resolve_path(p)
+            path = self._resolve_path(p)
             if self.debug:
                 self.log.dbg('import actions from {}'.format(path))
             self.actions = self._import_sub(path, self.key_actions,
@@ -412,7 +417,7 @@ class CfgYaml:
             paths = self._glob_paths(imp)
             for p in paths:
                 current = v.get(self.key_dotfiles, [])
-                path = self.resolve_path(p)
+                path = self._resolve_path(p)
                 current = self._import_sub(path, self.key_dotfiles,
                                            current, mandatory=False,
                                            path_func=self._norm_dotfiles)
@@ -426,7 +431,7 @@ class CfgYaml:
             return
         paths = self._glob_paths(imp)
         for path in paths:
-            path = self.resolve_path(path)
+            path = self._resolve_path(path)
             if self.debug:
                 self.log.dbg('import config from {}'.format(path))
             sub = CfgYaml(path, debug=self.debug)
@@ -481,7 +486,7 @@ class CfgYaml:
         values[self.key_profiles_dotfiles] = list(set(current))
         return values.get(self.key_profiles_dotfiles, [])
 
-    def resolve_path(self, path):
+    def _resolve_path(self, path):
         """resolve a path either absolute or relative to config path"""
         path = os.path.expanduser(path)
         if not os.path.isabs(path):

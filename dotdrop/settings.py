@@ -60,11 +60,6 @@ class Settings(DictParser):
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
 
-    def resolve_paths(self, resolver):
-        """resolve path using resolver function"""
-        self.dotpath = resolver(self.dotpath)
-        self.workdir = resolver(self.workdir)
-
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
         seq = getattr(self, name)

@@ -46,7 +46,6 @@ class CfgAggregator:
 
         # settings
         self.settings = Settings.parse(None, self.cfgyaml.settings)
-        self.settings.resolve_paths(self.cfgyaml.resolve_path)
         if self.debug:
             self.log.dbg('settings: {}'.format(self.settings))
 

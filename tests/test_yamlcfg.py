@@ -46,7 +46,8 @@ class TestConfig(SubsetTestCase):
         self.assertTrue(opts != {})
         self.assertTrue(opts['backup'] == self.CONFIG_BACKUP)
         self.assertTrue(opts['create'] == self.CONFIG_CREATE)
-        self.assertTrue(opts['dotpath'] == self.CONFIG_DOTPATH)
+        dpath = os.path.basename(opts['dotpath'])
+        self.assertTrue(dpath == self.CONFIG_DOTPATH)
         self.assertTrue(conf.dump() != '')
 
     def test_def_link(self):
