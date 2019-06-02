@@ -129,6 +129,7 @@ def cmd_install(o):
                 if os.path.exists(tmp):
                     remove(tmp)
         if r:
+            # dotfile was installed
             if not o.install_temporary:
                 defactions = o.install_default_actions_post
                 postactions = dotfile.get_post_actions()
@@ -136,8 +137,19 @@ def cmd_install(o):
                                                     defactions, t, post=True)
                 post_actions_exec()
             installed += 1
-        elif not r and err:
-            LOG.err('installing \"{}\" failed: {}'.format(dotfile.key, err))
+        elif not r:
+            # dotfile was NOT installed
+            if o.install_force_action:
+                LOG.dbg('force pre action execution ...')
+                pre_actions_exec()
+                LOG.dbg('force post pre action execution ...')
+                postactions = dotfile.get_post_actions()
+                post_actions_exec = action_executor(o, dotfile, postactions,
+                                                    defactions, t, post=True)
+                post_actions_exec()
+            if err:
+                LOG.err('installing \"{}\" failed: {}'.format(dotfile.key,
+                                                              err))
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
     LOG.log('\n{} dotfile(s) installed.'.format(installed))

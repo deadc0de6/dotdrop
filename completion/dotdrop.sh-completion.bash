@@ -40,7 +40,7 @@ _dotdropsh_install()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -t --temp -f --force -n --nodiff -d --dry -D --showdiff -c= --cfg= -p= --profile= ' -- $cur) )
+        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -t --temp -f --force -n --nodiff -d --dry -D --showdiff -a --force-action -c= --cfg= -p= --profile= ' -- $cur) )
     fi
 }
 

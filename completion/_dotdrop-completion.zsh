@@ -96,6 +96,8 @@ _dotdrop-install ()
 		'(--dry)--dry' \
 		'(-D)-D' \
 		'(--showdiff)--showdiff' \
+		'(-a)-a' \
+		'(--force-action)--force-action' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
