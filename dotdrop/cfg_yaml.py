@@ -24,7 +24,8 @@ class CfgYaml:
     key_dotfiles = 'dotfiles'
     key_profiles = 'profiles'
     key_actions = 'actions'
-    key_trans_r = 'trans'
+    old_key_trans_r = 'trans'
+    key_trans_r = 'trans_read'
     key_trans_w = 'trans_write'
     key_variables = 'variables'
     key_dvariables = 'dynvariables'
@@ -126,6 +127,12 @@ class CfgYaml:
             self.log.dbg('actions: {}'.format(self.actions))
 
         # trans_r
+        if self.old_key_trans_r in self.yaml_dict:
+            self.log.warn('\"trans\" is deprecated, please use \"trans_read\"')
+            self.yaml_dict[self.key_trans_r] = self.yaml_dict.pop(
+                self.old_key_trans_r
+            )
+            self.dirty = True
         self.trans_r = self._get_entry(self.yaml_dict, self.key_trans_r,
                                        mandatory=False)
         if self.debug:

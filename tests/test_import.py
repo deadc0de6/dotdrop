@@ -352,7 +352,7 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(a.endswith('ing') for a in actions))
 
         # testing transformations
-        transformations = y['trans'].keys()
+        transformations = y['trans_read'].keys()
         self.assertTrue(all(t.endswith('ed') for t in transformations))
         self.assertFalse(any(t.endswith('ing') for t in transformations))
         transformations = y['trans_write'].keys()
@@ -394,7 +394,7 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(action.endswith('ed') for action in actions))
 
         # testing transformations
-        transformations = y['trans'].keys()
+        transformations = y['trans_read'].keys()
         self.assertTrue(all(t.endswith('ing') for t in transformations))
         self.assertFalse(any(t.endswith('ed') for t in transformations))
         transformations = y['trans_write'].keys()
