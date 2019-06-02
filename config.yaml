@@ -1,10 +1,10 @@
 config:
   backup: true
+  banner: true
   create: true
   dotpath: dotfiles
-  banner: true
-  longkey: false
   keepdot: false
+  longkey: false
   link_on_import: nolink
   link_dotfile_default: nolink
 dotfiles:
