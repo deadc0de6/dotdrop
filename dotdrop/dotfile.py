@@ -49,6 +49,18 @@ class Dotfile(DictParser):
             raise Exception('only one trans_write allowed')
         self.upignore = upignore
 
+        if link != LinkTypes.NOLINK and \
+                (
+                    (trans_r and len(trans_r) > 0)
+                    or
+                    (trans_w and len(trans_w) > 0)
+                ):
+            msg = '[{}] transformations disabled'.format(key)
+            msg += ' because dotfile is linked'
+            self.log.warn(msg)
+            trans_r = []
+            trans_w = []
+
     def get_dotfile_variables(self):
         """return this dotfile specific variables"""
         return {
