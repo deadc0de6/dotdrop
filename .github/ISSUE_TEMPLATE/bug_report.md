@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-Dotdrop version: v0.xxx
+Dotdrop version (and git commit if run from source): v0.xxx
 Using dotdrop: as a submodule, from pypi, '...'
 
 **Describe the bug**
