@@ -12,7 +12,8 @@ import filecmp
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
-import dotdrop.utils as utils
+from dotdrop.utils import patch_ignores, remove, get_unique_tmp_name, \
+    write_to_tmpfile, must_ignore
 
 
 TILD = '~'
@@ -76,7 +77,8 @@ class Updater:
         """update dotfile from file pointed by path"""
         ret = False
         new_path = None
-        self.ignores = list(set(self.ignore + dotfile.upignore))
+        ignores = list(set(self.ignore + dotfile.upignore))
+        self.ignores = patch_ignores(ignores, dotfile.dst)
         if self.debug:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
@@ -98,7 +100,7 @@ class Updater:
             ret = self._handle_file(path, dtpath)
         # clean temporary files
         if new_path and os.path.exists(new_path):
-            utils.remove(new_path)
+            remove(new_path)
         return ret
 
     def _apply_trans_w(self, path, dotfile):
@@ -108,12 +110,12 @@ class Updater:
             return path
         if self.debug:
             self.log.dbg('executing write transformation {}'.format(trans))
-        tmp = utils.get_unique_tmp_name()
+        tmp = get_unique_tmp_name()
         if not trans.transform(path, tmp):
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, dotfile.key))
             if os.path.exists(tmp):
-                utils.remove(tmp)
+                remove(tmp)
             return None
         return tmp
 
@@ -128,7 +130,7 @@ class Updater:
     def _show_patch(self, fpath, tpath):
         """provide a way to manually patch the template"""
         content = self._resolve_template(tpath)
-        tmp = utils.write_to_tmpfile(content)
+        tmp = write_to_tmpfile(content)
         cmds = ['diff', '-u', tmp, fpath, '|', 'patch', tpath]
         self.log.warn('try patching with: \"{}\"'.format(' '.join(cmds)))
         return False
@@ -231,7 +233,7 @@ class Updater:
                 self.log.dbg('rm -r {}'.format(old))
             if not self._confirm_rm_r(old):
                 continue
-            utils.remove(old)
+            remove(old)
             self.log.sub('\"{}\" dir removed'.format(old))
 
         # handle files diff
@@ -283,7 +285,7 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
-            utils.remove(new)
+            remove(new)
             self.log.sub('\"{}\" removed'.format(new))
 
         # Recursively decent into common subdirectories.
@@ -308,7 +310,7 @@ class Updater:
         return True
 
     def _ignore(self, paths):
-        if utils.must_ignore(paths, self.ignores, debug=self.debug):
+        if must_ignore(paths, self.ignores, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring update for {}'.format(paths))
             return True

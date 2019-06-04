@@ -17,6 +17,7 @@ from shutil import rmtree
 from dotdrop.logger import Logger
 
 LOG = Logger()
+STAR = '*'
 
 
 def run(cmd, raw=True, debug=False, checkerr=False):
@@ -138,4 +139,22 @@ def uniq_list(a_list):
     for a in a_list:
         if a not in new:
             new.append(a)
+    return new
+
+
+def patch_ignores(ignores, prefix):
+    """allow relative ignore pattern"""
+    new = []
+    for ignore in ignores:
+        if STAR in ignore:
+            # is glob
+            new.append(ignore)
+            continue
+        if os.path.isabs(ignore):
+            # is absolute
+            new.append(ignore)
+            continue
+        # patch upignore
+        path = os.path.join(prefix, ignore)
+        new.append(path)
     return new

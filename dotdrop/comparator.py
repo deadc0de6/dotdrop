@@ -10,7 +10,7 @@ import filecmp
 
 # local imports
 from dotdrop.logger import Logger
-import dotdrop.utils as utils
+from dotdrop.utils import must_ignore, uniq_list, diff
 
 
 class Comparator:
@@ -43,7 +43,7 @@ class Comparator:
         """compare a file"""
         if self.debug:
             self.log.dbg('compare file {} with {}'.format(left, right))
-        if utils.must_ignore([left, right], ignore, debug=self.debug):
+        if must_ignore([left, right], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
             return ''
@@ -55,7 +55,7 @@ class Comparator:
             self.log.dbg('compare directory {} with {}'.format(left, right))
         if not os.path.exists(right):
             return ''
-        if utils.must_ignore([left, right], ignore, debug=self.debug):
+        if must_ignore([left, right], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring diff {} and {}'.format(left, right))
             return ''
@@ -68,15 +68,15 @@ class Comparator:
 
         # handle files only in deployed dir
         for i in comp.left_only:
-            if utils.must_ignore([os.path.join(left, i)],
-                                 ignore, debug=self.debug):
+            if must_ignore([os.path.join(left, i)],
+                           ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist on local\n'.format(i))
 
         # handle files only in dotpath dir
         for i in comp.right_only:
-            if utils.must_ignore([os.path.join(right, i)],
-                                 ignore, debug=self.debug):
+            if must_ignore([os.path.join(right, i)],
+                           ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist in dotdrop\n'.format(i))
 
@@ -85,8 +85,8 @@ class Comparator:
         for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
-            if utils.must_ignore([lfile, rfile],
-                                 ignore, debug=self.debug):
+            if must_ignore([lfile, rfile],
+                           ignore, debug=self.debug):
                 continue
             short = os.path.basename(lfile)
             # file vs dir
@@ -95,12 +95,12 @@ class Comparator:
         # content is different
         funny = comp.diff_files
         funny.extend(comp.funny_files)
-        funny = utils.uniq_list(funny)
+        funny = uniq_list(funny)
         for i in funny:
             lfile = os.path.join(left, i)
             rfile = os.path.join(right, i)
-            if utils.must_ignore([lfile, rfile],
-                                 ignore, debug=self.debug):
+            if must_ignore([lfile, rfile],
+                           ignore, debug=self.debug):
                 continue
             diff = self._diff(lfile, rfile, header=True)
             ret.append(diff)
@@ -115,9 +115,9 @@ class Comparator:
 
     def _diff(self, left, right, header=False):
         """diff using the unix tool diff"""
-        diff = utils.diff(left, right, raw=False,
-                          opts=self.diffopts, debug=self.debug)
+        d = diff(left, right, raw=False,
+                 opts=self.diffopts, debug=self.debug)
         if header:
             lshort = os.path.basename(left)
-            diff = '=> diff \"{}\":\n{}'.format(lshort, diff)
-        return diff
+            d = '=> diff \"{}\":\n{}'.format(lshort, diff)
+        return d

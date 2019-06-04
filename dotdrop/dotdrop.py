@@ -15,7 +15,8 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.utils import get_tmpdir, remove, strip_home, run, uniq_list
+from dotdrop.utils import get_tmpdir, remove, strip_home, \
+    run, uniq_list, patch_ignores
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException
 
@@ -225,6 +226,7 @@ def cmd_compare(o, tmp):
             same = False
             continue
         ignores = list(set(o.compare_ignore + dotfile.cmpignore))
+        ignores = patch_ignores(ignores, dotfile.src)
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
         if tmpsrc:
             # clean tmp transformed dotfile if any
