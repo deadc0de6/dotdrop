@@ -751,7 +751,7 @@ class CfgYaml:
         # ensure no null are displayed
         data = yaml.safe_dump(content,
                               default_flow_style=False,
-                              indent=2)
+                              indent=2, sort_keys=False)
         data = data.replace('null', '')
 
         # save to file
