@@ -642,16 +642,19 @@ class CfgYaml:
             self.log.err('key not in dotfiles: {}'.format(df_key))
             return False
         if pro_key not in self.profiles.keys():
-            self.log.err('key not in profiles: {}'.format(pro_key))
+            self.log.err('key not in profile: {}'.format(pro_key))
             return False
-        profiles = self.yaml_dict[self.key_profiles][pro_key]
+        # get the profile dictionary
+        profile = self.yaml_dict[self.key_profiles][pro_key]
+        if df_key not in profile[self.key_profiles_dotfiles]:
+            return True
         if self.debug:
-            dfs = profiles[self.key_profiles_dotfiles]
+            dfs = profile[self.key_profiles_dotfiles]
             self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
             self.log.dbg('remove {} from profile {}'.format(df_key, pro_key))
-        profiles[self.key_profiles_dotfiles].remove(df_key)
+        profile[self.key_profiles_dotfiles].remove(df_key)
         if self.debug:
-            dfs = profiles[self.key_profiles_dotfiles]
+            dfs = profile[self.key_profiles_dotfiles]
             self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
         self.dirty = True
         return True
