@@ -420,17 +420,13 @@ def cmd_remove(o):
         LOG.log('no dotfile to remove')
         return False
     if o.debug:
-        LOG.dbg('dotfile to remove: {}'.format(paths))
+        LOG.dbg('dotfile(s) to remove: {}'.format(','.join(paths)))
 
     removed = []
     for key in paths:
-        if o.debug:
-            LOG.dbg('removing {}'.format(key))
         if not iskey:
             # by path
-            print(key)
             dotfile = o.conf.get_dotfile_by_dst(key)
-            print(dotfile)
             if not dotfile:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
@@ -438,7 +434,13 @@ def cmd_remove(o):
         else:
             # by key
             dotfile = o.conf.get_dotfile(key)
+            if not dotfile:
+                LOG.warn('{} ignored, does not exist'.format(key))
+                continue
             k = key
+        if o.debug:
+            LOG.dbg('removing {}'.format(key))
+
         # make sure is part of the profile
         if dotfile.key not in [d.key for d in o.dotfiles]:
             LOG.warn('{} ignored, not associated to this profile'.format(key))
