@@ -147,9 +147,11 @@ def cmd_install(o):
         elif not r:
             # dotfile was NOT installed
             if o.install_force_action:
+                # pre-actions
                 LOG.dbg('force pre action execution ...')
                 pre_actions_exec()
-                LOG.dbg('force post pre action execution ...')
+                # post-actions
+                LOG.dbg('force post action execution ...')
                 postactions = dotfile.get_post_actions()
                 prof = o.conf.get_profile(o.profile)
                 postactions.extend(prof.get_post_actions())
