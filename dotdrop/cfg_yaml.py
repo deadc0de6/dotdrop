@@ -741,7 +741,7 @@ class CfgYaml:
             if cur.pop(0) >= minv.pop(0) and \
                     cur.pop(1) >= minv.pop(1):
                 return True
-        except:
+        except Exception:
             return False
         return False
 
