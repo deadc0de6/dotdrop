@@ -733,6 +733,18 @@ class CfgYaml:
             new[k] = newv
         return new
 
+    def _yaml_version(self):
+        """returns True if version >= 5.1"""
+        minv = [5, 1]
+        try:
+            cur = list(map(int, yaml.__version__.split('.')))
+            if cur.pop(0) >= minv.pop(0) and \
+                    cur.pop(1) >= minv.pop(1):
+                return True
+        except:
+            return False
+        return False
+
     def save(self):
         """save this instance and return True if saved"""
         if not self.dirty:
@@ -748,10 +760,12 @@ class CfgYaml:
         if self.key_profiles not in content:
             content[self.key_profiles] = None
 
+        opts = {'default_flow_style': False, 'indent': 2}
+        if self._yaml_version():
+            opts['sort_keys'] = False
+        data = yaml.safe_dump(content, **opts)
+
         # ensure no null are displayed
-        data = yaml.safe_dump(content,
-                              default_flow_style=False,
-                              indent=2, sort_keys=False)
         data = data.replace('null', '')
 
         # save to file
