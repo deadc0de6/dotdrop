@@ -549,11 +549,7 @@ class CfgYaml:
 
     def _merge_dict(self, high, low):
         """merge low into high"""
-        # won't work in python3.4
-        # return {**low, **high}
-        new = deepcopy(low)
-        new.update(high)
-        return new
+        return {**low, **high}
 
     def _get_entry(self, dic, key, mandatory=True):
         """return entry from yaml dictionary"""
