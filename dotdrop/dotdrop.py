@@ -472,7 +472,10 @@ def cmd_remove(o):
         LOG.raw(o.conf.dump())
     else:
         o.conf.save()
-    LOG.log('\ndotfile(s) removed: {}'.format(','.join(removed)))
+    if removed:
+        LOG.log('\ndotfile(s) removed: {}'.format(','.join(removed)))
+    else:
+        LOG.log('\nno dotfile removed')
     return True
 
 

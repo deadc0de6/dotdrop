@@ -4,7 +4,6 @@ Copyright (c) 2019, deadc0de6
 basic unittest for the remove function
 """
 
-import yaml
 import unittest
 import os
 
@@ -12,7 +11,7 @@ import os
 from dotdrop.dotdrop import cmd_remove
 from tests.helpers import (clean, create_dir,
                            create_random_file, load_options,
-                           get_tempdir)
+                           get_tempdir, yaml_load, yaml_dump)
 
 
 class TestRemove(unittest.TestCase):
@@ -20,10 +19,7 @@ class TestRemove(unittest.TestCase):
     def load_yaml(self, path):
         """Load yaml to dict"""
         self.assertTrue(os.path.exists(path))
-        content = ''
-        with open(path, 'r') as f:
-            content = yaml.safe_load(f)
-        return content
+        return yaml_load(path)
 
     def test_remove(self):
         """test the remove command"""
@@ -71,8 +67,7 @@ class TestRemove(unittest.TestCase):
             },
         }
 
-        with open(confpath, 'w') as f:
-            yaml.safe_dump(configdic, f)
+        yaml_dump(configdic, confpath)
         o = load_options(confpath, 'host1')
         o.remove_path = ['f_test1']
         o.remove_iskey = True
@@ -87,7 +82,7 @@ class TestRemove(unittest.TestCase):
         self.assertTrue(os.path.exists(df3))
 
         # load dict
-        y = self.load_yaml(confpath)
+        y = yaml_load(confpath)
 
         # ensure not present
         self.assertTrue('f_test1' not in y['dotfiles'])
@@ -114,7 +109,7 @@ class TestRemove(unittest.TestCase):
         self.assertFalse(os.path.exists(df3))
 
         # load dict
-        y = self.load_yaml(confpath)
+        y = yaml_load(confpath)
 
         # ensure not present
         self.assertTrue('f_test3' not in y['dotfiles'])

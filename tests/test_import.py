@@ -7,7 +7,6 @@ basic unittest for the import function
 
 import unittest
 import os
-import yaml
 
 from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotdrop import cmd_list_profiles
@@ -18,7 +17,8 @@ from dotdrop.linktypes import LinkTypes
 from tests.helpers import (clean, create_dir, create_fake_config,
                            create_random_file, edit_content, file_in_yaml,
                            get_path_strip_version, get_string, get_tempdir,
-                           load_options, populate_fake_config)
+                           load_options, populate_fake_config,
+                           yaml_load)
 
 
 class TestImport(unittest.TestCase):
@@ -31,10 +31,7 @@ class TestImport(unittest.TestCase):
     def load_yaml(self, path):
         """Load yaml to dict"""
         self.assertTrue(os.path.exists(path))
-        content = ''
-        with open(path, 'r') as f:
-            content = yaml.safe_load(f)
-        return content
+        return yaml_load(path)
 
     def assert_file(self, path, o, profile):
         """Make sure path has been inserted in conf for profile"""

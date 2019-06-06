@@ -6,7 +6,7 @@ handle lower level of the config file
 """
 
 import os
-import yaml
+from ruamel.yaml import YAML as yaml
 import glob
 from copy import deepcopy
 
@@ -572,12 +572,11 @@ class CfgYaml:
         content = {}
         if not os.path.exists(path):
             raise YamlException('config path not found: {}'.format(path))
-        with open(path, 'r') as f:
-            try:
-                content = yaml.safe_load(f)
-            except Exception as e:
-                self.log.err(e)
-                raise YamlException('invalid config: {}'.format(path))
+        try:
+            content = self._yaml_load(path)
+        except Exception as e:
+            self.log.err(e)
+            raise YamlException('invalid config: {}'.format(path))
         return content
 
     def _new_profile(self, key):
@@ -733,18 +732,6 @@ class CfgYaml:
             new[k] = newv
         return new
 
-    def _yaml_version(self):
-        """returns True if version >= 5.1"""
-        minv = [5, 1]
-        try:
-            cur = list(map(int, yaml.__version__.split('.')))
-            if cur.pop(0) >= minv.pop(0) and \
-                    cur.pop(1) >= minv.pop(1):
-                return True
-        except Exception:
-            return False
-        return False
-
     def save(self):
         """save this instance and return True if saved"""
         if not self.dirty:
@@ -760,19 +747,14 @@ class CfgYaml:
         if self.key_profiles not in content:
             content[self.key_profiles] = None
 
-        opts = {'default_flow_style': False, 'indent': 2}
-        if self._yaml_version():
-            opts['sort_keys'] = False
-        data = yaml.safe_dump(content, **opts)
-
-        # ensure no null are displayed
-        data = data.replace('null', '')
-
         # save to file
         if self.debug:
-            self.log.dbg('saving: {}'.format(content))
-        with open(self.path, 'w') as f:
-            f.write(data)
+            self.log.dbg('saving to {}'.format(self.path))
+        try:
+            self._yaml_dump(content, self.path)
+        except Exception as e:
+            self.log.err(e)
+            raise YamlException('error saving config: {}'.format(self.path))
 
         self.dirty = False
         return True
@@ -780,3 +762,18 @@ class CfgYaml:
     def dump(self):
         """dump the config dictionary"""
         return self.yaml_dict
+
+    def _yaml_load(self, path):
+        """load from yaml"""
+        with open(path, 'r') as f:
+            content = yaml(typ='safe').load(f)
+        return content
+
+    def _yaml_dump(self, content, path):
+        """dump to yaml"""
+        with open(self.path, 'w') as f:
+            y = yaml()
+            y.default_flow_style = False
+            y.indent = 2
+            y.typ = 'safe'
+            y.dump(content, f)

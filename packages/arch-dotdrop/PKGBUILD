@@ -8,7 +8,7 @@ arch=('any')
 url="https://github.com/deadc0de6/dotdrop"
 license=('GPL')
 groups=()
-depends=('python' 'python-setuptools' 'python-jinja' 'python-docopt' 'python-pyaml')
+depends=('python' 'python-setuptools' 'python-jinja' 'python-docopt' 'python-ruamel-yaml')
 makedepends=('git')
 source=("git+https://github.com/deadc0de6/dotdrop.git#tag=v${pkgver}")
 md5sums=('SKIP')

@@ -8,14 +8,13 @@ basic unittest for the config parser
 import unittest
 from unittest.mock import patch
 import os
-import yaml
 
 from dotdrop.cfg_yaml import CfgYaml as Cfg
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from tests.helpers import (SubsetTestCase, _fake_args, clean,
                            create_fake_config, create_yaml_keyval, get_tempdir,
-                           populate_fake_config)
+                           populate_fake_config, yaml_load, yaml_dump)
 
 
 class TestConfig(SubsetTestCase):
@@ -142,8 +141,7 @@ profiles:
                                       create=self.CONFIG_CREATE)
 
         # edit the config
-        with open(confpath, 'r') as f:
-            content = yaml.safe_load(f)
+        content = yaml_load(confpath)
 
         # adding dotfiles
         df1key = 'f_vimrc'
@@ -162,9 +160,7 @@ profiles:
                 }
 
         # save the new config
-        with open(confpath, 'w') as f:
-            yaml.safe_dump(content, f, default_flow_style=False,
-                           indent=2)
+        yaml_dump(content, confpath)
 
         # do the tests
         conf = Cfg(confpath, debug=True)
@@ -185,17 +181,14 @@ profiles:
 
         # test not existing included profile
         # edit the config
-        with open(confpath, 'r') as f:
-            content = yaml.safe_load(f)
+        content = yaml_load(confpath)
         content['profiles'] = {
                 pf1key: {'dotfiles': [df2key], 'include': ['host2']},
                 pf2key: {'dotfiles': [df1key], 'include': ['host3']}
                 }
 
         # save the new config
-        with open(confpath, 'w') as f:
-            yaml.safe_dump(content, f, default_flow_style=False,
-                           indent=2)
+        yaml_dump(content, confpath)
 
         # do the tests
         conf = Cfg(confpath, debug=True)
