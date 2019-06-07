@@ -74,6 +74,12 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: ${tmpd}/def
+    src: def
+  f_ghi:
+    dst: ${tmpd}/ghi
+    src: ghi
 profiles:
   p0:
     actions:
@@ -82,11 +88,15 @@ profiles:
     - nakedaction
     dotfiles:
     - f_abc
+    - f_def
+    - f_ghi
 _EOF
 #cat ${cfg}
 
 # create the dotfile
 echo "test" > ${tmps}/dotfiles/abc
+echo "test" > ${tmps}/dotfiles/def
+echo "test" > ${tmps}/dotfiles/ghi
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 -V
@@ -97,19 +107,25 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 -V
 [ ! -e ${tmpa}/naked ] && echo 'action not executed' && exit 1
 
 grep pre2 ${tmpa}/pre2
+nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "profile action executed multiple times" && exit 1
+
 grep post2 ${tmpa}/post2
+nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "profile action executed multiple times" && exit 1
+
 grep naked ${tmpa}/naked
+nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "profile action executed multiple times" && exit 1
 
 # install again
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 -V
 
 # check actions not executed twice
-nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
-[ "${nb}" -gt "1" ] && echo "action executed twice" && exit 1
 nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
-[ "${nb}" -gt "1" ] && echo "action executed twice" && exit 1
+[ "${nb}" -gt "1" ] && echo "action post2 executed twice" && exit 1
 nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
-[ "${nb}" -gt "1" ] && echo "action executed twice" && exit 1
+[ "${nb}" -gt "1" ] && echo "action naked executed twice" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}

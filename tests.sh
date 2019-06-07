@@ -49,3 +49,4 @@ PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
   rm -f ${log}
 }
 
+echo "All test finished successfully"
