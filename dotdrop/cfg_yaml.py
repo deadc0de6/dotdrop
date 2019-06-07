@@ -287,7 +287,7 @@ class CfgYaml:
                 for key, action in v.items():
                     new[key] = (k, action)
             else:
-                new[k] = (self.action_pre, v)
+                new[k] = (self.action_post, v)
         return new
 
     def _norm_dotfiles(self, dotfiles):
