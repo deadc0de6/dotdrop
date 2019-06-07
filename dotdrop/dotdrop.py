@@ -28,7 +28,7 @@ TRANS_SUFFIX = 'trans'
 ###########################################################
 
 
-def action_executor(o, dotfile, actions, defactions, templater, post=False):
+def action_executor(o, actions, defactions, templater, post=False):
     """closure for action execution"""
     def execute():
         """
@@ -71,6 +71,10 @@ def action_executor(o, dotfile, actions, defactions, templater, post=False):
 def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
+    prof = o.conf.get_profile(o.profile)
+    pro_pre_actions = prof.get_pre_actions()
+    pro_post_actions = prof.get_post_actions()
+
     if o.install_keys:
         # filtered dotfiles to install
         uniq = uniq_list(o.install_keys)
@@ -94,6 +98,15 @@ def cmd_install(o):
                      backup_suffix=o.install_backup_suffix)
     installed = 0
     tvars = t.add_tmp_vars()
+
+    # execute profile pre-action
+    if o.debug:
+        LOG.dbg('execute profile pre actions')
+    ret, err = action_executor(o, pro_pre_actions, [], t, post=False)()
+    if not ret:
+        return False
+
+    # install each dotfile
     for dotfile in dotfiles:
         # add dotfile variables
         t.restore_vars(tvars)
@@ -103,11 +116,9 @@ def cmd_install(o):
         preactions = []
         if not o.install_temporary:
             preactions.extend(dotfile.get_pre_actions())
-            prof = o.conf.get_profile(o.profile)
-            preactions.extend(prof.get_pre_actions())
         defactions = o.install_default_actions_pre
-        pre_actions_exec = action_executor(o, dotfile, preactions,
-                                           defactions, t, post=False)
+        pre_actions_exec = action_executor(o, preactions, defactions,
+                                           t, post=False)
 
         if o.debug:
             LOG.dbg('installing {}'.format(dotfile))
@@ -138,29 +149,35 @@ def cmd_install(o):
             if not o.install_temporary:
                 defactions = o.install_default_actions_post
                 postactions = dotfile.get_post_actions()
-                prof = o.conf.get_profile(o.profile)
-                postactions.extend(prof.get_post_actions())
-                post_actions_exec = action_executor(o, dotfile, postactions,
-                                                    defactions, t, post=True)
+                post_actions_exec = action_executor(o, postactions, defactions,
+                                                    t, post=True)
                 post_actions_exec()
             installed += 1
         elif not r:
             # dotfile was NOT installed
             if o.install_force_action:
                 # pre-actions
-                LOG.dbg('force pre action execution ...')
+                if o.debug:
+                    LOG.dbg('force pre action execution ...')
                 pre_actions_exec()
                 # post-actions
                 LOG.dbg('force post action execution ...')
                 postactions = dotfile.get_post_actions()
-                prof = o.conf.get_profile(o.profile)
-                postactions.extend(prof.get_post_actions())
-                post_actions_exec = action_executor(o, dotfile, postactions,
-                                                    defactions, t, post=True)
+                post_actions_exec = action_executor(o, postactions, defactions,
+                                                    t, post=True)
                 post_actions_exec()
             if err:
                 LOG.err('installing \"{}\" failed: {}'.format(dotfile.key,
                                                               err))
+
+    # execute profile post-action
+    if installed > 0 or o.install_force_action:
+        if o.debug:
+            LOG.dbg('execute profile post actions')
+        ret, err = action_executor(o, pro_post_actions, [], t, post=False)()
+        if not ret:
+            return False
+
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
     LOG.log('\n{} dotfile(s) installed.'.format(installed))
