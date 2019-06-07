@@ -36,7 +36,6 @@ class CfgYaml:
     action_post = 'post'
 
     # profiles/dotfiles entries
-    key_profiles_dotfiles = 'dotfiles'
     key_dotfile_src = 'src'
     key_dotfile_dst = 'dst'
     key_dotfile_link = 'link'
@@ -44,9 +43,11 @@ class CfgYaml:
     key_dotfile_link_children = 'link_children'
 
     # profile
+    key_profile_dotfiles = 'dotfiles'
     key_profile_include = 'include'
     key_profile_variables = 'variables'
     key_profile_dvariables = 'dynvariables'
+    key_profile_actions = 'actions'
     key_all = 'ALL'
 
     # import entries
@@ -470,44 +471,72 @@ class CfgYaml:
         """resolve some other parts of the config"""
         # profile -> ALL
         for k, v in self.profiles.items():
-            dfs = v.get(self.key_profiles_dotfiles, None)
+            dfs = v.get(self.key_profile_dotfiles, None)
             if not dfs:
                 continue
             if self.debug:
                 self.log.dbg('add ALL to profile {}'.format(k))
             if self.key_all in dfs:
-                v[self.key_profiles_dotfiles] = self.dotfiles.keys()
+                v[self.key_profile_dotfiles] = self.dotfiles.keys()
 
         # profiles -> include other profile
         for k, v in self.profiles.items():
             self._rec_resolve_profile_include(k)
 
     def _rec_resolve_profile_include(self, profile):
-        """recursively resolve include of other profiles's dotfiles"""
-        values = self.profiles[profile]
-        current = values.get(self.key_profiles_dotfiles, [])
-        inc = values.get(self.key_profile_include, None)
-        if not inc:
-            return current
+        """
+        recursively resolve include of other profiles's:
+        * dotfiles
+        * actions
+        """
+        this_profile = self.profiles[profile]
+
+        # include
+        dotfiles = this_profile.get(self.key_profile_dotfiles, [])
+        actions = this_profile.get(self.key_profile_actions, [])
+        includes = this_profile.get(self.key_profile_include, None)
+        if not includes:
+            # nothing to include
+            return dotfiles, actions
+        if self.debug:
+            self.log.dbg('{} includes: {}'.format(profile, ','.join(includes)))
+            self.log.dbg('{} dotfiles before include: {}'.format(profile,
+                                                                 dotfiles))
+            self.log.dbg('{} actions before include: {}'.format(profile,
+                                                                actions))
+
         seen = []
-        for i in inc:
+        for i in uniq_list(includes):
+            # ensure no include loop occurs
             if i in seen:
                 raise YamlException('\"include loop\"')
             seen.append(i)
+            # included profile even exists
             if i not in self.profiles.keys():
                 self.log.warn('include unknown profile: {}'.format(i))
                 continue
-            p = self.profiles[i]
-            others = p.get(self.key_profiles_dotfiles, [])
-            if self.key_profile_include in p.keys():
-                others.extend(self._rec_resolve_profile_include(i))
-            current.extend(others)
-        # unique them
-        values[self.key_profiles_dotfiles] = uniq_list(current)
+            # recursive resolve
+            o_dfs, o_actions = self._rec_resolve_profile_include(i)
+            # merge dotfile keys
+            dotfiles.extend(o_dfs)
+            this_profile[self.key_profile_dotfiles] = uniq_list(dotfiles)
+            # merge actions keys
+            actions.extend(o_actions)
+            this_profile[self.key_profile_actions] = uniq_list(actions)
+
+        dotfiles = this_profile.get(self.key_profile_dotfiles, [])
+        actions = this_profile.get(self.key_profile_actions, [])
         if self.debug:
-            dfs = values[self.key_profiles_dotfiles]
-            self.log.dbg('{} dfs after include: {}'.format(profile, dfs))
-        return values.get(self.key_profiles_dotfiles, [])
+            self.log.dbg('{} dotfiles after include: {}'.format(profile,
+                                                                dotfiles))
+            self.log.dbg('{} actions after include: {}'.format(profile,
+                                                               actions))
+
+        # since dotfiles and actions are resolved here
+        # and variables have been already done at the beginning
+        # of the parsing, we can clear these include
+        self.profiles[profile][self.key_profile_include] = None
+        return dotfiles, actions
 
     def _resolve_path(self, path):
         """resolve a path either absolute or relative to config path"""
@@ -580,7 +609,7 @@ class CfgYaml:
         if key not in self.profiles.keys():
             # update yaml_dict
             self.yaml_dict[self.key_profiles][key] = {
-                self.key_profiles_dotfiles: []
+                self.key_profile_dotfiles: []
             }
             if self.debug:
                 self.log.dbg('adding new profile: {}'.format(key))
@@ -590,8 +619,8 @@ class CfgYaml:
         """add an existing dotfile key to a profile_key"""
         self._new_profile(profile_key)
         profile = self.yaml_dict[self.key_profiles][profile_key]
-        if dotfile_key not in profile[self.key_profiles_dotfiles]:
-            profile[self.key_profiles_dotfiles].append(dotfile_key)
+        if dotfile_key not in profile[self.key_profile_dotfiles]:
+            profile[self.key_profile_dotfiles].append(dotfile_key)
             if self.debug:
                 msg = 'add \"{}\" to profile \"{}\"'.format(dotfile_key,
                                                             profile_key)
@@ -641,15 +670,15 @@ class CfgYaml:
             return False
         # get the profile dictionary
         profile = self.yaml_dict[self.key_profiles][pro_key]
-        if df_key not in profile[self.key_profiles_dotfiles]:
+        if df_key not in profile[self.key_profile_dotfiles]:
             return True
         if self.debug:
-            dfs = profile[self.key_profiles_dotfiles]
+            dfs = profile[self.key_profile_dotfiles]
             self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
             self.log.dbg('remove {} from profile {}'.format(df_key, pro_key))
-        profile[self.key_profiles_dotfiles].remove(df_key)
+        profile[self.key_profile_dotfiles].remove(df_key)
         if self.debug:
-            dfs = profile[self.key_profiles_dotfiles]
+            dfs = profile[self.key_profile_dotfiles]
             self.log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
         self.dirty = True
         return True
