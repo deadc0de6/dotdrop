@@ -245,7 +245,7 @@ def cmd_compare(o, tmp):
             same = False
             continue
         ignores = list(set(o.compare_ignore + dotfile.cmpignore))
-        ignores = patch_ignores(ignores, dotfile.src)
+        ignores = patch_ignores(ignores, dotfile.dst)
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
         if tmpsrc:
             # clean tmp transformed dotfile if any

@@ -115,9 +115,9 @@ class Comparator:
 
     def _diff(self, left, right, header=False):
         """diff using the unix tool diff"""
-        d = diff(left, right, raw=False,
-                 opts=self.diffopts, debug=self.debug)
+        out = diff(left, right, raw=False,
+                   opts=self.diffopts, debug=self.debug)
         if header:
             lshort = os.path.basename(left)
-            d = '=> diff \"{}\":\n{}'.format(lshort, diff)
-        return d
+            out = '=> diff \"{}\":\n{}'.format(lshort, out)
+        return out

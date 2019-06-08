@@ -54,10 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 
 # some files
-mkdir -p ${tmpd}/{program,config}
+mkdir -p ${tmpd}/{program,config,vscode}
 touch ${tmpd}/program/a
 touch ${tmpd}/config/a
-mkdir ${tmpd}/vscode
 touch ${tmpd}/vscode/extensions.txt
 touch ${tmpd}/vscode/keybindings.json
 
@@ -71,51 +70,35 @@ cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/vscode
 
-# add files
+# add files on filesystem
 echo "[+] add files"
 touch ${tmpd}/program/b
 touch ${tmpd}/config/b
 
 # expects diff
-echo "[+] comparing normal - 2 diffs"
+echo "[+] comparing normal - diffs expected"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose
-[ "$?" = "0" ] && exit 1
+ret="$?"
+echo ${ret}
+[ "${ret}" = "0" ] && exit 1
 set -e
 
 # expects one diff
-patt="${tmpd}/config/b"
-echo "[+] comparing with ignore (pattern: ${patt}) - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
-[ "$?" = "0" ] && exit 1
-set -e
-
-# expects no diff
-patt="*b"
-echo "[+] comparing with ignore (pattern: ${patt}) - 0 diff"
+patt="b"
+echo "[+] comparing with ignore (pattern: ${patt}) - no diff expected"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
 [ "$?" != "0" ] && exit 1
 set -e
 
-# expects one diff
-patt="*/config/*b"
-echo "[+] comparing with ignore (pattern: ${patt}) - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --ignore=${patt}
-[ "$?" = "0" ] && exit 1
-set -e
-
-#cat ${cfg}
-
 # adding ignore in dotfile
 cfg2="${basedir}/config2.yaml"
-sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "config/b"' ${cfg} > ${cfg2}
+sed '/d_config:/a \ \ \ \ cmpignore:\n\ \ \ \ - "b"' ${cfg} > ${cfg2}
 #cat ${cfg2}
 
 # expects one diff
-echo "[+] comparing with ignore in dotfile - 1 diff"
+echo "[+] comparing with ignore in dotfile - diff expected"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
 [ "$?" = "0" ] && exit 1
@@ -128,8 +111,7 @@ sed -i '/d_program:/a \ \ \ \ cmpignore:\n\ \ \ \ - "b"' ${cfg2}
 #cat ${cfg2}
 
 # expects no diff
-patt="*b"
-echo "[+] comparing with ignore in dotfile - 0 diff"
+echo "[+] comparing with ignore in dotfile - no diff expected"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
 [ "$?" != "0" ] && exit 1
@@ -140,12 +122,14 @@ echo touched > ${tmpd}/vscode/extensions.txt
 echo touched > ${tmpd}/vscode/keybindings.json
 
 # expect two diffs
+echo "[+] comparing - diff expected"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -C ${tmpd}/vscode
 [ "$?" = "0" ] && exit 1
 set -e
 
 # expects no diff
+echo "[+] comparing with ignore in dotfile - no diff expected"
 sed '/d_vscode:/a \ \ \ \ cmpignore:\n\ \ \ \ - "extensions.txt"\n\ \ \ \ - "keybindings.json"' ${cfg} > ${cfg2}
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose -C ${tmpd}/vscode
