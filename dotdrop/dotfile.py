@@ -14,7 +14,7 @@ class Dotfile(DictParser):
     """Represent a dotfile."""
     # dotfile keys
     key_noempty = 'ignoreempty'
-    key_trans_r = 'trans'
+    key_trans_r = 'trans_read'
     key_trans_w = 'trans_write'
 
     def __init__(self, key, dst, src,

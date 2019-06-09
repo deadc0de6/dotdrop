@@ -124,7 +124,8 @@ class CfgAggregator:
             for k in okeys:
                 o = get_by_key(k)
                 if not o:
-                    err = 'bad key for \"{}\": {}'.format(c.key, k)
+                    err = 'bad {} key for \"{}\": {}'.format(keys, c.key, k)
+                    self.log.err(err)
                     raise Exception(err)
                 objects.append(o)
             if self.debug:

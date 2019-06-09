@@ -292,15 +292,23 @@ class CfgYaml:
         return new
 
     def _norm_dotfiles(self, dotfiles):
-        """add 'src' as 'key if not present"""
+        """normalize dotfiles entries"""
         if not dotfiles:
             return dotfiles
         new = {}
         for k, v in dotfiles.items():
+            # add 'src' as key' if not present
             if self.key_dotfile_src not in v:
                 v[self.key_dotfile_src] = k
                 new[k] = v
             else:
+                new[k] = v
+            # fix deprecated trans key
+            if self.old_key_trans_r in k:
+                msg = '\"trans\" is deprecated, please use \"trans_read\"'
+                self.log.warn(msg)
+                v[self.key_trans_r] = v[self.old_key_trans_r].copy()
+                del v[self.old_key_trans_r]
                 new[k] = v
         return new
 
