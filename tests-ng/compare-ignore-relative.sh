@@ -136,6 +136,51 @@ cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose -C ${tmpd}/vscode
 [ "$?" != "0" ] && exit 1
 set -e
 
+####################
+# test for #149
+####################
+mkdir -p ${tmpd}/.zsh
+touch ${tmpd}/.zsh/somefile
+mkdir -p ${tmpd}/.zsh/plugins
+touch ${tmpd}/.zsh/plugins/someplugin
+
+echo "[+] import .zsh"
+cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/.zsh
+
+# no diff expected
+echo "[+] comparing .zsh"
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -C ${tmpd}/.zsh --ignore=${patt}
+[ "$?" != "0" ] && exit 1
+
+# add some files
+touch ${tmpd}/.zsh/plugins/ignore-1.zsh
+touch ${tmpd}/.zsh/plugins/ignore-2.zsh
+
+# expects diff
+echo "[+] comparing .zsh with new files"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -C ${tmpd}/.zsh
+ret="$?"
+echo ${ret}
+[ "${ret}" = "0" ] && exit 1
+set -e
+
+# expects no diff
+patt="plugins/ignore-*.zsh"
+echo "[+] comparing with ignore (pattern: ${patt}) - no diff expected"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -C ${tmpd}/.zsh --ignore=${patt}
+[ "$?" != "0" ] && exit 1
+set -e
+
+# expects no diff
+echo "[+] comparing with ignore in dotfile - no diff expected"
+sed '/d_zsh:/a \ \ \ \ cmpignore:\n\ \ \ \ - "plugins/ignore-*.zsh"' ${cfg} > ${cfg2}
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose -C ${tmpd}/.zsh
+[ "$?" != "0" ] && exit 1
+set -e
+
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
 

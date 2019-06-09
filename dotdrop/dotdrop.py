@@ -221,6 +221,8 @@ def cmd_compare(o, tmp):
         tmpsrc = None
         if dotfile.trans_r:
             # apply transformation
+            if o.debug:
+                LOG.dbg('applying transformation before comparing')
             tmpsrc = apply_trans(o.dotpath, dotfile, debug=o.debug)
             if not tmpsrc:
                 # could not apply trans
@@ -245,7 +247,7 @@ def cmd_compare(o, tmp):
             same = False
             continue
         ignores = list(set(o.compare_ignore + dotfile.cmpignore))
-        ignores = patch_ignores(ignores, dotfile.dst)
+        ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
         if tmpsrc:
             # clean tmp transformed dotfile if any
@@ -569,6 +571,9 @@ def main():
     except YamlException as e:
         LOG.err('config file error: {}'.format(str(e)))
         return False
+
+    if o.debug:
+        LOG.dbg('\n\n')
 
     ret = True
     try:

@@ -124,6 +124,8 @@ def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
     if not ignores:
         return False
+    if debug:
+        LOG.dbg('must ignore? {} against {}'.format(paths, ignores))
     for p in paths:
         for i in ignores:
             if fnmatch.fnmatch(p, i):
@@ -142,19 +144,24 @@ def uniq_list(a_list):
     return new
 
 
-def patch_ignores(ignores, prefix):
+def patch_ignores(ignores, prefix, debug=False):
     """allow relative ignore pattern"""
     new = []
+    if debug:
+        LOG.dbg('ignores before patching: {}'.format(ignores))
     for ignore in ignores:
-        if STAR in ignore:
-            # is glob
-            new.append(ignore)
-            continue
         if os.path.isabs(ignore):
             # is absolute
             new.append(ignore)
             continue
+        if STAR in ignore:
+            if ignore.startswith(STAR) or ignore.startswith(os.sep):
+                # is glob
+                new.append(ignore)
+                continue
         # patch upignore
         path = os.path.join(prefix, ignore)
         new.append(path)
+    if debug:
+        LOG.dbg('ignores after patching: {}'.format(new))
     return new

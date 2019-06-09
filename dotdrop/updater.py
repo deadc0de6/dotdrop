@@ -78,7 +78,7 @@ class Updater:
         ret = False
         new_path = None
         ignores = list(set(self.ignore + dotfile.upignore))
-        self.ignores = patch_ignores(ignores, dotfile.dst)
+        self.ignores = patch_ignores(ignores, dotfile.dst, debug=self.debug)
         if self.debug:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
