@@ -65,7 +65,7 @@ exec bspwm
                         f.write('      - {}\n'.format(action.key))
                 if d.trans_r:
                     for tr in d.trans_r:
-                        f.write('    trans: {}\n'.format(tr.key))
+                        f.write('    trans_read: {}\n'.format(tr.key))
             f.write('profiles:\n')
             f.write('  {}:\n'.format(profile))
             f.write('    dotfiles:\n')

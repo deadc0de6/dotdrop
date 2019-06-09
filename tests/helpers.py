@@ -238,7 +238,7 @@ def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
     config['dotfiles'] = dotfiles
     config['profiles'] = profiles
     config['actions'] = actions
-    config['trans'] = trans
+    config['trans_read'] = trans
     config['trans_write'] = trans_write
     config['variables'] = variables
     config['dynvariables'] = dynvariables

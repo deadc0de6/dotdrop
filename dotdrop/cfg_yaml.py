@@ -84,7 +84,7 @@ class CfgYaml:
         self._fix_deprecated(self.yaml_dict)
         self._parse_main_yaml(self.yaml_dict)
         if self.debug:
-            self.log.dbg('current dict: {}'.format(self.yaml_dict))
+            self.log.dbg('before normalization: {}'.format(self.yaml_dict))
 
         # resolve variables
         allvars = self._merge_and_apply_variables()
@@ -97,6 +97,8 @@ class CfgYaml:
         self._resolve_rest()
         # patch dotfiles paths
         self._resolve_dotfile_paths()
+        if self.debug:
+            self.log.dbg('after normalization: {}'.format(self.yaml_dict))
 
     def _parse_main_yaml(self, dic):
         """parse the different blocks"""
@@ -142,7 +144,8 @@ class CfgYaml:
         key = self.key_trans_r
         if self.old_key_trans_r in dic:
             self.log.warn('\"trans\" is deprecated, please use \"trans_read\"')
-            key = self.old_key_trans_r
+            dic[self.key_trans_r] = dic[self.old_key_trans_r]
+            del dic[self.old_key_trans_r]
         self.ori_trans_r = self._get_entry(dic, key, mandatory=False)
         self.trans_r = deepcopy(self.ori_trans_r)
         if self.debug:
@@ -304,10 +307,10 @@ class CfgYaml:
             else:
                 new[k] = v
             # fix deprecated trans key
-            if self.old_key_trans_r in k:
+            if self.old_key_trans_r in v:
                 msg = '\"trans\" is deprecated, please use \"trans_read\"'
                 self.log.warn(msg)
-                v[self.key_trans_r] = v[self.old_key_trans_r].copy()
+                v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
         return new
