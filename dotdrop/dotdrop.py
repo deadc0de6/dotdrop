@@ -123,12 +123,12 @@ def cmd_install(o):
         if o.debug:
             LOG.dbg('installing {}'.format(dotfile))
         if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
-            r = inst.link(t, dotfile.src, dotfile.dst,
-                          actionexec=pre_actions_exec)
+            r, err = inst.link(t, dotfile.src, dotfile.dst,
+                               actionexec=pre_actions_exec)
         elif hasattr(dotfile, 'link') and \
                 dotfile.link == LinkTypes.LINK_CHILDREN:
-            r = inst.link_children(t, dotfile.src, dotfile.dst,
-                                   actionexec=pre_actions_exec)
+            r, err = inst.link_children(t, dotfile.src, dotfile.dst,
+                                        actionexec=pre_actions_exec)
         else:
             src = dotfile.src
             tmp = None
