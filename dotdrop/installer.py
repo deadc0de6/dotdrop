@@ -173,7 +173,12 @@ class Installer:
             os.unlink(dst)
             os.mkdir(dst)
 
-        children = os.listdir(parent)
+        os.chdir(parent)
+        children = []
+        for folder, subfolders, files in os.walk(parent):
+            for file in files:
+                children.append(os.path.join(os.path.relpath(folder), file))
+
         srcs = [os.path.normpath(os.path.join(parent, child))
                 for child in children]
         dsts = [os.path.normpath(os.path.join(dst, child))
@@ -182,6 +187,11 @@ class Installer:
         for i in range(len(children)):
             src = srcs[i]
             dst = dsts[i]
+
+            dstdir = os.path.dirname(os.path.expanduser(dst))
+            if not os.path.lexists(dstdir):
+                self.log.sub('creating directory "{}"'.format(dstdir))
+                os.makedirs(dstdir)
 
             if self.debug:
                 self.log.dbg('symlink child {} to {}'.format(src, dst))
