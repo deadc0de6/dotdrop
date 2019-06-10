@@ -93,13 +93,12 @@ class Updater:
         new_path = self._apply_trans_w(path, dotfile)
         if not new_path:
             return False
-        path = new_path
-        if os.path.isdir(path):
-            ret = self._handle_dir(path, dtpath)
+        if os.path.isdir(new_path):
+            ret = self._handle_dir(new_path, dtpath)
         else:
-            ret = self._handle_file(path, dtpath)
+            ret = self._handle_file(new_path, dtpath)
         # clean temporary files
-        if new_path and os.path.exists(new_path):
+        if new_path != path and os.path.exists(new_path):
             remove(new_path)
         return ret
 
