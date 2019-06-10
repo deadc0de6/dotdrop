@@ -118,6 +118,7 @@ class Options(AttrMonitor):
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
         if self.debug:
+            self.log.dbg('version: {}'.format(VERSION))
             self.log.dbg('config file: {}'.format(self.confpath))
 
         self._read_config()
