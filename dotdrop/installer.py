@@ -211,8 +211,10 @@ class Installer:
         overwrite = not self.safe
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
-                err = 'ignoring "{}", link exists'.format(dst)
-                return False, err
+                msg = 'ignoring "{}", link already exists'.format(dst)
+                if self.debug:
+                    self.log.dbg(msg)
+                return True, None
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return True, None
