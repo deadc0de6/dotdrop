@@ -39,14 +39,11 @@ class Logger:
         ce = self._color(self.RESET)
         sys.stderr.write('{}{}{}'.format(cs, string, ce))
 
-    def err(self, string, end='\n', *, throw=None):
+    def err(self, string, end='\n'):
         cs = self._color(self.RED)
         ce = self._color(self.RESET)
         msg = '{} {}'.format(string, end)
         sys.stderr.write('{}[ERR] {}{}'.format(cs, msg, ce))
-
-        if throw is not None:
-            raise throw(msg)
 
     def warn(self, string, end='\n'):
         cs = self._color(self.YELLOW)
