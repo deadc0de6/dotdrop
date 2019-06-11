@@ -118,7 +118,7 @@ class TestUpdate(unittest.TestCase):
                 # retrieve the path of the sub in the dotpath
                 d1indotpath = os.path.join(o.dotpath, dotfile.src)
                 d1indotpath = os.path.expanduser(d1indotpath)
-            dotfile.trans_w = [trans]
+            dotfile.trans_w = trans
 
         # update template
         o.update_path = [d3t]

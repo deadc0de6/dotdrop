@@ -18,7 +18,7 @@ class Dotfile(DictParser):
     key_trans_w = 'trans_write'
 
     def __init__(self, key, dst, src,
-                 actions=[], trans_r=[], trans_w=[],
+                 actions=[], trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, cmpignore=[],
                  noempty=False, upignore=[]):
         """
@@ -42,11 +42,7 @@ class Dotfile(DictParser):
         self.noempty = noempty
         self.src = src
         self.trans_r = trans_r
-        if trans_r and len(self.trans_r) > 1:
-            raise Exception('only one trans_read allowed')
         self.trans_w = trans_w
-        if trans_w and len(self.trans_w) > 1:
-            raise Exception('only one trans_write allowed')
         self.upignore = upignore
 
         if link != LinkTypes.NOLINK and \
@@ -80,28 +76,18 @@ class Dotfile(DictParser):
 
     def get_trans_r(self):
         """return trans_r object"""
-        if self.trans_r:
-            return self.trans_r[0]
-        return None
+        return self.trans_r
 
     def get_trans_w(self):
         """return trans_w object"""
-        if self.trans_w:
-            return self.trans_w[0]
-        return None
+        return self.trans_w
 
     @classmethod
     def _adjust_yaml_keys(cls, value):
         """patch dict"""
         value['noempty'] = value.get(cls.key_noempty, False)
         value['trans_r'] = value.get(cls.key_trans_r)
-        if value['trans_r']:
-            # ensure is a list
-            value['trans_r'] = [value['trans_r']]
         value['trans_w'] = value.get(cls.key_trans_w)
-        if value['trans_w']:
-            # ensure is a list
-            value['trans_w'] = [value['trans_w']]
         # remove old entries
         value.pop(cls.key_noempty, None)
         value.pop(cls.key_trans_r, None)

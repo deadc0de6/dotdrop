@@ -545,17 +545,17 @@ def apply_trans(dotpath, dotfile, debug=False):
     """
     src = dotfile.src
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
-    for trans in dotfile.trans_r:
-        if debug:
-            LOG.dbg('executing transformation {}'.format(trans))
-        s = os.path.join(dotpath, src)
-        temp = os.path.join(dotpath, new_src)
-        if not trans.transform(s, temp):
-            msg = 'transformation \"{}\" failed for {}'
-            LOG.err(msg.format(trans.key, dotfile.key))
-            if new_src and os.path.exists(new_src):
-                remove(new_src)
-            return None
+    trans = dotfile.trans_r
+    if debug:
+        LOG.dbg('executing transformation {}'.format(trans))
+    s = os.path.join(dotpath, src)
+    temp = os.path.join(dotpath, new_src)
+    if not trans.transform(s, temp):
+        msg = 'transformation \"{}\" failed for {}'
+        LOG.err(msg.format(trans.key, dotfile.key))
+        if new_src and os.path.exists(new_src):
+            remove(new_src)
+        return None
     return new_src
 
 

@@ -102,15 +102,14 @@ class CfgAggregator:
 
         # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_r", self._get_trans_r)
+                                 "trans_r", self._get_trans_r, islist=False)
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_w", self._get_trans_w)
+                                 "trans_w", self._get_trans_w, islist=False)
 
-    def _patch_keys_to_objs(self, containers, keys, get_by_key):
+    def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
         """
-        patch each object in "containers" containing
-        a list of keys in the attribute "keys" with
-        the returned object of the function "get_by_key"
+        map for each key in the attribute 'keys' in 'containers'
+        the returned object from the method 'get_by_key'
         """
         if not containers:
             return
@@ -121,13 +120,17 @@ class CfgAggregator:
             okeys = getattr(c, keys)
             if not okeys:
                 continue
+            if not islist:
+                okeys = [okeys]
             for k in okeys:
                 o = get_by_key(k)
                 if not o:
-                    err = 'bad {} key for \"{}\": {}'.format(keys, c.key, k)
+                    err = 'bad {} key for \"{}\": {}'.format(keys, c, k)
                     self.log.err(err)
                     raise Exception(err)
                 objects.append(o)
+            if not islist:
+                objects = objects[0]
             if self.debug:
                 self.log.dbg('patching {}.{} with {}'.format(c, keys, objects))
             setattr(c, keys, objects)
