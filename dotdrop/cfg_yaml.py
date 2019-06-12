@@ -209,7 +209,12 @@ class CfgYaml:
 
         # exec dynvariables
         for k in dvar.keys():
-            allvars[k] = shell(allvars[k])
+            ret, out = shell(allvars[k])
+            if not ret:
+                err = 'command \"{}\" failed: {}'.format(allvars[k], out)
+                self.log.error(err)
+                raise YamlException(err)
+            allvars[k] = out
 
         if self.debug:
             self.log.dbg('variables:')

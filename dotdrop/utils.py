@@ -49,8 +49,12 @@ def write_to_tmpfile(content):
 
 
 def shell(cmd):
-    """run a command in the shell (expects a string)"""
-    return subprocess.getoutput(cmd)
+    """
+    run a command in the shell (expects a string)
+    returns True|False, output
+    """
+    ret, out = subprocess.getstatusoutput(cmd)
+    return ret == 0, out
 
 
 def diff(src, dst, raw=True, opts='', debug=False):
