@@ -802,7 +802,9 @@ class CfgYaml:
     def _yaml_load(self, path):
         """load from yaml"""
         with open(path, 'r') as f:
-            content = yaml(typ='safe').load(f)
+            y = yaml()
+            y.typ = 'rt'
+            content = y.load(f)
         return content
 
     def _yaml_dump(self, content, path):
@@ -811,5 +813,5 @@ class CfgYaml:
             y = yaml()
             y.default_flow_style = False
             y.indent = 2
-            y.typ = 'safe'
+            y.typ = 'rt'
             y.dump(content, f)
