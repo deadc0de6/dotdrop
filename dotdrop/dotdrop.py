@@ -457,6 +457,12 @@ def cmd_remove(o):
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
             k = key
+
+        # ignore if uses any type of link
+        if dotfile.link != LinkTypes.NOLINK:
+            LOG.warn('dotfile uses link, remove manually')
+            continue
+
         if o.debug:
             LOG.dbg('removing {}'.format(key))
 
