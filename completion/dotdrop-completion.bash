@@ -5,7 +5,7 @@ _dotdrop()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=( $( compgen -W '-h --help -v --version install import compare update listfiles detail list' -- $cur) )
+        COMPREPLY=( $( compgen -W '-h --help -v --version install import compare update remove listfiles detail list' -- $cur) )
     else
         case ${COMP_WORDS[1]} in
             install)
@@ -19,6 +19,9 @@ _dotdrop()
         ;;
             update)
             _dotdrop_update
+        ;;
+            remove)
+            _dotdrop_remove
         ;;
             listfiles)
             _dotdrop_listfiles
@@ -40,7 +43,7 @@ _dotdrop_install()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -t --temp -f --force -n --nodiff -d --dry -D --showdiff -c= --cfg= -p= --profile= ' -- $cur) )
+        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -t --temp -f --force -n --nodiff -d --dry -D --showdiff -a --force-actions -c= --cfg= -p= --profile= ' -- $cur) )
     fi
 }
 
@@ -71,6 +74,16 @@ _dotdrop_update()
 
     if [ $COMP_CWORD -ge 2 ]; then
         COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -f --force -d --dry -k --key -P --show-patch -c= --cfg= -p= --profile= -i= --ignore= ' -- $cur) )
+    fi
+}
+
+_dotdrop_remove()
+{
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+
+    if [ $COMP_CWORD -ge 2 ]; then
+        COMPREPLY=( $( compgen -fW '-V --verbose -b --no-banner -f --force -d --dry -k --key -c= --cfg= -p= --profile= ' -- $cur) )
     fi
 }
 

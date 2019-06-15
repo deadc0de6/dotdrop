@@ -64,12 +64,18 @@ dotfiles:
     dst: ${tmpd}/abc
     src: abc
 profiles:
+  p0:
+    include:
+    - p3
   p1:
     dotfiles:
     - f_abc
   p2:
     include:
     - p1
+  p3:
+    include:
+    - p2
 _EOF
 
 # create the source
@@ -82,6 +88,14 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
 # compare
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p2
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p3
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+
+# list
+cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 | grep f_abc
+cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p2 | grep f_abc
+cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p3 | grep f_abc
+cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p0 | grep f_abc
 
 # count
 cnt=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 -b | grep '^f_' | wc -l`

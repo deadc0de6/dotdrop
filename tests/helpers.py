@@ -11,9 +11,9 @@ import string
 import tempfile
 from unittest import TestCase
 
-import yaml
+from ruamel.yaml import YAML as yaml
 
-from dotdrop.options import Options, ENV_NODEBUG
+from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
 from dotdrop.utils import strip_home
 
@@ -127,6 +127,7 @@ def _fake_args():
     args['--key'] = False
     args['--ignore'] = []
     args['--show-patch'] = False
+    args['--force-actions'] = False
     # cmds
     args['list'] = False
     args['listfiles'] = False
@@ -135,6 +136,7 @@ def _fake_args():
     args['import'] = False
     args['update'] = False
     args['detail'] = False
+    args['remove'] = False
     return args
 
 
@@ -144,6 +146,7 @@ def load_options(confpath, profile):
     args = _fake_args()
     args['--cfg'] = confpath
     args['--profile'] = profile
+    args['--verbose'] = True
     # and get the options
     o = Options(args=args)
     o.profile = profile
@@ -153,8 +156,6 @@ def load_options(confpath, profile):
     o.import_link = LinkTypes.NOLINK
     o.install_showdiff = True
     o.debug = True
-    if ENV_NODEBUG in os.environ:
-        o.debug = False
     o.compare_dopts = ''
     o.variables = {}
     return o
@@ -171,8 +172,14 @@ def get_dotfile_from_yaml(dic, path):
     """Return the dotfile from the yaml dictionary"""
     # path is not the file in dotpath but on the FS
     dotfiles = dic['dotfiles']
-    src = get_path_strip_version(path)
-    return [d for d in dotfiles.values() if d['src'] == src][0]
+    # src = get_path_strip_version(path)
+    home = os.path.expanduser('~')
+    if path.startswith(home):
+        path = path.replace(home, '~')
+    dotfile = [d for d in dotfiles.values() if d['dst'] == path]
+    if dotfile:
+        return dotfile[0]
+    return None
 
 
 def yaml_dashed_list(items, indent=0):
@@ -214,9 +221,8 @@ def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
     if not parent_dir:
         parent_dir = get_tempdir()
 
-    fd, file_name = tempfile.mkstemp(dir=parent_dir, suffix='.yaml', text=True)
-    with os.fdopen(fd, 'w') as f:
-        yaml.safe_dump(pairs, f)
+    _, file_name = tempfile.mkstemp(dir=parent_dir, suffix='.yaml', text=True)
+    yaml_dump(pairs, file_name)
     return file_name
 
 
@@ -227,21 +233,18 @@ def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
     is_path = isinstance(config, str)
     if is_path:
         config_path = config
-        with open(config_path) as config_file:
-            config = yaml.safe_load(config_file)
+        config = yaml_load(config_path)
 
     config['dotfiles'] = dotfiles
     config['profiles'] = profiles
     config['actions'] = actions
-    config['trans'] = trans
+    config['trans_read'] = trans
     config['trans_write'] = trans_write
     config['variables'] = variables
     config['dynvariables'] = dynvariables
 
     if is_path:
-        with open(config_path, 'w') as config_file:
-            yaml.safe_dump(config, config_file, default_flow_style=False,
-                           indent=2)
+        yaml_dump(config, config_path)
 
 
 def file_in_yaml(yaml_file, path, link=False):
@@ -249,17 +252,36 @@ def file_in_yaml(yaml_file, path, link=False):
     strip = get_path_strip_version(path)
 
     if isinstance(yaml_file, str):
-        with open(yaml_file) as f:
-            yaml_conf = yaml.safe_load(f)
+        yaml_conf = yaml_load(yaml_file)
     else:
         yaml_conf = yaml_file
 
     dotfiles = yaml_conf['dotfiles'].values()
 
-    in_src = strip in (x['src'] for x in dotfiles)
+    in_src = any([x['src'].endswith(strip) for x in dotfiles])
     in_dst = path in (os.path.expanduser(x['dst']) for x in dotfiles)
 
     if link:
-        has_link = get_dotfile_from_yaml(yaml_conf, path)['link']
+        df = get_dotfile_from_yaml(yaml_conf, path)
+        has_link = False
+        if df:
+            has_link = 'link' in df
+        else:
+            return False
         return in_src and in_dst and has_link
     return in_src and in_dst
+
+
+def yaml_load(path):
+    with open(path, 'r') as f:
+        content = yaml(typ='safe').load(f)
+    return content
+
+
+def yaml_dump(content, path):
+    with open(path, 'w') as f:
+        y = yaml()
+        y.default_flow_style = False
+        y.indent = 2
+        y.typ = 'safe'
+        y.dump(content, f)

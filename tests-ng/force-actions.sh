@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test dotdrop auto-added variables
+# force actions
 # returns 1 in case of error
 #
 
@@ -45,27 +45,40 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # this is the test
 ################################################################
 
+# the action temp
+tmpa=`mktemp -d --suffix='-dotdrop-tests'`
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
 cat > ${cfg} << _EOF
+actions:
+  pre:
+    preaction: echo 'pre' > ${tmpa}/pre
+    preaction2: echo 'pre2' > ${tmpa}/pre2
+  post:
+    postaction: echo 'post' > ${tmpa}/post
+    postaction2: echo 'post2' > ${tmpa}/post2
+  nakedaction: echo 'naked' > ${tmpa}/naked
 config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+    actions:
+      - preaction
+      - postaction
+      - nakedaction
+      - preaction2
+      - postaction2
 profiles:
   p1:
     dotfiles:
@@ -74,21 +87,37 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+echo "test" > ${tmps}/dotfiles/abc
+# deploy the dotfile
+cp ${tmps}/dotfiles/abc ${tmpd}/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-cat ${tmpd}/abc
+# checks
+[ -e ${tmpa}/pre ] && exit 1
+[ -e ${tmpa}/post ] && exit 1
+[ -e ${tmpa}/naked ] && exit 1
+[ -e ${tmpa}/pre2 ] && exit 1
+[ -e ${tmpa}/post2 ] && exit 1
 
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+# install and force
+cd ${ddpath} | ${bin} install -f -a -c ${cfg} -p p1 -V
+
+# checks
+[ ! -e ${tmpa}/pre ] && exit 1
+grep pre ${tmpa}/pre >/dev/null
+[ ! -e ${tmpa}/post ] && exit 1
+grep post ${tmpa}/post >/dev/null
+[ ! -e ${tmpa}/naked ] && exit 1
+grep naked ${tmpa}/naked >/dev/null
+[ ! -e ${tmpa}/pre2 ] && exit 1
+grep pre2 ${tmpa}/pre2 >/dev/null
+[ ! -e ${tmpa}/post2 ] && exit 1
+grep post2 ${tmpa}/post2 >/dev/null
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

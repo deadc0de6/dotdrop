@@ -12,7 +12,8 @@ import filecmp
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
-import dotdrop.utils as utils
+from dotdrop.utils import patch_ignores, remove, get_unique_tmp_name, \
+    write_to_tmpfile, must_ignore
 
 
 TILD = '~'
@@ -20,12 +21,17 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, dotpath, dotfiles, variables, dry=False, safe=True,
+    def __init__(self, dotpath, variables,
+                 dotfile_key_getter, dotfile_dst_getter,
+                 dotfile_path_normalizer,
+                 dry=False, safe=True,
                  debug=False, ignore=[], showpatch=False):
         """constructor
         @dotpath: path where dotfiles are stored
-        @dotfiles: dotfiles for this profile
         @variables: dictionary of variables for the templates
+        @dotfile_key_getter: func to get a dotfile by key
+        @dotfile_dst_getter: func to get a dotfile by dst
+        @dotfile_path_normalizer: func to normalize dotfile dst
         @dry: simulate
         @safe: ask for overwrite if True
         @debug: enable debug
@@ -33,8 +39,10 @@ class Updater:
         @showpatch: show patch if dotfile to update is a template
         """
         self.dotpath = dotpath
-        self.dotfiles = dotfiles
         self.variables = variables
+        self.dotfile_key_getter = dotfile_key_getter
+        self.dotfile_dst_getter = dotfile_dst_getter
+        self.dotfile_path_normalizer = dotfile_path_normalizer
         self.dry = dry
         self.safe = safe
         self.debug = debug
@@ -48,8 +56,7 @@ class Updater:
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
-        path = self._normalize(path)
-        dotfile = self._get_dotfile_by_path(path)
+        dotfile = self.dotfile_dst_getter(path)
         if not dotfile:
             return False
         if self.debug:
@@ -58,19 +65,20 @@ class Updater:
 
     def update_key(self, key):
         """update the dotfile referenced by key"""
-        dotfile = self._get_dotfile_by_key(key)
+        dotfile = self.dotfile_key_getter(key)
         if not dotfile:
             return False
         if self.debug:
             self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
-        path = self._normalize(dotfile.dst)
+        path = self.dotfile_path_normalizer(dotfile.dst)
         return self._update(path, dotfile)
 
     def _update(self, path, dotfile):
         """update dotfile from file pointed by path"""
         ret = False
         new_path = None
-        self.ignores = list(set(self.ignore + dotfile.upignore))
+        ignores = list(set(self.ignore + dotfile.upignore))
+        self.ignores = patch_ignores(ignores, dotfile.dst, debug=self.debug)
         if self.debug:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
@@ -81,73 +89,34 @@ class Updater:
         if self._ignore([path, dtpath]):
             self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
-        if dotfile.trans_w:
-            # apply write transformation if any
-            new_path = self._apply_trans_w(path, dotfile)
-            if not new_path:
-                return False
-            path = new_path
-        if os.path.isdir(path):
-            ret = self._handle_dir(path, dtpath)
+        # apply write transformation if any
+        new_path = self._apply_trans_w(path, dotfile)
+        if not new_path:
+            return False
+        if os.path.isdir(new_path):
+            ret = self._handle_dir(new_path, dtpath)
         else:
-            ret = self._handle_file(path, dtpath)
+            ret = self._handle_file(new_path, dtpath)
         # clean temporary files
-        if new_path and os.path.exists(new_path):
-            utils.remove(new_path)
+        if new_path != path and os.path.exists(new_path):
+            remove(new_path)
         return ret
 
     def _apply_trans_w(self, path, dotfile):
         """apply write transformation to dotfile"""
-        trans = dotfile.trans_w
+        trans = dotfile.get_trans_w()
+        if not trans:
+            return path
         if self.debug:
             self.log.dbg('executing write transformation {}'.format(trans))
-        tmp = utils.get_unique_tmp_name()
+        tmp = get_unique_tmp_name()
         if not trans.transform(path, tmp):
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, dotfile.key))
             if os.path.exists(tmp):
-                utils.remove(tmp)
+                remove(tmp)
             return None
         return tmp
-
-    def _normalize(self, path):
-        """normalize the path to match dotfile"""
-        path = os.path.expanduser(path)
-        path = os.path.expandvars(path)
-        path = os.path.abspath(path)
-        home = os.path.expanduser(TILD) + os.sep
-
-        # normalize the path
-        if path.startswith(home):
-            path = path[len(home):]
-            path = os.path.join(TILD, path)
-        return path
-
-    def _get_dotfile_by_key(self, key):
-        """get the dotfile matching this key"""
-        dotfiles = self.dotfiles
-        subs = [d for d in dotfiles if d.key == key]
-        if not subs:
-            self.log.err('key \"{}\" not found!'.format(key))
-            return None
-        if len(subs) > 1:
-            found = ','.join([d.src for d in dotfiles])
-            self.log.err('multiple dotfiles found: {}'.format(found))
-            return None
-        return subs[0]
-
-    def _get_dotfile_by_path(self, path):
-        """get the dotfile matching this path"""
-        dotfiles = self.dotfiles
-        subs = [d for d in dotfiles if d.dst == path]
-        if not subs:
-            self.log.err('\"{}\" is not managed!'.format(path))
-            return None
-        if len(subs) > 1:
-            found = ','.join([d.src for d in dotfiles])
-            self.log.err('multiple dotfiles found: {}'.format(found))
-            return None
-        return subs[0]
 
     def _is_template(self, path):
         if not Templategen.is_template(path):
@@ -160,7 +129,7 @@ class Updater:
     def _show_patch(self, fpath, tpath):
         """provide a way to manually patch the template"""
         content = self._resolve_template(tpath)
-        tmp = utils.write_to_tmpfile(content)
+        tmp = write_to_tmpfile(content)
         cmds = ['diff', '-u', tmp, fpath, '|', 'patch', tpath]
         self.log.warn('try patching with: \"{}\"'.format(' '.join(cmds)))
         return False
@@ -263,7 +232,7 @@ class Updater:
                 self.log.dbg('rm -r {}'.format(old))
             if not self._confirm_rm_r(old):
                 continue
-            utils.remove(old)
+            remove(old)
             self.log.sub('\"{}\" dir removed'.format(old))
 
         # handle files diff
@@ -315,7 +284,7 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
-            utils.remove(new)
+            remove(new)
             self.log.sub('\"{}\" removed'.format(new))
 
         # Recursively decent into common subdirectories.
@@ -340,7 +309,7 @@ class Updater:
         return True
 
     def _ignore(self, paths):
-        if utils.must_ignore(paths, self.ignores, debug=self.debug):
+        if must_ignore(paths, self.ignores, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring update for {}'.format(paths))
             return True

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2019, deadc0de6
 #
-# test the use of the keyword "import" in profiles
-# returns 1 in case of error
+# test basic import
 #
 
 # exit on first error
@@ -50,10 +49,13 @@ tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-extdotfiles="${tmps}/df_p1.yaml"
+#echo "dotfile destination: ${tmpd}"
 
-dynextdotfiles_name="d_uid_dynvar"
-dynextdotfiles="${tmps}/ext_${dynextdotfiles_name}"
+# create the dotfile
+mkdir -p ${tmpd}/adir
+echo "adir/file1" > ${tmpd}/adir/file1
+echo "adir/fil2" > ${tmpd}/adir/file2
+echo "file3" > ${tmpd}/file3
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -63,61 +65,30 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-dynvariables:
-  d_uid: "echo ${dynextdotfiles_name}"
 dotfiles:
-  f_abc:
-    dst: ${tmpd}/abc
-    src: abc
-  f_def:
-    dst: ${tmpd}/def
-    src: def
-  f_xyz:
-    dst: ${tmpd}/xyz
-    src: xyz
-  f_dyn:
-    dst: ${tmpd}/dyn
-    src: dyn
 profiles:
-  p1:
-    dotfiles:
-    - f_abc
-    import:
-    - $(basename ${extdotfiles})
-    - "ext_{{@@ d_uid @@}}"
 _EOF
+#cat ${cfg}
 
-# create the external dotfile file
-cat > ${extdotfiles} << _EOF
-dotfiles:
-  - f_def
-  - f_xyz
-_EOF
+# import
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/file3
 
-cat > ${dynextdotfiles} << _EOF
-dotfiles:
-  - f_dyn
-_EOF
+cat ${cfg}
 
-# create the source
-mkdir -p ${tmps}/dotfiles/
-echo "abc" > ${tmps}/dotfiles/abc
-echo "def" > ${tmps}/dotfiles/def
-echo "xyz" > ${tmps}/dotfiles/xyz
-echo "dyn" > ${tmps}/dotfiles/dyn
+# ensure exists and is not link
+[ ! -d ${tmps}/dotfiles/${tmpd}/adir ] && echo "not a directory" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/adir/file1 ] && echo "not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/adir/file2 ] && echo "not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/file3 ] && echo "not a file" && exit 1
 
-# install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cat ${cfg} | grep ${tmpd}/adir >/dev/null 2>&1
+cat ${cfg} | grep ${tmpd}/file3 >/dev/null 2>&1
 
-# checks
-[ ! -e ${tmpd}/abc ] && exit 1
-[ ! -e ${tmpd}/def ] && exit 1
-[ ! -e ${tmpd}/xyz ] && exit 1
-[ ! -e ${tmpd}/dyn ] && exit 1
-grep 'abc' ${tmpd}/abc >/dev/null 2>&1
-grep 'def' ${tmpd}/def >/dev/null 2>&1
-grep 'xyz' ${tmpd}/xyz >/dev/null 2>&1
-grep 'dyn' ${tmpd}/dyn >/dev/null 2>&1
+nb=`cat ${cfg} | grep d_adir | wc -l`
+[ "${nb}" != "2" ] && echo 'bad config1' && exit 1
+nb=`cat ${cfg} | grep f_file3 | wc -l`
+[ "${nb}" != "2" ] && echo 'bad config2' && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

@@ -16,8 +16,10 @@ class Logger:
     YELLOW = '\033[93m'
     BLUE = '\033[94m'
     MAGENTA = '\033[95m'
+    LMAGENTA = '\033[35m'
     RESET = '\033[0m'
     EMPH = '\033[33m'
+    BOLD = '\033[1m'
 
     def __init__(self):
         pass
@@ -40,7 +42,8 @@ class Logger:
     def err(self, string, end='\n'):
         cs = self._color(self.RED)
         ce = self._color(self.RESET)
-        sys.stderr.write('{}[ERR] {} {}{}'.format(cs, string, end, ce))
+        msg = '{} {}'.format(string, end)
+        sys.stderr.write('{}[ERR] {}{}'.format(cs, msg, ce))
 
     def warn(self, string, end='\n'):
         cs = self._color(self.YELLOW)
@@ -53,8 +56,10 @@ class Logger:
         func = inspect.stack()[1][3]
         cs = self._color(self.MAGENTA)
         ce = self._color(self.RESET)
-        line = '{}[DEBUG][{}.{}] {}{}\n'
-        sys.stderr.write(line.format(cs, mod, func, string, ce))
+        cl = self._color(self.LMAGENTA)
+        bl = self._color(self.BOLD)
+        line = '{}{}[DEBUG][{}.{}]{}{} {}{}\n'
+        sys.stderr.write(line.format(bl, cl, mod, func, ce, cs, string, ce))
 
     def dry(self, string, end='\n'):
         cs = self._color(self.GREEN)

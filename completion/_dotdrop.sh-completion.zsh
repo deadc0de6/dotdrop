@@ -38,6 +38,7 @@ _dotdrop.sh ()
 				'import'
 				'compare'
 				'update'
+				'remove'
 				'listfiles'
 				'detail'
 				'list'
@@ -58,6 +59,9 @@ _dotdrop.sh ()
                 ;;
                 update)
                     _dotdrop.sh-update
+                ;;
+                remove)
+                    _dotdrop.sh-remove
                 ;;
                 listfiles)
                     _dotdrop.sh-listfiles
@@ -96,6 +100,8 @@ _dotdrop.sh-install ()
 		'(--dry)--dry' \
 		'(-D)-D' \
 		'(--showdiff)--showdiff' \
+		'(-a)-a' \
+		'(--force-actions)--force-actions' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
@@ -184,6 +190,35 @@ _dotdrop.sh-update ()
 		'(--profile=-)--profile=-' \
 		'(-i=-)-i=-' \
 		'(--ignore=-)--ignore=-' \
+
+    else
+        myargs=('<path>')
+        _message_next_arg
+    fi
+}
+
+_dotdrop.sh-remove ()
+{
+    local context state state_descr line
+    typeset -A opt_args
+
+    if [[ $words[$CURRENT] == -* ]] ; then
+        _arguments -C \
+        ':command:->command' \
+		'(-V)-V' \
+		'(--verbose)--verbose' \
+		'(-b)-b' \
+		'(--no-banner)--no-banner' \
+		'(-f)-f' \
+		'(--force)--force' \
+		'(-d)-d' \
+		'(--dry)--dry' \
+		'(-k)-k' \
+		'(--key)--key' \
+		'(-c=-)-c=-' \
+		'(--cfg=-)--cfg=-' \
+		'(-p=-)-p=-' \
+		'(--profile=-)--profile=-' \
 
     else
         myargs=('<path>')

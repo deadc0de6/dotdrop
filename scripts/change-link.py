@@ -13,7 +13,7 @@ usage example:
 from docopt import docopt
 import sys
 import os
-import yaml
+from ruamel.yaml import YAML as yaml
 
 USAGE = """
 change-link.py
@@ -42,7 +42,7 @@ def main():
     ignores = args['--ignore']
 
     with open(path, 'r') as f:
-        content = yaml.load(f)
+        content = yaml(typ='safe').load(f)
     for k, v in content[key].items():
         if k in ignores:
             continue

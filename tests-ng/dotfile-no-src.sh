@@ -2,12 +2,13 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test dotdrop auto-added variables
+# test dotfiles with no 'src'
 # returns 1 in case of error
 #
 
 # exit on first error
 set -e
+#set -v
 
 # all this crap to get current path
 rl="readlink -f"
@@ -48,10 +49,10 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
+echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
+echo "dotfiles destination: ${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -61,34 +62,33 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
 dotfiles:
-  f_abc:
+  abc:
     dst: ${tmpd}/abc
-    src: abc
 profiles:
   p1:
     dotfiles:
-    - f_abc
+    - ALL
 _EOF
 #cat ${cfg}
 
-# create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+# create the dotfiles
+echo "abc" > ${tmps}/dotfiles/abc
+
+###########################
+# test install and compare
+###########################
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
+[ "$?" != "0" ] && exit 1
 
-cat ${tmpd}/abc
-
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+# checks
+[ ! -e ${tmpd}/abc ] && exit 1
+grep 'abc' ${tmpd}/abc
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${tmpx} ${tmpy}
 
 echo "OK"
 exit 0

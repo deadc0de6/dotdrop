@@ -81,7 +81,7 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
 [ ! -e ${tmpd}/abc ] && echo 'dotfile not installed' && exit 1
-#cat ${tmpd}/abc
+cat ${tmpd}/abc
 grep "src:${tmps}/dotfiles/abc" ${tmpd}/abc >/dev/null
 grep "dst:${tmpd}/abc" ${tmpd}/abc >/dev/null
 grep "key:f_abc" ${tmpd}/abc >/dev/null

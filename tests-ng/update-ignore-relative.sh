@@ -2,12 +2,12 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test dotdrop auto-added variables
+# test ignore update relative pattern
 # returns 1 in case of error
 #
 
 # exit on first error
-set -e
+#set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -45,27 +45,33 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # this is the test
 ################################################################
 
-# the dotfile source
+# dotdrop directory
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
-mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
-# the dotfile destination
+dt="${tmps}/dotfiles"
+mkdir -p ${dt}
+mkdir -p ${dt}/a/{b,c}
+echo 'a' > ${dt}/a/b/abfile
+echo 'a' > ${dt}/a/c/acfile
+
+# fs dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
+cp -r ${dt}/a ${tmpd}/
 
 # create the config file
 cfg="${tmps}/config.yaml"
-
 cat > ${cfg} << _EOF
 config:
-  backup: true
+  backup: false
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
 dotfiles:
   f_abc:
-    dst: ${tmpd}/abc
-    src: abc
+    dst: ${tmpd}/a
+    src: a
+    upignore:
+    - "cfile"
+    - "newfile"
+    - "newdir"
 profiles:
   p1:
     dotfiles:
@@ -73,19 +79,26 @@ profiles:
 _EOF
 #cat ${cfg}
 
-# create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+#tree ${dt}
 
-# install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+# edit/add files
+echo "[+] edit/add files"
+touch ${tmpd}/a/newfile
+echo 'b' > ${tmpd}/a/c/acfile
+mkdir -p ${tmpd}/a/newdir/b
+touch ${tmpd}/a/newdir/b/c
 
-cat ${tmpd}/abc
+#tree ${tmpd}/a
 
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+# update
+echo "[+] update"
+cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
+
+#tree ${dt}
+
+# check files haven't been updated
+grep 'b' ${dt}/a/c/acfile >/dev/null
+[ -e ${dt}/a/newfile ] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

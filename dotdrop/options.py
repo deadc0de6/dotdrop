@@ -14,7 +14,8 @@ from docopt import docopt
 from dotdrop.version import __version__ as VERSION
 from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
-from dotdrop.config import Cfg
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
+from dotdrop.action import Action
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -49,15 +50,17 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-VbtfndD] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-Vbd]     [-c <path>] [-p <profile>] [-l <link>] <path>...
-  dotdrop compare   [-Vb]      [-c <path>] [-p <profile>]
-                               [-o <opts>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-VbfdkP]  [-c <path>] [-p <profile>]
-                               [-i <pattern>...] [<path>...]
-  dotdrop listfiles [-VbT]     [-c <path>] [-p <profile>]
-  dotdrop detail    [-Vb]      [-c <path>] [-p <profile>] [<key>...]
-  dotdrop list      [-Vb]      [-c <path>]
+  dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>] [<key>...]
+  dotdrop import    [-Vbd]      [-c <path>] [-p <profile>]
+                                [-l <link>] <path>...
+  dotdrop compare   [-Vb]       [-c <path>] [-p <profile>]
+                                [-o <opts>] [-C <file>...] [-i <pattern>...]
+  dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
+                                [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
+  dotdrop listfiles [-VbT]      [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
+  dotdrop list      [-Vb]       [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -74,6 +77,7 @@ Options:
   -D --showdiff           Show a diff before overwriting.
   -P --show-patch         Provide a one-liner to manually patch template.
   -f --force              Do not ask user confirmation for anything.
+  -a --force-actions      Execute all actions even if no dotfile is installed.
   -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
   -d --dry                Dry run.
@@ -107,24 +111,24 @@ class Options(AttrMonitor):
         if not args:
             self.args = docopt(USAGE, version=VERSION)
         self.log = Logger()
-        self.debug = self.args['--verbose']
-        if not self.debug and ENV_DEBUG in os.environ:
-            self.debug = True
+        self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         if ENV_NODEBUG in os.environ:
+            # force disabling debugs
             self.debug = False
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
         if self.debug:
+            self.log.dbg('version: {}'.format(VERSION))
             self.log.dbg('config file: {}'.format(self.confpath))
 
-        self._read_config(self.profile)
+        self._read_config()
         self._apply_args()
         self._fill_attr()
         if ENV_NOBANNER not in os.environ \
            and self.banner \
            and not self.args['--no-banner']:
             self._header()
-        self._print_attr()
+        self._debug_attr()
         # start monitoring for bad attribute
         self._set_attr_err = True
 
@@ -167,25 +171,18 @@ class Options(AttrMonitor):
 
         return None
 
-    def _find_cfg(self, paths):
-        """try to find the config in the paths list"""
-        for path in paths:
-            if os.path.exists(path):
-                return path
-        return None
-
     def _header(self):
-        """print the header"""
+        """display the header"""
         self.log.log(BANNER)
         self.log.log('')
 
-    def _read_config(self, profile=None):
+    def _read_config(self):
         """read the config file"""
-        self.conf = Cfg(self.confpath, profile=profile, debug=self.debug)
+        self.conf = Cfg(self.confpath, self.profile, debug=self.debug)
         # transform the config settings to self attribute
         for k, v in self.conf.get_settings().items():
             if self.debug:
-                self.log.dbg('setting: {}={}'.format(k, v))
+                self.log.dbg('new setting: {}={}'.format(k, v))
             setattr(self, k, v)
 
     def _apply_args(self):
@@ -198,6 +195,7 @@ class Options(AttrMonitor):
         self.cmd_import = self.args['import']
         self.cmd_update = self.args['update']
         self.cmd_detail = self.args['detail']
+        self.cmd_remove = self.args['remove']
 
         # adapt attributes based on arguments
         self.dry = self.args['--dry']
@@ -212,18 +210,20 @@ class Options(AttrMonitor):
                 self.log.err('bad option for --link: {}'.format(link))
                 sys.exit(USAGE)
             self.import_link = OPT_LINK[link]
-        if self.debug:
-            self.log.dbg('link_import value: {}'.format(self.import_link))
 
         # "listfiles" specifics
         self.listfiles_templateonly = self.args['--template']
         # "install" specifics
+        self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']
         self.install_keys = self.args['<key>']
         self.install_diff = not self.args['--nodiff']
         self.install_showdiff = self.showdiff or self.args['--showdiff']
         self.install_backup_suffix = BACKUP_SUFFIX
-        self.install_default_actions = self.default_actions
+        self.install_default_actions_pre = [a for a in self.default_actions
+                                            if a.kind == Action.pre]
+        self.install_default_actions_post = [a for a in self.default_actions
+                                             if a.kind == Action.post]
         # "compare" specifics
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']
@@ -239,30 +239,31 @@ class Options(AttrMonitor):
         self.update_showpatch = self.args['--show-patch']
         # "detail" specifics
         self.detail_keys = self.args['<key>']
+        # "remove" specifics
+        self.remove_path = self.args['<path>']
+        self.remove_iskey = self.args['--key']
 
     def _fill_attr(self):
         """create attributes from conf"""
         # variables
-        self.variables = self.conf.get_variables(self.profile,
-                                                 debug=self.debug).copy()
+        self.variables = self.conf.get_variables()
         # the dotfiles
-        self.dotfiles = self.conf.eval_dotfiles(self.profile, self.variables,
-                                                debug=self.debug).copy()
+        self.dotfiles = self.conf.get_dotfiles(self.profile)
         # the profiles
         self.profiles = self.conf.get_profiles()
 
-    def _print_attr(self):
-        """print all of this class attributes"""
+    def _debug_attr(self):
+        """debug display all of this class attributes"""
         if not self.debug:
             return
-        self.log.dbg('options:')
+        self.log.dbg('CLI options:')
         for att in dir(self):
             if att.startswith('_'):
                 continue
             val = getattr(self, att)
             if callable(val):
                 continue
-            self.log.dbg('- {}: \"{}\"'.format(att, val))
+            self.log.dbg('- {}: {}'.format(att, val))
 
     def _attr_set(self, attr):
         """error when some inexistent attr is set"""

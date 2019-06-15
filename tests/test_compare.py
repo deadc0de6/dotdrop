@@ -29,7 +29,7 @@ class TestCompare(unittest.TestCase):
     def compare(self, o, tmp, nbdotfiles):
         dotfiles = o.dotfiles
         self.assertTrue(len(dotfiles) == nbdotfiles)
-        t = Templategen(base=o.dotpath, debug=o.debug)
+        t = Templategen(base=o.dotpath, debug=True)
         inst = Installer(create=o.create, backup=o.backup,
                          dry=o.dry, base=o.dotpath, debug=o.debug)
         comp = Comparator()
@@ -109,6 +109,7 @@ class TestCompare(unittest.TestCase):
         self.assertTrue(os.path.exists(confpath))
         o = load_options(confpath, profile)
         o.longkey = True
+        o.debug = True
         dfiles = [d1, d2, d3, d4, d5, d9]
 
         # import the files

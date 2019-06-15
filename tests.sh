@@ -8,7 +8,7 @@ set -ev
 # PEP8 tests
 which pycodestyle 2>/dev/null
 [ "$?" != "0" ] && echo "Install pycodestyle" && exit 1
-pycodestyle --ignore=W605 dotdrop/
+pycodestyle --ignore=W503,W504,W605 dotdrop/
 pycodestyle tests/
 pycodestyle scripts/
 
@@ -35,7 +35,18 @@ PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 
 ## execute bash script tests
 [ "$1" = '--python-only' ] || {
-    for scr in tests-ng/*.sh; do
-        ${scr}
-    done
+  log=`mktemp`
+  for scr in tests-ng/*.sh; do
+    ${scr} 2>&1 | tee ${log}
+    set +e
+    if grep Traceback ${log}; then
+      echo "crash found in logs"
+      rm -f ${log}
+      exit 1
+    fi
+    set -e
+  done
+  rm -f ${log}
 }
+
+echo "All test finished successfully"

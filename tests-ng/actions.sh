@@ -60,8 +60,10 @@ cat > ${cfg} << _EOF
 actions:
   pre:
     preaction: echo 'pre' > ${tmpa}/pre
+    preaction2: echo 'pre2' > ${tmpa}/pre2
   post:
     postaction: echo 'post' > ${tmpa}/post
+    postaction2: echo 'post2' > ${tmpa}/post2
   nakedaction: echo 'naked' > ${tmpa}/naked
 config:
   backup: true
@@ -75,6 +77,8 @@ dotfiles:
       - preaction
       - postaction
       - nakedaction
+      - preaction2
+      - postaction2
 profiles:
   p1:
     dotfiles:
@@ -86,7 +90,7 @@ _EOF
 echo "test" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
 [ ! -e ${tmpa}/pre ] && exit 1
@@ -95,6 +99,10 @@ grep pre ${tmpa}/pre >/dev/null
 grep post ${tmpa}/post >/dev/null
 [ ! -e ${tmpa}/naked ] && exit 1
 grep naked ${tmpa}/naked >/dev/null
+[ ! -e ${tmpa}/pre2 ] && exit 1
+grep pre2 ${tmpa}/pre2 >/dev/null
+[ ! -e ${tmpa}/post2 ] && exit 1
+grep post2 ${tmpa}/post2 >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}

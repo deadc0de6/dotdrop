@@ -165,6 +165,13 @@ set -e
 ###########################
 
 # update single file
+echo 'update' > ${tmpd}/def
+cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V f_def
+[ "$?" != "0" ] && exit 1
+[ ! -e  ${tmpd}/def ] && echo 'dotfile in FS removed' && exit 1
+[ ! -e  ${tmps}/dotfiles/def ] && echo 'dotfile in dotpath removed' && exit 1
+
+# update single file
 cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V f_abc
 [ "$?" != "0" ] && exit 1
 

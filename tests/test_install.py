@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 import filecmp
 
-from dotdrop.config import Cfg
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from tests.helpers import (clean, create_dir, create_fake_config,
                            create_random_file, get_string, get_tempdir,
                            load_options, populate_fake_config)
@@ -47,8 +47,8 @@ exec bspwm
             for action in actions:
                 f.write('  {}: {}\n'.format(action.key, action.action))
             f.write('trans:\n')
-            for action in trans:
-                f.write('  {}: {}\n'.format(action.key, action.action))
+            for tr in trans:
+                f.write('  {}: {}\n'.format(tr.key, tr.action))
             f.write('config:\n')
             f.write('  backup: true\n')
             f.write('  create: true\n')
@@ -64,7 +64,8 @@ exec bspwm
                     for action in d.actions:
                         f.write('      - {}\n'.format(action.key))
                 if d.trans_r:
-                    f.write('    trans: {}\n'.format(d.trans_r.key))
+                    for tr in d.trans_r:
+                        f.write('    trans_read: {}\n'.format(tr.key))
             f.write('profiles:\n')
             f.write('  {}:\n'.format(profile))
             f.write('    dotfiles:\n')
@@ -89,7 +90,7 @@ exec bspwm
         f1, c1 = create_random_file(tmp)
         dst1 = os.path.join(dst, get_string(6))
         d1 = Dotfile(get_string(5), dst1, os.path.basename(f1))
-        # fake a print
+        # fake a __str__
         self.assertTrue(str(d1) != '')
         f2, c2 = create_random_file(tmp)
         dst2 = os.path.join(dst, get_string(6))
@@ -165,7 +166,7 @@ exec bspwm
         tr = Action('testtrans', 'post', cmd)
         f9, c9 = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
-        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=tr)
+        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=[tr])
 
         # to test template
         f10, _ = create_random_file(tmp, content='{{@@ header() @@}}')
@@ -178,7 +179,7 @@ exec bspwm
         dotfiles = [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, ddot]
         self.fake_config(confpath, dotfiles,
                          profile, tmp, [act1], [tr])
-        conf = Cfg(confpath)
+        conf = Cfg(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 
         # install them
@@ -305,7 +306,7 @@ exec bspwm
         # create the importing base config file
         importing_path = create_fake_config(tmp,
                                             configname='config.yaml',
-                                            import_configs=('config-*.yaml',),
+                                            import_configs=['config-2.yaml'],
                                             **importing['config'])
 
         # edit the imported config
@@ -485,7 +486,6 @@ exec bspwm
             # ensure dst is link
             self.assertTrue(os.path.islink(dst))
             # ensure dst not directly linked to src
-            # TODO: maybe check that its actually linked to template folder
             self.assertNotEqual(os.path.realpath(dst), src)
 
 

@@ -32,15 +32,15 @@ setup(
     python_requires=REQUIRES_PYTHON,
     classifiers=[
             'Development Status :: 5 - Production/Stable',
-            'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5',
             'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
           ],
 
     keywords='dotfiles jinja2',
     packages=find_packages(exclude=['tests*']),
-    install_requires=['docopt', 'Jinja2', 'PyYAML'],
+    install_requires=['docopt', 'Jinja2', 'ruamel.yaml'],
 
     extras_require={
         'dev': ['check-manifest'],

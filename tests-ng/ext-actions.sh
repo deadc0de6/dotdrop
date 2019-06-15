@@ -96,7 +96,7 @@ _EOF
 echo "test" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
 [ ! -e ${tmpa}/pre ] && exit 1

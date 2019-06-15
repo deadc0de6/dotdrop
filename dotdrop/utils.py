@@ -17,6 +17,7 @@ from shutil import rmtree
 from dotdrop.logger import Logger
 
 LOG = Logger()
+STAR = '*'
 
 
 def run(cmd, raw=True, debug=False, checkerr=False):
@@ -48,8 +49,12 @@ def write_to_tmpfile(content):
 
 
 def shell(cmd):
-    """run a command in the shell (expects a string)"""
-    return subprocess.getoutput(cmd)
+    """
+    run a command in the shell (expects a string)
+    returns True|False, output
+    """
+    ret, out = subprocess.getstatusoutput(cmd)
+    return ret == 0, out
 
 
 def diff(src, dst, raw=True, opts='', debug=False):
@@ -66,7 +71,7 @@ def get_tmpdir():
 
 def get_tmpfile():
     """create a temporary file"""
-    (fd, path) = tempfile.mkstemp(prefix='dotdrop-')
+    (_, path) = tempfile.mkstemp(prefix='dotdrop-')
     return path
 
 
@@ -123,6 +128,8 @@ def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
     if not ignores:
         return False
+    if debug:
+        LOG.dbg('must ignore? {} against {}'.format(paths, ignores))
     for p in paths:
         for i in ignores:
             if fnmatch.fnmatch(p, i):
@@ -130,3 +137,35 @@ def must_ignore(paths, ignores, debug=False):
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
     return False
+
+
+def uniq_list(a_list):
+    """unique elements of a list while preserving order"""
+    new = []
+    for a in a_list:
+        if a not in new:
+            new.append(a)
+    return new
+
+
+def patch_ignores(ignores, prefix, debug=False):
+    """allow relative ignore pattern"""
+    new = []
+    if debug:
+        LOG.dbg('ignores before patching: {}'.format(ignores))
+    for ignore in ignores:
+        if os.path.isabs(ignore):
+            # is absolute
+            new.append(ignore)
+            continue
+        if STAR in ignore:
+            if ignore.startswith(STAR) or ignore.startswith(os.sep):
+                # is glob
+                new.append(ignore)
+                continue
+        # patch upignore
+        path = os.path.join(prefix, ignore)
+        new.append(path)
+    if debug:
+        LOG.dbg('ignores after patching: {}'.format(new))
+    return new

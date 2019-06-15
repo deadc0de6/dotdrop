@@ -10,7 +10,7 @@ pkgbase = dotdrop
 	depends = python-setuptools
 	depends = python-jinja
 	depends = python-docopt
-	depends = python-pyaml
+	depends = python-ruamel-yaml
 	source = git+https://github.com/deadc0de6/dotdrop.git#tag=v0.28.0
 	md5sums = SKIP
 

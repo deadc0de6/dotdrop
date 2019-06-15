@@ -2,8 +2,11 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test dotdrop auto-added variables
-# returns 1 in case of error
+# ensure imports allow globs
+# - import_actions
+# - import_configs
+# - import_variables
+# - profile import
 #
 
 # exit on first error
@@ -48,47 +51,63 @@ echo -e "\e[96m\e[1m==> RUNNING $(basename $BASH_SOURCE) <==\e[0m"
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles
-#echo "dotfile source: ${tmps}"
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests'`
-#echo "dotfile destination: ${tmpd}"
+# temporary
+tmpa=`mktemp -d --suffix='-dotdrop-tests'`
 
-# create the config file
+###########
+# test globs in import_actions
+###########
+# create the action files
+actionsd="${tmps}/actions"
+mkdir -p ${actionsd}
+cat > ${actionsd}/action1.yaml << _EOF
+actions:
+  fromaction1: echo "fromaction1" > ${tmpa}/fromaction1
+_EOF
+cat > ${actionsd}/action2.yaml << _EOF
+actions:
+  fromaction2: echo "fromaction2" > ${tmpa}/fromaction2
+_EOF
+
 cfg="${tmps}/config.yaml"
-
 cat > ${cfg} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: /tmp/xxx
+  import_actions:
+  - ${actionsd}/*
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+    actions:
+      - fromaction1
+      - fromaction2
 profiles:
   p1:
     dotfiles:
     - f_abc
 _EOF
-#cat ${cfg}
 
-# create the dotfile
-echo "dotpath: {{@@ _dotdrop_dotpath @@}}" > ${tmps}/dotfiles/abc
-echo "cfgpath: {{@@ _dotdrop_cfgpath @@}}" >> ${tmps}/dotfiles/abc
-echo "workdir: {{@@ _dotdrop_workdir @@}}" >> ${tmps}/dotfiles/abc
+# create the source
+mkdir -p ${tmps}/dotfiles/
+echo "abc" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 -V
 
-cat ${tmpd}/abc
-
-grep "^dotpath: ${tmps}/dotfiles$" ${tmpd}/abc >/dev/null
-grep "^cfgpath: ${tmps}/config.yaml$" ${tmpd}/abc >/dev/null
-grep "^workdir: /tmp/xxx$" ${tmpd}/abc >/dev/null
+# checks
+[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
+[ ! -e  ${tmpa}/fromaction1 ] && echo "action1 not executed" && exit 1
+grep fromaction1 ${tmpa}/fromaction1
+[ ! -e  ${tmpa}/fromaction2 ] && echo "action2 not executed" && exit 1
+grep fromaction2 ${tmpa}/fromaction2
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

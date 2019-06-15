@@ -1,3 +1,3 @@
-Jinja2; python_version >= '3.0'
-docopt; python_version >= '3.0'
-PyYAML; python_version >= '3.0'
+Jinja2; python_version > '3.4'
+docopt; python_version > '3.4'
+ruamel.yaml; python_version > '3.4'
