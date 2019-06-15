@@ -44,7 +44,8 @@ class Templategen:
                                comment_end_string=COMMENT_END)
         # adding variables
         self.env.globals['env'] = os.environ
-        self.env.globals.update(variables)
+        if variables:
+            self.env.globals.update(variables)
         # adding header method
         self.env.globals['header'] = self._header
         # adding helper methods

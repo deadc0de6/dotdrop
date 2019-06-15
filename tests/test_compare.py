@@ -46,6 +46,11 @@ class TestCompare(unittest.TestCase):
             results[path] = diff == ''
         return results
 
+    def test_none(self):
+        t = Templategen(base=self.CONFIG_DOTPATH,
+                        debug=True, variables=None)
+        self.assertTrue(t is not None)
+
     def test_compare(self):
         """Test the compare function"""
         # setup some directories
