@@ -163,7 +163,7 @@ def patch_ignores(ignores, prefix, debug=False):
                 # is glob
                 new.append(ignore)
                 continue
-        # patch upignore
+        # patch ignore
         path = os.path.join(prefix, ignore)
         new.append(path)
     if debug:
