@@ -152,6 +152,47 @@ cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose -C ${tmpd}/vscode
 [ "$?" != "0" ] && exit 1
 set -e
 
+# clean
+rm -rf ${basedir}/dotfiles
+mkdir -p ${basedir}/dotfiles
+
+# create dotfiles/dirs
+mkdir -p ${tmpd}/{program,config,vscode}
+touch ${tmpd}/program/a
+touch ${tmpd}/config/a
+touch ${tmpd}/vscode/extensions.txt
+touch ${tmpd}/vscode/keybindings.json
+touch ${tmpd}/vscode/keybindings.json
+
+# create the config file
+cfg="${basedir}/config3.yaml"
+create_conf ${cfg} # sets token
+
+# import
+echo "[+] import"
+cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program ${tmpd}/config ${tmpd}/vscode
+
+# create the files to ignore
+touch ${tmpd}/program/.DS_Store
+touch ${tmpd}/config/.DS_Store
+touch ${tmpd}/vscode/.DS_Store
+
+# ensure not imported
+found=`find ${basedir}/dotfiles/ -iname '.DS_Store'`
+[ "${found}" != "" ] && echo "imported ???" && exit 1
+
+# general ignore
+echo "[+] comparing ..."
+cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -i '*/.DS_Store'
+[ "$?" != "0" ] && exit 1
+
+# general ignore
+echo "[+] comparing2  ..."
+sed '/^config:$/a\ \ cmpignore:\n\ \ - "*/.DS_Store"' ${cfg} > ${cfg2}
+cat ${cfg2}
+cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
+[ "$?" != "0" ] && exit 1
+
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
 

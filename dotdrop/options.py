@@ -16,6 +16,7 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.action import Action
+from dotdrop.utils import uniq_list
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -228,14 +229,18 @@ class Options(AttrMonitor):
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
+        self.compare_ignore.extend(self.cmpignore)
         self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.compare_ignore = uniq_list(self.compare_ignore)
         # "import" specifics
         self.import_path = self.args['<path>']
         # "update" specifics
         self.update_path = self.args['<path>']
         self.update_iskey = self.args['--key']
         self.update_ignore = self.args['--ignore']
+        self.update_ignore.extend(self.upignore)
         self.update_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
         # "detail" specifics
         self.detail_keys = self.args['<key>']
