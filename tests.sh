@@ -37,9 +37,15 @@ PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 [ "$1" = '--python-only' ] || {
   log=`mktemp`
   for scr in tests-ng/*.sh; do
-    ${scr} 2>&1 | tee ${log}
+    ${scr} > "${log}" 2>&1 &
+    tail --pid="$!" -f "${log}"
     set +e
-    if grep Traceback ${log}; then
+    wait "$!"
+    if [ "$?" -ne 0 ]; then
+        echo "Test ${scr} finished with error"
+        rm -f ${log}
+        exit 1
+    elif grep Traceback ${log}; then
       echo "crash found in logs"
       rm -f ${log}
       exit 1
