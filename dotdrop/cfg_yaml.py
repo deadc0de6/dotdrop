@@ -244,6 +244,21 @@ class CfgYaml:
                     self.log.dbg('resolved: {}'.format(new))
                 v[self.key_dotfile_actions] = new
 
+        # profile entries
+        try:
+            this_profile = self.profiles[self.profile]
+            # actions
+            this_profile[self.key_profile_actions] = [
+                t.generate_string(a)
+                for a in this_profile.get(self.key_profile_actions, [])
+            ]
+            this_profile_actions = this_profile[self.key_profile_actions]
+            if this_profile_actions and self.debug:
+                self.log.dbg('resolved: {}'.format(this_profile_actions))
+        except KeyError:
+            # self.profile is not in the YAML file
+            pass
+
         # external actions paths
         new = []
         for p in self.settings.get(self.key_import_actions, []):
