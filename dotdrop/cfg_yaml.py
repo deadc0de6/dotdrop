@@ -269,6 +269,16 @@ class CfgYaml:
                 # making sure that this generic name doesn't stay in scope
                 del actions
 
+        # settings entries
+        self.settings[Settings.key_default_actions] = [
+            t.generate_string(a)
+            for a in self.settings.get(Settings.key_default_actions, ())
+        ]
+        if self.debug:
+            default_actions = self.settings[Settings.key_default_actions]
+            if default_actions:
+                self.log.dbg('resolved: {}'.format(default_actions))
+
         # external actions paths
         new = []
         for p in self.settings.get(self.key_import_actions, []):
