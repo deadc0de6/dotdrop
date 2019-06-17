@@ -100,6 +100,10 @@ class CfgYaml:
         if self.debug:
             self.log.dbg('after normalization: {}'.format(self.yaml_dict))
 
+    def get_variables(self):
+        """retrieve all variables"""
+        return self._merge_dict(self.variables, self.dvariables)
+
     def _parse_main_yaml(self, dic):
         """parse the different blocks"""
         self.ori_settings = self._get_entry(dic, self.key_settings)
@@ -183,6 +187,17 @@ class CfgYaml:
             dst = dotfile[self.key_dotfile_dst]
             dotfile[self.key_dotfile_dst] = self._resolve_path(dst)
 
+    def _shell_dynvars(self, dvars):
+        new = {}
+        for k, v in dvars.items():
+            ret, val = shell(v)
+            if not ret:
+                err = 'command \"{}\" failed: {}'.format(k, val)
+                self.log.err(err)
+                raise YamlException(err)
+            new[k] = val
+        return new
+
     def _merge_and_apply_variables(self):
         """
         resolve all variables across the config
@@ -212,7 +227,7 @@ class CfgYaml:
             ret, out = shell(allvars[k])
             if not ret:
                 err = 'command \"{}\" failed: {}'.format(allvars[k], out)
-                self.log.error(err)
+                self.log.err(err)
                 raise YamlException(err)
             allvars[k] = out
 
@@ -295,6 +310,14 @@ class CfgYaml:
                 if self.debug:
                     self.log.dbg('resolved: {}'.format(new))
                 v[self.key_import_profile_dfs] = new
+
+        # profile includes
+        for k, v in self.profiles.items():
+            if self.key_profile_include in v:
+                new = []
+                for k in v[self.key_profile_include]:
+                    new.append(t.generate_string(k))
+                v[self.key_profile_include] = new
 
         return allvars
 
@@ -435,7 +458,8 @@ class CfgYaml:
                                               mandatory=False)
             self.dvariables = self._import_sub(path, self.key_dvariables,
                                                self.dvariables,
-                                               mandatory=False)
+                                               mandatory=False,
+                                               patch_func=self._shell_dynvars)
 
     def _import_actions(self, paths):
         """import external actions from paths"""
@@ -593,7 +617,7 @@ class CfgYaml:
             new = patch_func(new)
         if not new:
             self.log.warn('no \"{}\" imported from \"{}\"'.format(key, path))
-            return
+            return current
         if self.debug:
             self.log.dbg('found: {}'.format(new))
         if isinstance(current, dict) and isinstance(new, dict):
@@ -609,6 +633,10 @@ class CfgYaml:
 
     def _merge_dict(self, high, low):
         """merge low into high"""
+        if not high:
+            high = {}
+        if not low:
+            low = {}
         return {**low, **high}
 
     def _get_entry(self, dic, key, mandatory=True):

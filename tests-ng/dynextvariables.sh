@@ -135,7 +135,7 @@ echo "test: {{@@ test @@}}" >> ${tmps}/dotfiles/abc
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-#cat ${tmpd}/abc
+cat ${tmpd}/abc
 
 grep '^var1: var' ${tmpd}/abc >/dev/null
 grep '^dvar1: dynvar' ${tmpd}/abc >/dev/null

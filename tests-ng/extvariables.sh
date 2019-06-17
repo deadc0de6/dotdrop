@@ -109,8 +109,7 @@ echo "evar1: {{@@ evar1 @@}}" >> ${tmps}/dotfiles/abc
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-#cat ${tmpd}/abc
-
+cat ${tmpd}/abc
 grep '^var3: extvar1 var2 var3' ${tmpd}/abc >/dev/null
 grep '^dvar3: extdvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
 grep '^var4: echo extvar1 var2 var3' ${tmpd}/abc >/dev/null
@@ -168,7 +167,7 @@ echo "varx: {{@@ varx @@}}" >> ${tmps}/dotfiles/abc
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-#cat ${tmpd}/abc
+cat ${tmpd}/abc
 
 grep '^var3: extvar1 var2 var3' ${tmpd}/abc >/dev/null
 grep '^dvar3: extdvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null

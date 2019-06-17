@@ -101,12 +101,19 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 # checks
 [ ! -e ${tmpa}/pre ] && exit 1
 grep pre ${tmpa}/pre >/dev/null
+echo "pre is ok"
+
 [ ! -e ${tmpa}/post ] && exit 1
 grep post ${tmpa}/post >/dev/null
+echo "post is ok"
+
 [ ! -e ${tmpa}/naked ] && exit 1
 grep naked ${tmpa}/naked >/dev/null
+echo "naked is ok"
+
 [ ! -e ${tmpa}/write ] && exit 1
-grep write ${tmpa}/write >/dev/null
+grep over ${tmpa}/write >/dev/null
+echo "write is ok"
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}

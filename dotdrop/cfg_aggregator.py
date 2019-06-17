@@ -78,7 +78,7 @@ class CfgAggregator:
             self.log.dbg('trans_w: {}'.format(self.trans_w))
 
         # variables
-        self.variables = self.cfgyaml.variables
+        self.variables = self.cfgyaml.get_variables()
         if self.debug:
             self.log.dbg('variables: {}'.format(self.variables))
 
