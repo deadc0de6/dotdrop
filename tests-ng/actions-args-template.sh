@@ -63,7 +63,7 @@ actions:
   post:
     postaction: "echo {0} > ${tmpa}/post"
   nakedaction: "echo {0} > ${tmpa}/naked"
-  profileaction: "echo {0} > ${tmpa}/profile"
+  profileaction: "echo {0} >> ${tmpa}/profile"
   dynaction: "echo {0} > ${tmpa}/dyn"
 config:
   backup: true
@@ -84,11 +84,20 @@ profiles:
     actions:
     - profileaction '{{@@ var_profile @@}}'
     - dynaction '{{@@ user_name @@}}'
+    include:
+    - p2
+  p2:
+    dotfiles:
+    - f_abc
+    actions:
+    - profileaction '{{@@ var_profile_2 @@}}'
+    variables:
+      var_profile_2: profile_var_2
 variables:
-  var_pre: var_pre
-  var_post: var_post
-  var_naked: var_naked
-  var_profile: var_profile
+  var_pre: pre_var
+  var_post: post_var
+  var_naked: naked_var
+  var_profile: profile_var
 dynvariables:
   user_name: 'echo $USER'
 _EOF
@@ -106,10 +115,11 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -e ${tmpa}/naked ] && echo 'naked action not executed'  && exit 1
 [ ! -e ${tmpa}/profile ] && echo 'profile action not executed'  && exit 1
 [ ! -e ${tmpa}/dyn ] && echo 'dynamic acton action not executed'  && exit 1
-grep var_pre ${tmpa}/pre >/dev/null
-grep var_post ${tmpa}/post >/dev/null
-grep var_naked ${tmpa}/naked >/dev/null
-grep var_profile ${tmpa}/profile >/dev/null
+grep pre_var ${tmpa}/pre >/dev/null
+grep post_var ${tmpa}/post >/dev/null
+grep naked_var ${tmpa}/naked >/dev/null
+grep profile_var ${tmpa}/profile >/dev/null
+grep profile_var_2 ${tmpa}/profile >/dev/null
 grep "$USER" ${tmpa}/dyn >/dev/null
 
 ## CLEANING
