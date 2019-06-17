@@ -245,19 +245,29 @@ class CfgYaml:
                 v[self.key_dotfile_actions] = new
 
         # profile entries
-        try:
-            this_profile = self.profiles[self.profile]
-            # actions
-            this_profile[self.key_profile_actions] = [
-                t.generate_string(a)
-                for a in this_profile.get(self.key_profile_actions, [])
+        for profile in self.profiles.values():
+            # external dotfiles
+            profile[self.key_import_profile_dfs] = [
+                t.generate_string(dfs)
+                for dfs in profile.get(self.key_import_profile_dfs, [])
             ]
-            this_profile_actions = this_profile[self.key_profile_actions]
-            if this_profile_actions and self.debug:
-                self.log.dbg('resolved: {}'.format(this_profile_actions))
-        except KeyError:
-            # self.profile is not in the YAML file
-            pass
+            # actions
+            profile[self.key_profile_actions] = [
+                t.generate_string(a)
+                for a in profile.get(self.key_profile_actions, [])
+            ]
+
+            if self.debug:
+                imported_dotfiles = profile[self.key_import_profile_dfs]
+                actions = profile[self.key_profile_actions]
+
+                if imported_dotfiles:
+                    self.log.dbg('resolved: {}'.format(imported_dotfiles))
+                if actions:
+                    self.log.dbg('resolved: {}'.format(actions))
+
+                # making sure that this generic name doesn't stay in scope
+                del actions
 
         # external actions paths
         new = []
@@ -285,16 +295,6 @@ class CfgYaml:
             if self.debug:
                 self.log.dbg('resolved: {}'.format(new))
             self.settings[self.key_import_variables] = new
-
-        # external profiles dotfiles
-        for k, v in self.profiles.items():
-            new = []
-            for p in v.get(self.key_import_profile_dfs, []):
-                new.append(t.generate_string(p))
-            if new:
-                if self.debug:
-                    self.log.dbg('resolved: {}'.format(new))
-                v[self.key_import_profile_dfs] = new
 
         return allvars
 
