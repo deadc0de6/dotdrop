@@ -238,7 +238,7 @@ class CfgAggregator:
         while newkey in keys:
             # if unable to get a unique path
             # get a random one
-            newkey = self.key_sep.join([key, cnt])
+            newkey = self.key_sep.join([key, str(cnt)])
             cnt += 1
         return newkey
 
