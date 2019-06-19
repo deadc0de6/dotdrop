@@ -46,7 +46,7 @@ def action_executor(o, actions, defactions, templater, post=False):
                 continue
             if o.debug:
                 LOG.dbg('executing def-{}-action {}'.format(s, action))
-            ret = action.execute(templater=templater)
+            ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = 'def-{}-action \"{}\" failed'.format(s, action.key)
                 LOG.err(err)
@@ -59,7 +59,7 @@ def action_executor(o, actions, defactions, templater, post=False):
                 continue
             if o.debug:
                 LOG.dbg('executing {}-action {}'.format(s, action))
-            ret = action.execute(templater=templater)
+            ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = '{}-action \"{}\" failed'.format(s, action.key)
                 LOG.err(err)
