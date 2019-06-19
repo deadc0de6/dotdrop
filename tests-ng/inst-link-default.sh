@@ -56,6 +56,7 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests'`
 mkdir -p ${tmps}/dotfiles/abc
 echo "test link_dotfile_default 1" > ${tmps}/dotfiles/abc/file1
 echo "test link_dotfile_default 2" > ${tmps}/dotfiles/abc/file2
+echo "should be linked" > ${tmps}/dotfiles/def
 
 # create a shell script
 # create the config file
@@ -101,10 +102,14 @@ dotfiles:
   d_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: ${tmpd}/def
+    src: def
 profiles:
   p1:
     dotfiles:
     - d_abc
+    - f_def
 _EOF
 
 # install
@@ -119,6 +124,10 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -e ${tmpd}/abc/file2 ] && echo "not exist" && exit 1
 [ -h ${tmpd}/abc/file2 ] && echo "not a regular file" && exit 1
 rm -rf ${tmpd}/abc
+
+[ ! -e ${tmpd}/def ] && echo "not exist" && exit 1
+[ ! -h ${tmpd}/def ] && echo "not a symlink" && exit 1
+rm -f ${tmpd}/def
 
 cat > ${cfg} << _EOF
 config:
