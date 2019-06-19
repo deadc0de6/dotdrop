@@ -356,6 +356,9 @@ class CfgYaml:
                 v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
+            # apply link value
+            if self.key_dotfile_link not in v:
+                v[self.key_dotfile_link] = self.settings[self.key_settings_link_dotfile_default]
         return new
 
     def _get_variables_dict(self, profile, seen, sub=False):
