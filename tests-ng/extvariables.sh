@@ -68,6 +68,7 @@ variables:
   var3: "{{@@ var2 @@}} var3"
   var4: "{{@@ dvar4 @@}}"
   varx: "test"
+  provar: "local"
 dynvariables:
   dvar1: "echo dvar1"
   dvar2: "{{@@ dvar1 @@}} dvar2"
@@ -83,16 +84,15 @@ profiles:
     - f_abc
     variables:
       varx: profvarx
+      provar: provar
 _EOF
 #cat ${cfg}
 
 # create the external variables file
 cat > ${extvars} << _EOF
 variables:
-  var1: "extvar1"
   varx: "exttest"
 dynvariables:
-  dvar1: "echo extdvar1"
   evar1: "echo extevar1"
 _EOF
 
@@ -103,19 +103,22 @@ echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
 echo "dvar4: {{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
 echo "varx: {{@@ varx @@}}" >> ${tmps}/dotfiles/abc
 echo "evar1: {{@@ evar1 @@}}" >> ${tmps}/dotfiles/abc
+echo "provar: {{@@ provar @@}}" >> ${tmps}/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
+echo "check1"
 cat ${tmpd}/abc
-grep '^var3: extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar3: extdvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
-grep '^var4: echo extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar4: extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^varx: profvarx' ${tmpd}/abc >/dev/null
+grep '^var3: var1 var2 var3' ${tmpd}/abc >/dev/null
+grep '^dvar3: dvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
+grep '^var4: echo var1 var2 var3' ${tmpd}/abc >/dev/null
+grep '^dvar4: var1 var2 var3' ${tmpd}/abc >/dev/null
+grep '^varx: exttest' ${tmpd}/abc >/dev/null
 grep '^evar1: extevar1' ${tmpd}/abc >/dev/null
+grep '^provar: provar' ${tmpd}/abc >/dev/null
 
 rm -f ${tmpd}/abc
 
@@ -137,6 +140,7 @@ profiles:
     - f_abc
     variables:
       varx: profvarx
+      vary: profvary
 _EOF
 #cat ${cfg}
 
@@ -161,19 +165,21 @@ echo "dvar3: {{@@ dvar3 @@}}" >> ${tmps}/dotfiles/abc
 echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
 echo "dvar4: {{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
 echo "varx: {{@@ varx @@}}" >> ${tmps}/dotfiles/abc
+echo "vary: {{@@ vary @@}}" >> ${tmps}/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
+echo "test2"
 cat ${tmpd}/abc
-
 grep '^var3: extvar1 var2 var3' ${tmpd}/abc >/dev/null
 grep '^dvar3: extdvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
 grep '^var4: echo extvar1 var2 var3' ${tmpd}/abc >/dev/null
 grep '^dvar4: extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^varx: profvarx' ${tmpd}/abc >/dev/null
+grep '^varx: exttest' ${tmpd}/abc >/dev/null
+grep '^vary: profvary' ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

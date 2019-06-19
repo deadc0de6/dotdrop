@@ -109,7 +109,7 @@ echo "===================" >> ${tmps}/dotfiles/abc
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-#cat ${tmpd}/abc
+cat ${tmpd}/abc
 
 # test variables
 grep '^local1' ${tmpd}/abc >/dev/null

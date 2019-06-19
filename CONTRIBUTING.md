@@ -74,6 +74,35 @@ example) won't be *seen* by the higher layer until the config is reloaded. Consi
 `dirty` flag as a sign the file needs to be written and its representation in higher
 levels in not accurate anymore.
 
+## Variables resolution
+
+How variables are resolved (pass through jinja2's
+templating function) in the config file.
+
+* resolve `include` (the below merge is temporary just to resolve the `includes`)
+  * `variables` and `dynvariables` are first merged and recursively resolved
+  * `dynvariables` are executed
+  * they are all merged and `include` paths are resolved
+    (allows to use something like `include {{@@ os @@}}.variables.yaml`)
+* `variables` and profile's `variables` are merged
+* `dynvariables` and profile's `dynvariables` are merged
+* `dynvariables` are executed
+* they are all merged into the final *local* `variables`
+
+These are then used to resolve different elements in the config file:
+see [this](https://github.com/deadc0de6/dotdrop/wiki/config-variables#config-available-variables)
+
+Then additional variables (`import_variables` and `import_configs`) are
+then merged and take precedence over local variables.
+
+Note:
+
+* `dynvariables` > `variables`
+* profile variables > (`variables` or `dynvariables`)
+* imported `variables`/`dynvariables` > any other `variables` or `dynvariables`
+* actions using variables are resolved at runtime (when action is executed)
+  and not when loading the config
+
 # Testing
 
 Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.

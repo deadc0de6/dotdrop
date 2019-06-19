@@ -48,12 +48,16 @@ def write_to_tmpfile(content):
     return path
 
 
-def shell(cmd):
+def shell(cmd, debug=False):
     """
     run a command in the shell (expects a string)
     returns True|False, output
     """
+    if debug:
+        LOG.dbg('shell exec: {}'.format(cmd))
     ret, out = subprocess.getstatusoutput(cmd)
+    if debug:
+        LOG.dbg('shell result ({}): {}'.format(ret, out))
     return ret == 0, out
 
 
