@@ -101,7 +101,7 @@ grep '^another test' ${tmpd}/abc >/dev/null
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p2
 
 cat ${tmpd}/abc
-grep '^this is some test' ${tmpd}/abc >/dev/null
+grep '^this is some sub-test' ${tmpd}/abc >/dev/null
 grep '^42' ${tmpd}/abc >/dev/null
 grep '^another test' ${tmpd}/abc >/dev/null
 

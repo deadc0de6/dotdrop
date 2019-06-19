@@ -410,8 +410,13 @@ class CfgYaml:
             seen.append(inherited_profile)
             new = self._get_included_variables(inherited_profile,
                                                seen)
+            if self.debug:
+                msg = 'included vars from {}: {}'
+                self.log.dbg(msg.format(inherited_profile, new))
             variables.update(new)
-        return pentry.get(self.key_profile_variables, {})
+
+        cur = pentry.get(self.key_profile_variables, {})
+        return self._merge_dict(variables, cur)
 
     def _get_included_dvariables(self, profile, seen):
         """return included dynvariables"""
@@ -429,8 +434,13 @@ class CfgYaml:
                 raise YamlException('\"include loop\"')
             seen.append(inherited_profile)
             new = self._get_included_dvariables(inherited_profile, seen)
+            if self.debug:
+                msg = 'included dvars from {}: {}'
+                self.log.dbg(msg.format(inherited_profile, new))
             variables.update(new)
-        return pentry.get(self.key_profile_dvariables, {})
+
+        cur = pentry.get(self.key_profile_dvariables, {})
+        return self._merge_dict(variables, cur)
 
     def _resolve_profile_all(self):
         """resolve some other parts of the config"""
