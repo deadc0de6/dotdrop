@@ -123,6 +123,7 @@ profiles:
         args = _fake_args()
         args['--profile'] = 'p1'
         args['--cfg'] = 'mocked'
+        args['--verbose'] = True
 
         with self.assertRaises(ValueError):
             o = Options(args=args)
