@@ -72,8 +72,8 @@ def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
     prof = o.conf.get_profile(o.profile)
-    pro_pre_actions = prof.get_pre_actions()
-    pro_post_actions = prof.get_post_actions()
+    pro_pre_actions = prof.get_pre_actions() if prof else []
+    pro_post_actions = prof.get_post_actions() if prof else []
 
     if o.install_keys:
         # filtered dotfiles to install
