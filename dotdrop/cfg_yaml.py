@@ -91,7 +91,7 @@ class CfgYaml:
             self.log.dbg('before normalization: {}'.format(self.yaml_dict))
 
         # resolve variables
-        self.variables = self._merge_variables()
+        self.variables, self.prokeys = self._merge_variables()
 
         # apply variables
         self._apply_variables()
@@ -252,30 +252,24 @@ class CfgYaml:
                 v[self.key_profile_include] = new
 
         # now get the included ones
-        incl_var = self._get_included_variables(self.profile,
-                                                seen=[self.profile])
-        incl_dvar = self._get_included_dvariables(self.profile,
-                                                  seen=[self.profile])
+        pro_var = self._get_included_variables(self.profile,
+                                               seen=[self.profile])
+        pro_dvar = self._get_included_dvariables(self.profile,
+                                                 seen=[self.profile])
         # exec incl dynvariables
-        self._shell_exec_dvars(incl_dvar.keys(), incl_dvar)
+        self._shell_exec_dvars(pro_dvar.keys(), pro_dvar)
 
         # merge all and resolve
-        merged = self._merge_dict(incl_var, merged)
-        merged = self._merge_dict(incl_dvar, merged)
+        merged = self._merge_dict(pro_var, merged)
+        merged = self._merge_dict(pro_dvar, merged)
         merged = self._rec_resolve_vars(merged)
-        if self.debug:
-            self.log.dbg('with included variables')
-            self._debug_vars(merged)
-
-        if self.debug:
-            self.log.dbg('with included variables')
-            self._debug_vars(merged)
 
         if self.debug:
             self.log.dbg('resolve all uses of variables in config')
             self._debug_vars(merged)
 
-        return merged
+        prokeys = list(pro_var.keys()) + list(pro_dvar.keys())
+        return merged, prokeys
 
     def _apply_variables(self):
         """template any needed parts of the config"""
@@ -416,7 +410,7 @@ class CfgYaml:
             variables.update(new)
 
         cur = pentry.get(self.key_profile_variables, {})
-        return self._merge_dict(variables, cur)
+        return self._merge_dict(cur, variables)
 
     def _get_included_dvariables(self, profile, seen):
         """return included dynvariables"""
@@ -440,7 +434,7 @@ class CfgYaml:
             variables.update(new)
 
         cur = pentry.get(self.key_profile_dvariables, {})
-        return self._merge_dict(variables, cur)
+        return self._merge_dict(cur, variables)
 
     def _resolve_profile_all(self):
         """resolve some other parts of the config"""
@@ -449,9 +443,9 @@ class CfgYaml:
             dfs = v.get(self.key_profile_dotfiles, None)
             if not dfs:
                 continue
-            if self.debug:
-                self.log.dbg('add ALL to profile {}'.format(k))
             if self.key_all in dfs:
+                if self.debug:
+                    self.log.dbg('add ALL to profile {}'.format(k))
                 v[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
@@ -538,7 +532,12 @@ class CfgYaml:
             merged = self._rec_resolve_vars(merged)
             # execute dvar
             self._shell_exec_dvars(dvar.keys(), merged)
+            self._clear_profile_vars(merged)
             self.variables = self._merge_dict(merged, self.variables)
+
+    def _clear_profile_vars(self, dic):
+        """remove profile variables from dic if found"""
+        [dic.pop(k, None) for k in self.prokeys]
 
     def _import_actions(self):
         """import external actions from paths"""
@@ -571,26 +570,32 @@ class CfgYaml:
                                        mandatory=False)
                 v[self.key_dotfiles] = new + current
 
+    def _import_config(self, path):
+        """import config from path"""
+        path = self._norm_path(path)
+        if self.debug:
+            self.log.dbg('import config from {}'.format(path))
+        sub = CfgYaml(path, profile=self.profile, debug=self.debug)
+        # settings is ignored
+        self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
+        self.profiles = self._merge_dict(self.profiles, sub.profiles)
+        self.actions = self._merge_dict(self.actions, sub.actions)
+        self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
+        self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
+        self._clear_profile_vars(sub.variables)
+        if self.debug:
+            self.log.dbg('add import_configs var: {}'.format(sub.variables))
+        self.variables = self._merge_dict(sub.variables, self.variables)
+
     def _import_configs(self):
-        """import configs from external file"""
+        """import configs from external files"""
         # settings -> import_configs
         imp = self.settings.get(self.key_import_configs, None)
         if not imp:
             return
         paths = self._glob_paths(imp)
         for path in paths:
-            path = self._norm_path(path)
-            if self.debug:
-                self.log.dbg('import config from {}'.format(path))
-            sub = CfgYaml(path, debug=self.debug)
-            # settings is ignored
-            self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
-            self.profiles = self._merge_dict(self.profiles, sub.profiles)
-            self.actions = self._merge_dict(self.actions, sub.actions)
-            self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
-            self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
-            self.variables = self._merge_dict(self.variables,
-                                              sub.variables)
+            self._import_config(path)
 
     def _import_sub(self, path, key,
                     mandatory=False, patch_func=None):

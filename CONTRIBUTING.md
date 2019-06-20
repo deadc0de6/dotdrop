@@ -98,8 +98,9 @@ then merged and take precedence over local variables.
 Note:
 
 * `dynvariables` > `variables`
-* profile variables > (`variables` or `dynvariables`)
-* imported `variables`/`dynvariables` > any other `variables` or `dynvariables`
+* profile `(dyn)variables` > any other `(dyn)variables`
+* profile `(dyn)variables` > profile's included `(dyn)variables`
+* imported `variables`/`dynvariables` > `(dyn)variables`
 * actions using variables are resolved at runtime (when action is executed)
   and not when loading the config
 

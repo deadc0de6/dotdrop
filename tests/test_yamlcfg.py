@@ -583,9 +583,11 @@ profiles:
         ))
 
         # test variables
+        # since variables get merged they are
+        # the same in both configs
         imported_vars = imported_cfg.variables
         self.assertFalse(any(
-            imported_vars[k] == v
+            imported_vars[k] != v
             for k, v in importing_cfg.variables.items()
             if not k.startswith('_')
         ))
