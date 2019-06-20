@@ -104,6 +104,11 @@ class Action(Cmd):
             err += ' with \"{}\"'.format(args)
             self.log.warn(err)
             return False
+        except KeyError:
+            err = 'bad action: \"{}\"'.format(action)
+            err += ' with \"{}\"'.format(args)
+            self.log.warn(err)
+            return False
         self.log.sub('executing \"{}\"'.format(cmd))
         try:
             ret = subprocess.call(cmd, shell=True)
