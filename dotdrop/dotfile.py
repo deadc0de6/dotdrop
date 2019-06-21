@@ -45,7 +45,7 @@ class Dotfile(DictParser):
         self.trans_w = trans_w
         self.upignore = upignore
 
-        if link != LinkTypes.NOLINK and \
+        if self.link != LinkTypes.NOLINK and \
                 (
                     (trans_r and len(trans_r) > 0)
                     or
