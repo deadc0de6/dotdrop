@@ -170,7 +170,7 @@ class Options(AttrMonitor):
         if os.path.exists(path):
             return path
 
-        return None
+        return ''
 
     def _header(self):
         """display the header"""

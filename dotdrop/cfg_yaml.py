@@ -82,6 +82,12 @@ class CfgYaml:
         self.log = Logger()
         self.dirty = False
 
+        if not os.path.exists(path):
+            err = 'invalid config path: \"{}\"'.format(path)
+            if self.debug:
+                self.log.dbg(err)
+            raise YamlException(err)
+
         self.yaml_dict = self._load_yaml(self.path)
         # live patch deprecated entries
         self._fix_deprecated(self.yaml_dict)
