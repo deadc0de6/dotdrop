@@ -127,6 +127,8 @@ _dotdrop-import ()
 		'(--no-banner)--no-banner' \
 		'(-d)-d' \
 		'(--dry)--dry' \
+		'(-f)-f' \
+		'(--force)--force' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
