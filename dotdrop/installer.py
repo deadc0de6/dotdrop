@@ -214,7 +214,7 @@ class Installer:
                 msg = 'ignoring "{}", link already exists'.format(dst)
                 if self.debug:
                     self.log.dbg(msg)
-                return True, None
+                return False, None
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return True, None
