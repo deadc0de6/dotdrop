@@ -70,13 +70,13 @@ _EOF
 #cat ${cfg}
 
 # import dir
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir
 
 # change the file
 echo "second" > ${tmpd}/adir/file1
 
 # import file
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir/file1
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir/file1
 
 # test
 [ ! -e ${tmps}/dotfiles/${tmpd}/adir/file1 ] && echo "not exist" && exit 1
