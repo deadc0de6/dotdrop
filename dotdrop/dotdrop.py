@@ -353,7 +353,21 @@ def cmd_importer(o):
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(o.dotpath, src)
-        if not os.path.exists(srcf):
+        overwrite = not os.path.exists(srcf)
+        if o.safe and os.path.exists(srcf):
+            c = Comparator(debug=o.debug)
+            diff = c.compare(srcf, dst)
+            if diff != '':
+                # files are different, dunno what to do
+                LOG.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
+                LOG.emph(diff)
+                # ask user
+                msg = 'Dotfile \"{}\" already exists, overwrite?'.format(srcf)
+                overwrite = LOG.ask(msg)
+
+        if o.debug:
+            LOG.dbg('will overwrite: {}'.format(overwrite))
+        if overwrite:
             cmd = ['mkdir', '-p', '{}'.format(os.path.dirname(srcf))]
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
