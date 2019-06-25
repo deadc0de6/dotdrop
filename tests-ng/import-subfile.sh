@@ -73,14 +73,15 @@ _EOF
 cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir
 
 # change the file
-echo "second" > ${tmpd}/adir/file1
+echo "second" >> ${tmpd}/adir/file1
 
 # import file
 cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir/file1
 
 # test
+#cat ${tmps}/dotfiles/${tmpd}/adir/file1
 [ ! -e ${tmps}/dotfiles/${tmpd}/adir/file1 ] && echo "not exist" && exit 1
-grep 'second' ${tmps}/dotfiles/${tmpd}/adir/file1
+grep 'second' ${tmps}/dotfiles/${tmpd}/adir/file1 >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
