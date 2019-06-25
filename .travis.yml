@@ -12,3 +12,7 @@ script:
   ./tests.sh
 after_success:
   coveralls
+env:
+  global:
+    - DOTDROP_FORCE_NODEBUG=
+    - DOTDROP_NOBANNER=

@@ -10,7 +10,7 @@ if ! ${rl} "${0}" >/dev/null 2>&1; then
   rl="realpath"
 
   if ! hash ${rl}; then
-    echo "\"${rl}\" not found !" && exit 1
+    echo "\"${rl}\" not found!" && exit 1
   fi
 fi
 
