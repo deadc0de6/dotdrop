@@ -19,6 +19,13 @@ from dotdrop.logger import Logger
 LOG = Logger()
 STAR = '*'
 
+# files dotdrop refuses to remove
+DONOTDELETE = [
+    os.path.expanduser('~'),
+    os.path.expanduser('~/.config'),
+]
+NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
+
 
 def run(cmd, raw=True, debug=False, checkerr=False):
     """run a command (expects a list)"""
@@ -89,6 +96,10 @@ def remove(path):
     """remove a file/directory/symlink"""
     if not os.path.lexists(path):
         raise OSError("File not found: {}".format(path))
+    if os.path.normpath(os.path.expanduser(path)) in NOREMOVE:
+        err = 'Dotdrop refuses to remove {}'.format(path)
+        LOG.err(err)
+        raise OSError(err)
     if os.path.islink(path) or os.path.isfile(path):
         os.unlink(path)
     elif os.path.isdir(path):
