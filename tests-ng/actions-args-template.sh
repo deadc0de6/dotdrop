@@ -60,12 +60,12 @@ should_grep() {
 }
 
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests'`
+tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests'`
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests'`
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 # create the config file
 cfg="${tmps}/config.yaml"

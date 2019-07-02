@@ -46,12 +46,12 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests'`
+tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests'`
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests'`
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 act="${tmps}/actions.yaml"
 cat > ${act} << _EOF

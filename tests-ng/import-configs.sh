@@ -45,10 +45,10 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests'`
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests'`
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 # create the config file
 cfg1="${tmps}/config1.yaml"

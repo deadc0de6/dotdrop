@@ -46,11 +46,11 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests'`
+basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 dotfiles="${basedir}/dotfiles"
 echo "dotdrop dir: ${basedir}"
 # the dotfile
-tmpd=`mktemp -d --suffix='-dotdrop-tests'`
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 create_dir ${tmpd}
 
 # create the config file

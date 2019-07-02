@@ -46,20 +46,20 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests'`
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests'`
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
 # create a shell script
 export TESTENV="this is my global testenv"
-scr=`mktemp --suffix='-dotdrop-tests'`
+scr=`mktemp --suffix='-dotdrop-tests' || mktemp -d`
 chmod +x ${scr}
 echo -e "#!/bin/bash\necho $TESTENV\n" >> ${scr}
 
 export TESTENV2="this is my profile testenv"
-scr2=`mktemp --suffix='-dotdrop-tests'`
+scr2=`mktemp --suffix='-dotdrop-tests' || mktemp -d`
 chmod +x ${scr2}
 echo -e "#!/bin/bash\necho $TESTENV2\n" >> ${scr2}
 
