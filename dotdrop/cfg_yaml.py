@@ -80,7 +80,10 @@ class CfgYaml:
         self.profile = profile
         self.debug = debug
         self.log = Logger()
+        # config needs to be written
         self.dirty = False
+        # indicates the config has been updated
+        self.dirty_deprecated = False
 
         if not os.path.exists(path):
             err = 'invalid config path: \"{}\"'.format(path)
@@ -733,6 +736,7 @@ class CfgYaml:
         del config[key]
         self.log.warn('deprecated \"link_by_default\"')
         self.dirty = True
+        self.dirty_deprecated = True
 
     def _fix_deprecated_dotfile_link(self, yamldict):
         """fix deprecated link in dotfiles"""
@@ -751,6 +755,7 @@ class CfgYaml:
                     new = self.lnk_link
                 dotfile[self.key_dotfile_link] = new
                 self.dirty = True
+                self.dirty_deprecated = True
                 self.log.warn('deprecated \"link\" value')
 
             elif self.key_dotfile_link_children in dotfile and \
@@ -763,6 +768,7 @@ class CfgYaml:
                 del dotfile[self.key_dotfile_link_children]
                 dotfile[self.key_dotfile_link] = new
                 self.dirty = True
+                self.dirty_deprecated = True
                 self.log.warn('deprecated \"link_children\" value')
 
     ########################################################
@@ -793,7 +799,13 @@ class CfgYaml:
             self.log.err(e)
             raise YamlException('error saving config: {}'.format(self.path))
 
+        if self.dirty_deprecated:
+            warn = 'your config contained deprecated entries'
+            warn += ' and was updated'
+            self.log.warn(warn)
+
         self.dirty = False
+        self.cfg_updated = False
         return True
 
     def dump(self):
