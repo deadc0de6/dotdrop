@@ -11,6 +11,7 @@ import glob
 from copy import deepcopy
 
 # local imports
+from dotdrop.version import __version__ as VERSION
 from dotdrop.settings import Settings
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
@@ -62,6 +63,7 @@ class CfgYaml:
     key_settings_workdir = 'workdir'
     key_settings_link_dotfile_default = 'link_dotfile_default'
     key_settings_noempty = 'ignoreempty'
+    key_settings_minversion = 'minversion'
     key_imp_link = 'link_on_import'
 
     # link values
@@ -137,6 +139,11 @@ class CfgYaml:
         self.ori_settings = self._get_entry(dic, self.key_settings)
         self.settings = Settings(None).serialize().get(self.key_settings)
         self.settings.update(self.ori_settings)
+
+        # resolve minimum version
+        if self.key_settings_minversion in self.settings:
+            minversion = self.settings[self.key_settings_minversion]
+            self._check_minversion(minversion)
 
         # resolve settings paths
         p = self._norm_path(self.settings[self.key_settings_dotpath])
@@ -790,6 +797,11 @@ class CfgYaml:
         if self.key_profiles not in content:
             content[self.key_profiles] = None
 
+        if self.dirty_deprecated:
+            # add minversion
+            settings = content[self.key_settings]
+            settings[self.key_settings_minversion] = VERSION
+
         # save to file
         if self.debug:
             self.log.dbg('saving to {}'.format(self.path))
@@ -943,3 +955,17 @@ class CfgYaml:
                 self.log.dbg('resolved: {} -> {}'.format(e, et))
             new.append(et)
         return new
+
+    def _check_minversion(self, minversion):
+        if not minversion:
+            return
+        try:
+            cur = tuple([int(x) for x in VERSION.split('.')])
+            cfg = tuple([int(x) for x in minversion.split('.')])
+        except Exception:
+            err = 'bad version: \"{}\" VS \"{}\"'.format(VERSION, minversion)
+            raise YamlException(err)
+        if cur < cfg:
+            err = 'current dotdrop version is too old for that config file.'
+            err += ' Please update.'
+            raise YamlException(err)

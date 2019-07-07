@@ -29,6 +29,7 @@ class Settings(DictParser):
     key_showdiff = 'showdiff'
     key_upignore = 'upignore'
     key_workdir = 'workdir'
+    key_minversion = 'minversion'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -41,7 +42,8 @@ class Settings(DictParser):
                  import_variables=[], keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
-                 showdiff=False, upignore=[], workdir='~/.config/dotdrop'):
+                 showdiff=False, upignore=[], workdir='~/.config/dotdrop',
+                 minversion=None):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -59,6 +61,7 @@ class Settings(DictParser):
         self.workdir = workdir
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
+        self.minversion = minversion
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -80,6 +83,7 @@ class Settings(DictParser):
             self.key_longkey: self.longkey,
             self.key_showdiff: self.showdiff,
             self.key_workdir: self.workdir,
+            self.key_minversion: self.minversion,
         }
         self._serialize_seq(self.key_cmpignore, dic)
         self._serialize_seq(self.key_default_actions, dic)
