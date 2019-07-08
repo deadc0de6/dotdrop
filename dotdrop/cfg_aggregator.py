@@ -244,12 +244,10 @@ class CfgAggregator:
 
     def path_to_dotfile_dst(self, path):
         """normalize the path to match dotfile dst"""
-        path = os.path.expanduser(path)
-        path = os.path.expandvars(path)
-        path = os.path.abspath(path)
-        home = os.path.expanduser(TILD) + os.sep
+        path = self._norm_path(path)
 
-        # normalize the path
+        # use tild for home
+        home = os.path.expanduser(TILD) + os.sep
         if path.startswith(home):
             path = path[len(home):]
             path = os.path.join(TILD, path)
@@ -257,10 +255,12 @@ class CfgAggregator:
 
     def get_dotfile_by_dst(self, dst):
         """get a dotfile by dst"""
-        try:
-            return next(d for d in self.dotfiles if d.dst == dst)
-        except StopIteration:
-            return None
+        dst = self._norm_path(dst)
+        for d in self.dotfiles:
+            left = self._norm_path(d.dst)
+            if left == dst:
+                return d
+        return None
 
     def save(self):
         """save the config"""
@@ -350,3 +350,9 @@ class CfgAggregator:
             return next(x for x in self.trans_w if x.key == key)
         except StopIteration:
             return None
+
+    def _norm_path(self, path):
+        path = os.path.expanduser(path)
+        path = os.path.expandvars(path)
+        path = os.path.abspath(path)
+        return path
