@@ -223,7 +223,8 @@ class CfgYaml:
 
     def _rec_resolve_vars(self, variables):
         """recursive resolve variables"""
-        t = Templategen(variables=variables)
+        default = self._get_variables_dict(self.profile)
+        t = Templategen(variables=self._merge_dict(default, variables))
         for k in variables.keys():
             val = variables[k]
             while Templategen.var_is_template(val):
@@ -624,13 +625,15 @@ class CfgYaml:
         extdict = self._load_yaml(path)
         new = self._get_entry(extdict, key, mandatory=mandatory)
         if patch_func:
+            if self.debug:
+                self.log.dbg('calling patch: {}'.format(patch_func))
             new = patch_func(new)
         if not new and mandatory:
             err = 'no \"{}\" imported from \"{}\"'.format(key, path)
             self.log.warn(err)
             raise YamlException(err)
         if self.debug:
-            self.log.dbg('new \"{}\": {}'.format(key, new))
+            self.log.dbg('imported \"{}\": {}'.format(key, new))
         return new
 
     ########################################################
