@@ -214,11 +214,23 @@ class CfgYaml:
 
     def _resolve_dotfile_paths(self):
         """resolve dotfile paths"""
+        t = Templategen(variables=self.variables)
+
         for dotfile in self.dotfiles.values():
+            # src
             src = dotfile[self.key_dotfile_src]
+            new = t.generate_string(src)
+            if new != src and self.debug:
+                self.log.dbg('dotfile: {} -> {}'.format(src, new))
+            src = new
             src = os.path.join(self.settings[self.key_settings_dotpath], src)
             dotfile[self.key_dotfile_src] = self._norm_path(src)
+            # dst
             dst = dotfile[self.key_dotfile_dst]
+            new = t.generate_string(dst)
+            if new != dst and self.debug:
+                self.log.dbg('dotfile: {} -> {}'.format(dst, new))
+            dst = new
             dotfile[self.key_dotfile_dst] = self._norm_path(dst)
 
     def _rec_resolve_vars(self, variables):
@@ -291,15 +303,6 @@ class CfgYaml:
     def _apply_variables(self):
         """template any needed parts of the config"""
         t = Templategen(variables=self.variables)
-
-        # dotfiles src/dst/actions keys
-        for k, v in self.dotfiles.items():
-            # src
-            src = v.get(self.key_dotfile_src)
-            v[self.key_dotfile_src] = t.generate_string(src)
-            # dst
-            dst = v.get(self.key_dotfile_dst)
-            v[self.key_dotfile_dst] = t.generate_string(dst)
 
         # import_actions
         new = []

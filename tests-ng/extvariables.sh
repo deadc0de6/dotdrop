@@ -78,10 +78,14 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: ${tmpd}/{{@@ theprofile @@}}
+    src: def
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - f_def
     variables:
       varx: profvarx
       provar: provar
@@ -107,6 +111,8 @@ echo "evar1: {{@@ evar1 @@}}" >> ${tmps}/dotfiles/abc
 echo "provar: {{@@ provar @@}}" >> ${tmps}/dotfiles/abc
 echo "theprofile: {{@@ theprofile @@}}" >> ${tmps}/dotfiles/abc
 
+echo "theprofile: {{@@ theprofile @@}}" > ${tmps}/dotfiles/def
+
 #cat ${tmps}/dotfiles/abc
 
 # install
@@ -122,6 +128,10 @@ grep '^varx: profvarx' ${tmpd}/abc >/dev/null
 grep '^evar1: extevar1' ${tmpd}/abc >/dev/null
 grep '^provar: provar' ${tmpd}/abc >/dev/null
 grep '^theprofile: p1' ${tmpd}/abc >/dev/null
+
+# check def
+[ ! -e ${tmpd}/p1 ] && echo "def not created" && exit 1
+grep '^theprofile: p1' ${tmpd}/p1 >/dev/null
 
 rm -f ${tmpd}/abc
 
