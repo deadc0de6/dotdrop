@@ -101,8 +101,8 @@ Note:
 * profile `(dyn)variables` > any other `(dyn)variables`
 * profile `(dyn)variables` > profile's included `(dyn)variables`
 * imported `variables`/`dynvariables` > `(dyn)variables`
-* actions using variables are resolved at runtime (when action is executed)
-  and not when loading the config
+* actions/transformations  using variables are resolved at runtime
+  (when action/transformation is executed) and not when loading the config
 
 # Testing
 

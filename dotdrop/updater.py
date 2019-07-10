@@ -48,6 +48,11 @@ class Updater:
         self.debug = debug
         self.ignore = ignore
         self.showpatch = showpatch
+        self.templater = Templategen(variables=self.variables,
+                                     base=self.dotpath,
+                                     debug=self.debug)
+        # save template vars
+        self.tvars = self.templater.add_tmp_vars()
         self.log = Logger()
 
     def update_path(self, path):
@@ -110,7 +115,11 @@ class Updater:
         if self.debug:
             self.log.dbg('executing write transformation {}'.format(trans))
         tmp = get_unique_tmp_name()
-        if not trans.transform(path, tmp):
+        self.templater.restore_vars(self.tvars)
+        newvars = dotfile.get_dotfile_variables()
+        self.templater.add_tmp_vars(newvars=newvars)
+        if not trans.transform(path, tmp, templater=self.templater,
+                               debug=self.debug):
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, dotfile.key))
             if os.path.exists(tmp):
@@ -136,9 +145,8 @@ class Updater:
 
     def _resolve_template(self, tpath):
         """resolve the template to a temporary file"""
-        t = Templategen(variables=self.variables, base=self.dotpath,
-                        debug=self.debug)
-        return t.generate(tpath)
+        self.templater.restore_vars(self.tvars)
+        return self.templater.generate(tpath)
 
     def _handle_file(self, path, dtpath, compare=True):
         """sync path (deployed file) and dtpath (dotdrop dotfile path)"""

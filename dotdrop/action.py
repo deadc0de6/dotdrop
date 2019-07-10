@@ -121,14 +121,20 @@ class Action(Cmd):
 
 class Transform(Cmd):
 
-    def transform(self, arg0, arg1):
+    def transform(self, arg0, arg1, templater=None, debug=False):
         """
         execute transformation with {0} and {1}
         where {0} is the file to transform
         and {1} is the result file
         """
         ret = 1
-        cmd = self.action.format(arg0, arg1)
+        action = self.action
+        if templater:
+            action = templater.generate_string(action)
+            if debug:
+                self.log.dbg('trans \"{}\" -> \"{}\"'.format(self.action,
+                                                             action))
+        cmd = action.format(arg0, arg1)
         if os.path.exists(arg1):
             msg = 'transformation \"{}\": destination exists: {}'
             self.log.warn(msg.format(cmd, arg1))

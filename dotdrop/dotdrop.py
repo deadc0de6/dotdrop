@@ -133,7 +133,7 @@ def cmd_install(o):
             src = dotfile.src
             tmp = None
             if dotfile.trans_r:
-                tmp = apply_trans(o.dotpath, dotfile, debug=o.debug)
+                tmp = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
                 if not tmp:
                     continue
                 src = tmp
@@ -224,7 +224,7 @@ def cmd_compare(o, tmp):
             # apply transformation
             if o.debug:
                 LOG.dbg('applying transformation before comparing')
-            tmpsrc = apply_trans(o.dotpath, dotfile, debug=o.debug)
+            tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
             if not tmpsrc:
                 # could not apply trans
                 same = False
@@ -561,7 +561,7 @@ def _select(selections, dotfiles):
     return selected
 
 
-def apply_trans(dotpath, dotfile, debug=False):
+def apply_trans(dotpath, dotfile, templater, debug=False):
     """
     apply the read transformation to the dotfile
     return None if fails and new source if succeed
@@ -573,7 +573,7 @@ def apply_trans(dotpath, dotfile, debug=False):
         LOG.dbg('executing transformation {}'.format(trans))
     s = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
-    if not trans.transform(s, temp):
+    if not trans.transform(s, temp, templater=templater, debug=debug):
         msg = 'transformation \"{}\" failed for {}'
         LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
