@@ -102,9 +102,13 @@ class CfgAggregator:
 
         # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_r", self._get_trans_r, islist=False)
+                                 "trans_r",
+                                 self._get_trans_w_args(self._get_trans_r),
+                                 islist=False)
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_w", self._get_trans_w, islist=False)
+                                 "trans_w",
+                                 self._get_trans_w_args(self._get_trans_w),
+                                 islist=False)
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
         """
@@ -331,11 +335,28 @@ class CfgAggregator:
             # we have args
             key, *args = fields
             if self.debug:
-                self.log.dbg('action with parm: {} and {}'.format(key, args))
+                msg = 'action with parm: {} and {}'
+                self.log.dbg(msg.format(key, args))
             action = self._get_action(key).copy(args)
         else:
             action = self._get_action(key)
         return action
+
+    def _get_trans_w_args(self, getter):
+        """return transformation by key with the arguments"""
+        def getit(key):
+            fields = shlex.split(key)
+            if len(fields) > 1:
+                # we have args
+                key, *args = fields
+                if self.debug:
+                    msg = 'trans with parm: {} and {}'
+                    self.log.dbg(msg.format(key, args))
+                trans = getter(key).copy(args)
+            else:
+                trans = getter(key)
+            return trans
+        return getit
 
     def _get_trans_r(self, key):
         """return the trans_r with this key"""

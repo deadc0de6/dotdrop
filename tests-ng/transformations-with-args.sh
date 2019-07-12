@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
 #
-# test transformations using templates
+# test transformations with args and templates
 #
 
 # exit on first error
@@ -58,11 +58,11 @@ cfg="${tmps}/config.yaml"
 
 cat > ${cfg} << _EOF
 trans_read:
-  r_echo_abs_src: echo "\$(cat {0}); {{@@ _dotfile_abs_src @@}}" > {1}
-  r_echo_var: echo "\$(cat {0}); {{@@ r_var @@}}" > {1}
+  r_echo_abs_src: echo "\$(cat {0}); {{@@ _dotfile_abs_src @@}}; {2}" > {1}
+  r_echo_var: echo "\$(cat {0}); {{@@ r_var @@}}; {2}" > {1}
 trans_write:
-  w_echo_key: echo "\$(cat {0}); {{@@ _dotfile_key @@}}" > {1}
-  w_echo_var: echo "\$(cat {0}); {{@@ w_var @@}}" > {1}
+  w_echo_key: echo "\$(cat {0}); {{@@ _dotfile_key @@}}; {2}" > {1}
+  w_echo_var: echo "\$(cat {0}); {{@@ w_var @@}}; {2}" > {1}
 variables:
   r_var: readvar
   w_var: writevar
@@ -77,13 +77,13 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
-    trans_read: r_echo_abs_src
-    trans_write: w_echo_key
+    trans_read: r_echo_abs_src arg1
+    trans_write: w_echo_key arg2
   f_ghi:
     dst: ${tmpd}/ghi
     src: ghi
-    trans_read: r_echo_var
-    trans_write: w_echo_var
+    trans_read: r_echo_var "{{@@ profile @@}}"
+    trans_write: w_echo_var "{{@@ _dotfile_key @@}}"
 profiles:
   p1:
     dotfiles:
@@ -111,9 +111,9 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 [ ! -e ${tmpd}/ghi ] && exit 1
 grep marker ${tmpd}/def
 cat ${tmpd}/abc
-grep "^abc; ${tmps}/dotfiles/abc$" ${tmpd}/abc
+grep "^abc; ${tmps}/dotfiles/abc; arg1$" ${tmpd}/abc
 cat ${tmpd}/ghi
-grep "^ghi; readvar$" ${tmpd}/ghi
+grep "^ghi; readvar; p1$" ${tmpd}/ghi
 
 ###########################
 # test update
@@ -128,9 +128,9 @@ cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V
 [ ! -e ${tmps}/dotfiles/ghi ] && exit 1
 grep marker ${tmps}/dotfiles/def
 cat ${tmps}/dotfiles/abc
-grep "^abc; ${tmps}/dotfiles/abc; f_abc$" ${tmps}/dotfiles/abc
+grep "^abc; ${tmps}/dotfiles/abc; arg1; f_abc; arg2$" ${tmps}/dotfiles/abc
 cat ${tmps}/dotfiles/ghi
-grep "^ghi; readvar; writevar$" ${tmps}/dotfiles/ghi
+grep "^ghi; readvar; p1; writevar; f_ghi$" ${tmps}/dotfiles/ghi
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
