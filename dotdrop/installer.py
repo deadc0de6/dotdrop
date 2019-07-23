@@ -219,9 +219,7 @@ class Installer:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return True, None
             if self.showdiff:
-                with open(src, 'rb') as f:
-                    content = f.read()
-                self._diff_before_write(src, dst, content)
+                self._diff_before_write(src, dst)
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
                 err = 'ignoring "{}", link was not created'.format(dst)
@@ -375,7 +373,7 @@ class Installer:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
-                    self._diff_before_write(src, dst, content)
+                    self._diff_before_write(src, dst)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1, None
@@ -406,19 +404,16 @@ class Installer:
         os.chmod(dst, rights)
         return 0, None
 
-    def _diff_before_write(self, src, dst, src_content):
+    def _diff_before_write(self, src, dst):
         """diff before writing when using --showdiff - not efficient"""
         # create tmp to diff for templates
-        tmpfile = utils.get_tmpfile()
-        with open(tmpfile, 'wb') as f:
-            f.write(src_content)
         comp = Comparator(debug=self.debug)
-        diff = comp.compare(tmpfile, dst)
+        diff = comp.compare(src, dst)
         # fake the output for readability
+        if not diff:
+            return
         self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
         self.log.emph(diff)
-        if tmpfile:
-            utils.remove(tmpfile)
 
     def _create_dirs(self, directory):
         """mkdir -p <directory>"""

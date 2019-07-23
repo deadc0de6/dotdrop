@@ -31,6 +31,14 @@ class Comparator:
         if self.debug:
             self.log.dbg('comparing {} and {}'.format(left, right))
             self.log.dbg('ignore pattern(s): {}'.format(ignore))
+        # test type of file
+        if os.path.isdir(left) and not os.path.isdir(right):
+            return '\"{}\" is a dir while \"{}\" is a file\n'.format(left,
+                                                                     right)
+        if not os.path.isdir(left) and os.path.isdir(right):
+            return '\"{}\" is a file while \"{}\" is a dir\n'.format(left,
+                                                                     right)
+        # test content
         if not os.path.isdir(left):
             if self.debug:
                 self.log.dbg('is file')
