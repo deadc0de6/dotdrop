@@ -13,6 +13,8 @@
 It allows to store your dotfiles on git and automagically deploy
 different versions of the same file on different setups.
 
+If you like dotdrop, <a href='https://ko-fi.com/I2I2ZZT4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi1.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+
 It also allows to manage different *sets* of dotfiles.
 For example you can have a set of dotfiles for your home laptop and
 a different set for your office desktop. Those sets may overlap and different
@@ -70,6 +72,7 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 * [Installation](#installation)
 * [Getting started](#getting-started)
 * [Documentation](#documentation)
+* [Support](#support)
 
 # Installation
 
@@ -269,6 +272,10 @@ For more options see `dotdrop --help` and the [wiki](https://github.com/deadc0de
 # Documentation
 
 Dotdrop's documentation is hosted on [its wiki](https://github.com/deadc0de6/dotdrop/wiki).
+
+# Support
+
+If you like dotdrop, <a href='https://ko-fi.com/I2I2ZZT4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi1.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
 # Contribution
 
