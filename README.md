@@ -114,7 +114,9 @@ For MacOS users, make sure to install `realpath` through homebrew
 
 Using dotdrop as a submodule will need you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
-of your dotfiles repository.
+of your dotfiles repository. Note that this script updates the submodule
+automatically, unless called with the environment variable `DOTDROP_AUTOUPDATE`
+set to `no`.
 
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell (*~/.bashrc*, *~/.zshrc*, etc) with the config file path, for example
