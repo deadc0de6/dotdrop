@@ -10,7 +10,6 @@ import errno
 
 # local imports
 from dotdrop.logger import Logger
-from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
 
@@ -275,7 +274,8 @@ class Installer:
         content = templater.generate(src)
         templater.restore_vars(saved)
         if noempty and utils.content_empty(content):
-            self.log.dbg('ignoring empty template: {}'.format(src))
+            if self.debug:
+                self.log.dbg('ignoring empty template: {}'.format(src))
             return False, None
         if content is None:
             err = 'empty template {}'.format(src)
@@ -373,7 +373,7 @@ class Installer:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
-                    self._diff_before_write(src, dst)
+                    self._diff_before_write(src, dst, content=content)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1, None
@@ -404,11 +404,15 @@ class Installer:
         os.chmod(dst, rights)
         return 0, None
 
-    def _diff_before_write(self, src, dst):
+    def _diff_before_write(self, src, dst, content=None):
         """diff before writing when using --showdiff - not efficient"""
-        # create tmp to diff for templates
-        comp = Comparator(debug=self.debug)
-        diff = comp.compare(src, dst)
+        tmp = None
+        if content:
+            tmp = utils.write_to_tmpfile(content)
+            src = tmp
+        diff = utils.diff(src, dst, raw=False)
+        utils.remove(tmp, quiet=True)
+
         # fake the output for readability
         if not diff:
             return

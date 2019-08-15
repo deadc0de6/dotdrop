@@ -92,11 +92,15 @@ def get_unique_tmp_name():
     return os.path.join(tempfile.gettempdir(), unique)
 
 
-def remove(path):
+def remove(path, quiet=False):
     """remove a file/directory/symlink"""
     if not os.path.lexists(path):
+        if quiet:
+            return
         raise OSError("File not found: {}".format(path))
     if os.path.normpath(os.path.expanduser(path)) in NOREMOVE:
+        if quiet:
+            return
         err = 'Dotdrop refuses to remove {}'.format(path)
         LOG.err(err)
         raise OSError(err)
@@ -105,6 +109,8 @@ def remove(path):
     elif os.path.isdir(path):
         rmtree(path)
     else:
+        if quiet:
+            return
         raise OSError("Unsupported file type for deletion: {}".format(path))
 
 
