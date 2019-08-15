@@ -178,6 +178,7 @@ class Installer:
         dsts = [os.path.normpath(os.path.join(dst, child))
                 for child in children]
 
+        installed = 0
         for i in range(len(children)):
             src = srcs[i]
             dst = dsts[i]
@@ -196,17 +197,27 @@ class Installer:
                     continue
                 src = tmp
 
-            result = self._link(src, dst, actionexec=actionexec)
-
-            # void actionexec if dotfile installed
-            # to prevent from running actions multiple times
-            if len(result):
+            ret, err = self._link(src, dst, actionexec=actionexec)
+            if ret:
+                installed += 1
+                # void actionexec if dotfile installed
+                # to prevent from running actions multiple times
                 actionexec = None
+            else:
+                if err:
+                    return ret, err
 
-        return True, None
+        return installed > 0, None
 
     def _link(self, src, dst, actionexec=None):
-        """set src as a link target of dst"""
+        """
+        set src as a link target of dst
+
+        return
+        - True, None: success
+        - False, error_msg: error
+        - False, None, ignored
+        """
         overwrite = not self.safe
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
