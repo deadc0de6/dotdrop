@@ -422,7 +422,8 @@ class Installer:
             tmp = utils.write_to_tmpfile(content)
             src = tmp
         diff = utils.diff(src, dst, raw=False)
-        utils.remove(tmp, quiet=True)
+        if tmp:
+            utils.remove(tmp, quiet=True)
 
         # fake the output for readability
         if not diff:
