@@ -94,6 +94,8 @@ def get_unique_tmp_name():
 
 def remove(path, quiet=False):
     """remove a file/directory/symlink"""
+    if not path:
+        return
     if not os.path.lexists(path):
         if quiet:
             return
