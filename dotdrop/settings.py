@@ -17,7 +17,6 @@ class Settings(DictParser):
     # settings item keys
     key_backup = 'backup'
     key_banner = 'banner'
-    key_cmpignore = 'cmpignore'
     key_create = 'create'
     key_default_actions = 'default_actions'
     key_dotpath = 'dotpath'
@@ -28,6 +27,8 @@ class Settings(DictParser):
     key_link_on_import = 'link_on_import'
     key_showdiff = 'showdiff'
     key_upignore = 'upignore'
+    key_cmpignore = 'cmpignore'
+    key_instignore = 'instignore'
     key_workdir = 'workdir'
     key_minversion = 'minversion'
 
@@ -36,18 +37,18 @@ class Settings(DictParser):
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
 
-    def __init__(self, backup=True, banner=True, cmpignore=[],
+    def __init__(self, backup=True, banner=True,
                  create=True, default_actions=[], dotpath='dotfiles',
                  ignoreempty=True, import_actions=[], import_configs=[],
                  import_variables=[], keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
-                 showdiff=False, upignore=[], workdir='~/.config/dotdrop',
+                 upignore=[], cmpignore=[], instignore=[],
+                 workdir='~/.config/dotdrop', showdiff=False,
                  minversion=None):
         self.backup = backup
         self.banner = banner
         self.create = create
-        self.cmpignore = cmpignore
         self.default_actions = default_actions
         self.dotpath = dotpath
         self.ignoreempty = ignoreempty
@@ -58,6 +59,8 @@ class Settings(DictParser):
         self.longkey = longkey
         self.showdiff = showdiff
         self.upignore = upignore
+        self.cmpignore = cmpignore
+        self.instignore = instignore
         self.workdir = workdir
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
@@ -85,11 +88,12 @@ class Settings(DictParser):
             self.key_workdir: self.workdir,
             self.key_minversion: self.minversion,
         }
-        self._serialize_seq(self.key_cmpignore, dic)
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)
         self._serialize_seq(self.key_import_configs, dic)
         self._serialize_seq(self.key_import_variables, dic)
+        self._serialize_seq(self.key_cmpignore, dic)
         self._serialize_seq(self.key_upignore, dic)
+        self._serialize_seq(self.key_instignore, dic)
 
         return {self.key_yaml: dic}

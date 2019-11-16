@@ -225,6 +225,7 @@ class Options(AttrMonitor):
                                             if a.kind == Action.pre]
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
+        self.install_ignore = self.instignore
         # "compare" specifics
         self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']

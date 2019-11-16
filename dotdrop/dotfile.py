@@ -19,8 +19,9 @@ class Dotfile(DictParser):
 
     def __init__(self, key, dst, src,
                  actions=[], trans_r=None, trans_w=None,
-                 link=LinkTypes.NOLINK, cmpignore=[],
-                 noempty=False, upignore=[]):
+                 link=LinkTypes.NOLINK, noempty=False,
+                 cmpignore=[], upignore=[],
+                 instignore=[]):
         """
         constructor
         @key: dotfile key
@@ -30,12 +31,12 @@ class Dotfile(DictParser):
         @trans_r: transformation to change dotfile before it is installed
         @trans_w: transformation to change dotfile before updating it
         @link: link behavior
-        @cmpignore: patterns to ignore when comparing
         @noempty: ignore empty template if True
         @upignore: patterns to ignore when updating
+        @cmpignore: patterns to ignore when comparing
+        @instignore: patterns to ignore when installing
         """
         self.actions = actions
-        self.cmpignore = cmpignore
         self.dst = dst
         self.key = key
         self.link = LinkTypes.get(link)
@@ -44,6 +45,8 @@ class Dotfile(DictParser):
         self.trans_r = trans_r
         self.trans_w = trans_w
         self.upignore = upignore
+        self.cmpignore = cmpignore
+        self.instignore = instignore
 
         if self.link != LinkTypes.NOLINK and \
                 (

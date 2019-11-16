@@ -137,9 +137,12 @@ def cmd_install(o):
                 if not tmp:
                     continue
                 src = tmp
+            ignores = list(set(o.install_ignore + dotfile.instignore))
+            ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
             r, err = inst.install(t, src, dotfile.dst,
                                   actionexec=pre_actions_exec,
-                                  noempty=dotfile.noempty)
+                                  noempty=dotfile.noempty,
+                                  ignore=ignores)
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
                 if os.path.exists(tmp):
