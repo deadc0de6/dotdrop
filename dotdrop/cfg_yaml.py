@@ -658,7 +658,9 @@ class CfgYaml:
         """add an existing dotfile key to a profile_key"""
         self._new_profile(profile_key)
         profile = self.yaml_dict[self.key_profiles][profile_key]
-        pdfs = profile.get(self.key_profile_dotfiles, [])
+        if self.key_profile_dotfiles not in profile:
+            profile[self.key_profile_dotfiles] = []
+        pdfs = profile[self.key_profile_dotfiles]
         if self.key_all not in pdfs and \
                 dotfile_key not in pdfs:
             profile[self.key_profile_dotfiles].append(dotfile_key)
