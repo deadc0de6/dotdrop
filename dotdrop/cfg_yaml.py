@@ -482,9 +482,9 @@ class CfgYaml:
         this_profile = self.profiles[profile]
 
         # include
-        dotfiles = this_profile.get(self.key_profile_dotfiles, [])
-        actions = this_profile.get(self.key_profile_actions, [])
-        includes = this_profile.get(self.key_profile_include, None)
+        dotfiles = this_profile.get(self.key_profile_dotfiles, []) or []
+        actions = this_profile.get(self.key_profile_actions, []) or []
+        includes = this_profile.get(self.key_profile_include, []) or []
         if not includes:
             # nothing to include
             return dotfiles, actions
@@ -658,7 +658,7 @@ class CfgYaml:
         """add an existing dotfile key to a profile_key"""
         self._new_profile(profile_key)
         profile = self.yaml_dict[self.key_profiles][profile_key]
-        pdfs = profile[self.key_profile_dotfiles]
+        pdfs = profile.get(self.key_profile_dotfiles, [])
         if self.key_all not in pdfs and \
                 dotfile_key not in pdfs:
             profile[self.key_profile_dotfiles].append(dotfile_key)
