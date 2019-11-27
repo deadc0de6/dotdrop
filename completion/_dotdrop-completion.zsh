@@ -34,14 +34,14 @@ _dotdrop ()
         (command)
             local -a subcommands
             subcommands=(
-				'install'
-				'import'
-				'compare'
-				'update'
-				'remove'
-				'listfiles'
-				'detail'
-				'list'
+				'install[\[-VbtfndDa\] \[-c <path>\] \[-p <profile>\] \[<key>...\]]'
+				'import[\[-Vbdf\]     \[-c <path>\] \[-p <profile>\]]'
+				'compare[\[-Vb\]       \[-c <path>\] \[-p <profile>\]]'
+				'update[\[-VbfdkP\]   \[-c <path>\] \[-p <profile>\]]'
+				'remove[\[-Vbfdk\]    \[-c <path>\] \[-p <profile>\] \[<path>...\]]'
+				'files[\[-VbT\]      \[-c <path>\] \[-p <profile>\]]'
+				'detail[\[-Vb\]       \[-c <path>\] \[-p <profile>\] \[<key>...\]]'
+				'profiles[\[-Vb\]       \[-c <path>\]]'
             )
             _values 'dotdrop' $subcommands
         ;;
@@ -63,14 +63,14 @@ _dotdrop ()
                 remove)
                     _dotdrop-remove
                 ;;
-                listfiles)
-                    _dotdrop-listfiles
+                files)
+                    _dotdrop-files
                 ;;
                 detail)
                     _dotdrop-detail
                 ;;
-                list)
-                    _dotdrop-list
+                profiles)
+                    _dotdrop-profiles
                 ;;
             esac
         ;;
@@ -228,7 +228,7 @@ _dotdrop-remove ()
     fi
 }
 
-_dotdrop-listfiles ()
+_dotdrop-files ()
 {
     local context state state_descr line
     typeset -A opt_args
@@ -271,7 +271,7 @@ _dotdrop-detail ()
     fi
 }
 
-_dotdrop-list ()
+_dotdrop-profiles ()
 {
     local context state state_descr line
     typeset -A opt_args

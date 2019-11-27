@@ -5,7 +5,7 @@ _dotdropsh()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -eq 1 ]; then
-        COMPREPLY=( $( compgen -W '-h --help -v --version install import compare update remove listfiles detail list' -- $cur) )
+        COMPREPLY=( $( compgen -W '-h --help -v --version install import compare update remove files detail profiles' -- $cur) )
     else
         case ${COMP_WORDS[1]} in
             install)
@@ -23,14 +23,14 @@ _dotdropsh()
             remove)
             _dotdropsh_remove
         ;;
-            listfiles)
-            _dotdropsh_listfiles
+            files)
+            _dotdropsh_files
         ;;
             detail)
             _dotdropsh_detail
         ;;
-            list)
-            _dotdropsh_list
+            profiles)
+            _dotdropsh_profiles
         ;;
         esac
 
@@ -87,7 +87,7 @@ _dotdropsh_remove()
     fi
 }
 
-_dotdropsh_listfiles()
+_dotdropsh_files()
 {
     local cur
     cur="${COMP_WORDS[COMP_CWORD]}"
@@ -107,7 +107,7 @@ _dotdropsh_detail()
     fi
 }
 
-_dotdropsh_list()
+_dotdropsh_profiles()
 {
     local cur
     cur="${COMP_WORDS[COMP_CWORD]}"

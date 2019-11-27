@@ -39,9 +39,9 @@ _dotdrop.sh ()
 				'compare'
 				'update'
 				'remove'
-				'listfiles'
+				'files'
 				'detail'
-				'list'
+				'profiles'
             )
             _values 'dotdrop.sh' $subcommands
         ;;
@@ -63,14 +63,14 @@ _dotdrop.sh ()
                 remove)
                     _dotdrop.sh-remove
                 ;;
-                listfiles)
-                    _dotdrop.sh-listfiles
+                files)
+                    _dotdrop.sh-files
                 ;;
                 detail)
                     _dotdrop.sh-detail
                 ;;
-                list)
-                    _dotdrop.sh-list
+                profiles)
+                    _dotdrop.sh-profiles
                 ;;
             esac
         ;;
@@ -228,7 +228,7 @@ _dotdrop.sh-remove ()
     fi
 }
 
-_dotdrop.sh-listfiles ()
+_dotdrop.sh-files ()
 {
     local context state state_descr line
     typeset -A opt_args
@@ -271,7 +271,7 @@ _dotdrop.sh-detail ()
     fi
 }
 
-_dotdrop.sh-list ()
+_dotdrop.sh-profiles ()
 {
     local context state state_descr line
     typeset -A opt_args
