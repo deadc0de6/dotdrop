@@ -410,9 +410,12 @@ def cmd_list_profiles(o):
     """list all profiles"""
     LOG.emph('Available profile(s):\n')
     for p in o.profiles:
-        LOG.sub(p.key, end='')
-        LOG.log(' ({} dotfiles)'.format(len(p.dotfiles)))
-        #LOG.sub('{} ({} dotfile(s))'.format(p.key, len(p.dotfiles)))
+        if o.profiles_grepable:
+            fmt = '{}'.format(p.key)
+            LOG.raw(fmt)
+        else:
+            LOG.sub(p.key, end='')
+            LOG.log(' ({} dotfiles)'.format(len(p.dotfiles)))
     LOG.log('')
 
 
@@ -430,10 +433,16 @@ def cmd_list_files(o):
             src = os.path.join(o.dotpath, dotfile.src)
             if not Templategen.is_template(src):
                 continue
-        LOG.log('{}'.format(dotfile.key), bold=True)
-        LOG.sub('dst: {}'.format(dotfile.dst))
-        LOG.sub('src: {}'.format(dotfile.src))
-        LOG.sub('link: {}'.format(dotfile.link.name.lower()))
+        if o.files_grepable:
+            fmt = '{},dst:{},src:{},link:{}'
+            fmt = fmt.format(dotfile.key, dotfile.dst,
+                             dotfile.src, dotfile.link.name.lower())
+            LOG.raw(fmt)
+        else:
+            LOG.log('{}'.format(dotfile.key), bold=True)
+            LOG.sub('dst: {}'.format(dotfile.dst))
+            LOG.sub('src: {}'.format(dotfile.src))
+            LOG.sub('link: {}'.format(dotfile.link.name.lower()))
     LOG.log('')
 
 

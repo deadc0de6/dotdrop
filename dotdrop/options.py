@@ -59,9 +59,9 @@ Usage:
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
-  dotdrop files     [-VbT]      [-c <path>] [-p <profile>]
+  dotdrop files     [-VbTG]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
-  dotdrop profiles  [-Vb]       [-c <path>]
+  dotdrop profiles  [-VbG]      [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -83,6 +83,7 @@ Options:
   -V --verbose            Be verbose.
   -d --dry                Dry run.
   -b --no-banner          Do not display the banner.
+  -G --grepable           Grepable output.
   -v --version            Show version.
   -h --help               Show this screen.
 """.format(BANNER, PROFILE)
@@ -214,6 +215,9 @@ class Options(AttrMonitor):
 
         # "files" specifics
         self.files_templateonly = self.args['--template']
+        self.files_grepable = self.args['--grepable']
+        # "profiles" specifics
+        self.profiles_grepable = self.args['--grepable']
         # "install" specifics
         self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']

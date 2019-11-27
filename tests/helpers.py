@@ -128,6 +128,7 @@ def _fake_args():
     args['--ignore'] = []
     args['--show-patch'] = False
     args['--force-actions'] = False
+    args['--grepable'] = False
     # cmds
     args['profiles'] = False
     args['files'] = False
