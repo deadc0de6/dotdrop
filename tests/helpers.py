@@ -130,7 +130,7 @@ def _fake_args():
     args['--force-actions'] = False
     # cmds
     args['list'] = False
-    args['listfiles'] = False
+    args['files'] = False
     args['install'] = False
     args['compare'] = False
     args['import'] = False

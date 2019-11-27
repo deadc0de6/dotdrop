@@ -94,7 +94,7 @@ cd ${ddpath} | ${bin} import -c ${cfg} -p p2 \
   ${tmpd}/sub/sub2/abc
 
 # count dotfiles for p2
-cnt=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
 [ "${cnt}" != "4" ] && exit 1
 
 ## CLEANING

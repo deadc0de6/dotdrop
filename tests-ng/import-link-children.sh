@@ -88,7 +88,7 @@ _EOF
 cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V --link=link_children ${dt}
 
 # check is set to link_children
-line=$(cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 -V | grep "d_`basename ${dt}`")
+line=$(cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V | grep "d_`basename ${dt}`")
 echo ${line} | grep 'link: link_children'
 
 # checks file exists in dotpath

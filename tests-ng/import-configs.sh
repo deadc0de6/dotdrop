@@ -116,12 +116,12 @@ echo "zzz" > ${tmps}/dotfiles/zzz
 echo "sub" > ${tmps}/dotfiles/sub
 
 # install
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p0 -V | grep f_def
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p1 -V | grep f_abc
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p2 -V | grep f_def
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p p3 -V | grep f_zzz
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p pup -V | grep f_sub
-cd ${ddpath} | ${bin} listfiles -c ${cfg1} -p psubsub -V | grep f_sub
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p0 -V | grep f_def
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p1 -V | grep f_abc
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p2 -V | grep f_def
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p3 -V | grep f_zzz
+cd ${ddpath} | ${bin} files -c ${cfg1} -p pup -V | grep f_sub
+cd ${ddpath} | ${bin} files -c ${cfg1} -p psubsub -V | grep f_sub
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

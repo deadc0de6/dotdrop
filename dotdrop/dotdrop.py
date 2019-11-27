@@ -420,11 +420,11 @@ def cmd_list_files(o):
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
         return
     what = 'Dotfile(s)'
-    if o.listfiles_templateonly:
+    if o.files_templateonly:
         what = 'Template(s)'
     LOG.emph('{} for profile \"{}\"\n'.format(what, o.profile))
     for dotfile in o.dotfiles:
-        if o.listfiles_templateonly:
+        if o.files_templateonly:
             src = os.path.join(o.dotpath, dotfile.src)
             if not Templategen.is_template(src):
                 continue
@@ -610,10 +610,10 @@ def main():
                 LOG.dbg('running cmd: list')
             cmd_list_profiles(o)
 
-        elif o.cmd_listfiles:
+        elif o.cmd_files:
             # list files for selected profile
             if o.debug:
-                LOG.dbg('running cmd: listfiles')
+                LOG.dbg('running cmd: files')
             cmd_list_files(o)
 
         elif o.cmd_install:

@@ -82,13 +82,13 @@ class TestListings(unittest.TestCase):
         cmd_importer(o)
         o = load_options(confpath, profile)
 
-        # listfiles
+        # files
         cmd_list_profiles(o)
 
         # list files
-        o.listfiles_templateonly = False
+        o.files_templateonly = False
         cmd_list_files(o)
-        o.listfiles_templateonly = True
+        o.files_templateonly = True
         cmd_list_files(o)
 
         # details

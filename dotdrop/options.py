@@ -59,7 +59,7 @@ Usage:
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
-  dotdrop listfiles [-VbT]      [-c <path>] [-p <profile>]
+  dotdrop files     [-VbT]      [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
   dotdrop list      [-Vb]       [-c <path>]
   dotdrop --help
@@ -190,7 +190,7 @@ class Options(AttrMonitor):
         """apply cli args as attribute"""
         # the commands
         self.cmd_list = self.args['list']
-        self.cmd_listfiles = self.args['listfiles']
+        self.cmd_files = self.args['files']
         self.cmd_install = self.args['install']
         self.cmd_compare = self.args['compare']
         self.cmd_import = self.args['import']
@@ -212,8 +212,8 @@ class Options(AttrMonitor):
                 sys.exit(USAGE)
             self.import_link = OPT_LINK[link]
 
-        # "listfiles" specifics
-        self.listfiles_templateonly = self.args['--template']
+        # "files" specifics
+        self.files_templateonly = self.args['--template']
         # "install" specifics
         self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']

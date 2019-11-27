@@ -125,7 +125,7 @@ set -e
 
 # test values have been correctly updated
 echo "========> test for updated entries"
-dotfiles=`cd ${ddpath} | ${bin} listfiles -c ${cfg} -p p1 | grep -v '^ '`
+dotfiles=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 | grep -v '^ '`
 echo "${dotfiles}" | grep '^f_link ' | grep ', link: link)'
 echo "${dotfiles}" | grep '^f_nolink ' | grep ', link: nolink)'
 echo "${dotfiles}" | grep '^f_nolink1 ' | grep ', link: nolink)'
