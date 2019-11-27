@@ -408,9 +408,11 @@ def cmd_importer(o):
 
 def cmd_list_profiles(o):
     """list all profiles"""
-    LOG.log('Available profile(s):')
+    LOG.emph('Available profile(s):\n')
     for p in o.profiles:
-        LOG.sub(p.key)
+        LOG.sub(p.key, end='')
+        LOG.log(' ({} dotfiles)'.format(len(p.dotfiles)))
+        #LOG.sub('{} ({} dotfile(s))'.format(p.key, len(p.dotfiles)))
     LOG.log('')
 
 
@@ -422,15 +424,16 @@ def cmd_list_files(o):
     what = 'Dotfile(s)'
     if o.files_templateonly:
         what = 'Template(s)'
-    LOG.emph('{} for profile \"{}\"\n'.format(what, o.profile))
+    LOG.emph('{} for profile \"{}\":\n'.format(what, o.profile))
     for dotfile in o.dotfiles:
         if o.files_templateonly:
             src = os.path.join(o.dotpath, dotfile.src)
             if not Templategen.is_template(src):
                 continue
-        LOG.log('{} (src: \"{}\", link: {})'.format(dotfile.key, dotfile.src,
-                                                    dotfile.link.name.lower()))
-        LOG.sub('{}'.format(dotfile.dst))
+        LOG.log('{}'.format(dotfile.key), bold=True)
+        LOG.sub('dst: {}'.format(dotfile.dst))
+        LOG.sub('src: {}'.format(dotfile.src))
+        LOG.sub('link: {}'.format(dotfile.link.name.lower()))
     LOG.log('')
 
 

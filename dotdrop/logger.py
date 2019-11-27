@@ -24,15 +24,22 @@ class Logger:
     def __init__(self):
         pass
 
-    def log(self, string, end='\n', pre=''):
+    def log(self, string, end='\n', pre='', bold=False):
         cs = self._color(self.BLUE)
         ce = self._color(self.RESET)
-        sys.stdout.write('{}{}{}{}{}'.format(pre, cs, string, end, ce))
+        if bold:
+            bl = self._color(self.BOLD)
+            fmt = '{}{}{}{}{}{}{}'.format(pre, cs, bl,
+                                          string, ce,
+                                          end, ce)
+        else:
+            fmt = '{}{}{}{}{}'.format(pre, cs, string, end, ce)
+        sys.stdout.write(fmt)
 
-    def sub(self, string):
+    def sub(self, string, end='\n'):
         cs = self._color(self.BLUE)
         ce = self._color(self.RESET)
-        sys.stdout.write('\t{}->{} {}\n'.format(cs, ce, string))
+        sys.stdout.write('\t{}->{} {}{}'.format(cs, ce, string, end))
 
     def emph(self, string):
         cs = self._color(self.EMPH)
