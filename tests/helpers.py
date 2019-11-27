@@ -129,7 +129,7 @@ def _fake_args():
     args['--show-patch'] = False
     args['--force-actions'] = False
     # cmds
-    args['list'] = False
+    args['profiles'] = False
     args['files'] = False
     args['install'] = False
     args['compare'] = False

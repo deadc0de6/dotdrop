@@ -604,10 +604,10 @@ def main():
     ret = True
     try:
 
-        if o.cmd_list:
+        if o.cmd_profiles:
             # list existing profiles
             if o.debug:
-                LOG.dbg('running cmd: list')
+                LOG.dbg('running cmd: profiles')
             cmd_list_profiles(o)
 
         elif o.cmd_files:

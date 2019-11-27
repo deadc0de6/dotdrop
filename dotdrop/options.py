@@ -61,7 +61,7 @@ Usage:
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
   dotdrop files     [-VbT]      [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
-  dotdrop list      [-Vb]       [-c <path>]
+  dotdrop profiles  [-Vb]       [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -189,7 +189,7 @@ class Options(AttrMonitor):
     def _apply_args(self):
         """apply cli args as attribute"""
         # the commands
-        self.cmd_list = self.args['list']
+        self.cmd_profiles = self.args['profiles']
         self.cmd_files = self.args['files']
         self.cmd_install = self.args['install']
         self.cmd_compare = self.args['compare']
