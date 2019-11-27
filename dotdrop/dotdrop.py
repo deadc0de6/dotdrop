@@ -410,7 +410,7 @@ def cmd_list_profiles(o):
     """list all profiles"""
     LOG.log('Available profile(s):')
     for p in o.profiles:
-        LOG.sub(p)
+        LOG.sub(p.key)
     LOG.log('')
 
 
