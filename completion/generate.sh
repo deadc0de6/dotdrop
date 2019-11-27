@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2019, deadc0de6
+#
+# pip3 install --user infi.docopt_completion
+#
 
 set -e
 
