@@ -151,10 +151,11 @@ class Updater:
     def _same_rights(self, left, right):
         """return True if files have the same modes"""
         try:
-            l = os.stat(left)
-            r = os.stat(right)
-            return l.st_mode == r.st_mode
+            lefts = os.stat(left)
+            rights = os.stat(right)
+            return lefts.st_mode == rights.st_mode
         except OSError as e:
+            self.log.err(e)
             return False
 
     def _mirror_rights(self, src, dst):
@@ -316,10 +317,10 @@ class Updater:
 
         # compare rights
         for common in diff.common_files:
-            l = os.path.join(left, common)
-            r = os.path.join(right, common)
-            if not self._same_rights(l, r):
-                self._mirror_rights(l, r)
+            leftf = os.path.join(left, common)
+            rightf = os.path.join(right, common)
+            if not self._same_rights(leftf, rightf):
+                self._mirror_rights(leftf, rightf)
 
         # Recursively decent into common subdirectories.
         for subdir in diff.subdirs.values():
