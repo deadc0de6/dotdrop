@@ -148,6 +148,22 @@ class Updater:
         self.templater.restore_vars(self.tvars)
         return self.templater.generate(tpath)
 
+    def _same_rights(self, left, right):
+        """return True if files have the same modes"""
+        try:
+            l = os.stat(left)
+            r = os.stat(right)
+            return l.st_mode == r.st_mode
+        except OSError as e:
+            return False
+
+    def _mirror_rights(self, src, dst):
+        try:
+            rights = os.stat(src).st_mode
+            os.chmod(dst, rights)
+        except OSError as e:
+            self.log.err(e)
+
     def _handle_file(self, path, dtpath, compare=True):
         """sync path (deployed file) and dtpath (dotdrop dotfile path)"""
         if self._ignore([path, dtpath]):
@@ -162,7 +178,8 @@ class Updater:
             if self.showpatch:
                 self._show_patch(path, dtpath)
             return False
-        if compare and filecmp.cmp(path, dtpath, shallow=True):
+        if compare and filecmp.cmp(path, dtpath, shallow=False) and \
+                self._same_rights(path, dtpath):
             # no difference
             if self.debug:
                 self.log.dbg('identical files: {} and {}'.format(path, dtpath))
@@ -176,6 +193,7 @@ class Updater:
                 if self.debug:
                     self.log.dbg('cp {} {}'.format(path, dtpath))
                 shutil.copyfile(path, dtpath)
+                self._mirror_rights(path, dtpath)
                 self.log.sub('\"{}\" updated'.format(dtpath))
         except IOError as e:
             self.log.warn('{} update failed, do manually: {}'.format(path, e))
@@ -275,6 +293,7 @@ class Updater:
             if self.debug:
                 self.log.dbg('cp {} {}'.format(exist, new))
             shutil.copyfile(exist, new)
+            self._mirror_rights(exist, new)
             self.log.sub('\"{}\" added'.format(new))
 
         # remove files that don't exist in deployed version
@@ -294,6 +313,13 @@ class Updater:
                 self.log.dbg('rm {}'.format(new))
             remove(new)
             self.log.sub('\"{}\" removed'.format(new))
+
+        # compare rights
+        for common in diff.common_files:
+            l = os.path.join(left, common)
+            r = os.path.join(right, common)
+            if not self._same_rights(l, r):
+                self._mirror_rights(l, r)
 
         # Recursively decent into common subdirectories.
         for subdir in diff.subdirs.values():
