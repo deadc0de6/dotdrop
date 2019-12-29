@@ -63,11 +63,14 @@ config:
   create: true
   dotpath: dotfiles
   import_variables:
-  - /variables/does/not/exist:ignore
+  - /variables/does/not/exist:optional
+  - /variables/does/not/::exist:optional
   import_actions:
-  - /actions/does/not/exist:ignore
+  - /actions/does/not/exist:optional
+  - /actions/does/not/::exist:optional
   import_configs:
-  - /configs/does/not/exist:ignore
+  - /configs/does/not/exist:optional
+  - /configs/does/not/::exist:optional
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc

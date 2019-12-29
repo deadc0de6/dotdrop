@@ -58,7 +58,7 @@ class CfgYaml:
     key_import_variables = 'import_variables'
     key_import_profile_dfs = 'import'
     key_import_sep = ':'
-    key_import_ignore_key = 'ignore'
+    key_import_ignore_key = 'optional'
 
     # settings
     key_settings_dotpath = 'dotpath'
@@ -567,10 +567,11 @@ class CfgYaml:
         """normalize imported path and its attribute if any"""
         fields = path.split(self.key_import_sep)
         fatal_not_found = True
-        if len(fields) > 1:
-            if fields[1] == self.key_import_ignore_key:
-                fatal_not_found = False
-        return self._norm_path(fields[0]), fatal_not_found
+        filepath = path
+        if len(fields) > 1 and fields[-1] == self.key_import_ignore_key:
+            fatal_not_found = False
+            filepath = ''.join(fields[:-1])
+        return self._norm_path(filepath), fatal_not_found
 
     def _import_actions(self):
         """import external actions from paths"""
