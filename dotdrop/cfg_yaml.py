@@ -57,6 +57,8 @@ class CfgYaml:
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
     key_import_profile_dfs = 'import'
+    key_import_sep = ':'
+    key_import_ignore_key = 'optional'
 
     # settings
     key_settings_dotpath = 'dotpath'
@@ -539,15 +541,17 @@ class CfgYaml:
             return
         paths = self._glob_paths(paths)
         for p in paths:
-            path = self._norm_path(p)
+            path, fatal_not_found = self._norm_extended_import_path(p)
             if self.debug:
                 self.log.dbg('import variables from {}'.format(path))
             var = self._import_sub(path, self.key_variables,
-                                   mandatory=False)
+                                   mandatory=False,
+                                   fatal_not_found=fatal_not_found)
             if self.debug:
                 self.log.dbg('import dynvariables from {}'.format(path))
             dvar = self._import_sub(path, self.key_dvariables,
-                                    mandatory=False)
+                                    mandatory=False,
+                                    fatal_not_found=fatal_not_found)
             merged = self._merge_dict(dvar, var)
             merged = self._rec_resolve_vars(merged)
             # execute dvar
@@ -559,6 +563,16 @@ class CfgYaml:
         """remove profile variables from dic if found"""
         [dic.pop(k, None) for k in self.prokeys]
 
+    def _norm_extended_import_path(self, path):
+        """normalize imported path and its attribute if any"""
+        fields = path.split(self.key_import_sep)
+        fatal_not_found = True
+        filepath = path
+        if len(fields) > 1 and fields[-1] == self.key_import_ignore_key:
+            fatal_not_found = False
+            filepath = ''.join(fields[:-1])
+        return self._norm_path(filepath), fatal_not_found
+
     def _import_actions(self):
         """import external actions from paths"""
         paths = self.settings.get(self.key_import_actions, None)
@@ -566,12 +580,13 @@ class CfgYaml:
             return
         paths = self._glob_paths(paths)
         for p in paths:
-            path = self._norm_path(p)
+            path, fatal_not_found = self._norm_extended_import_path(p)
             if self.debug:
                 self.log.dbg('import actions from {}'.format(path))
             new = self._import_sub(path, self.key_actions,
                                    mandatory=False,
-                                   patch_func=self._norm_actions)
+                                   patch_func=self._norm_actions,
+                                   fatal_not_found=fatal_not_found)
             self.actions = self._merge_dict(new, self.actions)
 
     def _import_profiles_dotfiles(self):
@@ -592,9 +607,16 @@ class CfgYaml:
 
     def _import_config(self, path):
         """import config from path"""
-        path = self._norm_path(path)
+        path, fatal_not_found = self._norm_extended_import_path(path)
         if self.debug:
             self.log.dbg('import config from {}'.format(path))
+        if not os.path.exists(path):
+            err = 'config path not found: {}'.format(path)
+            if fatal_not_found:
+                raise YamlException(err)
+            else:
+                self.log.warn(err)
+                return
         sub = CfgYaml(path, profile=self.profile, debug=self.debug)
         # settings is ignored
         self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
@@ -617,15 +639,18 @@ class CfgYaml:
         for path in paths:
             self._import_config(path)
 
-    def _import_sub(self, path, key,
-                    mandatory=False, patch_func=None):
+    def _import_sub(self, path, key, mandatory=False,
+                    patch_func=None, fatal_not_found=True):
         """
         import the block "key" from "path"
         patch_func is applied to each element if defined
         """
         if self.debug:
             self.log.dbg('import \"{}\" from \"{}\"'.format(key, path))
-        extdict = self._load_yaml(path)
+            self.log.dbg('ignore non existing: \"{}\"'.format(fatal_not_found))
+        extdict = self._load_yaml(path, fatal_not_found=fatal_not_found)
+        if extdict is None and not fatal_not_found:
+            return {}
         new = self._get_entry(extdict, key, mandatory=mandatory)
         if patch_func:
             if self.debug:
@@ -834,11 +859,16 @@ class CfgYaml:
         """dump the config dictionary"""
         return self.yaml_dict
 
-    def _load_yaml(self, path):
+    def _load_yaml(self, path, fatal_not_found=True):
         """load a yaml file to a dict"""
         content = {}
         if not os.path.exists(path):
-            raise YamlException('config path not found: {}'.format(path))
+            err = 'config path not found: {}'.format(path)
+            if fatal_not_found:
+                raise YamlException(err)
+            else:
+                self.log.warn(err)
+                return None
         try:
             content = self._yaml_load(path)
         except Exception as e:
