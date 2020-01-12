@@ -6,6 +6,7 @@ jinja2 template generator
 """
 
 import os
+import inspect
 from jinja2 import Environment, FileSystemLoader
 
 # local imports
@@ -49,12 +50,19 @@ class Templategen:
         # adding header method
         self.env.globals['header'] = self._header
         # adding helper methods
-        self.env.globals['exists'] = jhelpers.exists
-        self.env.globals['exists_in_path'] = jhelpers.exists_in_path
-        self.env.globals['basename'] = jhelpers.basename
-        self.env.globals['dirname'] = jhelpers.dirname
+        self._load_funcs_to_dic(jhelpers, self.env.globals)
         if self.debug:
             self.log.dbg('template additional variables: {}'.format(variables))
+
+    def _load_funcs_to_dic(self, mod, dic):
+        """dynamically load functions from module to dic"""
+        for m in inspect.getmembers(mod):
+            name, func = m
+            if not inspect.isfunction(func):
+                continue
+            if self.debug:
+                self.log.dbg('load function \"{}\"'.format(name))
+            dic[name] = func
 
     def generate(self, src):
         """render template from path"""
