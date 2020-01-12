@@ -31,6 +31,8 @@ class Settings(DictParser):
     key_instignore = 'instignore'
     key_workdir = 'workdir'
     key_minversion = 'minversion'
+    key_func_file = 'func_file'
+    key_filter_file = 'filter_file'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -45,7 +47,7 @@ class Settings(DictParser):
                  link_on_import=LinkTypes.NOLINK, longkey=False,
                  upignore=[], cmpignore=[], instignore=[],
                  workdir='~/.config/dotdrop', showdiff=False,
-                 minversion=None):
+                 minversion=None, func_file=[], filter_file=[]):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -65,6 +67,8 @@ class Settings(DictParser):
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
         self.minversion = minversion
+        self.func_file = func_file
+        self.filter_file = filter_file
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -95,5 +99,7 @@ class Settings(DictParser):
         self._serialize_seq(self.key_cmpignore, dic)
         self._serialize_seq(self.key_upignore, dic)
         self._serialize_seq(self.key_instignore, dic)
+        self._serialize_seq(self.key_func_file, dic)
+        self._serialize_seq(self.key_filter_file, dic)
 
         return {self.key_yaml: dic}

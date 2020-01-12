@@ -11,6 +11,8 @@ import os
 import uuid
 import shlex
 import fnmatch
+import inspect
+import importlib
 from shutil import rmtree
 
 # local import
@@ -192,3 +194,24 @@ def patch_ignores(ignores, prefix, debug=False):
     if debug:
         LOG.dbg('ignores after patching: {}'.format(new))
     return new
+
+
+def get_module_functions(mod):
+    """return a list of fonction from a module"""
+    funcs = []
+    for m in inspect.getmembers(mod):
+        name, func = m
+        if not inspect.isfunction(func):
+            continue
+        funcs.append((name, func))
+    return funcs
+
+
+def get_module_from_path(path):
+    """get module from path"""
+    if not path or not os.path.exists(path):
+        return None
+    module_name = os.path.basename(path).rstrip('.py')
+    loader = importlib.machinery.SourceFileLoader(module_name, path)
+    mod = loader.load_module()
+    return mod

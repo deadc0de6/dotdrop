@@ -85,6 +85,7 @@ def cmd_install(o):
         return False
 
     t = Templategen(base=o.dotpath, variables=o.variables,
+                    func_file=o.func_file, filter_file=o.filter_file,
                     debug=o.debug)
     tmpdir = None
     if o.install_temporary:
@@ -205,6 +206,7 @@ def cmd_compare(o, tmp):
         return False
 
     t = Templategen(base=o.dotpath, variables=o.variables,
+                    func_file=o.func_file, filter_file=o.filter_file,
                     debug=o.debug)
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
