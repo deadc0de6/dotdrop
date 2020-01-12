@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 #
-# test jinja2 helpers from jhelpers
+# test jinja2 functions from func_file
 # returns 1 in case of error
 #
 
@@ -51,6 +51,8 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
+func_file=`mktemp`
+func_file2=`mktemp`
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -60,84 +62,66 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  func_file:
+  - ${func_file}
+  - ${func_file2}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
-  f_def:
-    dst: ${tmpd}/def
-    src: def
 profiles:
   p1:
     dotfiles:
     - f_abc
-    - f_def
 _EOF
 #cat ${cfg}
+
+cat << _EOF > ${func_file}
+def func1(something):
+  if something:
+    return True
+  return False
+_EOF
+
+cat << _EOF > ${func_file2}
+def func2(inp):
+  return not inp
+_EOF
 
 # create the dotfile
 echo "this is the test dotfile" > ${tmps}/dotfiles/abc
 
-# test exists
-echo "{%@@ if exists('/dev/null') @@%}" >> ${tmps}/dotfiles/abc
+# test imported function
+echo "{%@@ if func1(True) @@%}" >> ${tmps}/dotfiles/abc
 echo "this should exist" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
-echo "{%@@ if exists('/dev/abcdef') @@%}" >> ${tmps}/dotfiles/abc
-echo "this should not exist" >> ${tmps}/dotfiles/abc
+echo "{%@@ if not func1(False) @@%}" >> ${tmps}/dotfiles/abc
+echo "this should exist too" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
-# test exists_in_path
-cat >> ${tmps}/dotfiles/abc << _EOF
-{%@@ if exists_in_path('cat') @@%}
-this should exist too
-{%@@ endif @@%}
-_EOF
+echo "{%@@ if func2(True) @@%}" >> ${tmps}/dotfiles/abc
+echo "nope" >> ${tmps}/dotfiles/abc
+echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
-cat >> ${tmps}/dotfiles/abc << _EOF
-{%@@ if exists_in_path('a_name_that_is_unlikely_to_be_chosen_for_an_executable') @@%}
-this should not exist either
-{%@@ endif @@%}
-_EOF
-
-#cat ${tmps}/dotfiles/abc
-
-echo "this is def" > ${tmps}/dotfiles/def
-
-# test basename
-cat >> ${tmps}/dotfiles/def << _EOF
-{%@@ set dotfile_filename = basename( _dotfile_abs_dst ) @@%}
-dotfile dst filename: {{@@ dotfile_filename @@}}
-_EOF
-
-# test dirname
-cat >> ${tmps}/dotfiles/def << _EOF
-{%@@ set dotfile_dirname= dirname( _dotfile_abs_dst ) @@%}
-dotfile dst dirname: {{@@ dotfile_dirname @@}}
-_EOF
-
-#cat ${tmps}/dotfiles/def
+echo "{%@@ if func2(False) @@%}" >> ${tmps}/dotfiles/abc
+echo "yes" >> ${tmps}/dotfiles/abc
+echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 #cat ${tmpd}/abc
 
-grep '^this should exist' ${tmpd}/abc >/dev/null
-grep '^this should exist too' ${tmpd}/abc >/dev/null
+grep '^this should exist$' ${tmpd}/abc >/dev/null
+grep '^this should exist too$' ${tmpd}/abc >/dev/null
+grep '^yes$' ${tmpd}/abc >/dev/null
 set +e
-grep '^this should not exist' ${tmpd}/abc >/dev/null && exit 1
-grep '^this should not exist either' ${tmpd}/abc >/dev/null && exit 1
+grep '^nope$' ${tmpd}/abc >/dev/null && exit 1
 set -e
 
-#cat ${tmpd}/abc
-
-# test def
-grep "dotfile dst filename: `basename ${tmpd}/def`" ${tmpd}/def
-grep "dotfile dst dirname: `dirname ${tmpd}/def`" ${tmpd}/def
-
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${func_file} ${func_file2}
 
 echo "OK"
 exit 0

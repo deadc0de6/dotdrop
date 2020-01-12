@@ -102,7 +102,7 @@ grep '^dvar4: var1 var2 var3' ${tmpd}/abc >/dev/null
 #cat ${tmpd}/abc
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

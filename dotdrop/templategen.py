@@ -23,10 +23,13 @@ COMMENT_END = '@@#}'
 
 class Templategen:
 
-    def __init__(self, base='.', variables={}, debug=False):
+    def __init__(self, base='.', variables={},
+                 func_file=[], filter_file=[], debug=False):
         """constructor
         @base: directory path where to search for templates
         @variables: dictionary of variables for templates
+        @func_file: file path to load functions from
+        @filter_file: file path to load filters from
         @debug: enable debug
         """
         self.base = base.rstrip(os.sep)
@@ -49,10 +52,19 @@ class Templategen:
         # adding header method
         self.env.globals['header'] = self._header
         # adding helper methods
-        self.env.globals['exists'] = jhelpers.exists
-        self.env.globals['exists_in_path'] = jhelpers.exists_in_path
-        self.env.globals['basename'] = jhelpers.basename
-        self.env.globals['dirname'] = jhelpers.dirname
+        if self.debug:
+            self.log.dbg('load global functions:')
+        self._load_funcs_to_dic(jhelpers, self.env.globals)
+        if func_file:
+            for f in func_file:
+                if self.debug:
+                    self.log.dbg('load custom functions from {}'.format(f))
+                self._load_path_to_dic(f, self.env.globals)
+        if filter_file:
+            for f in filter_file:
+                if self.debug:
+                    self.log.dbg('load custom filters from {}'.format(f))
+                self._load_path_to_dic(f, self.env.filters)
         if self.debug:
             self.log.dbg('template additional variables: {}'.format(variables))
 
@@ -83,6 +95,23 @@ class Templategen:
     def update_variables(self, variables):
         """update variables"""
         self.env.globals.update(variables)
+
+    def _load_path_to_dic(self, path, dic):
+        mod = utils.get_module_from_path(path)
+        if not mod:
+            self.log.warn('cannot load module \"{}\"'.format(path))
+            return
+        self._load_funcs_to_dic(mod, dic)
+
+    def _load_funcs_to_dic(self, mod, dic):
+        """dynamically load functions from module to dic"""
+        if not mod or not dic:
+            return
+        funcs = utils.get_module_functions(mod)
+        for name, func in funcs:
+            if self.debug:
+                self.log.dbg('load function \"{}\"'.format(name))
+            dic[name] = func
 
     def _header(self, prepend=''):
         """add a comment usually in the header of a dotfile"""
