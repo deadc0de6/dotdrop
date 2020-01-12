@@ -215,7 +215,7 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 grep '^p1$' ${tmpd}/abc/file1
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

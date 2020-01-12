@@ -137,7 +137,7 @@ grep "dotfile dst filename: `basename ${tmpd}/def`" ${tmpd}/def
 grep "dotfile dst dirname: `dirname ${tmpd}/def`" ${tmpd}/def
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

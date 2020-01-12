@@ -159,7 +159,7 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 rm -rf ${tmpd}/abc
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0
