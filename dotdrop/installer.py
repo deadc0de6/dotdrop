@@ -444,7 +444,7 @@ class Installer:
         # fake the output for readability
         if not diff:
             return
-        self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
+        self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
         self.log.emph(diff)
 
     def _create_dirs(self, directory):

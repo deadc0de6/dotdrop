@@ -72,7 +72,7 @@ def shell(cmd, debug=False):
 
 def diff(src, dst, raw=True, opts='', debug=False):
     """call unix diff to compare two files"""
-    cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, src, dst)
+    cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, dst, src)
     _, out = run(shlex.split(cmd), raw=raw, debug=debug)
     return out
 
