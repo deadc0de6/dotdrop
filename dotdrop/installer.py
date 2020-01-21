@@ -437,7 +437,7 @@ class Installer:
         if content:
             tmp = utils.write_to_tmpfile(content)
             src = tmp
-        diff = utils.diff(src, dst, raw=False)
+        diff = utils.diff(modified=src, original=dst, raw=False)
         if tmp:
             utils.remove(tmp, quiet=True)
 
