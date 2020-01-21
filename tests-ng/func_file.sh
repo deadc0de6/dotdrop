@@ -105,7 +105,7 @@ _EOF
 
 cat << _EOF > ${func_file3}
 def func3(inp):
-  return "external"
+  return 42
 _EOF
 
 # create the dotfile
@@ -128,7 +128,7 @@ echo "{%@@ if func2(False) @@%}" >> ${tmps}/dotfiles/abc
 echo "yes" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
-echo "{%@@ if func3("whatever") == "external" @@%}" >> ${tmps}/dotfiles/abc
+echo "{%@@ if func3("whatever") == 42 @@%}" >> ${tmps}/dotfiles/abc
 echo "externalok" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
