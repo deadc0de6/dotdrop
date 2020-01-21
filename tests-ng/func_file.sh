@@ -53,9 +53,11 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 func_file=`mktemp`
 func_file2=`mktemp`
+func_file3=`mktemp`
 
 # create the config file
 cfg="${tmps}/config.yaml"
+cfgext="${tmps}/ext.yaml"
 
 cat > ${cfg} << _EOF
 config:
@@ -65,6 +67,8 @@ config:
   func_file:
   - ${func_file}
   - ${func_file2}
+  import_configs:
+  - ${cfgext}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -76,6 +80,17 @@ profiles:
 _EOF
 #cat ${cfg}
 
+cat > ${cfgext} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  func_file:
+  - ${func_file3}
+dotfiles:
+profiles:
+_EOF
+
 cat << _EOF > ${func_file}
 def func1(something):
   if something:
@@ -86,6 +101,11 @@ _EOF
 cat << _EOF > ${func_file2}
 def func2(inp):
   return not inp
+_EOF
+
+cat << _EOF > ${func_file3}
+def func3(inp):
+  return "external"
 _EOF
 
 # create the dotfile
@@ -108,6 +128,10 @@ echo "{%@@ if func2(False) @@%}" >> ${tmps}/dotfiles/abc
 echo "yes" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
+echo "{%@@ if func3("whatever") == "external" @@%}" >> ${tmps}/dotfiles/abc
+echo "externalok" >> ${tmps}/dotfiles/abc
+echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
+
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
@@ -116,12 +140,13 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 grep '^this should exist$' ${tmpd}/abc >/dev/null
 grep '^this should exist too$' ${tmpd}/abc >/dev/null
 grep '^yes$' ${tmpd}/abc >/dev/null
+grep '^externalok$' ${tmpd}/abc >/dev/null
 set +e
 grep '^nope$' ${tmpd}/abc >/dev/null && exit 1
 set -e
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${func_file} ${func_file2}
+rm -rf ${tmps} ${tmpd} ${func_file} ${func_file2} ${func_file3}
 
 echo "OK"
 exit 0

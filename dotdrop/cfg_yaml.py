@@ -618,13 +618,26 @@ class CfgYaml:
                 self.log.warn(err)
                 return
         sub = CfgYaml(path, profile=self.profile, debug=self.debug)
-        # settings is ignored
+
+        # settings are ignored from external file
+        # except for filter_file and func_file
+        self.settings[Settings.key_func_file] += [
+            self._norm_path(func_file)
+            for func_file in sub.settings[Settings.key_func_file]
+        ]
+        self.settings[Settings.key_filter_file] += [
+            self._norm_path(func_file)
+            for func_file in sub.settings[Settings.key_filter_file]
+        ]
+
+        # merge top entries
         self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
         self.profiles = self._merge_dict(self.profiles, sub.profiles)
         self.actions = self._merge_dict(self.actions, sub.actions)
         self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
         self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
         self._clear_profile_vars(sub.variables)
+
         if self.debug:
             self.log.dbg('add import_configs var: {}'.format(sub.variables))
         self.variables = self._merge_dict(sub.variables, self.variables)

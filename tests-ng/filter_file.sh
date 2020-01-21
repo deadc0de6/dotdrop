@@ -53,9 +53,11 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 filter_file=`mktemp`
 filter_file2=`mktemp`
+filter_file3=`mktemp`
 
 # create the config file
 cfg="${tmps}/config.yaml"
+cfgext="${tmps}/ext.yaml"
 
 cat > ${cfg} << _EOF
 config:
@@ -65,6 +67,8 @@ config:
   filter_file:
   - ${filter_file}
   - ${filter_file2}
+  import_configs:
+  - ${cfgext}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -75,6 +79,17 @@ profiles:
     - f_abc
 _EOF
 #cat ${cfg}
+
+cat > ${cfgext} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  filter_file:
+  - ${filter_file3}
+profiles:
+dotfiles:
+_EOF
 
 cat << _EOF > ${filter_file}
 def filter1(arg1):
@@ -88,6 +103,11 @@ def filter3(integer):
   return str(int(integer) - 10)
 _EOF
 
+cat << _EOF > ${filter_file3}
+def filter_ext(arg1):
+  return "external"
+_EOF
+
 # create the dotfile
 echo "this is the test dotfile" > ${tmps}/dotfiles/abc
 
@@ -95,6 +115,7 @@ echo "this is the test dotfile" > ${tmps}/dotfiles/abc
 echo "{{@@ "abc" | filter1 @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ "arg1" | filter2('arg2') @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ "13" | filter3() @@}}" >> ${tmps}/dotfiles/abc
+echo "{{@@ "something" | filter_ext() @@}}" >> ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
@@ -104,9 +125,13 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 grep '^filtered$' ${tmpd}/abc >/dev/null
 grep '^arg2$' ${tmpd}/abc >/dev/null
 grep '^3$' ${tmpd}/abc >/dev/null
+grep '^external$' ${tmpd}/abc >/dev/null
+set +e
+grep '^something$' ${tmpd}/abc >/dev/null && exit 1
+set -e
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ${filter_file} ${filter_file2}
+rm -rf ${tmps} ${tmpd} ${filter_file} ${filter_file2} ${filter_file3}
 
 echo "OK"
 exit 0
