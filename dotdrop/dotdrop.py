@@ -96,7 +96,8 @@ def cmd_install(o):
                      diff=o.install_diff, debug=o.debug,
                      totemp=tmpdir,
                      showdiff=o.install_showdiff,
-                     backup_suffix=o.install_backup_suffix)
+                     backup_suffix=o.install_backup_suffix,
+                     diff_cmd=o.diff_command)
     installed = 0
     tvars = t.add_tmp_vars()
 
@@ -211,8 +212,9 @@ def cmd_compare(o, tmp):
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
                      workdir=o.workdir, debug=o.debug,
-                     backup_suffix=o.install_backup_suffix)
-    comp = Comparator(diffopts=o.compare_dopts, debug=o.debug)
+                     backup_suffix=o.install_backup_suffix,
+                     diff_cmd=o.diff_command)
+    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
 
     for dotfile in selected:
         if o.debug:
@@ -362,7 +364,7 @@ def cmd_importer(o):
         if os.path.exists(srcf):
             overwrite = True
             if o.safe:
-                c = Comparator(debug=o.debug)
+                c = Comparator(debug=o.debug, diff_cmd=o.diff_command)
                 diff = c.compare(srcf, dst)
                 if diff != '':
                     # files are different, dunno what to do

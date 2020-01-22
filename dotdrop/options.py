@@ -55,7 +55,7 @@ Usage:
   dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>]
                                 [-l <link>] <path>...
   dotdrop compare   [-Vb]       [-c <path>] [-p <profile>]
-                                [-o <opts>] [-C <file>...] [-i <pattern>...]
+                                [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
@@ -70,7 +70,6 @@ Options:
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
-  -o --dopts=<opts>       Diff options [default: ].
   -l --link=<link>        "link_on_import" (nolink|link|link_children).
   -n --nodiff             Do not diff when installing.
   -t --temp               Install to a temporary directory for review.
@@ -231,7 +230,6 @@ class Options(AttrMonitor):
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
         # "compare" specifics
-        self.compare_dopts = self.args['--dopts']
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
         self.compare_ignore.extend(self.cmpignore)
