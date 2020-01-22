@@ -123,7 +123,7 @@ class Comparator:
 
     def _diff(self, left, right, header=False):
         """diff using the unix tool diff"""
-        out = diff(left, right, raw=False,
+        out = diff(modified=left, original=right, raw=False,
                    opts=self.diffopts, debug=self.debug)
         if header:
             lshort = os.path.basename(left)

@@ -437,14 +437,14 @@ class Installer:
         if content:
             tmp = utils.write_to_tmpfile(content)
             src = tmp
-        diff = utils.diff(src, dst, raw=False)
+        diff = utils.diff(modified=src, original=dst, raw=False)
         if tmp:
             utils.remove(tmp, quiet=True)
 
         # fake the output for readability
         if not diff:
             return
-        self.log.log('diff \"{}\" VS \"{}\"'.format(src, dst))
+        self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
         self.log.emph(diff)
 
     def _create_dirs(self, directory):
