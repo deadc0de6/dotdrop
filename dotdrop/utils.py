@@ -71,12 +71,19 @@ def shell(cmd, debug=False):
 
 
 def diff(original, modified, raw=True,
-         diff_cmd='diff -r "{0}" "{1}"', debug=False):
+         diff_cmd='diff -r {0} {1}', debug=False):
     """compare two files"""
     if not diff_cmd:
-        diff_cmd = 'diff -r "{0}" "{1}"'
-    cmd = diff_cmd.format(original, modified)
-    _, out = run(shlex.split(cmd), raw=raw, debug=debug)
+        diff_cmd = 'diff -r {0} {1}'
+
+    replacements = {
+        "{0}": original,
+        "{original}": original,
+        "{1}": modified,
+        "{modified}": modified,
+    }
+    cmd = [replacements.get(x, x) for x in diff_cmd.split()]
+    _, out = run(cmd, raw=raw, debug=debug)
     return out
 
 

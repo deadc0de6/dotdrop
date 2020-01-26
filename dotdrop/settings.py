@@ -49,7 +49,7 @@ class Settings(DictParser):
                  upignore=[], cmpignore=[], instignore=[],
                  workdir='~/.config/dotdrop', showdiff=False,
                  minversion=None, func_file=[], filter_file=[],
-                 diff_command='diff -r "{0}" "{1}"'):
+                 diff_command='diff -r {0} {1}'):
         self.backup = backup
         self.banner = banner
         self.create = create
