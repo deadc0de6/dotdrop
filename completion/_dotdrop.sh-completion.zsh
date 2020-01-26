@@ -157,8 +157,6 @@ _dotdrop.sh-compare ()
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
 		'(--profile=-)--profile=-' \
-		'(-o=-)-o=-' \
-		'(--dopts=-)--dopts=-' \
 		'(-C=-)-C=-' \
 		'(--file=-)--file=-' \
 		'(-i=-)-i=-' \
@@ -241,6 +239,8 @@ _dotdrop.sh-files ()
 		'(--no-banner)--no-banner' \
 		'(-T)-T' \
 		'(--template)--template' \
+		'(-G)-G' \
+		'(--grepable)--grepable' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
@@ -282,6 +282,8 @@ _dotdrop.sh-profiles ()
 		'(--verbose)--verbose' \
 		'(-b)-b' \
 		'(--no-banner)--no-banner' \
+		'(-G)-G' \
+		'(--grepable)--grepable' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
         

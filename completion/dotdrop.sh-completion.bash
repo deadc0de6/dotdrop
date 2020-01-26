@@ -63,7 +63,7 @@ _dotdropsh_compare()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -c= --cfg= -p= --profile= -o= --dopts= -C= --file= -i= --ignore= ' -- $cur) )
+        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -c= --cfg= -p= --profile= -C= --file= -i= --ignore= ' -- $cur) )
     fi
 }
 
@@ -93,7 +93,7 @@ _dotdropsh_files()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -T --template -c= --cfg= -p= --profile= ' -- $cur) )
+        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -T --template -G --grepable -c= --cfg= -p= --profile= ' -- $cur) )
     fi
 }
 
@@ -113,7 +113,7 @@ _dotdropsh_profiles()
     cur="${COMP_WORDS[COMP_CWORD]}"
 
     if [ $COMP_CWORD -ge 2 ]; then
-        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -c= --cfg= ' -- $cur) )
+        COMPREPLY=( $( compgen -W '-V --verbose -b --no-banner -G --grepable -c= --cfg= ' -- $cur) )
     fi
 }
 

@@ -39,9 +39,9 @@ _dotdrop ()
 				'compare[\[-Vb\]       \[-c <path>\] \[-p <profile>\]]'
 				'update[\[-VbfdkP\]   \[-c <path>\] \[-p <profile>\]]'
 				'remove[\[-Vbfdk\]    \[-c <path>\] \[-p <profile>\] \[<path>...\]]'
-				'files[\[-VbT\]      \[-c <path>\] \[-p <profile>\]]'
+				'files[\[-VbTG\]     \[-c <path>\] \[-p <profile>\]]'
 				'detail[\[-Vb\]       \[-c <path>\] \[-p <profile>\] \[<key>...\]]'
-				'profiles[\[-Vb\]       \[-c <path>\]]'
+				'profiles[\[-VbG\]      \[-c <path>\]]'
             )
             _values 'dotdrop' $subcommands
         ;;
@@ -157,8 +157,6 @@ _dotdrop-compare ()
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
 		'(--profile=-)--profile=-' \
-		'(-o=-)-o=-' \
-		'(--dopts=-)--dopts=-' \
 		'(-C=-)-C=-' \
 		'(--file=-)--file=-' \
 		'(-i=-)-i=-' \
@@ -241,6 +239,8 @@ _dotdrop-files ()
 		'(--no-banner)--no-banner' \
 		'(-T)-T' \
 		'(--template)--template' \
+		'(-G)-G' \
+		'(--grepable)--grepable' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
 		'(-p=-)-p=-' \
@@ -282,6 +282,8 @@ _dotdrop-profiles ()
 		'(--verbose)--verbose' \
 		'(-b)-b' \
 		'(--no-banner)--no-banner' \
+		'(-G)-G' \
+		'(--grepable)--grepable' \
 		'(-c=-)-c=-' \
 		'(--cfg=-)--cfg=-' \
         
