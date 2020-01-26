@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 import os
 import uuid
-import shlex
 import fnmatch
 import inspect
 import importlib
