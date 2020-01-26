@@ -70,10 +70,10 @@ def shell(cmd, debug=False):
 
 
 def diff(original, modified, raw=True,
-         diff_cmd='diff -r {0} {1}', debug=False):
+         diff_cmd='', debug=False):
     """compare two files"""
     if not diff_cmd:
-        diff_cmd = 'diff -r {0} {1}'
+        diff_cmd = 'diff -r -u {0} {1}'
 
     replacements = {
         "{0}": original,
