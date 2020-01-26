@@ -9,7 +9,6 @@ import subprocess
 import tempfile
 import os
 import uuid
-import shlex
 import fnmatch
 import inspect
 import importlib
@@ -70,10 +69,20 @@ def shell(cmd, debug=False):
     return ret == 0, out
 
 
-def diff(original, modified, raw=True, opts='', debug=False):
-    """call unix diff to compare two files"""
-    cmd = 'diff -r {} \"{}\" \"{}\"'.format(opts, original, modified)
-    _, out = run(shlex.split(cmd), raw=raw, debug=debug)
+def diff(original, modified, raw=True,
+         diff_cmd='diff -r {0} {1}', debug=False):
+    """compare two files"""
+    if not diff_cmd:
+        diff_cmd = 'diff -r {0} {1}'
+
+    replacements = {
+        "{0}": original,
+        "{original}": original,
+        "{1}": modified,
+        "{modified}": modified,
+    }
+    cmd = [replacements.get(x, x) for x in diff_cmd.split()]
+    _, out = run(cmd, raw=raw, debug=debug)
     return out
 
 

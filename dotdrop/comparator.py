@@ -15,12 +15,12 @@ from dotdrop.utils import must_ignore, uniq_list, diff
 
 class Comparator:
 
-    def __init__(self, diffopts='', debug=False):
+    def __init__(self, diff_cmd='', debug=False):
         """constructor
-        @diffopts: switches to pass to unix diff
+        @diff_cmd: diff command to use
         @debug: enable debug
         """
-        self.diffopts = diffopts
+        self.diff_cmd = diff_cmd
         self.debug = debug
         self.log = Logger()
 
@@ -122,9 +122,9 @@ class Comparator:
         return ''.join(ret)
 
     def _diff(self, left, right, header=False):
-        """diff using the unix tool diff"""
+        """diff two files"""
         out = diff(modified=left, original=right, raw=False,
-                   opts=self.diffopts, debug=self.debug)
+                   diff_cmd=self.diff_cmd, debug=self.debug)
         if header:
             lshort = os.path.basename(left)
             out = '=> diff \"{}\":\n{}'.format(lshort, out)

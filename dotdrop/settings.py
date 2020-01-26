@@ -33,6 +33,7 @@ class Settings(DictParser):
     key_minversion = 'minversion'
     key_func_file = 'func_file'
     key_filter_file = 'filter_file'
+    key_diff_command = 'diff_command'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -47,7 +48,8 @@ class Settings(DictParser):
                  link_on_import=LinkTypes.NOLINK, longkey=False,
                  upignore=[], cmpignore=[], instignore=[],
                  workdir='~/.config/dotdrop', showdiff=False,
-                 minversion=None, func_file=[], filter_file=[]):
+                 minversion=None, func_file=[], filter_file=[],
+                 diff_command='diff -r {0} {1}'):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -69,6 +71,7 @@ class Settings(DictParser):
         self.minversion = minversion
         self.func_file = func_file
         self.filter_file = filter_file
+        self.diff_command = diff_command
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -77,7 +80,6 @@ class Settings(DictParser):
 
     def serialize(self):
         """Return key-value pair representation of the settings"""
-        # Tedious, but less error-prone than introspection
         dic = {
             self.key_backup: self.backup,
             self.key_banner: self.banner,
@@ -91,6 +93,7 @@ class Settings(DictParser):
             self.key_showdiff: self.showdiff,
             self.key_workdir: self.workdir,
             self.key_minversion: self.minversion,
+            self.key_diff_command: self.diff_command,
         }
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)
