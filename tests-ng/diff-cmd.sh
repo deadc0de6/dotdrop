@@ -78,24 +78,24 @@ echo "modified" > ${tmpd}/singlefile
 echo "[+] comparing with normal diff"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} 2>&1 | grep -v '=>' > ${tmpd}/normal
-diff -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile > ${tmpd}/real
+diff -u -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile > ${tmpd}/real
 set -e
 
 # verify
 #cat ${tmpd}/normal
 #cat ${tmpd}/real
-diff ${tmpd}/normal ${tmpd}/real || exit 1
+diff <( tail -2 ${tmpd}/normal) <( tail -2 ${tmpd}/real) || exit 1
 
 # adding unified diff
 cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ diff_command: "diff -u {0} {1}"' ${cfg} > ${cfg2}
+sed '/dotpath: dotfiles/a \ \ diff_command: "diff -r {0} {1}"' ${cfg} > ${cfg2}
 #cat ${cfg2}
 
 # unified diff
 echo "[+] comparing with unified diff"
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} 2>&1 | grep -v '=>' | grep -v '^+++\|^---' > ${tmpd}/unified
-diff -u ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile | grep -v '^+++\|^---' > ${tmpd}/real
+diff -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile | grep -v '^+++\|^---' > ${tmpd}/real
 set -e
 
 # verify
