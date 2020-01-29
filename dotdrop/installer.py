@@ -68,7 +68,11 @@ class Installer:
         - False, None       : ignored
         """
         if self.debug:
-            self.log.dbg('install {} to {}'.format(src, dst))
+            self.log.dbg('install \"{}\" to \"{}\"'.format(src, dst))
+        if not dst or not src:
+            if self.debug:
+                self.log.dbg('empty dst for {}'.format(src))
+            return True, None
         self.action_executed = False
         src = os.path.join(self.base, os.path.expanduser(src))
         if not os.path.exists(src):
@@ -107,7 +111,11 @@ class Installer:
         - False, None       : ignored
         """
         if self.debug:
-            self.log.dbg('link {} to {}'.format(src, dst))
+            self.log.dbg('link \"{}\" to \"{}\"'.format(src, dst))
+        if not dst or not src:
+            if self.debug:
+                self.log.dbg('empty dst for {}'.format(src))
+            return True, None
         self.action_executed = False
         src = os.path.normpath(os.path.join(self.base,
                                             os.path.expanduser(src)))
@@ -144,7 +152,11 @@ class Installer:
         - False, None, ignored
         """
         if self.debug:
-            self.log.dbg('link_children {} to {}'.format(src, dst))
+            self.log.dbg('link_children \"{}\" to \"{}\"'.format(src, dst))
+        if not dst or not src:
+            if self.debug:
+                self.log.dbg('empty dst for {}'.format(src))
+            return True, None
         self.action_executed = False
         parent = os.path.join(self.base, os.path.expanduser(src))
 

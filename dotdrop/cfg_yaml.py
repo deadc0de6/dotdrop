@@ -221,19 +221,29 @@ class CfgYaml:
         for dotfile in self.dotfiles.values():
             # src
             src = dotfile[self.key_dotfile_src]
-            new = t.generate_string(src)
-            if new != src and self.debug:
-                self.log.dbg('dotfile: {} -> {}'.format(src, new))
-            src = new
-            src = os.path.join(self.settings[self.key_settings_dotpath], src)
-            dotfile[self.key_dotfile_src] = self._norm_path(src)
+            if not src:
+                dotfile[self.key_dotfile_src] = ''
+            else:
+                new = t.generate_string(src)
+                if new != src and self.debug:
+                    msg = 'dotfile src: \"{}\" -> \"{}\"'.format(src, new)
+                    self.log.dbg(msg)
+                src = new
+                src = os.path.join(self.settings[self.key_settings_dotpath],
+                                   src)
+                dotfile[self.key_dotfile_src] = self._norm_path(src)
+
             # dst
             dst = dotfile[self.key_dotfile_dst]
-            new = t.generate_string(dst)
-            if new != dst and self.debug:
-                self.log.dbg('dotfile: {} -> {}'.format(dst, new))
-            dst = new
-            dotfile[self.key_dotfile_dst] = self._norm_path(dst)
+            if not dst:
+                dotfile[self.key_dotfile_dst] = ''
+            else:
+                new = t.generate_string(dst)
+                if new != dst and self.debug:
+                    msg = 'dotfile dst: \"{}\" -> \"{}\"'.format(dst, new)
+                    self.log.dbg(msg)
+                dst = new
+                dotfile[self.key_dotfile_dst] = self._norm_path(dst)
 
     def _rec_resolve_vars(self, variables):
         """recursive resolve variables"""
@@ -980,6 +990,8 @@ class CfgYaml:
 
     def _norm_path(self, path):
         """resolve a path either absolute or relative to config path"""
+        if not path:
+            return path
         path = os.path.expanduser(path)
         if not os.path.isabs(path):
             d = os.path.dirname(self.path)
