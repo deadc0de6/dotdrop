@@ -59,6 +59,10 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+actions:
+    pre:
+      preaction: touch ${tmpd}/action.pre
+    postaction: touch ${tmpd}/action.post
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -68,6 +72,9 @@ profiles:
     include:
     - p3
   p1:
+    actions:
+    - preaction
+    - postaction
     dotfiles:
     - f_abc
   p2:
@@ -77,13 +84,17 @@ profiles:
     include:
     - p2
 _EOF
+cat ${cfg}
 
 # create the source
 mkdir -p ${tmps}/dotfiles/
 echo "test" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 --verbose
+
+[ ! -e ${tmpd}/action.pre ] && exit 1
+[ ! -e ${tmpd}/action.post ] && exit 1
 
 # compare
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
