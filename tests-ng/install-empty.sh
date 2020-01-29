@@ -68,7 +68,7 @@ dotfiles:
     src:
     dst:
 profiles:
-  qube:
+  p1:
     dotfiles:
     - f_x
     - f_y
@@ -77,7 +77,7 @@ profiles:
 _EOF
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -c ${cfg} --verbose | grep '^3 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^3 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 ## CLEANING
