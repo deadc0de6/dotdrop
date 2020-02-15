@@ -77,6 +77,8 @@ profiles:
   p1:
     dotfiles:
     - f_abc
+variables:
+  filt: "{{@@ 'whatever' | filter1 @@}}"
 _EOF
 #cat ${cfg}
 
@@ -116,6 +118,7 @@ echo "{{@@ "abc" | filter1 @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ "arg1" | filter2('arg2') @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ "13" | filter3() @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ "something" | filter_ext() @@}}" >> ${tmps}/dotfiles/abc
+echo "{{@@ filt @@}}variable" >> ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
@@ -129,6 +132,7 @@ grep '^external$' ${tmpd}/abc >/dev/null
 set +e
 grep '^something$' ${tmpd}/abc >/dev/null && exit 1
 set -e
+grep '^filteredvariable$' ${tmpd}/abc > /dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${filter_file} ${filter_file2} ${filter_file3}

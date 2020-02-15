@@ -77,6 +77,8 @@ profiles:
   p1:
     dotfiles:
     - f_abc
+variables:
+  func: "{{@@ func1(False) @@}}"
 _EOF
 #cat ${cfg}
 
@@ -132,6 +134,8 @@ echo "{%@@ if func3("whatever") == 42 @@%}" >> ${tmps}/dotfiles/abc
 echo "externalok" >> ${tmps}/dotfiles/abc
 echo "{%@@ endif @@%}" >> ${tmps}/dotfiles/abc
 
+echo "{{@@ func @@}}added" >> ${tmps}/dotfiles/abc
+
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
@@ -144,6 +148,7 @@ grep '^externalok$' ${tmpd}/abc >/dev/null
 set +e
 grep '^nope$' ${tmpd}/abc >/dev/null && exit 1
 set -e
+grep '^Falseadded$' ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${func_file} ${func_file2} ${func_file3}
