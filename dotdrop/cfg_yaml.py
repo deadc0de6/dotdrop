@@ -152,6 +152,16 @@ class CfgYaml:
         self.settings[self.key_settings_dotpath] = p
         p = self._norm_path(self.settings[self.key_settings_workdir])
         self.settings[self.key_settings_workdir] = p
+        p = [
+            self._norm_path(p)
+            for p in self.settings[Settings.key_filter_file]
+        ]
+        self.settings[Settings.key_filter_file] = p
+        p = [
+            self._norm_path(p)
+            for p in self.settings[Settings.key_func_file]
+        ]
+        self.settings[Settings.key_func_file] = p
         if self.debug:
             self.log.dbg('settings: {}'.format(self.settings))
 
