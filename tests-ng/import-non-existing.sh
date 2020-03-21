@@ -117,6 +117,29 @@ config:
   create: true
   dotpath: dotfiles
   import_variables:
+  - /variables/does/not/exist:with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "variables with separator" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_variables:
   - /variables/*/not/exist
 dotfiles:
   f_abc:
@@ -163,6 +186,29 @@ config:
   create: true
   dotpath: dotfiles
   import_actions:
+  - /actions/does/not:exist/with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "actions with separator" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_actions:
   - /actions/does/*/exist
 dotfiles:
   f_abc:
@@ -201,6 +247,29 @@ _EOF
 set +e
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
 [ "$?" = "0" ] && echo "configs" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_configs:
+  - /configs/does:not/exist/with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "configs with separator" && exit 1
 set -e
 
 cat > ${cfg} << _EOF

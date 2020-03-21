@@ -61,6 +61,7 @@ class CfgYaml:
     key_import_profile_dfs = 'import'
     key_import_sep = ':'
     key_import_ignore_key = 'optional'
+    key_import_ignore_default = True
 
     # settings
     key_settings_dotpath = Settings.key_dotpath
@@ -589,25 +590,37 @@ class CfgYaml:
 
     def _clear_profile_vars(self, dic):
         """remove profile variables from dic if found"""
-        [dic.pop(k, None) for k in self.prokeys]
+        for k in self.prokeys:
+            dic.pop(k, None)
 
-    def _parse_extended_import_path(self, path):
+    def _parse_extended_import_path(self, path_entry):
         """Parse an import path in a tuple (path, fatal_not_found)."""
         if self.debug:
-            self.log.dbg('parsing path entry {}'.format(path))
+            self.log.dbg('parsing path entry {}'.format(path_entry))
 
-        fields = path.split(self.key_import_sep)
-        fatal_not_found = True
-        filepath = path
+        path, _, attribute = path_entry.rpartition(self.key_import_sep)
 
-        if len(fields) > 1 and fields[-1] == self.key_import_ignore_key:
+        fatal_not_found = attribute != self.key_import_ignore_key
+
+        is_valid_attribute = attribute in ('', self.key_import_ignore_key)
+        if not is_valid_attribute:
+            # If attribute is not valid it can mean that:
+            # - path_entry doesn't contain the separator, and attribute is set
+            #   to the whole path by str.rpartition
+            # - path_entry contains a separator, but it's in the file path, so
+            #   attribute is set to whatever comes after the separator by
+            #   str.rpartition
+            # In both cases, path_entry is the path we're looking for.
             if self.debug:
-                self.log.dbg('path entry {} has fatal_not_found flag'
-                             .format(path))
-            fatal_not_found = False
-            filepath = ''.join(fields[:-1])
+                self.log.dbg('using attribute default values for path {}'
+                             .format(path_entry))
+            path = path_entry
+            fatal_not_found = self.key_import_ignore_default
+        elif self.debug:
+            self.log.dbg('path entry {} has fatal_not_found flag set to {}'
+                         .format(path_entry, fatal_not_found))
 
-        return filepath, fatal_not_found
+        return path, fatal_not_found
 
     def _is_glob(self, path):
         """Quick test if path is a glob."""
