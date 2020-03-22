@@ -9,7 +9,6 @@ import os
 import glob
 from copy import deepcopy
 from itertools import chain
-
 from ruamel.yaml import YAML as yaml
 
 # local imports
@@ -61,7 +60,7 @@ class CfgYaml:
     key_import_profile_dfs = 'import'
     key_import_sep = ':'
     key_import_ignore_key = 'optional'
-    key_import_ignore_default = True
+    key_import_fatal_not_found = True
 
     # settings
     key_settings_dotpath = Settings.key_dotpath
@@ -590,8 +589,7 @@ class CfgYaml:
 
     def _clear_profile_vars(self, dic):
         """remove profile variables from dic if found"""
-        for k in self.prokeys:
-            dic.pop(k, None)
+        [dic.pop(k, None) for k in self.prokeys]
 
     def _parse_extended_import_path(self, path_entry):
         """Parse an import path in a tuple (path, fatal_not_found)."""
@@ -599,9 +597,7 @@ class CfgYaml:
             self.log.dbg('parsing path entry {}'.format(path_entry))
 
         path, _, attribute = path_entry.rpartition(self.key_import_sep)
-
         fatal_not_found = attribute != self.key_import_ignore_key
-
         is_valid_attribute = attribute in ('', self.key_import_ignore_key)
         if not is_valid_attribute:
             # If attribute is not valid it can mean that:
@@ -615,43 +611,11 @@ class CfgYaml:
                 self.log.dbg('using attribute default values for path {}'
                              .format(path_entry))
             path = path_entry
-            fatal_not_found = self.key_import_ignore_default
+            fatal_not_found = self.key_import_fatal_not_found
         elif self.debug:
             self.log.dbg('path entry {} has fatal_not_found flag set to {}'
                          .format(path_entry, fatal_not_found))
-
         return path, fatal_not_found
-
-    def _is_glob(self, path):
-        """Quick test if path is a glob."""
-        return '*' in path or '?' in path
-
-    def _glob_path(self, path):
-        """Expand a glob."""
-        if self.debug:
-            self.log.dbg('expanding glob {}'.format(path))
-
-        expanded_path = os.path.expanduser(path)
-        return glob.glob(expanded_path, recursive=True)
-
-    def _norm_path(self, path):
-        """Resolve a path either absolute or relative to config path"""
-        if self.debug:
-            self.log.dbg('normalizing path {}'.format(path))
-
-        if not path:
-            return path
-
-        path = os.path.expanduser(path)
-        if not os.path.isabs(path):
-            if self.debug:
-                self.log.dbg('normalizing path {} relative to config file '
-                             'directory'.format(path))
-
-            d = os.path.dirname(self.path)
-            return os.path.join(d, path)
-
-        return os.path.normpath(path)
 
     def _handle_non_existing_path(self, path, fatal_not_found=True):
         """Raise an exception or log a warning to handle non-existing paths."""
@@ -689,7 +653,6 @@ class CfgYaml:
         """
         path, fatal_not_found = self._parse_extended_import_path(path_entry)
         path = self._norm_path(path)
-
         paths = self._glob_path(path) if self._is_glob(path) else [path]
         if not paths:
             if self.debug:
@@ -784,17 +747,16 @@ class CfgYaml:
         for path in paths:
             self._import_config(path)
 
-    def _import_sub(self, path, key, mandatory=False,
-                    patch_func=None, fatal_not_found=True):
+    def _import_sub(self, path, key, mandatory=False, patch_func=None):
         """
         import the block "key" from "path"
         patch_func is applied to each element if defined
         """
         if self.debug:
             self.log.dbg('import \"{}\" from \"{}\"'.format(key, path))
-            self.log.dbg('ignore non existing: \"{}\"'.format(fatal_not_found))
-        extdict = self._load_yaml(path, fatal_not_found=fatal_not_found)
-        if extdict is None and not fatal_not_found:
+        fnf = self.key_import_fatal_not_found
+        extdict = self._load_yaml(path, fatal_not_found=fnf)
+        if extdict is None and not self.key_import_fatal_not_found:
             return {}
         new = self._get_entry(extdict, key, mandatory=mandatory)
         if patch_func:
@@ -1082,6 +1044,17 @@ class CfgYaml:
             new[k] = newv
         return new
 
+    def _is_glob(self, path):
+        """Quick test if path is a glob."""
+        return '*' in path or '?' in path
+
+    def _glob_path(self, path):
+        """Expand a glob."""
+        if self.debug:
+            self.log.dbg('expanding glob {}'.format(path))
+        expanded_path = os.path.expanduser(path)
+        return glob.glob(expanded_path, recursive=True)
+
     def _debug_vars(self, variables):
         """pretty print variables"""
         if not self.debug:
@@ -1089,6 +1062,22 @@ class CfgYaml:
         self.log.dbg('variables:')
         for k, v in variables.items():
             self.log.dbg('\t\"{}\": {}'.format(k, v))
+
+    def _norm_path(self, path):
+        """Resolve a path either absolute or relative to config path"""
+        if self.debug:
+            self.log.dbg('normalizing path {}'.format(path))
+        if not path:
+            return path
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            if self.debug:
+                self.log.dbg('normalizing path {} relative to config file '
+                             'directory'.format(path))
+
+            d = os.path.dirname(self.path)
+            return os.path.join(d, path)
+        return os.path.normpath(path)
 
     def _shell_exec_dvars(self, keys, variables):
         """shell execute dynvariables"""
