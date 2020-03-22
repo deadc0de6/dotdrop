@@ -6,9 +6,11 @@ handle lower level of the config file
 """
 
 import os
-from ruamel.yaml import YAML as yaml
 import glob
 from copy import deepcopy
+from itertools import chain
+
+from ruamel.yaml import YAML as yaml
 
 # local imports
 from dotdrop.version import __version__ as VERSION
@@ -59,6 +61,7 @@ class CfgYaml:
     key_import_profile_dfs = 'import'
     key_import_sep = ':'
     key_import_ignore_key = 'optional'
+    key_import_ignore_default = True
 
     # settings
     key_settings_dotpath = Settings.key_dotpath
@@ -568,19 +571,16 @@ class CfgYaml:
         paths = self.settings.get(self.key_import_variables, None)
         if not paths:
             return
-        paths = self._glob_paths(paths)
-        for p in paths:
-            path, fatal_not_found = self._norm_extended_import_path(p)
+        paths = self._resolve_paths(paths)
+        for path in paths:
             if self.debug:
                 self.log.dbg('import variables from {}'.format(path))
             var = self._import_sub(path, self.key_variables,
-                                   mandatory=False,
-                                   fatal_not_found=fatal_not_found)
+                                   mandatory=False)
             if self.debug:
                 self.log.dbg('import dynvariables from {}'.format(path))
             dvar = self._import_sub(path, self.key_dvariables,
-                                    mandatory=False,
-                                    fatal_not_found=fatal_not_found)
+                                    mandatory=False)
             merged = self._merge_dict(dvar, var)
             merged = self._rec_resolve_vars(merged)
             # execute dvar
@@ -590,32 +590,144 @@ class CfgYaml:
 
     def _clear_profile_vars(self, dic):
         """remove profile variables from dic if found"""
-        [dic.pop(k, None) for k in self.prokeys]
+        for k in self.prokeys:
+            dic.pop(k, None)
 
-    def _norm_extended_import_path(self, path):
-        """normalize imported path and its attribute if any"""
-        fields = path.split(self.key_import_sep)
-        fatal_not_found = True
-        filepath = path
-        if len(fields) > 1 and fields[-1] == self.key_import_ignore_key:
-            fatal_not_found = False
-            filepath = ''.join(fields[:-1])
-        return self._norm_path(filepath), fatal_not_found
+    def _parse_extended_import_path(self, path_entry):
+        """Parse an import path in a tuple (path, fatal_not_found)."""
+        if self.debug:
+            self.log.dbg('parsing path entry {}'.format(path_entry))
+
+        path, _, attribute = path_entry.rpartition(self.key_import_sep)
+
+        fatal_not_found = attribute != self.key_import_ignore_key
+
+        is_valid_attribute = attribute in ('', self.key_import_ignore_key)
+        if not is_valid_attribute:
+            # If attribute is not valid it can mean that:
+            # - path_entry doesn't contain the separator, and attribute is set
+            #   to the whole path by str.rpartition
+            # - path_entry contains a separator, but it's in the file path, so
+            #   attribute is set to whatever comes after the separator by
+            #   str.rpartition
+            # In both cases, path_entry is the path we're looking for.
+            if self.debug:
+                self.log.dbg('using attribute default values for path {}'
+                             .format(path_entry))
+            path = path_entry
+            fatal_not_found = self.key_import_ignore_default
+        elif self.debug:
+            self.log.dbg('path entry {} has fatal_not_found flag set to {}'
+                         .format(path_entry, fatal_not_found))
+
+        return path, fatal_not_found
+
+    def _is_glob(self, path):
+        """Quick test if path is a glob."""
+        return '*' in path or '?' in path
+
+    def _glob_path(self, path):
+        """Expand a glob."""
+        if self.debug:
+            self.log.dbg('expanding glob {}'.format(path))
+
+        expanded_path = os.path.expanduser(path)
+        return glob.glob(expanded_path, recursive=True)
+
+    def _norm_path(self, path):
+        """Resolve a path either absolute or relative to config path"""
+        if self.debug:
+            self.log.dbg('normalizing path {}'.format(path))
+
+        if not path:
+            return path
+
+        path = os.path.expanduser(path)
+        if not os.path.isabs(path):
+            if self.debug:
+                self.log.dbg('normalizing path {} relative to config file '
+                             'directory'.format(path))
+
+            d = os.path.dirname(self.path)
+            return os.path.join(d, path)
+
+        return os.path.normpath(path)
+
+    def _handle_non_existing_path(self, path, fatal_not_found=True):
+        """Raise an exception or log a warning to handle non-existing paths."""
+        error = 'bad path {}'.format(path)
+        if fatal_not_found:
+            raise YamlException(error)
+        self.log.warn(error)
+
+    def _check_path_existence(self, path, fatal_not_found=True):
+        """Check if a path exists, raising if necessary."""
+        if os.path.exists(path):
+            if self.debug:
+                self.log.dbg('path {} exists'.format(path))
+            return path
+
+        self._handle_non_existing_path(path, fatal_not_found)
+        # Explicit return for readability. Anything evaluating to false is ok.
+        return None
+
+    def _process_path(self, path_entry):
+        """Process a path entry to a normalized form.
+
+        This method processed a path entry. Namely it:
+        - Normalizes the path.
+        - Expands globs.
+        - Checks for path existence, taking in account fatal_not_found.
+        This method always returns a list containing only absolute paths
+        existing on the filesystem. If the input is not a glob, the list
+        contains at most one element, otheriwse it could hold more.
+
+        :param path_entry: A path with an optional attribute.
+        :type path_entry: str
+        :return: A list of normalized existing paths, obtained from the input.
+        :rtype: List of str
+        """
+        path, fatal_not_found = self._parse_extended_import_path(path_entry)
+        path = self._norm_path(path)
+
+        paths = self._glob_path(path) if self._is_glob(path) else [path]
+        if not paths:
+            if self.debug:
+                self.log.dbg("glob path {} didn't expand".format(path))
+            self._handle_non_existing_path(path, fatal_not_found)
+            return []
+
+        checked_paths = (self._check_path_existence(p, fatal_not_found)
+                         for p in paths)
+        return [p for p in checked_paths if p]
+
+    def _resolve_paths(self, paths):
+        """Resolve a list of path to existing paths.
+
+        This function resolves a list of paths. This means normalizing,
+        expanding globs and checking for existence, taking in account
+        fatal_not_found flags.
+
+        :param paths: A list of paths. Might contain globs and options.
+        :type paths: List of str
+        :return: A list of processed paths.
+        :rtype: List of str
+        """
+        processed_paths = (self._process_path(p) for p in paths)
+        return list(chain.from_iterable(processed_paths))
 
     def _import_actions(self):
         """import external actions from paths"""
         paths = self.settings.get(self.key_import_actions, None)
         if not paths:
             return
-        paths = self._glob_paths(paths)
-        for p in paths:
-            path, fatal_not_found = self._norm_extended_import_path(p)
+        paths = self._resolve_paths(paths)
+        for path in paths:
             if self.debug:
                 self.log.dbg('import actions from {}'.format(path))
             new = self._import_sub(path, self.key_actions,
                                    mandatory=False,
-                                   patch_func=self._norm_actions,
-                                   fatal_not_found=fatal_not_found)
+                                   patch_func=self._norm_actions)
             self.actions = self._merge_dict(new, self.actions)
 
     def _import_profiles_dotfiles(self):
@@ -626,26 +738,17 @@ class CfgYaml:
                 continue
             if self.debug:
                 self.log.dbg('import dotfiles for profile {}'.format(k))
-            paths = self._glob_paths(imp)
-            for p in paths:
+            paths = self._resolve_paths(imp)
+            for path in paths:
                 current = v.get(self.key_dotfiles, [])
-                path = self._norm_path(p)
                 new = self._import_sub(path, self.key_dotfiles,
                                        mandatory=False)
                 v[self.key_dotfiles] = new + current
 
     def _import_config(self, path):
         """import config from path"""
-        path, fatal_not_found = self._norm_extended_import_path(path)
         if self.debug:
             self.log.dbg('import config from {}'.format(path))
-        if not os.path.exists(path):
-            err = 'config path not found: {}'.format(path)
-            if fatal_not_found:
-                raise YamlException(err)
-            else:
-                self.log.warn(err)
-                return
         sub = CfgYaml(path, profile=self.profile, debug=self.debug)
 
         # settings are ignored from external file
@@ -677,7 +780,7 @@ class CfgYaml:
         imp = self.settings.get(self.key_import_configs, None)
         if not imp:
             return
-        paths = self._glob_paths(imp)
+        paths = self._resolve_paths(imp)
         for path in paths:
             self._import_config(path)
 
@@ -979,26 +1082,6 @@ class CfgYaml:
             new[k] = newv
         return new
 
-    def _is_glob(self, path):
-        """quick test if path is a glob"""
-        return '*' in path or '?' in path
-
-    def _glob_paths(self, paths):
-        """glob a list of paths"""
-        if not isinstance(paths, list):
-            paths = [paths]
-        res = []
-        for p in paths:
-            if not self._is_glob(p):
-                res.append(p)
-                continue
-            p = os.path.expanduser(p)
-            new = glob.glob(p)
-            if not new:
-                raise YamlException('bad path: {}'.format(p))
-            res.extend(glob.glob(p))
-        return res
-
     def _debug_vars(self, variables):
         """pretty print variables"""
         if not self.debug:
@@ -1006,16 +1089,6 @@ class CfgYaml:
         self.log.dbg('variables:')
         for k, v in variables.items():
             self.log.dbg('\t\"{}\": {}'.format(k, v))
-
-    def _norm_path(self, path):
-        """resolve a path either absolute or relative to config path"""
-        if not path:
-            return path
-        path = os.path.expanduser(path)
-        if not os.path.isabs(path):
-            d = os.path.dirname(self.path)
-            return os.path.join(d, path)
-        return os.path.normpath(path)
 
     def _shell_exec_dvars(self, keys, variables):
         """shell execute dynvariables"""

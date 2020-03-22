@@ -65,12 +65,15 @@ config:
   import_variables:
   - /variables/does/not/exist:optional
   - /variables/does/not/::exist:optional
+  - /variables/*/not/exist:optional
   import_actions:
   - /actions/does/not/exist:optional
   - /actions/does/not/::exist:optional
+  - /actions/does/*/exist:optional
   import_configs:
   - /configs/does/not/exist:optional
   - /configs/does/not/::exist:optional
+  - /configs/does/not/*:optional
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -113,6 +116,52 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  import_variables:
+  - /variables/does/not/exist:with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "variables with separator" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_variables:
+  - /variables/*/not/exist
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "variables glob" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
   import_actions:
   - /actions/does/not/exist
 dotfiles:
@@ -136,6 +185,52 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  import_actions:
+  - /actions/does/not:exist/with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "actions with separator" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_actions:
+  - /actions/does/*/exist
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "actions glob" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
   import_configs:
   - /configs/does/not/exist
 dotfiles:
@@ -152,6 +247,52 @@ _EOF
 set +e
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
 [ "$?" = "0" ] && echo "configs" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_configs:
+  - /configs/does:not/exist/with/separator
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "configs with separator" && exit 1
+set -e
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_configs:
+  - /configs/does/not/*
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+
+# dummy call
+set +e
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
+[ "$?" = "0" ] && echo "configs glob" && exit 1
 set -e
 
 ## CLEANING
