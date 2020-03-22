@@ -74,28 +74,29 @@ cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/singlefile
 # modify the file
 echo "modified" > ${tmpd}/singlefile
 
-# normal diff
-echo "[+] comparing with normal diff"
+# suppressing the banner, so we can compare dotdrop diff with UNIX diff
+export DOTDROP_NOBANNER=yes
+
+# default diff (unified)
+echo "[+] comparing with default diff (unified)"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} 2>&1 | grep -v '=>' > ${tmpd}/normal
-diff -u -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile > ${tmpd}/real
+cd ${ddpath} | ${bin} compare -c ${cfg} 2>&1 | grep -v '=>' | grep -v '^+++\|^---' > ${tmpd}/normal
+diff -u -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile | grep -v '^+++\|^---' > ${tmpd}/real
 set -e
 
 # verify
-#cat ${tmpd}/normal
-#cat ${tmpd}/real
-diff <( tail -2 ${tmpd}/normal) <( tail -2 ${tmpd}/real) || exit 1
+diff ${tmpd}/normal ${tmpd}/real || exit 1
 
-# adding unified diff
+# adding normal diff
 cfg2="${basedir}/config2.yaml"
 sed '/dotpath: dotfiles/a \ \ diff_command: "diff -r {0} {1}"' ${cfg} > ${cfg2}
 #cat ${cfg2}
 
-# unified diff
-echo "[+] comparing with unified diff"
+# normal diff
+echo "[+] comparing with normal diff"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} 2>&1 | grep -v '=>' | grep -v '^+++\|^---' > ${tmpd}/unified
-diff -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile | grep -v '^+++\|^---' > ${tmpd}/real
+cd ${ddpath} | ${bin} compare -c ${cfg2} 2>&1 | grep -v '=>' > ${tmpd}/unified
+diff -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile > ${tmpd}/real
 set -e
 
 # verify
@@ -106,7 +107,7 @@ diff ${tmpd}/unified ${tmpd}/real || exit 1
 # adding fake diff
 cfg3="${basedir}/config3.yaml"
 sed '/dotpath: dotfiles/a \ \ diff_command: "echo fakediff"' ${cfg} > ${cfg3}
-cat ${cfg3}
+#cat ${cfg3}
 
 # fake diff
 echo "[+] comparing with fake diff"
@@ -115,11 +116,12 @@ cd ${ddpath} | ${bin} compare -c ${cfg3} 2>&1 | grep -v '=>' > ${tmpd}/fake
 set -e
 
 # verify
-cat ${tmpd}/fake
-grep fakediff ${tmpd}/fake || exit 1
+#cat ${tmpd}/fake
+grep fakediff ${tmpd}/fake &> /dev/null || exit 1
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
+unset DOTDROP_NOBANNER
 
 echo "OK"
 exit 0
