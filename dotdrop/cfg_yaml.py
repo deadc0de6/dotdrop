@@ -754,10 +754,7 @@ class CfgYaml:
         """
         if self.debug:
             self.log.dbg('import \"{}\" from \"{}\"'.format(key, path))
-        fnf = self.key_import_fatal_not_found
-        extdict = self._load_yaml(path, fatal_not_found=fnf)
-        if extdict is None and not self.key_import_fatal_not_found:
-            return {}
+        extdict = self._load_yaml(path)
         new = self._get_entry(extdict, key, mandatory=mandatory)
         if patch_func:
             if self.debug:
@@ -967,16 +964,9 @@ class CfgYaml:
         """dump the config dictionary"""
         return self.yaml_dict
 
-    def _load_yaml(self, path, fatal_not_found=True):
+    def _load_yaml(self, path):
         """load a yaml file to a dict"""
         content = {}
-        if not os.path.exists(path):
-            err = 'config path not found: {}'.format(path)
-            if fatal_not_found:
-                raise YamlException(err)
-            else:
-                self.log.warn(err)
-                return None
         try:
             content = self._yaml_load(path)
         except Exception as e:
