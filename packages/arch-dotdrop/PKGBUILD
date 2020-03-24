@@ -22,6 +22,6 @@ package() {
   cd "${pkgname}"
   python setup.py install --root="${pkgdir}/" --optimize=1
   install -Dm644 ${srcdir}/${pkgname}/completion/dotdrop-completion.bash "${pkgdir}/usr/share/bash-completion/completions/${pkgname}"
-  install -Dm644 ${srcdir}/${pkgname}/completion/_dotdrop-completion.zsh "${pkgdir}/usr/share/zsh/site-functions/${pkgname}"
+  install -Dm644 ${srcdir}/${pkgname}/completion/_dotdrop-completion.zsh "${pkgdir}/usr/share/zsh/site-functions/_${pkgname}"
 }
 
