@@ -227,7 +227,7 @@ class CfgYaml:
             self.log.dbg('dynvariables: {}'.format(self.ori_dvariables))
 
     def _resolve_dotfile_paths(self):
-        """resolve dotfile paths"""
+        """resolve dotfiles paths"""
         t = Templategen(variables=self.variables,
                         func_file=self.settings[Settings.key_func_file],
                         filter_file=self.settings[Settings.key_filter_file])
@@ -235,29 +235,42 @@ class CfgYaml:
         for dotfile in self.dotfiles.values():
             # src
             src = dotfile[self.key_dotfile_src]
-            if not src:
-                dotfile[self.key_dotfile_src] = ''
-            else:
-                new = t.generate_string(src)
-                if new != src and self.debug:
-                    msg = 'dotfile src: \"{}\" -> \"{}\"'.format(src, new)
-                    self.log.dbg(msg)
-                src = new
-                src = os.path.join(self.settings[self.key_settings_dotpath],
-                                   src)
-                dotfile[self.key_dotfile_src] = self._norm_path(src)
-
+            newsrc = self.resolve_dotfile_src(src, templater=t)
+            dotfile[self.key_dotfile_src] = newsrc
             # dst
             dst = dotfile[self.key_dotfile_dst]
-            if not dst:
-                dotfile[self.key_dotfile_dst] = ''
-            else:
-                new = t.generate_string(dst)
-                if new != dst and self.debug:
-                    msg = 'dotfile dst: \"{}\" -> \"{}\"'.format(dst, new)
-                    self.log.dbg(msg)
-                dst = new
-                dotfile[self.key_dotfile_dst] = self._norm_path(dst)
+            newdst = self.resolve_dotfile_dst(dst, templater=t)
+            dotfile[self.key_dotfile_dst] = newdst
+
+    def resolve_dotfile_src(self, src, templater=None):
+        """resolve dotfile src path"""
+        newsrc = ''
+        if src:
+            new = src
+            if templater:
+                new = templater.generate_string(src)
+            if new != src and self.debug:
+                msg = 'dotfile src: \"{}\" -> \"{}\"'.format(src, new)
+                self.log.dbg(msg)
+            src = new
+            src = os.path.join(self.settings[self.key_settings_dotpath],
+                               src)
+            newsrc = self._norm_path(src)
+        return newsrc
+
+    def resolve_dotfile_dst(self, dst, templater=None):
+        """resolve dotfile dst path"""
+        newdst = ''
+        if dst:
+            new = dst
+            if templater:
+                new = templater.generate_string(dst)
+            if new != dst and self.debug:
+                msg = 'dotfile dst: \"{}\" -> \"{}\"'.format(dst, new)
+                self.log.dbg(msg)
+            dst = new
+            newdst = self._norm_path(dst)
+        return newdst
 
     def _rec_resolve_vars(self, variables):
         """recursive resolve variables"""
