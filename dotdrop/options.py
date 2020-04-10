@@ -66,23 +66,23 @@ Usage:
   dotdrop --version
 
 Options:
-  -p --profile=<profile>  Specify the profile to use [default: {}].
+  -a --force-actions      Execute all actions even if no dotfile is installed.
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
-  -l --link=<link>        "link_on_import" (nolink|link|link_children).
+  -l --link=<link>        Link option (nolink|link|link_children).
+  -p --profile=<profile>  Specify the profile to use [default: {}].
+  -b --no-banner          Do not display the banner.
+  -d --dry                Dry run.
+  -D --showdiff           Show a diff before overwriting.
+  -f --force              Do not ask user confirmation for anything.
+  -G --grepable           Grepable output.
+  -k --key                Treat <path> as a dotfile key.
   -n --nodiff             Do not diff when installing.
+  -P --show-patch         Provide a one-liner to manually patch template.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
-  -D --showdiff           Show a diff before overwriting.
-  -P --show-patch         Provide a one-liner to manually patch template.
-  -f --force              Do not ask user confirmation for anything.
-  -a --force-actions      Execute all actions even if no dotfile is installed.
-  -k --key                Treat <path> as a dotfile key.
   -V --verbose            Be verbose.
-  -d --dry                Dry run.
-  -b --no-banner          Do not display the banner.
-  -G --grepable           Grepable output.
   -v --version            Show version.
   -h --help               Show this screen.
 """.format(BANNER, PROFILE)
