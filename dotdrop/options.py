@@ -256,7 +256,7 @@ class Options(AttrMonitor):
         # variables
         self.variables = self.conf.get_variables()
         # the dotfiles
-        self.dotfiles = self.conf.get_dotfiles(self.profile)
+        self.dotfiles = self.conf.get_dotfiles()
         # the profiles
         self.profiles = self.conf.get_profiles()
 

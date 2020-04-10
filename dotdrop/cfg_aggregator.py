@@ -28,15 +28,15 @@ class CfgAggregator:
     dir_prefix = 'd'
     key_sep = '_'
 
-    def __init__(self, path, profile=None, debug=False):
+    def __init__(self, path, profile_key, debug=False):
         """
         high level config parser
         @path: path to the config file
-        @profile: selected profile
+        @profile_key: profile key
         @debug: debug flag
         """
         self.path = path
-        self.profile = profile
+        self.profile_key = profile_key
         self.debug = debug
         self.log = Logger()
         self._load()
@@ -44,7 +44,7 @@ class CfgAggregator:
     def _load(self):
         """load lower level config"""
         self.cfgyaml = CfgYaml(self.path,
-                               self.profile,
+                               self.profile_key,
                                debug=self.debug)
 
         # settings
@@ -147,13 +147,12 @@ class CfgAggregator:
         """remove this dotfile from this profile"""
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
-    def new(self, src, dst, link, profile_key):
+    def new(self, src, dst, link):
         """
         import a new dotfile
         @src: path in dotpath
         @dst: path in FS
         @link: LinkType
-        @profile_key: to which profile
         """
         dst = self.path_to_dotfile_dst(dst)
 
@@ -168,15 +167,15 @@ class CfgAggregator:
             dotfile = Dotfile(key, dst, src)
 
         key = dotfile.key
-        ret = self.cfgyaml.add_dotfile_to_profile(key, profile_key)
+        ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
         if self.debug:
-            self.log.dbg('new dotfile {} to profile {}'.format(key,
-                                                               profile_key))
+            msg = 'new dotfile {} to profile {}'
+            self.log.dbg(msg.format(key, self.profile_key))
 
         # reload
         self.cfgyaml.save()
         if self.debug:
-            self.log.dbg('RELOADING')
+            self.log.dbg('reloading config')
         self._load()
         return ret
 
@@ -286,10 +285,10 @@ class CfgAggregator:
         """return profiles"""
         return self.profiles
 
-    def get_profile(self, key):
-        """return profile by key"""
+    def get_profile(self):
+        """return profile object"""
         try:
-            return next(x for x in self.profiles if x.key == key)
+            return next(x for x in self.profiles if x.key == self.profile_key)
         except StopIteration:
             return None
 
@@ -302,22 +301,22 @@ class CfgAggregator:
                 res.append(p)
         return res
 
-    def get_dotfiles(self, profile=None):
-        """return dotfiles dict for this profile key"""
+    def get_dotfiles(self):
+        """get all dotfiles for this profile"""
+        dotfiles = []
+        profile = self.get_profile()
         if not profile:
-            return self.dotfiles
-        try:
-            pro = self.get_profile(profile)
-            if not pro:
-                return []
-            return pro.dotfiles
-        except StopIteration:
-            return []
+            return dotfiles
+        return profile.dotfiles
 
     def get_dotfile(self, key):
-        """return dotfile by key"""
+        """
+        return dotfile object by key
+        @key: the dotfile key to look for
+        """
         try:
-            return next(x for x in self.dotfiles if x.key == key)
+            return next(x for x in self.dotfiles
+                        if x.key == key)
         except StopIteration:
             return None
 

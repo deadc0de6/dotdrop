@@ -71,7 +71,7 @@ def action_executor(o, actions, defactions, templater, post=False):
 def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
-    prof = o.conf.get_profile(o.profile)
+    prof = o.conf.get_profile()
     pro_pre_actions = prof.get_pre_actions() if prof else []
     pro_post_actions = prof.get_post_actions() if prof else []
 
@@ -356,7 +356,7 @@ def cmd_importer(o):
             continue
 
         if o.debug:
-            LOG.dbg('new dotfile: src:{} dst:{}'.format(src, dst))
+            LOG.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(o.dotpath, src)
@@ -395,7 +395,7 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-        retconf = o.conf.new(src, dst, linktype, o.profile)
+        retconf = o.conf.new(src, dst, linktype)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1

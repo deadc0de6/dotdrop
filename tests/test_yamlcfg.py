@@ -22,6 +22,7 @@ class TestConfig(SubsetTestCase):
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
     CONFIG_DOTPATH = 'dotfiles'
+    PROFILE = 'p1'
     TMPSUFFIX = '.dotdrop'
     CONFIG_NAME = 'config.yaml'
     CONFIG_NAME_2 = 'config-2.yaml'
@@ -37,7 +38,7 @@ class TestConfig(SubsetTestCase):
                                       dotpath=self.CONFIG_DOTPATH,
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
-        conf = Cfg(confpath, debug=True)
+        conf = Cfg(confpath, self.PROFILE, debug=True)
         self.assertTrue(conf is not None)
 
         opts = conf.settings
@@ -90,7 +91,7 @@ profiles:
         mock_exists.return_value = True
 
         args = _fake_args()
-        args['--profile'] = 'p1'
+        args['--profile'] = self.PROFILE
         args['--cfg'] = 'mocked'
         args['--link'] = cliargs
         args['--verbose'] = True
