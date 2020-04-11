@@ -341,7 +341,16 @@ def cmd_importer(o):
             continue
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
+
         src = strip_home(dst)
+        if o.import_as:
+            # handle import as
+            src = o.import_as.rstrip(os.sep)
+            src = os.path.abspath(src)
+            src = strip_home(src)
+            if o.debug:
+                LOG.dbg('import src for {}: {}'.format(dst, src))
+
         strip = '.' + os.sep
         if o.keepdot:
             strip = os.sep
@@ -357,6 +366,25 @@ def cmd_importer(o):
 
         if o.debug:
             LOG.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
+
+        # test no other dotfile exists with same
+        # dst for this profile but different src
+        dfs = o.conf.get_dotfile_by_dst(dst)
+        if dfs:
+            invalid = False
+            for df in dfs:
+                profiles = o.conf.get_profiles_by_dotfile_key(df.key)
+                profiles = [x.key for x in profiles]
+                if o.profile in profiles and \
+                        not o.conf.get_dotfile_by_src_dst(src, dst):
+                    # same profile
+                    # different src
+                    LOG.err('duplicate dotfile for this profile')
+                    ret = False
+                    invalid = True
+                    break
+            if invalid:
+                continue
 
         # prepare hierarchy for dotfile
         srcf = os.path.join(o.dotpath, src)
@@ -481,52 +509,54 @@ def cmd_remove(o):
     for key in paths:
         if not iskey:
             # by path
-            dotfile = o.conf.get_dotfile_by_dst(key)
-            if not dotfile:
+            dotfiles = o.conf.get_dotfile_by_dst(key)
+            if not dotfiles:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
-            k = dotfile.key
         else:
             # by key
             dotfile = o.conf.get_dotfile(key)
             if not dotfile:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
-            k = key
+            dotfiles = [dotfile]
 
-        # ignore if uses any type of link
-        if dotfile.link != LinkTypes.NOLINK:
-            LOG.warn('dotfile uses link, remove manually')
-            continue
+        for dotfile in dotfiles:
+            k = dotfile.key
+            # ignore if uses any type of link
+            if dotfile.link != LinkTypes.NOLINK:
+                LOG.warn('dotfile uses link, remove manually')
+                continue
 
-        if o.debug:
-            LOG.dbg('removing {}'.format(key))
+            if o.debug:
+                LOG.dbg('removing {}'.format(key))
 
-        # make sure is part of the profile
-        if dotfile.key not in [d.key for d in o.dotfiles]:
-            LOG.warn('{} ignored, not associated to this profile'.format(key))
-            continue
-        profiles = o.conf.get_profiles_by_dotfile_key(k)
-        pkeys = ','.join([p.key for p in profiles])
-        if o.dry:
-            LOG.dry('would remove {} from {}'.format(dotfile, pkeys))
-            continue
-        msg = 'Remove \"{}\" from all these profiles: {}'.format(k, pkeys)
-        if o.safe and not LOG.ask(msg):
-            return False
-        if o.debug:
-            LOG.dbg('remove dotfile: {}'.format(dotfile))
-
-        for profile in profiles:
-            if not o.conf.del_dotfile_from_profile(dotfile, profile):
+            # make sure is part of the profile
+            if dotfile.key not in [d.key for d in o.dotfiles]:
+                msg = '{} ignored, not associated to this profile'
+                LOG.warn(msg.format(key))
+                continue
+            profiles = o.conf.get_profiles_by_dotfile_key(k)
+            pkeys = ','.join([p.key for p in profiles])
+            if o.dry:
+                LOG.dry('would remove {} from {}'.format(dotfile, pkeys))
+                continue
+            msg = 'Remove \"{}\" from all these profiles: {}'.format(k, pkeys)
+            if o.safe and not LOG.ask(msg):
                 return False
-        if not o.conf.del_dotfile(dotfile):
-            return False
+            if o.debug:
+                LOG.dbg('remove dotfile: {}'.format(dotfile))
 
-        # remove dotfile from dotpath
-        dtpath = os.path.join(o.dotpath, dotfile.src)
-        remove(dtpath)
-        removed.append(dotfile.key)
+            for profile in profiles:
+                if not o.conf.del_dotfile_from_profile(dotfile, profile):
+                    return False
+            if not o.conf.del_dotfile(dotfile):
+                return False
+
+            # remove dotfile from dotpath
+            dtpath = os.path.join(o.dotpath, dotfile.src)
+            remove(dtpath)
+            removed.append(dotfile.key)
 
     if o.dry:
         LOG.dry('new config file would be:')

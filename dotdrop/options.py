@@ -52,7 +52,7 @@ USAGE = """
 
 Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>] [<key>...]
-  dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>]
+  dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] <path>...
   dotdrop compare   [-Vb]       [-c <path>] [-p <profile>]
                                 [-C <file>...] [-i <pattern>...]
@@ -72,6 +72,7 @@ Options:
   -i --ignore=<pattern>   Pattern to ignore.
   -l --link=<link>        Link option (nolink|link|link_children).
   -p --profile=<profile>  Specify the profile to use [default: {}].
+  -s --as=<path>          Import as a different path from actual path.
   -b --no-banner          Do not display the banner.
   -d --dry                Dry run.
   -D --showdiff           Show a diff before overwriting.
@@ -237,6 +238,7 @@ class Options(AttrMonitor):
         self.compare_ignore = uniq_list(self.compare_ignore)
         # "import" specifics
         self.import_path = self.args['<path>']
+        self.import_as = self.args['--as']
         # "update" specifics
         self.update_path = self.args['<path>']
         self.update_iskey = self.args['--key']

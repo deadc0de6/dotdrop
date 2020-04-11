@@ -129,6 +129,7 @@ def _fake_args():
     args['--show-patch'] = False
     args['--force-actions'] = False
     args['--grepable'] = False
+    args['--as'] = None
     # cmds
     args['profiles'] = False
     args['files'] = False

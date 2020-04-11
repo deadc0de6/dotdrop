@@ -147,6 +147,16 @@ class CfgAggregator:
         """remove this dotfile from this profile"""
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
+    def _create_new_dotfile(self, src, dst, link):
+        """create a new dotfile"""
+        # get a new dotfile with a unique key
+        key = self._get_new_dotfile_key(dst)
+        if self.debug:
+            self.log.dbg('new dotfile key: {}'.format(key))
+        # add the dotfile
+        self.cfgyaml.add_dotfile(key, src, dst, link)
+        return Dotfile(key, dst, src)
+
     def new(self, src, dst, link):
         """
         import a new dotfile
@@ -155,34 +165,31 @@ class CfgAggregator:
         @link: LinkType
         """
         dst = self.path_to_dotfile_dst(dst)
-
-        dotfile = self.get_dotfile_by_dst(dst)
+        dotfile = self.get_dotfile_by_src_dst(src, dst)
         if not dotfile:
-            # get a new dotfile with a unique key
-            key = self._get_new_dotfile_key(dst)
-            if self.debug:
-                self.log.dbg('new dotfile key: {}'.format(key))
-            # add the dotfile
-            self.cfgyaml.add_dotfile(key, src, dst, link)
-            dotfile = Dotfile(key, dst, src)
+            dotfile = self._create_new_dotfile(src, dst, link)
 
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
-        if self.debug:
+        if ret and self.debug:
             msg = 'new dotfile {} to profile {}'
             self.log.dbg(msg.format(key, self.profile_key))
 
-        # reload
         self.cfgyaml.save()
-        if self.debug:
-            self.log.dbg('reloading config')
-        self._load()
+        if ret:
+            # reload
+            if self.debug:
+                self.log.dbg('reloading config')
+            olddebug = self.debug
+            self.debug = False
+            self._load()
+            self.debug = olddebug
         return ret
 
     def _get_new_dotfile_key(self, dst):
         """return a new unique dotfile key"""
         path = os.path.expanduser(dst)
-        existing_keys = [x.key for x in self.dotfiles]
+        existing_keys = self.cfgyaml.get_all_dotfile_keys()
         if self.settings.longkey:
             return self._get_long_key(path, existing_keys)
         return self._get_short_key(path, existing_keys)
@@ -257,11 +264,28 @@ class CfgAggregator:
         return path
 
     def get_dotfile_by_dst(self, dst):
-        """get a dotfile by dst"""
+        """
+        get a list of dotfiles by dst
+        @dst: dotfile dst (on filesystem)
+        """
+        dotfiles = []
         dst = self._norm_path(dst)
         for d in self.dotfiles:
             left = self._norm_path(d.dst)
             if left == dst:
+                dotfiles.append(d)
+        return dotfiles
+
+    def get_dotfile_by_src_dst(self, src, dst):
+        """
+        get a dotfile by src and dst
+        @src: dotfile src (in dotpath)
+        @dst: dotfile dst (on filesystem)
+        """
+        src = self.cfgyaml.resolve_dotfile_src(src)
+        dotfiles = self.get_dotfile_by_dst(dst)
+        for d in dotfiles:
+            if d.src == src:
                 return d
         return None
 
