@@ -44,6 +44,11 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+clean()
+{
+  rm -rf ${tmps} ${tmpd} ~/.dotdrop-test
+}
+
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
@@ -73,11 +78,11 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
 cat ${cfg}
 
 # ensure exists and is not link
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
 grep 'original' ${tmps}/dotfiles/${tmpd}/testfile
 nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
-[ "${nb}" != "1" ] && echo 'not 1 entry' && exit 1
+[ "${nb}" != "1" ] && echo 'not 1 entry' && clean && exit 1
 
 # re-import without changing
 echo "[+] re-import without changes"
@@ -85,11 +90,11 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
 cat ${cfg}
 
 # test is only once
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
 grep 'original' ${tmps}/dotfiles/${tmpd}/testfile
 nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
-[ "${nb}" != "1" ] && echo 'two entries!' && exit 1
+[ "${nb}" != "1" ] && echo 'two entries!' && clean && exit 1
 
 # re-import with changes
 echo "[+] re-import with changes"
@@ -98,11 +103,11 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
 cat ${cfg}
 
 # test is only once
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
 grep 'modified' ${tmps}/dotfiles/${tmpd}/testfile
 nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
-[ "${nb}" != "1" ] && echo 'two entries!' && exit 1
+[ "${nb}" != "1" ] && echo 'two entries!' && clean && exit 1
 
 # ###################################################
 
@@ -113,11 +118,11 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
 cat ${cfg}
 
 # ensure exists and is not link
-[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
+[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
 grep 'original' ${tmps}/dotfiles/dotdrop.test
 nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
-[ "${nb}" != "1" ] && echo 'not 1 entry' && exit 1
+[ "${nb}" != "1" ] && echo 'not 1 entry' && clean && exit 1
 
 # re-import without changing
 echo "[+] re-import without changes in home"
@@ -125,11 +130,11 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
 cat ${cfg}
 
 # test is only once
-[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
+[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
 grep 'original' ${tmps}/dotfiles/dotdrop.test
 nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
-[ "${nb}" != "1" ] && echo 'two entries!' && exit 1
+[ "${nb}" != "1" ] && echo 'two entries!' && clean && exit 1
 
 # re-import with changes
 echo "[+] re-import with changes in home"
@@ -138,14 +143,14 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
 cat ${cfg}
 
 # test is only once
-[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
+[ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && clean && exit 1
 cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
 grep 'modified' ${tmps}/dotfiles/dotdrop.test
 nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
-[ "${nb}" != "1" ] && echo 'two entries!' && exit 1
+[ "${nb}" != "1" ] && echo 'two entries!' && clean && exit 1
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd} ~/.dotdrop-test
+clean
 
 echo "OK"
 exit 0

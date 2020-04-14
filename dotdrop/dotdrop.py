@@ -345,11 +345,12 @@ def cmd_importer(o):
         src = strip_home(dst)
         if o.import_as:
             # handle import as
-            src = o.import_as.rstrip(os.sep)
+            src = os.path.expanduser(o.import_as)
+            src = src.rstrip(os.sep)
             src = os.path.abspath(src)
             src = strip_home(src)
             if o.debug:
-                LOG.dbg('import src for {}: {}'.format(dst, src))
+                LOG.dbg('import src for {} as {}'.format(dst, src))
 
         strip = '.' + os.sep
         if o.keepdot:

@@ -44,6 +44,11 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+clean()
+{
+  rm -rf ${tmps} ${tmpd} ~/.dotdrop.test ~/.dotdrop-dotfiles-test
+}
+
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
@@ -113,10 +118,32 @@ nb=`cat ${cfg} | grep f_file3 | wc -l`
 cat ${cfg} | grep "src: config/adir" || exit 1
 cat ${cfg} | grep "src: config2/file3" || exit 1
 
-cat ${cfg}
+# test import from sub in home
+mkdir -p ~/.dotdrop-dotfiles-test/{dotfiles,config}
+cfg=~/.dotdrop-dotfiles-test/config/config.yaml
+echo 'remove-me' > ~/.dotdrop.test
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  banner: true
+  create: true
+  dotpath: ~/.dotdrop-dotfiles-test/dotfiles
+  keepdot: false
+  link_dotfile_default: nolink
+  link_on_import: nolink
+  longkey: true
+dotfiles:
+profiles:
+_EOF
+
+cd ${ddpath} | ${bin} import -b -c ${cfg} -p test -V ~/.dotdrop.test --as=~/.whatever
+#cat ${cfg}
+
+[ ! -e ~/.dotdrop-dotfiles-test/dotfiles/whatever ] && clean && echo 'tild imported' && exit 1
+cat ${cfg} | grep '~/.whatever' && clean && echo 'import with tild failed' && exit 1
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+clean
 
 echo "OK"
 exit 0
