@@ -193,7 +193,7 @@ def cmd_install(o):
 def cmd_compare(o, tmp):
     """compare dotfiles and return True if all identical"""
     dotfiles = o.dotfiles
-    if dotfiles == []:
+    if not dotfiles:
         msg = 'no dotfile defined for this profile (\"{}\")'
         LOG.warn(msg.format(o.profile))
         return True

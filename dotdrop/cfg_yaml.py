@@ -398,6 +398,9 @@ class CfgYaml:
             return profiles
         new = {}
         for k, v in profiles.items():
+            if not v:
+                # no dotfiles
+                continue
             # add dotfiles entry if not present
             if self.key_profile_dotfiles not in v:
                 v[self.key_profile_dotfiles] = []
