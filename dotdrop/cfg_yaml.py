@@ -818,6 +818,10 @@ class CfgYaml:
             self.dirty = True
         return self.dirty
 
+    def get_all_dotfile_keys(self):
+        """return all existing dotfile keys"""
+        return self.dotfiles.keys()
+
     def add_dotfile(self, key, src, dst, link):
         """add a new dotfile"""
         if key in self.dotfiles.keys():

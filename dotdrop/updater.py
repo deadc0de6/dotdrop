@@ -61,12 +61,21 @@ class Updater:
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
-        dotfile = self.dotfile_dst_getter(path)
-        if not dotfile:
+        dotfiles = self.dotfile_dst_getter(path)
+        if not dotfiles:
             return False
-        if self.debug:
-            self.log.dbg('updating {} from path \"{}\"'.format(dotfile, path))
-        return self._update(path, dotfile)
+        for dotfile in dotfiles:
+            if not dotfile:
+                msg = 'invalid dotfile for update: {}'
+                self.log.err(msg.format(dotfile.key))
+                return False
+
+            if self.debug:
+                msg = 'updating {} from path \"{}\"'
+                self.log.dbg(msg.format(dotfile, path))
+            if not self._update(path, dotfile):
+                return False
+        return True
 
     def update_key(self, key):
         """update the dotfile referenced by key"""
