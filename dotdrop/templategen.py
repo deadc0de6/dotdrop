@@ -148,6 +148,7 @@ class Templategen:
     def _template_loader(self, relpath):
         """manually load template when outside of base"""
         path = os.path.join(self.base, relpath)
+        path = os.path.normpath(path)
         if not os.path.exists(path):
             raise TemplateNotFound(path)
         with open(path, 'r') as f:
