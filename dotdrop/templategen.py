@@ -6,7 +6,8 @@ jinja2 template generator
 """
 
 import os
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, \
+    ChoiceLoader, FunctionLoader, TemplateNotFound
 
 # local imports
 import dotdrop.utils as utils
@@ -35,7 +36,9 @@ class Templategen:
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger()
-        loader = FileSystemLoader(self.base)
+        loader1 = FileSystemLoader(self.base)
+        loader2 = FunctionLoader(self._template_loader)
+        loader = ChoiceLoader([loader1, loader2])
         self.env = Environment(loader=loader,
                                trim_blocks=True, lstrip_blocks=True,
                                keep_trailing_newline=True,
@@ -141,6 +144,16 @@ class Templategen:
         if 'json' in out:
             return True
         return False
+
+    def _template_loader(self, relpath):
+        """manually load template when outside of base"""
+        path = os.path.join(self.base, relpath)
+        path = os.path.normpath(path)
+        if not os.path.exists(path):
+            raise TemplateNotFound(path)
+        with open(path, 'r') as f:
+            content = f.read()
+        return content
 
     def _handle_text_file(self, src):
         """write text to file"""
