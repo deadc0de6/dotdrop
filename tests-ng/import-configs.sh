@@ -99,10 +99,14 @@ dotfiles:
   f_ghi:
     dst: ${tmpd}/ghi
     src: ghi
+  f_asub:
+    dst: ${tmpd}/subdir/sub/asub
+    src: subdir/sub/asub
 profiles:
   p2:
     dotfiles:
     - f_def
+    - f_asub
   psubsub:
     dotfiles:
     - f_sub
@@ -125,6 +129,10 @@ echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/zzz
 echo "sub" > ${tmps}/dotfiles/sub
 echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/sub
 
+mkdir -p ${tmps}/dotfiles-other/subdir/sub
+echo "subsub" > ${tmps}/dotfiles-other/subdir/sub/asub
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles-other/subdir/sub/asub
+
 # install
 cd ${ddpath} | ${bin} files -c ${cfg1} -p p0 -V | grep f_def
 cd ${ddpath} | ${bin} files -c ${cfg1} -p p1 -V | grep f_abc
@@ -134,6 +142,35 @@ cd ${ddpath} | ${bin} files -c ${cfg1} -p pup -V | grep f_sub
 cd ${ddpath} | ${bin} files -c ${cfg1} -p psubsub -V | grep f_sub
 
 # test compare too
+cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V
+cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
+
+# test with non-existing dotpath this time
+rm -rf ${tmps}/dotfiles
+cat > ${cfg1} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_configs:
+  - ${cfg2}
+dotfiles:
+profiles:
+_EOF
+cat > ${cfg2} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles-other
+dotfiles:
+  f_asub:
+    dst: ${tmpd}/subdir/sub/asub
+    src: subdir/sub/asub
+profiles:
+  p2:
+    dotfiles:
+    - f_asub
+_EOF
 cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
 
