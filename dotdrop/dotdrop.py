@@ -16,7 +16,7 @@ from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, remove, strip_home, \
-    run, uniq_list, patch_ignores
+    run, uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException
 
@@ -647,6 +647,13 @@ def main():
 
     if o.debug:
         LOG.dbg('\n\n')
+
+    # check dependencies are met
+    try:
+        dependencies_met()
+    except Exception as e:
+        LOG.err(e)
+        return False
 
     ret = True
     try:
