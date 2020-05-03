@@ -47,6 +47,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
+mkdir -p ${tmps}/dotfiles-other
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
@@ -90,7 +91,7 @@ cat > ${cfg2} << _EOF
 config:
   backup: true
   create: true
-  dotpath: dotfiles
+  dotpath: dotfiles-other
 dotfiles:
   f_def:
     dst: ${tmpd}/def
@@ -110,10 +111,19 @@ _EOF
 # create the source
 mkdir -p ${tmps}/dotfiles/
 echo "abc" > ${tmps}/dotfiles/abc
-echo "def" > ${tmps}/dotfiles/def
-echo "ghi" > ${tmps}/dotfiles/ghi
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/abc
+
+echo "def" > ${tmps}/dotfiles-other/def
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles-other/def
+
+echo "ghi" > ${tmps}/dotfiles-other/ghi
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles-other/ghi
+
 echo "zzz" > ${tmps}/dotfiles/zzz
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/zzz
+
 echo "sub" > ${tmps}/dotfiles/sub
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/sub
 
 # install
 cd ${ddpath} | ${bin} files -c ${cfg1} -p p0 -V | grep f_def
@@ -122,6 +132,10 @@ cd ${ddpath} | ${bin} files -c ${cfg1} -p p2 -V | grep f_def
 cd ${ddpath} | ${bin} files -c ${cfg1} -p p3 -V | grep f_zzz
 cd ${ddpath} | ${bin} files -c ${cfg1} -p pup -V | grep f_sub
 cd ${ddpath} | ${bin} files -c ${cfg1} -p psubsub -V | grep f_sub
+
+# test compare too
+cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V
+cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

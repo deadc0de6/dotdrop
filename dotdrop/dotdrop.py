@@ -209,6 +209,7 @@ def cmd_compare(o, tmp):
     t = Templategen(base=o.dotpath, variables=o.variables,
                     func_file=o.func_file, filter_file=o.filter_file,
                     debug=o.debug)
+    tvars = t.add_tmp_vars()
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
                      workdir=o.workdir, debug=o.debug,
@@ -217,6 +218,11 @@ def cmd_compare(o, tmp):
     comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
 
     for dotfile in selected:
+        # add dotfile variables
+        t.restore_vars(tvars)
+        newvars = dotfile.get_dotfile_variables()
+        t.add_tmp_vars(newvars=newvars)
+
         if o.debug:
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
