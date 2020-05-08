@@ -21,9 +21,11 @@ class Cmd(DictParser):
         """constructor
         @key: action key
         @action: action string
+        @silent: action silent
         """
         self.key = key
         self.action = action
+        self.silent = key.startswith('_')
 
     def execute(self, templater=None, debug=False):
         """execute the command in the shell"""
@@ -53,7 +55,10 @@ class Cmd(DictParser):
             err += ' with \"{}\"'.format(args)
             self.log.warn(err)
             return False
-        self.log.sub('executing \"{}\"'.format(cmd))
+        if self.silent:
+            self.log.sub('executing silent action \"{}\"'.format(self.key))
+        else:
+            self.log.sub('executing \"{}\"'.format(cmd))
         try:
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
