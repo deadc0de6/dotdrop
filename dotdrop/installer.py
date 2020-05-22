@@ -263,7 +263,7 @@ class Installer:
             return True, None
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
-            err = 'creating directory for {}'.format(dst)
+            err = 'error creating directory for {}'.format(dst)
             return False, err
         r, e = self._exec_pre_actions(actionexec)
         if not r:
@@ -465,7 +465,9 @@ class Installer:
     def _create_dirs(self, directory):
         """mkdir -p <directory>"""
         if not self.create and not os.path.exists(directory):
-            return False,
+            if self.debug:
+                self.log.dbg('no mkdir as \"create\" set to false in config')
+            return False
         if os.path.exists(directory):
             return True
         if self.dry:
