@@ -227,7 +227,7 @@ def cmd_compare(o, tmp):
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
         if not os.path.lexists(os.path.expanduser(dotfile.dst)):
-            line = '=> compare {}: \"{}\" does not exist on local'
+            line = '=> compare {}: \"{}\" does not exist on destination'
             LOG.log(line.format(dotfile.key, dotfile.dst))
             same = False
             continue
@@ -421,7 +421,7 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-            cmd = ['cp', '-R', '-L', dst, srcf]
+            cmd = ['cp', '-R', '-L', '-T', dst, srcf]
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:

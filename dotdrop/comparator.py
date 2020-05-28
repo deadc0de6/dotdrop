@@ -79,7 +79,7 @@ class Comparator:
             if must_ignore([os.path.join(left, i)],
                            ignore, debug=self.debug):
                 continue
-            ret.append('=> \"{}\" does not exist on local\n'.format(i))
+            ret.append('=> \"{}\" does not exist on destination\n'.format(i))
 
         # handle files only in dotpath dir
         for i in comp.right_only:

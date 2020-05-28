@@ -90,6 +90,16 @@ nb=`cat ${cfg} | grep d_adir | wc -l`
 nb=`cat ${cfg} | grep f_file3 | wc -l`
 [ "${nb}" != "2" ] && echo 'bad config2' && exit 1
 
+cntpre=`find ${tmps}/dotfiles -type f | wc -l`
+
+# reimport
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/file3
+
+cntpost=`find ${tmps}/dotfiles -type f | wc -l`
+
+[ "${cntpost}" != "${cntpre}" ] && echo "import issue" && exit 1
+
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
 
