@@ -233,3 +233,9 @@ def dependencies_met():
     for dep in deps:
         if not which(dep):
             raise Exception(err.format(dep))
+
+
+def mirror_file_rights(src, dst):
+    """mirror file rights of src to dst (can rise exc)"""
+    rights = os.stat(src).st_mode
+    os.chmod(dst, rights)

@@ -13,7 +13,7 @@ import filecmp
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.utils import patch_ignores, remove, get_unique_tmp_name, \
-    write_to_tmpfile, must_ignore
+    write_to_tmpfile, must_ignore, mirror_file_rights
 
 
 TILD = '~'
@@ -148,6 +148,7 @@ class Updater:
         """provide a way to manually patch the template"""
         content = self._resolve_template(tpath)
         tmp = write_to_tmpfile(content)
+        mirror_file_rights(tpath, tmp)
         cmds = ['diff', '-u', tmp, fpath, '|', 'patch', tpath]
         self.log.warn('try patching with: \"{}\"'.format(' '.join(cmds)))
         return False
@@ -169,8 +170,7 @@ class Updater:
 
     def _mirror_rights(self, src, dst):
         try:
-            rights = os.stat(src).st_mode
-            os.chmod(dst, rights)
+            mirror_file_rights(src, dst)
         except OSError as e:
             self.log.err(e)
 
