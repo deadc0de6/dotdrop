@@ -421,7 +421,8 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-            cmd = ['cp', '-R', '-L', '-T', dst, srcf]
+            dst_with_trailing_slash = os.path.join(dst, '')
+            cmd = ['rsync', '-a', '-L', '--delete', dst_with_trailing_slash, srcf]
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
