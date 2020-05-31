@@ -228,7 +228,7 @@ def get_module_from_path(path):
 
 def dependencies_met():
     """make sure all dependencies are met"""
-    deps = ['file', 'diff', 'mkdir', 'cp']
+    deps = ['file', 'diff', 'mkdir']
     err = 'The tool \"{}\" was not found in the PATH!'
     for dep in deps:
         if not which(dep):
