@@ -426,20 +426,12 @@ def cmd_importer(o):
             if o.dry:
                 LOG.dry('would copy {} to {}'.format(dst, srcf))
             else:
-              if os.path.isdir(dst):
-                if os.path.exists(srcf):
-                  shutil.rmtree(srcf)
-                shutil.copytree(dst, srcf)
-              else:
-                shutil.copy2(dst, srcf)
-            if o.dry:
-                LOG.dry('would run: {}'.format(' '.join(cmd)))
-            else:
-                r, _ = run(cmd, raw=False, debug=o.debug, checkerr=True)
-                if not r:
-                    LOG.err('importing \"{}\" failed!'.format(path))
-                    ret = False
-                    continue
+                if os.path.isdir(dst):
+                    if os.path.exists(srcf):
+                        shutil.rmtree(srcf)
+                    shutil.copytree(dst, srcf)
+                else:
+                    shutil.copy2(dst, srcf)
         retconf = o.conf.new(src, dst, linktype)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
