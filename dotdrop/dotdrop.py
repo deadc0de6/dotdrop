@@ -8,6 +8,8 @@ entry point
 import os
 import sys
 
+import shutil
+
 # local imports
 from dotdrop.options import Options
 from dotdrop.logger import Logger
@@ -421,7 +423,15 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
-            cmd = ['cp', '-R', '-L', '-T', dst, srcf]
+            if o.dry:
+                LOG.dry('would copy {} to {}'.format(dst, srcf))
+            else:
+              if os.path.isdir(dst):
+                if os.path.exists(srcf):
+                  shutil.rmtree(srcf)
+                shutil.copytree(dst, srcf)
+              else:
+                shutil.copy2(dst, srcf)
             if o.dry:
                 LOG.dry('would run: {}'.format(' '.join(cmd)))
             else:
