@@ -114,6 +114,7 @@ class Options(AttrMonitor):
             self.args = docopt(USAGE, version=VERSION)
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
+        self.dry = self.args['--dry']
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False
@@ -180,7 +181,8 @@ class Options(AttrMonitor):
 
     def _read_config(self):
         """read the config file"""
-        self.conf = Cfg(self.confpath, self.profile, debug=self.debug)
+        self.conf = Cfg(self.confpath, self.profile, debug=self.debug,
+                        dry=self.dry)
         # transform the config settings to self attribute
         for k, v in self.conf.get_settings().items():
             if self.debug:
@@ -200,7 +202,6 @@ class Options(AttrMonitor):
         self.cmd_remove = self.args['remove']
 
         # adapt attributes based on arguments
-        self.dry = self.args['--dry']
         self.safe = not self.args['--force']
 
         # import link default value

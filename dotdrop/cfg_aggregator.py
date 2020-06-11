@@ -28,7 +28,7 @@ class CfgAggregator:
     dir_prefix = 'd'
     key_sep = '_'
 
-    def __init__(self, path, profile_key, debug=False):
+    def __init__(self, path, profile_key, debug=False, dry=False):
         """
         high level config parser
         @path: path to the config file
@@ -38,6 +38,7 @@ class CfgAggregator:
         self.path = path
         self.profile_key = profile_key
         self.debug = debug
+        self.dry = dry
         self.log = Logger()
         self._load()
 
@@ -175,8 +176,8 @@ class CfgAggregator:
             msg = 'new dotfile {} to profile {}'
             self.log.dbg(msg.format(key, self.profile_key))
 
-        self.cfgyaml.save()
-        if ret:
+        self.save()
+        if ret and not self.dry:
             # reload
             if self.debug:
                 self.log.dbg('reloading config')
@@ -291,6 +292,8 @@ class CfgAggregator:
 
     def save(self):
         """save the config"""
+        if self.dry:
+            return True
         return self.cfgyaml.save()
 
     def dump(self):
