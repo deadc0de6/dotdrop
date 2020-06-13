@@ -7,6 +7,7 @@ handle lower level of the config file
 
 import os
 import glob
+import io
 from copy import deepcopy
 from itertools import chain
 from ruamel.yaml import YAML as yaml
@@ -942,12 +943,8 @@ class CfgYaml:
     # yaml utils
     ########################################################
 
-    def save(self):
-        """save this instance and return True if saved"""
-        if not self.dirty:
-            return False
-
-        content = self._clear_none(self.dump())
+    def _prepare_to_save(self, content):
+        content = self._clear_none(content)
 
         # make sure we have the base entries
         if self.key_settings not in content:
@@ -956,6 +953,15 @@ class CfgYaml:
             content[self.key_dotfiles] = None
         if self.key_profiles not in content:
             content[self.key_profiles] = None
+
+        return content
+
+    def save(self):
+        """save this instance and return True if saved"""
+        if not self.dirty:
+            return False
+
+        content = self._prepare_to_save(self.yaml_dict)
 
         if self.dirty_deprecated:
             # add minversion
@@ -966,7 +972,8 @@ class CfgYaml:
         if self.debug:
             self.log.dbg('saving to {}'.format(self.path))
         try:
-            self._yaml_dump(content, self.path)
+            with open(self.path, 'w') as f:
+                self._yaml_dump(content, f)
         except Exception as e:
             self.log.err(e)
             raise YamlException('error saving config: {}'.format(self.path))
@@ -982,7 +989,10 @@ class CfgYaml:
 
     def dump(self):
         """dump the config dictionary"""
-        return self.yaml_dict
+        output = io.StringIO()
+        content = self._prepare_to_save(self.yaml_dict.copy())
+        self._yaml_dump(content, output)
+        return output.getvalue()
 
     def _load_yaml(self, path):
         """load a yaml file to a dict"""
@@ -1002,14 +1012,13 @@ class CfgYaml:
             content = y.load(f)
         return content
 
-    def _yaml_dump(self, content, path):
+    def _yaml_dump(self, content, where):
         """dump to yaml"""
-        with open(self.path, 'w') as f:
-            y = yaml()
-            y.default_flow_style = False
-            y.indent = 2
-            y.typ = 'rt'
-            y.dump(content, f)
+        y = yaml()
+        y.default_flow_style = False
+        y.indent = 2
+        y.typ = 'rt'
+        y.dump(content, where)
 
     ########################################################
     # helpers
