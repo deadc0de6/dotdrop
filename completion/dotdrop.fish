@@ -21,18 +21,18 @@ end
 
 # Complete subcommands
 #
-comp_sub -a "install"  -d "Install from dotfiles"
-comp_sub -a "import"   -d "Import from the filesystem into dotdrop"
-comp_sub -a "compare"  -d "Compare local dotfiles with dotdrop"
-comp_sub -a "update"   -d "Update from dotfiles into filesystem"
-comp_sub -a "remove"   -d "Remove a file from the filesystem"
-comp_sub -a "files"    -d "List files managed by dotdrop"
-comp_sub -a "detail"   -d "Details of the selected profile"
+comp_sub -a "install"  -d "Install dotfiles"
+comp_sub -a "import"   -d "Import dotfiles into dotdrop"
+comp_sub -a "compare"  -d "Compare your local dotfiles with managed dotfiles"
+comp_sub -a "update"   -d "Update a managed dotfile"
+comp_sub -a "remove"   -d "Remove a managed dotfile"
+comp_sub -a "files"    -d "List managed dotfiles"
+comp_sub -a "detail"   -d "List managed dotfiles details"
 comp_sub -a "profiles" -d "List available profiles"
 
 # Lone options
 #
-comp_sub -s h -l help 
+comp_sub -s h -l help
 comp_sub -s v -l version
 
 
@@ -55,11 +55,11 @@ comp_opt "$commands"\
 #
 comp_opt "install import update remove detail"\
     -s f -l force\
-    -d "Do not ask user confirmation for anything" 
+    -d "Do not ask user confirmation for anything"
 
 comp_opt "install import  update remove"\
     -s d -l dry\
-    -d "Dry run" 
+    -d "Dry run"
 
 comp_opt "update remove"\
     -s k -l key\
@@ -98,7 +98,7 @@ comp_opt "files profiles"\
 #
 comp_opt "install import compare update remove files detail"\
     -x -s p -l profile\
-    -d "Specify the profile to use [default: "(uname -n)"]" 
+    -d "Specify the profile to use [default: "(uname -n)"]"
 
 comp_opt "compare update"\
     -x -s i -l ignore\
