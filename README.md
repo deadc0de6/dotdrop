@@ -122,7 +122,7 @@ shell (*~/.bashrc*, *~/.zshrc*, etc) with the config file path, for example
 alias dotdrop='<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
-For bash and zsh completion scripts see [the related doc](completion/README.md).
+Completion scripts exist for `bash`, `zsh` and `fish`, see [the related doc](completion/README.md).
 
 # Getting started
 
