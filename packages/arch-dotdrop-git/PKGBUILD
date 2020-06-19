@@ -26,6 +26,6 @@ package() {
   python setup.py install --root="${pkgdir}/" --optimize=1
   install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop-completion.bash "${pkgdir}/usr/share/bash-completion/completions/${_pkgname}"
   install -Dm644 ${srcdir}/${_pkgname}/completion/_dotdrop-completion.zsh "${pkgdir}/usr/share/zsh/site-functions/_${_pkgname}"
-  install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop.fish "${pkgdir}/usr/share/fish/completions/"
+  install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop.fish "${pkgdir}/usr/share/fish/completions/${_pkgname}.fish"
 }
 
