@@ -19,6 +19,31 @@ function comp_opt -a "command"
         $argv[2..-1]
 end
 
+function list_profiles
+    dotdrop profiles \
+        --grepable \
+        --no-banner \
+        2> /dev/null
+end
+
+function list_test_keys -a "test_arg"
+    # Return only dotdrop keys in which the src field matches a test(1) criteria
+    #        ^⌣ ^  ← "Slide Time!!"
+    dotdrop files \
+        --grepable \
+        --no-banner \
+        2> /dev/null |
+    while read line
+        # Single use variable because fish's output capture may change soon
+        set -l dst (echo $line | cut -d, -f2 | cut -d: -f2 )
+        if test $test_arg "$dst"
+            echo $line
+        end
+    end |
+    cut -d, -f1
+end
+
+
 # Complete subcommands
 #
 comp_sub -a "install"  -d "Install dotfiles"
@@ -98,7 +123,8 @@ comp_opt "files profiles"\
 #
 comp_opt "install import compare update remove files detail"\
     -x -s p -l profile\
-    -d "Specify the profile to use [default: "(uname -n)"]"
+    -d "Specify the profile to use [default: "(uname -n)"]"\
+    -a "(list_profiles)"
 
 comp_opt "compare update"\
     -x -s i -l ignore\
@@ -129,12 +155,15 @@ comp_opt "update"\
 comp_opt "remove"\
     -F
 
-# TODO: complete keys
-comp_opt "install"\
-    -f
+comp_opt "install detail"\
+    -f\
+    -d "File"\
+    -a "(list_test_keys -f)"
 
-comp_opt "detail"\
-    -f
+comp_opt "install detail"\
+    -f\
+    -d "Directory"\
+    -a "(list_test_keys -d)"
 
 # dotdrop.sh
 #
