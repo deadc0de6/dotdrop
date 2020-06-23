@@ -47,7 +47,7 @@ def action_executor(o, actions, defactions, templater, post=False):
                                                                  action))
                 continue
             if o.debug:
-                LOG.dbg('executing def-{}-action {}'.format(s, action))
+                LOG.dbg('executing def-{}-action: {}'.format(s, action))
             ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = 'def-{}-action \"{}\" failed'.format(s, action.key)
@@ -60,7 +60,7 @@ def action_executor(o, actions, defactions, templater, post=False):
                 LOG.dry('would execute {}-action: {}'.format(s, action))
                 continue
             if o.debug:
-                LOG.dbg('executing {}-action {}'.format(s, action))
+                LOG.dbg('executing {}-action: {}'.format(s, action))
             ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = '{}-action \"{}\" failed'.format(s, action.key)
@@ -105,7 +105,7 @@ def cmd_install(o):
 
     # execute profile pre-action
     if o.debug:
-        LOG.dbg('execute profile pre actions')
+        LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
     ret, err = action_executor(o, pro_pre_actions, [], t, post=False)()
     if not ret:
         return False
@@ -125,7 +125,8 @@ def cmd_install(o):
                                            t, post=False)
 
         if o.debug:
-            LOG.dbg('installing {}'.format(dotfile))
+            LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
+            LOG.dbg(dotfile.prt())
         if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
             r, err = inst.link(t, dotfile.src, dotfile.dst,
                                actionexec=pre_actions_exec)
@@ -181,10 +182,14 @@ def cmd_install(o):
     # execute profile post-action
     if installed > 0 or o.install_force_action:
         if o.debug:
-            LOG.dbg('execute profile post actions')
+            msg = 'run {} profile post actions'
+            LOG.dbg(msg.format(len(pro_post_actions)))
         ret, err = action_executor(o, pro_post_actions, [], t, post=False)()
         if not ret:
             return False
+
+    if o.debug:
+        LOG.dbg('install done')
 
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
@@ -628,7 +633,7 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
     trans = dotfile.trans_r
     if debug:
-        LOG.dbg('executing transformation {}'.format(trans))
+        LOG.dbg('executing transformation: {}'.format(trans))
     s = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
     if not trans.transform(s, temp, templater=templater, debug=debug):

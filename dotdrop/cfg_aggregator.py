@@ -50,38 +50,36 @@ class CfgAggregator:
 
         # settings
         self.settings = Settings.parse(None, self.cfgyaml.settings)
-        if self.debug:
-            self.log.dbg('settings: {}'.format(self.settings))
 
         # dotfiles
         self.dotfiles = Dotfile.parse_dict(self.cfgyaml.dotfiles)
         if self.debug:
-            self.log.dbg('dotfiles: {}'.format(self.dotfiles))
+            self._debug_list('dotfiles', self.dotfiles)
 
         # profiles
         self.profiles = Profile.parse_dict(self.cfgyaml.profiles)
         if self.debug:
-            self.log.dbg('profiles: {}'.format(self.profiles))
+            self._debug_list('profiles', self.profiles)
 
         # actions
         self.actions = Action.parse_dict(self.cfgyaml.actions)
         if self.debug:
-            self.log.dbg('actions: {}'.format(self.actions))
+            self._debug_list('actions', self.actions)
 
         # trans_r
         self.trans_r = Transform.parse_dict(self.cfgyaml.trans_r)
         if self.debug:
-            self.log.dbg('trans_r: {}'.format(self.trans_r))
+            self._debug_list('trans_r', self.trans_r)
 
         # trans_w
         self.trans_w = Transform.parse_dict(self.cfgyaml.trans_w)
         if self.debug:
-            self.log.dbg('trans_w: {}'.format(self.trans_w))
+            self._debug_list('trans_w', self.trans_w)
 
         # variables
         self.variables = self.cfgyaml.get_variables()
         if self.debug:
-            self.log.dbg('variables: {}'.format(self.variables))
+            self._debug_dict('variables', self.variables)
 
         # patch dotfiles in profiles
         self._patch_keys_to_objs(self.profiles,
@@ -403,3 +401,19 @@ class CfgAggregator:
         path = os.path.expandvars(path)
         path = os.path.abspath(path)
         return path
+
+    def _debug_list(self, title, elems):
+        """pretty print list"""
+        if not self.debug:
+            return
+        self.log.dbg('{}:'.format(title))
+        for e in elems:
+            self.log.dbg('\t- {}'.format(e))
+
+    def _debug_dict(self, title, elems):
+        """pretty print dict"""
+        if not self.debug:
+            return
+        self.log.dbg('{}:'.format(title))
+        for k, v in elems.items():
+            self.log.dbg('\t- \"{}\": {}'.format(k, v))

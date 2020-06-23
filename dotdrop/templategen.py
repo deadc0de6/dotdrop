@@ -69,7 +69,7 @@ class Templategen:
                     self.log.dbg('load custom filters from {}'.format(f))
                 self._load_path_to_dic(f, self.env.filters)
         if self.debug:
-            self.log.dbg('template additional variables: {}'.format(variables))
+            self._debug_dict('template additional variables', variables)
 
     def generate(self, src):
         """render template from path"""
@@ -126,10 +126,10 @@ class Templategen:
                                 raw=False, debug=self.debug)
         filetype = filetype.strip()
         if self.debug:
-            self.log.dbg('\"{}\" filetype: {}'.format(src, filetype))
+            self.log.dbg('filetype \"{}\": {}'.format(src, filetype))
         istext = self._is_text(filetype)
         if self.debug:
-            self.log.dbg('\"{}\" is text: {}'.format(src, istext))
+            self.log.dbg('is text \"{}\": {}'.format(src, istext))
         if not istext:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
@@ -223,3 +223,13 @@ class Templategen:
             if marker in data:
                 return True
         return False
+
+    def _debug_dict(self, title, elems):
+        """pretty print dict"""
+        if not self.debug:
+            return
+        self.log.dbg('{}:'.format(title))
+        if not elems:
+            return
+        for k, v in elems.items():
+            self.log.dbg('  - \"{}\": {}'.format(k, v))

@@ -107,5 +107,36 @@ class Dotfile(DictParser):
         msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
         return msg.format(self.key, self.src, self.dst, str(self.link))
 
+    def prt(self):
+        """extended dotfile to str"""
+        indent = '  '
+        out = 'dotfile: \"{}\"'.format(self.key)
+        out += '\n{}src: \"{}\"'.format(indent, self.src)
+        out += '\n{}dst: \"{}\"'.format(indent, self.dst)
+        out += '\n{}link: \"{}\"'.format(indent, str(self.link))
+
+        out += '\n{}pre-action:'.format(indent)
+        some = self.get_pre_actions()
+        if some:
+            for a in some:
+                out += '\n{}- {}'.format(2 * indent, a)
+
+        out += '\n{}post-action:'.format(indent)
+        some = self.get_post_actions()
+        if some:
+            for a in some:
+                out += '\n{}- {}'.format(2 * indent, a)
+
+        out += '\n{}trans_r:'.format(indent)
+        some = self.get_trans_r()
+        if some:
+            out += '\n{}- {}'.format(2 * indent, some)
+
+        out += '\n{}trans_w:'.format(indent)
+        some = self.get_trans_w()
+        if some:
+            out += '\n{}- {}'.format(2 * indent, some)
+        return out
+
     def __repr__(self):
         return 'dotfile({!s})'.format(self)

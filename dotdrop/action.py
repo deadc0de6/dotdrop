@@ -34,15 +34,19 @@ class Cmd(DictParser):
         if templater:
             action = templater.generate_string(self.action)
             if debug:
-                self.log.dbg('{} \"{}\" -> \"{}\"'.format(self.descr,
-                                                          self.action,
-                                                          action))
+                self.log.dbg('{}:'.format(self.descr))
+                self.log.dbg('  - raw       \"{}\"'.format(self.action))
+                self.log.dbg('  - templated \"{}\"'.format(action))
         cmd = action
         args = []
         if self.args:
             args = self.args
             if templater:
                 args = [templater.generate_string(a) for a in args]
+        if debug and args:
+            self.log.dbg('action args:')
+            for cnt, arg in enumerate(args):
+                self.log.dbg('\targs[{}]: {}'.format(cnt, arg))
         try:
             cmd = action.format(*args)
         except IndexError:
@@ -57,7 +61,11 @@ class Cmd(DictParser):
             return False
         if self.silent:
             self.log.sub('executing silent action \"{}\"'.format(self.key))
+            if debug:
+                self.log.dbg('action cmd silenced')
         else:
+            if debug:
+                self.log.dbg('action cmd: \"{}\"'.format(cmd))
             self.log.sub('executing \"{}\"'.format(cmd))
         try:
             ret = subprocess.call(cmd, shell=True)
@@ -124,8 +132,8 @@ class Action(Cmd):
         return cls(key=key, **v)
 
     def __str__(self):
-        out = '{}: \"{}\" ({})'
-        return out.format(self.key, self.action, self.kind)
+        out = '{}: [{}] \"{}\"'
+        return out.format(self.key, self.kind, self.action)
 
     def __repr__(self):
         return 'action({})'.format(self.__str__())
