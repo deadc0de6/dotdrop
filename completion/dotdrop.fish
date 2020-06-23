@@ -46,14 +46,14 @@ end
 
 # Complete subcommands
 #
-comp_sub -a "install"  -d "Install dotfiles"
-comp_sub -a "import"   -d "Import dotfiles into dotdrop"
-comp_sub -a "compare"  -d "Compare your local dotfiles with managed dotfiles"
-comp_sub -a "update"   -d "Update a managed dotfile"
-comp_sub -a "remove"   -d "Remove a managed dotfile"
-comp_sub -a "files"    -d "List managed dotfiles"
-comp_sub -a "detail"   -d "List managed dotfiles details"
-comp_sub -a "profiles" -d "List available profiles"
+comp_sub -k -a "profiles" -d "List available profiles"
+comp_sub -k -a "detail"   -d "List managed dotfiles details"
+comp_sub -k -a "files"    -d "List managed dotfiles"
+comp_sub -k -a "remove"   -d "Remove a managed dotfile"
+comp_sub -k -a "update"   -d "Update a managed dotfile"
+comp_sub -k -a "compare"  -d "Compare your local dotfiles with managed dotfiles"
+comp_sub -k -a "import"   -d "Import dotfiles into dotdrop"
+comp_sub -k -a "install"  -d "Install dotfiles"
 
 # Lone options
 #
