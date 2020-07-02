@@ -322,15 +322,15 @@ class CfgYaml:
         for k, v in self.profiles.items():
             if self.key_profile_include in v:
                 new = []
-                for k in v[self.key_profile_include]:
-                    new.append(t.generate_string(k))
+                for x in v[self.key_profile_include]:
+                    new.append(t.generate_string(x))
                 v[self.key_profile_include] = new
 
         # now get the included ones
-        pro_var = self._get_included_variables(self.profile,
-                                               seen=[self.profile])
-        pro_dvar = self._get_included_dvariables(self.profile,
-                                                 seen=[self.profile])
+        pro_var = self._get_profile_included_variables(self.profile,
+                                                       seen=[self.profile])
+        pro_dvar = self._get_profile_included_dvariables(self.profile,
+                                                         seen=[self.profile])
         # exec incl dynvariables
         self._shell_exec_dvars(pro_dvar.keys(), pro_dvar)
 
@@ -459,8 +459,8 @@ class CfgYaml:
         variables = deepcopy(self.ori_dvariables)
         return variables
 
-    def _get_included_variables(self, profile, seen):
-        """return included variables"""
+    def _get_profile_included_variables(self, profile, seen):
+        """return included variables from profile"""
         variables = {}
         if not profile or profile not in self.profiles.keys():
             return variables
@@ -473,8 +473,8 @@ class CfgYaml:
             if inherited_profile == profile or inherited_profile in seen:
                 raise YamlException('\"include\" loop')
             seen.append(inherited_profile)
-            new = self._get_included_variables(inherited_profile,
-                                               seen)
+            new = self._get_profile_included_variables(inherited_profile,
+                                                       seen)
             if self.debug:
                 msg = 'included vars from {}: {}'
                 self.log.dbg(msg.format(inherited_profile, new))
@@ -483,8 +483,8 @@ class CfgYaml:
         cur = pentry.get(self.key_profile_variables, {})
         return self._merge_dict(cur, variables)
 
-    def _get_included_dvariables(self, profile, seen):
-        """return included dynvariables"""
+    def _get_profile_included_dvariables(self, profile, seen):
+        """return included dynvariables from profile"""
         variables = {}
 
         if not profile or profile not in self.profiles.keys():
@@ -498,7 +498,8 @@ class CfgYaml:
             if inherited_profile == profile or inherited_profile in seen:
                 raise YamlException('\"include loop\"')
             seen.append(inherited_profile)
-            new = self._get_included_dvariables(inherited_profile, seen)
+            new = self._get_profile_included_dvariables(inherited_profile,
+                                                        seen)
             if self.debug:
                 msg = 'included dvars from {}: {}'
                 self.log.dbg(msg.format(inherited_profile, new))
