@@ -521,21 +521,17 @@ class CfgYaml:
         returns dotfiles, actions, variables, dynvariables
         """
         this_profile = self.profiles[profile]
-        # the profiles included by the selected profile
-        included = []
-        if self.profile and self.profile in self.profiles:
-            included = self.profiles[self.profile] \
-                .get(self.key_profile_include, []) or []
 
         # considered profile content
         dotfiles = this_profile.get(self.key_profile_dotfiles, []) or []
         actions = this_profile.get(self.key_profile_actions, []) or []
         includes = this_profile.get(self.key_profile_include, []) or []
-        pvars = this_profile.get(self.key_profile_variables, []) or []
-        pdvars = this_profile.get(self.key_profile_dvariables, []) or []
+        pvars = this_profile.get(self.key_profile_variables, {}) or {}
+        pdvars = this_profile.get(self.key_profile_dvariables, {}) or {}
         if not includes:
             # nothing to include
             return dotfiles, actions, pvars, pdvars
+
         if self.debug:
             self.log.dbg('{} includes {}'.format(profile, ','.join(includes)))
             self.log.dbg('{} dotfiles before include: {}'.format(profile,
@@ -549,6 +545,10 @@ class CfgYaml:
 
         seen = []
         for i in uniq_list(includes):
+            if self.debug:
+                self.log.dbg('resolving includes "{}" <- "{}"'
+                             .format(profile, i))
+
             # ensure no include loop occurs
             if i in seen:
                 raise YamlException('\"include loop\"')
@@ -559,35 +559,45 @@ class CfgYaml:
                 continue
 
             # recursive resolve
+            if self.debug:
+                self.log.dbg('recursively resolving includes for profile "{}"'
+                             .format(i))
             o_dfs, o_actions, o_v, o_dv = self._rec_resolve_profile_include(i)
 
             # merge dotfile keys
+            if self.debug:
+                self.log.dbg('Merging dotfiles {} <- {}: {} <- {}'
+                             .format(profile, i, dotfiles, o_dfs))
             dotfiles.extend(o_dfs)
             this_profile[self.key_profile_dotfiles] = uniq_list(dotfiles)
 
             # merge actions keys
+            if self.debug:
+                self.log.dbg('Merging actions {} <- {}: {} <- {}'
+                             .format(profile, i, actions, o_actions))
             actions.extend(o_actions)
             this_profile[self.key_profile_actions] = uniq_list(actions)
 
             # merge variables
+            if self.debug:
+                self.log.dbg('Merging variables {} <- {}: {} <- {}'
+                             .format(profile, i, dict(pvars), dict(o_v)))
             pvars = self._merge_dict(o_v, pvars)
             this_profile[self.key_profile_variables] = pvars
 
             # merge dynvariables
+            if self.debug:
+                self.log.dbg('Merging dynamic variables {} <- {}: {} <- {}'
+                             .format(profile, i, dict(pdvars),
+                                     dict(o_dv)))
             pdvars = self._merge_dict(o_dv, pdvars)
-            self._shell_exec_dvars(pdvars.keys(), pdvars)
             this_profile[self.key_profile_dvariables] = pdvars
-
-            if i in included:
-                # only merge variables/dynvariables with the global variables
-                # if the considered profile is included by the selected profile
-                self.variables = self._merge_dict(pvars, self.variables)
-                self.variables = self._merge_dict(pdvars, self.variables)
 
         dotfiles = this_profile.get(self.key_profile_dotfiles, [])
         actions = this_profile.get(self.key_profile_actions, [])
-        pvars = this_profile.get(self.key_profile_variables, []) or []
-        pdvars = this_profile.get(self.key_profile_dvariables, []) or []
+        pvars = this_profile.get(self.key_profile_variables, {}) or {}
+        pdvars = this_profile.get(self.key_profile_dvariables, {}) or {}
+
         if self.debug:
             self.log.dbg('{} dotfiles after include: {}'.format(profile,
                                                                 dotfiles))
@@ -597,6 +607,13 @@ class CfgYaml:
                                                                  pvars))
             self.log.dbg('{} dynvariables after include: {}'.format(profile,
                                                                     pdvars))
+
+        if profile == self.profile:
+            # Only for the selected profile, we execute dynamic variables and
+            # we merge variables/dynvariables into the global variables
+            self._shell_exec_dvars(pdvars.keys(), pdvars)
+            self.variables = self._merge_dict(pvars, self.variables)
+            self.variables = self._merge_dict(pdvars, self.variables)
 
         # since included items are resolved here
         # we can clear these include
