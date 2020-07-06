@@ -117,14 +117,13 @@ echo "{{@@ maindyn @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ subdyn @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ subvar @@}}" >> ${tmps}/dotfiles/abc
 echo "end" >> ${tmps}/dotfiles/abc
-cat ${tmps}/dotfiles/abc
+#cat ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p profile_1 --verbose
 
 # check dotfile exists
 [ ! -e ${tmpd}/abc ] && exit 1
-cat ${tmpd}/abc
 grep 'maincontent' ${tmpd}/abc >/dev/null || (echo "variables 1 not resolved" && exit 1)
 grep 'maindyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 1 not resolved"  && exit 1)
 grep 'subcontent' ${tmpd}/abc >/dev/null || (echo "variables 2 not resolved" && exit 1)
