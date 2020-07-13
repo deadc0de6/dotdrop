@@ -186,7 +186,6 @@ exec bspwm
         o = load_options(confpath, profile)
         o.safe = False
         o.install_showdiff = True
-        o.variables = {}
         cmd_install(o)
 
         # now compare the generated files

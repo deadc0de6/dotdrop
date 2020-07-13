@@ -109,9 +109,11 @@ class Options(AttrMonitor):
         """constructor
         @args: argument dictionary (if None use sys)
         """
-        self.args = args
+        self.args = {}
         if not args:
             self.args = docopt(USAGE, version=VERSION)
+        if args:
+            self.args = args.copy()
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
