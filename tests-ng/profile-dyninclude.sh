@@ -90,6 +90,9 @@ dotfiles:
   f_def:
     dst: ${tmpd}/def
     src: def
+  f_ghi:
+    dst: '${tmpd}/{{@@ ghi @@}}'
+    src: ghi
 variables:
   mainvar: 'bad0'
   subvar: 'bad1'
@@ -100,8 +103,10 @@ profiles:
   subprofile:
     dotfiles:
     - f_abc
+    - f_ghi
     dynvariables:
       subdyn: 'echo subdyncontent'
+      ghi: 'echo ghi'
     variables:
       subvar: 'subcontent'
   subignore:
@@ -118,6 +123,7 @@ echo "{{@@ subdyn @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ subvar @@}}" >> ${tmps}/dotfiles/abc
 echo "end" >> ${tmps}/dotfiles/abc
 #cat ${tmps}/dotfiles/abc
+echo "ghi content" > ${tmps}/dotfiles/ghi
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p profile_1 --verbose
@@ -129,6 +135,7 @@ grep 'maindyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 1 not resolv
 grep 'subcontent' ${tmpd}/abc >/dev/null || (echo "variables 2 not resolved" && exit 1)
 grep 'subdyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 2 not resolved" && exit 1)
 #cat ${tmpd}/abc
+[ ! -e ${tmpd}/ghi] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
