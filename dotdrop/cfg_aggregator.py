@@ -17,6 +17,7 @@ from dotdrop.profile import Profile
 from dotdrop.action import Action, Transform
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home
+from dotdrop.exceptions import UndefinedException
 
 
 TILD = '~'
@@ -281,7 +282,12 @@ class CfgAggregator:
         @src: dotfile src (in dotpath)
         @dst: dotfile dst (on filesystem)
         """
-        src = self.cfgyaml.resolve_dotfile_src(src)
+        try:
+            src = self.cfgyaml.resolve_dotfile_src(src)
+        except UndefinedException as e:
+            err = 'unable to resolve {}: {}'
+            self.log.err(err.format(src, e))
+            return None
         dotfiles = self.get_dotfile_by_dst(dst)
         for d in dotfiles:
             if d.src == src:

@@ -12,6 +12,7 @@ import errno
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
+from dotdrop.exceptions import UndefinedException
 
 
 class Installer:
@@ -325,8 +326,12 @@ class Installer:
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
         saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
-        content = templater.generate(src)
-        templater.restore_vars(saved)
+        try:
+            content = templater.generate(src)
+        except UndefinedException as e:
+            return False, e.message
+        finally:
+            templater.restore_vars(saved)
         if noempty and utils.content_empty(content):
             if self.debug:
                 self.log.dbg('ignoring empty template: {}'.format(src))

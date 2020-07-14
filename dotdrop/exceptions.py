@@ -9,3 +9,8 @@ diverse exceptions
 class YamlException(Exception):
     """exception in CfgYaml"""
     pass
+
+
+class UndefinedException(Exception):
+    """exception in templating"""
+    pass

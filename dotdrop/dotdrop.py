@@ -20,7 +20,7 @@ from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, remove, strip_home, \
     run, uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
-from dotdrop.exceptions import YamlException
+from dotdrop.exceptions import YamlException, UndefinedException
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
@@ -655,7 +655,10 @@ def main():
     try:
         o = Options()
     except YamlException as e:
-        LOG.err('config file error: {}'.format(str(e)))
+        LOG.err('config error: {}'.format(str(e)))
+        return False
+    except UndefinedException as e:
+        LOG.err('config error: {}'.format(str(e)))
         return False
 
     if o.debug:

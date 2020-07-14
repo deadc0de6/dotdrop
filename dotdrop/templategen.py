@@ -9,11 +9,14 @@ import os
 from jinja2 import Environment, FileSystemLoader, \
     ChoiceLoader, FunctionLoader, TemplateNotFound, \
     StrictUndefined
+from jinja2.exceptions import UndefinedError
+
 
 # local imports
 import dotdrop.utils as utils
 from dotdrop.logger import Logger
 import dotdrop.jhelpers as jhelpers
+from dotdrop.exceptions import UndefinedException
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -79,22 +82,28 @@ class Templategen:
     def generate(self, src):
         """
         render template from path
-        may raise a jinja2.exceptions.UndefinedError
+        may raise a UndefinedException
         in case a variable is undefined
         """
         if not os.path.exists(src):
             return ''
-        return self._handle_file(src)
+        try:
+            return self._handle_file(src)
+        except UndefinedError as e:
+            raise UndefinedException(e.message)
 
     def generate_string(self, string):
         """
         render template from string
-        may raise a jinja2.exceptions.UndefinedError
+        may raise a UndefinedException
         in case a variable is undefined
         """
         if not string:
             return ''
-        return self.env.from_string(string).render(self.variables)
+        try:
+            return self.env.from_string(string).render(self.variables)
+        except UndefinedError as e:
+            raise UndefinedException(e.message)
 
     def add_tmp_vars(self, newvars={}):
         """add vars to the globals, make sure to call restore_vars"""
