@@ -329,7 +329,7 @@ class Installer:
         try:
             content = templater.generate(src)
         except UndefinedException as e:
-            return False, e.message
+            return False, str(e)
         finally:
             templater.restore_vars(saved)
         if noempty and utils.content_empty(content):
