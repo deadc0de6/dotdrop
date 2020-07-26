@@ -78,7 +78,7 @@ class CfgAggregator:
             self._debug_list('trans_w', self.trans_w)
 
         # variables
-        self.variables = self.cfgyaml.get_variables()
+        self.variables = self.cfgyaml.variables
         if self.debug:
             self._debug_dict('variables', self.variables)
 
