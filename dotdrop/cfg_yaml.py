@@ -104,14 +104,18 @@ class CfgYaml:
     # 3) "import_configs" variables
     # 4) other variables
     #
+    # variables / dynvariables hints
+    # - dynvariables are executed in their own config file
+    #
     # parse a config file
     # - parse settings
     # - parse variables
     #   - interprete dynvariables
     #   - template the include entries
-    # - parse and integrate included elements (see below)
     # - parse profiles
     # - parse dotfiles
+    # - parse other elements (actions, trans_r, trans_w)
+    # - parse and integrate included elements (see below)
     #
     # parse "include" entry
     # - same as parse config file
@@ -124,7 +128,6 @@ class CfgYaml:
     # - document dvars are executed in their own config file
     # - remove unused functions/methods
     # - coverage
-    # - remove ori_*
     #
 
     def __init__(self, path, profile=None, debug=False):
@@ -142,6 +145,8 @@ class CfgYaml:
         self._dirty = False
         # indicates the config has been updated
         self._dirty_deprecated = False
+        # profile variables
+        self._profilevarskeys = []
 
         # init the dictionaries
         self.settings = {}
@@ -159,53 +164,82 @@ class CfgYaml:
             raise YamlException(err)
 
         self._yaml_dict = self._load_yaml(self._path)
+        # live patch deprecated entries
+        self._fix_deprecated(self._yaml_dict)
+
+        ##################################################
+        # parse the config and variables
+        ##################################################
 
         # parse the "config" block
         self.settings = self._parse_blk_settings(self._yaml_dict)
 
-        # parse the "variables" block
-        self.variables = self._parse_blk_variables(self._yaml_dict)
+        # base templater (when no vars/dvars exist)
+        self.variables = self._enrich_vars(self.variables, self._profile)
         self._redefine_templater()
+
+        # parse the "variables" block
+        var = self._parse_blk_variables(self._yaml_dict)
+        self._add_variables(var, template=False)
 
         # parse the "dynvariables" block
         dvariables = self._parse_blk_dynvariables(self._yaml_dict)
-        self._add_variables(dvariables)
+        self._add_variables(dvariables, shell=True)
 
-        # interprete dynvariables
-        dvariables = self._template_dict(dvariables)
-        dvariables = self._shell_exec_dvars(dvariables)
+        # parse the "profiles" block
+        self.profiles = self._parse_blk_profiles(self._yaml_dict)
 
-        # merge variables and dynvariables
-        self.variables = self._merge_dict(dvariables, self.variables)
-        self._redefine_templater()
+        # include the profile's variables/dynvariables
+        # last as it overwrites existing ones
+        pv, pvd = self._get_profile_included_vars()
+        self._add_variables(pv, prio=True)
+        self._add_variables(pvd, shell=True, prio=True)
+        self._profilevarskeys.extend(pv.keys())
+        self._profilevarskeys.extend(pvd.keys())
+        # TODO handle prio when importing included profile from somewhere else
 
-        # TODO template variables
+        # template variables
         self.variables = self._template_dict(self.variables)
         if self._debug:
             self._debug_dict('variables', self.variables)
 
+        ##################################################
         # template the "include" entries
+        ##################################################
+
         self._template_include_entry()
+
+        ##################################################
+        # parse the other blocks
+        ##################################################
+
+        # parse the "dotfiles" block
+        self.dotfiles = self._parse_blk_dotfiles(self._yaml_dict)
+        # parse the "actions" block
+        self.actions = self._parse_blk_actions(self._yaml_dict)
+        # parse the "trans_r" block
+        self.trans_r = self._parse_blk_trans_r(self._yaml_dict)
+        # parse the "trans_w" block
+        self.trans_w = self._parse_blk_trans_w(self._yaml_dict)
+
+        ##################################################
+        # import elements
+        ##################################################
 
         # process imported variables (import_variables)
         newvars = self._import_variables()
+        self._clear_profile_vars(newvars)
         self._add_variables(newvars)
 
-        # TODO process imported actions (import_actions)
+        # process imported actions (import_actions)
         self._import_actions()
-        # TODO process imported profile dotfiles (import)
+        # process imported profile dotfiles (import)
         self._import_profiles_dotfiles()
-        # TODO process imported configs (import_configs)
+        # process imported configs (import_configs)
         self._import_configs()
 
         # process profile include
         self._resolve_profile_includes()
-
-        # =====
-        # TODO below
-        # ====
-        if self._debug:
-            self._log.dbg('BEFORE normalization: {}'.format(self._yaml_dict))
 
         # resolve variables
         # TODO
@@ -217,32 +251,43 @@ class CfgYaml:
         # process profile ALL
         self._resolve_profile_all()
         # patch dotfiles paths
-        self._resolve_dotfile_paths()
+        self._template_dotfiles_paths()
 
         # TODO ensure no element is left un-templated at the end
 
         if self._debug:
-            self._log.dbg('AFTER normalization: {}'.format(self._yaml_dict))
+            self._log.dbg('########### {} ###########'.format('final config'))
+            self._debug_entries()
 
-    def _add_variables(self, ext_variables):
-        """add new variables from external file"""
+    def _add_variables(self, new, shell=False, template=True, prio=False):
+        """
+        add new variables
+        @shell: execute the variable through the shell
+        @template: template the variable
+        @prio: new takes priority over existing variables
+        """
         # TODO move me
+        if not new:
+            return
         # merge
-        self.variables = self._merge_dict(self.variables, ext_variables)
+        if prio:
+            self.variables = self._merge_dict(new, self.variables)
+        else:
+            self.variables = self._merge_dict(self.variables, new)
         # ensure enriched variables are relative to this config
         self.variables = self._enrich_vars(self.variables, self._profile)
         # re-create the templater
         self._redefine_templater()
-        # rec resolve variables with new ones
-        self.variables = self._template_dict(self.variables)
-
-    def _redefine_templater(self):
-        """create templater based on current variables"""
-        fufile = self.settings[Settings.key_func_file]
-        fifile = self.settings[Settings.key_filter_file]
-        self._tmpl = Templategen(variables=self.variables,
-                                 func_file=fufile,
-                                 filter_file=fifile)
+        if template:
+            # rec resolve variables with new ones
+            self._rec_resolve_variables(self.variables)
+        if self._debug:
+            self._debug_dict('variables', self.variables)
+        if shell:
+            # shell exec
+            self._shell_exec_dvars(self.variables, keys=new.keys())
+            # re-create the templater
+            self._redefine_templater()
 
     ########################################################
     # outside available methods
@@ -307,6 +352,8 @@ class CfgYaml:
             return False
         if self._debug:
             self._log.dbg('adding new dotfile: {}'.format(key))
+            self._log.dbg('new dotfile src: {}'.format(src))
+            self._log.dbg('new dotfile dst: {}'.format(dst))
 
         df_dict = {
             self.key_dotfile_src: src,
@@ -430,33 +477,33 @@ class CfgYaml:
 
     def _parse_blk_dotfiles(self, dic):
         """parse the "dotfiles" block"""
-        self.ori_dotfiles = self._get_entry(dic, self.key_dotfiles)
-        self.dotfiles = deepcopy(self.ori_dotfiles)
-        keys = self.dotfiles.keys()
+        dotfiles = self._get_entry(dic, self.key_dotfiles)
+        keys = dotfiles.keys()
         if len(keys) != len(list(set(keys))):
             dups = [x for x in keys if x not in list(set(keys))]
             err = 'duplicate dotfile keys found: {}'.format(dups)
             raise YamlException(err)
-        self.dotfiles = self._norm_dotfiles(self.dotfiles)
+        dotfiles = self._norm_dotfiles(dotfiles)
         if self._debug:
-            self._debug_dict('dotfiles', self.dotfiles)
+            self._debug_dict('dotfiles', dotfiles)
+        return dotfiles
 
     def _parse_blk_profiles(self, dic):
         """parse the "profiles" block"""
-        self.ori_profiles = self._get_entry(dic, self.key_profiles)
-        self.profiles = deepcopy(self.ori_profiles)
-        self.profiles = self._norm_profiles(self.profiles)
+        profiles = self._get_entry(dic, self.key_profiles)
+        profiles = self._norm_profiles(profiles)
         if self._debug:
-            self._debug_dict('profiles', self.profiles)
+            self._debug_dict('profiles', profiles)
+        return profiles
 
     def _parse_blk_actions(self, dic):
         """parse the "actions" block"""
-        self.ori_actions = self._get_entry(dic, self.key_actions,
-                                           mandatory=False)
-        self.actions = deepcopy(self.ori_actions)
-        self.actions = self._norm_actions(self.actions)
+        actions = self._get_entry(dic, self.key_actions,
+                                  mandatory=False)
+        actions = self._norm_actions(actions)
         if self._debug:
-            self._debug_dict('actions', self.actions)
+            self._debug_dict('actions', actions)
+        return actions
 
     def _parse_blk_trans_r(self, dic):
         """parse the "trans_r" block"""
@@ -466,18 +513,18 @@ class CfgYaml:
             self._log.warn(msg)
             dic[self.key_trans_r] = dic[self.old_key_trans_r]
             del dic[self.old_key_trans_r]
-        self.ori_trans_r = self._get_entry(dic, key, mandatory=False)
-        self.trans_r = deepcopy(self.ori_trans_r)
+        trans_r = self._get_entry(dic, key, mandatory=False)
         if self._debug:
-            self._debug_dict('trans_r', self.trans_r)
+            self._debug_dict('trans_r', trans_r)
+        return trans_r
 
     def _parse_blk_trans_w(self, dic):
         """parse the "trans_w" block"""
-        self.ori_trans_w = self._get_entry(dic, self.key_trans_w,
-                                           mandatory=False)
-        self.trans_w = deepcopy(self.ori_trans_w)
+        trans_w = self._get_entry(dic, self.key_trans_w,
+                                  mandatory=False)
         if self._debug:
-            self._debug_dict('trans_w', self.trans_w)
+            self._debug_dict('trans_w', trans_w)
+        return trans_w
 
     def _parse_blk_variables(self, dic):
         """parse the "variables" block"""
@@ -500,71 +547,13 @@ class CfgYaml:
     ########################################################
     # parsing helpers
     ########################################################
-
-    def _resolve_dotfile_paths(self):
-        """resolve dotfiles paths"""
-        # TODO remove
-        t = Templategen(variables=self.variables,
-                        func_file=self.settings[Settings.key_func_file],
-                        filter_file=self.settings[Settings.key_filter_file])
-
-        for dotfile in self.dotfiles.values():
-            # src
-            src = dotfile[self.key_dotfile_src]
-            newsrc = self.resolve_dotfile_src(src, templater=t)
-            dotfile[self.key_dotfile_src] = newsrc
-            # dst
-            dst = dotfile[self.key_dotfile_dst]
-            newdst = self.resolve_dotfile_dst(dst, templater=t)
-            dotfile[self.key_dotfile_dst] = newdst
-
-    def _rec_resolve_vars(self, variables):
-        """recursive resolve variables"""
-        # TODO remove this and any call
-        default = self._get_variables_dict(self._profile)
-        t = Templategen(variables=self._merge_dict(default, variables),
-                        func_file=self.settings[Settings.key_func_file],
-                        filter_file=self.settings[Settings.key_filter_file])
-        for k in variables.keys():
-            val = variables[k]
-            while Templategen.var_is_template(val):
-                val = t.generate_string(val)
-                variables[k] = val
-                t.update_variables(variables)
-        return variables
-
-    def _get_profile_included_vars(self, tvars):
-        """resolve profile included variables/dynvariables"""
-        # TODO remove
-        t = Templategen(variables=tvars,
-                        func_file=self.settings[Settings.key_func_file],
-                        filter_file=self.settings[Settings.key_filter_file])
-
-        for k, v in self.profiles.items():
-            if self.key_profile_include in v:
-                new = []
-                for x in v[self.key_profile_include]:
-                    new.append(t.generate_string(x))
-                v[self.key_profile_include] = new
-
-        # now get the included ones
-        pro_var = self._get_profile_included_item(self._profile,
-                                                  self.key_profile_variables,
-                                                  seen=[self._profile])
-        pro_dvar = self._get_profile_included_item(self._profile,
-                                                   self.key_profile_dvariables,
-                                                   seen=[self._profile])
-
-        # exec incl dynvariables
-        self._shell_exec_dvars(pro_dvar.keys(), pro_dvar)
-        return pro_var, pro_dvar
-
     def _merge_variables(self):
         """
         resolve all variables across the config
         apply them to any needed entries
         and return the full list of variables
         """
+        # TODO remove me ???
         if self._debug:
             self._log.dbg('get local variables')
 
@@ -587,7 +576,7 @@ class CfgYaml:
             self._debug_dict('variables', merged)
 
         # resolve profile included variables/dynvariables
-        pro_var, pro_dvar = self._get_profile_included_vars(merged)
+        pro_var, pro_dvar = self._get_profile_included_vars()
 
         # merge all and resolve
         merged = self._merge_dict(pro_var, merged)
@@ -706,6 +695,7 @@ class CfgYaml:
 
     def _get_dvariables_dict(self):
         """return dynvariables"""
+        # TODO remove me ??
         variables = deepcopy(self.ori_dvariables)
         return variables
 
@@ -746,7 +736,7 @@ class CfgYaml:
                 v[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
-        # profiles -> include other profile
+        """resolve profile(s) including other profiles"""
         for k, v in self.profiles.items():
             self._rec_resolve_profile_include(k)
 
@@ -768,6 +758,7 @@ class CfgYaml:
         dotfiles = this_profile.get(self.key_profile_dotfiles, []) or []
         actions = this_profile.get(self.key_profile_actions, []) or []
         includes = this_profile.get(self.key_profile_include, []) or []
+        # TODO ignore those as already included through _get_profiles_vars
         pvars = this_profile.get(self.key_profile_variables, {}) or {}
         pdvars = this_profile.get(self.key_profile_dvariables, {}) or {}
         if not includes:
@@ -853,7 +844,7 @@ class CfgYaml:
         if profile == self._profile:
             # Only for the selected profile, we execute dynamic variables and
             # we merge variables/dynvariables into the global variables
-            self._shell_exec_dvars(pdvars.keys(), pdvars)
+            self._shell_exec_dvars(pdvars)
             self.variables = self._merge_dict(pvars, self.variables)
             self.variables = self._merge_dict(pdvars, self.variables)
 
@@ -882,11 +873,15 @@ class CfgYaml:
                 self._log.dbg('import dynvariables from {}'.format(path))
             dvar = self._import_sub(path, self.key_dvariables,
                                     mandatory=False)
+
             merged = self._merge_dict(dvar, var)
-            merged = self._template_dict(merged)
+            self._rec_resolve_variables(merged)
+            if dvar.keys():
+                self._shell_exec_dvars(merged, keys=dvar.keys())
+            self._clear_profile_vars(merged)
             newvars = self._merge_dict(newvars, merged)
-            # TODO needed?
-            # self._clear_profile_vars(merged)
+        if self._debug:
+            self._debug_dict('imported variables', newvars)
         return newvars
 
     def _import_actions(self):
@@ -999,6 +994,8 @@ class CfgYaml:
 
     def _fix_deprecated(self, yamldict):
         """fix deprecated entries"""
+        if not yamldict:
+            return
         self._fix_deprecated_link_by_default(yamldict)
         self._fix_deprecated_dotfile_link(yamldict)
         return yamldict
@@ -1088,8 +1085,7 @@ class CfgYaml:
         except Exception as e:
             self._log.err(e)
             raise YamlException('invalid config: {}'.format(path))
-        # live patch deprecated entries
-        return self._fix_deprecated(content)
+        return content
 
     def _yaml_load(self, path):
         """load from yaml"""
@@ -1108,13 +1104,119 @@ class CfgYaml:
         y.dump(content, where)
 
     ########################################################
+    # templating
+    ########################################################
+
+    def _redefine_templater(self):
+        """create templater based on current variables"""
+        fufile = self.settings[Settings.key_func_file]
+        fifile = self.settings[Settings.key_filter_file]
+        self._tmpl = Templategen(variables=self.variables,
+                                 func_file=fufile,
+                                 filter_file=fifile)
+
+    def _template_item(self, item, exc_if_fail=True):
+        """
+        template an item using the templategen
+        will raise an exception if template failed and exc_if_fail
+        """
+        #  TODO use this across the entire file
+        if not Templategen.var_is_template(item):
+            return item
+        try:
+            val = item
+            while Templategen.var_is_template(val):
+                val = self._tmpl.generate_string(val)
+        except UndefinedException as e:
+            if exc_if_fail:
+                raise e
+        return val
+
+    def _template_list(self, entries):
+        """template a list of entries"""
+        new = []
+        if not entries:
+            return new
+        for e in entries:
+            et = self._template_item(e)
+            if self._debug and e != et:
+                self._log.dbg('resolved: {} -> {}'.format(e, et))
+            new.append(et)
+        return new
+
+    def _template_dict(self, entries):
+        """template a dictionary of entries"""
+        new = {}
+        if not entries:
+            return new
+        for k, v in entries.items():
+            vt = self._template_item(v)
+            if self._debug and v != vt:
+                self._log.dbg('resolved: {} -> {}'.format(v, vt))
+            new[k] = vt
+        return new
+
+    def _template_dotfiles_paths(self):
+        """template dotfiles paths"""
+        for dotfile in self.dotfiles.values():
+            # src
+            src = dotfile[self.key_dotfile_src]
+            newsrc = self.resolve_dotfile_src(src, templater=self._tmpl)
+            dotfile[self.key_dotfile_src] = newsrc
+            # dst
+            dst = dotfile[self.key_dotfile_dst]
+            newdst = self.resolve_dotfile_dst(dst, templater=self._tmpl)
+            dotfile[self.key_dotfile_dst] = newdst
+
+    def _rec_resolve_variables(self, variables):
+        """recursive resolve variables"""
+        var = self._enrich_vars(variables, self._profile)
+        # use a separated templategen to handle variables
+        # resolved outside the main config
+        t = Templategen(variables=var,
+                        func_file=self.settings[Settings.key_func_file],
+                        filter_file=self.settings[Settings.key_filter_file])
+        for k in variables.keys():
+            val = variables[k]
+            while Templategen.var_is_template(val):
+                val = t.generate_string(val)
+                variables[k] = val
+                t.update_variables(variables)
+
+    def _get_profile_included_vars(self):
+        """resolve profile included variables/dynvariables"""
+        for k, v in self.profiles.items():
+            if self.key_profile_include in v:
+                new = []
+                for x in v[self.key_profile_include]:
+                    new.append(self._tmpl.generate_string(x))
+                v[self.key_profile_include] = new
+
+        # now get the included ones
+        pro_var = self._get_profile_included_item(self._profile,
+                                                  self.key_profile_variables,
+                                                  seen=[self._profile])
+        pro_dvar = self._get_profile_included_item(self._profile,
+                                                   self.key_profile_dvariables,
+                                                   seen=[self._profile])
+
+        # exec incl dynvariables
+        return pro_var, pro_dvar
+
+    ########################################################
     # helpers
     ########################################################
 
     def _clear_profile_vars(self, dic):
-        """remove profile variables from dic if found"""
-        # TODO check why this is used at all
-        [dic.pop(k, None) for k in self.prokeys]
+        """
+        remove profile variables from dic if found inplace
+        to avoid profile variables being overwriten
+        """
+        # TODO
+        # [dic.pop(k, None) for k in self.prokeys]
+        if not dic:
+            return
+        [dic.pop(k, None) for k in self._profilevarskeys]
 
     def _parse_extended_import_path(self, path_entry):
         """Parse an import path in a tuple (path, fatal_not_found)."""
@@ -1161,8 +1263,7 @@ class CfgYaml:
         return None
 
     def _process_path(self, path_entry):
-        """Process a path entry to a normalized form.
-
+        """
         This method processed a path entry. Namely it:
         - Normalizes the path.
         - Expands globs.
@@ -1170,11 +1271,6 @@ class CfgYaml:
         This method always returns a list containing only absolute paths
         existing on the filesystem. If the input is not a glob, the list
         contains at most one element, otheriwse it could hold more.
-
-        :param path_entry: A path with an optional attribute.
-        :type path_entry: str
-        :return: A list of normalized existing paths, obtained from the input.
-        :rtype: List of str
         """
         path, fatal_not_found = self._parse_extended_import_path(path_entry)
         path = self._norm_path(path)
@@ -1190,36 +1286,13 @@ class CfgYaml:
         return [p for p in checked_paths if p]
 
     def _resolve_paths(self, paths):
-        """Resolve a list of path to existing paths.
-
+        """
         This function resolves a list of paths. This means normalizing,
         expanding globs and checking for existence, taking in account
         fatal_not_found flags.
-
-        :param paths: A list of paths. Might contain globs and options.
-        :type paths: List of str
-        :return: A list of processed paths.
-        :rtype: List of str
         """
         processed_paths = (self._process_path(p) for p in paths)
         return list(chain.from_iterable(processed_paths))
-
-    def _template_item(self, item, exc_if_fail=True):
-        """
-        template an item using the templategen
-        will raise an exception if template failed and exc_if_fail
-        """
-        #  TODO use this across the entire file
-        if not Templategen.var_is_template(item):
-            return item
-        try:
-            val = item
-            while Templategen.var_is_template(val):
-                val = self._tmpl.generate_string(val)
-        except UndefinedException as e:
-            if exc_if_fail:
-                raise e
-        return val
 
     def _merge_dict(self, high, low):
         """merge high and low dict"""
@@ -1230,16 +1303,16 @@ class CfgYaml:
         return {**low, **high}
 
     def _get_entry(self, dic, key, mandatory=True):
-        """return entry from yaml dictionary"""
+        """return copy of entry from yaml dictionary"""
         if key not in dic:
             if mandatory:
                 raise YamlException('invalid config: no {} found'.format(key))
             dic[key] = {}
-            return dic[key]
+            return deepcopy(dic[key])
         if mandatory and not dic[key]:
             # ensure is not none
             dic[key] = {}
-        return dic[key]
+        return deepcopy(dic[key])
 
     def _clear_none(self, dic):
         """recursively delete all none/empty values in a dictionary."""
@@ -1288,11 +1361,13 @@ class CfgYaml:
             self._log.dbg('normalizing: {} -> {}'.format(path, ret))
         return ret
 
-    def _shell_exec_dvars(self, dic):
-        """shell execute dynvariables"""
+    def _shell_exec_dvars(self, dic, keys=[]):
+        """shell execute dynvariables in-place"""
         # TODO remove other calls outside initial setup of dvars
-        executed = {}
-        for k, v in dic.items():
+        if not keys:
+            keys = dic.keys()
+        for k in keys:
+            v = dic[k]
             ret, out = shell(v, debug=self._debug)
             if not ret:
                 err = 'var \"{}: {}\" failed: {}'.format(k, v, out)
@@ -1300,32 +1375,7 @@ class CfgYaml:
                 raise YamlException(err)
             if self._debug:
                 self._log.dbg('\"{}\": {} -> {}'.format(k, v, out))
-            executed[k] = out
-        return executed
-
-    def _template_list(self, entries):
-        """template a list of entries"""
-        new = []
-        if not entries:
-            return new
-        for e in entries:
-            et = self._template_item(e)
-            if self._debug and e != et:
-                self._log.dbg('resolved: {} -> {}'.format(e, et))
-            new.append(et)
-        return new
-
-    def _template_dict(self, entries):
-        """template a dictionary of entries"""
-        new = {}
-        if not entries:
-            return new
-        for k, v in entries.items():
-            vt = self._template_item(v)
-            if self._debug and v != vt:
-                self._log.dbg('resolved: {} -> {}'.format(v, vt))
-            new[k] = vt
-        return new
+            dic[k] = out
 
     def _check_minversion(self, minversion):
         if not minversion:
@@ -1340,6 +1390,18 @@ class CfgYaml:
             err = 'current dotdrop version is too old for that config file.'
             err += ' Please update.'
             raise YamlException(err)
+
+    def _debug_entries(self):
+        """debug print all interesting entries"""
+        if not self._debug:
+            return
+        self._debug_dict('settings', self.settings)
+        self._debug_dict('dotfiles', self.dotfiles)
+        self._debug_dict('profiles', self.profiles)
+        self._debug_dict('actions', self.actions)
+        self._debug_dict('trans_r', self.trans_r)
+        self._debug_dict('trans_w', self.trans_w)
+        self._debug_dict('variables', self.variables)
 
     def _debug_dict(self, title, elems):
         """pretty print dict"""
