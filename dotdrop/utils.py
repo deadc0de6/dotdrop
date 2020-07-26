@@ -203,9 +203,18 @@ def must_ignore(paths, ignores, debug=False):
         return False
     if debug:
         LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
+    do_not_ignore = []
     for p in paths:
         for i in ignores:
-            if fnmatch.fnmatch(p, i):
+            if i.startswith('!'):
+                i = i[1:]
+                if fnmatch.fnmatch(p, i):
+                    if debug:
+                        LOG.dbg('negative ignore \"{}\" match: {}'.format('!' + i, p))
+                    do_not_ignore.append(p)
+            elif fnmatch.fnmatch(p, i):
+                if p in do_not_ignore:
+                    continue
                 if debug:
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
@@ -229,18 +238,31 @@ def patch_ignores(ignores, prefix, debug=False):
     if debug:
         LOG.dbg('ignores before patching: {}'.format(ignores))
     for ignore in ignores:
+        negative = ignore.startswith('!')
+        if negative:
+            ignore = ignore[1:]
+
         if os.path.isabs(ignore):
             # is absolute
-            new.append(ignore)
+            if negative:
+                new.append('!' + ignore)
+            else:
+                new.append(ignore)
             continue
         if STAR in ignore:
             if ignore.startswith(STAR) or ignore.startswith(os.sep):
                 # is glob
-                new.append(ignore)
+                if negative:
+                    new.append('!' + ignore)
+                else:
+                    new.append(ignore)
                 continue
         # patch ignore
         path = os.path.join(prefix, ignore)
-        new.append(path)
+        if negative:
+            new.append('!' + path)
+        else:
+            new.append(path)
     if debug:
         LOG.dbg('ignores after patching: {}'.format(new))
     return new
