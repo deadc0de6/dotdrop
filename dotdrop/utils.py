@@ -13,6 +13,7 @@ import fnmatch
 import inspect
 import importlib
 import filecmp
+import itertools
 from shutil import rmtree, which
 
 # local import
@@ -203,21 +204,25 @@ def must_ignore(paths, ignores, debug=False):
         return False
     if debug:
         LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
-    do_not_ignore = []
+    ignored_negative, ignored = categorize(lambda ign: ign.startswith('!'), ignores)
     for p in paths:
-        for i in ignores:
-            if i.startswith('!'):
-                i = i[1:]
-                if fnmatch.fnmatch(p, i):
-                    if debug:
-                        LOG.dbg('negative ignore \"{}\" match: {}'.format('!' + i, p))
-                    do_not_ignore.append(p)
-            elif fnmatch.fnmatch(p, i):
-                if p in do_not_ignore:
-                    continue
+        ignore_matches = []
+        # First ignore dotfiles
+        for i in ignored:
+            if fnmatch.fnmatch(p, i):
                 if debug:
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
-                return True
+                ignore_matches.append(p)
+        # Then remove any matches that actually shouldn't be ignored
+        for ni in ignored_negative:
+            # Each of these will start with an '!' so we need to remove that
+            ni = ni[1:]
+            if fnmatch.fnmatch(p, ni):
+                if debug:
+                    LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p))
+                ignore_matches.remove(p)
+        if ignore_matches:
+            return True
     if debug:
         LOG.dbg('NOT ignoring {}'.format(paths))
     return False
@@ -374,3 +379,12 @@ def adapt_workers(options, logger):
     if options.dry and options.workers > 1:
         logger.warn('workers set to 1 when --dry is used')
         options.workers = 1
+
+
+def categorize(function, iterable):
+    """separate an iterable into elements for which
+    function(element) is true for each element and
+    for which function(element) is false for each
+    element"""
+    return tuple(filter(function, iterable)),\
+           tuple(itertools.filterfalse(function, iterable))
