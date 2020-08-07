@@ -104,8 +104,11 @@ class CfgYaml:
     # 3) "import_configs" variables
     # 4) other variables
     #
-    # variables / dynvariables hints
+    # rules:
     # - dynvariables are executed in their own config file
+    # - profile cannot include profiles defined above in the import tree
+    # - config files do not have access to variables
+    #   defined above in the import tree
     #
     # parse a config file
     # - parse settings
@@ -130,11 +133,12 @@ class CfgYaml:
     # - coverage
     #
 
-    def __init__(self, path, profile=None, debug=False):
+    def __init__(self, path, profile=None, addprofiles=[], debug=False):
         """
         config parser
         @path: config file path
         @profile: the selected profile
+        @addprofiles: included profiles
         @debug: debug flag
         """
         self._path = os.path.abspath(path)
@@ -147,6 +151,8 @@ class CfgYaml:
         self._dirty_deprecated = False
         # profile variables
         self._profilevarskeys = []
+        # included profiles
+        self._inc_profiles = addprofiles
 
         # init the dictionaries
         self.settings = {}
@@ -160,7 +166,7 @@ class CfgYaml:
         if not os.path.exists(self._path):
             err = 'invalid config path: \"{}\"'.format(path)
             if self._debug:
-                self._log.dbg(err)
+                self._dbg(err)
             raise YamlException(err)
 
         self._yaml_dict = self._load_yaml(self._path)
@@ -189,9 +195,9 @@ class CfgYaml:
         # parse the "profiles" block
         self.profiles = self._parse_blk_profiles(self._yaml_dict)
 
-        # include the profile's variables/dynvariables
-        # last as it overwrites existing ones
-        pv, pvd = self._get_profile_included_vars()
+        # include the profile's variables/dynvariables last
+        # as it overwrites existing ones
+        self._inc_profiles, pv, pvd = self._get_profile_included_vars()
         self._add_variables(pv, prio=True)
         self._add_variables(pvd, shell=True, prio=True)
         self._profilevarskeys.extend(pv.keys())
@@ -201,13 +207,15 @@ class CfgYaml:
         # template variables
         self.variables = self._template_dict(self.variables)
         if self._debug:
-            self._debug_dict('variables', self.variables)
+            self._debug_dict('current variables defined', self.variables)
 
         ##################################################
         # template the "include" entries
         ##################################################
 
         self._template_include_entry()
+        if self._debug:
+            self._debug_dict('current variables defined', self.variables)
 
         ##################################################
         # parse the other blocks
@@ -241,8 +249,18 @@ class CfgYaml:
         # process profile include
         self._resolve_profile_includes()
 
+        # TODO TODO
+        # add the current profile variables
+        _, pv, pvd = self._get_profile_included_vars()
+        self._add_variables(pv, prio=True)
+        self._add_variables(pvd, shell=True, prio=True)
+        self._profilevarskeys.extend(pv.keys())
+        self._profilevarskeys.extend(pvd.keys())
+
         # resolve variables
         # TODO
+        self._clear_profile_vars(newvars)
+        self._add_variables(newvars)
         # self.variables, self.prokeys = self._merge_variables()
 
         # apply variables
@@ -256,7 +274,7 @@ class CfgYaml:
         # TODO ensure no element is left un-templated at the end
 
         if self._debug:
-            self._log.dbg('########### {} ###########'.format('final config'))
+            self._dbg('########### {} ###########'.format('final config'))
             self._debug_entries()
 
     def _add_variables(self, new, shell=False, template=True, prio=False):
@@ -281,8 +299,6 @@ class CfgYaml:
         if template:
             # rec resolve variables with new ones
             self._rec_resolve_variables(self.variables)
-        if self._debug:
-            self._debug_dict('variables', self.variables)
         if shell:
             # shell exec
             self._shell_exec_dvars(self.variables, keys=new.keys())
@@ -302,7 +318,7 @@ class CfgYaml:
                 new = templater.generate_string(src)
             if new != src and self._debug:
                 msg = 'dotfile src: \"{}\" -> \"{}\"'.format(src, new)
-                self._log.dbg(msg)
+                self._dbg(msg)
             src = new
             src = os.path.join(self.settings[self.key_settings_dotpath],
                                src)
@@ -318,7 +334,7 @@ class CfgYaml:
                 new = templater.generate_string(dst)
             if new != dst and self._debug:
                 msg = 'dotfile dst: \"{}\" -> \"{}\"'.format(dst, new)
-                self._log.dbg(msg)
+                self._dbg(msg)
             dst = new
             newdst = self._norm_path(dst)
         return newdst
@@ -338,7 +354,7 @@ class CfgYaml:
                 msg = 'add \"{}\" to profile \"{}\"'.format(dotfile_key,
                                                             profile_key)
                 msg.format(dotfile_key, profile_key)
-                self._log.dbg(msg)
+                self._dbg(msg)
             self._dirty = True
         return self._dirty
 
@@ -351,9 +367,9 @@ class CfgYaml:
         if key in self.dotfiles.keys():
             return False
         if self._debug:
-            self._log.dbg('adding new dotfile: {}'.format(key))
-            self._log.dbg('new dotfile src: {}'.format(src))
-            self._log.dbg('new dotfile dst: {}'.format(dst))
+            self._dbg('adding new dotfile: {}'.format(key))
+            self._dbg('new dotfile src: {}'.format(src))
+            self._dbg('new dotfile dst: {}'.format(dst))
 
         df_dict = {
             self.key_dotfile_src: src,
@@ -371,11 +387,11 @@ class CfgYaml:
             self._log.err('key not in dotfiles: {}'.format(key))
             return False
         if self._debug:
-            self._log.dbg('remove dotfile: {}'.format(key))
+            self._dbg('remove dotfile: {}'.format(key))
         del self._yaml_dict[self.key_dotfiles][key]
         if self._debug:
             dfs = self._yaml_dict[self.key_dotfiles]
-            self._log.dbg('new dotfiles: {}'.format(dfs))
+            self._dbg('new dotfiles: {}'.format(dfs))
         self._dirty = True
         return True
 
@@ -393,12 +409,12 @@ class CfgYaml:
             return True
         if self._debug:
             dfs = profile[self.key_profile_dotfiles]
-            self._log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
-            self._log.dbg('remove {} from profile {}'.format(df_key, pro_key))
+            self._dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
+            self._dbg('remove {} from profile {}'.format(df_key, pro_key))
         profile[self.key_profile_dotfiles].remove(df_key)
         if self._debug:
             dfs = profile[self.key_profile_dotfiles]
-            self._log.dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
+            self._dbg('{} profile dotfiles: {}'.format(pro_key, dfs))
         self._dirty = True
         return True
 
@@ -416,7 +432,7 @@ class CfgYaml:
 
         # save to file
         if self._debug:
-            self._log.dbg('saving to {}'.format(self._path))
+            self._dbg('saving to {}'.format(self._path))
         try:
             with open(self._path, 'w') as f:
                 self._yaml_dump(content, f)
@@ -472,7 +488,7 @@ class CfgYaml:
         ]
         settings[Settings.key_func_file] = p
         if self._debug:
-            self._debug_dict('settings', settings)
+            self._debug_dict('settings block:', settings)
         return settings
 
     def _parse_blk_dotfiles(self, dic):
@@ -485,7 +501,7 @@ class CfgYaml:
             raise YamlException(err)
         dotfiles = self._norm_dotfiles(dotfiles)
         if self._debug:
-            self._debug_dict('dotfiles', dotfiles)
+            self._debug_dict('dotfiles block', dotfiles)
         return dotfiles
 
     def _parse_blk_profiles(self, dic):
@@ -493,7 +509,7 @@ class CfgYaml:
         profiles = self._get_entry(dic, self.key_profiles)
         profiles = self._norm_profiles(profiles)
         if self._debug:
-            self._debug_dict('profiles', profiles)
+            self._debug_dict('profiles block', profiles)
         return profiles
 
     def _parse_blk_actions(self, dic):
@@ -502,7 +518,7 @@ class CfgYaml:
                                   mandatory=False)
         actions = self._norm_actions(actions)
         if self._debug:
-            self._debug_dict('actions', actions)
+            self._debug_dict('actions block', actions)
         return actions
 
     def _parse_blk_trans_r(self, dic):
@@ -515,7 +531,7 @@ class CfgYaml:
             del dic[self.old_key_trans_r]
         trans_r = self._get_entry(dic, key, mandatory=False)
         if self._debug:
-            self._debug_dict('trans_r', trans_r)
+            self._debug_dict('trans_r block', trans_r)
         return trans_r
 
     def _parse_blk_trans_w(self, dic):
@@ -523,7 +539,7 @@ class CfgYaml:
         trans_w = self._get_entry(dic, self.key_trans_w,
                                   mandatory=False)
         if self._debug:
-            self._debug_dict('trans_w', trans_w)
+            self._debug_dict('trans_w block', trans_w)
         return trans_w
 
     def _parse_blk_variables(self, dic):
@@ -532,7 +548,7 @@ class CfgYaml:
                                     self.key_variables,
                                     mandatory=False)
         if self._debug:
-            self._debug_dict('variables', variables)
+            self._debug_dict('variables block', variables)
         return variables
 
     def _parse_blk_dynvariables(self, dic):
@@ -541,7 +557,7 @@ class CfgYaml:
                                      self.key_dvariables,
                                      mandatory=False)
         if self._debug:
-            self._debug_dict('dynvariables', dvariables)
+            self._debug_dict('dynvariables block', dvariables)
         return dvariables
 
     ########################################################
@@ -555,7 +571,7 @@ class CfgYaml:
         """
         # TODO remove me ???
         if self._debug:
-            self._log.dbg('get local variables')
+            self._dbg('get local variables')
 
         # get all variables from local and resolve
         var = self._get_variables_dict(self._profile)
@@ -572,11 +588,11 @@ class CfgYaml:
         self._shell_exec_dvars(dvar.keys(), merged)
 
         if self._debug:
-            self._log.dbg('local variables resolved')
+            self._dbg('local variables resolved')
             self._debug_dict('variables', merged)
 
         # resolve profile included variables/dynvariables
-        pro_var, pro_dvar = self._get_profile_included_vars()
+        _, pro_var, pro_dvar = self._get_profile_included_vars()
 
         # merge all and resolve
         merged = self._merge_dict(pro_var, merged)
@@ -584,7 +600,7 @@ class CfgYaml:
         merged = self._rec_resolve_vars(merged)
 
         if self._debug:
-            self._log.dbg('resolve all uses of variables in config')
+            self._dbg('resolve all uses of variables in config')
             self._debug_dict('variables', merged)
 
         prokeys = list(pro_var.keys()) + list(pro_dvar.keys())
@@ -699,8 +715,18 @@ class CfgYaml:
         variables = deepcopy(self.ori_dvariables)
         return variables
 
-    def _get_profile_included_item(self, profile, item, seen):
-        """recursively get included <item> from profile"""
+    def _get_profile_included_item(self, keyitem):
+        """recursively get included <keyitem> in profile"""
+        profiles = [self._profile] + self._inc_profiles
+        items = {}
+        for profile in profiles:
+            seen = [self._profile]
+            i = self.__get_profile_included_item(profile, keyitem, seen)
+            items = self._merge_dict(i, items)
+        return items
+
+    def __get_profile_included_item(self, profile, keyitem, seen):
+        """recursively get included <keyitem> from profile"""
         items = {}
         if not profile or profile not in self.profiles.keys():
             return items
@@ -708,19 +734,19 @@ class CfgYaml:
         # considered profile entry
         pentry = self.profiles.get(profile)
 
-        # recursively get <item> from inherited profile
+        # recursively get <keyitem> from inherited profile
         for inherited_profile in pentry.get(self.key_profile_include, []):
             if inherited_profile == profile or inherited_profile in seen:
                 raise YamlException('\"include\" loop')
             seen.append(inherited_profile)
-            new = self._get_profile_included_item(inherited_profile,
-                                                  item, seen)
+            new = self.__get_profile_included_item(inherited_profile,
+                                                   keyitem, seen)
             if self._debug:
                 msg = 'included {} from {}: {}'
-                self._log.dbg(msg.format(item, inherited_profile, new))
+                self._dbg(msg.format(keyitem, inherited_profile, new))
             items.update(new)
 
-        cur = pentry.get(item, {})
+        cur = pentry.get(keyitem, {})
         return self._merge_dict(cur, items)
 
     def _resolve_profile_all(self):
@@ -732,7 +758,7 @@ class CfgYaml:
                 continue
             if self.key_all in dfs:
                 if self._debug:
-                    self._log.dbg('add ALL to profile {}'.format(k))
+                    self._dbg('add ALL to profile {}'.format(k))
                 v[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
@@ -745,12 +771,7 @@ class CfgYaml:
         recursively resolve include of other profiles's:
         * dotfiles
         * actions
-        * variables
-        * dynvariables
-        variables/dynvariables are directly merged with the
-        global variables (self.variables) if these are
-        included in the selected profile
-        returns dotfiles, actions, variables, dynvariables
+        returns dotfiles, actions
         """
         this_profile = self.profiles[profile]
 
@@ -758,29 +779,22 @@ class CfgYaml:
         dotfiles = this_profile.get(self.key_profile_dotfiles, []) or []
         actions = this_profile.get(self.key_profile_actions, []) or []
         includes = this_profile.get(self.key_profile_include, []) or []
-        # TODO ignore those as already included through _get_profiles_vars
-        pvars = this_profile.get(self.key_profile_variables, {}) or {}
-        pdvars = this_profile.get(self.key_profile_dvariables, {}) or {}
         if not includes:
             # nothing to include
-            return dotfiles, actions, pvars, pdvars
+            return dotfiles, actions
 
         if self._debug:
-            self._log.dbg('{} includes {}'.format(profile, ','.join(includes)))
-            self._log.dbg('{} dotfiles before include: {}'.format(profile,
-                                                                  dotfiles))
-            self._log.dbg('{} actions before include: {}'.format(profile,
-                                                                 actions))
-            self._log.dbg('{} variables before include: {}'.format(profile,
-                                                                   pvars))
-            self._log.dbg('{} dynvariables before include: {}'.format(profile,
-                                                                      pdvars))
+            self._dbg('{} includes {}'.format(profile, ','.join(includes)))
+            self._dbg('{} dotfiles before include: {}'.format(profile,
+                                                              dotfiles))
+            self._dbg('{} actions before include: {}'.format(profile,
+                                                             actions))
 
         seen = []
         for i in uniq_list(includes):
             if self._debug:
-                self._log.dbg('resolving includes "{}" <- "{}"'
-                              .format(profile, i))
+                self._dbg('resolving includes "{}" <- "{}"'
+                          .format(profile, i))
 
             # ensure no include loop occurs
             if i in seen:
@@ -793,65 +807,37 @@ class CfgYaml:
 
             # recursive resolve
             if self._debug:
-                self._log.dbg('recursively resolving includes for profile "{}"'
-                              .format(i))
-            o_dfs, o_actions, o_v, o_dv = self._rec_resolve_profile_include(i)
+                self._dbg('recursively resolving includes for profile "{}"'
+                          .format(i))
+            o_dfs, o_actions = self._rec_resolve_profile_include(i)
 
             # merge dotfile keys
             if self._debug:
-                self._log.dbg('Merging dotfiles {} <- {}: {} <- {}'
-                              .format(profile, i, dotfiles, o_dfs))
+                self._dbg('Merging dotfiles {} <- {}: {} <- {}'
+                          .format(profile, i, dotfiles, o_dfs))
             dotfiles.extend(o_dfs)
             this_profile[self.key_profile_dotfiles] = uniq_list(dotfiles)
 
             # merge actions keys
             if self._debug:
-                self._log.dbg('Merging actions {} <- {}: {} <- {}'
-                              .format(profile, i, actions, o_actions))
+                self._dbg('Merging actions {} <- {}: {} <- {}'
+                          .format(profile, i, actions, o_actions))
             actions.extend(o_actions)
             this_profile[self.key_profile_actions] = uniq_list(actions)
 
-            # merge variables
-            if self._debug:
-                self._log.dbg('Merging variables {} <- {}: {} <- {}'
-                              .format(profile, i, dict(pvars), dict(o_v)))
-            pvars = self._merge_dict(o_v, pvars)
-            this_profile[self.key_profile_variables] = pvars
-
-            # merge dynvariables
-            if self._debug:
-                self._log.dbg('Merging dynamic variables {} <- {}: {} <- {}'
-                              .format(profile, i, dict(pdvars),
-                                      dict(o_dv)))
-            pdvars = self._merge_dict(o_dv, pdvars)
-            this_profile[self.key_profile_dvariables] = pdvars
-
         dotfiles = this_profile.get(self.key_profile_dotfiles, [])
         actions = this_profile.get(self.key_profile_actions, [])
-        pvars = this_profile.get(self.key_profile_variables, {}) or {}
-        pdvars = this_profile.get(self.key_profile_dvariables, {}) or {}
 
         if self._debug:
-            self._log.dbg('{} dotfiles after include: {}'.format(profile,
-                                                                 dotfiles))
-            self._log.dbg('{} actions after include: {}'.format(profile,
-                                                                actions))
-            self._log.dbg('{} variables after include: {}'.format(profile,
-                                                                  pvars))
-            self._log.dbg('{} dynvariables after include: {}'.format(profile,
-                                                                     pdvars))
-
-        if profile == self._profile:
-            # Only for the selected profile, we execute dynamic variables and
-            # we merge variables/dynvariables into the global variables
-            self._shell_exec_dvars(pdvars)
-            self.variables = self._merge_dict(pvars, self.variables)
-            self.variables = self._merge_dict(pdvars, self.variables)
+            self._dbg('{} dotfiles after include: {}'.format(profile,
+                                                             dotfiles))
+            self._dbg('{} actions after include: {}'.format(profile,
+                                                            actions))
 
         # since included items are resolved here
         # we can clear these include
-        self.profiles[profile][self.key_profile_include] = None
-        return dotfiles, actions, pvars, pdvars
+        self.profiles[profile][self.key_profile_include] = []
+        return dotfiles, actions
 
     ########################################################
     # handle imported entries
@@ -866,11 +852,11 @@ class CfgYaml:
         newvars = {}
         for path in paths:
             if self._debug:
-                self._log.dbg('import variables from {}'.format(path))
+                self._dbg('import variables from {}'.format(path))
             var = self._import_sub(path, self.key_variables,
                                    mandatory=False)
             if self._debug:
-                self._log.dbg('import dynvariables from {}'.format(path))
+                self._dbg('import dynvariables from {}'.format(path))
             dvar = self._import_sub(path, self.key_dvariables,
                                     mandatory=False)
 
@@ -892,7 +878,7 @@ class CfgYaml:
         paths = self._resolve_paths(paths)
         for path in paths:
             if self._debug:
-                self._log.dbg('import actions from {}'.format(path))
+                self._dbg('import actions from {}'.format(path))
             new = self._import_sub(path, self.key_actions,
                                    mandatory=False,
                                    patch_func=self._norm_actions)
@@ -905,7 +891,7 @@ class CfgYaml:
             if not imp:
                 continue
             if self._debug:
-                self._log.dbg('import dotfiles for profile {}'.format(k))
+                self._dbg('import dotfiles for profile {}'.format(k))
             paths = self._resolve_paths(imp)
             for path in paths:
                 current = v.get(self.key_dotfiles, [])
@@ -916,8 +902,10 @@ class CfgYaml:
     def _import_config(self, path):
         """import config from path"""
         if self._debug:
-            self._log.dbg('import config from {}'.format(path))
-        sub = CfgYaml(path, profile=self._profile, debug=self._debug)
+            self._dbg('import config from {}'.format(path))
+        sub = CfgYaml(path, profile=self._profile,
+                      addprofiles=self._inc_profiles,
+                      debug=self._debug)
 
         # settings are ignored from external file
         # except for filter_file and func_file
@@ -958,19 +946,19 @@ class CfgYaml:
         patch_func is applied to each element if defined
         """
         if self._debug:
-            self._log.dbg('import \"{}\" from \"{}\"'.format(key, path))
+            self._dbg('import \"{}\" from \"{}\"'.format(key, path))
         extdict = self._load_yaml(path)
         new = self._get_entry(extdict, key, mandatory=mandatory)
         if patch_func:
             if self._debug:
-                self._log.dbg('calling patch: {}'.format(patch_func))
+                self._dbg('calling patch: {}'.format(patch_func))
             new = patch_func(new)
         if not new and mandatory:
             err = 'no \"{}\" imported from \"{}\"'.format(key, path)
             self._log.warn(err)
             raise YamlException(err)
         if self._debug:
-            self._log.dbg('imported \"{}\": {}'.format(key, new))
+            self._dbg('imported \"{}\": {}'.format(key, new))
         return new
 
     ########################################################
@@ -985,7 +973,7 @@ class CfgYaml:
                 self.key_profile_dotfiles: []
             }
             if self._debug:
-                self._log.dbg('adding new profile: {}'.format(key))
+                self._dbg('adding new profile: {}'.format(key))
             self._dirty = True
 
     ########################################################
@@ -1073,13 +1061,13 @@ class CfgYaml:
         """load a yaml file to a dict"""
         content = {}
         if self._debug:
-            self._log.dbg('----------start:{}----------'.format(path))
+            self._dbg('----------start:{}----------'.format(path))
             cfg = '\n'
             with open(path, 'r') as f:
                 for line in f:
                     cfg += line
-            self._log.dbg(cfg.rstrip())
-            self._log.dbg('----------end:{}----------'.format(path))
+            self._dbg(cfg.rstrip())
+            self._dbg('----------end:{}----------'.format(path))
         try:
             content = self._yaml_load(path)
         except Exception as e:
@@ -1140,7 +1128,7 @@ class CfgYaml:
         for e in entries:
             et = self._template_item(e)
             if self._debug and e != et:
-                self._log.dbg('resolved: {} -> {}'.format(e, et))
+                self._dbg('resolved: {} -> {}'.format(e, et))
             new.append(et)
         return new
 
@@ -1152,7 +1140,7 @@ class CfgYaml:
         for k, v in entries.items():
             vt = self._template_item(v)
             if self._debug and v != vt:
-                self._log.dbg('resolved: {} -> {}'.format(v, vt))
+                self._dbg('resolved: {} -> {}'.format(v, vt))
             new[k] = vt
         return new
 
@@ -1186,22 +1174,24 @@ class CfgYaml:
     def _get_profile_included_vars(self):
         """resolve profile included variables/dynvariables"""
         for k, v in self.profiles.items():
-            if self.key_profile_include in v:
+            if self.key_profile_include in v and v[self.key_profile_include]:
                 new = []
                 for x in v[self.key_profile_include]:
                     new.append(self._tmpl.generate_string(x))
                 v[self.key_profile_include] = new
 
         # now get the included ones
-        pro_var = self._get_profile_included_item(self._profile,
-                                                  self.key_profile_variables,
-                                                  seen=[self._profile])
-        pro_dvar = self._get_profile_included_item(self._profile,
-                                                   self.key_profile_dvariables,
-                                                   seen=[self._profile])
+        pro_var = self._get_profile_included_item(self.key_profile_variables)
+        pro_dvar = self._get_profile_included_item(self.key_profile_dvariables)
+
+        # the included profiles
+        inc_profiles = []
+        if self._profile and self._profile in self.profiles.keys():
+            pentry = self.profiles.get(self._profile)
+            inc_profiles = pentry.get(self.key_profile_include, [])
 
         # exec incl dynvariables
-        return pro_var, pro_dvar
+        return inc_profiles, pro_var, pro_dvar
 
     ########################################################
     # helpers
@@ -1221,7 +1211,7 @@ class CfgYaml:
     def _parse_extended_import_path(self, path_entry):
         """Parse an import path in a tuple (path, fatal_not_found)."""
         if self._debug:
-            self._log.dbg('parsing path entry {}'.format(path_entry))
+            self._dbg('parsing path entry {}'.format(path_entry))
 
         path, _, attribute = path_entry.rpartition(self.key_import_sep)
         fatal_not_found = attribute != self.key_import_ignore_key
@@ -1235,13 +1225,13 @@ class CfgYaml:
             #   str.rpartition
             # In both cases, path_entry is the path we're looking for.
             if self._debug:
-                self._log.dbg('using attribute default values for path {}'
-                              .format(path_entry))
+                self._dbg('using attribute default values for path {}'
+                          .format(path_entry))
             path = path_entry
             fatal_not_found = self.key_import_fatal_not_found
         elif self._debug:
-            self._log.dbg('path entry {} has fatal_not_found flag set to {}'
-                          .format(path_entry, fatal_not_found))
+            self._dbg('path entry {} has fatal_not_found flag set to {}'
+                      .format(path_entry, fatal_not_found))
         return path, fatal_not_found
 
     def _handle_non_existing_path(self, path, fatal_not_found=True):
@@ -1255,7 +1245,7 @@ class CfgYaml:
         """Check if a path exists, raising if necessary."""
         if os.path.exists(path):
             if self._debug:
-                self._log.dbg('path {} exists'.format(path))
+                self._dbg('path {} exists'.format(path))
             return path
 
         self._handle_non_existing_path(path, fatal_not_found)
@@ -1277,7 +1267,7 @@ class CfgYaml:
         paths = self._glob_path(path) if self._is_glob(path) else [path]
         if not paths:
             if self._debug:
-                self._log.dbg("glob path {} didn't expand".format(path))
+                self._dbg("glob path {} didn't expand".format(path))
             self._handle_non_existing_path(path, fatal_not_found)
             return []
 
@@ -1340,7 +1330,7 @@ class CfgYaml:
     def _glob_path(self, path):
         """Expand a glob."""
         if self._debug:
-            self._log.dbg('expanding glob {}'.format(path))
+            self._dbg('expanding glob {}'.format(path))
         expanded_path = os.path.expanduser(path)
         return glob.glob(expanded_path, recursive=True)
 
@@ -1354,11 +1344,11 @@ class CfgYaml:
             ret = os.path.join(d, path)
             if self._debug:
                 msg = 'normalizing relative to cfg: {} -> {}'
-                self._log.dbg(msg.format(path, ret))
+                self._dbg(msg.format(path, ret))
             return ret
         ret = os.path.normpath(path)
         if self._debug and path != ret:
-            self._log.dbg('normalizing: {} -> {}'.format(path, ret))
+            self._dbg('normalizing: {} -> {}'.format(path, ret))
         return ret
 
     def _shell_exec_dvars(self, dic, keys=[]):
@@ -1374,7 +1364,7 @@ class CfgYaml:
                 self._log.err(err)
                 raise YamlException(err)
             if self._debug:
-                self._log.dbg('\"{}\": {} -> {}'.format(k, v, out))
+                self._dbg('\"{}\": {} -> {}'.format(k, v, out))
             dic[k] = out
 
     def _check_minversion(self, minversion):
@@ -1391,24 +1381,37 @@ class CfgYaml:
             err += ' Please update.'
             raise YamlException(err)
 
+    def _profile_yes(self, profile):
+        """returns True if the profile is to be considered"""
+        if profile == self._profile:
+            return True
+        if profile in self._inc_profiles:
+            return True
+        return False
+
     def _debug_entries(self):
         """debug print all interesting entries"""
         if not self._debug:
             return
-        self._debug_dict('settings', self.settings)
-        self._debug_dict('dotfiles', self.dotfiles)
-        self._debug_dict('profiles', self.profiles)
-        self._debug_dict('actions', self.actions)
-        self._debug_dict('trans_r', self.trans_r)
-        self._debug_dict('trans_w', self.trans_w)
-        self._debug_dict('variables', self.variables)
+        self._dbg('Current entries')
+        self._debug_dict('entry settings', self.settings)
+        self._debug_dict('entry dotfiles', self.dotfiles)
+        self._debug_dict('entry profiles', self.profiles)
+        self._debug_dict('entry actions', self.actions)
+        self._debug_dict('entry trans_r', self.trans_r)
+        self._debug_dict('entry trans_w', self.trans_w)
+        self._debug_dict('entry variables', self.variables)
 
     def _debug_dict(self, title, elems):
         """pretty print dict"""
         if not self._debug:
             return
-        self._log.dbg('{}:'.format(title))
+        self._dbg('{}:'.format(title))
         if not elems:
             return
         for k, v in elems.items():
-            self._log.dbg('\t- \"{}\": {}'.format(k, v))
+            self._dbg('\t- \"{}\": {}'.format(k, v))
+
+    def _dbg(self, content):
+        pre = os.path.basename(self._path)
+        self._log.dbg('[{}] {}'.format(pre, content))
