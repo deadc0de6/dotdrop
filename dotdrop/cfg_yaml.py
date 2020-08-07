@@ -261,7 +261,6 @@ class CfgYaml:
         # TODO
         self._clear_profile_vars(newvars)
         self._add_variables(newvars)
-        # self.variables, self.prokeys = self._merge_variables()
 
         # apply variables
         # self._apply_variables()
@@ -563,49 +562,6 @@ class CfgYaml:
     ########################################################
     # parsing helpers
     ########################################################
-    def _merge_variables(self):
-        """
-        resolve all variables across the config
-        apply them to any needed entries
-        and return the full list of variables
-        """
-        # TODO remove me ???
-        if self._debug:
-            self._dbg('get local variables')
-
-        # get all variables from local and resolve
-        var = self._get_variables_dict(self._profile)
-
-        # get all dynvariables from local and resolve
-        dvar = self._get_dvariables_dict()
-
-        # temporarly resolve all variables for "include"
-        merged = self._merge_dict(dvar, var)
-        merged = self._rec_resolve_vars(merged)
-        if self._debug:
-            self._debug_dict('variables', merged)
-        # exec dynvariables
-        self._shell_exec_dvars(dvar.keys(), merged)
-
-        if self._debug:
-            self._dbg('local variables resolved')
-            self._debug_dict('variables', merged)
-
-        # resolve profile included variables/dynvariables
-        _, pro_var, pro_dvar = self._get_profile_included_vars()
-
-        # merge all and resolve
-        merged = self._merge_dict(pro_var, merged)
-        merged = self._merge_dict(pro_dvar, merged)
-        merged = self._rec_resolve_vars(merged)
-
-        if self._debug:
-            self._dbg('resolve all uses of variables in config')
-            self._debug_dict('variables', merged)
-
-        prokeys = list(pro_var.keys()) + list(pro_dvar.keys())
-        return merged, prokeys
-
     def _template_include_entry(self):
         """template all "include" entries"""
         # import_actions
@@ -707,12 +663,6 @@ class CfgYaml:
         p = self.settings.get(self.key_settings_workdir)
         p = self._norm_path(p)
         variables['_dotdrop_workdir'] = p
-        return variables
-
-    def _get_dvariables_dict(self):
-        """return dynvariables"""
-        # TODO remove me ??
-        variables = deepcopy(self.ori_dvariables)
         return variables
 
     def _get_profile_included_item(self, keyitem):
