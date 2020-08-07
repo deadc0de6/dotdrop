@@ -128,9 +128,6 @@ class CfgYaml:
     # - properly handle the included profile
     # - document precedence in wiki
     # - document parsing in CONTRIBUTING.md
-    # - document dvars are executed in their own config file
-    # - remove unused functions/methods
-    # - coverage
     #
 
     def __init__(self, path, profile=None, addprofiles=[], debug=False):
@@ -202,7 +199,6 @@ class CfgYaml:
         self._add_variables(pvd, shell=True, prio=True)
         self._profilevarskeys.extend(pv.keys())
         self._profilevarskeys.extend(pvd.keys())
-        # TODO handle prio when importing included profile from somewhere else
 
         # template variables
         self.variables = self._template_dict(self.variables)
@@ -249,7 +245,6 @@ class CfgYaml:
         # process profile include
         self._resolve_profile_includes()
 
-        # TODO TODO
         # add the current profile variables
         _, pv, pvd = self._get_profile_included_vars()
         self._add_variables(pv, prio=True)
@@ -258,51 +253,17 @@ class CfgYaml:
         self._profilevarskeys.extend(pvd.keys())
 
         # resolve variables
-        # TODO
         self._clear_profile_vars(newvars)
         self._add_variables(newvars)
-
-        # apply variables
-        # self._apply_variables()
 
         # process profile ALL
         self._resolve_profile_all()
         # patch dotfiles paths
         self._template_dotfiles_paths()
 
-        # TODO ensure no element is left un-templated at the end
-
         if self._debug:
             self._dbg('########### {} ###########'.format('final config'))
             self._debug_entries()
-
-    def _add_variables(self, new, shell=False, template=True, prio=False):
-        """
-        add new variables
-        @shell: execute the variable through the shell
-        @template: template the variable
-        @prio: new takes priority over existing variables
-        """
-        # TODO move me
-        if not new:
-            return
-        # merge
-        if prio:
-            self.variables = self._merge_dict(new, self.variables)
-        else:
-            self.variables = self._merge_dict(self.variables, new)
-        # ensure enriched variables are relative to this config
-        self.variables = self._enrich_vars(self.variables, self._profile)
-        # re-create the templater
-        self._redefine_templater()
-        if template:
-            # rec resolve variables with new ones
-            self._rec_resolve_variables(self.variables)
-        if shell:
-            # shell exec
-            self._shell_exec_dvars(self.variables, keys=new.keys())
-            # re-create the templater
-            self._redefine_templater()
 
     ########################################################
     # outside available methods
@@ -649,6 +610,33 @@ class CfgYaml:
                 val = self.settings.get(self.key_settings_noempty, False)
                 v[self.key_dotfile_noempty] = val
         return new
+
+    def _add_variables(self, new, shell=False, template=True, prio=False):
+        """
+        add new variables
+        @shell: execute the variable through the shell
+        @template: template the variable
+        @prio: new takes priority over existing variables
+        """
+        if not new:
+            return
+        # merge
+        if prio:
+            self.variables = self._merge_dict(new, self.variables)
+        else:
+            self.variables = self._merge_dict(self.variables, new)
+        # ensure enriched variables are relative to this config
+        self.variables = self._enrich_vars(self.variables, self._profile)
+        # re-create the templater
+        self._redefine_templater()
+        if template:
+            # rec resolve variables with new ones
+            self._rec_resolve_variables(self.variables)
+        if shell:
+            # shell exec
+            self._shell_exec_dvars(self.variables, keys=new.keys())
+            # re-create the templater
+            self._redefine_templater()
 
     def _enrich_vars(self, variables, profile):
         """return enriched variables"""
@@ -1058,7 +1046,6 @@ class CfgYaml:
         template an item using the templategen
         will raise an exception if template failed and exc_if_fail
         """
-        #  TODO use this across the entire file
         if not Templategen.var_is_template(item):
             return item
         try:
@@ -1152,8 +1139,6 @@ class CfgYaml:
         remove profile variables from dic if found inplace
         to avoid profile variables being overwriten
         """
-        # TODO
-        # [dic.pop(k, None) for k in self.prokeys]
         if not dic:
             return
         [dic.pop(k, None) for k in self._profilevarskeys]
@@ -1303,7 +1288,6 @@ class CfgYaml:
 
     def _shell_exec_dvars(self, dic, keys=[]):
         """shell execute dynvariables in-place"""
-        # TODO remove other calls outside initial setup of dvars
         if not keys:
             keys = dic.keys()
         for k in keys:
