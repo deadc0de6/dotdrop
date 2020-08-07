@@ -37,16 +37,20 @@ PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m pytest tests
 
 # enable debug logs
-#export DOTDROP_DEBUG=
-#unset DOTDROP_FORCE_NODEBUG
+export DOTDROP_DEBUG=
+unset DOTDROP_FORCE_NODEBUG
 # do not print debugs when running tests (faster)
-export DOTDROP_FORCE_NODEBUG=yes
+#export DOTDROP_FORCE_NODEBUG=yes
 
 ## execute bash script tests
 [ "$1" = '--python-only' ] || {
   log=`mktemp`
   for scr in tests-ng/*.sh; do
-    ${scr} > "${log}" 2>&1 &
+    if [ -z ${TRAVIS} ]; then
+      ${scr} > "${log}" 2>&1 &
+    else
+      ${scr} > "${log}" 2>&1 >/dev/null &
+    fi
     tail --pid="$!" -f "${log}"
     set +e
     wait "$!"
