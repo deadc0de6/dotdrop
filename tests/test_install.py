@@ -362,8 +362,8 @@ exec bspwm
         src = '/some/non/existant/file'
 
         installer = Installer()
-        logger = MagicMock()
-        installer.log.err = logger
+        # logger = MagicMock()
+        # installer.log.err = logger
 
         res, err = installer.link_children(templater=MagicMock(), src=src,
                                            dst='/dev/null', actionexec=None)
@@ -381,10 +381,10 @@ exec bspwm
 
         src = create_random_file(src_dir)[0]
 
-        logger = MagicMock()
+        # logger = MagicMock()
         templater = MagicMock()
         installer = Installer()
-        installer.log.err = logger
+        # installer.log.err = logger
 
         # pass src file not src dir
         res, err = installer.link_children(templater=templater, src=src,
