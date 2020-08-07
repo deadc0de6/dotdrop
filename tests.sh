@@ -49,7 +49,7 @@ unset DOTDROP_FORCE_NODEBUG
     if [ -z ${TRAVIS} ]; then
       ${scr} > "${log}" 2>&1 &
     else
-      ${scr} > "${log}" 2>&1 >/dev/null &
+      ${scr} > "${log}" >/dev/null 2>&1 &
     fi
     tail --pid="$!" -f "${log}"
     set +e
