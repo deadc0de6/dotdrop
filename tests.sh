@@ -25,10 +25,20 @@ which ${nosebin} 2>/dev/null
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
 set -e
 
+# do not print debugs when running tests (faster)
+export DOTDROP_FORCE_NODEBUG=yes
+
+# coverage file location
+cur=`dirname $(readlink -f "${0}")`
+export COVERAGE_FILE="${cur}/.coverage"
+
 # execute tests with coverage
 PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m pytest tests
 
+# enable debug logs
+export DOTDROP_DEBUG=
+unset DOTDROP_FORCE_NODEBUG
 # do not print debugs when running tests (faster)
 #export DOTDROP_FORCE_NODEBUG=yes
 
