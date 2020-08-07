@@ -25,12 +25,12 @@ which ${nosebin} 2>/dev/null
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
 set -e
 
-# do not print debugs when running tests (faster)
-export DOTDROP_FORCE_NODEBUG=yes
-
 # execute tests with coverage
 PYTHONPATH=dotdrop ${nosebin} -s --with-coverage --cover-package=dotdrop
 #PYTHONPATH=dotdrop python3 -m pytest tests
+
+# do not print debugs when running tests (faster)
+#export DOTDROP_FORCE_NODEBUG=yes
 
 ## execute bash script tests
 [ "$1" = '--python-only' ] || {
