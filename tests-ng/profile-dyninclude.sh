@@ -135,7 +135,7 @@ grep 'maindyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 1 not resolv
 grep 'subcontent' ${tmpd}/abc >/dev/null || (echo "variables 2 not resolved" && exit 1)
 grep 'subdyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 2 not resolved" && exit 1)
 #cat ${tmpd}/abc
-[ ! -e ${tmpd}/ghi] && exit 1
+[ ! -e ${tmpd}/ghi ] && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
