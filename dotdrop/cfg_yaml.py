@@ -1274,14 +1274,6 @@ class CfgYaml:
             err += ' Please update.'
             raise YamlException(err)
 
-    def _profile_yes(self, profile):
-        """returns True if the profile is to be considered"""
-        if profile == self._profile:
-            return True
-        if profile in self._inc_profiles:
-            return True
-        return False
-
     def _debug_entries(self):
         """debug print all interesting entries"""
         if not self._debug:
