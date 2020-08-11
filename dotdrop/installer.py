@@ -240,7 +240,6 @@ class Installer:
                 actionexec = None
             else:
                 if err:
-                    return ret, err
                     return self._log_install(ret, err)
 
         return self._log_install(installed > 0, None)
