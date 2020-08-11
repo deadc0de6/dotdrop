@@ -89,47 +89,6 @@ class CfgYaml:
     lnk_link = LinkTypes.LINK.name.lower()
     lnk_children = LinkTypes.LINK_CHILDREN.name.lower()
 
-    # TODO
-    #
-    # "include" entries:
-    #   - import_actions
-    #   - import_configs
-    #   - import_variables
-    #   - profile's import
-    #   - profile's include
-    #
-    # variable precedence:
-    # 1) profile variable
-    # 2) "import_variables" variables
-    # 3) "import_configs" variables
-    # 4) other variables
-    #
-    # rules:
-    # - dynvariables are executed in their own config file
-    # - profile cannot include profiles defined above in the import tree
-    # - config files do not have access to variables
-    #   defined above in the import tree
-    #
-    # parse a config file
-    # - parse settings
-    # - parse variables
-    #   - interprete dynvariables
-    #   - template the include entries
-    # - parse profiles
-    # - parse dotfiles
-    # - parse other elements (actions, trans_r, trans_w)
-    # - parse and integrate included elements (see below)
-    #
-    # parse "include" entry
-    # - same as parse config file
-    # - add new entry to the top dict
-    #
-    # TODO
-    # - properly handle the included profile
-    # - document precedence in wiki
-    # - document parsing in CONTRIBUTING.md
-    #
-
     def __init__(self, path, profile=None, addprofiles=[], debug=False):
         """
         config parser

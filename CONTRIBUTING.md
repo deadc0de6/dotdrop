@@ -41,7 +41,25 @@ The configuration file (yaml) is parsed in two layers:
 
 Only the higher layer is accessible to other classes of dotdrop.
 
-The lower layer part is only taking care of basic types and
+**Rules**
+
+* `dynvariables` are executed in their own config file
+* profile cannot include profiles defined above in the import tree
+* config files do not have access to variables
+  defined above in the import tree
+
+**Precedence**
+
+* `dynvariables` > `variables`
+* profile `(dyn)variables` > any other `(dyn)variables`
+* profile `(dyn)variables` > profile's included `(dyn)variables`
+* imported `variables`/`dynvariables` > `(dyn)variables`
+* actions/transformations  using variables are resolved at runtime
+  (when action/transformation is executed) and not when loading the config
+
+## lower layer (cfg_yaml.py)
+
+The lower layer part is only taking care of basic types
 does the following:
   * normalize all config entries
     * resolve paths (dotfiles src, dotpath, etc)
@@ -55,8 +73,10 @@ does the following:
   * fix any deprecated entries (link_by_default, etc)
   * clear empty entries
 
-In the end it makes sure the dictionary (or parts of it) accessed
+In the end it makes sure the dictionary accessed
 by the higher layer is clean and normalized.
+
+## higher layer (cfg_aggregator.py)
 
 The higher layer will transform the dictionary parsed by the lower layer
 into objects (profiles, dotfiles, actions, etc).
@@ -74,35 +94,32 @@ example) won't be *seen* by the higher layer until the config is reloaded. Consi
 `dirty` flag as a sign the file needs to be written and its representation in higher
 levels in not accurate anymore.
 
-## Variables resolution
+## Variables resolution in the config file
 
-How variables are resolved (pass through jinja2's
-templating function) in the config file.
+How variables are resolved (through jinja2's
+templating) in the config file.
 
-* resolve `include` (the below merge is temporary just to resolve the `includes`)
-  * `variables` and `dynvariables` are first merged and recursively resolved
+* resolve main config file variables
+  * `variables` and `dynvariables` are recursively templated
   * `dynvariables` are executed
-  * they are all merged and `include` paths are resolved
+  * both `variables` and `dynvariables` are merged
+  * profile's `variables` and `dynvariables` are merged
+* resolve *included* entries (see below)
+  * paths and entries are templated
     (allows to use something like `include {{@@ os @@}}.variables.yaml`)
-* `variables` and profile's `variables` are merged
-* `dynvariables` and profile's `dynvariables` are merged
-* `dynvariables` are executed
-* they are all merged into the final *local* `variables`
+* *included* entries are processed
+  * dyn-/variables are all resolved in their own file
 
-These are then used to resolve different elements in the config file:
+*included*
+
+* entry *import_actions*
+* entry *import_configs*
+* entry *import_variables*
+* profile's *import*
+* profile's *include
+
+Variables are then used to resolve different elements in the config file:
 see [this](https://github.com/deadc0de6/dotdrop/wiki/config-variables#config-available-variables)
-
-Then additional variables (`import_variables` and `import_configs`) are
-then merged and take precedence over local variables.
-
-Note:
-
-* `dynvariables` > `variables`
-* profile `(dyn)variables` > any other `(dyn)variables`
-* profile `(dyn)variables` > profile's included `(dyn)variables`
-* imported `variables`/`dynvariables` > `(dyn)variables`
-* actions/transformations  using variables are resolved at runtime
-  (when action/transformation is executed) and not when loading the config
 
 # Testing
 
