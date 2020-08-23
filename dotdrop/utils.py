@@ -34,9 +34,9 @@ def run(cmd, raw=True, debug=False, checkerr=False):
         LOG.dbg('exec: {}'.format(' '.join(cmd)))
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    p.wait()
+    out, _ = p.communicate()
     ret = p.returncode
-    out = p.stdout.readlines()
+    out = out.splitlines(keepends=True)
     lines = ''.join([x.decode('utf-8', 'replace') for x in out])
     if checkerr and ret != 0:
         c = ' '.join(cmd)
