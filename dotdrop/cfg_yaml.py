@@ -381,7 +381,7 @@ class CfgYaml:
 
     def _parse_blk_settings(self, dic):
         """parse the "config" block"""
-        block = self._get_entry(dic, self.key_settings)
+        block = self._get_entry(dic, self.key_settings).copy()
         # set defaults
         settings = Settings(None).serialize().get(self.key_settings)
         settings.update(block)
@@ -412,12 +412,13 @@ class CfgYaml:
 
     def _parse_blk_dotfiles(self, dic):
         """parse the "dotfiles" block"""
-        dotfiles = self._get_entry(dic, self.key_dotfiles)
+        dotfiles = self._get_entry(dic, self.key_dotfiles).copy()
         keys = dotfiles.keys()
         if len(keys) != len(list(set(keys))):
             dups = [x for x in keys if x not in list(set(keys))]
             err = 'duplicate dotfile keys found: {}'.format(dups)
             raise YamlException(err)
+
         dotfiles = self._norm_dotfiles(dotfiles)
         if self._debug:
             self._debug_dict('dotfiles block', dotfiles)
@@ -425,7 +426,7 @@ class CfgYaml:
 
     def _parse_blk_profiles(self, dic):
         """parse the "profiles" block"""
-        profiles = self._get_entry(dic, self.key_profiles)
+        profiles = self._get_entry(dic, self.key_profiles).copy()
         profiles = self._norm_profiles(profiles)
         if self._debug:
             self._debug_dict('profiles block', profiles)
@@ -435,6 +436,8 @@ class CfgYaml:
         """parse the "actions" block"""
         actions = self._get_entry(dic, self.key_actions,
                                   mandatory=False)
+        if actions:
+            actions = actions.copy()
         actions = self._norm_actions(actions)
         if self._debug:
             self._debug_dict('actions block', actions)
@@ -449,6 +452,8 @@ class CfgYaml:
             dic[self.key_trans_r] = dic[self.old_key_trans_r]
             del dic[self.old_key_trans_r]
         trans_r = self._get_entry(dic, key, mandatory=False)
+        if trans_r:
+            trans_r = trans_r.copy()
         if self._debug:
             self._debug_dict('trans_r block', trans_r)
         return trans_r
@@ -457,6 +462,8 @@ class CfgYaml:
         """parse the "trans_w" block"""
         trans_w = self._get_entry(dic, self.key_trans_w,
                                   mandatory=False)
+        if trans_w:
+            trans_w = trans_w.copy()
         if self._debug:
             self._debug_dict('trans_w block', trans_w)
         return trans_w
@@ -466,6 +473,8 @@ class CfgYaml:
         variables = self._get_entry(dic,
                                     self.key_variables,
                                     mandatory=False)
+        if variables:
+            variables = variables.copy()
         if self._debug:
             self._debug_dict('variables block', variables)
         return variables
@@ -475,6 +484,8 @@ class CfgYaml:
         dvariables = self._get_entry(dic,
                                      self.key_dvariables,
                                      mandatory=False)
+        if dvariables:
+            dvariables = dvariables.copy()
         if self._debug:
             self._debug_dict('dynvariables block', dvariables)
         return dvariables
@@ -655,7 +666,7 @@ class CfgYaml:
                 continue
             if self.key_all in dfs:
                 if self._debug:
-                    self._dbg('add ALL to profile {}'.format(k))
+                    self._dbg('add ALL to profile \"{}\"'.format(k))
                 v[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
@@ -1042,7 +1053,30 @@ class CfgYaml:
 
     def _template_dotfiles_paths(self):
         """template dotfiles paths"""
-        for dotfile in self.dotfiles.values():
+        if self._debug:
+            self._dbg('templating dotfiles paths')
+        dotfiles = self.dotfiles.copy()
+
+        # only keep dotfiles related to the selected profile
+        pdfs = []
+        pro = self.profiles.get(self._profile)
+        if pro:
+            pdfs = pro.get(self.key_profile_dotfiles, [])
+        for addpro in self._inc_profiles:
+            pro = self.profiles.get(addpro)
+            if not pro:
+                continue
+            pdfsalt = pro.get(self.key_profile_dotfiles, [])
+            pdfs.extend(pdfsalt)
+        if self.key_all not in pdfs:
+            # take a subset of the dotfiles
+            newdotfiles = {}
+            for k, v in dotfiles.items():
+                if k in pdfs:
+                    newdotfiles[k] = v
+            dotfiles = newdotfiles
+
+        for dotfile in dotfiles.values():
             # src
             src = dotfile[self.key_dotfile_src]
             newsrc = self.resolve_dotfile_src(src, templater=self._tmpl)
@@ -1257,7 +1291,7 @@ class CfgYaml:
                 self._log.err(err)
                 raise YamlException(err)
             if self._debug:
-                self._dbg('\"{}\": {} -> {}'.format(k, v, out))
+                self._dbg('{}: `{}` -> {}'.format(k, v, out))
             dic[k] = out
 
     def _check_minversion(self, minversion):

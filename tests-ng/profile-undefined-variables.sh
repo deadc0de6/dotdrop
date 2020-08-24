@@ -86,6 +86,9 @@ profiles:
       defined_in_alt: echo defall
     dotfiles:
     - ALL
+  pinclude:
+    include:
+    - pmain
 _EOF
 #cat ${cfg}
 
@@ -93,15 +96,26 @@ _EOF
 echo "main" > ${tmps}/dotfiles/abc
 echo "alt" > ${tmps}/dotfiles/def
 
-# install
+# install pmain
+echo "install pmain"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p pmain -V
-
+[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
 grep main ${tmpd}/abc
 
 # install pall
+echo "install pall"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p pall -V
+[ ! -e ${tmpd}/abcall ] && echo "dotfile not installed" && exit 1
 grep main ${tmpd}/abcall
+[ ! -e ${tmpd}/defall ] && echo "dotfile not installed" && exit 1
 grep alt ${tmpd}/defall
+
+# install pinclude
+echo "install pinclude"
+rm -f ${tmpd}/abc
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p pinclude -V
+[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
+grep main ${tmpd}/abc
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${scr} ${scr2}
