@@ -52,15 +52,15 @@ Only the higher layer is accessible to other classes of dotdrop.
 * config files do not have access to variables
   defined above in the import tree
 
-This will result with `var0 = "echo test"` and not `var0 = test`
+This will result with `dvar0 = "test"` and `var0 = "echo test"` (**not** `var0 = test`)
 ```yaml
 variables:
-  var0: "{{@@ dvar4 @@}}"
+  var0: "{{@@ dvar0 @@}}"
 dynvariables:
   dvar0: "echo test"
 ```
 
-This will result with `dvar0 = "test"`
+This will result with `dvar0 = "test"` and `var0 = "test"`
 ```yaml
 variables:
   var0: "test"
