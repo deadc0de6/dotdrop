@@ -48,7 +48,6 @@ Only the higher layer is accessible to other classes of dotdrop.
   are executed, this means that `dynvariables` can safely reference `variables` however
   `variables` referencing `dynvariables` will result with the none executed value of the
   referenced `dynvariables` (see examples below)
-* a `dynvariables` can reference a `variables` however the opposite is not possible
 * profile cannot include profiles defined above in the import tree
 * config files do not have access to variables
   defined above in the import tree
