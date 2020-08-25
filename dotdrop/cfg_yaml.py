@@ -140,13 +140,31 @@ class CfgYaml:
         self.variables = self._enrich_vars(self.variables, self._profile)
         self._redefine_templater()
 
+        # variables and dynvariables need to be first merged
+        # before being templated in order to allow cyclic
+        # references between them
+
         # parse the "variables" block
         var = self._parse_blk_variables(self._yaml_dict)
-        self._add_variables(var, template=True)
+        self._add_variables(var, template=False)
 
         # parse the "dynvariables" block
         dvariables = self._parse_blk_dynvariables(self._yaml_dict)
-        self._add_variables(dvariables, shell=True)
+        self._add_variables(dvariables, template=False)
+
+        # now template variables and dynvariables from the same pool
+        self._rec_resolve_variables(self.variables)
+        # and execute dvariables
+        # since this is done after recursively resolving variables
+        # and dynvariables this means that variables referencing
+        # dynvariables will result with the not executed value
+        if dvariables.keys():
+            self._shell_exec_dvars(self.variables, keys=dvariables.keys())
+        # finally redefine the template
+        self._redefine_templater()
+
+        if self._debug:
+            self._debug_dict('current variables defined', self.variables)
 
         # parse the "profiles" block
         self.profiles = self._parse_blk_profiles(self._yaml_dict)

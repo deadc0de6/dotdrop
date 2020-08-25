@@ -44,9 +44,30 @@ Only the higher layer is accessible to other classes of dotdrop.
 **Rules**
 
 * `dynvariables` are executed in their own config file
+* since `variables` and `dynvariables` are templated before the `dynvariables`
+  are executed, this means that `dynvariables` can safely reference `variables` however
+  `variables` referencing `dynvariables` will result with the none executed value of the
+  referenced `dynvariables` (see examples below)
+* a `dynvariables` can reference a `variables` however the opposite is not possible
 * profile cannot include profiles defined above in the import tree
 * config files do not have access to variables
   defined above in the import tree
+
+This will result with `var0 = "echo test"` and not `var0 = test`
+```yaml
+variables:
+  var0: "{{@@ dvar4 @@}}"
+dynvariables:
+  dvar0: "echo test"
+```
+
+This will result with `dvar0 = "test"`
+```yaml
+variables:
+  var0: "test"
+dynvariables:
+  dvar0: "echo {{@@ var0 @@}}"
+```
 
 **Precedence**
 
@@ -100,9 +121,9 @@ How variables are resolved (through jinja2's
 templating) in the config file.
 
 * resolve main config file variables
-  * `variables` and `dynvariables` are recursively templated
+  * merge `variables` and `dynvariables` (allowing cycling reference)
+  * recursively template merged `variables` and `dynvariables`
   * `dynvariables` are executed
-  * both `variables` and `dynvariables` are merged
   * profile's `variables` and `dynvariables` are merged
 * resolve *included* entries (see below)
   * paths and entries are templated
