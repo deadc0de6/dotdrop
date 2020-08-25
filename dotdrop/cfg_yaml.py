@@ -142,7 +142,7 @@ class CfgYaml:
 
         # parse the "variables" block
         var = self._parse_blk_variables(self._yaml_dict)
-        self._add_variables(var, template=False)
+        self._add_variables(var, template=True)
 
         # parse the "dynvariables" block
         dvariables = self._parse_blk_dynvariables(self._yaml_dict)
@@ -1100,6 +1100,8 @@ class CfgYaml:
                 val = t.generate_string(val)
                 variables[k] = val
                 t.update_variables(variables)
+        if variables is self.variables:
+            self._redefine_templater()
 
     def _get_profile_included_vars(self):
         """resolve profile included variables/dynvariables"""
