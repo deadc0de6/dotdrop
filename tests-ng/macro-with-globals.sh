@@ -52,17 +52,13 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 # create the config file
-cfg1="${tmps}/config1.yaml"
-cfg2="${tmps}/config2.yaml"
-varf="${tmps}/variables.yaml"
+cfg="${tmps}/config.yaml"
 
-cat > ${cfg1} << _EOF
+cat > ${cfg} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
-  import_configs:
-  - ${cfg2}
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -71,40 +67,33 @@ profiles:
   p0:
     dotfiles:
     - f_abc
-_EOF
-
-cat > ${cfg2} << _EOF
-config:
-  backup: true
-  create: true
-  dotpath: dotfiles-other
-  import_variables:
-  - ${varf}
-dotfiles:
-profiles:
-_EOF
-
-cat > ${varf} << _EOF
 variables:
-  var1: var1value
-dynvariables:
-  dvar1: "echo dvar1value"
+  global: global_var
+  local: local_var
 _EOF
 
 # create the source
 mkdir -p ${tmps}/dotfiles/
-echo "start" > ${tmps}/dotfiles/abc
-echo "{{@@ var1 @@}}" >> ${tmps}/dotfiles/abc
-echo "{{@@ dvar1 @@}}" >> ${tmps}/dotfiles/abc
-echo "end" >> ${tmps}/dotfiles/abc
+
+cat > ${tmps}/dotfiles/macro_file << _EOF
+{%@@ macro macro(var) @@%}
+{{@@ global @@}}
+{{@@ var @@}}
+{%@@ endmacro @@%}
+_EOF
+
+cat > ${tmps}/dotfiles/abc << _EOF
+{%@@ from 'macro_file' import macro @@%}
+{{@@ macro(local) @@}}
+_EOF
 
 # install
-cd ${ddpath} | ${bin} install -c ${cfg1} -p p0 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -p p0 -V
 
 # test file content
 cat ${tmpd}/abc
-grep 'var1value' ${tmpd}/abc >/dev/null 2>&1
-grep 'dvar1value' ${tmpd}/abc >/dev/null 2>&1
+grep 'global_var' ${tmpd}/abc >/dev/null 2>&1
+grep 'local_var' ${tmpd}/abc >/dev/null 2>&1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
