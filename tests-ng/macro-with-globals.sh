@@ -83,7 +83,7 @@ cat > ${tmps}/dotfiles/macro_file << _EOF
 _EOF
 
 cat > ${tmps}/dotfiles/abc << _EOF
-{%@@ from 'macro_file' import macro @@%}
+{%@@ from 'macro_file' import macro with context @@%}
 {{@@ macro(local) @@}}
 _EOF
 
