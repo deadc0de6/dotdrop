@@ -109,6 +109,9 @@ cd ${ddpath} | ${bin} files -c ${cfg} -p p2 | grep f_abc
 cd ${ddpath} | ${bin} files -c ${cfg} -p p3 | grep f_abc
 cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc
 
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc | wc -l`
+[ "${cnt}" != "1" ] && echo "dotfiles displayed more than once" && exit 1
+
 # count
 cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -b | grep '^f_' | wc -l`
 [ "${cnt}" != "1" ] && exit 1
