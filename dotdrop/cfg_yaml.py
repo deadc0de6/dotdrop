@@ -1077,15 +1077,17 @@ class CfgYaml:
 
         # only keep dotfiles related to the selected profile
         pdfs = []
-        pro = self.profiles.get(self._profile)
+        pro = self.profiles.get(self._profile, [])
         if pro:
-            pdfs = pro.get(self.key_profile_dotfiles, [])
+            pdfs = list(pro.get(self.key_profile_dotfiles, []))
         for addpro in self._inc_profiles:
-            pro = self.profiles.get(addpro)
+            pro = self.profiles.get(addpro, [])
             if not pro:
                 continue
             pdfsalt = pro.get(self.key_profile_dotfiles, [])
             pdfs.extend(pdfsalt)
+            pdfs = uniq_list(pdfs)
+
         if self.key_all not in pdfs:
             # take a subset of the dotfiles
             newdotfiles = {}
