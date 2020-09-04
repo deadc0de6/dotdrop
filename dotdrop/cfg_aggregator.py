@@ -135,8 +135,9 @@ class CfgAggregator:
                 objects.append(o)
             if not islist:
                 objects = objects[0]
-            if self.debug:
-                self.log.dbg('patching {}.{} with {}'.format(c, keys, objects))
+            # if self.debug:
+            #     er = 'patching {}.{} with {}'
+            #     self.log.dbg(er.format(c, keys, objects))
             setattr(c, keys, objects)
 
     def del_dotfile(self, dotfile):

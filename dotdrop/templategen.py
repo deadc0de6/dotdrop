@@ -90,7 +90,8 @@ class Templategen:
         try:
             return self._handle_file(src)
         except UndefinedError as e:
-            raise UndefinedException(e.message)
+            err = 'undefined variable: {}'.format(e.message)
+            raise UndefinedException(err)
 
     def generate_string(self, string):
         """
@@ -103,7 +104,8 @@ class Templategen:
         try:
             return self.env.from_string(string).render(self.variables)
         except UndefinedError as e:
-            raise UndefinedException(e.message)
+            err = 'undefined variable: {}'.format(e.message)
+            raise UndefinedException(err)
 
     def add_tmp_vars(self, newvars={}):
         """add vars to the globals, make sure to call restore_vars"""

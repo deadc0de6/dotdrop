@@ -551,9 +551,10 @@ class Installer:
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         if self.debug:
-            self.log.dbg('tmp install {} to {}'.format(src, dst))
+            self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
         # install the dotfile to a temp directory for comparing
-        ret, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
+        r, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
+        ret, err = r
         if self.debug:
             self.log.dbg('tmp installed in {}'.format(tmpdst))
         # reset flags
@@ -561,4 +562,4 @@ class Installer:
         self.diff = diffsaved
         self.comparing = False
         self.create = createsaved
-        return ret, tmpdst
+        return ret, err, tmpdst

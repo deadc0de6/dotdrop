@@ -36,8 +36,8 @@ class TestCompare(unittest.TestCase):
         results = {}
         for dotfile in dotfiles:
             path = os.path.expanduser(dotfile.dst)
-            ret, insttmp = inst.install_to_temp(t, tmp, dotfile.src,
-                                                dotfile.dst)
+            ret, err, insttmp = inst.install_to_temp(t, tmp, dotfile.src,
+                                                     dotfile.dst)
             if not ret:
                 results[path] = False
                 continue
