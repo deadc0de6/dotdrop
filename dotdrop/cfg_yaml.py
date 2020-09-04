@@ -854,7 +854,7 @@ class CfgYaml:
 
         if self._debug:
             self._debug_dict('add import_configs var', sub.variables)
-        self.variables = self._merge_dict(sub.variables, self.variables)
+        self._add_variables(sub.variables, prio=True)
 
     def _import_configs(self):
         """import configs from external files"""
