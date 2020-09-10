@@ -1258,6 +1258,9 @@ class CfgYaml:
         """recursively delete all none/empty values in a dictionary."""
         new = {}
         for k, v in dic.items():
+            if k == self.key_dotfiles and v:
+                new[k] = v
+                continue
             newv = v
             if isinstance(v, dict):
                 newv = self._clear_none(v)

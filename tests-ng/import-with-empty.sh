@@ -93,11 +93,18 @@ profiles:
 _EOF
 
 echo "[+] import"
-#cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^5 dotfile(s) installed.$'
 cd ${ddpath} | ${bin} import -c ${cfg} -p p1 --verbose ${dftoimport}
 [ "$?" != "0" ] && exit 1
 
-cat ${cfg}
+echo "[+] install"
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^5 dotfile(s) installed.$'
+rm -f ${dftoimport}
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^6 dotfile(s) installed.$'
+
+nb=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 --verbose | grep '^[a-zA-Z]' | wc -l`
+[ "${nb}" != "6" ] && echo 'error in dotfile list' && exit 1
+
+#cat ${cfg}
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
