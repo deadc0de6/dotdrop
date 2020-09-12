@@ -9,13 +9,13 @@ It is possible to ignore specific patterns when using dotdrop. For example for `
 files don't need to appear in the output.
 
 * for [install](usage#install-dotfiles)
-  * using `instignore` in [the config file](config)
+    * using `instignore` in [the config file](config)
 * for [compare](usage#compare-dotfiles)
-  * using `cmpignore` in [the config file](config)
-  * using the command line switch `-i --ignore`
+    * using `cmpignore` in [the config file](config)
+    * using the command line switch `-i --ignore`
 * for [update](usage#update-dotfiles)
-  * using `upignore` in [the config file](config)
-  * using the command line switch `-i --ignore`
+    * using `upignore` in [the config file](config)
+    * using the command line switch `-i --ignore`
 
 The ignore pattern must follow Unix shell-style wildcards like for example `*/path/to/file`.
 Make sure to quote those when using wildcards in the config file.

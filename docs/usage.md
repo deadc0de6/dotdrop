@@ -4,16 +4,16 @@ Run `dotdrop --help` to see all available options.
 
 * [Basic use](#basic-use)
 * Commands:
-  * [Install dotfiles](#install-dotfiles)
-  * [Compare dotfiles](#compare-dotfiles)
-  * [Import dotfiles](#import-dotfiles)
-  * [List profiles](#list-profiles)
-  * [List dotfiles](#list-dotfiles)
-  * [Update dotfiles](#update-dotfiles)
-  * [Remove dotfiles](#remove-dotfiles)
+    * [Install dotfiles](#install-dotfiles)
+    * [Compare dotfiles](#compare-dotfiles)
+    * [Import dotfiles](#import-dotfiles)
+    * [List profiles](#list-profiles)
+    * [List dotfiles](#list-dotfiles)
+    * [Update dotfiles](#update-dotfiles)
+    * [Remove dotfiles](#remove-dotfiles)
 * Uses
-  * [Use actions](usage-actions)
-  * [Use transformations](usage-transformations)
+    * [Use actions](usage-actions)
+    * [Use transformations](usage-transformations)
 * [Update dotdrop](#update-dotdrop)
 * [Environment variables](#environment-variables)
 * [User tricks](#user-tricks)
@@ -85,18 +85,18 @@ with the option `longkey` (per default to *false*).
 
 Two formats are available:
 
-  * *short format* (default): take the shortest unique path
-  * *long format*: take the full path
+* *short format* (default): take the shortest unique path
+* *long format*: take the full path
 
 For example `~/.config/awesome/rc.lua` gives
 
-  * `f_rc.lua` in the short format
-  * `f_config_awesome_rc.lua` in the long format
+* `f_rc.lua` in the short format
+* `f_config_awesome_rc.lua` in the long format
 
 Importing `~/.mutt/colors` and then `~/.vim/colors` will result in
 
-  * `d_colors` and `d_vim_colors` in the short format
-  * `d_mutt_colors` and `d_vim_colors` in the long format
+* `d_colors` and `d_vim_colors` in the short format
+* `d_mutt_colors` and `d_vim_colors` in the long format
 
 Dotfile can be imported as a different file with the use
 of the command line switch `--as`. It is however recommended

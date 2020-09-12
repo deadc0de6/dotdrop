@@ -5,22 +5,22 @@ The config file used by dotdrop is
 
 * [Location](#location)
 * [Format](#format)
-  * [Actions](#actions)
-  * [Transformations](#transformations)
-  * [Variables](#variables)
-  * [Interpreted variables](#interpreted-variables)
+    * [Actions](#actions)
+    * [Transformations](#transformations)
+    * [Variables](#variables)
+    * [Interpreted variables](#interpreted-variables)
 * Config details on
-  * [Symlinking dotfiles](#symlinking-dotfiles)
-  * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
-  * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
-  * [Import profile dotfiles from file](#import-profile-dotfiles-from-file)
-  * [Import variables from file](#import-variables-from-file)
-  * [Import actions from file](#import-actions-from-file)
-  * [Import config files](#import-config-files)
+    * [Symlinking dotfiles](#symlinking-dotfiles)
+    * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
+    * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
+    * [Import profile dotfiles from file](#import-profile-dotfiles-from-file)
+    * [Import variables from file](#import-variables-from-file)
+    * [Import actions from file](#import-actions-from-file)
+    * [Import config files](#import-config-files)
 * Dynamic elements
-  * [Dynamic dotfile paths](#dynamic-dotfile-paths)
-  * [Dynamic actions](#dynamic-actions)
-  * [Dynamic transformations](#dynamic-transformations)
+    * [Dynamic dotfile paths](#dynamic-dotfile-paths)
+    * [Dynamic actions](#dynamic-actions)
+    * [Dynamic transformations](#dynamic-transformations)
 
 ---
 
@@ -45,77 +45,77 @@ Dotdrop config file uses [yaml](https://yaml.org/) syntax.
 Content Format:
 
 * **config** entry (mandatory): contains settings for the deployment
-  * `backup`: create a backup of the dotfile in case it differs from the
-    one that will be installed by dotdrop (default *true*)
-  * `banner`: display the banner (default *true*)
-  * `cmpignore`: list of patterns to ignore when comparing, apply to all dotfiles
-    (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
-  * `create`: create directory hierarchy when installing dotfiles if
-    it doesn't exist (default *true*)
-  * `default_actions`: list of action's keys to execute for all installed dotfile
-    (see [Use actions](usage-actions))
-  * `diff_command`: the diff command to use for diffing files (default `diff -r -u {0} {1}`)
-  * `dotpath`: path to the directory containing the dotfiles to be managed (default `dotfiles`)
-    by dotdrop (absolute path or relative to the config file location)
-  * `filter_file`: list of paths to load templating filters from
-    (see [Templating available filters](templating#available-filters))
-  * `func_file`: list of paths to load templating functions from
-     (see [Templating available methods](templating#available-methods))
-  * `ignoreempty`: do not deploy template if empty (default *false*)
-  * `import_actions`: list of paths to load actions from
-    (absolute path or relative to the config file location,
-    see [Import actions from file](#import-actions-from-file))
-  * `import_configs`: list of config file paths to be imported in
-    the current config (absolute path or relative to the current config file location,
-    see [Import config files](#import-config-files))
-  * `import_variables`: list of paths to load variables from
-    (absolute path or relative to the config file location,
-    see [Import variables from file](#import-variables-from-file))
-  * `instignore`: list of patterns to ignore when installing, apply to all dotfiles
-    (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
-  * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
-  * `link_dotfile_default`: set dotfile's `link` attribute to this value when undefined.
-    Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
-    see [Symlinking dotfiles](#symlinking-dotfiles))
-  * `link_on_import`: set dotfile's `link` attribute to this value when importing.
-    Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
-    see [Symlinking dotfiles](#symlinking-dotfiles))
-  * `longkey`: use long keys for dotfiles when importing (default *false*,
-    see [Import dotfiles](usage#import-dotfiles))
-  * `minversion`: (*for internal use, do not modify*) provides the minimal dotdrop version to use
-  * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
-  * `upignore`: list of patterns to ignore when updating, apply to all dotfiles
-    (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
-  * `workdir`: path to the directory where templates are installed before being symlinked
-    when using `link:link` or `link:link_children`
-    (absolute path or relative to the config file location, defaults to *~/.config/dotdrop*)
-  * DEPRECATED `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
+    * `backup`: create a backup of the dotfile in case it differs from the
+      one that will be installed by dotdrop (default *true*)
+    * `banner`: display the banner (default *true*)
+    * `cmpignore`: list of patterns to ignore when comparing, apply to all dotfiles
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+    * `create`: create directory hierarchy when installing dotfiles if
+      it doesn't exist (default *true*)
+    * `default_actions`: list of action's keys to execute for all installed dotfile
+      (see [Use actions](usage-actions))
+    * `diff_command`: the diff command to use for diffing files (default `diff -r -u {0} {1}`)
+    * `dotpath`: path to the directory containing the dotfiles to be managed (default `dotfiles`)
+      by dotdrop (absolute path or relative to the config file location)
+    * `filter_file`: list of paths to load templating filters from
+      (see [Templating available filters](templating#available-filters))
+    * `func_file`: list of paths to load templating functions from
+       (see [Templating available methods](templating#available-methods))
+    * `ignoreempty`: do not deploy template if empty (default *false*)
+    * `import_actions`: list of paths to load actions from
+      (absolute path or relative to the config file location,
+      see [Import actions from file](#import-actions-from-file))
+    * `import_configs`: list of config file paths to be imported in
+      the current config (absolute path or relative to the current config file location,
+      see [Import config files](#import-config-files))
+    * `import_variables`: list of paths to load variables from
+      (absolute path or relative to the config file location,
+      see [Import variables from file](#import-variables-from-file))
+    * `instignore`: list of patterns to ignore when installing, apply to all dotfiles
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+    * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
+    * `link_dotfile_default`: set dotfile's `link` attribute to this value when undefined.
+      Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
+      see [Symlinking dotfiles](#symlinking-dotfiles))
+    * `link_on_import`: set dotfile's `link` attribute to this value when importing.
+      Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
+      see [Symlinking dotfiles](#symlinking-dotfiles))
+    * `longkey`: use long keys for dotfiles when importing (default *false*,
+      see [Import dotfiles](usage#import-dotfiles))
+    * `minversion`: (*for internal use, do not modify*) provides the minimal dotdrop version to use
+    * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
+    * `upignore`: list of patterns to ignore when updating, apply to all dotfiles
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+    * `workdir`: path to the directory where templates are installed before being symlinked
+      when using `link:link` or `link:link_children`
+      (absolute path or relative to the config file location, defaults to *~/.config/dotdrop*)
+    * DEPRECATED `link_by_default`: when importing a dotfile set `link` to that value per default (default *false*)
 
 * **dotfiles** entry (mandatory): a list of dotfiles
-  * `dst`: where this dotfile needs to be deployed
-    (dotfile with empty `dst` are ignored and considered installed,
-    can use `variables` and `dynvariables`, make sure to quote)
-  * `src`: dotfile path within the `dotpath`
-    (dotfile with empty `src` are ignored and considered installed,
-    can use `variables` and `dynvariables`, make sure to quote)
-  * `link`: define how this dotfile is installed.
-    Possible values: *nolink*, *link*, *link_children* (default: `link_dotfile_default`,
-    see [Symlinking dotfiles](#symlinking-dotfiles))
-  * `actions`: list of action keys that need to be defined in the **actions** entry below
-    (see [Use actions](usage-actions))
-  * `cmpignore`: list of patterns to ignore when comparing (enclose in quotes when using wildcards,
-    see [ignore patterns](ignore-pattern))
-  * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
-  * `instignore`: list of patterns to ignore when installing (enclose in quotes when using wildcards,
-    see [ignore patterns](ignore-pattern))
-  * `trans_read`: transformation key to apply when installing this dotfile
-    (must be defined in the **trans_read** entry below, see [Use transformations](usage-transformations))
-  * `trans_write`: transformation key to apply when updating this dotfile
-    (must be defined in the **trans_write** entry below, see [Use transformations](usage-transformations))
-  * `upignore`: list of patterns to ignore when updating (enclose in quotes when using wildcards,
-    see [ignore patterns](ignore-pattern))
-  * DEPRECATED `link_children`: replaced by `link: link_children`
-  * DEPRECATED `trans`: replaced by `trans_read`
+    * `dst`: where this dotfile needs to be deployed
+      (dotfile with empty `dst` are ignored and considered installed,
+      can use `variables` and `dynvariables`, make sure to quote)
+    * `src`: dotfile path within the `dotpath`
+      (dotfile with empty `src` are ignored and considered installed,
+      can use `variables` and `dynvariables`, make sure to quote)
+    * `link`: define how this dotfile is installed.
+      Possible values: *nolink*, *link*, *link_children* (default: `link_dotfile_default`,
+      see [Symlinking dotfiles](#symlinking-dotfiles))
+    * `actions`: list of action keys that need to be defined in the **actions** entry below
+      (see [Use actions](usage-actions))
+    * `cmpignore`: list of patterns to ignore when comparing (enclose in quotes when using wildcards,
+      see [ignore patterns](ignore-pattern))
+    * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
+    * `instignore`: list of patterns to ignore when installing (enclose in quotes when using wildcards,
+      see [ignore patterns](ignore-pattern))
+    * `trans_read`: transformation key to apply when installing this dotfile
+      (must be defined in the **trans_read** entry below, see [Use transformations](usage-transformations))
+    * `trans_write`: transformation key to apply when updating this dotfile
+      (must be defined in the **trans_write** entry below, see [Use transformations](usage-transformations))
+    * `upignore`: list of patterns to ignore when updating (enclose in quotes when using wildcards,
+      see [ignore patterns](ignore-pattern))
+    * DEPRECATED `link_children`: replaced by `link: link_children`
+    * DEPRECATED `trans`: replaced by `trans_read`
 
 ```yaml
   <dotfile-key-name>:
@@ -138,18 +138,18 @@ Content Format:
 
 * **profiles** entry (mandatory): a list of profiles with the different dotfiles that
   need to be managed
-  * `dotfiles`: the dotfiles associated to this profile
-  * `import`: list of paths containing dotfiles keys for this profile
-    (absolute path or relative to the config file location,
-    see [Import profile dotfiles from file](#import-profile-dotfiles-from-file)).
-  * `include`: include all elements (dotfiles, actions, (dyn)variables, etc) from another profile
-    (see [Include dotfiles from another profile](#include-dotfiles-from-another-profile))
-  * `variables`: profile specific variables
-    (see [Variables](#variables))
-  * `dynvariables`: profile specific interpreted variables
-    (see [Interpreted variables](#interpreted-variables))
-  * `actions`: list of action keys that need to be defined in the **actions** entry below
-    (see [Use actions](usage-actions))
+    * `dotfiles`: the dotfiles associated to this profile
+    * `import`: list of paths containing dotfiles keys for this profile
+      (absolute path or relative to the config file location,
+      see [Import profile dotfiles from file](#import-profile-dotfiles-from-file)).
+    * `include`: include all elements (dotfiles, actions, (dyn)variables, etc) from another profile
+      (see [Include dotfiles from another profile](#include-dotfiles-from-another-profile))
+    * `variables`: profile specific variables
+      (see [Variables](#variables))
+    * `dynvariables`: profile specific interpreted variables
+      (see [Interpreted variables](#interpreted-variables))
+    * `actions`: list of action keys that need to be defined in the **actions** entry below
+      (see [Use actions](usage-actions))
 
 ```yaml
   <some-profile-name-usually-the-hostname>:
@@ -422,11 +422,11 @@ import_actions:
 Entire config files can be imported. This means making the following available
 from the imported config file in the original config file:
 
-- dotfiles
-- profiles
-- actions
-- read/write transformations
-- variables/dynvariables
+* dotfiles
+* profiles
+* actions
+* read/write transformations
+* variables/dynvariables
 
 Paths to import can be absolute or relative to the importing config file
 location.
@@ -552,7 +552,7 @@ Make sure to quote the actions using variables.
 
 # Dynamic transformations
 
-As for [dynamic actions](#dynamic-actions), transformations support 
+As for [dynamic actions](#dynamic-actions), transformations support
 the use of variables ([variables and dynvariables](config-variables)
 and [template variables](templating#template-variables)).
 

@@ -1,10 +1,10 @@
 # Config variables
 
 * [Config available variables](available-variables)
-  * [Variables entry](#variables-entry)
-  * [Profile variables](#profile-variables)
-  * [Config variables in templates](#config-variables-in-templates)
-  * [Interpreted variables entry](#interpreted-variables-entry)
+    * [Variables entry](#variables-entry)
+    * [Profile variables](#profile-variables)
+    * [Config variables in templates](#config-variables-in-templates)
+    * [Interpreted variables entry](#interpreted-variables-entry)
 
 ---
 
@@ -22,7 +22,7 @@ parametrize following elements of the config:
 
 `actions` and `transformations` also support the use of variables
 but those are resolved when the action/transformation is executed
-(see [Dynamic actions](config#dynamic-actions), 
+(see [Dynamic actions](config#dynamic-actions),
 [Dynamic transformations](config#dynamic-transformations) and [Templating](templating)).
 
 Following variables are available in the config files:

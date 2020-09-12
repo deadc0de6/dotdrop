@@ -6,9 +6,9 @@ or the below sections for more information on how to template your dotfiles.
 
 * [Delimiters](#delimiters)
 * [Template variables](#template-variables)
-  * [Dotfile variables](#dotfile-variables)
-  * [Environment variables](#environment-variables)
-  * [Dotdrop header](#dotdrop-header)
+    * [Dotfile variables](#dotfile-variables)
+    * [Environment variables](#environment-variables)
+    * [Dotdrop header](#dotdrop-header)
 * [Available methods](#available-methods)
 * [Available filters](#available-filters)
 * [Import macros](#import-macros)
@@ -114,7 +114,7 @@ The header can be automatically added with:
 
 Properly commenting the header in templates is the responsibility of the user
 as [jinja2](http://jinja.pocoo.org/) has no way of knowing what is the proper char(s) used for comments.
-Either prepend the directive with the commenting char(s) used in the dotfile 
+Either prepend the directive with the commenting char(s) used in the dotfile
 (for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
 The result is equivalent.
 
@@ -197,7 +197,7 @@ dotfile content
 {{@@ "13" | myfilter() @@}}
 ```
 
-For more information on how to create filters, 
+For more information on how to create filters,
 see [jinja2 official doc](https://jinja.palletsprojects.com/en/2.10.x/api/#writing-filters).
 
 # Import macros

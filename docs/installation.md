@@ -10,12 +10,12 @@ In that case, the virtualenv environment might need to be loaded before any atte
 Installation instructions
 
 * Installation
-  * [Install as a submodule](#as-a-submodule)
-  * [Install as a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv)
-  * [Install with pypi](#with-pypi)
-  * [Install with pypi in a virtualenv](#with-pypi-in-a-virtualenv)
-  * [Aur packages](#aur-packages)
-  * [Snap package](#snap-package)
+    * [Install as a submodule](#as-a-submodule)
+    * [Install as a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv)
+    * [Install with pypi](#with-pypi)
+    * [Install with pypi in a virtualenv](#with-pypi-in-a-virtualenv)
+    * [Aur packages](#aur-packages)
+    * [Snap package](#snap-package)
 * [Setup your repository](#setup-your-repository)
 * [Shell completion](#shell-completion)
 * [Dependencies](dependencies)
@@ -128,7 +128,7 @@ Then follow the [doc to setup your repository](#setup-your-repository).
 # Setup your repository
 
 Either create a repository on your prefered platform and clone it or create one locally.
-This repository will contain two main elements, dotdrop's config file (`config.yaml`) 
+This repository will contain two main elements, dotdrop's config file (`config.yaml`)
 and a directory containing all your dotfiles managed by dotdrop.
 ```bash
 ## clone your repository (my-dotfiles)
