@@ -11,14 +11,14 @@ This can be useful when working with sensitive data containing passwords for exa
 
 There are two types of transformations available:
 
-* **read transformations**: used to transform dotfiles before they are installed ([Config](config) key `trans_read`)
+* **read transformations**: used to transform dotfiles before they are installed ([Config](config.md) key `trans_read`)
     * Used for commands `install` and `compare`
     * They have two arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
-    * Happens **before** the dotfile is templated with jinja2 (see [templating](templating))
+    * Happens **before** the dotfile is templated with jinja2 (see [templating](../template/templating.md))
 
-* **write transformations**: used to transform files before updating a dotfile ([Config](config) key `trans_write`)
+* **write transformations**: used to transform files before updating a dotfile ([Config](config.md) key `trans_write`)
     * Used for command `update`
     * They have two arguments:
         * **{0}** will be replaced with the file path to update the dotfile with
@@ -54,5 +54,5 @@ will result in `abc; f_abc; p1; lastarg`
 
 See
 
-* [Store compressed directories](store-compressed-directories)
-* [Sensitive dotfiles](sensitive-dotfiles)
+* [Store compressed directories](../howto/store-compressed-directories.md)
+* [Sensitive dotfiles](../howto/sensitive-dotfiles.md)

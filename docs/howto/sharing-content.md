@@ -5,14 +5,14 @@ nice to share as much code as possible across the dotfiles, by leveraging
 templating and merging them in the same dotfile in Dotdrop's `dotpath`. Here
 are a few suggestions about how to achieve this.
 
-* [Brute force templating](brute-force-templating)
-* [Profile variables](profile-variables)
-* [Jinja macros](jinja-macros)
+* [Brute force templating](#brute-force-templating)
+* [Profile variables](#profile-variables)
+* [Jinja macros](#jinja-macros)
 
 # Brute force templating
 
-The first approach is sheer use of templating and Dotdrop
-[template variables](#template-variables). In order to do this, we need to:
+The first approach is sheer use of templating and variables
+In order to do this, we need to:
 
 1. Create the merged dotfile with an arbitrary name somewhere in `dotpath`.
 2. Create two `dotfile` entries in `config.yaml`, both having the merged
@@ -64,7 +64,7 @@ export DB_PORT='4521'
 Albeit flexible, the previous method is a bit cumbersome for some use cases.
 For example, when the dotfiles belong to different profiles, the cleanest
 solution consists in using
-[profile variables](config-variables#profile-variables). This is achieved by:
+[profile variables](../config/config-variables.md#profile-variables). This is achieved by:
 
 1. Creating the merged dotfile with an arbitrary name somewhere in `dotpath`.
 2. Adding some variables in the merged dotfile via templating.

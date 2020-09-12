@@ -1,10 +1,10 @@
 One way for creating symlinks (or any other special files) is to use a combination of
-[actions](usage-actions) and a *fake* dotfile.
+[actions](../config/usage-actions.md) and a *fake* dotfile.
 
 Let's say for example you have a list of directories you want to link
 from under `~/.original` to `~/symlinks`.
 ```bash
-$ tree ~/.original       
+$ tree ~/.original
 /home/user/.original
 ├── dir1
 ├── dir2
@@ -28,7 +28,7 @@ The config file would contain different elements
 dynvariables:
   links_list: "cat {{@@ _dotdrop_dotpath @@}}/links.txt | xargs"
 ...
-variables:   
+variables:
   links_dst: "{{@@ env['HOME'] @@}}/.symlinks"
   links_src: "{{@@ env['HOME'] @@}}/.original"
 ...
@@ -44,7 +44,7 @@ actions:
 
 The result would be
 ```bash
-$ tree ~/.symlinks 
+$ tree ~/.symlinks
 /home/user/.symlinks
 ├── dir1 -> /home/user/.original/dir1
 ├── dir2 -> /home/user/.original/dir2

@@ -8,7 +8,7 @@
 
 # Available solutions
 
-Two solutions exist, the first one using an unversioned file (see [Environment variables](templating#environment-variables))
+Two solutions exist, the first one using an unversioned file (see [Environment variables](../template/templating.md#environment-variables))
 and the second using transformations (see [Store encrypted dotfiles](#store-encrypted-dotfiles)).
 
 # Store encrypted dotfiles

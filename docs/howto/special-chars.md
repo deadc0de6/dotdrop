@@ -37,7 +37,7 @@ See https://github.com/deadc0de6/dotdrop/issues/42.
 
 Jinja2 is not able to process non-unicode chars (http://jinja.pocoo.org/docs/2.10/api/). This means that dotfiles using non-unicode chars can still be fully managed by dotdrop however when comparing the local file with the one stored in dotdrop, `compare` will return a difference even if there is none.
 
-Either replace the non-unicode chars (see below [Re-encode](re-encode)) or accept the fact the comparison shows a difference while there's none.
+Either replace the non-unicode chars (see below [Re-encode](#re-encode)) or accept the fact the comparison shows a difference while there's none.
 
 See https://github.com/deadc0de6/dotdrop/issues/42.
 

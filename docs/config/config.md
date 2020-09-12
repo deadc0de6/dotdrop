@@ -49,18 +49,18 @@ Content Format:
       one that will be installed by dotdrop (default *true*)
     * `banner`: display the banner (default *true*)
     * `cmpignore`: list of patterns to ignore when comparing, apply to all dotfiles
-      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern.md))
     * `create`: create directory hierarchy when installing dotfiles if
       it doesn't exist (default *true*)
     * `default_actions`: list of action's keys to execute for all installed dotfile
-      (see [Use actions](usage-actions))
+      (see [Use actions](usage-actions.md))
     * `diff_command`: the diff command to use for diffing files (default `diff -r -u {0} {1}`)
     * `dotpath`: path to the directory containing the dotfiles to be managed (default `dotfiles`)
       by dotdrop (absolute path or relative to the config file location)
     * `filter_file`: list of paths to load templating filters from
-      (see [Templating available filters](templating#available-filters))
+      (see [Templating available filters](../template/templating.md#available-filters))
     * `func_file`: list of paths to load templating functions from
-       (see [Templating available methods](templating#available-methods))
+       (see [Templating available methods](../template/templating.md#available-methods))
     * `ignoreempty`: do not deploy template if empty (default *false*)
     * `import_actions`: list of paths to load actions from
       (absolute path or relative to the config file location,
@@ -72,7 +72,7 @@ Content Format:
       (absolute path or relative to the config file location,
       see [Import variables from file](#import-variables-from-file))
     * `instignore`: list of patterns to ignore when installing, apply to all dotfiles
-      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern.md))
     * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
     * `link_dotfile_default`: set dotfile's `link` attribute to this value when undefined.
       Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
@@ -81,11 +81,11 @@ Content Format:
       Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
       see [Symlinking dotfiles](#symlinking-dotfiles))
     * `longkey`: use long keys for dotfiles when importing (default *false*,
-      see [Import dotfiles](usage#import-dotfiles))
+      see [Import dotfiles](../usage.md#import-dotfiles))
     * `minversion`: (*for internal use, do not modify*) provides the minimal dotdrop version to use
     * `showdiff`: on install show a diff before asking to overwrite (see `--showdiff`) (default *false*)
     * `upignore`: list of patterns to ignore when updating, apply to all dotfiles
-      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern))
+      (enclose in quotes when using wildcards, see [ignore patterns](ignore-pattern.md))
     * `workdir`: path to the directory where templates are installed before being symlinked
       when using `link:link` or `link:link_children`
       (absolute path or relative to the config file location, defaults to *~/.config/dotdrop*)
@@ -102,18 +102,18 @@ Content Format:
       Possible values: *nolink*, *link*, *link_children* (default: `link_dotfile_default`,
       see [Symlinking dotfiles](#symlinking-dotfiles))
     * `actions`: list of action keys that need to be defined in the **actions** entry below
-      (see [Use actions](usage-actions))
+      (see [Use actions](usage-actions.md))
     * `cmpignore`: list of patterns to ignore when comparing (enclose in quotes when using wildcards,
-      see [ignore patterns](ignore-pattern))
+      see [ignore patterns](ignore-pattern.md))
     * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
     * `instignore`: list of patterns to ignore when installing (enclose in quotes when using wildcards,
-      see [ignore patterns](ignore-pattern))
+      see [ignore patterns](ignore-pattern.md))
     * `trans_read`: transformation key to apply when installing this dotfile
-      (must be defined in the **trans_read** entry below, see [Use transformations](usage-transformations))
+      (must be defined in the **trans_read** entry below, see [Use transformations](usage-transformations.md))
     * `trans_write`: transformation key to apply when updating this dotfile
-      (must be defined in the **trans_write** entry below, see [Use transformations](usage-transformations))
+      (must be defined in the **trans_write** entry below, see [Use transformations](usage-transformations.md))
     * `upignore`: list of patterns to ignore when updating (enclose in quotes when using wildcards,
-      see [ignore patterns](ignore-pattern))
+      see [ignore patterns](ignore-pattern.md))
     * DEPRECATED `link_children`: replaced by `link: link_children`
     * DEPRECATED `trans`: replaced by `trans_read`
 
@@ -149,7 +149,7 @@ Content Format:
     * `dynvariables`: profile specific interpreted variables
       (see [Interpreted variables](#interpreted-variables))
     * `actions`: list of action keys that need to be defined in the **actions** entry below
-      (see [Use actions](usage-actions))
+      (see [Use actions](usage-actions.md))
 
 ```yaml
   <some-profile-name-usually-the-hostname>:
@@ -173,21 +173,21 @@ Content Format:
     - ...
 ```
 
-* **actions** entry (optional): a list of actions (see [Use actions](usage-actions))
+* **actions** entry (optional): a list of actions (see [Use actions](usage-actions.md))
 
 ```yaml
 actions:
   <action-key>: <command-to-execute>
 ```
 
-* **trans_read** entry (optional): a list of transformations (see [Use transformations](usage-transformations))
+* **trans_read** entry (optional): a list of transformations (see [Use transformations](usage-transformations.md))
 
 ```yaml
 trans_read:
    <trans-key>: <command-to-execute>
 ```
 
-* **trans_write** entry (optional): a list of write transformations (see [Use transformations](usage-transformations))
+* **trans_write** entry (optional): a list of write transformations (see [Use transformations](usage-transformations.md))
 
 ```yaml
 trans_write:
@@ -211,19 +211,19 @@ dynvariables:
 
 # Actions
 
-see [Actions](usage-actions)
+see [Actions](usage-actions.md)
 
 # Transformations
 
-see [Transformations](usage-transformations)
+see [Transformations](usage-transformations.md)
 
 # Variables
 
-see [Variables](config-variables)
+see [Variables](config-variables.md)
 
 # Interpreted variables
 
-see [Interpreted variables](config-variables)
+see [Interpreted variables](config-variables.md)
 
 # Symlinking dotfiles
 
@@ -234,7 +234,7 @@ which are controlled by the `link` attribute of each dotfile:
 * `link: link`: the dotfile (file or directory) is symlinked to its destination
 * `link: link_children`: the files/directories found under the dotfile (directory) are symlinked to their destination
 
-For more see [this how-to](symlinked-dotfiles)
+For more see [this how-to](../howto/symlinked-dotfiles.md)
 
 # All dotfiles for a profile
 
@@ -282,7 +282,7 @@ profiles:
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
 For more advanced use-cases variables
-([variables](config-variables) and [dynvariables](config-variables))
+([variables](config-variables.md) and [dynvariables](config-variables.md))
 can be used to specify the profile to include in a profile
 
 For example:
@@ -498,7 +498,7 @@ import_configs:
 # Dynamic dotfile paths
 
 Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
-defined variables ([variables and dynvariables](config-variables)).
+defined variables ([variables and dynvariables](config-variables.md)).
 
 For example to have a dotfile deployed on the unique firefox profile where the
 profile path is dynamically found using a shell oneliner stored in a dynvariable:
@@ -519,8 +519,8 @@ Make sure to quote the path in the config file.
 
 # Dynamic actions
 
-Variables ([config variables and dynvariables](config-variables)
-and [template variables](templating#template-variables)) can be used
+Variables ([config variables and dynvariables](config-variables.md)
+and [template variables](../template/templating.md#template-variables)) can be used
 in actions for more advanced use-cases.
 
 ```yaml
@@ -553,8 +553,8 @@ Make sure to quote the actions using variables.
 # Dynamic transformations
 
 As for [dynamic actions](#dynamic-actions), transformations support
-the use of variables ([variables and dynvariables](config-variables)
-and [template variables](templating#template-variables)).
+the use of variables ([variables and dynvariables](config-variables.md)
+and [template variables](../template/templating.md#template-variables)).
 
 A very dumb example:
 ```yaml

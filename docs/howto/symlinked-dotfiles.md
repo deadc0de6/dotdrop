@@ -10,7 +10,7 @@ Where `src` is considered as the file stored in your *dotpath* and
 `dst` as the file located in your `$HOME`.
 
 Note that if the dotfile is using template directives, it will be symlinked into
-`~/.config/dotdrop` instead of directly into your *dotpath* 
+`~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
 * [Link children](#link-children)
@@ -22,7 +22,7 @@ Note that if the dotfile is using template directives, it will be symlinked into
 
 This feature can be very useful for dotfiles when you don't want the entire
 directory to be symlink but still want to keep a clean config files (with a
-limited number of entries). 
+limited number of entries).
 
 *Make sure to do a backup of your dotfiles with something like `cp -r <my-important-dotfile>{,.bak}`*
 
@@ -85,11 +85,11 @@ $ tree -L 1 ~/.vim
 # Templating symlinked dotfiles
 
 For dotfiles not using any templating directives, those are directly linked
-to dotdrop's `dotpath` directory (see [Config](config)).
+to dotdrop's `dotpath` directory (see [Config](../config/config.md)).
 
 When using templating directives however the dotfiles are first installed into
-`workdir` (defaults to *~/.config/dotdrop*, see [Config](config))
-and then symlinked there. 
+`workdir` (defaults to *~/.config/dotdrop*, see [Config](../config/config.md))
+and then symlinked there.
 This applies to both dotfiles with `link: link` and `link: link_children`.
 
 For example

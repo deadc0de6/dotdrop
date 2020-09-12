@@ -1,6 +1,6 @@
 # Config variables
 
-* [Config available variables](available-variables)
+* [Config available variables](#available-variables)
     * [Variables entry](#variables-entry)
     * [Profile variables](#profile-variables)
     * [Config variables in templates](#config-variables-in-templates)
@@ -8,12 +8,12 @@
 
 ---
 
-# Config available variables
+# Available variables
 
 Multiple variables can be used within the config file to
 parametrize following elements of the config:
 
-* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](config#dynamic-dotfile-paths))
+* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](config.md#dynamic-dotfile-paths))
 * external path specifications
   * `import_variables`
   * `import_actions`
@@ -22,8 +22,8 @@ parametrize following elements of the config:
 
 `actions` and `transformations` also support the use of variables
 but those are resolved when the action/transformation is executed
-(see [Dynamic actions](config#dynamic-actions),
-[Dynamic transformations](config#dynamic-transformations) and [Templating](templating)).
+(see [Dynamic actions](config.md#dynamic-actions),
+[Dynamic transformations](config.md#dynamic-transformations) and [Templating](../template/templating.md)).
 
 Following variables are available in the config files:
 
@@ -31,9 +31,9 @@ Following variables are available in the config files:
 * [interpreted variables defined in the config](#interpreted-variables-entry)
 * [profile variables defined in the config](#profile-variables)
 * environment variables: `{{@@ env['MY_VAR'] @@}}`
-* dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating#dotdrop-header))
+* dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](../template/templating.md#dotdrop-header))
 
-As well as all template methods (see [Available methods](templating#available-methods))
+As well as all template methods (see [Available methods](../template/templating.md#available-methods))
 
 # Variables entry
 
@@ -89,7 +89,7 @@ profiles:
 # Config variables in templates
 
 `variables` and `dynvariables` are also made available in templates
-(see [Template variables](templating#template-variables)).
+(see [Template variables](../template/templating.md#template-variables)).
 
 Variables in the config file
 ```yaml

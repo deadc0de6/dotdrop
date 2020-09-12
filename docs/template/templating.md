@@ -43,8 +43,8 @@ Following variables are available in templates:
 * `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](https://github.com/deadc0de6/dotdrop/wiki/config).
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](https://github.com/deadc0de6/dotdrop/wiki/config) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* config variables (see [Variables](config-variables)).
-* config interpreted variables (see [Interpreted variables](config-variables)).
+* config variables (see [Variables](../config/config-variables.md)).
+* config interpreted variables (see [Interpreted variables](../config/config-variables.md)).
 
 # Dotfile variables
 
@@ -73,7 +73,7 @@ It's possible to access environment variables inside the templates.
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
-It is recommended to use `variables` (see [Config variables](#config-variables))
+It is recommended to use `variables` (see [Config variables](../config/config-variables.md))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in git.
 
@@ -215,7 +215,7 @@ It is possible to avoid having an empty rendered template being
 deployed by setting the `ignoreempty` entry to *true*. This can be set
 globally for all dotfiles or only for specific dotfiles.
 
-For more see the [Config](config).
+For more see the [Config](../config/config.md).
 
 # Include file or template in template
 

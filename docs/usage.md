@@ -12,8 +12,8 @@ Run `dotdrop --help` to see all available options.
     * [Update dotfiles](#update-dotfiles)
     * [Remove dotfiles](#remove-dotfiles)
 * Uses
-    * [Use actions](usage-actions)
-    * [Use transformations](usage-transformations)
+    * [Use actions](config/usage-actions.md)
+    * [Use transformations](config/usage-transformations.md)
 * [Update dotdrop](#update-dotdrop)
 * [Environment variables](#environment-variables)
 * [User tricks](#user-tricks)
@@ -47,7 +47,7 @@ options
 
 For more detail, see the usage with `dotdrop --help`
 
-To ignore specific pattern during installation see [the dedicated wiki page](ignore-pattern)
+To ignore specific pattern during installation see [the dedicated wiki page](config/ignore-pattern.md)
 
 # Compare dotfiles
 
@@ -60,7 +60,7 @@ The diffing is done by `diff` in the backend, one can provide its specific
 diff command using the config option `diff_command`.
 
 To ignore specific pattern,
-see [the dedicated wiki page](ignore-pattern)
+see [the dedicated wiki page](config/ignore-pattern.md)
 
 It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
@@ -176,11 +176,11 @@ $ dotdrop update --key f_vimrc
 If not argument is provided, all dotfiles for the selected profile are updated.
 
 To ignore specific pattern,
-see [the dedicated wiki page](ignore-pattern)
+see [the dedicated wiki page](config/ignore-pattern.md)
 
 There are two cases when updating a dotfile:
 
-## The dotfile doesn't use [templating](templating)
+## The dotfile doesn't use [templating](template/templating.md)
 
 The new version of the dotfile is copied to the *dotpath* directory and overwrites
 the old version. If git is used to version the dotfiles stored by dotdrop, the git command
@@ -191,7 +191,7 @@ $ dotdrop update ~/.vimrc
 $ git diff
 ```
 
-## The dotfile uses [templating](templating)
+## The dotfile uses [templating](template/templating.md)
 
 The dotfile must be manually updated, three solutions can be used to identify the
 changes to apply to the template:
