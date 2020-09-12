@@ -6,6 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/dotdrop.svg)](https://badge.fury.io/py/dotdrop)
 [![AUR](https://img.shields.io/aur/version/dotdrop.svg)](https://aur.archlinux.org/packages/dotdrop)
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
+[![Donate](https://img.shields.io/badge/donate-KoFi-blue.svg)](https://ko-fi.com/deadc0de6)
 
 *Save your dotfiles once, deploy them everywhere*
 
@@ -275,7 +276,7 @@ Dotdrop's documentation is hosted on [its wiki](https://github.com/deadc0de6/dot
 
 # Thank you
 
-If you like dotdrop, <a href='https://ko-fi.com/I2I2ZZT4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://az743702.vo.msecnd.net/cdn/kofi1.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+If you like dotdrop, [![buy me a coffee](https://img.shields.io/badge/donate-KoFi-blue.svg)](https://ko-fi.com/deadc0de6).
 
 # Contribution
 
