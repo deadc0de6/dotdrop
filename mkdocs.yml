@@ -14,3 +14,4 @@ nav:
   - HowTo: 'howto/index.md'
   - Dependencies: 'meta/dependencies.md'
   - People using dotdrop: 'meta/people-using-dotdrop.md'
+  - Contributing: 'contributing.md'
