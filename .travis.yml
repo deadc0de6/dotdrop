@@ -3,6 +3,7 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 dist: xenial
 install:
   - "pip install pip --upgrade"
