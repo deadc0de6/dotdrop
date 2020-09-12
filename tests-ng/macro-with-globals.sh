@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2019, deadc0de6
 #
-# test cmpignore
-# returns 1 in case of error
+# import variables from file
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -46,67 +45,58 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-# dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-echo "[+] dotdrop dir: ${basedir}"
-echo "[+] dotpath dir: ${basedir}/dotfiles"
-
-# the dotfile to be imported
+# the dotfile source
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
-# some files
-mkdir -p ${tmpd}/{program,config}
-touch ${tmpd}/program/a
-touch ${tmpd}/config/a
-
 # create the config file
-cfg="${basedir}/config.yaml"
+cfg="${tmps}/config.yaml"
+
 cat > ${cfg} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
 dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
 profiles:
+  p0:
+    dotfiles:
+    - f_abc
+variables:
+  global: global_var
+  local: local_var
 _EOF
 
-# import
-echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
+# create the source
+mkdir -p ${tmps}/dotfiles/
 
-# add files
-echo "[+] add files"
-touch ${tmpd}/program/b
-touch ${tmpd}/config/b
+cat > ${tmps}/dotfiles/macro_file << _EOF
+{%@@ macro macro(var) @@%}
+{{@@ global @@}}
+{{@@ var @@}}
+{%@@ endmacro @@%}
+_EOF
 
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
-cat ${cfg2}
+cat > ${tmps}/dotfiles/abc << _EOF
+{%@@ from 'macro_file' import macro with context @@%}
+{{@@ macro(local) @@}}
+_EOF
 
-# expects one diff
-echo "[+] comparing with ignore in dotfile - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" = "0" ] && exit 1
-set -e
+# install
+cd ${ddpath} | ${bin} install -c ${cfg} -p p0 -V
 
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects no diff
-patt="*b"
-echo "[+] comparing with ignore in dotfile - 0 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" != "0" ] && exit 1
-set -e
+# test file content
+cat ${tmpd}/abc
+grep 'global_var' ${tmpd}/abc >/dev/null 2>&1
+grep 'local_var' ${tmpd}/abc >/dev/null 2>&1
 
 ## CLEANING
-rm -rf ${basedir} ${tmpd}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

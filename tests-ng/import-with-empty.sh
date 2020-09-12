@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2019, deadc0de6
 #
-# test cmpignore
+# test import new dotfiles with empty dst/src on existing dotfiles
 # returns 1 in case of error
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -50,14 +50,12 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
-
-# the dotfile to be imported
+# the temp directory
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
-# some files
-mkdir -p ${tmpd}/{program,config}
-touch ${tmpd}/program/a
-touch ${tmpd}/config/a
+# create a dotfile
+dftoimport="${tmpd}/a_dotfile"
+echo 'some content' > ${dftoimport}
 
 # create the config file
 cfg="${basedir}/config.yaml"
@@ -67,43 +65,46 @@ config:
   create: true
   dotpath: dotfiles
 dotfiles:
+  f_x:
+    src: /tmp/x
+    dst:
+  f_y:
+    src:
+    dst: /tmp/y
+  f_z:
+    src:
+    dst:
+  f_l:
+    src:
+    dst:
+    link: link
+  f_lc:
+    src:
+    dst:
+    link: link_children
 profiles:
+  p1:
+    dotfiles:
+    - f_x
+    - f_y
+    - f_z
+    - f_l
+    - f_lc
 _EOF
 
-# import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
-
-# add files
-echo "[+] add files"
-touch ${tmpd}/program/b
-touch ${tmpd}/config/b
-
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects one diff
-echo "[+] comparing with ignore in dotfile - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" = "0" ] && exit 1
-set -e
-
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects no diff
-patt="*b"
-echo "[+] comparing with ignore in dotfile - 0 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 --verbose ${dftoimport}
 [ "$?" != "0" ] && exit 1
-set -e
+
+echo "[+] install"
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^5 dotfile(s) installed.$'
+rm -f ${dftoimport}
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^6 dotfile(s) installed.$'
+
+nb=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 --verbose | grep '^[a-zA-Z]' | wc -l`
+[ "${nb}" != "6" ] && echo 'error in dotfile list' && exit 1
+
+#cat ${cfg}
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}

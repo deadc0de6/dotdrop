@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -67,17 +68,26 @@ dotfiles:
   f_z:
     src:
     dst:
+  f_l:
+    src:
+    dst:
+    link: link
+  f_lc:
+    src:
+    dst:
+    link: link_children
 profiles:
   p1:
     dotfiles:
     - f_x
     - f_y
     - f_z
-
+    - f_l
+    - f_lc
 _EOF
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^3 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^5 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 ## CLEANING

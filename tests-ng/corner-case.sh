@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2019, deadc0de6
 #
-# test cmpignore
+# the only purpose is to test corner-cases
+# not covered by other tests like
+# dry
+# diff before write
+# etc
+#
 # returns 1 in case of error
 #
 
@@ -51,14 +56,6 @@ basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
-# the dotfile to be imported
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-
-# some files
-mkdir -p ${tmpd}/{program,config}
-touch ${tmpd}/program/a
-touch ${tmpd}/config/a
-
 # create the config file
 cfg="${basedir}/config.yaml"
 cat > ${cfg} << _EOF
@@ -67,46 +64,39 @@ config:
   create: true
   dotpath: dotfiles
 dotfiles:
+  f_x:
+    src: /tmp/x
+    dst:
+  f_y:
+    src: /tmp/.i-do-not-exist-dotdrop
+    dst: /tmp/y
 profiles:
+  p1:
+    dotfiles:
+    - f_x
+    - f_y
+
 _EOF
 
-# import
-echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
-
-# add files
-echo "[+] add files"
-touch ${tmpd}/program/b
-touch ${tmpd}/config/b
-
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects one diff
-echo "[+] comparing with ignore in dotfile - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" = "0" ] && exit 1
-set -e
-
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects no diff
-patt="*b"
-echo "[+] comparing with ignore in dotfile - 0 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
+echo "[+] test install dry"
+cd ${ddpath} | ${bin} install -c ${cfg} --dry -p p1 --verbose f_x
 [ "$?" != "0" ] && exit 1
-set -e
+
+echo "[+] test install show-diff"
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose f_x
+[ "$?" != "0" ] && exit 1
+cd ${ddpath} | ${bin} install -D -c ${cfg} -p p1 --verbose f_x
+[ "$?" != "0" ] && exit 1
+
+echo "[+] test install not existing src"
+cd ${ddpath} | ${bin} install -c ${cfg} --dry -p p1 --verbose f_y
+
+echo "[+] test install to temp"
+cd ${ddpath} | ${bin} install -t -c ${cfg} -p p1 --verbose f_x
+[ "$?" != "0" ] && exit 1
 
 ## CLEANING
-rm -rf ${basedir} ${tmpd}
+rm -rf ${basedir}
 
 echo "OK"
 exit 0

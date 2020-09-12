@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -86,7 +87,7 @@ mkdir -p ${tmpd}/sub/sub
 echo "test2" > ${tmpd}/sub/sub/abc
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p2 \
+cd ${ddpath} | ${bin} import --verbose -c ${cfg} -p p2 \
   ${tmpd}/abc \
   ${tmpd}/sub/abc \
   ${tmpd}/sub/abc \
@@ -94,7 +95,7 @@ cd ${ddpath} | ${bin} import -c ${cfg} -p p2 \
   ${tmpd}/sub/sub2/abc
 
 # count dotfiles for p2
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
+cnt=`cd ${ddpath} | ${bin} files --verbose -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
 [ "${cnt}" != "4" ] && exit 1
 
 ## CLEANING

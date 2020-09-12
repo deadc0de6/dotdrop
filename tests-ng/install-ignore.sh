@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -81,7 +82,7 @@ echo "new data" > ${basedir}/dotfiles/${tmpd}/readmes/README.md
 # install
 rm -rf ${tmpd}
 echo "[+] install normal"
-cd ${ddpath} | ${bin} install -c ${cfg} --verbose
+cd ${ddpath} | ${bin} install --showdiff -c ${cfg} --verbose
 [ "$?" != "0" ] && exit 1
 nb=`find ${tmpd} -iname 'README.md' | wc -l`
 echo "(1) found ${nb} README.md file(s)"

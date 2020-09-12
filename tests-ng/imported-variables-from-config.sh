@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# author: davla (https://github.com/davls)
+# Copyright (c) 2020, davla
 #
-# test cmpignore
+# test variables imported from config and used in the importing yaml config
 # returns 1 in case of error
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -46,67 +46,65 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-# dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-echo "[+] dotdrop dir: ${basedir}"
-echo "[+] dotpath dir: ${basedir}/dotfiles"
-
-# the dotfile to be imported
+# the dotfile source
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
-# some files
-mkdir -p ${tmpd}/{program,config}
-touch ${tmpd}/program/a
-touch ${tmpd}/config/a
-
 # create the config file
-cfg="${basedir}/config.yaml"
+cfg="${tmps}/config.yaml"
+subcfg="${tmps}/subconfig.yaml"
+
 cat > ${cfg} << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
+  import_configs:
+  - ${subcfg}
 dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: '{{@@ abc_dyn_src @@}}{{@@ abc_src @@}}'
 profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+cat ${cfg}
+
+# create the subconfig file
+cat > ${subcfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+variables:
+  abc_src: c
+dynvariables:
+  abc_dyn_src: 'echo ab'
+dotfiles: []
+profiles: []
 _EOF
 
-# import
-echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
+# create the dotfile
+dirname ${tmps}/dotfiles/abc | xargs mkdir -p
+cat > ${tmps}/dotfiles/abc << _EOF
+Hell yeah
+_EOF
 
-# add files
-echo "[+] add files"
-touch ${tmpd}/program/b
-touch ${tmpd}/config/b
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*/config/b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects one diff
-echo "[+] comparing with ignore in dotfile - 1 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" = "0" ] && exit 1
-set -e
-
-# adding ignore in dotfile
-cfg2="${basedir}/config2.yaml"
-sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*b"' ${cfg} > ${cfg2}
-cat ${cfg2}
-
-# expects no diff
-patt="*b"
-echo "[+] comparing with ignore in dotfile - 0 diff"
-set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
-[ "$?" != "0" ] && exit 1
-set -e
+# test file existence and content
+[ -f "${tmpd}/abc" ] || {
+    echo 'Dotfile not installed'
+    exit 1
+}
 
 ## CLEANING
-rm -rf ${basedir} ${tmpd}
+rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

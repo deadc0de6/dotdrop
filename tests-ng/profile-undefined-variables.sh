@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2019, deadc0de6
+# Copyright (c) 2017, deadc0de6
 #
-# test ignore update relative pattern
+# test variables defined in a different profile
+# than the one selected
 # returns 1 in case of error
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
@@ -46,63 +47,78 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-# dotdrop directory
+# the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-dt="${tmps}/dotfiles"
-mkdir -p ${dt}
-mkdir -p ${dt}/a/{b,c}
-echo 'a' > ${dt}/a/b/abfile
-echo 'a' > ${dt}/a/c/acfile
-
-# fs dotfiles
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-cp -r ${dt}/a ${tmpd}/
+#echo "dotfile destination: ${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
+
 cat > ${cfg} << _EOF
 config:
-  backup: false
+  backup: true
   create: true
   dotpath: dotfiles
 dotfiles:
   f_abc:
-    dst: ${tmpd}/a
-    src: a
-    upignore:
-    - "cfile"
-    - "newfile"
-    - "newdir"
+    dst: "${tmpd}/{{@@ defined_in_main @@}}"
+    src: abc
+  f_def:
+    dst: "${tmpd}/{{@@ defined_in_alt @@}}"
+    src: def
 profiles:
-  p1:
+  pmain:
+    dynvariables:
+      defined_in_main: echo abc
     dotfiles:
     - f_abc
+  palt:
+    dynvariables:
+      defined_in_alt: echo def
+    dotfiles:
+    - f_def
+  pall:
+    dynvariables:
+      defined_in_main: echo abcall
+      defined_in_alt: echo defall
+    dotfiles:
+    - ALL
+  pinclude:
+    include:
+    - pmain
 _EOF
 #cat ${cfg}
 
-#tree ${dt}
+# create the dotfile
+echo "main" > ${tmps}/dotfiles/abc
+echo "alt" > ${tmps}/dotfiles/def
 
-# edit/add files
-echo "[+] edit/add files"
-touch ${tmpd}/a/newfile
-echo 'b' > ${tmpd}/a/c/acfile
-mkdir -p ${tmpd}/a/newdir/b
-touch ${tmpd}/a/newdir/b/c
+# install pmain
+echo "install pmain"
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p pmain -V
+[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
+grep main ${tmpd}/abc
 
-#tree ${tmpd}/a
+# install pall
+echo "install pall"
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p pall -V
+[ ! -e ${tmpd}/abcall ] && echo "dotfile not installed" && exit 1
+grep main ${tmpd}/abcall
+[ ! -e ${tmpd}/defall ] && echo "dotfile not installed" && exit 1
+grep alt ${tmpd}/defall
 
-# update
-echo "[+] update"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
-
-#tree ${dt}
-
-# check files haven't been updated
-grep 'b' ${dt}/a/c/acfile >/dev/null
-[ -e ${dt}/a/newfile ] && exit 1
+# install pinclude
+echo "install pinclude"
+rm -f ${tmpd}/abc
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p pinclude -V
+[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
+grep main ${tmpd}/abc
 
 ## CLEANING
-rm -rf ${tmps} ${tmpd}
+rm -rf ${tmps} ${tmpd} ${scr} ${scr2}
 
 echo "OK"
 exit 0

@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -66,9 +67,9 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/vscode
+cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/program || exit 1
+cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/config || exit 1
+cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/vscode || exit 1
 
 # add files on filesystem
 echo "[+] add files"

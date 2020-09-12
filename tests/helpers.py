@@ -158,7 +158,6 @@ def load_options(confpath, profile):
     o.import_link = LinkTypes.NOLINK
     o.install_showdiff = True
     o.debug = True
-    o.variables = {}
     return o
 
 

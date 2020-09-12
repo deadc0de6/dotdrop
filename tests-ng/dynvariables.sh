@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -68,10 +69,12 @@ config:
   dotpath: dotfiles
 variables:
   var1: "this is some test"
+  var2: "the_dvar4"
 dynvariables:
   dvar1: head -1 /proc/meminfo
   dvar2: "echo 'this is some test' | rev | tr ' ' ','"
   dvar3: ${scr}
+  dvar4: "echo {{@@ var2 @@}} | rev"
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -88,17 +91,19 @@ echo "{{@@ var1 @@}}" > ${tmps}/dotfiles/abc
 echo "{{@@ dvar1 @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ dvar2 @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ dvar3 @@}}" >> ${tmps}/dotfiles/abc
+echo "{{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
 echo "test" >> ${tmps}/dotfiles/abc
 
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-#cat ${tmpd}/abc
+cat ${tmpd}/abc
 
 grep '^this is some test' ${tmpd}/abc >/dev/null
 grep "^MemTotal" ${tmpd}/abc >/dev/null
 grep '^tset,emos,si,siht' ${tmpd}/abc >/dev/null
 grep "^${TESTENV}" ${tmpd}/abc > /dev/null
+grep '^4ravd_eht' ${tmpd}/abc >/dev/null
 
 #cat ${tmpd}/abc
 

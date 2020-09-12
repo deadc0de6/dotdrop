@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -107,6 +108,9 @@ cd ${ddpath} | ${bin} files -c ${cfg} -p p1 | grep f_abc
 cd ${ddpath} | ${bin} files -c ${cfg} -p p2 | grep f_abc
 cd ${ddpath} | ${bin} files -c ${cfg} -p p3 | grep f_abc
 cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc
+
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc | wc -l`
+[ "${cnt}" != "1" ] && echo "dotfiles displayed more than once" && exit 1
 
 # count
 cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -b | grep '^f_' | wc -l`

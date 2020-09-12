@@ -14,6 +14,7 @@ from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.utils import patch_ignores, remove, get_unique_tmp_name, \
     write_to_tmpfile, must_ignore, mirror_file_rights
+from dotdrop.exceptions import UndefinedException
 
 
 TILD = '~'
@@ -186,7 +187,11 @@ class Updater:
             if self.debug:
                 self.log.dbg('{} is a template'.format(dtpath))
             if self.showpatch:
-                self._show_patch(path, dtpath)
+                try:
+                    self._show_patch(path, dtpath)
+                except UndefinedException as e:
+                    msg = 'unable to show patch for {}: {}'.format(path, e)
+                    self.log.warn(msg)
             return False
         if compare and filecmp.cmp(path, dtpath, shallow=False) and \
                 self._same_rights(path, dtpath):

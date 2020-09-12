@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -76,7 +77,7 @@ _EOF
 
 # create the dotfile
 mkdir -p ${tmps}/dotfiles/d1
-echo "{{@@ var1 @@}}" > ${tmps}/dotfiles/d1/empty
+echo "{#@@ should be stripped @@#}" > ${tmps}/dotfiles/d1/empty
 echo "not empty" > ${tmps}/dotfiles/d1/notempty
 
 # install

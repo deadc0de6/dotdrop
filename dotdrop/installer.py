@@ -12,6 +12,7 @@ import errno
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
+from dotdrop.exceptions import UndefinedException
 
 
 class Installer:
@@ -239,7 +240,6 @@ class Installer:
                 actionexec = None
             else:
                 if err:
-                    return ret, err
                     return self._log_install(ret, err)
 
         return self._log_install(installed > 0, None)
@@ -325,8 +325,12 @@ class Installer:
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
         saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
-        content = templater.generate(src)
-        templater.restore_vars(saved)
+        try:
+            content = templater.generate(src)
+        except UndefinedException as e:
+            return False, str(e)
+        finally:
+            templater.restore_vars(saved)
         if noempty and utils.content_empty(content):
             if self.debug:
                 self.log.dbg('ignoring empty template: {}'.format(src))
@@ -547,9 +551,10 @@ class Installer:
         src = os.path.expanduser(src)
         dst = os.path.expanduser(dst)
         if self.debug:
-            self.log.dbg('tmp install {} to {}'.format(src, dst))
+            self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
         # install the dotfile to a temp directory for comparing
-        ret, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
+        r, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
+        ret, err = r
         if self.debug:
             self.log.dbg('tmp installed in {}'.format(tmpdst))
         # reset flags
@@ -557,4 +562,4 @@ class Installer:
         self.diff = diffsaved
         self.comparing = False
         self.create = createsaved
-        return ret, tmpdst
+        return ret, err, tmpdst

@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -55,6 +56,7 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 # create the config file
 cfg="${tmps}/config.yaml"
+export dotdrop_test_dst="${tmpd}/def"
 
 cat > ${cfg} << _EOF
 config:
@@ -65,14 +67,19 @@ variables:
   var1: "this is some test"
   var2: 12
   var3: another test
+  vardst: "{{@@ env['dotdrop_test_dst'] @@}}"
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
+  f_def:
+    dst: "{{@@ vardst @@}}"
+    src: def
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - f_def
 _EOF
 #cat ${cfg}
 
@@ -82,12 +89,18 @@ echo "{{@@ var2 @@}}" >> ${tmps}/dotfiles/abc
 echo "{{@@ var3 @@}}" >> ${tmps}/dotfiles/abc
 echo "test" >> ${tmps}/dotfiles/abc
 
-# install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+echo "test_def" > ${tmps}/dotfiles/def
 
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --verbose
+
+[ ! -e ${tmpd}/abc ] && echo "abc not installed" && exit 1
 grep '^this is some test' ${tmpd}/abc >/dev/null
 grep '^12' ${tmpd}/abc >/dev/null
 grep '^another test' ${tmpd}/abc >/dev/null
+
+[ ! -e ${tmpd}/def ] && echo "def not installed" && exit 1
+grep '^test_def' ${tmpd}/def >/dev/null
 
 #cat ${tmpd}/abc
 

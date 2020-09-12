@@ -109,9 +109,11 @@ class Options(AttrMonitor):
         """constructor
         @args: argument dictionary (if None use sys)
         """
-        self.args = args
+        self.args = {}
         if not args:
             self.args = docopt(USAGE, version=VERSION)
+        if args:
+            self.args = args.copy()
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
@@ -122,6 +124,7 @@ class Options(AttrMonitor):
         self.confpath = self._get_config_path()
         if self.debug:
             self.log.dbg('version: {}'.format(VERSION))
+            self.log.dbg('command: {}'.format(' '.join(sys.argv)))
             self.log.dbg('config file: {}'.format(self.confpath))
 
         self._read_config()

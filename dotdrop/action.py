@@ -11,6 +11,7 @@ import os
 
 # local imports
 from dotdrop.dictparser import DictParser
+from dotdrop.exceptions import UndefinedException
 
 
 class Cmd(DictParser):
@@ -32,7 +33,12 @@ class Cmd(DictParser):
         ret = 1
         action = self.action
         if templater:
-            action = templater.generate_string(self.action)
+            try:
+                action = templater.generate_string(self.action)
+            except UndefinedException as e:
+                err = 'bad {}: {}'.format(self.descr, e)
+                self.log.warn(err)
+                return False
             if debug:
                 self.log.dbg('{}:'.format(self.descr))
                 self.log.dbg('  - raw       \"{}\"'.format(self.action))
@@ -42,7 +48,12 @@ class Cmd(DictParser):
         if self.args:
             args = self.args
             if templater:
-                args = [templater.generate_string(a) for a in args]
+                try:
+                    args = [templater.generate_string(a) for a in args]
+                except UndefinedException as e:
+                    err = 'bad arguments for {}: {}'.format(self.descr, e)
+                    self.log.warn(err)
+                    return False
         if debug and args:
             self.log.dbg('action args:')
             for cnt, arg in enumerate(args):

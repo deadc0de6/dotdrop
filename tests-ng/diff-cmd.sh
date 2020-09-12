@@ -32,6 +32,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -67,15 +68,15 @@ dotfiles:
 profiles:
 _EOF
 
+export DOTDROP_FORCE_NODEBUG=yes
+export DOTDROP_NOBANNER=yes
+
 # import
 echo "[+] import"
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/singlefile
 
 # modify the file
 echo "modified" > ${tmpd}/singlefile
-
-# suppressing the banner, so we can compare dotdrop diff with UNIX diff
-export DOTDROP_NOBANNER=yes
 
 # default diff (unified)
 echo "[+] comparing with default diff (unified)"
@@ -121,7 +122,9 @@ grep fakediff ${tmpd}/fake &> /dev/null || exit 1
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
+
 unset DOTDROP_NOBANNER
+unset DOTDROP_FORCE_NODEBUG
 
 echo "OK"
 exit 0

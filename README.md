@@ -38,7 +38,7 @@ Features:
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
 the [example](#getting-started), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
-how [people are using dotdrop](https://github.com/deadc0de6/dotdrop/wiki/people-using-dotdrop)
+how [people are using dotdrop](https://github.com/deadc0de6/dotdrop/wiki/meta-people-using-dotdrop)
 for more.
 
 Quick start:
@@ -261,8 +261,8 @@ That's it, a single repository with all your dotfiles for your different hosts.
 
 You can then
 
-* [create actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions)
-* [use transformations](https://github.com/deadc0de6/dotdrop/wiki/usage-transformations)
+* [create actions](https://github.com/deadc0de6/dotdrop/wiki/config-actions)
+* [use transformations](https://github.com/deadc0de6/dotdrop/wiki/config-transformations)
 * [use variables](https://github.com/deadc0de6/dotdrop/wiki/config-variables)
 * [symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles)
 * [and more](https://github.com/deadc0de6/dotdrop/wiki)

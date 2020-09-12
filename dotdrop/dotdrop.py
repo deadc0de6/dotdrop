@@ -20,7 +20,7 @@ from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, remove, strip_home, \
     run, uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
-from dotdrop.exceptions import YamlException
+from dotdrop.exceptions import YamlException, UndefinedException
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
@@ -230,6 +230,7 @@ def cmd_compare(o, tmp):
         newvars = dotfile.get_dotfile_variables()
         t.add_tmp_vars(newvars=newvars)
 
+        # dotfiles does not exist / not installed
         if o.debug:
             LOG.dbg('comparing {}'.format(dotfile))
         src = dotfile.src
@@ -239,9 +240,9 @@ def cmd_compare(o, tmp):
             same = False
             continue
 
+        # apply transformation
         tmpsrc = None
         if dotfile.trans_r:
-            # apply transformation
             if o.debug:
                 LOG.dbg('applying transformation before comparing')
             tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
@@ -261,20 +262,26 @@ def cmd_compare(o, tmp):
                 LOG.dbg('points to itself')
             continue
 
-        # install dotfile to temporary dir
-        ret, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
+        # install dotfile to temporary dir and compare
+        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
         if not ret:
             # failed to install to tmp
+            line = '=> compare {}: error'
+            LOG.log(line.format(dotfile.key, err))
+            LOG.err(err)
             same = False
             continue
         ignores = list(set(o.compare_ignore + dotfile.cmpignore))
         ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
         diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
+
+        # clean tmp transformed dotfile if any
         if tmpsrc:
-            # clean tmp transformed dotfile if any
             tmpsrc = os.path.join(o.dotpath, tmpsrc)
             if os.path.exists(tmpsrc):
                 remove(tmpsrc)
+
+        # print diff result
         if diff == '':
             if o.debug:
                 line = '=> compare {}: diffing with \"{}\"'
@@ -655,7 +662,10 @@ def main():
     try:
         o = Options()
     except YamlException as e:
-        LOG.err('config file error: {}'.format(str(e)))
+        LOG.err('config error: {}'.format(str(e)))
+        return False
+    except UndefinedException as e:
+        LOG.err('config error: {}'.format(str(e)))
         return False
 
     if o.debug:

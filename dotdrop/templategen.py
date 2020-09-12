@@ -7,12 +7,16 @@ jinja2 template generator
 
 import os
 from jinja2 import Environment, FileSystemLoader, \
-    ChoiceLoader, FunctionLoader, TemplateNotFound
+    ChoiceLoader, FunctionLoader, TemplateNotFound, \
+    StrictUndefined
+from jinja2.exceptions import UndefinedError
+
 
 # local imports
 import dotdrop.utils as utils
 from dotdrop.logger import Logger
 import dotdrop.jhelpers as jhelpers
+from dotdrop.exceptions import UndefinedException
 
 BLOCK_START = '{%@@'
 BLOCK_END = '@@%}'
@@ -36,6 +40,7 @@ class Templategen:
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger()
+        self.variables = {}
         loader1 = FileSystemLoader(self.base)
         loader2 = FunctionLoader(self._template_loader)
         loader = ChoiceLoader([loader1, loader2])
@@ -47,11 +52,14 @@ class Templategen:
                                variable_start_string=VAR_START,
                                variable_end_string=VAR_END,
                                comment_start_string=COMMENT_START,
-                               comment_end_string=COMMENT_END)
+                               comment_end_string=COMMENT_END,
+                               undefined=StrictUndefined)
+
         # adding variables
-        self.env.globals['env'] = os.environ
+        self.variables['env'] = os.environ
         if variables:
-            self.env.globals.update(variables)
+            self.variables.update(variables)
+
         # adding header method
         self.env.globals['header'] = self._header
         # adding helper methods
@@ -72,32 +80,48 @@ class Templategen:
             self._debug_dict('template additional variables', variables)
 
     def generate(self, src):
-        """render template from path"""
+        """
+        render template from path
+        may raise a UndefinedException
+        in case a variable is undefined
+        """
         if not os.path.exists(src):
             return ''
-        return self._handle_file(src)
+        try:
+            return self._handle_file(src)
+        except UndefinedError as e:
+            err = 'undefined variable: {}'.format(e.message)
+            raise UndefinedException(err)
 
     def generate_string(self, string):
-        """render template from string"""
+        """
+        render template from string
+        may raise a UndefinedException
+        in case a variable is undefined
+        """
         if not string:
             return ''
-        return self.env.from_string(string).render()
+        try:
+            return self.env.from_string(string).render(self.variables)
+        except UndefinedError as e:
+            err = 'undefined variable: {}'.format(e.message)
+            raise UndefinedException(err)
 
     def add_tmp_vars(self, newvars={}):
         """add vars to the globals, make sure to call restore_vars"""
-        saved_globals = self.env.globals.copy()
+        saved_variables = self.variables.copy()
         if not newvars:
-            return saved_globals
-        self.env.globals.update(newvars)
-        return saved_globals
+            return saved_variables
+        self.variables.update(newvars)
+        return saved_variables
 
     def restore_vars(self, saved_globals):
         """restore globals from add_tmp_vars"""
-        self.env.globals = saved_globals.copy()
+        self.variables = saved_globals.copy()
 
     def update_variables(self, variables):
         """update variables"""
-        self.env.globals.update(variables)
+        self.variables.update(variables)
 
     def _load_path_to_dic(self, path, dic):
         mod = utils.get_module_from_path(path)
@@ -160,7 +184,7 @@ class Templategen:
         template_rel_path = os.path.relpath(src, self.base)
         try:
             template = self.env.get_template(template_rel_path)
-            content = template.render()
+            content = template.render(self.variables)
         except UnicodeDecodeError:
             data = self._read_bad_encoded_text(src)
             content = self.generate_string(data)
