@@ -69,4 +69,17 @@ unset DOTDROP_FORCE_NODEBUG
   rm -f ${log}
 }
 
+## test the doc with remark
+## https://github.com/remarkjs/remark-validate-links
+set +e
+which remark >/dev/null 2>&1
+r="$?"
+set -e
+if [ "$r" != "0" ]; then
+  echo "[WARNING] install \"remark\" to test the doc"
+else
+  remark -f -u validate-links docs/
+fi
+
+## done
 echo "All test finished successfully"
