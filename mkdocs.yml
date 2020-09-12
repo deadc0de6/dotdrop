@@ -1,0 +1,18 @@
+site_name: dotdrop
+site_url: https://github.com/deadc0de6/dotdrop
+repo_url: https://github.com/deadc0de6/dotdrop
+theme:
+    name: readthedocs
+    highlightjs: true
+use_directory_urls: true
+markdown_extensions:
+  - mdx_truly_sane_lists
+nav:
+  - Home: 'index.md'
+  - Installation: 'installation.md'
+  - Usage: 'usage.md'
+  - Config: 'config/config.md'
+  - Template: 'template/templating.md'
+  - HowTo: 'howto/index.md'
+  - Dependencies: 'meta/dependencies.md'
+  - People using dotdrop: 'meta/people-using-dotdrop.md'
