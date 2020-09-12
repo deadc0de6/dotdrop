@@ -276,7 +276,7 @@ Dotdrop's documentation is hosted on [its wiki](https://github.com/deadc0de6/dot
 
 # Thank you
 
-If you like dotdrop, [![buy me a coffee](https://img.shields.io/badge/donate-KoFi-blue.svg)](https://ko-fi.com/deadc0de6).
+If you like dotdrop, [buy me a coffee](https://ko-fi.com/deadc0de6).
 
 # Contribution
 
