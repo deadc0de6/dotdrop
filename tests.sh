@@ -79,6 +79,7 @@ if [ "$r" != "0" ]; then
   echo "[WARNING] install \"remark\" to test the doc"
 else
   remark -f -u validate-links docs/
+  remark -f -u validate-links *.md
 fi
 
 ## done
