@@ -18,7 +18,7 @@ Installation instructions
     * [Snap package](#snap-package)
 * [Setup your repository](#setup-your-repository)
 * [Shell completion](#shell-completion)
-* [Dependencies](dependencies)
+* [Dependencies](meta/dependencies.md)
 
 # As a submodule
 
@@ -169,4 +169,5 @@ Finally start using dotdrop with `dotdrop --help`. See the [usage doc](https://g
 
 # Shell completion
 
-Completion scripts exist for `bash`, `zsh` and `fish`, see [the related doc](completion/README.md).
+Completion scripts exist for `bash`, `zsh` and `fish`,
+see [the related doc](https://github.com/deadc0de6/dotdrop/blob/master/completion/README.md).
