@@ -4,21 +4,7 @@ Dotdrop leverage the power of [jinja2](http://jinja.pocoo.org/) to handle the
 templating of dotfiles. See [jinja2 template doc](http://jinja.pocoo.org/docs/2.9/templates/)
 or the below sections for more information on how to template your dotfiles.
 
-* [Delimiters](#delimiters)
-* [Template variables](#template-variables)
-    * [Dotfile variables](#dotfile-variables)
-    * [Environment variables](#environment-variables)
-    * [Dotdrop header](#dotdrop-header)
-* [Available methods](#available-methods)
-* [Available filters](#available-filters)
-* [Import macros](#import-macros)
-* [Ignore empty template](#ignore-empty-template)
-* [Include file or template in template](#include-file-or-template-in-template)
-* [Debug templates](#debug-templates)
-
----
-
-# Delimiters
+## Delimiters
 
 Dotdrop uses different delimiters than
 [jinja2](http://jinja.pocoo.org/)'s defaults:
@@ -32,7 +18,7 @@ Dotdrop uses different delimiters than
 
 More info in [jinja2 templating doc](https://jinja.palletsprojects.com/en/2.11.x/templates/?highlight=delimiter)
 
-# Template variables
+## Template variables
 
 Following variables are available in templates:
 
@@ -46,7 +32,7 @@ Following variables are available in templates:
 * config variables (see [Variables](../config/config-variables.md)).
 * config interpreted variables (see [Interpreted variables](../config/config-variables.md)).
 
-# Dotfile variables
+## Dotfile variables
 
 When a dotfile is handled by dotdrop, the following variables are added:
 
@@ -65,7 +51,7 @@ For example a directory dotfile (like `~/.ssh`) would process several files
 * `_dotfile_abs_dst` would be `/home/user/.ssh`
 * `_dotfile_sub_abs_dst` would be `/home/user/.ssh/config`
 
-# Environment variables
+## Environment variables
 
 It's possible to access environment variables inside the templates.
 ```
@@ -97,7 +83,7 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
 
-# Dotdrop header
+## Dotdrop header
 
 Dotdrop is able to insert a header in the generated dotfiles. This allows
 to remind anyone opening the file for editing that this file is managed by dotdrop.
@@ -118,7 +104,7 @@ Either prepend the directive with the commenting char(s) used in the dotfile
 (for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
 The result is equivalent.
 
-# Available methods
+## Available methods
 
 Beside [jinja2 global functions](http://jinja.pocoo.org/docs/2.10/templates/#list-of-global-functions)
 the following methods can be used within the templates:
@@ -173,7 +159,7 @@ this should exist
 {%@@ endif @@%}
 ```
 
-# Available filters
+## Available filters
 
 Beside [jinja2 builtin filters](https://jinja.palletsprojects.com/en/2.10.x/templates/#builtin-filters)
 custom user-defined filter functions can be loaded using the config entry `filter_file`:
@@ -200,7 +186,7 @@ dotfile content
 For more information on how to create filters,
 see [jinja2 official doc](https://jinja.palletsprojects.com/en/2.10.x/api/#writing-filters).
 
-# Import macros
+## Import macros
 
 Macros must be imported `with context` in order to have access to the variables:
 ```
@@ -209,7 +195,7 @@ Macros must be imported `with context` in order to have access to the variables:
 
 For more see the [dedicated jinja2 doc](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros).
 
-# Ignore empty template
+## Ignore empty template
 
 It is possible to avoid having an empty rendered template being
 deployed by setting the `ignoreempty` entry to *true*. This can be set
@@ -217,7 +203,7 @@ globally for all dotfiles or only for specific dotfiles.
 
 For more see the [Config](../config/config.md).
 
-# Include file or template in template
+## Include file or template in template
 
 [Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) provides the ability to include an external file/template from within a template with the directive `include`. See the [related doc](http://jinja.pocoo.org/docs/2.10/templates/#include) for more. The path must be relative to the `dotpath`.
 
@@ -232,7 +218,7 @@ For example:
 {%@@ include colors_path + '/black.colors' @@%}
 ```
 
-# Debug templates
+## Debug templates
 
 To debug the result of a template, one can install the dotfiles to a temporary
 directory with the `install` command and the `-t` switch:

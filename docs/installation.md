@@ -7,20 +7,7 @@ If you want to keep your python environment clean, use the virtualenv installati
 [With pypi in a virtualenv](#with-pypi-in-a-virtualenv)).
 In that case, the virtualenv environment might need to be loaded before any attempt to use dotdrop.
 
-Installation instructions
-
-* Installation
-    * [Install as a submodule](#as-a-submodule)
-    * [Install as a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv)
-    * [Install with pypi](#with-pypi)
-    * [Install with pypi in a virtualenv](#with-pypi-in-a-virtualenv)
-    * [Aur packages](#aur-packages)
-    * [Snap package](#snap-package)
-* [Setup your repository](#setup-your-repository)
-* [Shell completion](#shell-completion)
-* [Dependencies](meta/dependencies.md)
-
-# As a submodule
+## As a submodule
 
 The following will create a git repository for your dotfiles and
 keep dotdrop as a submodule:
@@ -51,7 +38,7 @@ shell with the config file path, for example
 alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
-# As a submodule in a virtualenv
+## As a submodule in a virtualenv
 
 To install in a [virtualenv](https://virtualenv.pypa.io):
 ```bash
@@ -79,7 +66,7 @@ $ ./dotdrop.sh --help
 
 Then follow the instructions under [As a submodule](#as-a-submodule).
 
-# With pypi
+## With pypi
 
 Install dotdrop
 ```bash
@@ -88,7 +75,7 @@ $ pip3 install --user dotdrop
 
 and then [setup your repository](#setup-your-repository).
 
-# With pypi in a virtualenv
+## With pypi in a virtualenv
 
 Install dotdrop in a virtualenv from pypi
 ```bash
@@ -106,7 +93,7 @@ $ dotdrop --help
 
 Then follow the instructions under [With pypi](#with-pypi).
 
-# Aur packages
+## Aur packages
 
 Dotdrop is available on aur:
 * stable: https://aur.archlinux.org/packages/dotdrop/
@@ -114,7 +101,7 @@ Dotdrop is available on aur:
 
 Then follow the [doc to setup your repository](#setup-your-repository).
 
-# Snap package
+## Snap package
 
 Dotdrop is available as a snap package: <https://snapcraft.io/dotdrop>
 
@@ -125,7 +112,45 @@ snap install dotdrop
 
 Then follow the [doc to setup your repository](#setup-your-repository).
 
-# Setup your repository
+## Dependencies
+
+Beside the python dependencies defined in [requirements.txt](https://github.com/deadc0de6/dotdrop/blob/master/requirements.txt),
+dotdrop depends on following tools:
+
+* `file`
+* `diff`
+* `mkdir`
+* `git` (for the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
+* `readlink` or `realpath` (for the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
+
+For MacOS users, make sure to install `realpath` (part of `coreutils`) through [homebrew](https://brew.sh/).
+
+## Update dotdrop
+
+If using dotdrop as a submodule, one can control if dotdrop
+is auto-updated through the [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh)
+script by defining the environment variable `DOTDROP_AUTOUPDATE=yes`.
+If undefined, `DOTDROP_AUTOUPDATE` will take the value `yes`.
+
+If used as a submodule, update it with
+```bash
+$ git submodule update --init --recursive
+$ git submodule update --remote dotdrop
+```
+
+You will then need to commit the changes with
+```bash
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
+```
+
+Or if installed through pypi:
+```bash
+$ pip3 install --user dotdrop --upgrade
+```
+
+## Setup your repository
 
 Either create a repository on your prefered platform and clone it or create one locally.
 This repository will contain two main elements, dotdrop's config file (`config.yaml`)
@@ -167,7 +192,8 @@ For more info on the config file format, see [the config doc](https://github.com
 
 Finally start using dotdrop with `dotdrop --help`. See the [usage doc](https://github.com/deadc0de6/dotdrop/wiki/usage) and [the example](https://github.com/deadc0de6/dotdrop/blob/master/README.md#getting-started).
 
-# Shell completion
+## Shell completion
 
 Completion scripts exist for `bash`, `zsh` and `fish`,
 see [the related doc](https://github.com/deadc0de6/dotdrop/blob/master/completion/README.md).
+

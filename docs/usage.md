@@ -2,38 +2,22 @@
 
 Run `dotdrop --help` to see all available options.
 
-* [Basic use](#basic-use)
-* Commands:
-    * [Install dotfiles](#install-dotfiles)
-    * [Compare dotfiles](#compare-dotfiles)
-    * [Import dotfiles](#import-dotfiles)
-    * [List profiles](#list-profiles)
-    * [List dotfiles](#list-dotfiles)
-    * [Update dotfiles](#update-dotfiles)
-    * [Remove dotfiles](#remove-dotfiles)
-* Uses
-    * [Use actions](config/usage-actions.md)
-    * [Use transformations](config/usage-transformations.md)
-* [Update dotdrop](#update-dotdrop)
-* [Environment variables](#environment-variables)
-* [User tricks](#user-tricks)
-
----
-
-# Basic use
+## Basic usage
 
 The basic use of dotdrop is
+
 * import a file/directory to manage (this will copy the files from the filesystem to your `dotpath`): `dotdrop import <somefile>`
 * install the dotfiles (will *copy/link* those from your `dotpath` to the filesystem): `dotdrop install`
 
 Then if you happen to update the file/directory directly on the filesystem (add new file/dir, edit content, etc) you can use `update` to mirror back those changes in the `dotpath` of dotdrop.
 
 For more advanced uses:
+
 * See [this wiki](https://github.com/deadc0de6/dotdrop/wiki)
 * `dotdrop --help` for more options.
 * [the example](https://github.com/deadc0de6/dotdrop#getting-started)
 
-# Install dotfiles
+## Install dotfiles
 
 Simply run
 ```bash
@@ -49,7 +33,7 @@ For more detail, see the usage with `dotdrop --help`
 
 To ignore specific pattern during installation see [the dedicated wiki page](config/ignore-pattern.md)
 
-# Compare dotfiles
+## Compare dotfiles
 
 Compare local dotfiles with the ones stored in dotdrop:
 ```bash
@@ -66,7 +50,7 @@ It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
 the local version by using `install` and the `-t` switch.
 
-# Import dotfiles
+## Import dotfiles
 
 Dotdrop allows to import dotfiles directly from the
 filesystem. It will copy the dotfile and update the
@@ -106,7 +90,7 @@ dotfiles management.
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test
 ```
 
-# List profiles
+## List profiles
 
 ```bash
 $ dotdrop profiles
@@ -119,7 +103,7 @@ else than the default (the hostname).
 The default profile can also be changed by defining the
 `DOTDROP_PROFILE` environment variable.
 
-# List dotfiles
+## List dotfiles
 
 The following command lists the different dotfiles
 configured for a specific profile:
@@ -155,7 +139,7 @@ This is especially useful when the dotfile entry is a directory
 and one wants to have information on the different files (is it
 a templated file, etc).
 
-# Update dotfiles
+## Update dotfiles
 
 Dotfiles managed by dotdrop can be updated using the `update` command. When updating, only
 dotfiles that have differences with the stored version are updated.
@@ -180,7 +164,7 @@ see [the dedicated wiki page](config/ignore-pattern.md)
 
 There are two cases when updating a dotfile:
 
-## The dotfile doesn't use [templating](template/templating.md)
+### The dotfile doesn't use [templating](template/templating.md)
 
 The new version of the dotfile is copied to the *dotpath* directory and overwrites
 the old version. If git is used to version the dotfiles stored by dotdrop, the git command
@@ -191,7 +175,7 @@ $ dotdrop update ~/.vimrc
 $ git diff
 ```
 
-## The dotfile uses [templating](template/templating.md)
+### The dotfile uses [templating](template/templating.md)
 
 The dotfile must be manually updated, three solutions can be used to identify the
 changes to apply to the template:
@@ -227,7 +211,7 @@ in the command line. For example for a dotfile having a key `f_zshrc` in the con
 $ dotdrop install -t f_zshrc
 ```
 
-# Remove dotfiles
+## Remove dotfiles
 
 The command `remove` allows to stop managing a specific dotfile with
 dotdrop. It will:
@@ -235,32 +219,7 @@ dotdrop. It will:
 * remove the entry in the config file (under `dotfiles` and `profile`)
 * remove the file from the `dotpath`
 
-# Update dotdrop
-
-If using dotdrop as a submodule, one can control if dotdrop
-is auto-updated through the [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh)
-script by defining the environment variable `DOTDROP_AUTOUPDATE=yes`.
-If undefined, `DOTDROP_AUTOUPDATE` will take the value `yes`.
-
-If used as a submodule, update it with
-```bash
-$ git submodule update --init --recursive
-$ git submodule update --remote dotdrop
-```
-
-You will then need to commit the changes with
-```bash
-$ git add dotdrop
-$ git commit -m 'update dotdrop'
-$ git push
-```
-
-Or if installed through pypi:
-```bash
-$ pip3 install --user dotdrop --upgrade
-```
-
-# Environment variables
+## Environment variables
 
 Following environment variables can be used to specify different CLI options.
 Note that CLI switches take precedence over environment variables (except for `DOTDROP_FORCE_NODEBUG`)
@@ -285,20 +244,3 @@ export DOTDROP_DEBUG=
 ```bash
 export DOTDROP_FORCE_NODEBUG=
 ```
-
-# User tricks
-
-## Improve git integration
-
-The below aliases can help with the process of updating your dotfiles between multiple hosts. Add those to your `~/.zshrc` or `~/.bashrc`. You can then simply run `dotsync` to push or pull from your dotfile repository.
-
-```
-# Your dotdrop git repository location
-export DOTREPO="/path/to/your/dotdrop/repo"
-
-alias dotdrop="$DOTREPO/dotdrop.sh"
-alias dotgit="git -C $DOTREPO"
-alias dotsync="dotgit pull && dotgit add -A && dotgit commit && dotgit push; dotdrop install"
-```
-
-Provided by [ReekyMarko](https://github.com/ReekyMarko)

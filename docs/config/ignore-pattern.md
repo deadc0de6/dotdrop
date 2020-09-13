@@ -1,9 +1,4 @@
-* [ignore patterns](#ignore-patterns)
-* [examples](#examples)
-
----
-
-# ignore patterns
+# Ignore patterns
 
 It is possible to ignore specific patterns when using dotdrop. For example for `compare` when temporary
 files don't need to appear in the output.
@@ -41,7 +36,7 @@ dotfiles:
 ...
 ```
 
-# examples
+## examples
 
 To completely ignore comparison of a specific dotfile:
 ```yaml

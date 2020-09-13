@@ -3,28 +3,7 @@
 The config file used by dotdrop is
 [config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
 
-* [Location](#location)
-* [Format](#format)
-    * [Actions](#actions)
-    * [Transformations](#transformations)
-    * [Variables](#variables)
-    * [Interpreted variables](#interpreted-variables)
-* Config details on
-    * [Symlinking dotfiles](#symlinking-dotfiles)
-    * [All dotfiles for a profile](#all-dotfiles-for-a-profile)
-    * [Include dotfiles from another profile](#include-dotfiles-from-another-profile)
-    * [Import profile dotfiles from file](#import-profile-dotfiles-from-file)
-    * [Import variables from file](#import-variables-from-file)
-    * [Import actions from file](#import-actions-from-file)
-    * [Import config files](#import-config-files)
-* Dynamic elements
-    * [Dynamic dotfile paths](#dynamic-dotfile-paths)
-    * [Dynamic actions](#dynamic-actions)
-    * [Dynamic transformations](#dynamic-transformations)
-
----
-
-# Location
+## Location
 
 Unless specified dotdrop will look in following places for the config file (`config.yaml`)
 and use the first one found
@@ -38,7 +17,7 @@ and use the first one found
 You can force dotdrop to use a different file either by using the `-c --cfg` cli switch
 or by defining the `DOTDROP_CONFIG` environment variable.
 
-# Format
+## Format
 
 Dotdrop config file uses [yaml](https://yaml.org/) syntax.
 
@@ -209,23 +188,23 @@ dynvariables:
   <variable-name>: <shell-oneliner>
 ```
 
-# Actions
+## Actions
 
 see [Actions](usage-actions.md)
 
-# Transformations
+## Transformations
 
 see [Transformations](usage-transformations.md)
 
-# Variables
+## Variables
 
 see [Variables](config-variables.md)
 
-# Interpreted variables
+## Interpreted variables
 
 see [Interpreted variables](config-variables.md)
 
-# Symlinking dotfiles
+## Symlinking dotfiles
 
 Dotdrop is able to install dotfiles in three different ways
 which are controlled by the `link` attribute of each dotfile:
@@ -236,7 +215,7 @@ which are controlled by the `link` attribute of each dotfile:
 
 For more see [this how-to](../howto/symlinked-dotfiles.md)
 
-# All dotfiles for a profile
+## All dotfiles for a profile
 
 To use all defined dotfiles for a profile, simply use
 the keyword `ALL`.
@@ -259,7 +238,7 @@ profiles:
     - f_vimrc
 ```
 
-# Include dotfiles from another profile
+## Include dotfiles from another profile
 
 If one profile is using the entire set of another profile, one can use
 the `include` entry to avoid redundancy.
@@ -306,7 +285,7 @@ profiles:
     - "profile_{{@@ var1 @@}}"
 ```
 
-# Import profile dotfiles from file
+## Import profile dotfiles from file
 
 Profile's dotfiles list can be loaded from external files
 by specifying their paths in the config entry `import` under the specific profile.
@@ -346,7 +325,7 @@ import:
 - profiles.d/{{@@ profile @@}}.yaml
 ```
 
-# Import variables from file
+## Import variables from file
 
 It is possible to load variables/dynvariables from external files by providing their
 paths in the config entry `import_variables`.
@@ -378,7 +357,7 @@ import_variables:
 - variables.d/myvars.yaml:optional
 ```
 
-# Import actions from file
+## Import actions from file
 
 It is possible to load actions from external files by providing their
 paths in the config entry `import_actions`.
@@ -417,7 +396,7 @@ import_actions:
 - actions.d/myactions.yaml:optional
 ```
 
-# Import config files
+## Import config files
 
 Entire config files can be imported. This means making the following available
 from the imported config file in the original config file:
@@ -495,7 +474,7 @@ import_configs:
 - other-config.yaml:optional
 ```
 
-# Dynamic dotfile paths
+## Dynamic dotfile paths
 
 Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
 defined variables ([variables and dynvariables](config-variables.md)).
@@ -517,7 +496,7 @@ profiles:
 
 Make sure to quote the path in the config file.
 
-# Dynamic actions
+## Dynamic actions
 
 Variables ([config variables and dynvariables](config-variables.md)
 and [template variables](../template/templating.md#template-variables)) can be used
@@ -550,7 +529,7 @@ config:
 
 Make sure to quote the actions using variables.
 
-# Dynamic transformations
+## Dynamic transformations
 
 As for [dynamic actions](#dynamic-actions), transformations support
 the use of variables ([variables and dynvariables](config-variables.md)

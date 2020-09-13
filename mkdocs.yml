@@ -6,12 +6,15 @@ theme:
     highlightjs: true
 use_directory_urls: true
 nav:
-  - Home: 'index.md'
+  - Home: 'README.md'
   - Installation: 'installation.md'
   - Usage: 'usage.md'
   - Config: 'config/config.md'
   - Template: 'template/templating.md'
-  - HowTo: 'howto/index.md'
-  - Dependencies: 'meta/dependencies.md'
-  - People using dotdrop: 'meta/people-using-dotdrop.md'
+  - HowTo: 'howto/README.md'
   - Contributing: 'contributing.md'
+markdown_extensions:
+    - toc:
+        baselevel: 2
+        permalink: "#"
+
