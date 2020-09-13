@@ -20,5 +20,6 @@ markdown_extensions:
   - meta
   - tables
   - fenced_code
-  - toc
+  - toc:
+    permalink: True
 
