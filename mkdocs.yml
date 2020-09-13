@@ -21,5 +21,5 @@ markdown_extensions:
   - tables
   - fenced_code
   - toc:
-    permalink: True
+      permalink: True
 
