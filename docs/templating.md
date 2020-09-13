@@ -25,12 +25,12 @@ Following variables are available in templates:
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` contains dotdrop header (see [Dotdrop header](#dotdrop-header)).
-* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](https://github.com/deadc0de6/dotdrop/wiki/config) absolute path.
-* `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](https://github.com/deadc0de6/dotdrop/wiki/config).
-* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](https://github.com/deadc0de6/dotdrop/wiki/config) absolute path.
+* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config.md) absolute path.
+* `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config.md).
+* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config.md) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* config variables (see [Variables](../config/config-variables.md)).
-* config interpreted variables (see [Interpreted variables](../config/config-variables.md)).
+* config variables (see [Variables](config.md#variables)).
+* config interpreted variables (see [Interpreted variables](config.md#interpreted-variables)).
 
 ## Dotfile variables
 
@@ -59,7 +59,7 @@ It's possible to access environment variables inside the templates.
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
-It is recommended to use `variables` (see [Config variables](../config/config-variables.md))
+It is recommended to use `variables` (see [config variables](config.md#variables))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in git.
 
@@ -201,7 +201,7 @@ It is possible to avoid having an empty rendered template being
 deployed by setting the `ignoreempty` entry to *true*. This can be set
 globally for all dotfiles or only for specific dotfiles.
 
-For more see the [Config](../config/config.md).
+For more see the [Config](config.md).
 
 ## Include file or template in template
 

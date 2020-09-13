@@ -1,5 +1,5 @@
-Here are the completion files for `bash`, `zsh` and `fish`.
-for the use of dotdrop either through the bash script `dotdrop.sh`
+Here are completion files for `bash`, `zsh` and `fish`
+for the use of dotdrop through the bash script `dotdrop.sh`
 or through the python script `dotdrop` (pypi, snap, setup.py, etc).
 
 `bash` and `zsh` scripts are generated using

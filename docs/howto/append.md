@@ -1,6 +1,6 @@
-Sometimes it might be useful to be able to append some text to a 
+Sometimes it might be useful to be able to append some text to a
 file. Dotdrop is able to do that with the help of
-[actions](https://github.com/deadc0de6/dotdrop/wiki/usage-actions)
+[actions](../config.md#actions).
 and a temporary file.
 
 Below is a config example to append to a file:
@@ -18,7 +18,7 @@ dotfiles:
       - append "{{@@ tmpfile @@}}" "{{@@ somefile_final @@}}"
 actions:
   pre:
-    strip: "sed -i '/^# my pattern$/,$d' {0}"    
+    strip: "sed -i '/^# my pattern$/,$d' {0}"
   post:
     append: "cat {0} >> {1}; rm -f {0}"
 ```

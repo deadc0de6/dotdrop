@@ -2,15 +2,15 @@
 
 ## Append to a dotfile
 
-[Append to a dotfile](howto/append.md)
+[Append to a dotfile](append.md)
 
 ## Create special files
 
-[Create special files](howto/create-special-files.md)
+[Create special files](create-special-files.md)
 
 ## Handle special chars
 
-[Handle special chars](howto/special-chars.md)
+[Handle special chars](special-chars.md)
 
 ## Improve git integration
 
@@ -18,20 +18,20 @@
 
 ## Merge files on install
 
-[Merge files on install](howto/merge-files-when-installing.md)
+[Merge files on install](merge-files-when-installing.md)
 
 ## Share content across dotfiles
 
-[Share content across dotfiles](howto/sharing-content.md)
+[Share content across dotfiles](sharing-content.md)
 
 ## Store compressed directories
 
-[Store compressed directories](howto/store-compressed-directories.md)
+[Store compressed directories](store-compressed-directories.md)
 
 ## Store secrets
 
-[Store secrets](howto/sensitive-dotfiles.md)
+[Store secrets](sensitive-dotfiles.md)
 
 ## Symlink dotfiles
 
-[Symlink dotfiles](howto/symlinked-dotfiles.md)
+[Symlink dotfiles](symlinked-dotfiles.md)

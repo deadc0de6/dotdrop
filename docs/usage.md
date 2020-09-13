@@ -13,7 +13,6 @@ Then if you happen to update the file/directory directly on the filesystem (add 
 
 For more advanced uses:
 
-* See [this wiki](https://github.com/deadc0de6/dotdrop/wiki)
 * `dotdrop --help` for more options.
 * [the example](https://github.com/deadc0de6/dotdrop#getting-started)
 
@@ -24,14 +23,14 @@ Simply run
 $ dotdrop install
 ```
 
-options
+some available options
 
 * `-t --temp`: install the dotfile(s) to a temporary directory for review (it helps to debug templating issues for example). Note that actions are not executed in that mode.
 * `-a --force-actions`: force the execution of actions even if the dotfiles are not installed
 
 For more detail, see the usage with `dotdrop --help`
 
-To ignore specific pattern during installation see [the dedicated wiki page](config/ignore-pattern.md)
+To ignore specific pattern during installation see [the ignore patterns](config.md#ignore-patterns)
 
 ## Compare dotfiles
 
@@ -44,7 +43,7 @@ The diffing is done by `diff` in the backend, one can provide its specific
 diff command using the config option `diff_command`.
 
 To ignore specific pattern,
-see [the dedicated wiki page](config/ignore-pattern.md)
+see [the ignore patterns](config.md#ignore-patterns)
 
 It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
@@ -160,11 +159,11 @@ $ dotdrop update --key f_vimrc
 If not argument is provided, all dotfiles for the selected profile are updated.
 
 To ignore specific pattern,
-see [the dedicated wiki page](config/ignore-pattern.md)
+see [the dedicated page](config.md#ignore-patterns)
 
 There are two cases when updating a dotfile:
 
-### The dotfile doesn't use [templating](template/templating.md)
+### The dotfile doesn't use [templating](templating.md)
 
 The new version of the dotfile is copied to the *dotpath* directory and overwrites
 the old version. If git is used to version the dotfiles stored by dotdrop, the git command
@@ -175,7 +174,7 @@ $ dotdrop update ~/.vimrc
 $ git diff
 ```
 
-### The dotfile uses [templating](template/templating.md)
+### The dotfile uses [templating](templating.md)
 
 The dotfile must be manually updated, three solutions can be used to identify the
 changes to apply to the template:

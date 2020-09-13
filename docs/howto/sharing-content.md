@@ -64,7 +64,7 @@ export DB_PORT='4521'
 Albeit flexible, the previous method is a bit cumbersome for some use cases.
 For example, when the dotfiles belong to different profiles, the cleanest
 solution consists in using
-[profile variables](../config/config-variables.md#profile-variables). This is achieved by:
+[profile variables](../config.md#profile-variables). This is achieved by:
 
 1. Creating the merged dotfile with an arbitrary name somewhere in `dotpath`.
 2. Adding some variables in the merged dotfile via templating.

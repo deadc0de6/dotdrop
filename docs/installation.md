@@ -70,7 +70,7 @@ Then follow the instructions under [As a submodule](#as-a-submodule).
 
 Install dotdrop
 ```bash
-$ pip3 install --user dotdrop
+$ pip3 install dotdrop --user
 ```
 
 and then [setup your repository](#setup-your-repository).
@@ -147,7 +147,7 @@ $ git push
 
 Or if installed through pypi:
 ```bash
-$ pip3 install --user dotdrop --upgrade
+$ pip3 install dotdrop --upgrade --user
 ```
 
 ## Setup your repository
@@ -173,7 +173,7 @@ $ wget https://raw.githubusercontent.com/deadc0de6/dotdrop/master/config.yaml
 ```
 It is recommended to store your config file directly within your repository
 (*my-dotfiles* in the example above) but you could save it in different places if you wish,
-see [this doc](https://github.com/deadc0de6/dotdrop/wiki/config#location) for more.
+see [config location](config.md#location) for more.
 
 ```bash
 $ tree my-dotfiles
@@ -188,9 +188,10 @@ in your preferred shell to call dotdrop with the config file path argument.
 alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
 
-For more info on the config file format, see [the config doc](https://github.com/deadc0de6/dotdrop/wiki/config)
+For more info on the config file format, see [the config doc](config.md).
 
-Finally start using dotdrop with `dotdrop --help`. See the [usage doc](https://github.com/deadc0de6/dotdrop/wiki/usage) and [the example](https://github.com/deadc0de6/dotdrop/blob/master/README.md#getting-started).
+Finally start using dotdrop with `dotdrop --help`. See the [usage doc](usage.md)
+and [the example](https://github.com/deadc0de6/dotdrop/blob/master/README.md#getting-started).
 
 ## Shell completion
 

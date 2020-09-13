@@ -4,17 +4,20 @@ repo_url: https://github.com/deadc0de6/dotdrop
 theme:
     name: readthedocs
     highlightjs: true
+    hljs_languages:
+      - yaml
 use_directory_urls: true
 nav:
   - Home: 'README.md'
   - Installation: 'installation.md'
   - Usage: 'usage.md'
-  - Config: 'config/config.md'
-  - Template: 'template/templating.md'
+  - Config: 'config.md'
+  - Templating: 'templating.md'
   - HowTo: 'howto/README.md'
   - Contributing: 'contributing.md'
 markdown_extensions:
-    - toc:
-        baselevel: 2
-        permalink: "#"
+  - meta
+  - tables
+  - fenced_code
+  - toc
 
