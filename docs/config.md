@@ -33,7 +33,7 @@ The **config** entry (mandatory) contains settings for the deployment
 * `create`: create directory hierarchy when installing dotfiles if
   it doesn't exist (default *true*)
 * `default_actions`: list of action's keys to execute for all installed dotfile
-  (see [Use actions](#actions))
+  (see [actions](#entry-actions))
 * `diff_command`: the diff command to use for diffing files (default `diff -r -u {0} {1}`)
 * `dotpath`: path to the directory containing the dotfiles to be managed (default `dotfiles`)
   by dotdrop (absolute path or relative to the config file location)
@@ -44,22 +44,22 @@ The **config** entry (mandatory) contains settings for the deployment
 * `ignoreempty`: do not deploy template if empty (default *false*)
 * `import_actions`: list of paths to load actions from
   (absolute path or relative to the config file location,
-  see [Import actions from file](#import-actions-from-file))
+  see [Import actions from file](#entry-import_actions))
 * `import_configs`: list of config file paths to be imported in
   the current config (absolute path or relative to the current config file location,
-  see [Import config files](#import-config-files))
+  see [Import config files](#entry-import_configs))
 * `import_variables`: list of paths to load variables from
   (absolute path or relative to the config file location,
-  see [Import variables from file](#import-variables-from-file))
+  see [Import variables from file](#entry-import_variables))
 * `instignore`: list of patterns to ignore when installing, apply to all dotfiles
   (enclose in quotes when using wildcards, see [ignore patterns](#ignore-patterns))
 * `keepdot`: preserve leading dot when importing hidden file in the `dotpath` (default *false*)
 * `link_dotfile_default`: set dotfile's `link` attribute to this value when undefined.
   Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
-  see [Symlinking dotfiles](#symlinking-dotfiles))
+  see [Symlinking dotfiles](#symlink-dotfiles))
 * `link_on_import`: set dotfile's `link` attribute to this value when importing.
   Possible values: *nolink*, *link*, *link_children* (default: *nolink*,
-  see [Symlinking dotfiles](#symlinking-dotfiles))
+  see [Symlinking dotfiles](#symlink-dotfiles))
 * `longkey`: use long keys for dotfiles when importing (default *false*,
   see [Import dotfiles](usage.md#import-dotfiles))
 * `minversion`: (*for internal use, do not modify*) provides the minimal dotdrop version to use
@@ -83,18 +83,18 @@ The **dotfiles** entry (mandatory) contains a list of dotfiles managed by dotdro
   can use `variables` and `dynvariables`, make sure to quote)
 * `link`: define how this dotfile is installed.
   Possible values: *nolink*, *link*, *link_children* (default: `link_dotfile_default`,
-  see [Symlinking dotfiles](#symlinking-dotfiles))
+  see [Symlinking dotfiles](#symlink-dotfiles))
 * `actions`: list of action keys that need to be defined in the **actions** entry below
-  (see [Use actions](#actions))
+  (see [actions](#entry-actions))
 * `cmpignore`: list of patterns to ignore when comparing (enclose in quotes when using wildcards,
   see [ignore patterns](#ignore-patterns))
 * `ignoreempty`: if true empty template will not be deployed (defaults to the value of `ignoreempty` above)
 * `instignore`: list of patterns to ignore when installing (enclose in quotes when using wildcards,
   see [ignore patterns](#ignore-patterns))
 * `trans_read`: transformation key to apply when installing this dotfile
-  (must be defined in the **trans_read** entry below, see [Use transformations](#transformations))
+  (must be defined in the **trans_read** entry below, see [transformations](#entry-transformations))
 * `trans_write`: transformation key to apply when updating this dotfile
-  (must be defined in the **trans_write** entry below, see [Use transformations](#transformations))
+  (must be defined in the **trans_write** entry below, see [transformations](#entry-transformations))
 * `upignore`: list of patterns to ignore when updating (enclose in quotes when using wildcards,
   see [ignore patterns](#ignore-patterns))
 * *DEPRECATED* `link_children`: replaced by `link: link_children`
@@ -127,15 +127,15 @@ The **profiles** entry (mandatory) contains a list of profiles with the differen
 * `dotfiles`: the dotfiles associated to this profile
 * `import`: list of paths containing dotfiles keys for this profile
   (absolute path or relative to the config file location,
-  see [Import profile dotfiles from file](#import-profile-dotfiles-from-file)).
+  see [Import profile dotfiles from file](#entry-profile-import)).
 * `include`: include all elements (dotfiles, actions, (dyn)variables, etc) from another profile
-  (see [Include dotfiles from another profile](#include-dotfiles-from-another-profile))
+  (see [Include dotfiles from another profile](#entry-profile-include))
 * `variables`: profile specific variables
   (see [Variables](#variables))
 * `dynvariables`: profile specific interpreted variables
-  (see [Interpreted variables](#interpreted-variables))
+  (see [Interpreted variables](#entry-dynvariables))
 * `actions`: list of action keys that need to be defined in the **actions** entry below
-  (see [Use actions](#actions))
+  (see [actions](#entry-actions))
 
 ```yaml
 <some-profile-name-usually-the-hostname>:
@@ -161,7 +161,7 @@ The **profiles** entry (mandatory) contains a list of profiles with the differen
 
 ### actions entry
 
-The **actions** entry (optional) contains a list of actions (see [actions](#actions))
+The **actions** entry (optional) contains a list of actions (see [actions](#entry-actions))
 
 ```yaml
 actions:
@@ -170,7 +170,7 @@ actions:
 
 ### trans_read entry
 
-The **trans_read** entry (optional) contains a list of transformations (see [transformations](#transformations))
+The **trans_read** entry (optional) contains a list of transformations (see [transformations](#entry-transformations))
 
 ```yaml
 trans_read:
@@ -179,7 +179,7 @@ trans_read:
 
 ### trans_write entry
 
-The **trans_write** entry (optional) contains a list of write transformations (see [transformations](#transformations))
+The **trans_write** entry (optional) contains a list of write transformations (see [transformations](#entry-transformations))
 
 ```yaml
 trans_write:
@@ -198,14 +198,52 @@ variables:
 ### dynvariables entry
 
 The **dynvariables** entry (optional) contains a list of interpreted variables
-(see [Interpreted variables](#interpreted-variables))
+(see [Interpreted variables](#entry-dynvariables))
 
 ```yaml
 dynvariables:
   <variable-name>: <shell-oneliner>
 ```
 
-## Actions
+## Variables
+
+Multiple variables can be used within the config file to
+parametrize following elements of the config:
+
+* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](#dynamic-dotfile-paths))
+* external path specifications
+  * `import_variables`
+  * `import_actions`
+  * `import_configs`
+  * profiles's `import`
+
+`actions` and `transformations` also support the use of variables
+but those are resolved when the action/transformation is executed
+(see [Dynamic actions](#dynamic-actions),
+[Dynamic transformations](#dynamic-transformations) and [Templating](templating.md)).
+
+Following variables are available in the config files:
+
+* [variables defined in the config](#entry-variables)
+* [interpreted variables defined in the config](#entry-dynvariables)
+* [profile variables defined in the config](#profile-variables)
+* environment variables: `{{@@ env['MY_VAR'] @@}}`
+* dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
+
+As well as all template methods (see [Available methods](templating.md#available-methods))
+
+## Symlink dotfiles
+
+Dotdrop is able to install dotfiles in three different ways
+which are controlled by the `link` config attribute of each dotfile:
+
+* `link: nolink`: the dotfile (file or directory) is copied to its destination
+* `link: link`: the dotfile (file or directory) is symlinked to its destination
+* `link: link_children`: the files/directories found under the dotfile (directory) are symlinked to their destination
+
+For more see [this how-to](howto/symlink-dotfiles.md)
+
+## Entry actions
 
 **Note**: any action with a key starting with an underscore (`_`) won't be shown in output.
 This can be useful when working with sensitive data containing passwords for example.
@@ -368,7 +406,7 @@ dotfiles:
     - always_action
 ```
 
-## Transformations
+## Entry transformations
 
 For examples of transformation uses, see
 
@@ -394,7 +432,7 @@ There are two types of transformations available:
         * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when dotfiles need to be
-stored encrypted or compressed. For more see below [the howto](howto/README.md).
+stored encrypted or compressed. For more see [the howto](howto/README.md).
 
 Note that transformations cannot be used if the dotfiles is to be linked (when `link: link` or `link: link_children`).
 
@@ -417,34 +455,7 @@ profiles:
 
 will result in `abc; f_abc; p1; lastarg`
 
-## Variables
-
-Multiple variables can be used within the config file to
-parametrize following elements of the config:
-
-* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](#dynamic-dotfile-paths))
-* external path specifications
-  * `import_variables`
-  * `import_actions`
-  * `import_configs`
-  * profiles's `import`
-
-`actions` and `transformations` also support the use of variables
-but those are resolved when the action/transformation is executed
-(see [Dynamic actions](#dynamic-actions),
-[Dynamic transformations](#dynamic-transformations) and [Templating](templating.md)).
-
-Following variables are available in the config files:
-
-* [variables defined in the config](#variables)
-* [interpreted variables defined in the config](#interpreted-variables)
-* [profile variables defined in the config](#profile-variables)
-* environment variables: `{{@@ env['MY_VAR'] @@}}`
-* dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
-
-As well as all template methods (see [Available methods](templating.md#available-methods))
-
-### config variables
+## Entry variables
 
 Variables defined in the `variables` entry are made available within the config file.
 
@@ -464,6 +475,7 @@ dynvariables:
 ```
 
 will result in the following available variables:
+
 * var1: `var1`
 * var2: `var1 var2`
 * var3: `var1 var2 var3`
@@ -495,7 +507,7 @@ profiles:
     - f_gitconfig
 ```
 
-### Interpreted variables
+## Entry dynvariables
 
 It is also possible to have *dynamic* variables in the sense that their
 content will be interpreted by the shell before being substituted.
@@ -517,41 +529,7 @@ variables:
 
 They have the same properties as [Variables](#variables).
 
-## Symlinking dotfiles
-
-Dotdrop is able to install dotfiles in three different ways
-which are controlled by the `link` attribute of each dotfile:
-
-* `link: nolink`: the dotfile (file or directory) is copied to its destination
-* `link: link`: the dotfile (file or directory) is symlinked to its destination
-* `link: link_children`: the files/directories found under the dotfile (directory) are symlinked to their destination
-
-For more see [this how-to](howto/symlinked-dotfiles.md)
-
-## All dotfiles for a profile
-
-To use all defined dotfiles for a profile, simply use
-the keyword `ALL`.
-
-For example:
-```yaml
-dotfiles:
-  f_xinitrc:
-    dst: ~/.xinitrc
-    src: xinitrc
-  f_vimrc:
-    dst: ~/.vimrc
-    src: vimrc
-profiles:
-  host1:
-    dotfiles:
-    - ALL
-  host2:
-    dotfiles:
-    - f_vimrc
-```
-
-## Include dotfiles from another profile
+## Entry profile include
 
 If one profile is using the entire set of another profile, one can use
 the `include` entry to avoid redundancy.
@@ -574,7 +552,7 @@ profiles:
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
 For more advanced use-cases variables
-([variables](#variables) and [dynvariables](#interpreted-variables))
+([variables](#variables) and [dynvariables](#entry-dynvariables))
 can be used to specify the profile to include in a profile
 
 For example:
@@ -598,7 +576,7 @@ profiles:
     - "profile_{{@@ var1 @@}}"
 ```
 
-## Import profile dotfiles from file
+## Entry profile import
 
 Profile's dotfiles list can be loaded from external files
 by specifying their paths in the config entry `import` under the specific profile.
@@ -638,7 +616,7 @@ import:
 - profiles.d/{{@@ profile @@}}.yaml
 ```
 
-## Import variables from file
+## Entry import_variables
 
 It is possible to load variables/dynvariables from external files by providing their
 paths in the config entry `import_variables`.
@@ -670,7 +648,7 @@ import_variables:
 - variables.d/myvars.yaml:optional
 ```
 
-## Import actions from file
+## Entry import_actions
 
 It is possible to load actions from external files by providing their
 paths in the config entry `import_actions`.
@@ -709,10 +687,10 @@ import_actions:
 - actions.d/myactions.yaml:optional
 ```
 
-## Import config files
+## Entry import_configs
 
-Entire config files can be imported. This means making the following available
-from the imported config file in the original config file:
+Entire config files can be imported using the `import_configs` entry.
+This means making the following available from the imported config file in the original config file:
 
 * dotfiles
 * profiles
@@ -872,6 +850,30 @@ dotfiles:
     trans_write: w_echo_var
 ```
 
+## All dotfiles for a profile
+
+To use all defined dotfiles for a profile, simply use
+the keyword `ALL`.
+
+For example:
+```yaml
+dotfiles:
+  f_xinitrc:
+    dst: ~/.xinitrc
+    src: xinitrc
+  f_vimrc:
+    dst: ~/.vimrc
+    src: vimrc
+profiles:
+  host1:
+    dotfiles:
+    - ALL
+  host2:
+    dotfiles:
+    - f_vimrc
+```
+
+
 ## Ignore patterns
 
 It is possible to ignore specific patterns when using dotdrop. For example for `compare` when temporary
@@ -909,8 +911,6 @@ dotfiles:
     - "*/plugged"
 ...
 ```
-
-examples
 
 To completely ignore comparison of a specific dotfile:
 ```yaml

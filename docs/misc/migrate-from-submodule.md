@@ -1,4 +1,3 @@
-
 **WARNING**
 
 Only do the following if you are using dotdrop version `< 0.7.1` or if you encounter an issue when running dotdrop that redirects you here.

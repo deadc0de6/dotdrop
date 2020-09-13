@@ -31,15 +31,15 @@ This is due to Jinja2 stripping CRLF.
 
 One solution is to use `dos2unix` to re-format the dotfiles before adding them                                                       to dotdrop.
 
-See https://github.com/deadc0de6/dotdrop/issues/42.
+See <https://github.com/deadc0de6/dotdrop/issues/42>.
 
 ## Non-unicode chars
 
-Jinja2 is not able to process non-unicode chars (http://jinja.pocoo.org/docs/2.10/api/). This means that dotfiles using non-unicode chars can still be fully managed by dotdrop however when comparing the local file with the one stored in dotdrop, `compare` will return a difference even if there is none.
+Jinja2 is not able to process non-unicode chars (<http://jinja.pocoo.org/docs/2.10/api/>). This means that dotfiles using non-unicode chars can still be fully managed by dotdrop however when comparing the local file with the one stored in dotdrop, `compare` will return a difference even if there is none.
 
 Either replace the non-unicode chars (see below [Re-encode](#re-encode)) or accept the fact the comparison shows a difference while there's none.
 
-See https://github.com/deadc0de6/dotdrop/issues/42.
+See <https://github.com/deadc0de6/dotdrop/issues/42>.
 
 # Re-encode
 

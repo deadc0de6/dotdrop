@@ -30,7 +30,7 @@ Following variables are available in templates:
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config.md) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
 * config variables (see [Variables](config.md#variables)).
-* config interpreted variables (see [Interpreted variables](config.md#interpreted-variables)).
+* config interpreted variables (see [Interpreted variables](config.md#entry-dynvariables)).
 
 ## Dotfile variables
 

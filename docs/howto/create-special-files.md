@@ -1,5 +1,5 @@
 One way for creating symlinks (or any other special files) is to use a combination of
-[actions](../config.md#actions) and a *fake* dotfile.
+[actions](../config.md#entry-actions) and a *fake* dotfile.
 
 Let's say for example you have a list of directories you want to link
 from under `~/.original` to `~/symlinks`.
@@ -19,6 +19,7 @@ dir3
 ```
 
 The config file would contain different elements
+
 * a `dynvariables` that will read the above text file
 * a few `variables` for the source and destination
 * an action that will create the destination directory and symlink those directories

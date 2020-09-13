@@ -13,11 +13,6 @@ Note that if the dotfile is using template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
-* [Link children](#link-children)
-* [Templating symlinked dotfiles](#templating-symlinked-dotfiles)
-
----
-
 # Link children
 
 This feature can be very useful for dotfiles when you don't want the entire

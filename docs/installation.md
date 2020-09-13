@@ -96,8 +96,8 @@ Then follow the instructions under [With pypi](#with-pypi).
 ## Aur packages
 
 Dotdrop is available on aur:
-* stable: https://aur.archlinux.org/packages/dotdrop/
-* git version: https://aur.archlinux.org/packages/dotdrop-git/
+* stable: <https://aur.archlinux.org/packages/dotdrop/>
+* git version: <https://aur.archlinux.org/packages/dotdrop-git/>
 
 Then follow the [doc to setup your repository](#setup-your-repository).
 

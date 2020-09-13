@@ -6,6 +6,7 @@ theme:
     highlightjs: true
     hljs_languages:
       - yaml
+    collapse_navigation: false
 use_directory_urls: true
 nav:
   - Home: 'README.md'

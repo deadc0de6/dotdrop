@@ -34,4 +34,4 @@
 
 ## Symlink dotfiles
 
-[Symlink dotfiles](symlinked-dotfiles.md)
+[Symlink dotfiles](symlink-dotfiles.md)
