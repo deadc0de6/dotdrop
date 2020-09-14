@@ -9,6 +9,7 @@ theme:
     collapse_navigation: false
 use_directory_urls: true
 nav:
+  - Dotdrop: 'README.md'
   - Installation: 'installation.md'
   - 'Repository setup': 'repository-setup.md'
   - Usage: 'usage.md'

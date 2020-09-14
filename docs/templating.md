@@ -25,9 +25,9 @@ Following variables are available in templates:
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` contains dotdrop header (see [Dotdrop header](#dotdrop-header)).
-* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config.md) absolute path.
+* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-format.md) absolute path.
 * `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config.md).
-* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config.md) absolute path.
+* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-format.md) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
 * config variables (see [Variables](config.md#variables)).
 * config interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables)).

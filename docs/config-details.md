@@ -172,8 +172,8 @@ dotfiles:
 
 For examples of transformation uses, see
 
-* [Store compressed directories](howto/store-compressed-directories.md)
-* [Sensitive dotfiles](howto/sensitive-dotfiles.md)
+* [Handle compressed directories](howto/store-compressed-directories.md)
+* [Handle secrets](howto/sensitive-dotfiles.md)
 
 **Note**: any transformation with a key starting with an underscore (`_`) won't be shown in output.
 This can be useful when working with sensitive data containing passwords for example.
