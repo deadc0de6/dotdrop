@@ -17,7 +17,7 @@ nav:
   - 'Config format': 'config-format.md'
   - 'Config details': 'config-details.md'
   - Templating: 'templating.md'
-  - HowTo: 'howto/README.md'
+  - HowTo: 'howto/howto.md'
 markdown_extensions:
   - meta
   - tables

@@ -194,7 +194,7 @@ There are two types of transformations available:
         * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when dotfiles need to be
-stored encrypted or compressed. For more see [the howto](howto/README.md).
+stored encrypted or compressed. For more see [the howto](howto/howto.md).
 
 Note that transformations cannot be used if the dotfiles is to be linked (when `link: link` or `link: link_children`).
 
