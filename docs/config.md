@@ -1,11 +1,9 @@
-# Config
+## Location
 
 The config file used by dotdrop is
 [config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
 
-## Location
-
-Unless specified dotdrop will look in following places for the config file (`config.yaml`)
+Unless specified dotdrop will look in following places for its config file
 and use the first one found
 
 * current/working directory or the directory where [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) is located if used

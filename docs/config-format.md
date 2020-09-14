@@ -1,4 +1,4 @@
-## Format
+## Syntax
 
 Dotdrop config file uses [yaml](https://yaml.org/) syntax.
 

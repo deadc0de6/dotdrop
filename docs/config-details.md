@@ -1,5 +1,3 @@
-# Config details
-
 ## Entry actions
 
 **Note**: any action with a key starting with an underscore (`_`) won't be shown in output.
