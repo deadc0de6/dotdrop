@@ -1,3 +1,5 @@
+# Share content across dotfiles
+
 There are cases in which two or more dotfiles are very similar. For example,
 two files exporting environment variables for two projects built with the same
 technology (eg. two node.js web servers deployed on AWS). In these cases it's
@@ -9,7 +11,7 @@ are a few suggestions about how to achieve this.
 * [Profile variables](#profile-variables)
 * [Jinja macros](#jinja-macros)
 
-# Brute force templating
+## Brute force templating
 
 The first approach is sheer use of templating and variables
 In order to do this, we need to:
@@ -59,12 +61,12 @@ export DB_HOST='super-duper.host'
 export DB_PORT='4521'
 ```
 
-# Profile variables
+## Profile variables
 
 Albeit flexible, the previous method is a bit cumbersome for some use cases.
 For example, when the dotfiles belong to different profiles, the cleanest
 solution consists in using
-[profile variables](../config.md#profile-variables). This is achieved by:
+[profile variables](../config-details.md#entry-profile-variables). This is achieved by:
 
 1. Creating the merged dotfile with an arbitrary name somewhere in `dotpath`.
 2. Adding some variables in the merged dotfile via templating.
@@ -122,7 +124,7 @@ export DB_HOST='cheaper.host'
 export DB_PORT='9632'
 ```
 
-# Jinja macros
+## Jinja macros
 
 Even though it has cleaner dotfiles, the profile-variable-based procedure can't
 be used in two scenarios: when the dotfiles belong to the same profile, and

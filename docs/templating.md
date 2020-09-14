@@ -30,7 +30,7 @@ Following variables are available in templates:
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config.md) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
 * config variables (see [Variables](config.md#variables)).
-* config interpreted variables (see [Interpreted variables](config.md#entry-dynvariables)).
+* config interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables)).
 
 ## Dotfile variables
 
@@ -83,28 +83,7 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
 
-## Dotdrop header
-
-Dotdrop is able to insert a header in the generated dotfiles. This allows
-to remind anyone opening the file for editing that this file is managed by dotdrop.
-
-Here's what it looks like:
-```
-This dotfile is managed using dotdrop
-```
-
-The header can be automatically added with:
-```
-{{@@ header() @@}}
-```
-
-Properly commenting the header in templates is the responsibility of the user
-as [jinja2](http://jinja.pocoo.org/) has no way of knowing what is the proper char(s) used for comments.
-Either prepend the directive with the commenting char(s) used in the dotfile
-(for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
-The result is equivalent.
-
-## Available methods
+## Template methods
 
 Beside [jinja2 global functions](http://jinja.pocoo.org/docs/2.10/templates/#list-of-global-functions)
 the following methods can be used within the templates:
@@ -159,7 +138,7 @@ this should exist
 {%@@ endif @@%}
 ```
 
-## Available filters
+## Template filters
 
 Beside [jinja2 builtin filters](https://jinja.palletsprojects.com/en/2.10.x/templates/#builtin-filters)
 custom user-defined filter functions can be loaded using the config entry `filter_file`:
@@ -195,28 +174,26 @@ Macros must be imported `with context` in order to have access to the variables:
 
 For more see the [dedicated jinja2 doc](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros).
 
-## Ignore empty template
+## Dotdrop header
 
-It is possible to avoid having an empty rendered template being
-deployed by setting the `ignoreempty` entry to *true*. This can be set
-globally for all dotfiles or only for specific dotfiles.
+Dotdrop is able to insert a header in the generated dotfiles. This allows
+to remind anyone opening the file for editing that this file is managed by dotdrop.
 
-For more see the [Config](config.md).
-
-## Include file or template in template
-
-[Jinja2](http://jinja.pocoo.org/docs/2.10/templates/) provides the ability to include an external file/template from within a template with the directive `include`. See the [related doc](http://jinja.pocoo.org/docs/2.10/templates/#include) for more. The path must be relative to the `dotpath`.
-
-For example:
-```yaml
-{%@@ include 'colors/black.colors' @@%}
+Here's what it looks like:
+```
+This dotfile is managed using dotdrop
 ```
 
-Of course, paths could be also dynamically generated using variables.
-For example:
-```yaml
-{%@@ include colors_path + '/black.colors' @@%}
+The header can be automatically added with:
 ```
+{{@@ header() @@}}
+```
+
+Properly commenting the header in templates is the responsibility of the user
+as [jinja2](http://jinja.pocoo.org/) has no way of knowing what is the proper char(s) used for comments.
+Either prepend the directive with the commenting char(s) used in the dotfile
+(for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
+The result is equivalent.
 
 ## Debug templates
 

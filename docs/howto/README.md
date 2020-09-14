@@ -1,12 +1,20 @@
 # HowTo
 
-## Append to a dotfile
+## Append text to a dotfile on install
 
-[Append to a dotfile](append.md)
+[Append text to a dotfile on install](append.md)
 
-## Create special files
+## Create files on install
 
-[Create special files](create-special-files.md)
+[Create files on install](create-special-files.md)
+
+## Handle compressed directories
+
+[Store compressed directories](store-compressed-directories.md)
+
+## Handle secrets
+
+[Handle secrets](sensitive-dotfiles.md)
 
 ## Handle special chars
 
@@ -16,6 +24,14 @@
 
 [Improve git integration](improve-git-integration.md)
 
+## Include file or template in template
+
+[Include file or template in template](include-in-template.md)
+
+## Manage system dotfiles
+
+[Manage system dotfiles](global-config-files.md)
+
 ## Merge files on install
 
 [Merge files on install](merge-files-when-installing.md)
@@ -23,14 +39,6 @@
 ## Share content across dotfiles
 
 [Share content across dotfiles](sharing-content.md)
-
-## Store compressed directories
-
-[Store compressed directories](store-compressed-directories.md)
-
-## Store secrets
-
-[Store secrets](sensitive-dotfiles.md)
 
 ## Symlink dotfiles
 

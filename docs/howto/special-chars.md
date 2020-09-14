@@ -1,10 +1,12 @@
+# Handle special chars
+
 * [Detect encoding](#detect-encoding)
 * [Special chars](#special-chars)
 * [Re-encode](#re-encode)
 
 ---
 
-# Detect encoding
+## Detect encoding
 
 Text file encoding can be identified using for example `file -b <file-path>` or in vim
 with `:set fileencoding`
@@ -21,9 +23,9 @@ $ file -b <some-file>
 ISO-8859 text, with escape sequences
 ```
 
-# Special chars
+## Special chars
 
-## CRLF
+### CRLF
 
 The use of dotfiles with DOS/Windows line ending (CRLF, `\r\n`) will result in
 the comparison (`compare`) returning a difference while there is none.
@@ -33,7 +35,7 @@ One solution is to use `dos2unix` to re-format the dotfiles before adding them  
 
 See <https://github.com/deadc0de6/dotdrop/issues/42>.
 
-## Non-unicode chars
+### Non-unicode chars
 
 Jinja2 is not able to process non-unicode chars (<http://jinja.pocoo.org/docs/2.10/api/>). This means that dotfiles using non-unicode chars can still be fully managed by dotdrop however when comparing the local file with the one stored in dotdrop, `compare` will return a difference even if there is none.
 
@@ -41,6 +43,6 @@ Either replace the non-unicode chars (see below [Re-encode](#re-encode)) or acce
 
 See <https://github.com/deadc0de6/dotdrop/issues/42>.
 
-# Re-encode
+## Re-encode
 
 To change an existing file's encoding, you can use `recode UTF-8 <filename>` (see [recode](https://linux.die.net/man/1/recode)) or in vim `:set fileencoding=utf-8`.

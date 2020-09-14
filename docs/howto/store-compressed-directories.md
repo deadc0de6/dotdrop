@@ -1,4 +1,4 @@
-# Store compressed directories
+# Handle compressed directories
 
 This is an example on how to use transformations (`trans_read` and `trans_write`) to store
 compressed directories and deploy them with dotdrop.

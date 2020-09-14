@@ -1,4 +1,4 @@
-# Dotdrop documentation
+# Dotdrop
 
 [Dotdrop](https://deadc0de.re/dotdrop/) is a dotfiles manager that provides efficient ways of managing your dotfiles.
 It is especially powerful when it comes to managing those across different hosts.

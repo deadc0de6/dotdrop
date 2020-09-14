@@ -1,5 +1,7 @@
+# Create files on install
+
 One way for creating symlinks (or any other special files) is to use a combination of
-[actions](../config.md#entry-actions) and a *fake* dotfile.
+[actions](../config-details.md#entry-actions) and a *fake* dotfile.
 
 Let's say for example you have a list of directories you want to link
 from under `~/.original` to `~/symlinks`.

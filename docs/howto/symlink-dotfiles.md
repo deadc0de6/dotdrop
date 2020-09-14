@@ -13,7 +13,7 @@ Note that if the dotfile is using template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
-# Link children
+## Link children
 
 This feature can be very useful for dotfiles when you don't want the entire
 directory to be symlink but still want to keep a clean config files (with a
@@ -77,7 +77,7 @@ $ tree -L 1 ~/.vim
 └── vimrc -> ~/.dotfiles/vim/vimrc
 ```
 
-# Templating symlinked dotfiles
+## Templating symlinked dotfiles
 
 For dotfiles not using any templating directives, those are directly linked
 to dotdrop's `dotpath` directory (see [Config](../config.md)).

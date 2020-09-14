@@ -1,4 +1,4 @@
-# Sensitive dotfiles
+# Handle secrets
 
 Two solutions exist, the first one using an unversioned file (see [Environment variables](../templating.md#environment-variables))
 and the second using transformations (see [Store encrypted dotfiles](#store-encrypted-dotfiles)).
@@ -6,7 +6,7 @@ and the second using transformations (see [Store encrypted dotfiles](#store-encr
 * [Store encrypted dotfiles](#store-encrypted-dotfiles)
 * [Load passphrase from file](#load-passphrase-from-file)
 
-# Store encrypted dotfiles
+## Store encrypted dotfiles
 
 Here's an example of part of a config file to use gpg encrypted dotfiles:
 ```yaml
@@ -47,7 +47,7 @@ $ cp <encrypted-version-of-secret> dotfiles/secret
 
 * commit and push the changes
 
-# Load passphrase from file
+## Load passphrase from file
 
 Passphrase is retrieved using a script:
 ```yaml

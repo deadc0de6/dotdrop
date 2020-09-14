@@ -1,4 +1,4 @@
-# How to manage system wide config files with dotdrop
+# Manage system dotfiles
 
 Dotdrop doesn't allow to handle file rights and permissions (at least not directly). Every operations (`mkdir`, `cp`, `mv`, `ln`, file creation) are executed with the rights of the user calling dotdrop. The rights of the stored dotfile are mirrored on the deployed dotfile (`chmod` like). It works well for local/user dotfiles but doesn't allow to manage global/system config files (`/etc` or `/var` for example) directly.
 
