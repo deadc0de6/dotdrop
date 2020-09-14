@@ -127,7 +127,7 @@ potential *included* entries
 * profile's *include
 
 Variables are then used to resolve different elements in the config file:
-see [this](https://github.com/deadc0de6/dotdrop/wiki/config-variables#config-available-variables)
+see [this](docs/config.md#variables)
 
 ## rules
 
@@ -185,4 +185,4 @@ start of your new test (see the head of the file down to `# this is the test`).
 
 # documentation
 
-Most of dotdrop documentation is hosted in [its wiki](https://github.com/deadc0de6/dotdrop/wiki)
+Dotdrop documentation is available under [https://dotdrop.readthedocs.io/](https://dotdrop.readthedocs.io/).

@@ -39,8 +39,8 @@ Features:
 * Provide solutions for handling dotfiles containing sensitive information
 
 Check also the [blog post](https://deadc0de.re/articles/dotfiles.html),
-the [example](#getting-started), the [wiki](https://github.com/deadc0de6/dotdrop/wiki) or
-how [people are using dotdrop](https://github.com/deadc0de6/dotdrop/wiki/meta-people-using-dotdrop)
+the [example](#getting-started), the [documentation](https://dotdrop.readthedocs.io/) or
+how [people are using dotdrop](https://dotdrop.readthedocs.io/en/latest/misc/people-using-dotdrop/)
 for more.
 
 Quick start:
@@ -83,7 +83,7 @@ you are cloning your dotfiles git tree from you'll have dotdrop shipped with it.
 
 Below instructions show how to install dotdrop as a submodule. For alternative
 installation instructions (with virtualenv, pypi, aur, snap, etc) see the
-[wiki installation page](https://github.com/deadc0de6/dotdrop/wiki/installation).
+[installation documentation](https://dotdrop.readthedocs.io/en/latest/installation/).
 
 Dotdrop is also available on
 * pypi: https://pypi.org/project/dotdrop/
@@ -130,7 +130,7 @@ Completion scripts exist for `bash`, `zsh` and `fish`, see [the related doc](com
 
 Create a new repository to store your dotfiles with dotdrop. *Init* or *clone*
 that new repository and
-[install dotdrop](https://github.com/deadc0de6/dotdrop/wiki/installation#as-a-submodule).
+[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/#as-a-submodule).
 
 Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
@@ -178,7 +178,7 @@ profiles:
     - d_polybar
 ```
 For a description of the different fields and their use,
-see the [config doc](https://github.com/deadc0de6/dotdrop/wiki/config).
+see the [config doc](https://dotdrop.readthedocs.io/en/latest/config-format/).
 
 Commit and push your changes.
 
@@ -207,7 +207,7 @@ profiles:
     - d_polybar
 ```
 
-Then adapt any dotfile using the [templating](https://github.com/deadc0de6/dotdrop/wiki/templating)
+Then adapt any dotfile using the [templating](https://dotdrop.readthedocs.io/en/latest/templating/)
 feature (if needed). For example you might want different fonts sizes on polybar for the different
 hosts:
 
@@ -263,17 +263,17 @@ That's it, a single repository with all your dotfiles for your different hosts.
 
 You can then
 
-* [create actions](https://github.com/deadc0de6/dotdrop/wiki/config-actions)
-* [use transformations](https://github.com/deadc0de6/dotdrop/wiki/config-transformations)
-* [use variables](https://github.com/deadc0de6/dotdrop/wiki/config-variables)
-* [symlink dotfiles](https://github.com/deadc0de6/dotdrop/wiki/symlinked-dotfiles)
-* [and more](https://github.com/deadc0de6/dotdrop/wiki)
+* [create actions](https://dotdrop.readthedocs.io/en/latest/config-details/#entry-actions)
+* [use transformations](https://dotdrop.readthedocs.io/en/latest/config-details/#entry-transformations)
+* [use variables](https://dotdrop.readthedocs.io/en/latest/config/#variables)
+* [symlink dotfiles](https://dotdrop.readthedocs.io/en/latest/config/#symlink-dotfiles)
+* [and more](https://dotdrop.readthedocs.io)
 
-For more options see `dotdrop --help` and the [wiki](https://github.com/deadc0de6/dotdrop/wiki).
+For more options see `dotdrop --help` and the [documentation](https://dotdrop.readthedocs.io).
 
 # Documentation
 
-Dotdrop's documentation is hosted on [its wiki](https://github.com/deadc0de6/dotdrop/wiki).
+Dotdrop's documentation is hosted on [readthedocs](https://dotdrop.readthedocs.io/en/latest/).
 
 # Thank you
 
