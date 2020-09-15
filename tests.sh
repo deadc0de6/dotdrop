@@ -82,17 +82,17 @@ else
   remark -f -u validate-links *.md
 fi
 
-## test the doc with liche
-## https://github.com/raviqqe/liche/
+## test the doc with markdown-link-check
+## https://github.com/tcort/markdown-link-check
 set +e
-which liche >/dev/null 2>&1
+which markdown-link-check >/dev/null 2>&1
 r="$?"
 set -e
 if [ "$r" != "0" ]; then
-  echo "[WARNING] install \"liche\" to test the doc"
+  echo "[WARNING] install \"markdown-link-check\" to test the doc"
 else
-  liche -r -v docs
-  liche -v README.md
+  for i in `find docs -iname '*.md'`; do markdown-link-check $i; done
+  markdown-link-check README.md
 fi
 
 ## done
