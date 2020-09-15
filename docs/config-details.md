@@ -530,7 +530,7 @@ import_configs:
 ## Dynamic dotfile paths
 
 Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
-defined variables ([variables and dynvariables](#variables)).
+defined variables ([variables and dynvariables](config.md#variables)).
 
 For example to have a dotfile deployed on the unique firefox profile where the
 profile path is dynamically found using a shell oneliner stored in a dynvariable:
@@ -551,7 +551,7 @@ Make sure to quote the path in the config file.
 
 ## Dynamic actions
 
-Variables ([config variables and dynvariables](#variables)
+Variables ([config variables and dynvariables](config.md#variables)
 and [template variables](templating.md#template-variables)) can be used
 in actions for more advanced use-cases.
 
@@ -585,7 +585,7 @@ Make sure to quote the actions using variables.
 ## Dynamic transformations
 
 As for [dynamic actions](#dynamic-actions), transformations support
-the use of variables ([variables and dynvariables](#variables)
+the use of variables ([variables and dynvariables](config.md#variables)
 and [template variables](templating.md#template-variables)).
 
 A very dumb example:

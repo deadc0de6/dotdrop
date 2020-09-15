@@ -20,7 +20,7 @@ or by defining the `DOTDROP_CONFIG` environment variable.
 Multiple variables can be used within the config file to
 parametrize following elements of the config:
 
-* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](#dynamic-dotfile-paths))
+* dotfiles `src` and `dst` paths (see [Dynamic dotfile paths](config-details.md#dynamic-dotfile-paths))
 * external path specifications
   * `import_variables`
   * `import_actions`
@@ -29,8 +29,8 @@ parametrize following elements of the config:
 
 `actions` and `transformations` also support the use of variables
 but those are resolved when the action/transformation is executed
-(see [Dynamic actions](#dynamic-actions),
-[Dynamic transformations](#dynamic-transformations) and [Templating](templating.md)).
+(see [Dynamic actions](config-details.md#dynamic-actions),
+[Dynamic transformations](config-details.md#dynamic-transformations) and [Templating](templating.md)).
 
 Following variables are available in the config files:
 
