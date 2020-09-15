@@ -1,13 +1,13 @@
 # Templating
 
-Dotdrop leverage the power of [jinja2](https://jinja.pocoo.org/) to handle the
-templating of dotfiles. See [jinja2 template doc](https://jinja.pocoo.org/docs/2.9/templates/)
+Dotdrop leverage the power of [jinja2](https://palletsprojects.com/p/jinja/) to handle the
+templating of dotfiles. See [jinja2 template doc](https://jinja.palletsprojects.com/en/2.11.x/templates/)
 or the below sections for more information on how to template your dotfiles.
 
 ## Delimiters
 
 Dotdrop uses different delimiters than
-[jinja2](https://jinja.pocoo.org/)'s defaults:
+[jinja2](https://palletsprojects.com/p/jinja/)'s defaults:
 
 * block/statement start = `{%@@`
 * block/statement end = `@@%}`
@@ -85,7 +85,7 @@ The above aliases load all the variables from `~/dotfiles/.env`
 
 ## Template methods
 
-Beside [jinja2 global functions](https://jinja.pocoo.org/docs/2.11/templates/#list-of-global-functions)
+Beside [jinja2 global functions](https://jinja.palletsprojects.com/en/2.11.x/templates/#list-of-global-functions)
 the following methods can be used within the templates:
 
 * `exists(path)`: return true when path exists
@@ -190,7 +190,7 @@ The header can be automatically added with:
 ```
 
 Properly commenting the header in templates is the responsibility of the user
-as [jinja2](https://jinja.pocoo.org/) has no way of knowing what is the proper char(s) used for comments.
+as [jinja2](https://palletsprojects.com/p/jinja/) has no way of knowing what is the proper char(s) used for comments.
 Either prepend the directive with the commenting char(s) used in the dotfile
 (for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
 The result is equivalent.

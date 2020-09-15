@@ -121,7 +121,7 @@ f_dunstrc (file: "config/dunst/dunstrc", link: nolink)
 ```
 
 By using the `-T --template` switch, only the dotfiles that
-are using [jinja2](https://jinja.pocoo.org/) directives are listed.
+are using [jinja2](https://palletsprojects.com/p/jinja/) directives are listed.
 
 It is also possible to list all files related to each dotfile entries
 by invoking the `detail` command, for example:
