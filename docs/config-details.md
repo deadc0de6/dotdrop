@@ -526,3 +526,88 @@ It is possible to make non-existing paths not fatal by appending the path with `
 import_configs:
 - other-config.yaml:optional
 ```
+
+## Dynamic dotfile paths
+
+Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
+defined variables ([variables and dynvariables](#variables)).
+
+For example to have a dotfile deployed on the unique firefox profile where the
+profile path is dynamically found using a shell oneliner stored in a dynvariable:
+```yaml
+dynvariables:
+  mozpath: find ~/.mozilla/firefox -name '*.default'
+dotfiles:
+  f_somefile:
+    dst: "{{@@ mozpath @@}}/somefile"
+    src: firefox/somefile
+profiles:
+  home:
+    dotfiles:
+    - f_somefile
+```
+
+Make sure to quote the path in the config file.
+
+## Dynamic actions
+
+Variables ([config variables and dynvariables](#variables)
+and [template variables](templating.md#template-variables)) can be used
+in actions for more advanced use-cases.
+
+```yaml
+dotfiles:
+  f_test:
+    dst: ~/.test
+    src: test
+    actions:
+      - cookie_mv_somewhere "/tmp/moved-cookie"
+variables:
+  cookie_dir_available: (test -d /tmp/cookiedir || mkdir -p /tmp/cookiedir)
+  cookie_header: "{{@@ cookie_dir_available @@}} && echo 'header' > /tmp/cookiedir/cookie"
+  cookie_mv: "{{@@ cookie_header @@}} && mv /tmp/cookiedir/cookie"
+actions:
+  cookie_mv_somewhere: "{{@@ cookie_mv @@}} {0}"
+```
+
+or even something like this:
+```yaml
+actions:
+  log: "echo {0} >> {1}"
+config:
+  default_actions:
+  - preaction '{{@@ _dotfile_key @@}} installed' "/tmp/log"
+...
+```
+
+Make sure to quote the actions using variables.
+
+## Dynamic transformations
+
+As for [dynamic actions](#dynamic-actions), transformations support
+the use of variables ([variables and dynvariables](#variables)
+and [template variables](templating.md#template-variables)).
+
+A very dumb example:
+```yaml
+trans_read:
+  r_echo_abs_src: echo "{0}: {{@@ _dotfile_abs_src @@}}" > {1}
+  r_echo_var: echo "{0}: {{@@ r_var @@}}" > {1}
+trans_write:
+  w_echo_key: echo "{0}: {{@@ _dotfile_key @@}}" > {1}
+  w_echo_var: echo "{0}: {{@@ w_var @@}}" > {1}
+variables:
+  r_var: readvar
+  w_var: writevar
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+    trans_read: r_echo_abs_src
+    trans_write: w_echo_key
+  f_def:
+    dst: ${tmpd}/def
+    src: def
+    trans_read: r_echo_var
+    trans_write: w_echo_var
+```
