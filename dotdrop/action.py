@@ -93,25 +93,6 @@ class Cmd(DictParser):
     def __str__(self):
         return 'key:{} -> \"{}\"'.format(self.key, self.action)
 
-    def __repr__(self):
-        return 'cmd({})'.format(self.__str__())
-
-    def __eq__(self, other):
-        self_dict = {
-            k: v
-            for k, v in self.__dict__.items()
-            if k not in self.eq_ignore
-        }
-        other_dict = {
-            k: v
-            for k, v in other.__dict__.items()
-            if k not in self.eq_ignore
-        }
-        return self_dict == other_dict
-
-    def __hash__(self):
-        return hash(self.key) ^ hash(self.action)
-
 
 class Action(Cmd):
 
