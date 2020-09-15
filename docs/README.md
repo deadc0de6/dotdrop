@@ -5,7 +5,7 @@ It is especially powerful when it comes to managing those across different hosts
 
 The idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different
 content on different hosts/setups.
-To achieve this, it uses [jinja2](http://jinja.pocoo.org/) which is a templating engine that allows to specify
+To achieve this, it uses [jinja2](https://jinja.pocoo.org/) which is a templating engine that allows to specify
 during the dotfile installation how (with what content) each dotfile will be installed based on a selected profile.
 
 Most information on using dotdrop are described in this documentation
