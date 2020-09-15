@@ -82,5 +82,18 @@ else
   remark -f -u validate-links *.md
 fi
 
+## test the doc with liche
+## https://github.com/raviqqe/liche/
+set +e
+which liche >/dev/null 2>&1
+r="$?"
+set -e
+if [ "$r" != "0" ]; then
+  echo "[WARNING] install \"liche\" to test the doc"
+else
+  liche -r -v docs
+  liche -v README.md
+fi
+
 ## done
 echo "All test finished successfully"
