@@ -27,7 +27,7 @@ a slightly different version of some of the dotfiles.
 Features:
 
 * Sync once every dotfile on git for different usages
-* Allow dotfiles templating by leveraging [jinja2](http://jinja.pocoo.org/)
+* Allow dotfiles templating by leveraging [jinja2](https://jinja.pocoo.org/)
 * Dynamically generated dotfile contents with pre-defined variables
 * Comparison between deployed and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
