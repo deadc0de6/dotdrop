@@ -4,13 +4,16 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
-dist: xenial
+dist: focal
+env:
+  global:
+  - GO111MODULE="on"
 install:
   - "pip install pip --upgrade"
   - "pip install -r tests-requirements.txt"
   - "pip install -r requirements.txt"
   - "npm install -g remark-cli remark-validate-links"
-  - "env GO111MODULE=on go get -u github.com/raviqqe/liche"
+  - "go get -u github.com/raviqqe/liche"
 script:
   ./tests.sh
 after_success:
