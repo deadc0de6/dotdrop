@@ -96,6 +96,7 @@ Then follow the instructions under [Pypi package](#pypi-package).
 ## Aur packages
 
 Dotdrop is available on aur:
+
 * stable: <https://aur.archlinux.org/packages/dotdrop/>
 * git version: <https://aur.archlinux.org/packages/dotdrop-git/>
 

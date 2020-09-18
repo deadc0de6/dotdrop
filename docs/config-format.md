@@ -2,6 +2,9 @@
 
 Dotdrop config file uses [yaml](https://yaml.org/) syntax.
 
+Here is a minimal config file to start with:
+[config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
+
 ### config entry
 
 The **config** entry (mandatory) contains settings for the deployment

@@ -26,6 +26,7 @@ parametrize following elements of the config:
   * `import_actions`
   * `import_configs`
   * profiles's `import`
+  * profiles's `include`
 
 `actions` and `transformations` also support the use of variables
 but those are resolved when the action/transformation is executed
@@ -40,7 +41,18 @@ Following variables are available in the config files:
 * environment variables: `{{@@ env['MY_VAR'] @@}}`
 * dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
 
-As well as all template methods (see [Available methods](templating.md#template-methods))
+As well as all [template methods](templating.md#template-methods) and [template filters](templating.md#template-filters).
+
+Note that all variables available in the config file will
+then be available during [templating](templating.md).
+
+Here are some rules on the use of variables in configs:
+
+* [interpreted variables](config-details.md#entry-dynvariables) are executed in their own file
+* [interpreted variables](config-details.md#entry-dynvariables) and
+  [variables](config-details.md#entry-variables) are templated before
+  [interpreted variables](config-details.md#entry-dynvariables) are executed
+* config files do not have access to variables defined above in the import tree
 
 ## Symlink dotfiles
 

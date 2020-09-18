@@ -9,7 +9,7 @@ The basic use of dotdrop is
 * import a file/directory to manage (this will copy the files from the filesystem to your `dotpath`): `dotdrop import <somefile>`
 * install the dotfiles (will *copy/link* those from your `dotpath` to the filesystem): `dotdrop install`
 
-Then if you happen to update the file/directory directly on the filesystem (add new file/dir, edit content, etc) you can use `update` to mirror back those changes in the `dotpath` of dotdrop.
+Then if you happen to update the file/directory directly on the filesystem (add new file/dir, edit content, etc) you can use `update` to mirror back those changes in dotdrop.
 
 For more advanced uses:
 
@@ -56,7 +56,7 @@ filesystem. It will copy the dotfile and update the
 config file automatically.
 
 Note that dotdrop will dereference all symlinks
-when importing a file or directory (see [issue #184](https://github.com/deadc0de6/dotdrop/issues/184) for more)
+when importing a file or directory.
 
 For example to import `~/.xinitrc`
 ```bash
@@ -82,8 +82,9 @@ Importing `~/.mutt/colors` and then `~/.vim/colors` will result in
 * `d_mutt_colors` and `d_vim_colors` in the long format
 
 Dotfile can be imported as a different file with the use
-of the command line switch `--as`. It is however recommended
-to use the [[templating]] to avoid duplicates and optimize
+of the command line switch `--as` (effectively selecting the `src` part
+of the dotfile in the config). It is however recommended
+to use [templating](templating.md) to avoid duplicates and optimize
 dotfiles management.
 ```bash
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test

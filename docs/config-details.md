@@ -10,7 +10,7 @@ Four types of actions can be defined:
 * [Profile actions](#profile-actions)
 * [Fake dotfiles and actions](#fake-dotfile-and-actions)
 
-### Dotfile actions
+#### Dotfile actions
 
 It is sometimes useful to execute some kind of action
 when deploying a dotfile.
@@ -119,7 +119,7 @@ The above will execute `echo 'vim installed' > /tmp/mydotdrop.log` when
 vimrc is installed and `echo 'xinitrc installed' > /tmp/myotherlog.log'`
 when xinitrc is installed.
 
-### Default actions
+#### Default actions
 
 Dotdrop allows to execute an action for any dotfile installation. These actions work as any other action (*pre* or *post*).
 
@@ -145,13 +145,13 @@ profiles:
     - f_vimrc
 ```
 
-### Profile actions
+#### Profile actions
 
 Profile can be either `pre` or `post` actions. Those are executed before
 any dotfile installation (for `pre`) and after all dotfiles installation (for `post`)
 only if at least one dotfile has been installed.
 
-### Fake dotfile and actions
+#### Fake dotfile and actions
 
 *Fake* dotfile can be created by specifying no `dst` and no `src` (see [config format](config-format.md)).
 By binding an action to such a *fake* dotfile, you make sure the action is always executed since
@@ -337,6 +337,9 @@ profiles:
     include:
     - "profile_{{@@ var1 @@}}"
 ```
+
+Note that profile cannot include other profiles defined above in
+the import tree (profile exists in another file and is imported using `import_configs` for example).
 
 ## Entry profile import
 
