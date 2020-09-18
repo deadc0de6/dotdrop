@@ -29,8 +29,8 @@ Following variables are available in templates:
 * `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config.md).
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-format.md) absolute path.
 * dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* config variables (see [Variables](config.md#variables)).
-* config interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables)).
+* all defined config variables (see [Variables](config.md#variables)).
+* all defined config interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables)).
 
 ## Dotfile variables
 
@@ -47,6 +47,7 @@ Additionally to the above, the following variables are set in each file processe
 * `{{@@ _dotfile_sub_abs_dst @@}}` contains the absolute destination path of each file when handled by dotdrop.
 
 For example a directory dotfile (like `~/.ssh`) would process several files
+
 (`~/.ssh/config` and `~/.ssh/authorized_keys` for example). In `~/.ssh/config`:
 * `_dotfile_abs_dst` would be `/home/user/.ssh`
 * `_dotfile_sub_abs_dst` would be `/home/user/.ssh/config`
@@ -119,19 +120,20 @@ config entry `func_file`.
 
 Example:
 
+the config file
 ```yaml
 config:
   func_file:
   - /tmp/myfuncs_file.py
 ```
 
-`/tmp/myfuncs_file.py`
+the python function under `/tmp/myfuncs_file.py`
 ```python
 def myfunc(arg):
   return not arg
 ```
 
-dotfile content
+the dotfile content
 ```
 {%@@ if myfunc(False) @@%}
 this should exist
@@ -145,19 +147,20 @@ custom user-defined filter functions can be loaded using the config entry `filte
 
 Example:
 
+the config file
 ```yaml
 config:
   filter_file:
   - /tmp/myfilter_file.py
 ```
 
-`/tmp/myfilter_file.py`
+the python filter under `/tmp/myfilter_file.py`
 ```python
 def myfilter(arg1):
   return str(int(arg1) - 10)
 ```
 
-dotfile content
+the dotfile content
 ```
 {{@@ "13" | myfilter() @@}}
 ```
@@ -180,12 +183,12 @@ Dotdrop is able to insert a header in the generated dotfiles. This allows
 to remind anyone opening the file for editing that this file is managed by dotdrop.
 
 Here's what it looks like:
-```
+```none
 This dotfile is managed using dotdrop
 ```
 
 The header can be automatically added with:
-```
+```none
 {{@@ header() @@}}
 ```
 
