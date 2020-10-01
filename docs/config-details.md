@@ -1,7 +1,13 @@
 ## Entry actions
 
-**Note**: any action with a key starting with an underscore (`_`) won't be shown in output.
-This can be useful when working with sensitive data containing passwords for example.
+Actions can be either `post` or `pre`
+
+* `post` action will be executed after the dotfile deployment
+* `pre` action will be executed before the dotfile deployment
+
+If you don't specify neither `post` nor `pre`, the action will be executed
+after the dotfile deployment (which is equivalent to `post`).
+Actions cannot obviously be named `pre` or `post`.
 
 Four types of actions can be defined:
 
@@ -9,6 +15,9 @@ Four types of actions can be defined:
 * [Default actions](#default-actions)
 * [Profile actions](#profile-actions)
 * [Fake dotfiles and actions](#fake-dotfile-and-actions)
+
+**Note**: any action with a key starting with an underscore (`_`) won't be shown in output.
+This can be useful when working with sensitive data containing passwords for example.
 
 ### Dotfile actions
 
@@ -85,11 +94,8 @@ actions:
     some-action: echo "Hello, World!" >/tmp/log
 ```
 
-If you don't specify neither `post` nor `pre`, the action will be executed
-after the dotfile deployment (which is equivalent to `post`).
-Actions cannot obviously be named `pre` or `post`.
-
 Actions can even be parameterized. For example:
+
 ```yaml
 actions:
   echoaction: echo '{0}' > {1}
@@ -121,7 +127,7 @@ when xinitrc is installed.
 
 ### Default actions
 
-Dotdrop allows to execute an action for any dotfile installation. These actions work as any other action (*pre* or *post*).
+Dotdrop allows to execute an action for any dotfile installation. These actions work as any other action (`pre` or `post`).
 
 For example, the below action will log each dotfile installation to a file.
 
@@ -147,8 +153,8 @@ profiles:
 
 ### Profile actions
 
-Profile can be either `pre` or `post` actions. Those are executed before
-any dotfile installation (for `pre`) and after all dotfiles installation (for `post`)
+A profile action can be either `pre` or `post` action (see [actions](config-details.md#entry-actions)).
+Those are executed before any dotfile installation (for `pre`) and after all dotfiles installation (for `post`)
 only if at least one dotfile has been installed.
 
 ### Fake dotfile and actions

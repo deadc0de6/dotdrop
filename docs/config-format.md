@@ -118,6 +118,20 @@ actions:
   <action-key>: <command-to-execute>
 ```
 
+*pre* actions
+```yaml
+actions:
+  pre:
+    <action-key>: <command-to-execute>
+```
+
+*post* actions
+```yaml
+actions:
+  post:
+    <action-key>: <command-to-execute>
+```
+
 ### trans_read entry
 
 The **trans_read** entry (optional) contains a list of transformations (see [transformations](config-details.md#entry-transformations))
