@@ -69,6 +69,7 @@ actions:
     postaction1: echo 'postinside' > ${tmpa}/postinside
   nakedaction: echo 'naked' > ${tmpa}/naked
   nakedaction1: echo 'nakedinside' > ${tmpa}/nakedinside
+  appendaction: echo 'newline' >> ${tmpa}/append
 config:
   backup: true
   create: true
@@ -77,6 +78,7 @@ config:
   - preaction
   - postaction
   - nakedaction
+  - appendaction
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -113,6 +115,12 @@ grep postinside ${tmpa}/postinside >/dev/null
 [ ! -e ${tmpa}/nakedinside ] && echo 'naked action not executed'  && exit 1
 grep naked ${tmpa}/naked >/dev/null
 grep nakedinside ${tmpa}/nakedinside >/dev/null
+
+# test default action run
+cd ${ddpath} | ${bin} install -fa -c ${cfg} -p p1 -V
+
+cnt=`cat ${tmpa}/append | wc -l`
+[ "${cnt}" != "2" ] && echo "default_actions not run on -a" && exit 1
 
 # clear
 rm -f ${tmpa}/naked* ${tmpa}/pre* ${tmpa}/post* ${tmpd}/abc
