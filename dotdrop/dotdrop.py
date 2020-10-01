@@ -171,6 +171,7 @@ def cmd_install(o):
                 # post-actions
                 if o.debug:
                     LOG.dbg('force post action execution ...')
+                defactions = o.install_default_actions_post
                 postactions = dotfile.get_post_actions()
                 post_actions_exec = action_executor(o, postactions, defactions,
                                                     t, post=True)
