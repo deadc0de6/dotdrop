@@ -16,7 +16,7 @@ Note that if the dotfile is using template directives, it will be symlinked into
 ## Symlink a dotfile
 
 Below is the ad-hoc way when [link_dotfile_default](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry)
-and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry) uses their default values.
+and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry) use their default values.
 
 import the file
 ```bash
