@@ -13,6 +13,41 @@ Note that if the dotfile is using template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
+## Symlink a dotfile
+
+Below is the ad-hoc way when [link_dotfile_default](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry)
+and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry) uses their default values.
+
+import the file
+```bash
+$ ./dotdrop.sh import ~/.bashrc
+	-> "/home/user/.bashrc" imported
+```
+
+edit the `config.yaml` and set the `link` value to `link`
+```yaml
+dotfiles:
+  f_bashrc:
+    src: bashrc
+    dst: ~/.bashrc
+    link: link
+```
+
+install the dotfile what will remove your `~/.bashrc` and replace it with a link to the file stored in dotdrop
+```bash
+$ ./dotdrop.sh install
+Remove "/home/user/.bashrc" for link creation? [y/N] ? y
+	-> linked /home/user/.bashrc to /home/user/dotdrop/dotfiles/bashrc
+
+1 dotfile(s) installed.
+```
+
+The dotfile then points to the file in dotdrop
+```bash
+$ readlink ~/.bashrc
+/home/user/dotdrop/dotfiles/bashrc
+```
+
 ## Link children
 
 This feature can be very useful for dotfiles when you don't want the entire
