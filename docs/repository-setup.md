@@ -1,6 +1,6 @@
 # Repository setup
 
-Either create a repository on your prefered platform and clone it or create one locally.
+Either create a git repository on your prefered platform and clone it or create one locally.
 This repository will contain two main elements, dotdrop's config file (`config.yaml`)
 and a directory containing all your dotfiles managed by dotdrop.
 ```bash

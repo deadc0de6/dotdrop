@@ -128,13 +128,13 @@ Completion scripts exist for `bash`, `zsh` and `fish`, see [the related doc](com
 
 # Getting started
 
-Create a new repository to store your dotfiles with dotdrop. *Init* or *clone*
-that new repository and
+[Create a new repository](https://dotdrop.readthedocs.io/en/latest/repository-setup/)
+to store your dotfiles with dotdrop. *Init* or *clone* that new repository and
 [install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/#as-a-submodule).
 
 Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
-your running dotdrop on) or provide it specifically using the switch `-p --profile`.
+you are running dotdrop on) or provide it specifically using the switch `-p --profile`.
 
 Import dotfiles on host *home*
 ```bash
@@ -146,7 +146,7 @@ Dotdrop does two things:
 * Copy the dotfiles in the *dotpath* directory
   (defined in `config.yaml`, defaults to *dotfiles*)
 * Create the associated entries in the `config.yaml` file
-  (in `dotfiles` and in `profiles`)
+  (in the `dotfiles` and `profiles` entries)
 
 Your config file will look something similar to this
 ```yaml
@@ -180,7 +180,7 @@ profiles:
 For a description of the different fields and their use,
 see the [config doc](https://dotdrop.readthedocs.io/en/latest/config-format/).
 
-Commit and push your changes.
+Commit and push your changes with git.
 
 Then go to another host where your dotfiles need to be managed as well,
 clone the previously setup repository
@@ -192,7 +192,7 @@ $ dotdrop compare --profile=home
 Now you might want to adapt the `config.yaml` file to your likings on
 that second host. Let's say for example that you only want `d_polybar` and
 `f_xinitrc` to be deployed on that second host. You would then change your config
-to something like this (considering that second host's hostname is *office*):
+to something like this (considering that the second host's hostname is *office*):
 ```yaml
 …
 profiles:
@@ -248,7 +248,7 @@ exec bspwm
 
 The *if branch* on above template examples will define
 which part is deployed based on the
-hostname of the host on which dotdrop is run from.
+hostname of the host on which dotdrop is run from
 (or the selected profile).
 
 When done, you can install your dotfiles using
@@ -267,7 +267,7 @@ You can then
 * [use transformations](https://dotdrop.readthedocs.io/en/latest/config-details/#entry-transformations)
 * [use variables](https://dotdrop.readthedocs.io/en/latest/config/#variables)
 * [symlink dotfiles](https://dotdrop.readthedocs.io/en/latest/config/#symlink-dotfiles)
-* [and more](https://dotdrop.readthedocs.io)
+* [and more](https://dotdrop.readthedocs.io/en/latest/howto/howto/)
 
 For more options see `dotdrop --help` and the [documentation](https://dotdrop.readthedocs.io).
 
