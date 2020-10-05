@@ -404,6 +404,8 @@ class CfgAggregator:
             return None
 
     def _norm_path(self, path):
+        if not path:
+            return path
         path = os.path.expanduser(path)
         path = os.path.expandvars(path)
         path = os.path.abspath(path)
