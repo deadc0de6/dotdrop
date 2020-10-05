@@ -26,8 +26,8 @@ Entry    | Description | Default
 `import_variables` | list of paths to load variables from (absolute path or relative to the config file location see [Import variables from file](config-details.md#entry-import_variables)) | -
 `instignore` | list of patterns to ignore when installing, apply to all dotfiles (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
 `keepdot` | preserve leading dot when importing hidden file in the `dotpath` | false
-`link_dotfile_default` | set dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link*, *link_children* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
-`link_on_import` | set dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link*, *link_children* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
+`link_dotfile_default` | set dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
+`link_on_import` | set dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
 `longkey` | use long keys for dotfiles when importing (see [Import dotfiles](usage.md#import-dotfiles)) | false
 `minversion` | (*for internal use, do not modify*) provides the minimal dotdrop version to use | -
 `showdiff` | on install show a diff before asking to overwrite (see `--showdiff`) | false

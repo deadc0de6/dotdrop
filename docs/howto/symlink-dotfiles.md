@@ -13,6 +13,10 @@ Note that if the dotfile is using template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
+Although the config entries `link_on_import` and `link_dotfile_default` can be set to `link_children`, it
+is not recommended since operations on a dotfile that is not a directory with the option `link_children`
+will fail.
+
 ## Symlink a dotfile
 
 Below is the ad-hoc way when [link_dotfile_default](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry)
@@ -50,9 +54,11 @@ $ readlink ~/.bashrc
 
 ## Link children
 
-This feature can be very useful for dotfiles when you don't want the entire
+The `link_children` option can be very useful for dotfiles when you don't want the entire
 directory to be symlink but still want to keep a clean config files (with a
 limited number of entries).
+
+This option set on a file that is not a directory will make any operation on the dotfile fail.
 
 *Make sure to do a backup of your dotfiles with something like `cp -r <my-important-dotfile>{,.bak}`*
 
