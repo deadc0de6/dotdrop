@@ -1075,6 +1075,15 @@ class CfgYaml:
             self._dbg('templating dotfiles paths')
         dotfiles = self.dotfiles.copy()
 
+        # make sure no dotfiles path is None
+        for dotfile in dotfiles.values():
+            src = dotfile[self.key_dotfile_src]
+            if src is None:
+                dotfile[self.key_dotfile_src] = ''
+            dst = dotfile[self.key_dotfile_dst]
+            if dst is None:
+                dotfile[self.key_dotfile_dst] = ''
+
         # only keep dotfiles related to the selected profile
         pdfs = []
         pro = self.profiles.get(self._profile, [])
@@ -1258,11 +1267,17 @@ class CfgYaml:
         """recursively delete all none/empty values in a dictionary."""
         new = {}
         for k, v in dic.items():
-            if k == self.key_dotfiles and v:
+            if k == self.key_dotfile_src:
+                # allow empty dotfile src
+                new[k] = v
+                continue
+            if k == self.key_dotfile_dst:
+                # allow empty dotfile dst
                 new[k] = v
                 continue
             newv = v
             if isinstance(v, dict):
+                # recursive travers dict
                 newv = self._clear_none(v)
                 if not newv:
                     # no empty dict
