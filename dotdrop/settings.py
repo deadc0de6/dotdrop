@@ -34,6 +34,7 @@ class Settings(DictParser):
     key_func_file = 'func_file'
     key_filter_file = 'filter_file'
     key_diff_command = 'diff_command'
+    key_template_dotfile_default = 'template_dotfile_default'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -49,7 +50,8 @@ class Settings(DictParser):
                  upignore=[], cmpignore=[], instignore=[],
                  workdir='~/.config/dotdrop', showdiff=False,
                  minversion=None, func_file=[], filter_file=[],
-                 diff_command='diff -r -u {0} {1}'):
+                 diff_command='diff -r -u {0} {1}',
+                 template_dotfile_default=False):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -72,6 +74,7 @@ class Settings(DictParser):
         self.func_file = func_file
         self.filter_file = filter_file
         self.diff_command = diff_command
+        self.template_dotfile_default = template_dotfile_default
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -94,6 +97,7 @@ class Settings(DictParser):
             self.key_workdir: self.workdir,
             self.key_minversion: self.minversion,
             self.key_diff_command: self.diff_command,
+            self.key_template_dotfile_default: self.template_dotfile_default,
         }
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)

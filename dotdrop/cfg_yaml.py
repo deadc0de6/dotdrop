@@ -58,6 +58,7 @@ class CfgYaml:
     key_dotfile_actions = 'actions'
     key_dotfile_link_children = 'link_children'
     key_dotfile_noempty = 'ignoreempty'
+    key_dotfile_notemplate = 'notemplate'
 
     # profile
     key_profile_dotfiles = 'dotfiles'
@@ -83,6 +84,7 @@ class CfgYaml:
     key_settings_noempty = Settings.key_ignoreempty
     key_settings_minversion = Settings.key_minversion
     key_imp_link = Settings.key_link_on_import
+    key_settings_notemplate = Settings.key_template_dotfile_default
 
     # link values
     lnk_nolink = LinkTypes.NOLINK.name.lower()
@@ -597,6 +599,10 @@ class CfgYaml:
             if self.key_dotfile_noempty not in v:
                 val = self.settings.get(self.key_settings_noempty, False)
                 v[self.key_dotfile_noempty] = val
+            # apply notemplate if undefined
+            if self.key_dotfile_notemplate not in v:
+                val = self.settings.get(self.key_settings_notemplate, False)
+                v[self.key_dotfile_notemplate] = val
         return new
 
     def _add_variables(self, new, shell=False, template=True, prio=False):
