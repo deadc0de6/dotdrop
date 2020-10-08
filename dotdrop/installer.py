@@ -103,13 +103,13 @@ class Installer:
             self.log.dbg('install {} to {}'.format(src, dst))
             self.log.dbg('is a directory \"{}\": {}'.format(src, isdir))
         if isdir:
-            b, e = self._handle_dir(templater, src, dst,
-                                    actionexec=actionexec,
-                                    noempty=noempty, ignore=ignore)
+            b, e = self._install_dir(templater, src, dst,
+                                     actionexec=actionexec,
+                                     noempty=noempty, ignore=ignore)
             return self._log_install(b, e)
-        b, e = self._handle_file(templater, src, dst,
-                                 actionexec=actionexec,
-                                 noempty=noempty, ignore=ignore)
+        b, e = self._install_file(templater, src, dst,
+                                  actionexec=actionexec,
+                                  noempty=noempty, ignore=ignore)
         return self._log_install(b, e)
 
     def link(self, templater, src, dst, actionexec=None):
@@ -306,9 +306,9 @@ class Installer:
         tmp['_dotfile_sub_abs_dst'] = dst
         return tmp
 
-    def _handle_file(self, templater, src, dst,
-                     actionexec=None, noempty=False,
-                     ignore=[]):
+    def _install_file(self, templater, src, dst,
+                      actionexec=None, noempty=False,
+                      ignore=[]):
         """install src to dst when is a file"""
         if self.debug:
             self.log.dbg('generate template for {}'.format(src))
@@ -357,9 +357,9 @@ class Installer:
         err = 'installing {} to {}'.format(src, dst)
         return False, err
 
-    def _handle_dir(self, templater, src, dst,
-                    actionexec=None, noempty=False,
-                    ignore=[]):
+    def _install_dir(self, templater, src, dst,
+                     actionexec=None, noempty=False,
+                     ignore=[]):
         """install src to dst when is a directory"""
         if self.debug:
             self.log.dbg('install dir {}'.format(src))
@@ -374,11 +374,11 @@ class Installer:
             f = os.path.join(src, entry)
             if not os.path.isdir(f):
                 # is file
-                res, err = self._handle_file(templater, f,
-                                             os.path.join(dst, entry),
-                                             actionexec=actionexec,
-                                             noempty=noempty,
-                                             ignore=ignore)
+                res, err = self._install_file(templater, f,
+                                              os.path.join(dst, entry),
+                                              actionexec=actionexec,
+                                              noempty=noempty,
+                                              ignore=ignore)
                 if not res and err:
                     # error occured
                     ret = res, err
@@ -388,11 +388,11 @@ class Installer:
                     ret = True, None
             else:
                 # is directory
-                res, err = self._handle_dir(templater, f,
-                                            os.path.join(dst, entry),
-                                            actionexec=actionexec,
-                                            noempty=noempty,
-                                            ignore=ignore)
+                res, err = self._install_dir(templater, f,
+                                             os.path.join(dst, entry),
+                                             actionexec=actionexec,
+                                             noempty=noempty,
+                                             ignore=ignore)
                 if not res and err:
                     # error occured
                     ret = res, err
