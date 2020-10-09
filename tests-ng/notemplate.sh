@@ -63,7 +63,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  template_dotfile_default: true
+  template_dotfile_default: false
 dotfiles:
   f_f1:
     dst: ${tmpd}/f1
@@ -83,6 +83,10 @@ dotfiles:
     dst: ${tmpd}/fl
     src: fl
     link: link
+  f_fn:
+    dst: ${tmpd}/fn
+    src: fn
+    template: true
 profiles:
   p1:
     dotfiles:
@@ -91,6 +95,7 @@ profiles:
     - d_d2
     - d_d3
     - f_fl
+    - f_fn
 _EOF
 #cat ${cfg}
 
@@ -116,11 +121,16 @@ echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir3/s2/f2
 # create the linked dotfile
 echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/fl
 
+# create the normal dotfile
+echo "before" > ${tmps}/dotfiles/fn
+echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/fn
+echo "after" > ${tmps}/dotfiles/fn
+
 # install
-echo "doing globally"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # simple file
+echo "doing globally"
 echo "* test simple file"
 [ ! -e ${tmpd}/f1 ] && echo 'not installed1' && exit 1
 grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
@@ -155,6 +165,11 @@ grep 'header' ${tmpd}/dir3/s2/f2 || (echo "header stripped" && exit 1)
 echo "* test linked file"
 [ ! -h ${tmpd}/fl ] && echo 'not installed' && exit 1
 grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
+
+# normal dotfile
+echo "* normal dotfile"
+[ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
+grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
 
 # through the dotfile
 cat > ${cfg} << _EOF
@@ -167,21 +182,29 @@ dotfiles:
   f_f1:
     dst: ${tmpd}/f1
     src: f1
+    template: false
   d_d1:
     dst: ${tmpd}/dir1
     src: dir1
+    template: false
   d_d2:
     dst: ${tmpd}/dir2
     src: dir2
     link: link
+    template: false
   d_d3:
     dst: ${tmpd}/dir3
     src: dir3
     link: link_children
+    template: false
   f_fl:
     dst: ${tmpd}/fl
     src: fl
     link: link
+    template: false
+  f_fn:
+    dst: ${tmpd}/fn
+    src: fn
 profiles:
   p1:
     dotfiles:
@@ -190,6 +213,7 @@ profiles:
     - d_d2
     - d_d3
     - f_fl
+    - f_fn
 _EOF
 #cat ${cfg}
 
@@ -197,10 +221,10 @@ _EOF
 rm -rf ${tmpd}/*
 
 # install
-echo "doing specifically"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # simple file
+echo "doing specifically"
 echo "* test simple file"
 [ ! -e ${tmpd}/f1 ] && echo 'not installed1' && exit 1
 grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
@@ -235,6 +259,11 @@ grep 'header' ${tmpd}/dir3/s2/f2 || (echo "header stripped" && exit 1)
 echo "* test linked file"
 [ ! -h ${tmpd}/fl ] && echo 'not installed' && exit 1
 grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
+
+# normal dotfile
+echo "* normal dotfile"
+[ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
+grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

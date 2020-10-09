@@ -16,13 +16,13 @@ class Dotfile(DictParser):
     key_noempty = 'ignoreempty'
     key_trans_r = 'trans_read'
     key_trans_w = 'trans_write'
-    key_notemplate = 'notemplate'
+    key_template = 'template'
 
     def __init__(self, key, dst, src,
                  actions=[], trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, noempty=False,
                  cmpignore=[], upignore=[],
-                 instignore=[], notemplate=False):
+                 instignore=[], template=True):
         """
         constructor
         @key: dotfile key
@@ -36,7 +36,7 @@ class Dotfile(DictParser):
         @upignore: patterns to ignore when updating
         @cmpignore: patterns to ignore when comparing
         @instignore: patterns to ignore when installing
-        @notemplate: disable template for this dotfile
+        @template: template this dotfile
         """
         self.actions = actions
         self.dst = dst
@@ -49,7 +49,7 @@ class Dotfile(DictParser):
         self.upignore = upignore
         self.cmpignore = cmpignore
         self.instignore = instignore
-        self.notemplate = notemplate
+        self.template = template
 
         if self.link != LinkTypes.NOLINK and \
                 (
@@ -94,7 +94,7 @@ class Dotfile(DictParser):
         value['noempty'] = value.get(cls.key_noempty, False)
         value['trans_r'] = value.get(cls.key_trans_r)
         value['trans_w'] = value.get(cls.key_trans_w)
-        value['notemplate'] = value.get(cls.key_notemplate, False)
+        value['template'] = value.get(cls.key_template, True)
         # remove old entries
         value.pop(cls.key_noempty, None)
         value.pop(cls.key_trans_r, None)
@@ -112,7 +112,7 @@ class Dotfile(DictParser):
         msg += ', src:\"{}\"'.format(self.src)
         msg += ', dst:\"{}\"'.format(self.dst)
         msg += ', link:\"{}\"'.format(str(self.link))
-        msg += ', template:{}'.format(not self.notemplate)
+        msg += ', template:{}'.format(self.template)
         return msg
 
     def prt(self):
@@ -122,7 +122,7 @@ class Dotfile(DictParser):
         out += '\n{}src: \"{}\"'.format(indent, self.src)
         out += '\n{}dst: \"{}\"'.format(indent, self.dst)
         out += '\n{}link: \"{}\"'.format(indent, str(self.link))
-        out += '\n{}notemplate: \"{}\"'.format(indent, str(self.notemplate))
+        out += '\n{}template: \"{}\"'.format(indent, str(self.template))
 
         out += '\n{}pre-action:'.format(indent)
         some = self.get_pre_actions()

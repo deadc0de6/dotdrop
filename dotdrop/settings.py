@@ -51,7 +51,7 @@ class Settings(DictParser):
                  workdir='~/.config/dotdrop', showdiff=False,
                  minversion=None, func_file=[], filter_file=[],
                  diff_command='diff -r -u {0} {1}',
-                 template_dotfile_default=False):
+                 template_dotfile_default=True):
         self.backup = backup
         self.banner = banner
         self.create = create
