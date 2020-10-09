@@ -107,27 +107,28 @@ echo "after" >> ${tmps}/dotfiles/f1
 
 # create the directory
 mkdir -p ${tmps}/dotfiles/dir1/d1
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir1/d1/f2
+echo "{{@@ header() @@}}" > ${tmps}/dotfiles/dir1/d1/f2
 
 # create the linked directory
 mkdir -p ${tmps}/dotfiles/dir2/d1
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir2/d1/f2
+echo "{{@@ header() @@}}" > ${tmps}/dotfiles/dir2/d1/f2
 
 # create the link_children directory
 mkdir -p ${tmps}/dotfiles/dir3/{s1,s2,s3}
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir3/s1/f1
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir3/s2/f2
+echo "{{@@ header() @@}}" > ${tmps}/dotfiles/dir3/s1/f1
+echo "{{@@ header() @@}}" > ${tmps}/dotfiles/dir3/s2/f2
 
 # create the linked dotfile
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/fl
+echo "{{@@ header() @@}}" > ${tmps}/dotfiles/fl
 
 # create the normal dotfile
 echo "before" > ${tmps}/dotfiles/fn
 echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/fn
-echo "after" > ${tmps}/dotfiles/fn
+echo "after" >> ${tmps}/dotfiles/fn
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -f --showdiff -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
 
 # simple file
 echo "doing globally"
@@ -170,6 +171,17 @@ grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 echo "* normal dotfile"
 [ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
 grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
+
+# test backup done
+echo "before" > ${tmps}/dotfiles/f1
+cd ${ddpath} | ${bin} install -f --showdiff -c ${cfg} -p p1 -V
+[ ! -e ${tmpd}/f1.dotdropbak ] && echo "backup not done" && exit 1
+
+# re-create the dotfile
+echo "before" > ${tmps}/dotfiles/f1
+echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/f1
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/f1
+echo "after" >> ${tmps}/dotfiles/f1
 
 # through the dotfile
 cat > ${cfg} << _EOF
@@ -221,7 +233,8 @@ _EOF
 rm -rf ${tmpd}/*
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -f --showdiff -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
 
 # simple file
 echo "doing specifically"
@@ -264,6 +277,7 @@ grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 echo "* normal dotfile"
 [ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
 grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
+
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
