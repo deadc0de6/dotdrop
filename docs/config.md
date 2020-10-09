@@ -67,7 +67,7 @@ For more see [this how-to](howto/symlink-dotfiles.md)
 
 ## Template config entries
 
-Some entries in the config can used the templating feature (see [templating](templating.md)):
+Some entries in the config can use the templating feature (see [templating](templating.md)):
 
 Entry    | Related doc
 -------- | -------------
