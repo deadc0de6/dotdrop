@@ -71,7 +71,7 @@ def shell(cmd, debug=False):
 
 def diff(original, modified, raw=True,
          diff_cmd='', debug=False):
-    """compare two files"""
+    """compare two files, returns '' if same"""
     if not diff_cmd:
         diff_cmd = 'diff -r -u {0} {1}'
 

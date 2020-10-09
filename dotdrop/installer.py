@@ -274,7 +274,7 @@ class Installer:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return True, None
             if self.showdiff:
-                self._diff_before_write(src, dst)
+                self._diff_before_write(src, dst, quiet=False)
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
                 err = 'ignoring "{}", link was not created'.format(dst)
@@ -337,7 +337,12 @@ class Installer:
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
 
+        if not os.path.exists(src):
+            err = 'source dotfile does not exist: {}'.format(src)
+            return False, err
+
         # handle the file
+        content = None
         if template:
             # template the file
             saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
@@ -354,30 +359,20 @@ class Installer:
             if content is None:
                 err = 'empty template {}'.format(src)
                 return False, err
-            if not os.path.exists(src):
-                err = 'source dotfile does not exist: {}'.format(src)
-                return False, err
-            st = os.stat(src)
-            ret, err = self._write(src, dst, content,
-                                   st.st_mode, actionexec=actionexec)
-            # build return values
-            if ret < 0:
-                # error
-                return False, err
-            if ret > 0:
-                # already exists
-                if self.debug:
-                    self.log.dbg('ignoring {}'.format(dst))
-                return False, None
-        else:
-            # copy the file
-            try:
-                shutil.copyfile(src, dst)
-                shutil.copymode(src, dst)
-            except Exception as e:
-                return False, str(e)
-            ret = 0
+        ret, err = self._write(src, dst,
+                               content=content,
+                               actionexec=actionexec,
+                               template=template)
 
+        # build return values
+        if ret < 0:
+            # error
+            return False, err
+        if ret > 0:
+            # already exists
+            if self.debug:
+                self.log.dbg('ignoring {}'.format(dst))
+            return False, None
         if ret == 0:
             # success
             if not self.dry and not self.comparing:
@@ -435,22 +430,31 @@ class Installer:
         return ret
 
     def _fake_diff(self, dst, content):
-        """fake diff by comparing file content with content"""
+        """
+        fake diff by comparing file content with content
+        returns True if same
+        """
         cur = ''
         with open(dst, 'br') as f:
             cur = f.read()
         return cur == content
 
-    def _write(self, src, dst, content, rights, actionexec=None):
-        """write content to file
+    def _write(self, src, dst, content=None,
+               actionexec=None, template=True):
+        """
+        copy dotfile / write content to file
         return  0, None:  for success,
                 1, None:  when already exists
-               -1, err: when error"""
+               -1, err: when error
+        content is always empty if template is False
+        and is to be ignored
+        """
         overwrite = not self.safe
         if self.dry:
             self.log.dry('would install {}'.format(dst))
             return 0, None
         if os.path.lexists(dst):
+            rights = os.stat(src).st_mode
             samerights = False
             try:
                 samerights = os.stat(dst).st_mode == rights
@@ -459,15 +463,24 @@ class Installer:
                     # broken symlink
                     err = 'broken symlink {}'.format(dst)
                     return -1, err
-            if self.diff and self._fake_diff(dst, content) and samerights:
-                if self.debug:
-                    self.log.dbg('{} is the same'.format(dst))
-                return 1, None
+            diff = None
+            if self.diff:
+                diff = self._diff_before_write(src, dst,
+                                               content=content,
+                                               quiet=True)
+                if not diff and samerights:
+                    if self.debug:
+                        self.log.dbg('{} is the same'.format(dst))
+                    return 1, None
             if self.safe:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
-                    self._diff_before_write(src, dst, content=content)
+                    if diff is None:
+                        diff = self._diff_before_write(src, dst,
+                                                       content=content,
+                                                       quiet=True)
+                    self._print_diff(src, dst, diff)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1, None
@@ -482,24 +495,35 @@ class Installer:
         if not r:
             return -1, e
         if self.debug:
-            self.log.dbg('writes content to \"{}\"'.format(dst))
+            self.log.dbg('install dotfile to \"{}\"'.format(dst))
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring {}'.format(dst))
                 return 1, None
-        # write the file
-        try:
-            with open(dst, 'wb') as f:
-                f.write(content)
-        except NotADirectoryError as e:
-            err = 'opening dest file: {}'.format(e)
-            return -1, err
-        os.chmod(dst, rights)
+
+        if template:
+            # write content the file
+            try:
+                with open(dst, 'wb') as f:
+                    f.write(content)
+                shutil.copymode(src, dst)
+            except NotADirectoryError as e:
+                err = 'opening dest file: {}'.format(e)
+                return -1, err
+            except Exception as e:
+                return -1, str(e)
+        else:
+            # copy file
+            try:
+                shutil.copyfile(src, dst)
+                shutil.copymode(src, dst)
+            except Exception as e:
+                return -1, str(e)
         return 0, None
 
-    def _diff_before_write(self, src, dst, content=None):
-        """diff before writing when using --showdiff - not efficient"""
+    def _diff_before_write(self, src, dst, content=None, quiet=False):
+        """diff before writing"""
         tmp = None
         if content:
             tmp = utils.write_to_tmpfile(content)
@@ -509,9 +533,11 @@ class Installer:
         if tmp:
             utils.remove(tmp, quiet=True)
 
-        # fake the output for readability
-        if not diff:
-            return
+        if not quiet:
+            self._print_diff(src, dst, diff)
+        return diff
+
+    def _print_diff(self, src, dst, diff):
         self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
         self.log.emph(diff)
 
