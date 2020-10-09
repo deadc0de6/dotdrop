@@ -7,6 +7,7 @@ handle the installation of dotfiles
 
 import os
 import errno
+import shutil
 
 # local imports
 from dotdrop.logger import Logger
@@ -65,7 +66,7 @@ class Installer:
 
     def install(self, templater, src, dst,
                 actionexec=None, noempty=False,
-                ignore=[]):
+                ignore=[], notemplate=False):
         """
         install src to dst using a template
         @templater: the templater object
@@ -74,6 +75,7 @@ class Installer:
         @actionexec: action executor callback
         @noempty: render empty template flag
         @ignore: pattern to ignore when installing
+        @notemplate: do not template
 
         return
         - True, None        : success
@@ -105,20 +107,23 @@ class Installer:
         if isdir:
             b, e = self._install_dir(templater, src, dst,
                                      actionexec=actionexec,
-                                     noempty=noempty, ignore=ignore)
+                                     noempty=noempty, ignore=ignore,
+                                     notemplate=notemplate)
             return self._log_install(b, e)
         b, e = self._install_file(templater, src, dst,
                                   actionexec=actionexec,
-                                  noempty=noempty, ignore=ignore)
+                                  noempty=noempty, ignore=ignore,
+                                  notemplate=notemplate)
         return self._log_install(b, e)
 
-    def link(self, templater, src, dst, actionexec=None):
+    def link(self, templater, src, dst, actionexec=None, notemplate=False):
         """
         set src as the link target of dst
         @templater: the templater
         @src: dotfile source path in dotpath
         @dst: dotfile destination path in the FS
         @actionexec: action executor callback
+        @notemplate: do no template
 
         return
         - True, None        : success
@@ -140,28 +145,32 @@ class Installer:
         dst = os.path.normpath(os.path.expanduser(dst))
         if self.totemp:
             # ignore actions
-            b, e = self.install(templater, src, dst, actionexec=None)
+            b, e = self.install(templater, src, dst, actionexec=None,
+                                notemplate=notemplate)
             return self._log_install(b, e)
 
-        if Templategen.is_template(src):
+        if not notemplate and Templategen.is_template(src):
             if self.debug:
                 self.log.dbg('dotfile is a template')
                 self.log.dbg('install to {} and symlink'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
-            i, err = self.install(templater, src, tmp, actionexec=actionexec)
+            i, err = self.install(templater, src, tmp, actionexec=actionexec,
+                                  notemplate=notemplate)
             if not i and not os.path.exists(tmp):
                 return self._log_install(i, err)
             src = tmp
         b, e = self._link(src, dst, actionexec=actionexec)
         return self._log_install(b, e)
 
-    def link_children(self, templater, src, dst, actionexec=None):
+    def link_children(self, templater, src, dst, actionexec=None,
+                      notemplate=False):
         """
         link all dotfiles in a given directory
         @templater: the templater
         @src: dotfile source path in dotpath
         @dst: dotfile destination path in the FS
         @actionexec: action executor callback
+        @notemplate: do not template
 
         return
         - True, None: success
@@ -221,13 +230,14 @@ class Installer:
             if self.debug:
                 self.log.dbg('symlink child {} to {}'.format(src, dst))
 
-            if Templategen.is_template(src):
+            if not notemplate and Templategen.is_template(src):
                 if self.debug:
                     self.log.dbg('dotfile is a template')
                     self.log.dbg('install to {} and symlink'
                                  .format(self.workdir))
                 tmp = self._pivot_path(dst, self.workdir, striphome=True)
-                r, e = self.install(templater, src, tmp, actionexec=actionexec)
+                r, e = self.install(templater, src, tmp, actionexec=actionexec,
+                                    notemplate=notemplate)
                 if not r and e and not os.path.exists(tmp):
                     continue
                 src = tmp
@@ -308,12 +318,14 @@ class Installer:
 
     def _install_file(self, templater, src, dst,
                       actionexec=None, noempty=False,
-                      ignore=[]):
+                      ignore=[], notemplate=False):
         """install src to dst when is a file"""
         if self.debug:
-            self.log.dbg('generate template for {}'.format(src))
+            self.log.dbg('deploy file: {}'.format(src))
             self.log.dbg('ignore empty: {}'.format(noempty))
             self.log.dbg('ignore pattern: {}'.format(ignore))
+            self.log.dbg('no template: {}'.format(notemplate))
+            self.log.dbg('no empty: {}'.format(noempty))
 
         if utils.must_ignore([src, dst], ignore, debug=self.debug):
             if self.debug:
@@ -324,42 +336,60 @@ class Installer:
             # symlink loop
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
-        saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
-        try:
-            content = templater.generate(src)
-        except UndefinedException as e:
-            return False, str(e)
-        finally:
-            templater.restore_vars(saved)
-        if noempty and utils.content_empty(content):
-            if self.debug:
-                self.log.dbg('ignoring empty template: {}'.format(src))
-            return False, None
-        if content is None:
-            err = 'empty template {}'.format(src)
-            return False, err
-        if not os.path.exists(src):
-            err = 'source dotfile does not exist: {}'.format(src)
-            return False, err
-        st = os.stat(src)
-        ret, err = self._write(src, dst, content,
-                               st.st_mode, actionexec=actionexec)
-        if ret < 0:
-            return False, err
-        if ret > 0:
-            if self.debug:
-                self.log.dbg('ignoring {}'.format(dst))
-            return False, None
+
+        # handle the file
+        if not notemplate:
+            # template the file
+            saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
+            try:
+                content = templater.generate(src)
+            except UndefinedException as e:
+                return False, str(e)
+            finally:
+                templater.restore_vars(saved)
+            if noempty and utils.content_empty(content):
+                if self.debug:
+                    self.log.dbg('ignoring empty template: {}'.format(src))
+                return False, None
+            if content is None:
+                err = 'empty template {}'.format(src)
+                return False, err
+            if not os.path.exists(src):
+                err = 'source dotfile does not exist: {}'.format(src)
+                return False, err
+            st = os.stat(src)
+            ret, err = self._write(src, dst, content,
+                                   st.st_mode, actionexec=actionexec)
+            # build return values
+            if ret < 0:
+                # error
+                return False, err
+            if ret > 0:
+                # already exists
+                if self.debug:
+                    self.log.dbg('ignoring {}'.format(dst))
+                return False, None
+        else:
+            # copy the file
+            try:
+                shutil.copyfile(src, dst)
+                shutil.copymode(src, dst)
+            except Exception as e:
+                return False, str(e)
+            ret = 0
+
         if ret == 0:
+            # success
             if not self.dry and not self.comparing:
                 self.log.sub('copied {} to {}'.format(src, dst))
             return True, None
+        # error
         err = 'installing {} to {}'.format(src, dst)
         return False, err
 
     def _install_dir(self, templater, src, dst,
                      actionexec=None, noempty=False,
-                     ignore=[]):
+                     ignore=[], notemplate=False):
         """install src to dst when is a directory"""
         if self.debug:
             self.log.dbg('install dir {}'.format(src))
@@ -378,7 +408,8 @@ class Installer:
                                               os.path.join(dst, entry),
                                               actionexec=actionexec,
                                               noempty=noempty,
-                                              ignore=ignore)
+                                              ignore=ignore,
+                                              notemplate=notemplate)
                 if not res and err:
                     # error occured
                     ret = res, err
@@ -392,7 +423,8 @@ class Installer:
                                              os.path.join(dst, entry),
                                              actionexec=actionexec,
                                              noempty=noempty,
-                                             ignore=ignore)
+                                             ignore=ignore,
+                                             notemplate=notemplate)
                 if not res and err:
                     # error occured
                     ret = res, err
@@ -530,12 +562,13 @@ class Installer:
         self.action_executed = True
         return ret, err
 
-    def _install_to_temp(self, templater, src, dst, tmpdir):
+    def _install_to_temp(self, templater, src, dst, tmpdir, notemplate=False):
         """install a dotfile to a tempdir"""
         tmpdst = self._pivot_path(dst, tmpdir)
-        return self.install(templater, src, tmpdst), tmpdst
+        r = self.install(templater, src, tmpdst, notemplate=notemplate)
+        return r, tmpdst
 
-    def install_to_temp(self, templater, tmpdir, src, dst):
+    def install_to_temp(self, templater, tmpdir, src, dst, notemplate=False):
         """install a dotfile to a tempdir"""
         ret = False
         tmpdst = ''
@@ -553,7 +586,8 @@ class Installer:
         if self.debug:
             self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
         # install the dotfile to a temp directory for comparing
-        r, tmpdst = self._install_to_temp(templater, src, dst, tmpdir)
+        r, tmpdst = self._install_to_temp(templater, src, dst, tmpdir,
+                                          notemplate=notemplate)
         ret, err = r
         if self.debug:
             self.log.dbg('tmp installed in {}'.format(tmpdst))

@@ -603,6 +603,7 @@ class CfgYaml:
             if self.key_dotfile_notemplate not in v:
                 val = self.settings.get(self.key_settings_notemplate, False)
                 v[self.key_dotfile_notemplate] = val
+
         return new
 
     def _add_variables(self, new, shell=False, template=True, prio=False):

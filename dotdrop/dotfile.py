@@ -99,7 +99,6 @@ class Dotfile(DictParser):
         value.pop(cls.key_noempty, None)
         value.pop(cls.key_trans_r, None)
         value.pop(cls.key_trans_w, None)
-        value.pop(cls.key_notemplate, None)
         return value
 
     def __eq__(self, other):
@@ -109,8 +108,12 @@ class Dotfile(DictParser):
         return hash(self.dst) ^ hash(self.src) ^ hash(self.key)
 
     def __str__(self):
-        msg = 'key:\"{}\", src:\"{}\", dst:\"{}\", link:\"{}\"'
-        return msg.format(self.key, self.src, self.dst, str(self.link))
+        msg = 'key:\"{}\"'.format(self.key)
+        msg += ', src:\"{}\"'.format(self.src)
+        msg += ', dst:\"{}\"'.format(self.dst)
+        msg += ', link:\"{}\"'.format(str(self.link))
+        msg += ', template:{}'.format(not self.notemplate)
+        return msg
 
     def prt(self):
         """extended dotfile to str"""
