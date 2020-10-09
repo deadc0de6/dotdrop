@@ -65,6 +65,23 @@ which are controlled by the `link` config attribute of each dotfile:
 
 For more see [this how-to](howto/symlink-dotfiles.md)
 
+## Template config entries
+
+Some entries in the config can used the templating feature (see [templating](templating.md)):
+
+Entry    | Related doc
+-------- | -------------
+dotfile src | [dynamic dotfile paths](config-details/#dynamic-dotfile-paths)
+dotfile dst | [dynamic dotfile paths](config-details/#dynamic-dotfile-paths)
+variables | [variables](config-details/#entry-variables)
+dynvariables | [dynvariables](config-details/#entry-dynvariables)
+actions | [dynamic actions](config-details/#dynamic-actions)
+profile include | [profile include](config-details/#entry-profile-include)
+profile import | [profile import](config-details/#entry-profile-import)
+import_variables | [import_variables](config-details/#entry-import_variables)
+import_actions | [import_actions](config-details/#entry-import_actions)
+import_configs | [import_configs](config-details/#entry-import_configs)
+
 ## All dotfiles for a profile
 
 To use all defined dotfiles for a profile, simply use
