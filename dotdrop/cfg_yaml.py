@@ -998,7 +998,7 @@ class CfgYaml:
             content = self._yaml_load(path)
         except Exception as e:
             self._log.err(e)
-            raise YamlException('invalid config: {}'.format(path))
+            raise YamlException('config format error: {}'.format(path))
         return content
 
     def _yaml_load(self, path):
@@ -1255,7 +1255,8 @@ class CfgYaml:
         """return copy of entry from yaml dictionary"""
         if key not in dic:
             if mandatory:
-                raise YamlException('invalid config: no {} found'.format(key))
+                err = 'invalid config: no entry \"{}\" found'.format(key)
+                raise YamlException(err)
             dic[key] = {}
             return deepcopy(dic[key])
         if mandatory and not dic[key]:
