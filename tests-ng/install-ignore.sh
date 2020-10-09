@@ -116,6 +116,11 @@ nb=`find ${tmpd} -iname 'README.md' | wc -l`
 echo "(3) found ${nb} README.md file(s)"
 [ "${nb}" != "0" ] && exit 1
 
+## reinstall to trigger showdiff
+echo "showdiff" > ${tmpd}/program/a
+cd ${ddpath} | echo "y" | ${bin} install --showdiff -c ${cfg} --verbose
+[ "$?" != "0" ] && exit 1
+
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
 
