@@ -71,6 +71,7 @@ Entry    | Description
     - "<ignore-pattern>"
   actions:
     - <action-key>
+  template: (true|false)
   trans_read: <transformation-key>
   trans_write: <transformation-key>
 ```
