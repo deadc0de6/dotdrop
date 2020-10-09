@@ -68,18 +68,23 @@ dotfiles:
     src: y
     dst: ${tmpd}/y
     link: link
+  f_z:
+    src: z
+    dst: ${tmpd}/z
 profiles:
   p1:
     dotfiles:
     - f_x
     - f_y
+    - f_z
 _EOF
 
 echo 'test_x' > ${basedir}/dotfiles/x
 echo 'test_y' > ${basedir}/dotfiles/y
+echo "00000000  01 02 03 04 05" | xxd -r - ${basedir}/dotfiles/z
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --showdiff --verbose --temp | grep '^2 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --showdiff --verbose --temp | grep '^3 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 ## CLEANING
