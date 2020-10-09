@@ -65,29 +65,96 @@ config:
   dotpath: dotfiles
   template_dotfile_default: true
 dotfiles:
+  f_f1:
+    dst: ${tmpd}/f1
+    src: f1
   d_d1:
-    dst: ${tmpd}/d1
-    src: d1
+    dst: ${tmpd}/dir1
+    src: dir1
+  d_d2:
+    dst: ${tmpd}/dir2
+    src: dir2
+    link: link
+  d_d3:
+    dst: ${tmpd}/dir3
+    src: dir3
+    link: link_children
+  f_fl:
+    dst: ${tmpd}/fl
+    src: fl
+    link: link
 profiles:
   p1:
     dotfiles:
+    - f_f1
     - d_d1
+    - d_d2
+    - d_d3
+    - f_fl
 _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "before" > ${tmps}/dotfiles/d1
-echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/d1
-echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/d1
-echo "after" >> ${tmps}/dotfiles/d1
+echo "before" > ${tmps}/dotfiles/f1
+echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/f1
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/f1
+echo "after" >> ${tmps}/dotfiles/f1
+
+# create the directory
+mkdir -p ${tmps}/dotfiles/dir1/d1
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir1/d1/f2
+
+# create the linked directory
+mkdir -p ${tmps}/dotfiles/dir2/d1
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir2/d1/f2
+
+# create the link_children directory
+mkdir -p ${tmps}/dotfiles/dir3/{s1,s2,s3}
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir3/s1/f1
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/dir3/s2/f2
+
+# create the linked dotfile
+echo "{{@@ header() @@}}" >> ${tmps}/dotfiles/fl
 
 # install
+echo "doing globally"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-# test existence
-[ ! -e ${tmpd}/d1 ] && echo 'not installed' && exit 1
-grep 'header' ${tmpd}/d1 || echo "header stripped" && exit 1
-grep 'should not be stripped' ${tmpd}/d1 || echo "comment stripped" && exit 1
+# simple file
+echo "* test simple file"
+[ ! -e ${tmpd}/f1 ] && echo 'not installed1' && exit 1
+grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
+grep 'should not be stripped' ${tmpd}/f1 || (echo "comment stripped" && exit 1)
+
+# directory
+echo "* test directory"
+[ ! -d ${tmpd}/dir1 ] && echo 'not installed1' && exit 1
+[ ! -d ${tmpd}/dir1/d1 ] && echo 'not installed2' && exit 1
+[ ! -e ${tmpd}/dir1/d1/f2 ] && echo 'not installed3' && exit 1
+grep 'header' ${tmpd}/dir1/d1/f2 || (echo "header stripped" && exit 1)
+
+# linked directory
+echo "* test linked directory"
+[ ! -h ${tmpd}/dir2 ] && echo 'not installed1' && exit 1
+[ ! -d ${tmpd}/dir2/d1 ] && echo 'not installed2' && exit 1
+[ ! -e ${tmpd}/dir2/d1/f2 ] && echo 'not installed3' && exit 1
+grep 'header' ${tmpd}/dir2/d1/f2 || (echo "header stripped" && exit 1)
+
+# children_link directory
+echo "* test link_children directory"
+[ ! -d ${tmpd}/dir3 ] && echo 'not installed1' && exit 1
+[ ! -h ${tmpd}/dir3/s1 ] && echo 'not installed2' && exit 1
+[ ! -h ${tmpd}/dir3/s2 ] && echo 'not installed3' && exit 1
+[ ! -h ${tmpd}/dir3/s3 ] && echo 'not installed4' && exit 1
+[ ! -e ${tmpd}/dir3/s1/f1 ] && echo 'not installed5' && exit 1
+[ ! -e ${tmpd}/dir3/s2/f2 ] && echo 'not installed6' && exit 1
+grep 'header' ${tmpd}/dir3/s1/f1 || (echo "header stripped" && exit 1)
+grep 'header' ${tmpd}/dir3/s2/f2 || (echo "header stripped" && exit 1)
+
+# linked file
+echo "* test linked file"
+[ ! -h ${tmpd}/fl ] && echo 'not installed' && exit 1
+grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 
 # through the dotfile
 cat > ${cfg} << _EOF
@@ -95,15 +162,34 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  template_dotfile_default: true
 dotfiles:
+  f_f1:
+    dst: ${tmpd}/f1
+    src: f1
   d_d1:
-    dst: ${tmpd}/d1
-    src: d1
-    notemplate: true
+    dst: ${tmpd}/dir1
+    src: dir1
+  d_d2:
+    dst: ${tmpd}/dir2
+    src: dir2
+    link: link
+  d_d3:
+    dst: ${tmpd}/dir3
+    src: dir3
+    link: link_children
+  f_fl:
+    dst: ${tmpd}/fl
+    src: fl
+    link: link
 profiles:
   p1:
     dotfiles:
+    - f_f1
     - d_d1
+    - d_d2
+    - d_d3
+    - f_fl
 _EOF
 #cat ${cfg}
 
@@ -111,12 +197,44 @@ _EOF
 rm -rf ${tmpd}/*
 
 # install
+echo "doing specifically"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-# test existence
-[ ! -e ${tmpd}/d1 ] && echo 'not installed' && exit 1
-grep 'header' ${tmpd}/d1 || echo "header stripped" && exit 1
-grep 'should not be stripped' ${tmpd}/d1 || echo "comment stripped" && exit 1
+# simple file
+echo "* test simple file"
+[ ! -e ${tmpd}/f1 ] && echo 'not installed1' && exit 1
+grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
+grep 'should not be stripped' ${tmpd}/f1 || (echo "comment stripped" && exit 1)
+
+# directory
+echo "* test directory"
+[ ! -d ${tmpd}/dir1 ] && echo 'not installed1' && exit 1
+[ ! -d ${tmpd}/dir1/d1 ] && echo 'not installed2' && exit 1
+[ ! -e ${tmpd}/dir1/d1/f2 ] && echo 'not installed3' && exit 1
+grep 'header' ${tmpd}/dir1/d1/f2 || (echo "header stripped" && exit 1)
+
+# linked directory
+echo "* test linked directory"
+[ ! -h ${tmpd}/dir2 ] && echo 'not installed1' && exit 1
+[ ! -d ${tmpd}/dir2/d1 ] && echo 'not installed2' && exit 1
+[ ! -e ${tmpd}/dir2/d1/f2 ] && echo 'not installed3' && exit 1
+grep 'header' ${tmpd}/dir2/d1/f2 || (echo "header stripped" && exit 1)
+
+# children_link directory
+echo "* test link_children directory"
+[ ! -d ${tmpd}/dir3 ] && echo 'not installed1' && exit 1
+[ ! -h ${tmpd}/dir3/s1 ] && echo 'not installed2' && exit 1
+[ ! -h ${tmpd}/dir3/s2 ] && echo 'not installed3' && exit 1
+[ ! -h ${tmpd}/dir3/s3 ] && echo 'not installed4' && exit 1
+[ ! -e ${tmpd}/dir3/s1/f1 ] && echo 'not installed5' && exit 1
+[ ! -e ${tmpd}/dir3/s2/f2 ] && echo 'not installed6' && exit 1
+grep 'header' ${tmpd}/dir3/s1/f1 || (echo "header stripped" && exit 1)
+grep 'header' ${tmpd}/dir3/s2/f2 || (echo "header stripped" && exit 1)
+
+# linked file
+echo "* test linked file"
+[ ! -h ${tmpd}/fl ] && echo 'not installed' && exit 1
+grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
