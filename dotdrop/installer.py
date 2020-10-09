@@ -165,7 +165,7 @@ class Installer:
     def link_children(self, templater, src, dst, actionexec=None,
                       template=True):
         """
-        link all dotfiles in a given directory
+        link all files under a given directory
         @templater: the templater
         @src: dotfile source path in dotpath
         @dst: dotfile destination path in the FS
@@ -477,10 +477,12 @@ class Installer:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
                     if diff is None:
+                        # get diff
                         diff = self._diff_before_write(src, dst,
                                                        content=content,
                                                        quiet=True)
-                    self._print_diff(src, dst, diff)
+                        if diff:
+                            self._print_diff(src, dst, diff)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1, None
@@ -523,7 +525,11 @@ class Installer:
         return 0, None
 
     def _diff_before_write(self, src, dst, content=None, quiet=False):
-        """diff before writing"""
+        """
+        diff before writing
+        using a temp file if content is not None
+        returns diff string ('' if same)
+        """
         tmp = None
         if content:
             tmp = utils.write_to_tmpfile(content)
@@ -533,11 +539,12 @@ class Installer:
         if tmp:
             utils.remove(tmp, quiet=True)
 
-        if not quiet:
+        if not quiet and diff:
             self._print_diff(src, dst, diff)
         return diff
 
     def _print_diff(self, src, dst, diff):
+        """show diff to user"""
         self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
         self.log.emph(diff)
 
