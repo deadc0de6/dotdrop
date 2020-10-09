@@ -71,16 +71,16 @@ Some entries in the config can use the templating feature (see [templating](temp
 
 Entry    | Related doc
 -------- | -------------
-dotfile src | [dynamic dotfile paths](config-details/#dynamic-dotfile-paths)
-dotfile dst | [dynamic dotfile paths](config-details/#dynamic-dotfile-paths)
-variables | [variables](config-details/#entry-variables)
-dynvariables | [dynvariables](config-details/#entry-dynvariables)
-actions | [dynamic actions](config-details/#dynamic-actions)
-profile include | [profile include](config-details/#entry-profile-include)
-profile import | [profile import](config-details/#entry-profile-import)
-import_variables | [import_variables](config-details/#entry-import_variables)
-import_actions | [import_actions](config-details/#entry-import_actions)
-import_configs | [import_configs](config-details/#entry-import_configs)
+dotfile src | [dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
+dotfile dst | [dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
+variables | [variables](config-details.md#entry-variables)
+dynvariables | [dynvariables](config-details.md#entry-dynvariables)
+actions | [dynamic actions](config-details.md#dynamic-actions)
+profile include | [profile include](config-details.md#entry-profile-include)
+profile import | [profile import](config-details.md#entry-profile-import)
+import_variables | [import_variables](config-details.md#entry-import_variables)
+import_actions | [import_actions](config-details.md#entry-import_actions)
+import_configs | [import_configs](config-details.md#entry-import_configs)
 
 ## All dotfiles for a profile
 
