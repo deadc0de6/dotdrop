@@ -20,7 +20,7 @@ This file provides a few pointers on how to contribute to dotdrop
 and where to find information. For any question, feel free to open an issue.
 
 For PR adding new features, I'd be very thankful if you could add either
-a unittest testing the added feature or a bash script test ((see [testing](#testing), thanks!
+a unittest for the added feature or a bash script test (see [testing](#testing)), thanks!
 
 # code base
 
@@ -29,8 +29,8 @@ Dotdrop's code base is located in the [dotdrop directory](/dotdrop).
 Here's an overview of the different files and their role:
 
 * **action.py**: represent the actions and transformations
-* **cfg_yaml.py**: the lower level config parser
-* **cfg_aggregator.py**: the higher level config parser
+* **cfg_yaml.py**: the lower level config parser (see [lower layer](#lower-layer))
+* **cfg_aggregator.py**: the higher level config parser (see [higher layer](#higher-layer))
 * **comparator.py**: the class handling the comparison for `compare`
 * **dictparser.py**: abstract class for parsing dictionaries
 * **dotdrop.py**: the entry point and where the different cli commands are executed
@@ -44,7 +44,7 @@ Here's an overview of the different files and their role:
 * **settings.py**: represent the config settings
 * **templategen.py**: the jinja2 templating class
 * **updater.py**: the class handling the update of dotfiles for `update`
-* **utils.py**: some useful methods
+* **utils.py**: some useful methods used across the code base
 
 # config parsing
 
@@ -124,7 +124,7 @@ potential *included* entries
 * entry *import_configs*
 * entry *import_variables*
 * profile's *import*
-* profile's *include
+* profile's *include*
 
 Variables are then used to resolve different elements in the config file:
 see [this](docs/config.md#variables)
@@ -178,7 +178,7 @@ for the tests.
 
 The bash scripts are available in [tests-ng directory](tests-ng).
 These test entire workflows by simulating the use of dotdrop from end to end
-for different use-cases (usually described in their filename).
+for different use-cases (usually described in their filename or in the file header).
 
 Each script starts with the same boiler plate code that you can paste at the
 start of your new test (see the head of the file down to `# this is the test`).
