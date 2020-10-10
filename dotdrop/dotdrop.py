@@ -741,9 +741,14 @@ def main():
         LOG.err('interrupted')
         ret = False
 
+    if o.debug:
+        LOG.dbg('done executing command')
+
     if ret and o.conf.save():
         LOG.log('config file updated')
 
+    if o.debug:
+        LOG.dbg('return {}'.format(ret))
     return ret
 
 

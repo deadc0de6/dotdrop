@@ -99,7 +99,7 @@ cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 
 # check files haven't been updated
 grep 'b' ${dt}/a/c/acfile >/dev/null
-[ -e ${dt}/a/newfile ] && exit 1
+[ -e ${dt}/a/newfile ] && echo "should not have been updated" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
