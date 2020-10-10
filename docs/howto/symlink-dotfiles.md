@@ -13,8 +13,8 @@ Note that if the dotfile is using template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
 (see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
 
-Although the config entries `link_on_import` and `link_dotfile_default` can be set to `link_children`, it
-is not recommended since operations on a dotfile that is not a directory with the option `link_children`
+Although the config entries `link_on_import` and `link_dotfile_default` can be set to the value `link_children`,
+it is not recommended since operations on a dotfile that is not a directory with the option `link_children`
 will fail.
 
 ## Symlink a dotfile

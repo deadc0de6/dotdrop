@@ -31,6 +31,7 @@ Entry    | Description | Default
 `longkey` | use long keys for dotfiles when importing (see [Import dotfiles](usage.md#import-dotfiles)) | false
 `minversion` | (*for internal use, do not modify*) provides the minimal dotdrop version to use | -
 `showdiff` | on install show a diff before asking to overwrite (see `--showdiff`) | false
+`template_dotfile_default` | disable templating on all dotfiles when set to false | true
 `upignore` | list of patterns to ignore when updating, apply to all dotfiles (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
 `workdir` | path to the directory where templates are installed before being symlinked when using `link:link` or `link:link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
 <s>link_by_default</s> | when importing a dotfile set `link` to that value per default | false
@@ -48,6 +49,7 @@ Entry    | Description
 `cmpignore` | list of patterns to ignore when comparing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
 `ignoreempty` | if true empty template will not be deployed (defaults to value of `ignoreempty`)
 `instignore` | list of patterns to ignore when installing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
+`template` | if false disable template for this dotfile (defaults to value of `template_dotfile_default`)
 `trans_read` | transformation key to apply when installing this dotfile (must be defined in the **trans_read** entry below, see [transformations](config-details.md#entry-transformations))
 `trans_write` | transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below, see [transformations](config-details.md#entry-transformations))
 `upignore` | list of patterns to ignore when updating (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
@@ -69,6 +71,7 @@ Entry    | Description
     - "<ignore-pattern>"
   actions:
     - <action-key>
+  template: (true|false)
   trans_read: <transformation-key>
   trans_write: <transformation-key>
 ```
