@@ -4,6 +4,19 @@ Dotdrop leverage the power of [jinja2](https://palletsprojects.com/p/jinja/) to 
 templating of dotfiles. See [jinja2 template doc](https://jinja.palletsprojects.com/en/2.11.x/templates/)
 or the below sections for more information on how to template your dotfiles.
 
+## Templating or not templating
+
+The dotfile config entry [template](config-format.md#dotfiles-entry)
+and the global config entry [template_dotfile_default](config-format.md#config-entry)
+allow to control if a dotfile is being process by the templating engine.
+
+Obviously if the dotfile uses template directives, it needs to be templated. However if it
+is not, disabling templating will speed up its installation (since it won't have to be
+processed by the engine).
+
+For dotfiles being symlinked (`link` or `link_children`), see
+[the dedicated doc](howto/symlink-dotfiles.md#templating-symlinked-dotfiles)
+
 ## Delimiters
 
 Dotdrop uses different delimiters than

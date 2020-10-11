@@ -129,11 +129,13 @@ def cmd_install(o):
             LOG.dbg(dotfile.prt())
         if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
             r, err = inst.link(t, dotfile.src, dotfile.dst,
-                               actionexec=pre_actions_exec)
+                               actionexec=pre_actions_exec,
+                               template=dotfile.template)
         elif hasattr(dotfile, 'link') and \
                 dotfile.link == LinkTypes.LINK_CHILDREN:
             r, err = inst.link_children(t, dotfile.src, dotfile.dst,
-                                        actionexec=pre_actions_exec)
+                                        actionexec=pre_actions_exec,
+                                        template=dotfile.template)
         else:
             src = dotfile.src
             tmp = None
@@ -147,7 +149,8 @@ def cmd_install(o):
             r, err = inst.install(t, src, dotfile.dst,
                                   actionexec=pre_actions_exec,
                                   noempty=dotfile.noempty,
-                                  ignore=ignores)
+                                  ignore=ignores,
+                                  template=dotfile.template)
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
                 if os.path.exists(tmp):
@@ -264,7 +267,8 @@ def cmd_compare(o, tmp):
             continue
 
         # install dotfile to temporary dir and compare
-        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst)
+        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
+                                                 template=dotfile.template)
         if not ret:
             # failed to install to tmp
             line = '=> compare {}: error'
@@ -737,9 +741,14 @@ def main():
         LOG.err('interrupted')
         ret = False
 
+    if o.debug:
+        LOG.dbg('done executing command')
+
     if ret and o.conf.save():
         LOG.log('config file updated')
 
+    if o.debug:
+        LOG.dbg('return {}'.format(ret))
     return ret
 
 
