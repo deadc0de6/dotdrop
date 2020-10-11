@@ -556,7 +556,32 @@ profiles:
     - f_somefile
 ```
 
-Make sure to quote the path in the config file.
+## Dynamic dotfile link value
+
+Dotfile `link` value can be dynamically constructed using
+define variables (([variables and dynvariables](config.md#variables)).
+
+For example
+```yaml
+variables:
+  link_value: "nolink"
+dotfiles:
+  f_test:
+    src: test
+    dst: ~/.test
+    link: "{{@@ link_value @@}}"
+profiles:
+  linux:
+    dotfiles:
+    - f_test
+    variables:
+      link_value: "link"
+  windows:
+    dotfiles:
+    - f_test
+```
+
+Make sure to quote the link value in the config file.
 
 ## Dynamic actions
 

@@ -73,6 +73,7 @@ Entry    | Related doc
 -------- | -------------
 dotfile src | [dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
 dotfile dst | [dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
+dotfile link | [Dynamic dotfile link value](config-details.md#Dynamic-dotfile-link-value)
 variables | [variables](config-details.md#entry-variables)
 dynvariables | [dynvariables](config-details.md#entry-dynvariables)
 actions | [dynamic actions](config-details.md#dynamic-actions)

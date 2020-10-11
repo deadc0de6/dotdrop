@@ -242,15 +242,15 @@ class CfgYaml:
 
         # process profile ALL
         self._resolve_profile_all()
-        # patch dotfiles paths
-        self._template_dotfiles_paths()
+        # template dotfiles entries
+        self._template_dotfiles_entries()
 
         if self._debug:
             self._dbg('########### {} ###########'.format('final config'))
             self._debug_entries()
 
     ########################################################
-    # outside available methods
+    # public methods
     ########################################################
 
     def resolve_dotfile_src(self, src, templater=None):
@@ -596,15 +596,7 @@ class CfgYaml:
                 v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
-            # normalize the link value
-            if self.key_dotfile_link in v:
-                # check link value
-                val = v[self.key_dotfile_link]
-                if val not in self.allowed_link_val:
-                    err = 'bad value: {}'.format(val)
-                    self._log.err(err)
-                    raise YamlException('config content error: {}'.format(err))
-            else:
+            if self.key_dotfile_link not in v:
                 # apply link value if undefined
                 val = self.settings[self.key_settings_link_dotfile_default]
                 v[self.key_dotfile_link] = val
@@ -1119,10 +1111,10 @@ class CfgYaml:
             new[k] = vt
         return new
 
-    def _template_dotfiles_paths(self):
-        """template dotfiles paths"""
+    def _template_dotfiles_entries(self):
+        """template dotfiles entries"""
         if self._debug:
-            self._dbg('templating dotfiles paths')
+            self._dbg('templating dotfiles entries')
         dotfiles = self.dotfiles.copy()
 
         # make sure no dotfiles path is None
@@ -1164,6 +1156,17 @@ class CfgYaml:
             dst = dotfile[self.key_dotfile_dst]
             newdst = self.resolve_dotfile_dst(dst, templater=self._tmpl)
             dotfile[self.key_dotfile_dst] = newdst
+            # normalize the link value
+            if self.key_dotfile_link in dotfile:
+                # link
+                link = dotfile[self.key_dotfile_link]
+                newlink = self._template_item(link)
+                dotfile[self.key_dotfile_link] = newlink
+                # check link value
+                if newlink not in self.allowed_link_val:
+                    err = 'bad value: {}'.format(newlink)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
 
     def _rec_resolve_variables(self, variables):
         """recursive resolve variables"""

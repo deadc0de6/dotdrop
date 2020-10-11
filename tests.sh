@@ -96,4 +96,4 @@ else
 fi
 
 ## done
-echo "All test finished successfully"
+echo "All test finished successfully in ${SECONDS}s"
