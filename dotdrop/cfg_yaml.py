@@ -56,7 +56,6 @@ class CfgYaml:
     key_dotfile_dst = 'dst'
     key_dotfile_link = 'link'
     key_dotfile_actions = 'actions'
-    key_dotfile_link_children = 'link_children'
     key_dotfile_noempty = 'ignoreempty'
 
     # profile
@@ -916,26 +915,27 @@ class CfgYaml:
 
     def _fix_deprecated_link_by_default(self, yamldict):
         """fix deprecated link_by_default"""
-        key = 'link_by_default'
+        old_key = 'link_by_default'
         newkey = self.key_imp_link
         if self.key_settings not in yamldict:
             return
         if not yamldict[self.key_settings]:
             return
         config = yamldict[self.key_settings]
-        if key not in config:
+        if old_key not in config:
             return
-        if config[key]:
+        if config[old_key]:
             config[newkey] = self.lnk_link
         else:
             config[newkey] = self.lnk_nolink
-        del config[key]
+        del config[old_key]
         self._log.warn('deprecated \"link_by_default\"')
         self._dirty = True
         self._dirty_deprecated = True
 
     def _fix_deprecated_dotfile_link(self, yamldict):
         """fix deprecated link in dotfiles"""
+        old_key = 'link_children'
         if self.key_dotfiles not in yamldict:
             return
         if not yamldict[self.key_dotfiles]:
@@ -954,14 +954,14 @@ class CfgYaml:
                 self._dirty_deprecated = True
                 self._log.warn('deprecated \"link\" value')
 
-            elif self.key_dotfile_link_children in dotfile and \
-                    type(dotfile[self.key_dotfile_link_children]) is bool:
+            elif old_key in dotfile and \
+                    type(dotfile[old_key]) is bool:
                 # patch link_children: <bool>
-                cur = dotfile[self.key_dotfile_link_children]
+                cur = dotfile[old_key]
                 new = self.lnk_nolink
                 if cur:
                     new = self.lnk_children
-                del dotfile[self.key_dotfile_link_children]
+                del dotfile[old_key]
                 dotfile[self.key_dotfile_link] = new
                 self._dirty = True
                 self._dirty_deprecated = True
