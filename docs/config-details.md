@@ -559,7 +559,7 @@ profiles:
 ## Dynamic dotfile link value
 
 Dotfile `link` value can be dynamically constructed using
-define variables (([variables and dynvariables](config.md#variables)).
+define variables ([variables and dynvariables](config.md#variables)).
 
 For example
 ```yaml
