@@ -88,6 +88,10 @@ class CfgYaml:
     lnk_link = LinkTypes.LINK.name.lower()
     lnk_children = LinkTypes.LINK_CHILDREN.name.lower()
 
+    # checks
+    allowed_link_val = [lnk_nolink, lnk_link, lnk_children]
+    top_entries = [key_dotfiles, key_settings, key_profiles]
+
     def __init__(self, path, profile=None, addprofiles=[], debug=False):
         """
         config parser
@@ -127,6 +131,8 @@ class CfgYaml:
         self._yaml_dict = self._load_yaml(self._path)
         # live patch deprecated entries
         self._fix_deprecated(self._yaml_dict)
+        # validate content
+        self._validate(self._yaml_dict)
 
         ##################################################
         # parse the config and variables
@@ -588,8 +594,16 @@ class CfgYaml:
                 v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
-            # apply link value
-            if self.key_dotfile_link not in v:
+            # normalize the link value
+            if self.key_dotfile_link in v:
+                # check link value
+                val = v[self.key_dotfile_link]
+                if val not in self.allowed_link_val:
+                    err = 'bad value: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+            else:
+                # apply link value if undefined
                 val = self.settings[self.key_settings_link_dotfile_default]
                 v[self.key_dotfile_link] = val
             # apply noempty if undefined
@@ -999,7 +1013,36 @@ class CfgYaml:
         except Exception as e:
             self._log.err(e)
             raise YamlException('config format error: {}'.format(path))
+
         return content
+
+    def _validate(self, yamldict):
+        """validate entries"""
+        if not yamldict:
+            return
+
+        # check top entries
+        for e in self.top_entries:
+            if e not in yamldict:
+                err = 'no {} entry found'.format(e)
+                self._log.err(err)
+                raise YamlException('config format error: {}'.format(err))
+
+        # check link_dotfile_default
+        if self.key_settings not in yamldict:
+            # no configs top entry
+            return
+        if not yamldict[self.key_settings]:
+            # configs empty
+            return
+        settings = yamldict[self.key_settings]
+        if self.key_settings_link_dotfile_default not in settings:
+            return
+        val = settings[self.key_settings_link_dotfile_default]
+        if val not in self.allowed_link_val:
+            err = 'bad value: {}'.format(val)
+            self._log.err(err)
+            raise YamlException('config content error: {}'.format(err))
 
     def _yaml_load(self, path):
         """load from yaml"""
