@@ -6,7 +6,7 @@ layout: default
 that provides efficient ways of managing your dotfiles. It is especially powerful when
 it comes to managing those across different hosts.
 
-The main idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different content on different hosts/setups. To achieve this, it uses jinja2 which is a templating engine that allows to specify, during the dotfile installation with dotdrop, based on a selected profile, how (with what content) each dotfile will be installed.
+The main idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different content on different hosts/setups. To achieve this, it uses a templating engine that allows to specify, during the dotfile installation with dotdrop, based on a selected profile, how (with what content) each dotfile will be installed.
 
 * [✔] **VERSIONED**
 
@@ -58,8 +58,4 @@ Go check [dotdrop](https://github.com/deadc0de6/dotdrop), it does all that!
 For more check
 
 * [The readme](https://github.com/deadc0de6/dotdrop/blob/master/README.md)
-* [A small example](https://github.com/deadc0de6/dotdrop#example)
-* [How people are using dotdrop](https://github.com/deadc0de6/dotdrop#people-using-dotdrop)
-* [The blog post](https://deadc0de.re/articles/dotfiles.html)
-* [The wiki](https://github.com/deadc0de6/dotdrop/wiki)
-
+* [The documentation](https://dotdrop.readthedocs.io/)
