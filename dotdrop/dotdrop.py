@@ -229,6 +229,9 @@ def cmd_compare(o, tmp):
     comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
 
     for dotfile in selected:
+        if not dotfile.src and not dotfile.dst:
+            # ignore fake dotfile
+            continue
         # add dotfile variables
         t.restore_vars(tvars)
         newvars = dotfile.get_dotfile_variables()
@@ -581,7 +584,21 @@ def cmd_remove(o):
 
             # remove dotfile from dotpath
             dtpath = os.path.join(o.dotpath, dotfile.src)
-            remove(dtpath)
+            try:
+                remove(dtpath)
+            except OSError:
+                # did not exist
+                pass
+            # remove empty directory
+            parent = os.path.dirname(dtpath)
+            # remove any empty parent up to dotpath
+            while parent != o.dotpath:
+                if os.path.isdir(parent) and not os.listdir(parent):
+                    msg = 'Remove empty dir \"{}\"'.format(parent)
+                    if o.safe and not LOG.ask(msg):
+                        break
+                    remove(parent)
+                parent = os.path.dirname(parent)
             removed.append(dotfile.key)
 
     if o.dry:
