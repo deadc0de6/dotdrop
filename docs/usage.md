@@ -17,6 +17,15 @@ For more advanced uses:
 * [the example](https://github.com/deadc0de6/dotdrop#getting-started)
 * [the howto](howto/howto.md)
 
+## Profile
+
+The default profile used by dotdrop is the *hostname* of the host you are running dotdrop on.
+
+It can be changed:
+
+* using the command line switch `-p --profile=<profile>`
+* by defining it in the env variable `DOTDROP_PROFILE`
+
 ## Import dotfiles
 
 The `import` command imports dotfiles to be managed by dotdrop.
