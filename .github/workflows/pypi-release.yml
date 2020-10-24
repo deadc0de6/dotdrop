@@ -1,14 +1,10 @@
 name: Release to PyPI
-
 on:
   release:
     types: [created]
-
 jobs:
   release:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
