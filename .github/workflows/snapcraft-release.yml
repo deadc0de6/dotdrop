@@ -13,6 +13,7 @@ jobs:
         SNAPCRAFT_BUILD_ENVIRONMENT: host
       run: |
         sudo apt update
+        sudo apt -y install git
         sudo snap install snapcraft --classic
         echo "$SNAP_TOKEN" | snapcraft login --with -
         cd packages/snap/
