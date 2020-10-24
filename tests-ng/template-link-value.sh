@@ -95,6 +95,10 @@ dotfiles:
     dst: ${tmpd}/f
     src: f
     link: "{{@@ dyn_link_children_val @@}}"
+  f_not:
+    dst: ${tmpd}/n
+    src: n
+    link: "{{@@ link_true @@}}"
 profiles:
   p1:
     dotfiles:
