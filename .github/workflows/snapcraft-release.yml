@@ -1,0 +1,20 @@
+name: Release to Snapcraft
+on:
+  release:
+    types: [created]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and Publish Snapcraft
+      env:
+        SNAP_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}
+        SNAPCRAFT_BUILD_ENVIRONMENT: host
+      run: |
+        sudo apt update
+        sudo snap install snapcraft --classic
+        echo "$SNAP_TOKEN" | snapcraft login --with -
+        cd packages/snap/
+        snapcraft
+        snapcraft upload --release=stable "dotdrop*.snap"
