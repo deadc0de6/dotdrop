@@ -47,6 +47,7 @@ unset DOTDROP_FORCE_NODEBUG
   echo "doing extended tests"
   log=`mktemp`
   for scr in tests-ng/*.sh; do
+    echo "Running test ${scr}"
     if [ -z ${TRAVIS} ]; then
       ${scr} > "${log}" 2>&1 &
     else
