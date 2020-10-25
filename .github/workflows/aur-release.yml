@@ -13,11 +13,11 @@ jobs:
         version=$(git describe --abbrev=0 --tags | sed 's/^v//g')
         sed "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD > PKGBUILD
     - name: Upload PKGBUILD
-        uses: actions/upload-artifact@v2
-        with:
-          name: PKGBUILD
-          path: ./PKGBUILD
-          retention-days: 1
+      uses: actions/upload-artifact@v2
+      with:
+        name: PKGBUILD
+        path: ./PKGBUILD
+        retention-days: 1
   aur_upload:
     name: upload aur package
     runs-on: ubuntu-latest
