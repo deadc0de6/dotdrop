@@ -1,0 +1,39 @@
+name: Release to aur
+on:
+  release:
+    types: [created]
+jobs:
+  aur_patch:
+    name: patch aur package
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - shell: bash
+      run: |
+        version=$(git describe --abbrev=0 --tags | sed 's/^v//g')
+        sed "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD > PKGBUILD
+    - name: Upload PKGBUILD
+        uses: actions/upload-artifact@v2
+        with:
+          name: PKGBUILD
+          path: ./PKGBUILD
+          retention-days: 1
+  aur_upload:
+    name: upload aur package
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download PKGBUILD
+      uses: actions/download-artifact@v2.0
+      with:
+        name: PKGBUILD
+        path: ./PKGBUILD
+    - name: Publish to aur
+      uses: KSXGitHub/github-actions-deploy-aur@v2
+      with:
+        pkgname: dotdrop
+        pkgbuild: ./PKGBUILD
+        commit_username: ${{ secrets.AUR_USERNAME }}
+        commit_email: ${{ secrets.AUR_EMAIL }}
+        ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        commit_message: "bump version"
