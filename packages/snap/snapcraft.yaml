@@ -38,5 +38,5 @@ parts:
     source: .
     plugin: nil
     override-build: |
-      VERSION=$(git tag -l | tail -1 | sed 's/^v//g')
+      VERSION=$(git describe --abbrev=0 --tags | sed 's/^v//g')
       snapcraftctl set-version "${VERSION}"
