@@ -3,37 +3,22 @@ on:
   release:
     types: [created]
 jobs:
-  aur_patch:
+  aur_publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - shell: bash
+    - name: Prepare AUR package
       env:
         RELEASE_TAG: ${{ github.ref }}
       run: |
         version=$(echo ${RELEASE_TAG} | sed 's#^.*v##g')
-        sed "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD > PKGBUILD
-    - name: Upload PKGBUILD
-      uses: actions/upload-artifact@v2
-      with:
-        name: PKGBUILD
-        path: ./PKGBUILD
-        retention-days: 1
-  aur_upload:
-    needs: aur_patch
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Download PKGBUILD
-      uses: actions/download-artifact@v2.0
-      with:
-        name: PKGBUILD
-        path: ./PKGBUILD
+        sed -i "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD
+        cat packages/arch-dotdrop/PKGBUILD
     - name: Publish to aur
-      uses: KSXGitHub/github-actions-deploy-aur@v2
+      uses: KSXGitHub/github-actions-deploy-aur@v2.0.2
       with:
         pkgname: dotdrop
-        pkgbuild: ./PKGBUILD
+        pkgbuild: ./packages/arch-dotdrop/PKGBUILD
         commit_username: ${{ secrets.AUR_USERNAME }}
         commit_email: ${{ secrets.AUR_EMAIL }}
         ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
