@@ -4,7 +4,6 @@ on:
     types: [created]
 jobs:
   aur_patch:
-    name: patch aur package
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +18,6 @@ jobs:
         path: ./PKGBUILD
         retention-days: 1
   aur_upload:
-    name: upload aur package
     needs:
       - aur_patch
     runs-on: ubuntu-latest
