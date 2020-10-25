@@ -4,7 +4,7 @@ on:
     types: [created]
 jobs:
   snapcraft_publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
     - uses: actions/checkout@v2
     - name: Build and Publish Snapcraft
@@ -13,7 +13,7 @@ jobs:
         SNAPCRAFT_BUILD_ENVIRONMENT: host
       run: |
         sudo apt update
-        sudo apt -y install git
+        sudo apt -y install git python3-pypandoc pandoc
         sudo snap install snapcraft --classic
         echo "$SNAP_TOKEN" | snapcraft login --with -
         cd packages/snap/
