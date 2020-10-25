@@ -11,7 +11,7 @@ jobs:
       env:
         RELEASE_TAG: ${{ github.ref }}
       run: |
-        version=$(echo ${RELEASE_TAG} | sed 's/^v//g')
+        version=$(echo ${RELEASE_TAG} | sed 's#^.*v##g')
         sed "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD > PKGBUILD
     - name: Upload PKGBUILD
       uses: actions/upload-artifact@v2
