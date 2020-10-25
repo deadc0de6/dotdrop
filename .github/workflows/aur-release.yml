@@ -20,6 +20,8 @@ jobs:
         retention-days: 1
   aur_upload:
     name: upload aur package
+    needs:
+      - aur_patch
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
