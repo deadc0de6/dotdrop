@@ -1021,7 +1021,7 @@ class CfgYaml:
             content = self._yaml_load(path)
         except Exception as e:
             self._log.err(e)
-            raise YamlException('config format error: {}'.format(path))
+            raise YamlException('config yaml error: {}'.format(path))
 
         return content
 
