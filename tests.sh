@@ -25,9 +25,6 @@ which ${nosebin} >/dev/null 2>&1
 which ${nosebin} >/dev/null 2>&1
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
 
-# do not print debugs when running tests (faster)
-export DOTDROP_FORCE_NODEBUG=yes
-
 # coverage file location
 cur=`dirname $(readlink -f "${0}")`
 export COVERAGE_FILE="${cur}/.coverage"
@@ -38,8 +35,8 @@ PYTHONPATH="dotdrop" ${nosebin} -s --with-coverage --cover-package=dotdrop
 
 # enable debug logs
 export DOTDROP_DEBUG=
-unset DOTDROP_FORCE_NODEBUG
 # do not print debugs when running tests (faster)
+unset DOTDROP_FORCE_NODEBUG
 #export DOTDROP_FORCE_NODEBUG=yes
 
 ## execute bash script tests
@@ -47,11 +44,11 @@ unset DOTDROP_FORCE_NODEBUG
   echo "doing extended tests"
   log=`mktemp`
   for scr in tests-ng/*.sh; do
-    echo "Running test ${scr}"
     if [ -z ${TRAVIS} ]; then
       ${scr} > "${log}" 2>&1 &
     else
-      ${scr} > "${log}" >/dev/null 2>&1 &
+      #${scr} > "${log}" >/dev/null 2>&1 &
+      ${scr} &
     fi
     tail --pid="$!" -f "${log}"
     set +e
