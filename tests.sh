@@ -25,6 +25,9 @@ which ${nosebin} >/dev/null 2>&1
 which ${nosebin} >/dev/null 2>&1
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
 
+# do not print debugs when running tests (faster)
+export DOTDROP_FORCE_NODEBUG=yes
+
 # coverage file location
 cur=`dirname $(readlink -f "${0}")`
 export COVERAGE_FILE="${cur}/.coverage"
@@ -42,29 +45,33 @@ unset DOTDROP_FORCE_NODEBUG
 ## execute bash script tests
 [ "$1" = '--python-only' ] || {
   echo "doing extended tests"
-  log=`mktemp`
+  logdir=`mktemp -d`
   for scr in tests-ng/*.sh; do
+    logfile="${logdir}/`basename ${scr}`.log"
+    echo "-> running test ${scr} (logfile:${logfile})"
     if [ -z ${TRAVIS} ]; then
-      ${scr} > "${log}" 2>&1 &
+      ${scr} > "${logfile}" 2>&1 &
+      #tail --pid="$!" -f "${logfile}"
     else
       #${scr} > "${log}" >/dev/null 2>&1 &
-      ${scr} &
+      ${scr} > "${logfile}" 2>&1 &
     fi
-    tail --pid="$!" -f "${log}"
     set +e
     wait "$!"
     if [ "$?" -ne 0 ]; then
-        echo "Test ${scr} finished with error"
-        rm -f ${log}
+        echo "test ${scr} finished with error"
+        rm -rf ${logdir}
         exit 1
-    elif grep Traceback ${log}; then
-      echo "crash found in logs"
-      rm -f ${log}
+    elif grep Traceback ${logfile}; then
+      echo "test ${scr} crashed"
+      cat ${logfile}
+      rm -rf ${logdir}
       exit 1
     fi
     set -e
+    echo "test ${scr} ok"
   done
-  rm -f ${log}
+  rm -rf ${logdir}
 }
 
 ## test the doc with remark
