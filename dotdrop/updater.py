@@ -114,7 +114,7 @@ class Updater:
             ret = self._handle_file(new_path, dtpath)
         # clean temporary files
         if new_path != path and os.path.exists(new_path):
-            remove(new_path)
+            remove(new_path, logger=self.log)
         return ret
 
     def _apply_trans_w(self, path, dotfile):
@@ -133,7 +133,7 @@ class Updater:
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, dotfile.key))
             if os.path.exists(tmp):
-                remove(tmp)
+                remove(tmp, logger=self.log)
             return None
         return tmp
 
@@ -273,7 +273,7 @@ class Updater:
                 self.log.dbg('rm -r {}'.format(old))
             if not self._confirm_rm_r(old):
                 continue
-            remove(old)
+            remove(old, logger=self.log)
             self.log.sub('\"{}\" dir removed'.format(old))
 
         # handle files diff
@@ -326,7 +326,7 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
-            remove(new)
+            remove(new, logger=self.log)
             self.log.sub('\"{}\" removed'.format(new))
 
         # compare rights

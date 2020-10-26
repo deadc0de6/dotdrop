@@ -537,7 +537,7 @@ class Installer:
         diff = utils.diff(modified=src, original=dst, raw=False,
                           diff_cmd=self.diff_cmd)
         if tmp:
-            utils.remove(tmp, quiet=True)
+            utils.remove(tmp, logger=self.log)
 
         if not quiet and diff:
             self._print_diff(src, dst, diff)

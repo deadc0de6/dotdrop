@@ -154,7 +154,7 @@ def cmd_install(o):
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
                 if os.path.exists(tmp):
-                    remove(tmp)
+                    remove(tmp, LOG)
         if r:
             # dotfile was installed
             if not o.install_temporary:
@@ -287,7 +287,7 @@ def cmd_compare(o, tmp):
         if tmpsrc:
             tmpsrc = os.path.join(o.dotpath, tmpsrc)
             if os.path.exists(tmpsrc):
-                remove(tmpsrc)
+                remove(tmpsrc, LOG)
 
         # print diff result
         if diff == '':
@@ -584,11 +584,7 @@ def cmd_remove(o):
 
             # remove dotfile from dotpath
             dtpath = os.path.join(o.dotpath, dotfile.src)
-            try:
-                remove(dtpath)
-            except OSError:
-                # did not exist
-                pass
+            remove(dtpath, LOG)
             # remove empty directory
             parent = os.path.dirname(dtpath)
             # remove any empty parent up to dotpath
@@ -597,7 +593,7 @@ def cmd_remove(o):
                     msg = 'Remove empty dir \"{}\"'.format(parent)
                     if o.safe and not LOG.ask(msg):
                         break
-                    remove(parent)
+                    remove(parent, LOG)
                 parent = os.path.dirname(parent)
             removed.append(dotfile.key)
 
@@ -669,7 +665,7 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
         msg = 'transformation \"{}\" failed for {}'
         LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
-            remove(new_src)
+            remove(new_src, LOG)
         return None
     return new_src
 
@@ -728,7 +724,7 @@ def main():
             tmp = get_tmpdir()
             ret = cmd_compare(o, tmp)
             # clean tmp directory
-            remove(tmp)
+            remove(tmp, LOG)
 
         elif o.cmd_import:
             # import dotfile(s)

@@ -103,28 +103,42 @@ def get_unique_tmp_name():
     return os.path.join(tempfile.gettempdir(), unique)
 
 
-def remove(path, quiet=False):
-    """remove a file/directory/symlink"""
+def remove(path, logger=None):
+    """
+    remove a file/directory/symlink
+    if logger is defined, OSError are catched
+    and printed to logger.warn instead of being forwarded
+    as OSError
+    """
     if not path:
         return
     if not os.path.lexists(path):
-        if quiet:
+        err = 'File not found: {}'.format(path)
+        if logger:
+            logger.warn(err)
             return
-        raise OSError("File not found: {}".format(path))
+        raise OSError(err)
     if os.path.normpath(os.path.expanduser(path)) in NOREMOVE:
-        if quiet:
-            return
         err = 'Dotdrop refuses to remove {}'.format(path)
+        if logger:
+            logger.warn(err)
+            return
         LOG.err(err)
         raise OSError(err)
-    if os.path.islink(path) or os.path.isfile(path):
-        os.unlink(path)
-    elif os.path.isdir(path):
-        rmtree(path)
-    else:
-        if quiet:
+    try:
+        if os.path.islink(path) or os.path.isfile(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
+            rmtree(path)
+        else:
+            err = 'Unsupported file type for deletion: {}'.format(path)
+            raise OSError(err)
+    except Exception as e:
+        err = str(e)
+        if logger:
+            logger.warn(err)
             return
-        raise OSError("Unsupported file type for deletion: {}".format(path))
+        raise OSError(err)
 
 
 def samefile(path1, path2):
