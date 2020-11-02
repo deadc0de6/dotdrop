@@ -13,7 +13,7 @@ jobs:
         SNAPCRAFT_BUILD_ENVIRONMENT: host
       run: |
         sudo apt update
-        sudo apt -y install git pandoc python3-pip
+        sudo apt -y install git pandoc python3-pip python3-setuptools
         sudo pip3 install pypandoc
         sudo snap install snapcraft --classic
         echo "$SNAP_TOKEN" | snapcraft login --with -
