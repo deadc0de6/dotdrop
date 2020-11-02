@@ -351,6 +351,8 @@ class CfgYaml:
 
     def del_dotfile_from_profile(self, df_key, pro_key):
         """remove this dotfile from that profile"""
+        if self._debug:
+            self._dbg('removing \"{}\" from \"{}\"'.format(df_key, pro_key))
         if df_key not in self.dotfiles.keys():
             self._log.err('key not in dotfiles: {}'.format(df_key))
             return False
@@ -359,6 +361,9 @@ class CfgYaml:
             return False
         # get the profile dictionary
         profile = self._yaml_dict[self.key_profiles][pro_key]
+        if self.key_profile_dotfiles not in profile:
+            # profile does not contain any dotfiles
+            return True
         if df_key not in profile[self.key_profile_dotfiles]:
             return True
         if self._debug:
