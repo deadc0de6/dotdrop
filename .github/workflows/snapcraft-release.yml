@@ -11,12 +11,14 @@ jobs:
       env:
         SNAP_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}
         SNAPCRAFT_BUILD_ENVIRONMENT: host
+        RELEASE_TAG: ${{ github.ref }}
+      working-directory: ./packages/snap/
       run: |
         sudo apt update
         sudo apt -y install git pandoc python3-pip python3-setuptools
         sudo pip3 install pypandoc
         sudo snap install snapcraft --classic
         echo "$SNAP_TOKEN" | snapcraft login --with -
-        cd packages/snap/
         snapcraft
-        snapcraft upload --release=stable "dotdrop*.snap"
+        version=$(echo ${RELEASE_TAG} | sed 's#^.*v##g')
+        snapcraft upload --release=stable dotdrop_${version}_amd64.snap
