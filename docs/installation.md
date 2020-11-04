@@ -113,6 +113,21 @@ snap install dotdrop
 
 Then follow the [doc to setup your repository](repository-setup.md).
 
+## From source
+
+Clone the repository
+```bash
+$ git clone https://github.com/deadc0de6/dotdrop.git
+```
+
+Start using it directly through the `dotdrop.sh` script and
+use the `--cfg` to make it point to your config file.
+
+```bash
+$ cd dotdrop/
+$ ./dotdrop.sh --cfg <my-config-file> files
+```
+
 ## Dependencies
 
 Beside the python dependencies defined in [requirements.txt](https://github.com/deadc0de6/dotdrop/blob/master/requirements.txt),
