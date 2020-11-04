@@ -43,7 +43,7 @@ class Settings(DictParser):
 
     def __init__(self, backup=True, banner=True,
                  create=True, default_actions=[], dotpath='dotfiles',
-                 ignoreempty=True, import_actions=[], import_configs=[],
+                 ignoreempty=False, import_actions=[], import_configs=[],
                  import_variables=[], keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
