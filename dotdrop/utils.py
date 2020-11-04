@@ -102,13 +102,16 @@ def get_tmpdir():
 
 def _get_tmpdir():
     """create the tmpdir"""
-    if ENV_TEMP in os.environ:
-        t = os.environ[ENV_TEMP]
-        t = os.path.expanduser(t)
-        t = os.path.abspath(t)
-        t = os.path.normpath(t)
-        os.makedirs(t, exist_ok=True)
-        return t
+    try:
+        if ENV_TEMP in os.environ:
+            t = os.environ[ENV_TEMP]
+            t = os.path.expanduser(t)
+            t = os.path.abspath(t)
+            t = os.path.normpath(t)
+            os.makedirs(t, exist_ok=True)
+            return t
+    except Exception:
+        pass
     return tempfile.mkdtemp(prefix='dotdrop-')
 
 
