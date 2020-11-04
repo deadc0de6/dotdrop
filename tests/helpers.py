@@ -130,6 +130,7 @@ def _fake_args():
     args['--force-actions'] = False
     args['--grepable'] = False
     args['--as'] = None
+    args['--file-only'] = False
     # cmds
     args['profiles'] = False
     args['files'] = False

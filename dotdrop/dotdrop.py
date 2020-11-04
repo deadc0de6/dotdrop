@@ -289,16 +289,20 @@ def cmd_compare(o, tmp):
             if os.path.exists(tmpsrc):
                 remove(tmpsrc, LOG)
 
-        # print diff result
         if diff == '':
+            # no difference
             if o.debug:
                 line = '=> compare {}: diffing with \"{}\"'
                 LOG.dbg(line.format(dotfile.key, dotfile.dst))
                 LOG.dbg('same file')
         else:
+            # print diff results
             line = '=> compare {}: diffing with \"{}\"'
             LOG.log(line.format(dotfile.key, dotfile.dst))
-            LOG.emph(diff)
+            if o.compare_fileonly:
+                LOG.raw('<files are different>')
+            else:
+                LOG.emph(diff)
             same = False
 
     return same

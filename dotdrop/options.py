@@ -54,7 +54,7 @@ Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>] [<key>...]
   dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] <path>...
-  dotdrop compare   [-Vb]       [-c <path>] [-p <profile>]
+  dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
                                 [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-i <pattern>...] [<path>...]
@@ -71,6 +71,7 @@ Options:
   -C --file=<path>        Path of dotfile to compare.
   -i --ignore=<pattern>   Pattern to ignore.
   -l --link=<link>        Link option (nolink|link|link_children).
+  -L --file-only          Do not show diff but only the files that differ.
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -s --as=<path>          Import as a different path from actual path.
   -b --no-banner          Do not display the banner.
@@ -239,6 +240,7 @@ class Options(AttrMonitor):
         self.compare_ignore.extend(self.cmpignore)
         self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
         self.compare_ignore = uniq_list(self.compare_ignore)
+        self.compare_fileonly = self.args['--file-only']
         # "import" specifics
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
