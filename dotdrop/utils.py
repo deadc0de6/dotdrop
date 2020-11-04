@@ -19,6 +19,10 @@ from dotdrop.logger import Logger
 
 LOG = Logger()
 STAR = '*'
+# the environment variable for temporary
+ENV_TEMP = 'DOTDROP_TMPDIR'
+# the temporary directory
+TMPDIR = None
 
 # files dotdrop refuses to remove
 DONOTDELETE = [
@@ -87,20 +91,42 @@ def diff(original, modified, raw=True,
 
 
 def get_tmpdir():
-    """create a temporary directory"""
+    """create and return the temporary directory"""
+    global TMPDIR
+    if TMPDIR:
+        return TMPDIR
+    t = _get_tmpdir()
+    TMPDIR = t
+    return t
+
+
+def _get_tmpdir():
+    """create the tmpdir"""
+    try:
+        if ENV_TEMP in os.environ:
+            t = os.environ[ENV_TEMP]
+            t = os.path.expanduser(t)
+            t = os.path.abspath(t)
+            t = os.path.normpath(t)
+            os.makedirs(t, exist_ok=True)
+            return t
+    except Exception:
+        pass
     return tempfile.mkdtemp(prefix='dotdrop-')
 
 
 def get_tmpfile():
     """create a temporary file"""
-    (_, path) = tempfile.mkstemp(prefix='dotdrop-')
+    tmpdir = get_tmpdir()
+    (_, path) = tempfile.mkstemp(prefix='dotdrop-', dir=tmpdir)
     return path
 
 
 def get_unique_tmp_name():
     """get a unique file name (not created)"""
     unique = str(uuid.uuid4())
-    return os.path.join(tempfile.gettempdir(), unique)
+    tmpdir = get_tmpdir()
+    return os.path.join(tmpdir, unique)
 
 
 def remove(path, logger=None):
