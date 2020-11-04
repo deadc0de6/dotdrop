@@ -251,3 +251,7 @@ export DOTDROP_DEBUG=
 ```bash
 export DOTDROP_FORCE_NODEBUG=
 ```
+* `DOTDROP_TMPDIR`: defines a temporary directory for dotdrop to use for its operations instead of using a system generated one
+```bash
+export DOTDROP_TMPDIR="/tmp/dotdrop-tmp"
+```
