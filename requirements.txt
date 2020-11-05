@@ -1,3 +1,4 @@
 Jinja2; python_version > '3.4'
 docopt; python_version > '3.4'
 ruamel.yaml; python_version > '3.4'
+python-magic; python_version > '3.4'

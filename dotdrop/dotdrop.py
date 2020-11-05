@@ -18,7 +18,7 @@ from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, remove, strip_home, \
-    run, uniq_list, patch_ignores, dependencies_met
+    uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
 
@@ -438,12 +438,13 @@ def cmd_importer(o):
         if o.debug:
             LOG.dbg('will overwrite: {}'.format(overwrite))
         if overwrite:
-            cmd = ['mkdir', '-p', '{}'.format(os.path.dirname(srcf))]
+            cmd = 'mkdir -p {}'.format(os.path.dirname(srcf))
             if o.dry:
-                LOG.dry('would run: {}'.format(' '.join(cmd)))
+                LOG.dry('would run: {}'.format(cmd))
             else:
-                r, _ = run(cmd, raw=False, debug=o.debug, checkerr=True)
-                if not r:
+                try:
+                    os.makedirs(os.path.dirname(srcf), exist_ok=True)
+                except Exception:
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
