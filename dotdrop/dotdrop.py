@@ -374,6 +374,14 @@ def cmd_importer(o):
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
 
+        if o.safe:
+            # ask for symlinks
+            realdst = os.path.realpath(dst)
+            if dst != realdst:
+                msg = '\"{}\" is a symlink, dereference it and continue?'
+                if not LOG.ask(msg.format(dst)):
+                    continue
+
         src = strip_home(dst)
         if o.import_as:
             # handle import as

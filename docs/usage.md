@@ -31,7 +31,7 @@ It can be changed:
 The `import` command imports dotfiles to be managed by dotdrop.
 It copies the dotfile to your `dotpath` and updates the config file with the new entry.
 
-Note that dotdrop will dereference all symlinks when importing a file or directory.
+Dotdrop will ask for dereferencing symlinks on import unless `-f --force` is used.
 
 For example to import `~/.xinitrc`
 ```bash
