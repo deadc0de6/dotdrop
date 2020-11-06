@@ -1,6 +1,5 @@
 # DOTDROP
 
-[![Build Status](https://travis-ci.org/deadc0de6/dotdrop.svg?branch=master)](https://travis-ci.org/deadc0de6/dotdrop)
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
