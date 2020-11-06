@@ -281,7 +281,7 @@ class Installer:
                 return False, err
             overwrite = True
             try:
-                utils.remove(dst)
+                utils.removepath(dst)
             except OSError as e:
                 err = 'something went wrong with {}: {}'.format(src, e)
                 return False, err
@@ -302,7 +302,7 @@ class Installer:
                 err = 'ignoring "{}", link was not created'.format(dst)
                 return False, err
             try:
-                utils.remove(dst)
+                utils.removepath(dst)
             except OSError as e:
                 err = 'something went wrong with {}: {}'.format(src, e)
                 return False, err
@@ -537,7 +537,7 @@ class Installer:
         diff = utils.diff(modified=src, original=dst, raw=False,
                           diff_cmd=self.diff_cmd)
         if tmp:
-            utils.remove(tmp, logger=self.log)
+            utils.removepath(tmp, logger=self.log)
 
         if not quiet and diff:
             self._print_diff(src, dst, diff)

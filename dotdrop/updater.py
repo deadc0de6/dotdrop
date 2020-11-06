@@ -12,7 +12,7 @@ import filecmp
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
-from dotdrop.utils import patch_ignores, remove, get_unique_tmp_name, \
+from dotdrop.utils import patch_ignores, removepath, get_unique_tmp_name, \
     write_to_tmpfile, must_ignore, mirror_file_rights
 from dotdrop.exceptions import UndefinedException
 
@@ -114,7 +114,7 @@ class Updater:
             ret = self._handle_file(new_path, dtpath)
         # clean temporary files
         if new_path != path and os.path.exists(new_path):
-            remove(new_path, logger=self.log)
+            removepath(new_path, logger=self.log)
         return ret
 
     def _apply_trans_w(self, path, dotfile):
@@ -133,7 +133,7 @@ class Updater:
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, dotfile.key))
             if os.path.exists(tmp):
-                remove(tmp, logger=self.log)
+                removepath(tmp, logger=self.log)
             return None
         return tmp
 
@@ -273,7 +273,7 @@ class Updater:
                 self.log.dbg('rm -r {}'.format(old))
             if not self._confirm_rm_r(old):
                 continue
-            remove(old, logger=self.log)
+            removepath(old, logger=self.log)
             self.log.sub('\"{}\" dir removed'.format(old))
 
         # handle files diff
@@ -326,7 +326,7 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('rm {}'.format(new))
-            remove(new, logger=self.log)
+            removepath(new, logger=self.log)
             self.log.sub('\"{}\" removed'.format(new))
 
         # compare rights

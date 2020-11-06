@@ -17,7 +17,7 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.utils import get_tmpdir, remove, strip_home, \
+from dotdrop.utils import get_tmpdir, removepath, strip_home, \
     uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
@@ -154,7 +154,7 @@ def cmd_install(o):
             if tmp:
                 tmp = os.path.join(o.dotpath, tmp)
                 if os.path.exists(tmp):
-                    remove(tmp, LOG)
+                    removepath(tmp, LOG)
         if r:
             # dotfile was installed
             if not o.install_temporary:
@@ -287,7 +287,7 @@ def cmd_compare(o, tmp):
         if tmpsrc:
             tmpsrc = os.path.join(o.dotpath, tmpsrc)
             if os.path.exists(tmpsrc):
-                remove(tmpsrc, LOG)
+                removepath(tmpsrc, LOG)
 
         if diff == '':
             # no difference
@@ -597,7 +597,7 @@ def cmd_remove(o):
 
             # remove dotfile from dotpath
             dtpath = os.path.join(o.dotpath, dotfile.src)
-            remove(dtpath, LOG)
+            removepath(dtpath, LOG)
             # remove empty directory
             parent = os.path.dirname(dtpath)
             # remove any empty parent up to dotpath
@@ -606,7 +606,7 @@ def cmd_remove(o):
                     msg = 'Remove empty dir \"{}\"'.format(parent)
                     if o.safe and not LOG.ask(msg):
                         break
-                    remove(parent, LOG)
+                    removepath(parent, LOG)
                 parent = os.path.dirname(parent)
             removed.append(dotfile.key)
 
@@ -678,7 +678,7 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
         msg = 'transformation \"{}\" failed for {}'
         LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
-            remove(new_src, LOG)
+            removepath(new_src, LOG)
         return None
     return new_src
 
@@ -737,7 +737,7 @@ def main():
             tmp = get_tmpdir()
             ret = cmd_compare(o, tmp)
             # clean tmp directory
-            remove(tmp, LOG)
+            removepath(tmp, LOG)
 
         elif o.cmd_import:
             # import dotfile(s)
