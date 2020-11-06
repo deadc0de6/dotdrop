@@ -118,8 +118,8 @@ def _get_tmpdir():
 def get_tmpfile():
     """create a temporary file"""
     tmpdir = get_tmpdir()
-    (_, path) = tempfile.mkstemp(prefix='dotdrop-', dir=tmpdir)
-    return path
+    return tempfile.NamedTemporaryFile(prefix='dotdrop-',
+                                       dir=tmpdir, delete=False).name
 
 
 def get_unique_tmp_name():
