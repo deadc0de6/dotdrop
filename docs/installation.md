@@ -140,7 +140,7 @@ dotdrop depends on following tools:
 
 For MacOS users, make sure to install `realpath` (part of `coreutils`) through [homebrew](https://brew.sh/).
 
-## Update dotdrop
+## Update dotdrop submodule
 
 If using dotdrop as a submodule, one can control if dotdrop
 is auto-updated through the [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh)
@@ -160,10 +160,25 @@ $ git commit -m 'update dotdrop'
 $ git push
 ```
 
-Or if installed through pypi:
+## Downgrade dotdrop submodule
+
+If you wish to get a specific version of dotdrop when using
+it as a submodule, the following operations can be done.
+
+Here dotdrop is downgraded to the latest stable version
 ```bash
-$ pip3 install dotdrop --upgrade --user
+## enter the repository containing the dotdrop submodule
+$ cd my-dotfiles
+## enter the dotdrop submodule
+$ cd dotdrop
+## update the list of tags
+$ git fetch --tags
+## checkout the latest stable version
+$ git checkout `git tag -l | tail -1`
 ```
+
+If using the `dotdrop.sh` script, make sure it doesn't
+automatically update dotdrop back to the latest commit.
 
 ## Shell completion
 
