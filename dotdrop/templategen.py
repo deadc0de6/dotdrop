@@ -167,6 +167,8 @@ class Templategen:
         out = fileoutput.lower()
         if out.startswith('text'):
             return True
+        if 'text' in out:
+            return True
         if 'empty' in out:
             return True
         if 'json' in out:
