@@ -690,6 +690,13 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
 
 def main():
     """entry point"""
+    # check dependencies are met
+    try:
+        dependencies_met()
+    except Exception as e:
+        LOG.err(e)
+        return False
+
     try:
         o = Options()
     except YamlException as e:
@@ -701,13 +708,6 @@ def main():
 
     if o.debug:
         LOG.dbg('\n\n')
-
-    # check dependencies are met
-    try:
-        dependencies_met()
-    except Exception as e:
-        LOG.err(e)
-        return False
 
     ret = True
     try:

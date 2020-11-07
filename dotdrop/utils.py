@@ -268,11 +268,34 @@ def get_module_from_path(path):
 
 def dependencies_met():
     """make sure all dependencies are met"""
-    deps = ['file', 'diff', 'mkdir']
+    # check unix tools deps
+    deps = ['file', 'diff']
     err = 'The tool \"{}\" was not found in the PATH!'
     for dep in deps:
         if not which(dep):
             raise Exception(err.format(dep))
+    # check python deps
+    err = 'missing python module {}'
+    try:
+        import magic
+        assert(magic)
+    except ImportError:
+        raise Exception(err.format('python-magic'))
+    try:
+        from docopt import docopt
+        assert(docopt)
+    except ImportError:
+        raise Exception(err.format('docopt'))
+    try:
+        import jinja2
+        assert(jinja2)
+    except ImportError:
+        raise Exception(err.format('jinja2'))
+    try:
+        from ruamel.yaml import YAML
+        assert(YAML)
+    except ImportError:
+        raise Exception(err.format('ruamel.yaml'))
 
 
 def mirror_file_rights(src, dst):
