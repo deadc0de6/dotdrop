@@ -149,9 +149,13 @@ class Templategen:
         try:
             import magic
             filetype = magic.from_file(src, mime=True)
+            if self.debug:
+                self.log.dbg('using \"magic\" for filetype identification')
         except ImportError:
-            _, filetype = utils.run(['file', '-b', src],
+            _, filetype = utils.run(['file', '-b', '--mime-type', src],
                                     raw=False, debug=self.debug)
+            if self.debug:
+                self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
         istext = self._is_text(filetype)
         if self.debug:
@@ -166,8 +170,6 @@ class Templategen:
         """return if `file -b` output is ascii text"""
         out = fileoutput.lower()
         if out.startswith('text'):
-            return True
-        if 'text' in out:
             return True
         if 'empty' in out:
             return True
