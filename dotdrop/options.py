@@ -68,21 +68,21 @@ Usage:
 
 Options:
   -a --force-actions      Execute all actions even if no dotfile is installed.
+  -b --no-banner          Do not display the banner.
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
-  -i --ignore=<pattern>   Pattern to ignore.
+  -d --dry                Dry run.
   -l --link=<link>        Link option (nolink|link|link_children).
   -L --file-only          Do not show diff but only the files that differ.
   -p --profile=<profile>  Specify the profile to use [default: {}].
-  -s --as=<path>          Import as a different path from actual path.
-  -b --no-banner          Do not display the banner.
-  -d --dry                Dry run.
   -D --showdiff           Show a diff before overwriting.
   -f --force              Do not ask user confirmation for anything.
   -G --grepable           Grepable output.
+  -i --ignore=<pattern>   Pattern to ignore.
   -k --key                Treat <path> as a dotfile key.
   -n --nodiff             Do not diff when installing.
   -P --show-patch         Provide a one-liner to manually patch template.
+  -s --as=<path>          Import as a different path from actual path.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
@@ -237,6 +237,8 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
+        # TODO add as option
+        self.install_parallel = True
         # "compare" specifics
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
