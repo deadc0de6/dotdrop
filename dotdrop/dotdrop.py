@@ -72,7 +72,10 @@ def action_executor(o, actions, defactions, templater, post=False):
 
 
 def _dotfile_install(o, dotfile, tmpdir=None):
-    """install a dotfile"""
+    """
+    install a dotfile
+    returns <success, dotfile key, err>
+    """
     # installer
     inst = _get_install_installer(o, tmpdir=tmpdir)
 
@@ -186,7 +189,7 @@ def cmd_install(o):
         return False
 
     # install each dotfile
-    if o.install_parallel:
+    if o.install_parallel > 1:
         # in parallel
         ex = futures.ThreadPoolExecutor(max_workers=INST_WORKERS)
 
@@ -204,11 +207,11 @@ def cmd_install(o):
     else:
         # sequentially
         for dotfile in dotfiles:
-            r, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
             if r:
                 installed += 1
             elif err:
-                LOG.err('installing \"{}\" failed: {}'.format(dotfile.key,
+                LOG.err('installing \"{}\" failed: {}'.format(key,
                                                               err))
 
     # execute profile post-action
@@ -221,7 +224,7 @@ def cmd_install(o):
             return False
 
     if o.debug:
-        LOG.dbg('install done')
+        LOG.dbg('install done - {} installed'.format(installed))
 
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
