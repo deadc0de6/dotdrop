@@ -53,6 +53,11 @@ Here are some rules on the use of variables in configs:
   [variables](config-details.md#entry-variables) are templated before
   [interpreted variables](config-details.md#entry-dynvariables) are executed
 * config files do not have access to variables defined above in the import tree
+* `dynvariables` take precedence over `variables`
+* profile `(dyn)variables` take precedence over any other `(dyn)variables`
+* profile `(dyn)variables` take precedence over profile's included `(dyn)variables`
+* external/imported `(dyn)variables` take precedence over
+  `(dyn)variables` defined inside the main config file
 
 ## Symlink dotfiles
 

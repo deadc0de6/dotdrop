@@ -448,8 +448,8 @@ actions:
   dateme: date > /tmp/timestamp
 ```
 
-External variables will take precedence over variables defined within
-the source config file.
+External/imported variables will take precedence over variables defined
+inside the main config file.
 
 Dotdrop will fail if an imported path points to a non-existing file.
 It is possible to make non-existing paths not fatal by appending the path with `:optional`
