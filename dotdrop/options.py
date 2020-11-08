@@ -225,8 +225,10 @@ class Options(AttrMonitor):
         # "files" specifics
         self.files_templateonly = self.args['--template']
         self.files_grepable = self.args['--grepable']
+
         # "profiles" specifics
         self.profiles_grepable = self.args['--grepable']
+
         # "install" specifics
         self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']
@@ -239,7 +241,15 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
-        self.install_parallel = int(self.args['--workers'])
+        try:
+            self.install_parallel = int(self.args['--workers'])
+        except ValueError:
+            self.log.err('bad option for --workers')
+            sys.exit(USAGE)
+        if self.safe and self.install_parallel > 1:
+            self.log.err('\"-w --workers\" must be used with \"-f --force\"')
+            sys.exit(USAGE)
+
         # "compare" specifics
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
@@ -247,9 +257,11 @@ class Options(AttrMonitor):
         self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
         self.compare_ignore = uniq_list(self.compare_ignore)
         self.compare_fileonly = self.args['--file-only']
+
         # "import" specifics
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
+
         # "update" specifics
         self.update_path = self.args['<path>']
         self.update_iskey = self.args['--key']
@@ -258,8 +270,10 @@ class Options(AttrMonitor):
         self.update_ignore.append('*{}'.format(self.install_backup_suffix))
         self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
+
         # "detail" specifics
         self.detail_keys = self.args['<key>']
+
         # "remove" specifics
         self.remove_path = self.args['<path>']
         self.remove_iskey = self.args['--key']
