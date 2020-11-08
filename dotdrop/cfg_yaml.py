@@ -231,8 +231,8 @@ class CfgYaml:
 
         # add the current profile variables
         _, pv, pvd = self._get_profile_included_vars()
-        self._add_variables(pv, prio=True)
-        self._add_variables(pvd, shell=True, prio=True)
+        self._add_variables(pv, prio=False)
+        self._add_variables(pvd, shell=True, prio=False)
         self._profilevarskeys.extend(pv.keys())
         self._profilevarskeys.extend(pvd.keys())
 
@@ -639,6 +639,11 @@ class CfgYaml:
         if prio:
             self.variables = self._merge_dict(new, self.variables)
         else:
+            # clear existing variable
+            for k in list(new.keys()):
+                if k in self.variables.keys():
+                    del new[k]
+            # merge
             self.variables = self._merge_dict(self.variables, new)
         # ensure enriched variables are relative to this config
         self.variables = self._enrich_vars(self.variables, self._profile)
@@ -647,7 +652,7 @@ class CfgYaml:
         if template:
             # rec resolve variables with new ones
             self._rec_resolve_variables(self.variables)
-        if shell:
+        if shell and new:
             # shell exec
             self._shell_exec_dvars(self.variables, keys=new.keys())
             # re-create the templater

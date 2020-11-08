@@ -66,7 +66,7 @@ def shell(cmd, debug=False):
     returns True|False, output
     """
     if debug:
-        LOG.dbg('shell exec: {}'.format(cmd))
+        LOG.dbg('shell exec: \"{}\"'.format(cmd))
     ret, out = subprocess.getstatusoutput(cmd)
     if debug:
         LOG.dbg('shell result ({}): {}'.format(ret, out))
