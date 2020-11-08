@@ -108,7 +108,7 @@ echo "third" > ${tmps}/dotfiles/third
 attempts="3"
 for ((i=0;i<${attempts};i++)); do
   # install
-  cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 -V
+  cd ${ddpath} | ${bin} install -w 1 -f -c ${cfg} -p p0 -V
 
   # checks timestamp
   echo "first timestamp: `stat -c %y ${tmpd}/first`"
