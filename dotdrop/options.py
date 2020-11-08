@@ -17,6 +17,7 @@ from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list
+from dotdrop.exceptions import YamlException
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -123,6 +124,8 @@ class Options(AttrMonitor):
             self.debug = False
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
+        if not self.confpath:
+            raise YamlException('no config file found')
         if self.debug:
             self.log.dbg('version: {}'.format(VERSION))
             self.log.dbg('command: {}'.format(' '.join(sys.argv)))
