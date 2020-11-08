@@ -49,9 +49,8 @@ unset DOTDROP_FORCE_NODEBUG
   for scr in tests-ng/*.sh; do
     logfile="${logdir}/`basename ${scr}`.log"
     echo "-> running test ${scr} (logfile:${logfile})"
-    ${scr} > "${logfile}" 2>&1 &
     set +e
-    wait "$!"
+    ${scr} > "${logfile}" 2>&1
     if [ "$?" -ne 0 ]; then
       echo "test ${scr} finished with error"
       cat ${logfile}
