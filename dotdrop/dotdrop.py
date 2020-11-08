@@ -24,7 +24,6 @@ from dotdrop.exceptions import YamlException, UndefinedException
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
-INST_WORKERS = 10
 
 ###########################################################
 # entry point
@@ -191,7 +190,7 @@ def cmd_install(o):
     # install each dotfile
     if o.install_parallel > 1:
         # in parallel
-        ex = futures.ThreadPoolExecutor(max_workers=INST_WORKERS)
+        ex = futures.ThreadPoolExecutor(max_workers=o.install_parallel)
 
         wait_for = [
             ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
