@@ -7,6 +7,7 @@ entry point
 
 import os
 import sys
+import time
 from concurrent import futures
 import shutil
 
@@ -746,6 +747,7 @@ def main():
         LOG.err(e)
         return False
 
+    t0 = time.time()
     try:
         o = Options()
     except YamlException as e:
@@ -757,32 +759,39 @@ def main():
 
     if o.debug:
         LOG.dbg('\n\n')
+    options_time = time.time() - t0
 
     ret = True
+    t0 = time.time()
+    command = ''
     try:
 
         if o.cmd_profiles:
             # list existing profiles
+            command = 'profiles'
             if o.debug:
-                LOG.dbg('running cmd: profiles')
+                LOG.dbg('running cmd: {}'.format(command))
             cmd_list_profiles(o)
 
         elif o.cmd_files:
             # list files for selected profile
+            command = 'files'
             if o.debug:
-                LOG.dbg('running cmd: files')
+                LOG.dbg('running cmd: {}'.format(command))
             cmd_list_files(o)
 
         elif o.cmd_install:
             # install the dotfiles stored in dotdrop
+            command = 'install'
             if o.debug:
-                LOG.dbg('running cmd: install')
+                LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_install(o)
 
         elif o.cmd_compare:
             # compare local dotfiles with dotfiles stored in dotdrop
+            command = 'compare'
             if o.debug:
-                LOG.dbg('running cmd: compare')
+                LOG.dbg('running cmd: {}'.format(command))
             tmp = get_tmpdir()
             ret = cmd_compare(o, tmp)
             # clean tmp directory
@@ -790,34 +799,41 @@ def main():
 
         elif o.cmd_import:
             # import dotfile(s)
+            command = 'import'
             if o.debug:
-                LOG.dbg('running cmd: import')
+                LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_importer(o)
 
         elif o.cmd_update:
             # update a dotfile
+            command = 'update'
             if o.debug:
-                LOG.dbg('running cmd: update')
+                LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_update(o)
 
         elif o.cmd_detail:
             # detail files
+            command = 'detail'
             if o.debug:
-                LOG.dbg('running cmd: detail')
+                LOG.dbg('running cmd: {}'.format(command))
             cmd_detail(o)
 
         elif o.cmd_remove:
             # remove dotfile
+            command = 'remove'
             if o.debug:
-                LOG.dbg('running cmd: remove')
+                LOG.dbg('running cmd: {}'.format(command))
             cmd_remove(o)
 
     except KeyboardInterrupt:
         LOG.err('interrupted')
         ret = False
+    cmd_time = time.time() - t0
 
     if o.debug:
-        LOG.dbg('done executing command')
+        LOG.dbg('done executing command \"{}\"'.format(command))
+        LOG.dbg('options loaded in {}'.format(options_time))
+        LOG.dbg('command executed in {}'.format(cmd_time))
 
     if ret and o.conf.save():
         LOG.log('config file updated')
