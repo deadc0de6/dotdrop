@@ -52,13 +52,13 @@ unset DOTDROP_FORCE_NODEBUG
     set +e
     ${scr} > "${logfile}" 2>&1
     if [ "$?" -ne 0 ]; then
-      echo "test ${scr} finished with error"
       cat ${logfile}
+      echo "test ${scr} finished with error"
       rm -rf ${logdir}
       exit 1
     elif grep Traceback ${logfile}; then
-      echo "test ${scr} crashed"
       cat ${logfile}
+      echo "test ${scr} crashed"
       rm -rf ${logdir}
       exit 1
     fi

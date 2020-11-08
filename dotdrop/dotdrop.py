@@ -7,7 +7,7 @@ entry point
 
 import os
 import sys
-
+from concurrent import futures
 import shutil
 
 # local imports
@@ -70,6 +70,92 @@ def action_executor(o, actions, defactions, templater, post=False):
     return execute
 
 
+def _dotfile_install(o, dotfile, tmpdir=None):
+    """
+    install a dotfile
+    returns <success, dotfile key, err>
+    """
+    # installer
+    inst = _get_install_installer(o, tmpdir=tmpdir)
+
+    # templater
+    t = _get_templater(o)
+
+    # add dotfile variables
+    newvars = dotfile.get_dotfile_variables()
+    t.add_tmp_vars(newvars=newvars)
+
+    preactions = []
+    if not o.install_temporary:
+        preactions.extend(dotfile.get_pre_actions())
+    defactions = o.install_default_actions_pre
+    pre_actions_exec = action_executor(o, preactions, defactions,
+                                       t, post=False)
+
+    if o.debug:
+        LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
+        LOG.dbg(dotfile.prt())
+
+    if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
+        # link
+        r, err = inst.link(t, dotfile.src, dotfile.dst,
+                           actionexec=pre_actions_exec,
+                           template=dotfile.template)
+    elif hasattr(dotfile, 'link') and \
+            dotfile.link == LinkTypes.LINK_CHILDREN:
+        # link_children
+        r, err = inst.link_children(t, dotfile.src, dotfile.dst,
+                                    actionexec=pre_actions_exec,
+                                    template=dotfile.template)
+    else:
+        # nolink
+        src = dotfile.src
+        tmp = None
+        if dotfile.trans_r:
+            tmp = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
+            if not tmp:
+                return False, dotfile.key, None
+            src = tmp
+        ignores = list(set(o.install_ignore + dotfile.instignore))
+        ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+        r, err = inst.install(t, src, dotfile.dst,
+                              actionexec=pre_actions_exec,
+                              noempty=dotfile.noempty,
+                              ignore=ignores,
+                              template=dotfile.template)
+        if tmp:
+            tmp = os.path.join(o.dotpath, tmp)
+            if os.path.exists(tmp):
+                removepath(tmp, LOG)
+
+    # check result of installation
+    if r:
+        # dotfile was installed
+        if not o.install_temporary:
+            defactions = o.install_default_actions_post
+            postactions = dotfile.get_post_actions()
+            post_actions_exec = action_executor(o, postactions, defactions,
+                                                t, post=True)
+            post_actions_exec()
+    else:
+        # dotfile was NOT installed
+        if o.install_force_action:
+            # pre-actions
+            if o.debug:
+                LOG.dbg('force pre action execution ...')
+            pre_actions_exec()
+            # post-actions
+            if o.debug:
+                LOG.dbg('force post action execution ...')
+            defactions = o.install_default_actions_post
+            postactions = dotfile.get_post_actions()
+            post_actions_exec = action_executor(o, postactions, defactions,
+                                                t, post=True)
+            post_actions_exec()
+
+    return r, dotfile.key, err
+
+
 def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
@@ -86,101 +172,45 @@ def cmd_install(o):
         LOG.warn(msg.format(o.profile))
         return False
 
-    t = Templategen(base=o.dotpath, variables=o.variables,
-                    func_file=o.func_file, filter_file=o.filter_file,
-                    debug=o.debug)
+    # the installer
     tmpdir = None
     if o.install_temporary:
         tmpdir = get_tmpdir()
-    inst = Installer(create=o.create, backup=o.backup,
-                     dry=o.dry, safe=o.safe,
-                     base=o.dotpath, workdir=o.workdir,
-                     diff=o.install_diff, debug=o.debug,
-                     totemp=tmpdir,
-                     showdiff=o.install_showdiff,
-                     backup_suffix=o.install_backup_suffix,
-                     diff_cmd=o.diff_command)
+
     installed = 0
-    tvars = t.add_tmp_vars()
 
     # execute profile pre-action
     if o.debug:
         LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
+    t = _get_templater(o)
     ret, err = action_executor(o, pro_pre_actions, [], t, post=False)()
     if not ret:
         return False
 
     # install each dotfile
-    for dotfile in dotfiles:
-        # add dotfile variables
-        t.restore_vars(tvars)
-        newvars = dotfile.get_dotfile_variables()
-        t.add_tmp_vars(newvars=newvars)
+    if o.install_parallel > 1:
+        # in parallel
+        ex = futures.ThreadPoolExecutor(max_workers=o.install_parallel)
 
-        preactions = []
-        if not o.install_temporary:
-            preactions.extend(dotfile.get_pre_actions())
-        defactions = o.install_default_actions_pre
-        pre_actions_exec = action_executor(o, preactions, defactions,
-                                           t, post=False)
-
-        if o.debug:
-            LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
-            LOG.dbg(dotfile.prt())
-        if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
-            r, err = inst.link(t, dotfile.src, dotfile.dst,
-                               actionexec=pre_actions_exec,
-                               template=dotfile.template)
-        elif hasattr(dotfile, 'link') and \
-                dotfile.link == LinkTypes.LINK_CHILDREN:
-            r, err = inst.link_children(t, dotfile.src, dotfile.dst,
-                                        actionexec=pre_actions_exec,
-                                        template=dotfile.template)
-        else:
-            src = dotfile.src
-            tmp = None
-            if dotfile.trans_r:
-                tmp = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
-                if not tmp:
-                    continue
-                src = tmp
-            ignores = list(set(o.install_ignore + dotfile.instignore))
-            ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
-            r, err = inst.install(t, src, dotfile.dst,
-                                  actionexec=pre_actions_exec,
-                                  noempty=dotfile.noempty,
-                                  ignore=ignores,
-                                  template=dotfile.template)
-            if tmp:
-                tmp = os.path.join(o.dotpath, tmp)
-                if os.path.exists(tmp):
-                    removepath(tmp, LOG)
-        if r:
-            # dotfile was installed
-            if not o.install_temporary:
-                defactions = o.install_default_actions_post
-                postactions = dotfile.get_post_actions()
-                post_actions_exec = action_executor(o, postactions, defactions,
-                                                    t, post=True)
-                post_actions_exec()
-            installed += 1
-        elif not r:
-            # dotfile was NOT installed
-            if o.install_force_action:
-                # pre-actions
-                if o.debug:
-                    LOG.dbg('force pre action execution ...')
-                pre_actions_exec()
-                # post-actions
-                if o.debug:
-                    LOG.dbg('force post action execution ...')
-                defactions = o.install_default_actions_post
-                postactions = dotfile.get_post_actions()
-                post_actions_exec = action_executor(o, postactions, defactions,
-                                                    t, post=True)
-                post_actions_exec()
-            if err:
-                LOG.err('installing \"{}\" failed: {}'.format(dotfile.key,
+        wait_for = [
+            ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
+            for dotfile in dotfiles
+        ]
+        for f in futures.as_completed(wait_for):
+            r, key, err = f.result()
+            if r:
+                installed += 1
+            elif err:
+                LOG.err('installing \"{}\" failed: {}'.format(key,
+                                                              err))
+    else:
+        # sequentially
+        for dotfile in dotfiles:
+            r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            if r:
+                installed += 1
+            elif err:
+                LOG.err('installing \"{}\" failed: {}'.format(key,
                                                               err))
 
     # execute profile post-action
@@ -193,7 +223,7 @@ def cmd_install(o):
             return False
 
     if o.debug:
-        LOG.dbg('install done')
+        LOG.dbg('install done - {} installed'.format(installed))
 
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
@@ -217,9 +247,7 @@ def cmd_compare(o, tmp):
     if len(selected) < 1:
         return False
 
-    t = Templategen(base=o.dotpath, variables=o.variables,
-                    func_file=o.func_file, filter_file=o.filter_file,
-                    debug=o.debug)
+    t = _get_templater(o)
     tvars = t.add_tmp_vars()
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
@@ -625,6 +653,27 @@ def cmd_remove(o):
 ###########################################################
 # helpers
 ###########################################################
+
+
+def _get_install_installer(o, tmpdir=None):
+    """get an installer instance for cmd_install"""
+    inst = Installer(create=o.create, backup=o.backup,
+                     dry=o.dry, safe=o.safe,
+                     base=o.dotpath, workdir=o.workdir,
+                     diff=o.install_diff, debug=o.debug,
+                     totemp=tmpdir,
+                     showdiff=o.install_showdiff,
+                     backup_suffix=o.install_backup_suffix,
+                     diff_cmd=o.diff_command)
+    return inst
+
+
+def _get_templater(o):
+    """get an templater instance"""
+    t = Templategen(base=o.dotpath, variables=o.variables,
+                    func_file=o.func_file, filter_file=o.filter_file,
+                    debug=o.debug)
+    return t
 
 
 def _detail(dotpath, dotfile):
