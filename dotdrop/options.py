@@ -54,7 +54,7 @@ USAGE = """
 Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>] [<key>...]
   dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>] [-s <path>]
-                                [-l <link>] <path>...
+                                [-w <nb>] [-l <link>] <path>...
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
                                 [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
@@ -86,6 +86,7 @@ Options:
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
+  -w --workers=<nb>       Number of concurrent workers [default: 1].
   -v --version            Show version.
   -h --help               Show this screen.
 """.format(BANNER, PROFILE)
@@ -237,8 +238,7 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
-        # TODO add as option
-        self.install_parallel = True
+        self.install_parallel = int(self.args['--workers'])
         # "compare" specifics
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']

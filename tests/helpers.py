@@ -131,6 +131,7 @@ def _fake_args():
     args['--grepable'] = False
     args['--as'] = None
     args['--file-only'] = False
+    args['--workers'] = 1
     # cmds
     args['profiles'] = False
     args['files'] = False
