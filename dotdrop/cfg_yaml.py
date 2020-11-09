@@ -58,6 +58,7 @@ class CfgYaml:
     key_dotfile_actions = 'actions'
     key_dotfile_noempty = 'ignoreempty'
     key_dotfile_template = 'template'
+    key_dotfile_chmod = 'chmod'
 
     # profile
     key_profile_dotfiles = 'dotfiles'
@@ -316,7 +317,7 @@ class CfgYaml:
         """return all existing dotfile keys"""
         return self.dotfiles.keys()
 
-    def add_dotfile(self, key, src, dst, link):
+    def add_dotfile(self, key, src, dst, link, chmod=None):
         """add a new dotfile"""
         if key in self.dotfiles.keys():
             return False
@@ -324,14 +325,23 @@ class CfgYaml:
             self._dbg('adding new dotfile: {}'.format(key))
             self._dbg('new dotfile src: {}'.format(src))
             self._dbg('new dotfile dst: {}'.format(dst))
+            self._dbg('new dotfile link: {}'.format(link))
+            if chmod:
+                self._dbg('new dotfile chmod: {}'.format(chmod))
 
         df_dict = {
             self.key_dotfile_src: src,
             self.key_dotfile_dst: dst,
         }
+        # link
         dfl = self.settings[self.key_settings_link_dotfile_default]
         if str(link) != dfl:
             df_dict[self.key_dotfile_link] = str(link)
+        # chmod
+        if chmod:
+            df_dict[self.key_dotfile_chmod] = format(chmod, 'o')
+
+        # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict
         self._dirty = True
 
@@ -623,6 +633,25 @@ class CfgYaml:
             if self.key_dotfile_template not in v:
                 val = self.settings.get(self.key_settings_template, True)
                 v[self.key_dotfile_template] = val
+            # validate value of chmod if defined
+            if self.key_dotfile_chmod in v:
+                val = v[self.key_dotfile_chmod]
+                if len(val) < 3:
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('dotfile chmod error: {}'.format(err))
+                try:
+                    int(val)
+                except Exception:
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('dotfile chmod error: {}'.format(err))
+                for x in val:
+                    y = int(x)
+                    if y < 0 or y > 7:
+                        err = 'bad format for chmod: {}'.format(val)
+                        self._log.err(err)
+                        raise YamlException('dotfile chmod error: {}'.format(err))
 
         return new
 

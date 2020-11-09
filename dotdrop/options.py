@@ -16,7 +16,7 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.action import Action
-from dotdrop.utils import uniq_list
+from dotdrop.utils import uniq_list, get_umask
 from dotdrop.exceptions import YamlException
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
@@ -54,7 +54,7 @@ USAGE = """
 Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>]
                                 [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>] [-s <path>]
+  dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] <path>...
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
                                 [-C <file>...] [-i <pattern>...]
@@ -73,15 +73,16 @@ Options:
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
   -d --dry                Dry run.
-  -l --link=<link>        Link option (nolink|link|link_children).
-  -L --file-only          Do not show diff but only the files that differ.
-  -p --profile=<profile>  Specify the profile to use [default: {}].
   -D --showdiff           Show a diff before overwriting.
   -f --force              Do not ask user confirmation for anything.
   -G --grepable           Grepable output.
   -i --ignore=<pattern>   Pattern to ignore.
   -k --key                Treat <path> as a dotfile key.
+  -l --link=<link>        Link option (nolink|link|link_children).
+  -L --file-only          Do not show diff but only the files that differ.
+  -m --preserve-mode      Insert a chmod entry in the dotfile with its permissions.
   -n --nodiff             Do not diff when installing.
+  -p --profile=<profile>  Specify the profile to use [default: {}].
   -P --show-patch         Provide a one-liner to manually patch template.
   -s --as=<path>          Import as a different path from actual path.
   -t --temp               Install to a temporary directory for review.
@@ -121,6 +122,7 @@ class Options(AttrMonitor):
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
+        self.umask = get_umask()
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False
@@ -261,6 +263,7 @@ class Options(AttrMonitor):
         # "import" specifics
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
+        self.import_mode = self.args['--preserve-mode']
 
         # "update" specifics
         self.update_path = self.args['<path>']

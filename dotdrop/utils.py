@@ -302,3 +302,15 @@ def mirror_file_rights(src, dst):
     """mirror file rights of src to dst (can rise exc)"""
     rights = os.stat(src).st_mode
     os.chmod(dst, rights)
+
+
+def get_umask():
+    """return current umask value"""
+    cur = os.umask(0)
+    os.umask(cur)
+    return 0o777-cur
+
+
+def get_file_perm(path):
+    """return file permission"""
+    return os.stat(path).st_mode & 0o777

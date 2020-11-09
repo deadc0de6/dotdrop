@@ -149,27 +149,28 @@ class CfgAggregator:
         """remove this dotfile from this profile"""
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
-    def _create_new_dotfile(self, src, dst, link):
+    def _create_new_dotfile(self, src, dst, link, chmod=None):
         """create a new dotfile"""
         # get a new dotfile with a unique key
         key = self._get_new_dotfile_key(dst)
         if self.debug:
             self.log.dbg('new dotfile key: {}'.format(key))
         # add the dotfile
-        self.cfgyaml.add_dotfile(key, src, dst, link)
+        self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod)
         return Dotfile(key, dst, src)
 
-    def new(self, src, dst, link):
+    def new(self, src, dst, link, chmod=None):
         """
         import a new dotfile
         @src: path in dotpath
         @dst: path in FS
         @link: LinkType
+        @chmod: file permission
         """
         dst = self.path_to_dotfile_dst(dst)
         dotfile = self.get_dotfile_by_src_dst(src, dst)
         if not dotfile:
-            dotfile = self._create_new_dotfile(src, dst, link)
+            dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod)
 
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)

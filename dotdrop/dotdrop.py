@@ -19,7 +19,7 @@ from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, removepath, strip_home, \
-    uniq_list, patch_ignores, dependencies_met
+    uniq_list, patch_ignores, dependencies_met, get_file_perm
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
 
@@ -426,6 +426,9 @@ def cmd_importer(o):
             strip = os.sep
         src = src.lstrip(strip)
 
+        # get the permission
+        perm = get_file_perm(dst)
+
         # set the link attribute
         linktype = o.import_link
         if linktype == LinkTypes.LINK_CHILDREN and \
@@ -485,16 +488,23 @@ def cmd_importer(o):
                     LOG.err('importing \"{}\" failed!'.format(path))
                     ret = False
                     continue
+
             if o.dry:
                 LOG.dry('would copy {} to {}'.format(dst, srcf))
             else:
+                # copy the file to the dotpath
                 if os.path.isdir(dst):
                     if os.path.exists(srcf):
                         shutil.rmtree(srcf)
                     shutil.copytree(dst, srcf)
                 else:
                     shutil.copy2(dst, srcf)
-        retconf = o.conf.new(src, dst, linktype)
+
+        chmod = None
+        if o.import_mode or perm&o.umask:
+            # insert chmod
+            chmod = perm
+        retconf = o.conf.new(src, dst, linktype, chmod=chmod)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
