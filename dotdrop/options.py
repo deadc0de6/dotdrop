@@ -80,7 +80,7 @@ Options:
   -k --key                Treat <path> as a dotfile key.
   -l --link=<link>        Link option (nolink|link|link_children).
   -L --file-only          Do not show diff but only the files that differ.
-  -m --preserve-mode      Insert a chmod entry in the dotfile with its permissions.
+  -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
   -n --nodiff             Do not diff when installing.
   -p --profile=<profile>  Specify the profile to use [default: {}].
   -P --show-patch         Provide a one-liner to manually patch template.

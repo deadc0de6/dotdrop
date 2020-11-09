@@ -501,7 +501,7 @@ def cmd_importer(o):
                     shutil.copy2(dst, srcf)
 
         chmod = None
-        if o.import_mode or perm&o.umask:
+        if o.import_mode or perm & o.umask:
             # insert chmod
             chmod = perm
         retconf = o.conf.new(src, dst, linktype, chmod=chmod)

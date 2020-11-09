@@ -639,19 +639,19 @@ class CfgYaml:
                 if len(val) < 3:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
-                    raise YamlException('dotfile chmod error: {}'.format(err))
+                    raise YamlException(err)
                 try:
                     int(val)
                 except Exception:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
-                    raise YamlException('dotfile chmod error: {}'.format(err))
+                    raise YamlException(err)
                 for x in val:
                     y = int(x)
                     if y < 0 or y > 7:
                         err = 'bad format for chmod: {}'.format(val)
                         self._log.err(err)
-                        raise YamlException('dotfile chmod error: {}'.format(err))
+                        raise YamlException(err)
 
         return new
 

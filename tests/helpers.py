@@ -132,6 +132,7 @@ def _fake_args():
     args['--as'] = None
     args['--file-only'] = False
     args['--workers'] = 1
+    args['--preserve-mode'] = False
     # cmds
     args['profiles'] = False
     args['files'] = False
