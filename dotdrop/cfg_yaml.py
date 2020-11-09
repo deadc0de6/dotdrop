@@ -625,14 +625,7 @@ class CfgYaml:
                 v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
-            if self.key_dotfile_link in v:
-                # validate link value
-                val = v[self.key_dotfile_link]
-                if val not in self.allowed_link_val:
-                    err = 'bad link value: {}'.format(val)
-                    self._log.err(err)
-                    raise YamlException('config content error: {}'.format(err))
-            else:
+            if self.key_dotfile_link not in v:
                 # apply link value if undefined
                 val = self.settings[self.key_settings_link_dotfile_default]
                 v[self.key_dotfile_link] = val
