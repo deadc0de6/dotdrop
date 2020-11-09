@@ -342,7 +342,7 @@ class CfgYaml:
         if chmod:
             lnkval = df_dict.get(self.key_dotfile_link, None)
             if lnkval != self.lnk_children:
-                df_dict[self.key_dotfile_chmod] = format(chmod, 'o')
+                df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
 
         # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict
@@ -639,7 +639,7 @@ class CfgYaml:
                 v[self.key_dotfile_template] = val
             # validate value of chmod if defined
             if self.key_dotfile_chmod in v:
-                val = v[self.key_dotfile_chmod]
+                val = str(v[self.key_dotfile_chmod])
                 if len(val) < 3:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
@@ -661,6 +661,7 @@ class CfgYaml:
                     err = 'incompatible use of chmod and link_children'
                     self._log.err(err)
                     raise YamlException('config content error: {}'.format(err))
+                v[self.key_dotfile_chmod] = val
 
         return new
 

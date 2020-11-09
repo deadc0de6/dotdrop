@@ -73,7 +73,7 @@ class Installer:
         - False, error_msg  : error
         - False, None       : ignored
         """
-        if not self._chmod_file(dst, chmod):
+        if not self._check_chmod(dst, chmod):
             err = 'ignoring "{}", nothing installed'.format(dst)
             return False, err
 
@@ -83,8 +83,8 @@ class Installer:
                                ignore=ignore,
                                template=template)
 
-        if chmod:
-            os.chmod(dst, chmod)
+        if r and chmod:
+            os.chmod(dst, int(chmod, 8))
 
         return self._log_install(r, err)
 
@@ -142,7 +142,7 @@ class Installer:
         - False, error_msg  : error
         - False, None       : ignored
         """
-        if not self._chmod_file(dst, chmod):
+        if not self._check_chmod(dst, chmod):
             err = 'ignoring "{}", nothing installed'.format(dst)
             return False, err
 
@@ -150,7 +150,7 @@ class Installer:
                             actionexec=actionexec,
                             template=template)
         if chmod:
-            os.chmod(dst, chmod)
+            os.chmod(dst, int(chmod, 8))
         return self._log_install(r, err)
 
     def _link(self, templater, src, dst, actionexec=None,
@@ -681,7 +681,7 @@ class Installer:
                 self.log.dbg('install: IGNORED')
         return boolean, err
 
-    def _chmod_file(self, path, chmod):
+    def _check_chmod(self, path, chmod):
         """chmod file if needed and return True to continue"""
         if chmod:
             return True
