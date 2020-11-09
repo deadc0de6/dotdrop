@@ -337,13 +337,17 @@ class CfgYaml:
         dfl = self.settings[self.key_settings_link_dotfile_default]
         if str(link) != dfl:
             df_dict[self.key_dotfile_link] = str(link)
+
         # chmod
         if chmod:
-            df_dict[self.key_dotfile_chmod] = format(chmod, 'o')
+            lnkval = df_dict.get(self.key_dotfile_link, None)
+            if lnkval != self.lnk_children:
+                df_dict[self.key_dotfile_chmod] = format(chmod, 'o')
 
         # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict
         self._dirty = True
+        return True
 
     def del_dotfile(self, key):
         """remove this dotfile from config"""
@@ -603,7 +607,7 @@ class CfgYaml:
         return new
 
     def _norm_dotfiles(self, dotfiles):
-        """normalize dotfiles entries"""
+        """normalize and check dotfiles entries"""
         if not dotfiles:
             return dotfiles
         new = {}
@@ -621,7 +625,14 @@ class CfgYaml:
                 v[self.key_trans_r] = v[self.old_key_trans_r]
                 del v[self.old_key_trans_r]
                 new[k] = v
-            if self.key_dotfile_link not in v:
+            if self.key_dotfile_link in v:
+                # validate link value
+                val = v[self.key_dotfile_link]
+                if val not in self.allowed_link_val:
+                    err = 'bad link value: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+            else:
                 # apply link value if undefined
                 val = self.settings[self.key_settings_link_dotfile_default]
                 v[self.key_dotfile_link] = val
@@ -639,19 +650,24 @@ class CfgYaml:
                 if len(val) < 3:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
-                    raise YamlException(err)
+                    raise YamlException('config content error: {}'.format(err))
                 try:
                     int(val)
                 except Exception:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
-                    raise YamlException(err)
-                for x in val:
+                    raise YamlException('config content error: {}'.format(err))
+                for x in list(val):
                     y = int(x)
-                    if y < 0 or y > 7:
-                        err = 'bad format for chmod: {}'.format(val)
-                        self._log.err(err)
-                        raise YamlException(err)
+                    if y >= 0 or y <= 7:
+                        continue
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+                if v[self.key_dotfile_link] == self.lnk_children:
+                    err = 'incompatible use of chmod and link_children'
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
 
         return new
 

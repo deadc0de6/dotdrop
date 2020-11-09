@@ -308,7 +308,8 @@ def get_umask():
     """return current umask value"""
     cur = os.umask(0)
     os.umask(cur)
-    return 0o777 - cur
+    # return 0o777 - cur
+    return cur
 
 
 def get_file_perm(path):

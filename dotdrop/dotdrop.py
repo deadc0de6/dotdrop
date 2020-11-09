@@ -101,7 +101,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         # link
         r, err = inst.link(t, dotfile.src, dotfile.dst,
                            actionexec=pre_actions_exec,
-                           template=dotfile.template)
+                           template=dotfile.template,
+                           chmod=dotfile.chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
         # link_children
@@ -123,7 +124,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               actionexec=pre_actions_exec,
                               noempty=dotfile.noempty,
                               ignore=ignores,
-                              template=dotfile.template)
+                              template=dotfile.template,
+                              chmod=dotfile.chmod)
         if tmp:
             tmp = os.path.join(o.dotpath, tmp)
             if os.path.exists(tmp):
@@ -300,7 +302,8 @@ def cmd_compare(o, tmp):
 
         # install dotfile to temporary dir and compare
         ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
-                                                 template=dotfile.template)
+                                                 template=dotfile.template,
+                                                 chmod=dotfile.chmod)
         if not ret:
             # failed to install to tmp
             line = '=> compare {}: error'
@@ -339,6 +342,7 @@ def cmd_compare(o, tmp):
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
+    # TODO chmod
     ret = True
     paths = o.update_path
     iskey = o.update_iskey
@@ -689,8 +693,13 @@ def _get_templater(o):
 
 def _detail(dotpath, dotfile):
     """display details on all files under a dotfile entry"""
-    LOG.log('{} (dst: \"{}\", link: {})'.format(dotfile.key, dotfile.dst,
-                                                dotfile.link.name.lower()))
+    entry = '{}'.format(dotfile.key)
+    attribs = []
+    attribs.append('dst: \"{}\"'.format(dotfile.dst))
+    attribs.append('link: \"{}\"'.format(dotfile.link.name.lower()))
+    if dotfile.chmod:
+        attribs.append('chmod: \"{}\"'.format(dotfile.chmod))
+    LOG.log('{} ({})'.format(entry, ', '.join(attribs)))
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
         template = 'no'

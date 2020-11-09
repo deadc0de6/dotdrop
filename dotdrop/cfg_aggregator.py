@@ -156,7 +156,8 @@ class CfgAggregator:
         if self.debug:
             self.log.dbg('new dotfile key: {}'.format(key))
         # add the dotfile
-        self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod)
+        if not self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod):
+            return None
         return Dotfile(key, dst, src)
 
     def new(self, src, dst, link, chmod=None):
@@ -171,6 +172,9 @@ class CfgAggregator:
         dotfile = self.get_dotfile_by_src_dst(src, dst)
         if not dotfile:
             dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod)
+
+        if not dotfile:
+            return False
 
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
