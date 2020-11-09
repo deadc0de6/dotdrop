@@ -86,15 +86,6 @@ One `compare`:
 
 * **TODO**
 
-Make sure to quote the `chmod` value in the config file:
-```yaml
-dotfiles:
-  f_xinitrc:
-    dst: ~/.xinitrc
-    src: xinitrc
-    chmod: '777'
-```
-
 ## Symlink dotfiles
 
 Dotdrop is able to install dotfiles in three different ways
