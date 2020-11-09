@@ -6,6 +6,9 @@
 # with files and directories
 # with different link
 #
+# TODO
+# - test for symlink templates
+# - check for mode difference when install
 
 # exit on first error
 set -e
@@ -62,6 +65,14 @@ echo 'link' > ${tmps}/dotfiles/link
 mkdir -p ${tmps}/dotfiles/dir
 echo "f1" > ${tmps}/dotfiles/dir/f1
 
+echo "exists" > ${tmps}/dotfiles/exists
+chmod 644 ${tmps}/dotfiles/exists
+echo "exists" > ${tmpd}/exists
+chmod 644 ${tmpd}/exists
+
+echo "existslink" > ${tmps}/dotfiles/existslink
+chmod 644 ${tmpd}/exists
+
 cat > ${cfg} << _EOF
 config:
   backup: true
@@ -81,12 +92,27 @@ dotfiles:
     src: dir
     dst: ${tmpd}/dir
     chmod: 777
+  f_exists:
+    src: exists
+    dst: ${tmpd}/exists
+    chmod: 777
+  f_existslink:
+    src: existslink
+    dst: ${tmpd}/existslink
+    chmod: 777
+    link: link
 profiles:
   p1:
     dotfiles:
     - f_f777
     - f_link
     - d_dir
+    - f_exists
+    - f_existslink
+  p2:
+    dotfiles:
+    - f_exists
+    - f_existslink
 _EOF
 #cat ${cfg}
 
@@ -101,6 +127,27 @@ mode=`stat -c '%a' "${tmpd}/link"`
 
 mode=`stat -c '%a' "${tmpd}/dir"`
 [ "${mode}" != "777" ] && echo "bad mode for dir" && exit 1
+
+mode=`stat -c '%a' "${tmpd}/exists"`
+[ "${mode}" != "777" ] && echo "bad mode for exists" && exit 1
+
+mode=`stat -c '%a' "${tmpd}/existslink"`
+[ "${mode}" != "777" ] && echo "bad mode for existslink" && exit 1
+
+echo "exists" > ${tmps}/dotfiles/exists
+chmod 644 ${tmps}/dotfiles/exists
+echo "exists" > ${tmpd}/exists
+chmod 644 ${tmpd}/exists
+
+chmod 644 ${tmpd}/existslink
+
+cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -V ${i}
+
+mode=`stat -c '%a' "${tmpd}/exists"`
+[ "${mode}" != "777" ] && echo "bad mode for exists" && exit 1
+
+mode=`stat -c '%a' "${tmpd}/existslink"`
+[ "${mode}" != "777" ] && echo "bad mode for existslink" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
