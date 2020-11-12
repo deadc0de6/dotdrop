@@ -281,6 +281,8 @@ def dependencies_met():
         assert(magic)
     except ImportError:
         raise Exception(err.format('python-magic'))
+    if not hasattr(magic, 'from_file'):
+        raise Exception(err.format('python-magic'))
     try:
         from docopt import docopt
         assert(docopt)
