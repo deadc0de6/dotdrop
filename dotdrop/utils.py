@@ -315,3 +315,10 @@ def get_umask():
 def get_file_perm(path):
     """return file permission"""
     return os.stat(path).st_mode & 0o777
+
+
+def chmod(path, mode, debug=False):
+    cm = int(mode, 8)
+    if debug:
+        LOG.dbg('chmod {} {}'.format(oct(cm), path))
+    os.chmod(path, cm)

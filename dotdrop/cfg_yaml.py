@@ -657,10 +657,6 @@ class CfgYaml:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
                     raise YamlException('config content error: {}'.format(err))
-                if v[self.key_dotfile_link] == self.lnk_children:
-                    err = 'incompatible use of chmod and link_children'
-                    self._log.err(err)
-                    raise YamlException('config content error: {}'.format(err))
                 v[self.key_dotfile_chmod] = val
 
         return new

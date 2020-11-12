@@ -108,7 +108,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         # link_children
         r, err = inst.link_children(t, dotfile.src, dotfile.dst,
                                     actionexec=pre_actions_exec,
-                                    template=dotfile.template)
+                                    template=dotfile.template,
+                                    chmod=dotfile.chmod)
     else:
         # nolink
         src = dotfile.src
@@ -342,7 +343,6 @@ def cmd_compare(o, tmp):
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
-    # TODO chmod
     ret = True
     paths = o.update_path
     iskey = o.update_iskey

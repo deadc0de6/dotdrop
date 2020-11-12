@@ -76,13 +76,9 @@ On `install` the following rules are applied:
 
 * if `chmod` is specified, it will be applied to the installed dotfile
 * if file exists and its permissions differ from `umask` and no `chmod` is specified user needs
-  to confirm installation (unless `-f --force` is used) **TODO unless permissions match existing file**
+  to confirm installation (unless `-f --force` is used or the permission match the dotfile in the `dotpath`)
 
 On `update`:
-
-* **TODO**
-
-One `compare`:
 
 * **TODO**
 

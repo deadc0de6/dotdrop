@@ -6,12 +6,20 @@
 # with files and directories
 # with different link
 #
-# TODO
-# - test for symlink templates
-# - check for mode difference when install
 
 # exit on first error
 set -e
+
+# $1 path
+# $2 rights
+has_rights()
+{
+  echo "testing ${1} is ${2}"
+  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
+  local mode=`stat -L -c '%a' "$1"`
+  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1`" && exit 1
+  true
+}
 
 # all this crap to get current path
 rl="readlink -f"
@@ -73,6 +81,23 @@ chmod 644 ${tmpd}/exists
 echo "existslink" > ${tmps}/dotfiles/existslink
 chmod 644 ${tmpd}/exists
 
+mkdir -p ${tmps}/dotfiles/direxists
+echo "f1" > ${tmps}/dotfiles/direxists/f1
+mkdir -p ${tmpd}/direxists
+echo "f1" > ${tmpd}/direxists/f1
+chmod 644 ${tmpd}/direxists/f1
+chmod 744 ${tmpd}/direxists
+
+mkdir -p ${tmps}/dotfiles/linkchildren
+echo "f1" > ${tmps}/dotfiles/linkchildren/f1
+mkdir -p ${tmps}/dotfiles/linkchildren/d1
+echo "f2" > ${tmps}/dotfiles/linkchildren/d1/f2
+
+echo '{{@@ profile @@}}' > ${tmps}/dotfiles/symlinktemplate
+
+mkdir -p ${tmps}/dotfiles/symlinktemplatedir
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/symlinktemplatedir/t
+
 cat > ${cfg} << _EOF
 config:
   backup: true
@@ -101,6 +126,25 @@ dotfiles:
     dst: ${tmpd}/existslink
     chmod: 777
     link: link
+  d_direxists:
+    src: direxists
+    dst: ${tmpd}/direxists
+    chmod: 777
+  d_linkchildren:
+    src: linkchildren
+    dst: ${tmpd}/linkchildren
+    chmod: 777
+    link: link_children
+  f_symlinktemplate:
+    src: symlinktemplate
+    dst: ${tmpd}/symlinktemplate
+    chmod: 777
+    link: link
+  d_symlinktemplatedir:
+    src: symlinktemplatedir
+    dst: ${tmpd}/symlinktemplatedir
+    chmod: 777
+    link: link
 profiles:
   p1:
     dotfiles:
@@ -109,45 +153,60 @@ profiles:
     - d_dir
     - f_exists
     - f_existslink
+    - d_direxists
+    - d_linkchildren
+    - f_symlinktemplate
+    - d_symlinktemplatedir
   p2:
     dotfiles:
     - f_exists
     - f_existslink
+    - d_linkchildren
+    - f_symlinktemplate
 _EOF
 #cat ${cfg}
 
 # install
+echo "first install round"
 cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V ${i}
 
-mode=`stat -c '%a' "${tmpd}/f777"`
-[ "${mode}" != "777" ] && echo "bad mode for f777" && exit 1
+has_rights "${tmpd}/f777" "777"
+has_rights "${tmpd}/link" "777"
+has_rights "${tmpd}/dir" "777"
+has_rights "${tmpd}/exists" "777"
+has_rights "${tmpd}/existslink" "777"
+has_rights "${tmpd}/direxists" "777"
+has_rights "${tmpd}/direxists/f1" "644"
+has_rights "${tmpd}/linkchildren" "777"
+has_rights "${tmpd}/linkchildren/f1" "644"
+has_rights "${tmpd}/linkchildren/d1" "755"
+has_rights "${tmpd}/linkchildren/d1/f2" "644"
+has_rights "${tmpd}/symlinktemplate" "777"
 
-mode=`stat -c '%a' "${tmpd}/link"`
-[ "${mode}" != "777" ] && echo "bad mode for link" && exit 1
+grep 'p1' ${tmpd}/symlinktemplate
+grep 'p1' ${tmpd}/symlinktemplatedir/t
 
-mode=`stat -c '%a' "${tmpd}/dir"`
-[ "${mode}" != "777" ] && echo "bad mode for dir" && exit 1
-
-mode=`stat -c '%a' "${tmpd}/exists"`
-[ "${mode}" != "777" ] && echo "bad mode for exists" && exit 1
-
-mode=`stat -c '%a' "${tmpd}/existslink"`
-[ "${mode}" != "777" ] && echo "bad mode for existslink" && exit 1
-
+## second round
 echo "exists" > ${tmps}/dotfiles/exists
-chmod 644 ${tmps}/dotfiles/exists
+chmod 600 ${tmps}/dotfiles/exists
 echo "exists" > ${tmpd}/exists
-chmod 644 ${tmpd}/exists
+chmod 600 ${tmpd}/exists
 
-chmod 644 ${tmpd}/existslink
+chmod 600 ${tmpd}/existslink
 
-cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -V ${i}
+chmod 700 ${tmpd}/linkchildren
 
-mode=`stat -c '%a' "${tmpd}/exists"`
-[ "${mode}" != "777" ] && echo "bad mode for exists" && exit 1
+chmod 600 ${tmpd}/symlinktemplate
 
-mode=`stat -c '%a' "${tmpd}/existslink"`
-[ "${mode}" != "777" ] && echo "bad mode for existslink" && exit 1
+echo "second install round"
+cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -f -V ${i}
+
+has_rights "${tmpd}/exists" "777"
+has_rights "${tmpd}/existslink" "777"
+has_rights "${tmpd}/linkchildren/f1" "644"
+has_rights "${tmpd}/linkchildren/d1" "755"
+has_rights "${tmpd}/linkchildren/d1/f2" "644"
+has_rights "${tmpd}/symlinktemplate" "777"
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
