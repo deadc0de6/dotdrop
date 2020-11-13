@@ -64,7 +64,7 @@ class Comparator:
         right_mode = get_file_perm(right)
         if left_mode == right_mode:
             return ''
-        ret = 'modes differ ({} vs {})\n'.format(left_mode, right_mode)
+        ret = 'modes differ ({:o} vs {:o})\n'.format(left_mode, right_mode)
         return ret
 
     def _comp_file(self, left, right, ignore):
