@@ -196,10 +196,17 @@ def cmd_install(o):
         # in parallel
         ex = futures.ThreadPoolExecutor(max_workers=o.install_parallel)
 
-        wait_for = [
-            ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
-            for dotfile in dotfiles
-        ]
+        wait_for = []
+        for dotfile in dotfiles:
+            if not dotfile.src or not dotfile.dst:
+                # fake dotfile are always considered installed
+                if o.debug:
+                    LOG.dbg('fake dotfile installed')
+                installed += 1
+            else:
+                j = ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
+                wait_for.append(j)
+        # check result
         for f in futures.as_completed(wait_for):
             r, key, err = f.result()
             if r:
@@ -210,7 +217,16 @@ def cmd_install(o):
     else:
         # sequentially
         for dotfile in dotfiles:
-            r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            if not dotfile.src or not dotfile.dst:
+                # fake dotfile are always considered installed
+                if o.debug:
+                    LOG.dbg('fake dotfile installed')
+                key = dotfile.key
+                r = True
+                err = None
+            else:
+                r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            # check result
             if r:
                 installed += 1
             elif err:
