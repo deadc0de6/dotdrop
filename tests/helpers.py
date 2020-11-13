@@ -65,7 +65,9 @@ def get_string(length):
 
 def get_tempdir():
     """Get a temporary directory"""
-    return tempfile.mkdtemp(suffix=TMPSUFFIX)
+    tmpdir = tempfile.mkdtemp(suffix=TMPSUFFIX)
+    os.chmod(tmpdir, 0o755)
+    return tmpdir
 
 
 def create_random_file(directory, content=None,
