@@ -340,9 +340,7 @@ class CfgYaml:
 
         # chmod
         if chmod:
-            lnkval = df_dict.get(self.key_dotfile_link, None)
-            if lnkval != self.lnk_children:
-                df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+            df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
 
         # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict
