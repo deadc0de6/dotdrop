@@ -53,7 +53,6 @@ class Installer:
         self.backup_suffix = backup_suffix
         self.diff_cmd = diff_cmd
         self.action_executed = False
-        self.umask = utils.get_umask()
         # avoids printing file copied logs
         # when using install_to_tmp for comparing
         self.comparing = False
@@ -588,7 +587,7 @@ class Installer:
                     if self.debug:
                         self.log.dbg('{} is the same'.format(dst))
                     return 1, None
-            if self.safe:
+            if diff and self.safe:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
@@ -739,7 +738,10 @@ class Installer:
         return boolean, err
 
     def _check_chmod(self, src, dst, chmod):
-        """check chmod needs change"""
+        """
+        check chmod needs change
+        returns True to continue installation
+        """
         if chmod:
             return True
         if not os.path.exists(dst):
@@ -750,11 +752,10 @@ class Installer:
         perms = utils.get_file_perm(dst)
         if perms == cperms:
             return True
-        if perms & self.umask:
-            # perms and umask differ
+        elif self.safe:
             if self.safe:
-                msg = 'File mode ({}) differs from umask ({})'
-                msg.format(perms, self.umask)
+                msg = 'Mode differs ({:o} and {:o} ({})'
+                msg = msg.format(cperms, perms, dst)
                 msg += ', continue'
                 if not self.log.ask(msg):
                     return False
