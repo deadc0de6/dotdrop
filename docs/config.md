@@ -74,13 +74,14 @@ On `import` the following rules are applied:
 
 On `install` the following rules are applied:
 
-* if `chmod` is specified, it will be applied to the installed dotfile
+* if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
 * if file exists and its permissions differ from `umask` and no `chmod` is specified user needs
   to confirm installation (unless `-f --force` is used or the permission match the dotfile in the `dotpath`)
 
 On `update`:
 
-* **TODO**
+* no `chmod` entry is added/updated in the config however the rights are mirrored from the filesystem to the
+  file in `dotpath`
 
 ## Symlink dotfiles
 
