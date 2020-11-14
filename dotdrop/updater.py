@@ -13,7 +13,7 @@ import filecmp
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.utils import patch_ignores, removepath, get_unique_tmp_name, \
-    write_to_tmpfile, must_ignore, mirror_file_rights
+    write_to_tmpfile, must_ignore, mirror_file_rights, get_file_perm
 from dotdrop.exceptions import UndefinedException
 
 
@@ -162,15 +162,20 @@ class Updater:
     def _same_rights(self, left, right):
         """return True if files have the same modes"""
         try:
-            lefts = os.stat(left)
-            rights = os.stat(right)
-            return lefts.st_mode == rights.st_mode
+            lefts = get_file_perm(left)
+            rights = get_file_perm(right)
+            return lefts == rights
         except OSError as e:
             self.log.err(e)
             return False
 
     def _mirror_rights(self, src, dst):
         try:
+            if self.debug:
+                srcr = get_file_perm(src)
+                dstr = get_file_perm(dst)
+                msg = 'copy rights from {} ({:o}) to {} ({:o})'
+                self.log.dbg(msg.format(src, srcr, dst, dstr))
             mirror_file_rights(src, dst)
         except OSError as e:
             self.log.err(e)
@@ -228,7 +233,9 @@ class Updater:
         # find the differences
         diff = filecmp.dircmp(path, dtpath, ignore=None)
         # handle directories diff
-        return self._merge_dirs(diff)
+        ret = self._merge_dirs(diff)
+        self._mirror_rights(path, dtpath)
+        return ret
 
     def _merge_dirs(self, diff):
         """Synchronize directories recursively."""
