@@ -37,8 +37,8 @@ if [ -z ${GITHUB_WORKFLOW} ]; then
   #PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
   PYTHONPATH="dotdrop" ${nosebin} -s --processes=-1 --with-coverage --cover-package=dotdrop
 else
-  #PYTHONPATH="dotdrop" ${nosebin} --processes=-1 --with-coverage --cover-package=dotdrop
-  PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
+  PYTHONPATH="dotdrop" ${nosebin} --processes=-1 --with-coverage --cover-package=dotdrop
+  #PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
 fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
 
