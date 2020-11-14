@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# author: deadc0de6 (https://github.com/deadc0de6)
+# Copyright (c) 2020, deadc0de6
+#
+# test chmod on update
+#
+
+# exit on first error
+set -e
+
+# all this crap to get current path
+rl="readlink -f"
+if ! ${rl} "${0}" >/dev/null 2>&1; then
+  rl="realpath"
+
+  if ! hash ${rl}; then
+    echo "\"${rl}\" not found !" && exit 1
+  fi
+fi
+cur=$(dirname "$(${rl} "${0}")")
+
+#hash dotdrop >/dev/null 2>&1
+#[ "$?" != "0" ] && echo "install dotdrop to run tests" && exit 1
+
+#echo "called with ${1}"
+
+# dotdrop path can be pass as argument
+ddpath="${cur}/../"
+[ "${1}" != "" ] && ddpath="${1}"
+[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+
+export PYTHONPATH="${ddpath}:${PYTHONPATH}"
+bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+
+echo "dotdrop path: ${ddpath}"
+echo "pythonpath: ${PYTHONPATH}"
+
+# get the helpers
+source ${cur}/helpers
+
+echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+
+################################################################
+# this is the test
+################################################################
+
+# the dotfile source
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+#echo "dotfile destination: ${tmpd}"
+
+# create the dotfile
+dnormal="${tmpd}/dir_normal"
+mkdir -p ${dnormal}
+echo "dir_normal/f1" > ${dnormal}/file1
+echo "dir_normal/f2" > ${dnormal}/file2
+
+dlink="${tmpd}/dir_link"
+mkdir -p ${dlink}
+echo "dir_link/f1" > ${dlink}/file1
+echo "dir_link/f2" > ${dlink}/file2
+
+dlinkchildren="${tmpd}/dir_link_children"
+mkdir -p ${dlinkchildren}
+echo "dir_linkchildren/f1" > ${dlinkchildren}/file1
+echo "dir_linkchildren/f2" > ${dlinkchildren}/file2
+
+fnormal="${tmpd}/filenormal"
+echo "filenormal" > ${fnormal}
+
+flink="${tmpd}/filelink"
+echo "filelink" > ${flink}
+
+toimport="${dnormal} ${dlink} ${dlinkchildren} ${fnormal} ${flink}"
+
+# create the config file
+cfg="${tmps}/config.yaml"
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+profiles:
+_EOF
+#cat ${cfg}
+
+# import
+for i in ${toimport}; do
+  cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
+done
+
+# test no chmod
+cnt=`cat ${cfg} | grep chmod | wc -l`
+[ "${cnt}" != "0" ] && echo "chmod wrongly inserted" && exit 1
+
+######################
+# update dnormal
+chmod 777 ${dnormal}
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dnormal}
+
+# check rights updated
+[ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dnormal})`" != "777" ] && echo "rights not updated (1)" && exit 1
+
+######################
+# update dlink
+chmod 777 ${dlink}
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dlink}
+
+# check rights updated
+[ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dlink})`" != "777" ] && echo "rights not updated (2)" && exit 1
+
+######################
+# update dlinkchildren
+chmod 777 ${dlinkchildren}
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dlinkchildren}
+
+# check rights updated
+[ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dlinkchildren})`" != "777" ] && echo "rights not updated (3)" && exit 1
+
+######################
+# update fnormal
+chmod 777 ${fnormal}
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${fnormal}
+
+# check rights updated
+[ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${fnormal})`" != "777" ] && echo "rights not updated (4)" && exit 1
+
+######################
+# update flink
+chmod 777 ${flink}
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${flink}
+
+# check rights updated
+[ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${flink})`" != "777" ] && echo "rights not updated (5)" && exit 1
+
+## CLEANING
+rm -rf ${tmps} ${tmpd}
+
+echo "OK"
+exit 0
