@@ -61,27 +61,29 @@ Here are some rules on the use of variables in configs:
 
 ## Permissions
 
-Dotfile allows to control the permission applied to a dotfile using the
-config dotfile entry `chmod`.
-A `chmod` entry on a directory is applied to the directory only, not recursively.
+Dotdrop allows to control the permission applied to a dotfile using the
+config dotfile entry [chmod](config-format.md#dotfiles-entry).
+A [chmod](config-format.md#dotfiles-entry) entry on a directory is applied to the
+directory only, not recursively.
 
 On `import` the following rules are applied:
 
 * if the `-m --preserve-mode` switch is provided the imported file permissions are
+  stored in a `chmod` entry
+* if imported file permissions differ from umask then its permissions are automatically
   stored in the `chmod` entry
-* if imported file permissions differ from umask its permissions are automatically
-  stored in the `chmod` entry
+* otherwise no `chmod` entry is added
 
 On `install` the following rules are applied:
 
 * if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
-* if file exists and its permissions differ from `umask` and no `chmod` is specified user needs
-  to confirm installation (unless `-f --force` is used or the permission match the dotfile in the `dotpath`)
+* if no `chmod` is specified and the file exists on the filesystem with different permissions than the file in the `dotpath`
+  then the user needs to confirm the dotfile installation (unless `-f --force` is used)
 
 On `update`:
 
-* no `chmod` entry is added/updated in the config however the rights are mirrored from the filesystem to the
-  file in `dotpath`
+* no `chmod` entry is added/updated in the config however the rights are mirrored
+  from the filesystem to the dotfile in the `dotpath`
 
 ## Symlink dotfiles
 
