@@ -19,7 +19,8 @@ from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.utils import get_tmpdir, removepath, strip_home, \
-    uniq_list, patch_ignores, dependencies_met, get_file_perm
+    uniq_list, patch_ignores, dependencies_met, get_file_perm, \
+    get_default_file_perms
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
 
@@ -521,7 +522,8 @@ def cmd_importer(o):
                     shutil.copy2(dst, srcf)
 
         chmod = None
-        if o.import_mode or perm & o.umask:
+        dflperm = get_default_file_perms(dst, o.umask)
+        if o.import_mode or perm != dflperm:
             # insert chmod
             chmod = perm
         retconf = o.conf.new(src, dst, linktype, chmod=chmod)

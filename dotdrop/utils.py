@@ -312,6 +312,14 @@ def get_umask():
     return cur
 
 
+def get_default_file_perms(path, umask):
+    """get default rights for a file"""
+    base = 0o666
+    if os.path.isdir(path):
+        base = 0o777
+    return base - umask
+
+
 def get_file_perm(path):
     """return file permission"""
     return os.stat(path).st_mode & 0o777

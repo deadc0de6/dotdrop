@@ -47,6 +47,19 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+# $1 file
+chmod_to_umask()
+{
+  u=`umask`
+  u=`echo ${u} | sed 's/^0*//'`
+  if [ -d ${1} ]; then
+    v=$((777 - u))
+  else
+    v=$((666 - u))
+  fi
+  chmod ${v} ${1}
+}
+
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
@@ -155,7 +168,7 @@ mkdir -p ${tmps}/dotfiles
 
 # import with --preserve-mode
 for i in ${toimport}; do
-  chmod `umask -S` ${i}
+  chmod_to_umask ${i}
   cd ${ddpath} | ${bin} import -c ${cfg} -m -f -p p1 -V ${i}
 done
 
@@ -182,9 +195,9 @@ _EOF
 rm -rf ${tmps}/dotfiles
 mkdir -p ${tmps}/dotfiles
 
-# import with --preserve-mode
+# import without --preserve-mode
 for i in ${toimport}; do
-  chmod `umask -S` ${i}
+  chmod_to_umask ${i}
   cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
 done
 
