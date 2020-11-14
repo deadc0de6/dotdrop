@@ -94,7 +94,7 @@ profiles:
 _EOF
 #cat ${cfg}
 
-# import without --preserve-mode
+# import
 for i in ${toimport}; do
   cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 ${i}
 done
@@ -111,7 +111,6 @@ chmod 700 ${flink}
 set +e
 cnt=`cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 2>&1 | grep 'modes differ' | wc -l`
 set -e
-
 [ "${cnt}" != "5" ] && echo "compare modes failed" && exit 1
 
 ## CLEANING

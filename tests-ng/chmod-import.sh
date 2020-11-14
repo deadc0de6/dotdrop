@@ -67,7 +67,7 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
-# create the dotfile
+# create the dotfiles
 dnormal="${tmpd}/dir_normal"
 mkdir -p ${dnormal}
 echo "dir_normal/f1" > ${dnormal}/file1
@@ -120,8 +120,8 @@ cat ${cfg}
 cd ${ddpath} | ${bin} detail -c ${cfg} -p p1 -V
 
 tot=`echo ${toimport} | wc -w`
-cnt=`cat ${cfg} | grep chmod | wc -l`
-[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (1)" && exit 1
 
 ## with link
 cat > ${cfg} << _EOF
@@ -138,7 +138,6 @@ rm -rf ${tmps}/dotfiles
 mkdir -p ${tmps}/dotfiles
 
 # import without --preserve-mode and link
-
 for i in ${toimport}; do
   cd ${ddpath} | ${bin} import -c ${cfg} -l link -f -p p1 -V ${i}
 done
@@ -149,8 +148,12 @@ cat ${cfg}
 cd ${ddpath} | ${bin} detail -c ${cfg} -p p1 -V
 
 tot=`echo ${toimport} | wc -w`
-cnt=`cat ${cfg} | grep chmod | wc -l`
-[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (2)" && exit 1
+
+tot=`echo ${toimport} | wc -w`
+cnt=`cat ${cfg} | grep 'link: link' | wc -l`
+[ "${cnt}" != "${tot}" ] && echo "not all link inserted" && exit 1
 
 ## --preserve-mode
 cat > ${cfg} << _EOF
@@ -178,8 +181,8 @@ cat ${cfg}
 cd ${ddpath} | ${bin} detail -c ${cfg} -p p1 -V
 
 tot=`echo ${toimport} | wc -w`
-cnt=`cat ${cfg} | grep chmod | wc -l`
-[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted" && exit 1
+cnt=`cat ${cfg} | grep "chmod: " | wc -l`
+[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (3)" && exit 1
 
 ## import normal
 cat > ${cfg} << _EOF

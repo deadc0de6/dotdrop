@@ -58,6 +58,22 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+get_file_mode()
+{
+  u=`umask`
+  u=`echo ${u} | sed 's/^0*//'`
+  v=$((666 - u))
+  echo "${v}"
+}
+
+get_dir_mode()
+{
+  u=`umask`
+  u=`echo ${u} | sed 's/^0*//'`
+  v=$((777 - u))
+  echo "${v}"
+}
+
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
@@ -97,6 +113,8 @@ echo '{{@@ profile @@}}' > ${tmps}/dotfiles/symlinktemplate
 
 mkdir -p ${tmps}/dotfiles/symlinktemplatedir
 echo "{{@@ profile @@}}" > ${tmps}/dotfiles/symlinktemplatedir/t
+
+echo 'nomode' > ${tmps}/dotfiles/nomode
 
 cat > ${cfg} << _EOF
 config:
@@ -145,6 +163,9 @@ dotfiles:
     dst: ${tmpd}/symlinktemplatedir
     chmod: 777
     link: link
+  f_nomode:
+    src: nomode
+    dst: ${tmpd}/nomode
 profiles:
   p1:
     dotfiles:
@@ -157,12 +178,14 @@ profiles:
     - d_linkchildren
     - f_symlinktemplate
     - d_symlinktemplatedir
+    - f_nomode
   p2:
     dotfiles:
     - f_exists
     - f_existslink
     - d_linkchildren
     - f_symlinktemplate
+    - f_nomode
 _EOF
 #cat ${cfg}
 
@@ -182,6 +205,8 @@ has_rights "${tmpd}/linkchildren/f1" "644"
 has_rights "${tmpd}/linkchildren/d1" "755"
 has_rights "${tmpd}/linkchildren/d1/f2" "644"
 has_rights "${tmpd}/symlinktemplate" "777"
+m=`get_file_mode`
+has_rights "${tmpd}/nomode" "${m}"
 
 grep 'p1' ${tmpd}/symlinktemplate
 grep 'p1' ${tmpd}/symlinktemplatedir/t
@@ -207,6 +232,28 @@ has_rights "${tmpd}/linkchildren/f1" "644"
 has_rights "${tmpd}/linkchildren/d1" "755"
 has_rights "${tmpd}/linkchildren/d1/f2" "644"
 has_rights "${tmpd}/symlinktemplate" "777"
+m=`get_file_mode`
+has_rights "${tmpd}/nomode" "${m}"
+
+## no user confirmation expected
+## same mode
+echo "same mode"
+echo "nomode" > ${tmps}/dotfiles/nomode
+chmod 600 ${tmps}/dotfiles/nomode
+echo "nomode" > ${tmpd}/nomode
+chmod 600 ${tmpd}/nomode
+cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -V f_nomode
+has_rights "${tmpd}/nomode" "600"
+
+## user confirmation expected
+## different mode
+echo "different mode"
+echo "nomode" > ${tmps}/dotfiles/nomode
+chmod 600 ${tmps}/dotfiles/nomode
+echo "nomode" > ${tmpd}/nomode
+chmod 700 ${tmpd}/nomode
+cd ${ddpath} | printf 'y\n' | ${bin} install -c ${cfg} -p p2 -V f_nomode
+has_rights "${tmpd}/nomode" "600"
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
