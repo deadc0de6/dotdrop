@@ -326,7 +326,6 @@ def get_file_perm(path):
 
 
 def chmod(path, mode, debug=False):
-    cm = int(mode, 8)
     if debug:
-        LOG.dbg('chmod {} {}'.format(oct(cm), path))
-    os.chmod(path, cm)
+        LOG.dbg('chmod {} {}'.format(oct(mode), path))
+    os.chmod(path, mode)
