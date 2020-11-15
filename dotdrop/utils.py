@@ -275,25 +275,32 @@ def dependencies_met():
         if not which(dep):
             raise Exception(err.format(dep))
     # check python deps
-    err = 'missing python module {}'
+    err = 'missing python module \"{}\"'
+
+    # python-magic
     try:
         import magic
         assert(magic)
+        if not hasattr(magic, 'from_file'):
+            LOG.warn(err.format('python-magic'))
     except ImportError:
-        raise Exception(err.format('python-magic'))
-    if not hasattr(magic, 'from_file'):
-        e = 'wrong magic module found'
-        raise Exception(e)
+        LOG.warn(err.format('python-magic'))
+
+    # docopt
     try:
         from docopt import docopt
         assert(docopt)
     except ImportError:
         raise Exception(err.format('docopt'))
+
+    # jinja2
     try:
         import jinja2
         assert(jinja2)
     except ImportError:
         raise Exception(err.format('jinja2'))
+
+    # ruamel.yaml
     try:
         from ruamel.yaml import YAML
         assert(YAML)

@@ -136,11 +136,13 @@ Beside the python dependencies defined in [requirements.txt](https://github.com/
 dotdrop depends on following tools:
 
 * `diff`
-* `file` (if libmagic is not installed, see <https://github.com/ahupp/python-magic>)
 * `git` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
 * `readlink` or `realpath` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
 
-For MacOS users, make sure to install `realpath` (part of `coreutils`) through [homebrew](https://brew.sh/).
+For MacOS users, make sure to install below packages through [homebrew](https://brew.sh/):
+
+* [coreutils](https://formulae.brew.sh/formula/coreutils) (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) - realpath)
+* [libmagic](https://formulae.brew.sh/formula/libmagic) - python-magic
 
 ## Update dotdrop submodule
 
