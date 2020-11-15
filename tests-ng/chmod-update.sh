@@ -87,12 +87,13 @@ config:
 dotfiles:
 profiles:
 _EOF
-#cat ${cfg}
 
 # import
 for i in ${toimport}; do
   cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
 done
+
+cat ${cfg}
 
 # test no chmod
 cnt=`cat ${cfg} | grep chmod | wc -l`
@@ -106,6 +107,9 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dnormal}
 # check rights updated
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dnormal})`" != "777" ] && echo "rights not updated (1)" && exit 1
 
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "1" ] && echo "chmod not updated (1)" && exit 1
+
 ######################
 # update dlink
 chmod 777 ${dlink}
@@ -113,6 +117,8 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dlink}
 
 # check rights updated
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dlink})`" != "777" ] && echo "rights not updated (2)" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "2" ] && echo "chmod not updated (2)" && exit 1
 
 ######################
 # update dlinkchildren
@@ -121,6 +127,8 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${dlinkchildren}
 
 # check rights updated
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${dlinkchildren})`" != "777" ] && echo "rights not updated (3)" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "3" ] && echo "chmod not updated (3)" && exit 1
 
 ######################
 # update fnormal
@@ -129,6 +137,8 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${fnormal}
 
 # check rights updated
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${fnormal})`" != "777" ] && echo "rights not updated (4)" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "4" ] && echo "chmod not updated (4)" && exit 1
 
 ######################
 # update flink
@@ -137,6 +147,8 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${flink}
 
 # check rights updated
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${flink})`" != "777" ] && echo "rights not updated (5)" && exit 1
+cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
+[ "${cnt}" != "5" ] && echo "chmod not updated (5)" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
