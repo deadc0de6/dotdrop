@@ -131,6 +131,9 @@ class Options(AttrMonitor):
         if not self.confpath:
             raise YamlException('no config file found')
         if self.debug:
+            self.log.dbg('#################################################')
+            self.log.dbg('#################### DOTDROP ####################')
+            self.log.dbg('#################################################')
             self.log.dbg('version: {}'.format(VERSION))
             self.log.dbg('command: {}'.format(' '.join(sys.argv)))
             self.log.dbg('config file: {}'.format(self.confpath))
