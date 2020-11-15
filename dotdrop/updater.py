@@ -180,9 +180,11 @@ class Updater:
             return False
 
     def _mirror_rights(self, src, dst):
+        srcr = get_file_perm(src)
+        dstr = get_file_perm(dst)
+        if srcr == dstr:
+            return
         if self.debug:
-            srcr = get_file_perm(src)
-            dstr = get_file_perm(dst)
             msg = 'copy rights from {} ({:o}) to {} ({:o})'
             self.log.dbg(msg.format(src, srcr, dst, dstr))
         try:

@@ -254,6 +254,7 @@ def cmd_install(o):
 
 def cmd_compare(o, tmp):
     """compare dotfiles and return True if all identical"""
+    cnt = 0
     dotfiles = o.dotfiles
     if not dotfiles:
         msg = 'no dotfile defined for this profile (\"{}\")'
@@ -266,6 +267,7 @@ def cmd_compare(o, tmp):
         selected = _select(o.compare_focus, dotfiles)
 
     if len(selected) < 1:
+        LOG.log('\nno dotfile to compare')
         return False
 
     t = _get_templater(o)
@@ -281,6 +283,8 @@ def cmd_compare(o, tmp):
         if not dotfile.src and not dotfile.dst:
             # ignore fake dotfile
             continue
+        cnt += 1
+
         # add dotfile variables
         t.restore_vars(tvars)
         newvars = dotfile.get_dotfile_variables()
@@ -355,12 +359,14 @@ def cmd_compare(o, tmp):
                 LOG.emph(diff)
             same = False
 
+    LOG.log('\n{} dotfile(s) compared.'.format(cnt))
     return same
 
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
     ret = True
+    cnt = 0
     paths = o.update_path
     iskey = o.update_iskey
     ignore = o.update_ignore
@@ -374,10 +380,11 @@ def cmd_update(o):
             paths = [d.dst for d in o.dotfiles]
         msg = 'Update all dotfiles for profile \"{}\"'.format(o.profile)
         if o.safe and not LOG.ask(msg):
+            LOG.log('\n{} file(s) updated.'.format(cnt))
             return False
 
     if not paths:
-        LOG.log('no dotfile to update')
+        LOG.log('\nno dotfile to update')
         return True
     if o.debug:
         LOG.dbg('dotfile to update: {}'.format(paths))
@@ -385,6 +392,7 @@ def cmd_update(o):
     updater = Updater(o.dotpath, o.variables, o.conf,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=ignore, showpatch=showpatch)
+    cnt = 0
     if not iskey:
         # update paths
         if o.debug:
@@ -392,6 +400,8 @@ def cmd_update(o):
         for path in paths:
             if not updater.update_path(path):
                 ret = False
+            else:
+                cnt += 1
     else:
         # update keys
         keys = paths
@@ -403,6 +413,9 @@ def cmd_update(o):
         for key in keys:
             if not updater.update_key(key):
                 ret = False
+            else:
+                cnt += 1
+    LOG.log('\n{} file(s) updated.'.format(cnt))
     return ret
 
 

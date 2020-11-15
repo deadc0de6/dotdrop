@@ -99,8 +99,9 @@ cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 
 # check files haven't been updated
 [ ! -e ${dt}/a/c/acfile ] && echo "acfile not found" && exit 1
-cat ${dt}/a/c/acfile
-grep 'b' ${dt}/a/c/acfile >/dev/null
+set +e
+grep 'b' ${dt}/a/c/acfile || (echo "acfile not updated" && exit 1)
+set -e
 [ -e ${dt}/a/newfile ] && echo "newfile found" && exit 1
 
 ## CLEANING
