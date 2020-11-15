@@ -50,6 +50,7 @@ export DOTDROP_DEBUG=yes
 unset DOTDROP_FORCE_NODEBUG
 # do not print debugs when running tests (faster)
 #export DOTDROP_FORCE_NODEBUG=yes
+export DOTDROP_WORKDIR=/tmp/dotdrop-tests-workdir
 
 ## execute bash script tests
 [ "$1" = '--python-only' ] || {

@@ -255,3 +255,7 @@ export DOTDROP_FORCE_NODEBUG=
 ```bash
 export DOTDROP_TMPDIR="/tmp/dotdrop-tmp"
 ```
+* `DOTDROP_WORKDIR`: overwrite the `workdir` defined in the config
+```bash
+export DOTDROP_WORKDIR="/tmp/dotdrop-workdir"
+```
