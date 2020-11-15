@@ -300,6 +300,8 @@ def dependencies_met():
 
 def mirror_file_rights(src, dst):
     """mirror file rights of src to dst (can rise exc)"""
+    if not os.path.exists(src) or not os.path.exists(dst):
+        return
     rights = get_file_perm(src)
     os.chmod(dst, rights)
 
