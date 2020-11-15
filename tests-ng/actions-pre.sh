@@ -46,6 +46,15 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+# $1 pattern
+# $2 path
+grep_or_fail()
+{
+  set +e
+  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
+  set -e
+}
+
 # the action temp
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # the dotfile source
@@ -136,38 +145,36 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks
 [ ! -e ${tmpa}/pre ] && echo 'pre action not executed' && exit 1
-grep pre ${tmpa}/pre >/dev/null
+grep_or_fail pre ${tmpa}/pre
 [ ! -e ${tmpa}/naked ] && echo 'naked action not executed'  && exit 1
-grep naked ${tmpa}/naked >/dev/null
+grep_or_fail naked ${tmpa}/naked
 
 [ ! -e ${tmpa}/multiple ] && echo 'pre action multiple not executed' && exit 1
-grep multiple ${tmpa}/multiple >/dev/null
+grep_or_fail multiple ${tmpa}/multiple
 [ "`wc -l ${tmpa}/multiple | awk '{print $1}'`" -gt "1" ] && echo 'pre action multiple executed twice' && exit 1
 
 [ ! -e ${tmpa}/pre2 ] && echo 'pre action 2 not executed' && exit 1
-grep pre2 ${tmpa}/pre2 >/dev/null
+grep_or_fail pre2 ${tmpa}/pre2
 [ ! -e ${tmpa}/naked2 ] && echo 'naked action 2 not executed'  && exit 1
-grep naked2 ${tmpa}/naked2 >/dev/null
+grep_or_fail naked2 ${tmpa}/naked2
 
 [ ! -e ${tmpa}/multiple2 ] && echo 'pre action multiple 2 not executed' && exit 1
-grep multiple2 ${tmpa}/multiple2 >/dev/null
+grep_or_fail multiple2 ${tmpa}/multiple2
 [ "`wc -l ${tmpa}/multiple2 | awk '{print $1}'`" -gt "1" ] && echo 'pre action multiple 2 executed twice' && exit 1
 [ ! -e ${tmpa}/naked3 ] && echo 'naked action 3 not executed'  && exit 1
-grep naked3 ${tmpa}/naked3 >/dev/null
+grep_or_fail naked3 ${tmpa}/naked3
 
-
-# remove the pre action result and re-run
+# remove the pre action result and re-install
 rm ${tmpa}/pre
-
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
-[ -e ${tmpa}/pre ] && exit 1
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+[ -e ${tmpa}/pre ] && echo "pre exists" && exit 1
 
 # ensure failing actions make the installation fail
 # install
 set +e
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p2 -V
 set -e
-[ -e ${tmpd}/fail ] && exit 1
+[ -e ${tmpd}/fail ] && echo "fail exists" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}

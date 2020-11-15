@@ -12,6 +12,7 @@ import uuid
 import fnmatch
 import inspect
 import importlib
+import filecmp
 from shutil import rmtree, which
 
 # local import
@@ -71,6 +72,11 @@ def shell(cmd, debug=False):
     if debug:
         LOG.dbg('shell result ({}): {}'.format(ret, out))
     return ret == 0, out
+
+
+def fastdiff(left, right):
+    """fast compare files and returns True if different"""
+    return not filecmp.cmp(left, right, shallow=False)
 
 
 def diff(original, modified, raw=True,

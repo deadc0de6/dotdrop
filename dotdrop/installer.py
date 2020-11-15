@@ -382,7 +382,7 @@ class Installer:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
                 return True, None
             if self.showdiff:
-                self._diff_before_write(src, dst, quiet=False)
+                self._show_diff_before_write(src, dst)
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
                 err = 'ignoring "{}", link was not created'.format(dst)
@@ -565,43 +565,31 @@ class Installer:
             return 0, None
 
         if os.path.lexists(dst):
-            if chmod:
-                rights = chmod
-            else:
-                rights = utils.get_file_perm(src)
-            samerights = False
             try:
-                dstrights = utils.get_file_perm(dst)
-                samerights = dstrights == rights
+                os.stat(dst)
             except OSError as e:
                 if e.errno == errno.ENOENT:
                     # broken symlink
                     err = 'broken symlink {}'.format(dst)
                     return -1, err
-            if self.debug:
-                d = 'src mode {:o}, dst mode {:o}'
-                self.log.dbg(d.format(rights, dstrights))
 
-            diff = None
+            src_mode = chmod
+            if not src_mode:
+                src_mode = utils.get_file_perm(src)
             if self.diff:
-                diff = self._diff_before_write(src, dst,
-                                               content=content,
-                                               quiet=True)
-                if not diff and samerights:
+                if not self._is_different(src, dst,
+                                          content=content,
+                                          src_mode=src_mode):
                     if self.debug:
                         self.log.dbg('{} is the same'.format(dst))
                     return 1, None
-            if diff and self.safe:
+            if self.safe:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
-                    if diff is None:
-                        # get diff
-                        diff = self._diff_before_write(src, dst,
-                                                       content=content,
-                                                       quiet=True)
-                        if diff:
-                            self._print_diff(src, dst, diff)
+                    # get diff
+                    self._show_diff_before_write(src, dst,
+                                                 content=content)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                     self.log.warn('ignoring {}'.format(dst))
                     return 1, None
@@ -656,7 +644,40 @@ class Installer:
         tmp['_dotfile_sub_abs_dst'] = dst
         return tmp
 
-    def _diff_before_write(self, src, dst, content=None, quiet=False):
+    def _is_different(self, src, dst, src_mode=None, content=None):
+        """
+        returns True if file is different and
+        needs to be installed
+        """
+        # check file size
+        src_size = os.stat(src).st_size
+        dst_size = os.stat(dst).st_size
+        if src_size != dst_size:
+            if self.debug:
+                self.log.dbg('size differ')
+            return True
+
+        # check file mode
+        if not src_mode:
+            src_mode = utils.get_file_perm(src)
+        dst_mode = utils.get_file_perm(dst)
+        if src_mode != dst_mode:
+            if self.debug:
+                m = 'mode differ ({:o} vs {:o})'
+                self.log.dbg(m.format(src_mode, dst_mode))
+            return True
+
+        # check file content
+        if content:
+            tmp = utils.write_to_tmpfile(content)
+            src = tmp
+        r = utils.fastdiff(src, dst)
+        if r:
+            if self.debug:
+                self.log.dbg('content differ')
+        return r
+
+    def _show_diff_before_write(self, src, dst, content=None):
         """
         diff before writing
         using a temp file if content is not None
@@ -671,7 +692,7 @@ class Installer:
         if tmp:
             utils.removepath(tmp, logger=self.log)
 
-        if not quiet and diff:
+        if diff:
             self._print_diff(src, dst, diff)
         return diff
 

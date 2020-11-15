@@ -172,7 +172,7 @@ profiles:
     dotfiles:
     - f_asub
 _EOF
-cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V
+cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V -f
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
 
 ## CLEANING

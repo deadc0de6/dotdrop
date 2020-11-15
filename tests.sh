@@ -3,7 +3,8 @@
 # Copyright (c) 2017, deadc0de6
 
 # stop on first error
-set -ev
+#set -ev
+set -e
 
 # PEP8 tests
 which pycodestyle >/dev/null 2>&1
@@ -54,9 +55,12 @@ unset DOTDROP_FORCE_NODEBUG
 [ "$1" = '--python-only' ] || {
   echo "doing extended tests"
   logdir=`mktemp -d`
+  tot=`ls -1 tests-ng/*.sh | wc -l`
+  cnt=0
   for scr in tests-ng/*.sh; do
+    cnt=$((cnt + 1))
     logfile="${logdir}/`basename ${scr}`.log"
-    echo "-> running test ${scr} (logfile:${logfile})"
+    echo "-> (${cnt}/${tot}) running test ${scr} (logfile:${logfile})"
     set +e
     ${scr} > "${logfile}" 2>&1
     if [ "$?" -ne 0 ]; then
