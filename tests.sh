@@ -31,16 +31,15 @@ export DOTDROP_FORCE_NODEBUG=yes
 
 # coverage file location
 cur=`dirname $(readlink -f "${0}")`
-export COVERAGE_FILE="${cur}/.coverage"
 
 # execute tests with coverage
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
-  #PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
+  export COVERAGE_FILE=
   PYTHONPATH="dotdrop" ${nosebin} -s --processes=-1 --with-coverage --cover-package=dotdrop
 else
   ## CI/CD
-  #PYTHONPATH="dotdrop" ${nosebin} --processes=-1 --with-coverage --cover-package=dotdrop
+  export COVERAGE_FILE="${cur}/.coverage"
   PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
 fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
@@ -52,34 +51,16 @@ unset DOTDROP_FORCE_NODEBUG
 #export DOTDROP_FORCE_NODEBUG=yes
 export DOTDROP_WORKDIR=/tmp/dotdrop-tests-workdir
 
-## execute bash script tests
-[ "$1" = '--python-only' ] || {
-  echo "doing extended tests"
-  logdir=`mktemp -d`
-  tot=`ls -1 tests-ng/*.sh | wc -l`
-  cnt=0
-  for scr in tests-ng/*.sh; do
-    cnt=$((cnt + 1))
-    logfile="${logdir}/`basename ${scr}`.log"
-    echo "-> (${cnt}/${tot}) running test ${scr} (logfile:${logfile})"
-    set +e
-    ${scr} > "${logfile}" 2>&1
-    if [ "$?" -ne 0 ]; then
-      cat ${logfile}
-      echo "test ${scr} finished with error"
-      rm -rf ${logdir}
-      exit 1
-    elif grep Traceback ${logfile}; then
-      cat ${logfile}
-      echo "test ${scr} crashed"
-      rm -rf ${logdir}
-      exit 1
-    fi
-    set -e
-    echo "test ${scr} ok"
-  done
-  rm -rf ${logdir}
-}
+# run bash tests
+if [ -z ${GITHUB_WORKFLOW} ]; then
+  ## local
+  export COVERAGE_FILE=
+  tests-ng/tests-launcher.py
+else
+  ## CI/CD
+  export COVERAGE_FILE="${cur}/.coverage"
+  tests-ng/tests-launcher.py 1
+fi
 
 ## test the doc with remark
 ## https://github.com/remarkjs/remark-validate-links
