@@ -317,6 +317,28 @@ class CfgYaml:
         """return all existing dotfile keys"""
         return self.dotfiles.keys()
 
+    def update_dotfile(self, key, chmod):
+        """update an existing dotfile"""
+        if key not in self.dotfiles.keys():
+            return False
+        df = self._yaml_dict[self.key_dotfiles][key]
+        old = None
+        if self.key_dotfile_chmod in df:
+            old = df[self.key_dotfile_chmod]
+        if old == chmod:
+            return False
+        if self._debug:
+            self._dbg('update dotfile: {}'.format(key))
+            self._dbg('old chmod value: {}'.format(old))
+            self._dbg('new chmod value: {}'.format(chmod))
+        df = self._yaml_dict[self.key_dotfiles][key]
+        if not chmod:
+            del df[self.key_dotfile_chmod]
+        else:
+            df[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+        self._dirty = True
+        return True
+
     def add_dotfile(self, key, src, dst, link, chmod=None):
         """add a new dotfile"""
         if key in self.dotfiles.keys():

@@ -43,103 +43,9 @@ class CfgAggregator:
         self.log = Logger()
         self._load()
 
-    def _load(self):
-        """load lower level config"""
-        self.cfgyaml = CfgYaml(self.path,
-                               self.profile_key,
-                               debug=self.debug)
-
-        # settings
-        self.settings = Settings.parse(None, self.cfgyaml.settings)
-
-        # dotfiles
-        self.dotfiles = Dotfile.parse_dict(self.cfgyaml.dotfiles)
-        if self.debug:
-            self._debug_list('dotfiles', self.dotfiles)
-
-        # profiles
-        self.profiles = Profile.parse_dict(self.cfgyaml.profiles)
-        if self.debug:
-            self._debug_list('profiles', self.profiles)
-
-        # actions
-        self.actions = Action.parse_dict(self.cfgyaml.actions)
-        if self.debug:
-            self._debug_list('actions', self.actions)
-
-        # trans_r
-        self.trans_r = Transform.parse_dict(self.cfgyaml.trans_r)
-        if self.debug:
-            self._debug_list('trans_r', self.trans_r)
-
-        # trans_w
-        self.trans_w = Transform.parse_dict(self.cfgyaml.trans_w)
-        if self.debug:
-            self._debug_list('trans_w', self.trans_w)
-
-        # variables
-        self.variables = self.cfgyaml.variables
-        if self.debug:
-            self._debug_dict('variables', self.variables)
-
-        # patch dotfiles in profiles
-        self._patch_keys_to_objs(self.profiles,
-                                 "dotfiles", self.get_dotfile)
-
-        # patch action in dotfiles actions
-        self._patch_keys_to_objs(self.dotfiles,
-                                 "actions", self._get_action_w_args)
-        # patch action in profiles actions
-        self._patch_keys_to_objs(self.profiles,
-                                 "actions", self._get_action_w_args)
-
-        # patch actions in settings default_actions
-        self._patch_keys_to_objs([self.settings],
-                                 "default_actions", self._get_action_w_args)
-        if self.debug:
-            msg = 'default actions: {}'.format(self.settings.default_actions)
-            self.log.dbg(msg)
-
-        # patch trans_w/trans_r in dotfiles
-        self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_r",
-                                 self._get_trans_w_args(self._get_trans_r),
-                                 islist=False)
-        self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_w",
-                                 self._get_trans_w_args(self._get_trans_w),
-                                 islist=False)
-
-    def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
-        """
-        map for each key in the attribute 'keys' in 'containers'
-        the returned object from the method 'get_by_key'
-        """
-        if not containers:
-            return
-        if self.debug:
-            self.log.dbg('patching {} ...'.format(keys))
-        for c in containers:
-            objects = []
-            okeys = getattr(c, keys)
-            if not okeys:
-                continue
-            if not islist:
-                okeys = [okeys]
-            for k in okeys:
-                o = get_by_key(k)
-                if not o:
-                    err = '{} does not contain'.format(c)
-                    err += ' a {} entry named {}'.format(keys, k)
-                    self.log.err(err)
-                    raise Exception(err)
-                objects.append(o)
-            if not islist:
-                objects = objects[0]
-            # if self.debug:
-            #     er = 'patching {}.{} with {}'
-            #     self.log.dbg(er.format(c, keys, objects))
-            setattr(c, keys, objects)
+    ########################################################
+    # public methods
+    ########################################################
 
     def del_dotfile(self, dotfile):
         """remove this dotfile from the config"""
@@ -149,18 +55,7 @@ class CfgAggregator:
         """remove this dotfile from this profile"""
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
-    def _create_new_dotfile(self, src, dst, link, chmod=None):
-        """create a new dotfile"""
-        # get a new dotfile with a unique key
-        key = self._get_new_dotfile_key(dst)
-        if self.debug:
-            self.log.dbg('new dotfile key: {}'.format(key))
-        # add the dotfile
-        if not self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod):
-            return None
-        return Dotfile(key, dst, src)
-
-    def new(self, src, dst, link, chmod=None):
+    def new_dotfile(self, src, dst, link, chmod=None):
         """
         import a new dotfile
         @src: path in dotpath
@@ -182,82 +77,16 @@ class CfgAggregator:
             msg = 'new dotfile {} to profile {}'
             self.log.dbg(msg.format(key, self.profile_key))
 
-        self.save()
-        if ret and not self.dry:
-            # reload
-            if self.debug:
-                self.log.dbg('reloading config')
-            olddebug = self.debug
-            self.debug = False
-            self._load()
-            self.debug = olddebug
+        if ret:
+            self._save_and_reload()
         return ret
 
-    def _get_new_dotfile_key(self, dst):
-        """return a new unique dotfile key"""
-        path = os.path.expanduser(dst)
-        existing_keys = self.cfgyaml.get_all_dotfile_keys()
-        if self.settings.longkey:
-            return self._get_long_key(path, existing_keys)
-        return self._get_short_key(path, existing_keys)
-
-    def _norm_key_elem(self, elem):
-        """normalize path element for sanity"""
-        elem = elem.lstrip('.')
-        elem = elem.replace(' ', '-')
-        return elem.lower()
-
-    def _split_path_for_key(self, path):
-        """return a list of path elements, excluded home path"""
-        p = strip_home(path)
-        dirs = []
-        while True:
-            p, f = os.path.split(p)
-            dirs.append(f)
-            if not p or not f:
-                break
-        dirs.reverse()
-        # remove empty entries
-        dirs = filter(None, dirs)
-        # normalize entries
-        return list(map(self._norm_key_elem, dirs))
-
-    def _get_long_key(self, path, keys):
-        """
-        return a unique long key representing the
-        absolute path of path
-        """
-        dirs = self._split_path_for_key(path)
-        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
-        key = self.key_sep.join([prefix] + dirs)
-        return self._uniq_key(key, keys)
-
-    def _get_short_key(self, path, keys):
-        """
-        return a unique key where path
-        is known not to be an already existing dotfile
-        """
-        dirs = self._split_path_for_key(path)
-        dirs.reverse()
-        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
-        entries = []
-        for d in dirs:
-            entries.insert(0, d)
-            key = self.key_sep.join([prefix] + entries)
-            if key not in keys:
-                return key
-        return self._uniq_key(key, keys)
-
-    def _uniq_key(self, key, keys):
-        """unique dotfile key"""
-        newkey = key
-        cnt = 1
-        while newkey in keys:
-            # if unable to get a unique path
-            # get a random one
-            newkey = self.key_sep.join([key, str(cnt)])
-            cnt += 1
-        return newkey
+    def update_dotfile(self, key, chmod):
+        """update an existing dotfile"""
+        ret = self.cfgyaml.update_dotfile(key, chmod)
+        if ret:
+            self._save_and_reload()
+        return ret
 
     def path_to_dotfile_dst(self, path):
         """normalize the path to match dotfile dst"""
@@ -358,6 +187,216 @@ class CfgAggregator:
         except StopIteration:
             return None
 
+    ########################################################
+    # accessors for public methods
+    ########################################################
+
+    def _create_new_dotfile(self, src, dst, link, chmod=None):
+        """create a new dotfile"""
+        # get a new dotfile with a unique key
+        key = self._get_new_dotfile_key(dst)
+        if self.debug:
+            self.log.dbg('new dotfile key: {}'.format(key))
+        # add the dotfile
+        if not self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod):
+            return None
+        return Dotfile(key, dst, src)
+
+    ########################################################
+    # parsing
+    ########################################################
+
+    def _load(self):
+        """load lower level config"""
+        self.cfgyaml = CfgYaml(self.path,
+                               self.profile_key,
+                               debug=self.debug)
+
+        # settings
+        self.settings = Settings.parse(None, self.cfgyaml.settings)
+
+        # dotfiles
+        self.dotfiles = Dotfile.parse_dict(self.cfgyaml.dotfiles)
+        if self.debug:
+            self._debug_list('dotfiles', self.dotfiles)
+
+        # profiles
+        self.profiles = Profile.parse_dict(self.cfgyaml.profiles)
+        if self.debug:
+            self._debug_list('profiles', self.profiles)
+
+        # actions
+        self.actions = Action.parse_dict(self.cfgyaml.actions)
+        if self.debug:
+            self._debug_list('actions', self.actions)
+
+        # trans_r
+        self.trans_r = Transform.parse_dict(self.cfgyaml.trans_r)
+        if self.debug:
+            self._debug_list('trans_r', self.trans_r)
+
+        # trans_w
+        self.trans_w = Transform.parse_dict(self.cfgyaml.trans_w)
+        if self.debug:
+            self._debug_list('trans_w', self.trans_w)
+
+        # variables
+        self.variables = self.cfgyaml.variables
+        if self.debug:
+            self._debug_dict('variables', self.variables)
+
+        # patch dotfiles in profiles
+        self._patch_keys_to_objs(self.profiles,
+                                 "dotfiles", self.get_dotfile)
+
+        # patch action in dotfiles actions
+        self._patch_keys_to_objs(self.dotfiles,
+                                 "actions", self._get_action_w_args)
+        # patch action in profiles actions
+        self._patch_keys_to_objs(self.profiles,
+                                 "actions", self._get_action_w_args)
+
+        # patch actions in settings default_actions
+        self._patch_keys_to_objs([self.settings],
+                                 "default_actions", self._get_action_w_args)
+        if self.debug:
+            msg = 'default actions: {}'.format(self.settings.default_actions)
+            self.log.dbg(msg)
+
+        # patch trans_w/trans_r in dotfiles
+        self._patch_keys_to_objs(self.dotfiles,
+                                 "trans_r",
+                                 self._get_trans_w_args(self._get_trans_r),
+                                 islist=False)
+        self._patch_keys_to_objs(self.dotfiles,
+                                 "trans_w",
+                                 self._get_trans_w_args(self._get_trans_w),
+                                 islist=False)
+
+    def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
+        """
+        map for each key in the attribute 'keys' in 'containers'
+        the returned object from the method 'get_by_key'
+        """
+        if not containers:
+            return
+        if self.debug:
+            self.log.dbg('patching {} ...'.format(keys))
+        for c in containers:
+            objects = []
+            okeys = getattr(c, keys)
+            if not okeys:
+                continue
+            if not islist:
+                okeys = [okeys]
+            for k in okeys:
+                o = get_by_key(k)
+                if not o:
+                    err = '{} does not contain'.format(c)
+                    err += ' a {} entry named {}'.format(keys, k)
+                    self.log.err(err)
+                    raise Exception(err)
+                objects.append(o)
+            if not islist:
+                objects = objects[0]
+            # if self.debug:
+            #     er = 'patching {}.{} with {}'
+            #     self.log.dbg(er.format(c, keys, objects))
+            setattr(c, keys, objects)
+
+    ########################################################
+    # dotfile key
+    ########################################################
+
+    def _get_new_dotfile_key(self, dst):
+        """return a new unique dotfile key"""
+        path = os.path.expanduser(dst)
+        existing_keys = self.cfgyaml.get_all_dotfile_keys()
+        if self.settings.longkey:
+            return self._get_long_key(path, existing_keys)
+        return self._get_short_key(path, existing_keys)
+
+    def _norm_key_elem(self, elem):
+        """normalize path element for sanity"""
+        elem = elem.lstrip('.')
+        elem = elem.replace(' ', '-')
+        return elem.lower()
+
+    def _get_long_key(self, path, keys):
+        """
+        return a unique long key representing the
+        absolute path of path
+        """
+        dirs = self._split_path_for_key(path)
+        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
+        key = self.key_sep.join([prefix] + dirs)
+        return self._uniq_key(key, keys)
+
+    def _get_short_key(self, path, keys):
+        """
+        return a unique key where path
+        is known not to be an already existing dotfile
+        """
+        dirs = self._split_path_for_key(path)
+        dirs.reverse()
+        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
+        entries = []
+        for d in dirs:
+            entries.insert(0, d)
+            key = self.key_sep.join([prefix] + entries)
+            if key not in keys:
+                return key
+        return self._uniq_key(key, keys)
+
+    def _uniq_key(self, key, keys):
+        """unique dotfile key"""
+        newkey = key
+        cnt = 1
+        while newkey in keys:
+            # if unable to get a unique path
+            # get a random one
+            newkey = self.key_sep.join([key, str(cnt)])
+            cnt += 1
+        return newkey
+
+    ########################################################
+    # helpers
+    ########################################################
+
+    def _save_and_reload(self):
+        if self.dry:
+            return
+        self.save()
+        if self.debug:
+            self.log.dbg('reloading config')
+        olddebug = self.debug
+        self.debug = False
+        self._load()
+        self.debug = olddebug
+
+    def _norm_path(self, path):
+        if not path:
+            return path
+        path = os.path.expanduser(path)
+        path = os.path.expandvars(path)
+        path = os.path.abspath(path)
+        return path
+
+    def _split_path_for_key(self, path):
+        """return a list of path elements, excluded home path"""
+        p = strip_home(path)
+        dirs = []
+        while True:
+            p, f = os.path.split(p)
+            dirs.append(f)
+            if not p or not f:
+                break
+        dirs.reverse()
+        # remove empty entries
+        dirs = filter(None, dirs)
+        # normalize entries
+        return list(map(self._norm_key_elem, dirs))
+
     def _get_action(self, key):
         """return action by key"""
         try:
@@ -408,14 +447,6 @@ class CfgAggregator:
             return next(x for x in self.trans_w if x.key == key)
         except StopIteration:
             return None
-
-    def _norm_path(self, path):
-        if not path:
-            return path
-        path = os.path.expanduser(path)
-        path = os.path.expandvars(path)
-        path = os.path.abspath(path)
-        return path
 
     def _debug_list(self, title, elems):
         """pretty print list"""

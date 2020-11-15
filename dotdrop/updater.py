@@ -22,17 +22,13 @@ TILD = '~'
 
 class Updater:
 
-    def __init__(self, dotpath, variables,
-                 dotfile_key_getter, dotfile_dst_getter,
-                 dotfile_path_normalizer,
-                 dry=False, safe=True,
-                 debug=False, ignore=[], showpatch=False):
+    def __init__(self, dotpath, variables, conf,
+                 dry=False, safe=True, debug=False,
+                 ignore=[], showpatch=False):
         """constructor
         @dotpath: path where dotfiles are stored
         @variables: dictionary of variables for the templates
-        @dotfile_key_getter: func to get a dotfile by key
-        @dotfile_dst_getter: func to get a dotfile by dst
-        @dotfile_path_normalizer: func to normalize dotfile dst
+        @conf: configuration manager
         @dry: simulate
         @safe: ask for overwrite if True
         @debug: enable debug
@@ -41,9 +37,7 @@ class Updater:
         """
         self.dotpath = dotpath
         self.variables = variables
-        self.dotfile_key_getter = dotfile_key_getter
-        self.dotfile_dst_getter = dotfile_dst_getter
-        self.dotfile_path_normalizer = dotfile_path_normalizer
+        self.conf = conf
         self.dry = dry
         self.safe = safe
         self.debug = debug
@@ -62,7 +56,7 @@ class Updater:
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
-        dotfiles = self.dotfile_dst_getter(path)
+        dotfiles = self.conf.get_dotfile_by_dst(path)
         if not dotfiles:
             return False
         for dotfile in dotfiles:
@@ -80,12 +74,12 @@ class Updater:
 
     def update_key(self, key):
         """update the dotfile referenced by key"""
-        dotfile = self.dotfile_key_getter(key)
+        dotfile = self.conf.get_dotfile(key)
         if not dotfile:
             return False
         if self.debug:
             self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
-        path = self.dotfile_path_normalizer(dotfile.dst)
+        path = self.conf.path_to_dotfile_dst(dotfile.dst)
         return self._update(path, dotfile)
 
     def _update(self, path, dotfile):
@@ -108,10 +102,26 @@ class Updater:
         new_path = self._apply_trans_w(path, dotfile)
         if not new_path:
             return False
+
+        # save current rights
+        fsmode = get_file_perm(path)
+        dfmode = get_file_perm(dtpath)
+
+        # handle the pointed file
         if os.path.isdir(new_path):
             ret = self._handle_dir(new_path, dtpath)
         else:
             ret = self._handle_file(new_path, dtpath)
+
+        if fsmode != dfmode:
+            # mirror rights
+            if self.debug:
+                m = 'adopt mode {:o} for {}'
+                self.log.dbg(m.format(fsmode, dotfile.key))
+            r = self.conf.update_dotfile(dotfile.key, fsmode)
+            if r:
+                ret = True
+
         # clean temporary files
         if new_path != path and os.path.exists(new_path):
             removepath(new_path, logger=self.log)
@@ -170,12 +180,12 @@ class Updater:
             return False
 
     def _mirror_rights(self, src, dst):
+        if self.debug:
+            srcr = get_file_perm(src)
+            dstr = get_file_perm(dst)
+            msg = 'copy rights from {} ({:o}) to {} ({:o})'
+            self.log.dbg(msg.format(src, srcr, dst, dstr))
         try:
-            if self.debug:
-                srcr = get_file_perm(src)
-                dstr = get_file_perm(dst)
-                msg = 'copy rights from {} ({:o}) to {} ({:o})'
-                self.log.dbg(msg.format(src, srcr, dst, dstr))
             mirror_file_rights(src, dst)
         except OSError as e:
             self.log.err(e)

@@ -382,10 +382,7 @@ def cmd_update(o):
     if o.debug:
         LOG.dbg('dotfile to update: {}'.format(paths))
 
-    updater = Updater(o.dotpath, o.variables,
-                      o.conf.get_dotfile,
-                      o.conf.get_dotfile_by_dst,
-                      o.conf.path_to_dotfile_dst,
+    updater = Updater(o.dotpath, o.variables, o.conf,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=ignore, showpatch=showpatch)
     if not iskey:
@@ -531,7 +528,7 @@ def cmd_importer(o):
                 LOG.dbg('adopt mode {:o} (umask {:o})'.format(perm, dflperm))
             # insert chmod
             chmod = perm
-        retconf = o.conf.new(src, dst, linktype, chmod=chmod)
+        retconf = o.conf.new_dotfile(src, dst, linktype, chmod=chmod)
         if retconf:
             LOG.sub('\"{}\" imported'.format(path))
             cnt += 1
