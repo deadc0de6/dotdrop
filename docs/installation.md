@@ -141,8 +141,8 @@ dotdrop depends on following tools:
 
 For MacOS users, make sure to install below packages through [homebrew](https://brew.sh/):
 
-* [coreutils](https://formulae.brew.sh/formula/coreutils) (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) - realpath)
-* [libmagic](https://formulae.brew.sh/formula/libmagic) - python-magic
+* [coreutils](https://formulae.brew.sh/formula/coreutils) (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) which uses realpath)
+* [libmagic](https://formulae.brew.sh/formula/libmagic) (for python-magic)
 
 ## Update dotdrop submodule
 
