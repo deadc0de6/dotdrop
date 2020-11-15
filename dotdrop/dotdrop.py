@@ -523,7 +523,12 @@ def cmd_importer(o):
 
         chmod = None
         dflperm = get_default_file_perms(dst, o.umask)
+
+        if o.debug:
+            LOG.dbg('import mode: {}'.format(o.import_mode))
         if o.import_mode or perm != dflperm:
+            if o.debug:
+                LOG.dbg('adopt mode {:o} (umask {:o})'.format(perm, dflperm))
             # insert chmod
             chmod = perm
         retconf = o.conf.new(src, dst, linktype, chmod=chmod)
