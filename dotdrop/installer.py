@@ -578,6 +578,10 @@ class Installer:
                     # broken symlink
                     err = 'broken symlink {}'.format(dst)
                     return -1, err
+            if self.debug:
+                d = 'src mode {:o}, dst mode {:o}'
+                self.log.dbg(d.format(rights, dstrights))
+
             diff = None
             if self.diff:
                 diff = self._diff_before_write(src, dst,
@@ -748,15 +752,17 @@ class Installer:
             return True
         if not os.path.exists(src):
             return True
-        cperms = utils.get_file_perm(src)
-        perms = utils.get_file_perm(dst)
-        if perms == cperms:
+        sperms = utils.get_file_perm(src)
+        dperms = utils.get_file_perm(dst)
+        if sperms == dperms:
             return True
         elif self.safe:
+            # this only happens if no
+            # chmod is provided
+            # and dst/src modes differ
             if self.safe:
-                msg = 'Mode differs ({:o} and {:o} ({})'
-                msg = msg.format(cperms, perms, dst)
-                msg += ', continue'
+                msg = 'Set mode {:o} to \"{}\"'
+                msg = msg.format(sperms, dst)
                 if not self.log.ask(msg):
                     return False
         return True
