@@ -326,9 +326,7 @@ class CfgYaml:
             self._dbg('new dotfile src: {}'.format(src))
             self._dbg('new dotfile dst: {}'.format(dst))
             self._dbg('new dotfile link: {}'.format(link))
-            if chmod:
-                self._dbg('new dotfile chmod: {}'.format(chmod))
-
+            self._dbg('new dotfile chmod: {}'.format(chmod))
         df_dict = {
             self.key_dotfile_src: src,
             self.key_dotfile_dst: dst,
@@ -655,7 +653,7 @@ class CfgYaml:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
                     raise YamlException('config content error: {}'.format(err))
-                v[self.key_dotfile_chmod] = val
+                v[self.key_dotfile_chmod] = int(val, 8)
 
         return new
 
