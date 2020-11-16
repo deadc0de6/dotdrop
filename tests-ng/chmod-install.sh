@@ -242,7 +242,7 @@ echo "nomode" > ${tmps}/dotfiles/nomode
 chmod 600 ${tmps}/dotfiles/nomode
 echo "nomode" > ${tmpd}/nomode
 chmod 600 ${tmpd}/nomode
-cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -V f_nomode
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p2 -V f_nomode
 has_rights "${tmpd}/nomode" "600"
 
 ## no user confirmation with force
@@ -262,7 +262,7 @@ echo "nomode" > ${tmps}/dotfiles/nomode
 chmod 600 ${tmps}/dotfiles/nomode
 echo "nomode" > ${tmpd}/nomode
 chmod 700 ${tmpd}/nomode
-cd ${ddpath} | printf 'y\ny\n' | ${bin} install -c ${cfg} -p p2 -V f_nomode
+cd ${ddpath} | printf 'y\ny\n' | ${bin} install -f -c ${cfg} -p p2 -V f_nomode
 has_rights "${tmpd}/nomode" "600"
 
 ## CLEANING

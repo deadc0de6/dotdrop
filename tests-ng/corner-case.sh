@@ -56,6 +56,8 @@ basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
+export DOTDROP_WORKERS=1
+
 # create the config file
 cfg="${basedir}/config.yaml"
 cat > ${cfg} << _EOF

@@ -88,7 +88,7 @@ cat > ${tmps}/dotfiles/abc << _EOF
 _EOF
 
 # install
-cd ${ddpath} | ${bin} install -c ${cfg} -p p0 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -p p0 -V -f
 
 # test file content
 cat ${tmpd}/abc

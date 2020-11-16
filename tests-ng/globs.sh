@@ -98,7 +98,7 @@ mkdir -p ${tmps}/dotfiles/
 echo "abc" > ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
 
 # checks
 [ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1

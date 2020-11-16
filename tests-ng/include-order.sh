@@ -55,6 +55,7 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # temporary
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+export DOTDROP_WORKERS=1
 # create the config file
 cfg="${tmps}/config.yaml"
 

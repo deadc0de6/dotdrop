@@ -143,7 +143,7 @@ cd ${ddpath} | ${bin} files -c ${cfg1} -p pup -V | grep f_sub
 cd ${ddpath} | ${bin} files -c ${cfg1} -p psubsub -V | grep f_sub
 
 # test compare too
-cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V
+cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V -f
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
 
 # test with non-existing dotpath this time

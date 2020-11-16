@@ -82,7 +82,7 @@ echo "new data" > ${basedir}/dotfiles/${tmpd}/readmes/README.md
 # install
 rm -rf ${tmpd}
 echo "[+] install normal"
-cd ${ddpath} | ${bin} install --showdiff -c ${cfg} --verbose
+cd ${ddpath} | ${bin} install --showdiff -c ${cfg} --verbose -f
 [ "$?" != "0" ] && exit 1
 nb=`find ${tmpd} -iname 'README.md' | wc -l`
 echo "(1) found ${nb} README.md file(s)"
@@ -96,7 +96,7 @@ cat ${cfg2}
 # install
 rm -rf ${tmpd}
 echo "[+] install with ignore in dotfile"
-cd ${ddpath} | ${bin} install -c ${cfg2} --verbose
+cd ${ddpath} | ${bin} install -c ${cfg2} --verbose -f
 [ "$?" != "0" ] && exit 1
 nb=`find ${tmpd} -iname 'README.md' | wc -l`
 echo "(2) found ${nb} README.md file(s)"
@@ -110,7 +110,7 @@ cat ${cfg2}
 # install
 rm -rf ${tmpd}
 echo "[+] install with ignore in config"
-cd ${ddpath} | ${bin} install -c ${cfg2} --verbose
+cd ${ddpath} | ${bin} install -c ${cfg2} --verbose -f
 [ "$?" != "0" ] && exit 1
 nb=`find ${tmpd} -iname 'README.md' | wc -l`
 echo "(3) found ${nb} README.md file(s)"
@@ -118,7 +118,7 @@ echo "(3) found ${nb} README.md file(s)"
 
 ## reinstall to trigger showdiff
 echo "showdiff" > ${tmpd}/program/a
-cd ${ddpath} | echo "y" | ${bin} install --showdiff -c ${cfg} --verbose
+cd ${ddpath} | echo "y" | ${bin} install --showdiff -c ${cfg} --verbose -f
 [ "$?" != "0" ] && exit 1
 
 ## CLEANING
