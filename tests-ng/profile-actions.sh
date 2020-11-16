@@ -94,6 +94,9 @@ profiles:
 _EOF
 #cat ${cfg}
 
+# list profiles
+cd ${ddpath} | ${bin} profiles -c ${cfg} -V
+
 # create the dotfile
 echo "test" > ${tmps}/dotfiles/abc
 echo "test" > ${tmps}/dotfiles/def

@@ -687,7 +687,7 @@ class Installer:
         if content:
             tmp = utils.write_to_tmpfile(content)
             src = tmp
-        diff = utils.diff(modified=src, original=dst, raw=False,
+        diff = utils.diff(modified=src, original=dst,
                           diff_cmd=self.diff_cmd)
         if tmp:
             utils.removepath(tmp, logger=self.log)

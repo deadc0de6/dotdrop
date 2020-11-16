@@ -143,7 +143,7 @@ class Comparator:
 
     def _diff(self, left, right, header=False):
         """diff two files"""
-        out = diff(modified=left, original=right, raw=False,
+        out = diff(modified=left, original=right,
                    diff_cmd=self.diff_cmd, debug=self.debug)
         if header:
             lshort = os.path.basename(left)

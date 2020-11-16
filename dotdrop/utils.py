@@ -33,7 +33,7 @@ DONOTDELETE = [
 NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
 
 
-def run(cmd, raw=True, debug=False, checkerr=False):
+def run(cmd, debug=False):
     """run a command (expects a list)"""
     if debug:
         LOG.dbg('exec: {}'.format(' '.join(cmd)))
@@ -43,13 +43,6 @@ def run(cmd, raw=True, debug=False, checkerr=False):
     ret = p.returncode
     out = out.splitlines(keepends=True)
     lines = ''.join([x.decode('utf-8', 'replace') for x in out])
-    if checkerr and ret != 0:
-        c = ' '.join(cmd)
-        errl = lines.rstrip()
-        m = '\"{}\" returned non zero ({}): {}'.format(c, ret, errl)
-        LOG.err(m)
-    if raw:
-        return ret == 0, out
     return ret == 0, lines
 
 
@@ -79,7 +72,7 @@ def fastdiff(left, right):
     return not filecmp.cmp(left, right, shallow=False)
 
 
-def diff(original, modified, raw=True,
+def diff(original, modified,
          diff_cmd='', debug=False):
     """compare two files, returns '' if same"""
     if not diff_cmd:
@@ -92,7 +85,7 @@ def diff(original, modified, raw=True,
         "{modified}": modified,
     }
     cmd = [replacements.get(x, x) for x in diff_cmd.split()]
-    _, out = run(cmd, raw=raw, debug=debug)
+    _, out = run(cmd, debug=debug)
     return out
 
 

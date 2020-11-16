@@ -153,7 +153,7 @@ class Templategen:
                 self.log.dbg('using \"magic\" for filetype identification')
         except ImportError:
             _, filetype = utils.run(['file', '-b', '--mime-type', src],
-                                    raw=False, debug=self.debug)
+                                    debug=self.debug)
             if self.debug:
                 self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
