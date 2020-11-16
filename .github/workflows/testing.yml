@@ -26,7 +26,8 @@ jobs:
         npm install -g markdown-link-check
     - name: Run tests
       run: |
-        ./tests.sh
+        DOTDROP_WORKERS=1 ./tests.sh
+        DOTDROP_WORKERS=4 ./tests.sh
       env:
         DOTDROP_FORCE_NODEBUG: yes
         DOTDROP_NOBANNER: yes
