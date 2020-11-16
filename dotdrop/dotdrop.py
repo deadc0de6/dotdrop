@@ -71,6 +71,16 @@ def action_executor(o, actions, defactions, templater, post=False):
     return execute
 
 
+def _dotfile_update(o, path, key=False):
+    updater = Updater(o.dotpath, o.variables, o.conf,
+                      dry=o.dry, safe=o.safe, debug=o.debug,
+                      ignore=o.update_ignore,
+                      showpatch=o.update_showpatch)
+    if key:
+        return updater.update_key(path)
+    return updater.update_path(path)
+
+
 def _dotfile_install(o, dotfile, tmpdir=None):
     """
     install a dotfile
@@ -370,18 +380,19 @@ def cmd_compare(o, tmp):
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
-    ret = True
     cnt = 0
     paths = o.update_path
     iskey = o.update_iskey
-    ignore = o.update_ignore
-    showpatch = o.update_showpatch
 
     if not paths:
         # update the entire profile
         if iskey:
+            if o.debug:
+                LOG.dbg('update by keys: {}'.format(paths))
             paths = [d.key for d in o.dotfiles]
         else:
+            if o.debug:
+                LOG.dbg('update by paths: {}'.format(paths))
             paths = [d.dst for d in o.dotfiles]
         msg = 'Update all dotfiles for profile \"{}\"'.format(o.profile)
         if o.safe and not LOG.ask(msg):
@@ -391,37 +402,31 @@ def cmd_update(o):
     if not paths:
         LOG.log('\nno dotfile to update')
         return True
+
     if o.debug:
         LOG.dbg('dotfile to update: {}'.format(paths))
 
-    updater = Updater(o.dotpath, o.variables, o.conf,
-                      dry=o.dry, safe=o.safe, debug=o.debug,
-                      ignore=ignore, showpatch=showpatch)
-    cnt = 0
-    if not iskey:
-        # update paths
-        if o.debug:
-            LOG.dbg('update by paths: {}'.format(paths))
+    # update each dotfile
+    if o.update_parallel > 1:
+        # in parallel
+        ex = futures.ThreadPoolExecutor(max_workers=o.update_parallel)
+
+        wait_for = []
         for path in paths:
-            if not updater.update_path(path):
-                ret = False
-            else:
+            j = ex.submit(_dotfile_update, o, path, key=iskey)
+            wait_for.append(j)
+        # check result
+        for f in futures.as_completed(wait_for):
+            if f.result():
                 cnt += 1
     else:
-        # update keys
-        keys = paths
-        if not keys:
-            # if not provided, take all keys
-            keys = [d.key for d in o.dotfiles]
-        if o.debug:
-            LOG.dbg('update by keys: {}'.format(keys))
-        for key in keys:
-            if not updater.update_key(key):
-                ret = False
-            else:
+        # sequentially
+        for path in paths:
+            if _dotfile_update(o, path, key=iskey):
                 cnt += 1
+
     LOG.log('\n{} file(s) updated.'.format(cnt))
-    return ret
+    return cnt == len(paths)
 
 
 def cmd_importer(o):

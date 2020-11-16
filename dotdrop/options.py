@@ -60,7 +60,7 @@ Usage:
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
                                 [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
-                                [-i <pattern>...] [<path>...]
+                                [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
   dotdrop files     [-VbTG]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
@@ -277,6 +277,15 @@ class Options(AttrMonitor):
         self.update_ignore.append('*{}'.format(self.install_backup_suffix))
         self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
+        try:
+            if ENV_WORKERS in os.environ:
+                workers = int(os.environ[ENV_WORKERS])
+            else:
+                workers = int(self.args['--workers'])
+            self.update_parallel = workers
+        except ValueError:
+            self.log.err('bad option for --workers')
+            sys.exit(USAGE)
 
         # "detail" specifics
         self.detail_keys = self.args['<key>']
