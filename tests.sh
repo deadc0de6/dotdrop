@@ -32,6 +32,12 @@ export DOTDROP_FORCE_NODEBUG=yes
 # coverage file location
 cur=`dirname $(readlink -f "${0}")`
 
+workers=${DOTDROP_WORKERS}
+if [ ! -z ${workers} ]; then
+  unset DOTDROP_WORKERS
+  echo "DISABLE workers"
+fi
+
 # execute tests with coverage
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
@@ -50,6 +56,11 @@ unset DOTDROP_FORCE_NODEBUG
 # do not print debugs when running tests (faster)
 #export DOTDROP_FORCE_NODEBUG=yes
 export DOTDROP_WORKDIR=/tmp/dotdrop-tests-workdir
+
+if [ ! -z ${workers} ]; then
+  DOTDROP_WORKERS=${workers}
+  echo "ENABLE workers: ${workers}"
+fi
 
 # run bash tests
 if [ -z ${GITHUB_WORKFLOW} ]; then
