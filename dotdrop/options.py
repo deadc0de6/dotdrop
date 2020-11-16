@@ -16,7 +16,7 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.action import Action
-from dotdrop.utils import uniq_list, get_umask
+from dotdrop.utils import uniq_list
 from dotdrop.exceptions import YamlException
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
@@ -123,7 +123,6 @@ class Options(AttrMonitor):
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
-        self.umask = get_umask()
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False

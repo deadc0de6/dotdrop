@@ -9,7 +9,6 @@ import os
 import sys
 import time
 from concurrent import futures
-import shutil
 
 # local imports
 from dotdrop.options import Options
@@ -18,9 +17,9 @@ from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
-from dotdrop.utils import get_tmpdir, removepath, strip_home, \
-    uniq_list, patch_ignores, dependencies_met, get_file_perm, \
-    get_default_file_perms
+from dotdrop.importer import Importer
+from dotdrop.utils import get_tmpdir, removepath, \
+    uniq_list, patch_ignores, dependencies_met
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
 
@@ -430,135 +429,26 @@ def cmd_importer(o):
     ret = True
     cnt = 0
     paths = o.import_path
+    importer = Importer(o.profile, o.conf, o.dotpath, o.diff_command,
+                        dry=o.dry, safe=o.safe, debug=o.debug,
+                        keepdot=o.keepdot)
+
     for path in paths:
-        if o.debug:
-            LOG.dbg('trying to import {}'.format(path))
-        if not os.path.exists(path):
-            LOG.err('\"{}\" does not exist, ignored!'.format(path))
+        r = importer.import_path(path, import_as=o.import_as,
+                                 import_link=o.import_link,
+                                 import_mode=o.import_mode)
+        if r < 0:
             ret = False
-            continue
-        dst = path.rstrip(os.sep)
-        dst = os.path.abspath(dst)
-
-        if o.safe:
-            # ask for symlinks
-            realdst = os.path.realpath(dst)
-            if dst != realdst:
-                msg = '\"{}\" is a symlink, dereference it and continue?'
-                if not LOG.ask(msg.format(dst)):
-                    continue
-
-        src = strip_home(dst)
-        if o.import_as:
-            # handle import as
-            src = os.path.expanduser(o.import_as)
-            src = src.rstrip(os.sep)
-            src = os.path.abspath(src)
-            src = strip_home(src)
-            if o.debug:
-                LOG.dbg('import src for {} as {}'.format(dst, src))
-
-        strip = '.' + os.sep
-        if o.keepdot:
-            strip = os.sep
-        src = src.lstrip(strip)
-
-        # get the permission
-        perm = get_file_perm(dst)
-
-        # set the link attribute
-        linktype = o.import_link
-        if linktype == LinkTypes.LINK_CHILDREN and \
-                not os.path.isdir(path):
-            LOG.err('importing \"{}\" failed!'.format(path))
-            ret = False
-            continue
-
-        if o.debug:
-            LOG.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
-
-        # test no other dotfile exists with same
-        # dst for this profile but different src
-        dfs = o.conf.get_dotfile_by_dst(dst)
-        if dfs:
-            invalid = False
-            for df in dfs:
-                profiles = o.conf.get_profiles_by_dotfile_key(df.key)
-                profiles = [x.key for x in profiles]
-                if o.profile in profiles and \
-                        not o.conf.get_dotfile_by_src_dst(src, dst):
-                    # same profile
-                    # different src
-                    LOG.err('duplicate dotfile for this profile')
-                    ret = False
-                    invalid = True
-                    break
-            if invalid:
-                continue
-
-        # prepare hierarchy for dotfile
-        srcf = os.path.join(o.dotpath, src)
-        overwrite = not os.path.exists(srcf)
-        if os.path.exists(srcf):
-            overwrite = True
-            if o.safe:
-                c = Comparator(debug=o.debug, diff_cmd=o.diff_command)
-                diff = c.compare(srcf, dst)
-                if diff != '':
-                    # files are different, dunno what to do
-                    LOG.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
-                    LOG.emph(diff)
-                    # ask user
-                    msg = 'Dotfile \"{}\" already exists, overwrite?'
-                    overwrite = LOG.ask(msg.format(srcf))
-
-        if o.debug:
-            LOG.dbg('will overwrite: {}'.format(overwrite))
-        if overwrite:
-            cmd = 'mkdir -p {}'.format(os.path.dirname(srcf))
-            if o.dry:
-                LOG.dry('would run: {}'.format(cmd))
-            else:
-                try:
-                    os.makedirs(os.path.dirname(srcf), exist_ok=True)
-                except Exception:
-                    LOG.err('importing \"{}\" failed!'.format(path))
-                    ret = False
-                    continue
-
-            if o.dry:
-                LOG.dry('would copy {} to {}'.format(dst, srcf))
-            else:
-                # copy the file to the dotpath
-                if os.path.isdir(dst):
-                    if os.path.exists(srcf):
-                        shutil.rmtree(srcf)
-                    shutil.copytree(dst, srcf)
-                else:
-                    shutil.copy2(dst, srcf)
-
-        chmod = None
-        dflperm = get_default_file_perms(dst, o.umask)
-
-        if o.debug:
-            LOG.dbg('import mode: {}'.format(o.import_mode))
-        if o.import_mode or perm != dflperm:
-            if o.debug:
-                LOG.dbg('adopt mode {:o} (umask {:o})'.format(perm, dflperm))
-            # insert chmod
-            chmod = perm
-        retconf = o.conf.new_dotfile(src, dst, linktype, chmod=chmod)
-        if retconf:
-            LOG.sub('\"{}\" imported'.format(path))
+        elif r > 0:
             cnt += 1
-        else:
-            LOG.warn('\"{}\" ignored'.format(path))
+
     if o.dry:
         LOG.dry('new config file would be:')
         LOG.raw(o.conf.dump())
     else:
         o.conf.save()
     LOG.log('\n{} file(s) imported.'.format(cnt))
+
     return ret
 
 
