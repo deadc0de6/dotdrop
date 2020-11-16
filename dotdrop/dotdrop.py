@@ -299,6 +299,8 @@ def cmd_install(o):
     # install each dotfile
     if o.workers > 1:
         # in parallel
+        if o.debug:
+            LOG.dbg('run with {} workers'.format(o.workers))
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
 
         wait_for = []
@@ -378,6 +380,9 @@ def cmd_compare(o, tmp):
     cnt = 0
     if o.workers > 1:
         # in parallel
+        if o.debug:
+            LOG.dbg('run with {} workers'.format(o.workers))
+
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for dotfile in selected:
@@ -441,8 +446,10 @@ def cmd_update(o):
     # update each dotfile
     if o.workers > 1:
         # in parallel
-        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
+        if o.debug:
+            LOG.dbg('run with {} workers'.format(o.workers))
 
+        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for path in paths:
             j = ex.submit(_dotfile_update, o, path, key=iskey)
