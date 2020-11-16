@@ -584,15 +584,17 @@ def cmd_list_files(o):
             if not Templategen.is_template(src):
                 continue
         if o.files_grepable:
-            fmt = '{},dst:{},src:{},link:{}'
+            fmt = '{},dst:{},src:{},link:{},chmod:{}'
             fmt = fmt.format(dotfile.key, dotfile.dst,
-                             dotfile.src, dotfile.link.name.lower())
+                             dotfile.src, dotfile.link.name.lower(),
+                             dotfile.chmod)
             LOG.raw(fmt)
         else:
             LOG.log('{}'.format(dotfile.key), bold=True)
             LOG.sub('dst: {}'.format(dotfile.dst))
             LOG.sub('src: {}'.format(dotfile.src))
             LOG.sub('link: {}'.format(dotfile.link.name.lower()))
+            LOG.sub('chmod: {}'.format(dotfile.chmod))
     LOG.log('')
 
 
@@ -730,8 +732,7 @@ def _detail(dotpath, dotfile):
     attribs = []
     attribs.append('dst: \"{}\"'.format(dotfile.dst))
     attribs.append('link: \"{}\"'.format(dotfile.link.name.lower()))
-    if dotfile.chmod:
-        attribs.append('chmod: \"{}\"'.format(dotfile.chmod))
+    attribs.append('chmod: \"{}\"'.format(dotfile.chmod))
     LOG.log('{} ({})'.format(entry, ', '.join(attribs)))
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
