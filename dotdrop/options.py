@@ -25,6 +25,7 @@ ENV_NOBANNER = 'DOTDROP_NOBANNER'
 ENV_DEBUG = 'DOTDROP_DEBUG'
 ENV_NODEBUG = 'DOTDROP_FORCE_NODEBUG'
 ENV_XDG = 'XDG_CONFIG_HOME'
+ENV_WORKERS = 'DOTDROP_WORKERS'
 BACKUP_SUFFIX = '.dotdropbak'
 
 PROFILE = socket.gethostname()
@@ -247,7 +248,11 @@ class Options(AttrMonitor):
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
         try:
-            self.install_parallel = int(self.args['--workers'])
+            if ENV_WORKERS in os.environ:
+                workers = int(os.environ[ENV_WORKERS])
+            else:
+                workers = int(self.args['--workers'])
+            self.install_parallel = workers
         except ValueError:
             self.log.err('bad option for --workers')
             sys.exit(USAGE)

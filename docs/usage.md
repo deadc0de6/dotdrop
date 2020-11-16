@@ -259,3 +259,7 @@ export DOTDROP_TMPDIR="/tmp/dotdrop-tmp"
 ```bash
 export DOTDROP_WORKDIR="/tmp/dotdrop-workdir"
 ```
+* `DOTDROP_WORKERS`: overwrite the `-w --workers` cli argument
+```bash
+export DOTDROP_WORKERS="10"
+```
