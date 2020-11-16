@@ -256,9 +256,6 @@ class Options(AttrMonitor):
         except ValueError:
             self.log.err('bad option for --workers')
             sys.exit(USAGE)
-        if self.safe and self.install_parallel > 1:
-            self.log.err('\"-w --workers\" must be used with \"-f --force\"')
-            sys.exit(USAGE)
 
         # "compare" specifics
         self.compare_focus = self.args['--file']

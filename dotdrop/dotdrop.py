@@ -165,6 +165,12 @@ def cmd_install(o):
     """install dotfiles for this profile"""
     dotfiles = o.dotfiles
     prof = o.conf.get_profile()
+
+    # ensure parallel install is unattended
+    if o.install_parallel > 1 and o.safe:
+        LOG.err('\"-w --workers\" must be used with \"-f --force\"')
+        return False
+
     pro_pre_actions = prof.get_pre_actions() if prof else []
     pro_post_actions = prof.get_post_actions() if prof else []
 
