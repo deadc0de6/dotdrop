@@ -58,7 +58,7 @@ Usage:
   dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] <path>...
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
-                                [-C <file>...] [-i <pattern>...]
+                                [-w <nb>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
                                 [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
@@ -217,6 +217,16 @@ class Options(AttrMonitor):
         # adapt attributes based on arguments
         self.safe = not self.args['--force']
 
+        try:
+            if ENV_WORKERS in os.environ:
+                workers = int(os.environ[ENV_WORKERS])
+            else:
+                workers = int(self.args['--workers'])
+            self.workers = workers
+        except ValueError:
+            self.log.err('bad option for --workers')
+            sys.exit(USAGE)
+
         # import link default value
         self.import_link = self.link_on_import
         if self.args['--link']:
@@ -246,15 +256,6 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
-        try:
-            if ENV_WORKERS in os.environ:
-                workers = int(os.environ[ENV_WORKERS])
-            else:
-                workers = int(self.args['--workers'])
-            self.install_parallel = workers
-        except ValueError:
-            self.log.err('bad option for --workers')
-            sys.exit(USAGE)
 
         # "compare" specifics
         self.compare_focus = self.args['--file']
@@ -277,15 +278,6 @@ class Options(AttrMonitor):
         self.update_ignore.append('*{}'.format(self.install_backup_suffix))
         self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
-        try:
-            if ENV_WORKERS in os.environ:
-                workers = int(os.environ[ENV_WORKERS])
-            else:
-                workers = int(self.args['--workers'])
-            self.update_parallel = workers
-        except ValueError:
-            self.log.err('bad option for --workers')
-            sys.exit(USAGE)
 
         # "detail" specifics
         self.detail_keys = self.args['<key>']

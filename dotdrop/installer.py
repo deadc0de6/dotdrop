@@ -715,7 +715,7 @@ class Installer:
         if self.debug:
             self.log.dbg('mkdir -p {}'.format(directory))
 
-        os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
         return os.path.exists(directory)
 
     def _backup(self, path):

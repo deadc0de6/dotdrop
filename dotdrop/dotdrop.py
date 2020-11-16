@@ -72,6 +72,10 @@ def action_executor(o, actions, defactions, templater, post=False):
 
 
 def _dotfile_update(o, path, key=False):
+    """
+    update a dotfile pointed by path
+    if key is false or by key (in path)
+    """
     updater = Updater(o.dotpath, o.variables, o.conf,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=o.update_ignore,
@@ -79,6 +83,91 @@ def _dotfile_update(o, path, key=False):
     if key:
         return updater.update_key(path)
     return updater.update_path(path)
+
+
+def _dotfile_compare(o, dotfile, tmp):
+    """
+    compare a dotfile
+    returns True if same
+    """
+    t = _get_templater(o)
+    inst = Installer(create=o.create, backup=o.backup,
+                     dry=o.dry, base=o.dotpath,
+                     workdir=o.workdir, debug=o.debug,
+                     backup_suffix=o.install_backup_suffix,
+                     diff_cmd=o.diff_command)
+    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
+
+    # add dotfile variables
+    newvars = dotfile.get_dotfile_variables()
+    t.add_tmp_vars(newvars=newvars)
+
+    # dotfiles does not exist / not installed
+    if o.debug:
+        LOG.dbg('comparing {}'.format(dotfile))
+
+    src = dotfile.src
+    if not os.path.lexists(os.path.expanduser(dotfile.dst)):
+        line = '=> compare {}: \"{}\" does not exist on destination'
+        LOG.log(line.format(dotfile.key, dotfile.dst))
+        return False
+
+    # apply transformation
+    tmpsrc = None
+    if dotfile.trans_r:
+        if o.debug:
+            LOG.dbg('applying transformation before comparing')
+        tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
+        if not tmpsrc:
+            # could not apply trans
+            return False
+        src = tmpsrc
+
+    # is a symlink pointing to itself
+    asrc = os.path.join(o.dotpath, os.path.expanduser(src))
+    adst = os.path.expanduser(dotfile.dst)
+    if os.path.samefile(asrc, adst):
+        if o.debug:
+            line = '=> compare {}: diffing with \"{}\"'
+            LOG.dbg(line.format(dotfile.key, dotfile.dst))
+            LOG.dbg('points to itself')
+        return True
+
+    # install dotfile to temporary dir and compare
+    ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
+                                             template=dotfile.template,
+                                             chmod=dotfile.chmod)
+    if not ret:
+        # failed to install to tmp
+        line = '=> compare {}: error'
+        LOG.log(line.format(dotfile.key, err))
+        LOG.err(err)
+        return False
+    ignores = list(set(o.compare_ignore + dotfile.cmpignore))
+    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+    diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
+
+    # clean tmp transformed dotfile if any
+    if tmpsrc:
+        tmpsrc = os.path.join(o.dotpath, tmpsrc)
+        if os.path.exists(tmpsrc):
+            removepath(tmpsrc, LOG)
+
+    if diff != '':
+        # print diff results
+        line = '=> compare {}: diffing with \"{}\"'
+        LOG.log(line.format(dotfile.key, dotfile.dst))
+        if o.compare_fileonly:
+            LOG.raw('<files are different>')
+        else:
+            LOG.emph(diff)
+        return False
+    # no difference
+    if o.debug:
+        line = '=> compare {}: diffing with \"{}\"'
+        LOG.dbg(line.format(dotfile.key, dotfile.dst))
+        LOG.dbg('same file')
+    return True
 
 
 def _dotfile_install(o, dotfile, tmpdir=None):
@@ -175,8 +264,8 @@ def cmd_install(o):
     dotfiles = o.dotfiles
     prof = o.conf.get_profile()
 
-    # ensure parallel install is unattended
-    if o.install_parallel > 1 and o.safe:
+    # ensure parallel is unattended
+    if o.workers > 1 and o.safe:
         LOG.err('\"-w --workers\" must be used with \"-f --force\"')
         return False
 
@@ -208,9 +297,9 @@ def cmd_install(o):
         return False
 
     # install each dotfile
-    if o.install_parallel > 1:
+    if o.workers > 1:
         # in parallel
-        ex = futures.ThreadPoolExecutor(max_workers=o.install_parallel)
+        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
 
         wait_for = []
         for dotfile in dotfiles:
@@ -269,14 +358,14 @@ def cmd_install(o):
 
 def cmd_compare(o, tmp):
     """compare dotfiles and return True if all identical"""
-    cnt = 0
+    # ensure parallel is unattended
     dotfiles = o.dotfiles
     if not dotfiles:
         msg = 'no dotfile defined for this profile (\"{}\")'
         LOG.warn(msg.format(o.profile))
         return True
+
     # compare only specific files
-    same = True
     selected = dotfiles
     if o.compare_focus:
         selected = _select(o.compare_focus, dotfiles)
@@ -285,94 +374,32 @@ def cmd_compare(o, tmp):
         LOG.log('\nno dotfile to compare')
         return False
 
-    t = _get_templater(o)
-    tvars = t.add_tmp_vars()
-    inst = Installer(create=o.create, backup=o.backup,
-                     dry=o.dry, base=o.dotpath,
-                     workdir=o.workdir, debug=o.debug,
-                     backup_suffix=o.install_backup_suffix,
-                     diff_cmd=o.diff_command)
-    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
-
-    for dotfile in selected:
-        if not dotfile.src and not dotfile.dst:
-            # ignore fake dotfile
-            continue
-        cnt += 1
-
-        # add dotfile variables
-        t.restore_vars(tvars)
-        newvars = dotfile.get_dotfile_variables()
-        t.add_tmp_vars(newvars=newvars)
-
-        # dotfiles does not exist / not installed
-        if o.debug:
-            LOG.dbg('comparing {}'.format(dotfile))
-        src = dotfile.src
-        if not os.path.lexists(os.path.expanduser(dotfile.dst)):
-            line = '=> compare {}: \"{}\" does not exist on destination'
-            LOG.log(line.format(dotfile.key, dotfile.dst))
-            same = False
-            continue
-
-        # apply transformation
-        tmpsrc = None
-        if dotfile.trans_r:
-            if o.debug:
-                LOG.dbg('applying transformation before comparing')
-            tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
-            if not tmpsrc:
-                # could not apply trans
-                same = False
+    same = True
+    cnt = 0
+    if o.workers > 1:
+        # in parallel
+        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
+        wait_for = []
+        for dotfile in selected:
+            j = ex.submit(_dotfile_compare, o, dotfile, tmp)
+            wait_for.append(j)
+        # check result
+        for f in futures.as_completed(wait_for):
+            if not dotfile.src and not dotfile.dst:
+                # ignore fake dotfile
                 continue
-            src = tmpsrc
-
-        # is a symlink pointing to itself
-        asrc = os.path.join(o.dotpath, os.path.expanduser(src))
-        adst = os.path.expanduser(dotfile.dst)
-        if os.path.samefile(asrc, adst):
-            if o.debug:
-                line = '=> compare {}: diffing with \"{}\"'
-                LOG.dbg(line.format(dotfile.key, dotfile.dst))
-                LOG.dbg('points to itself')
-            continue
-
-        # install dotfile to temporary dir and compare
-        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
-                                                 template=dotfile.template,
-                                                 chmod=dotfile.chmod)
-        if not ret:
-            # failed to install to tmp
-            line = '=> compare {}: error'
-            LOG.log(line.format(dotfile.key, err))
-            LOG.err(err)
-            same = False
-            continue
-        ignores = list(set(o.compare_ignore + dotfile.cmpignore))
-        ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
-        diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
-
-        # clean tmp transformed dotfile if any
-        if tmpsrc:
-            tmpsrc = os.path.join(o.dotpath, tmpsrc)
-            if os.path.exists(tmpsrc):
-                removepath(tmpsrc, LOG)
-
-        if diff == '':
-            # no difference
-            if o.debug:
-                line = '=> compare {}: diffing with \"{}\"'
-                LOG.dbg(line.format(dotfile.key, dotfile.dst))
-                LOG.dbg('same file')
-        else:
-            # print diff results
-            line = '=> compare {}: diffing with \"{}\"'
-            LOG.log(line.format(dotfile.key, dotfile.dst))
-            if o.compare_fileonly:
-                LOG.raw('<files are different>')
-            else:
-                LOG.emph(diff)
-            same = False
+            if not f.result():
+                same = False
+            cnt += 1
+    else:
+        # sequentially
+        for dotfile in selected:
+            if not dotfile.src and not dotfile.dst:
+                # ignore fake dotfile
+                continue
+            if not _dotfile_compare(o, dotfile, tmp):
+                same = False
+            cnt += 1
 
     LOG.log('\n{} dotfile(s) compared.'.format(cnt))
     return same
@@ -380,6 +407,11 @@ def cmd_compare(o, tmp):
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
+    # ensure parallel is unattended
+    if o.workers > 1 and o.safe:
+        LOG.err('\"-w --workers\" must be used with \"-f --force\"')
+        return False
+
     cnt = 0
     paths = o.update_path
     iskey = o.update_iskey
@@ -407,9 +439,9 @@ def cmd_update(o):
         LOG.dbg('dotfile to update: {}'.format(paths))
 
     # update each dotfile
-    if o.update_parallel > 1:
+    if o.workers > 1:
         # in parallel
-        ex = futures.ThreadPoolExecutor(max_workers=o.update_parallel)
+        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
 
         wait_for = []
         for path in paths:

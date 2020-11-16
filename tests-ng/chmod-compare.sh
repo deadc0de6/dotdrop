@@ -111,7 +111,7 @@ chmod 700 ${flink}
 set +e
 cnt=`cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 2>&1 | grep 'modes differ' | wc -l`
 set -e
-[ "${cnt}" != "5" ] && echo "compare modes failed" && exit 1
+[ "${cnt}" != "5" ] && echo "compare modes failed (${cnt})" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
