@@ -75,18 +75,18 @@ else
   remark -f -u validate-links *.md
 fi
 
-## test the doc with markdown-link-check
-## https://github.com/tcort/markdown-link-check
-set +e
-which markdown-link-check >/dev/null 2>&1
-r="$?"
-set -e
-if [ "$r" != "0" ]; then
-  echo "[WARNING] install \"markdown-link-check\" to test the doc"
-else
-  for i in `find docs -iname '*.md'`; do markdown-link-check $i; done
-  markdown-link-check README.md
-fi
+### test the doc with markdown-link-check
+### https://github.com/tcort/markdown-link-check
+#set +e
+#which markdown-link-check >/dev/null 2>&1
+#r="$?"
+#set -e
+#if [ "$r" != "0" ]; then
+#  echo "[WARNING] install \"markdown-link-check\" to test the doc"
+#else
+#  for i in `find docs -iname '*.md'`; do markdown-link-check $i; done
+#  markdown-link-check README.md
+#fi
 
 ## done
 echo "All test finished successfully in ${SECONDS}s"
