@@ -330,3 +330,4 @@ def chmod(path, mode, debug=False):
     if debug:
         LOG.dbg('chmod {} {}'.format(oct(mode), path))
     os.chmod(path, mode)
+    return get_file_perm(path) == mode

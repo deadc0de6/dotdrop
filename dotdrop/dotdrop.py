@@ -198,17 +198,19 @@ def _dotfile_install(o, dotfile, tmpdir=None):
 
     if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
         # link
-        r, err = inst.link(t, dotfile.src, dotfile.dst,
-                           actionexec=pre_actions_exec,
-                           template=dotfile.template,
-                           chmod=dotfile.chmod)
+        r, err = inst.install(t, dotfile.src, dotfile.dst,
+                              dotfile.link,
+                              actionexec=pre_actions_exec,
+                              template=dotfile.template,
+                              chmod=dotfile.chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
         # link_children
-        r, err = inst.link_children(t, dotfile.src, dotfile.dst,
-                                    actionexec=pre_actions_exec,
-                                    template=dotfile.template,
-                                    chmod=dotfile.chmod)
+        r, err = inst.install(t, dotfile.src, dotfile.dst,
+                              dotfile.link,
+                              actionexec=pre_actions_exec,
+                              template=dotfile.template,
+                              chmod=dotfile.chmod)
     else:
         # nolink
         src = dotfile.src
@@ -221,6 +223,7 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         ignores = list(set(o.install_ignore + dotfile.instignore))
         ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
         r, err = inst.install(t, src, dotfile.dst,
+                              LinkTypes.NOLINK,
                               actionexec=pre_actions_exec,
                               noempty=dotfile.noempty,
                               ignore=ignores,

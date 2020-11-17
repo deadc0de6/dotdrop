@@ -115,7 +115,8 @@ class Dotfile(DictParser):
         msg += ', dst:\"{}\"'.format(self.dst)
         msg += ', link:\"{}\"'.format(str(self.link))
         msg += ', template:{}'.format(self.template)
-        msg += ', chmod:{}'.format(self.chmod)
+        if self.chmod:
+            msg += ', chmod:{:o}'.format(self.chmod)
         return msg
 
     def prt(self):
@@ -126,7 +127,8 @@ class Dotfile(DictParser):
         out += '\n{}dst: \"{}\"'.format(indent, self.dst)
         out += '\n{}link: \"{}\"'.format(indent, str(self.link))
         out += '\n{}template: \"{}\"'.format(indent, str(self.template))
-        out += '\n{}chmod: \"{}\"'.format(indent, str(self.chmod))
+        if self.chmod:
+            out += '\n{}chmod: \"{:o}\"'.format(indent, self.chmod)
 
         out += '\n{}pre-action:'.format(indent)
         some = self.get_pre_actions()

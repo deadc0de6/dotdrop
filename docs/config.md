@@ -77,8 +77,6 @@ On `import` the following rules are applied:
 On `install` the following rules are applied:
 
 * if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
-* if no `chmod` is specified and the file exists on the filesystem with different permissions than the file in the `dotpath`
-  then the user needs to confirm the dotfile installation (unless `-f --force` is used)
 
 On `update`:
 

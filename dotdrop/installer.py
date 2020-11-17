@@ -11,6 +11,7 @@ import shutil
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.linktypes import LinkTypes
 from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
 from dotdrop.exceptions import UndefinedException
@@ -63,16 +64,17 @@ class Installer:
     # public methods
     ########################################################
 
-    def install(self, templater, src, dst,
+    def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=[], template=True,
                 chmod=None):
         """
-        install src to dst using a templater
+        install src to dst
 
         @templater: the templater object
         @src: dotfile source path in dotpath
         @dst: dotfile destination path in the FS
+        @linktype: linktypes.LinkTypes
         @actionexec: action executor callback
         @noempty: render empty template flag
         @ignore: pattern to ignore when installing
@@ -85,77 +87,79 @@ class Installer:
         - False, None       : ignored
         """
         if self.debug:
-            self.log.dbg('installing \"{}\" to \"{}\"'.format(src, dst))
+            msg = 'installing \"{}\" to \"{}\" (link: {})'
+            self.log.dbg(msg.format(src, dst, str(linktype)))
         src, dst, cont, err = self._check_paths(src, dst, chmod)
         if not cont:
             return self._log_install(cont, err)
 
-        r, err = self._install(templater, src, dst,
-                               actionexec=actionexec,
-                               noempty=noempty,
-                               ignore=ignore,
-                               template=template,
-                               chmod=chmod)
+        # check source file exists
+        src = os.path.join(self.base, src)
+        if not os.path.exists(src):
+            err = 'source dotfile does not exist: {}'.format(src)
+            return self._log_install(False, err)
 
-        return self._log_install(r, err)
+        self.action_executed = False
 
-    def link(self, templater, src, dst, actionexec=None,
-             template=True, chmod=None):
-        """
-        set src as the link target of dst
+        # install to temporary dir
+        # and ignore any actions
+        if self.totemp:
+            r, err, _ = self.install_to_temp(templater, self.totemp,
+                                             src, dst, template=template,
+                                             chmod=chmod)
+            return self._log_install(r, err)
 
-        @templater: the templater
-        @src: dotfile source path in dotpath
-        @dst: dotfile destination path in the FS
-        @actionexec: action executor callback
-        @template: template this dotfile
-        @chmod: rights to apply if any
-
-        return
-        - True, None        : success
-        - False, error_msg  : error
-        - False, None       : ignored
-        """
+        isdir = os.path.isdir(src)
         if self.debug:
-            self.log.dbg('link \"{}\" to \"{}\"'.format(src, dst))
-        src, dst, cont, err = self._check_paths(src, dst, chmod)
-        if not cont:
-            return self._log_install(cont, err)
+            self.log.dbg('install {} to {}'.format(src, dst))
+            self.log.dbg('\"{}\" is a directory: {}'.format(src, isdir))
 
-        r, err = self._link(templater, src, dst,
-                            actionexec=actionexec,
-                            template=template)
+        # TODO remove template and set templater
+        # to None when no template should occur
+        if linktype == LinkTypes.NOLINK:
+            # normal file
+            if isdir:
+                r, err = self._copy_dir(templater, src, dst,
+                                        actionexec=actionexec,
+                                        noempty=noempty, ignore=ignore,
+                                        template=template,
+                                        chmod=chmod)
+            else:
+                r, err = self._copy_file(templater, src, dst,
+                                         actionexec=actionexec,
+                                         noempty=noempty, ignore=ignore,
+                                         template=template,
+                                         chmod=chmod)
+        elif linktype == LinkTypes.LINK:
+            # symlink
+            r, err = self._link(templater, src, dst,
+                                actionexec=actionexec,
+                                template=template)
+        elif linktype == LinkTypes.LINK_CHILDREN:
+            # symlink direct children
+            if not isdir:
+                if self.debug:
+                    msg = 'symlink children of {} to {}'
+                    self.log.dbg(msg.format(src, dst))
+                err = 'source dotfile is not a directory: {}'.format(src)
+                r = False
+            else:
+                r, err = self._link_children(templater, src, dst,
+                                             actionexec=actionexec,
+                                             template=template)
+
+        # handle chmod
         if chmod and not self.dry:
-            # apply mode
-            utils.chmod(dst, chmod, self.debug)
-        return self._log_install(r, err)
+            dstperms = utils.get_file_perm(dst)
+            if dstperms != chmod:
+                # apply mode
+                self.log.sub('chmod {} to {:o}'.format(dst, chmod))
+                if utils.chmod(dst, chmod, debug=self.debug):
+                    r = True
+                else:
+                    r = False
+                    err = 'chmod failed'
 
-    def link_children(self, templater, src, dst, actionexec=None,
-                      template=True, chmod=None):
-        """
-        link all files under a given directory
-
-        @templater: the templater
-        @src: dotfile source path in dotpath
-        @dst: dotfile destination path in the FS
-        @actionexec: action executor callback
-        @template: template this dotfile
-        @chmod: file mode to apply
-
-        return
-        - True, None: success
-        - False, error_msg: error
-        - False, None, ignored
-        """
-        if self.debug:
-            self.log.dbg('link_children \"{}\" to \"{}\"'.format(src, dst))
-        src, dst, cont, err = self._check_paths(src, dst, chmod)
-        if not cont:
-            return self._log_install(cont, err)
-
-        r, err = self._link_children(templater, src, dst,
-                                     actionexec=actionexec,
-                                     template=template, chmod=chmod)
         return self._log_install(r, err)
 
     def install_to_temp(self, templater, tmpdir, src, dst,
@@ -190,10 +194,13 @@ class Installer:
         self.diff = False
         createsaved = self.create
         self.create = True
+        totemp = self.totemp
+        self.totemp = None
 
         # install the dotfile to a temp directory
         tmpdst = self._pivot_path(dst, tmpdir)
         ret, err = self.install(templater, src, tmpdst,
+                                LinkTypes.NOLINK,
                                 template=template, chmod=chmod)
         if self.debug:
             if ret:
@@ -204,101 +211,35 @@ class Installer:
         self.diff = diffsaved
         self.create = createsaved
         self.comparing = False
+        self.totemp = totemp
+
         return ret, err, tmpdst
 
     ########################################################
     # low level accessors for public methods
     ########################################################
 
-    def _install(self, templater, src, dst,
-                 actionexec=None, noempty=False,
-                 ignore=[], template=True,
-                 chmod=None):
-        """install link:nolink"""
-        self.action_executed = False
-
-        # check source file exists
-        src = os.path.join(self.base, src)
-        if not os.path.exists(src):
-            err = 'source dotfile does not exist: {}'.format(src)
-            return False, err
-
-        # check dst is valid
-        if self.totemp:
-            dst = self._pivot_path(dst, self.totemp)
-        if utils.samefile(src, dst):
-            # symlink loop
-            err = 'dotfile points to itself: {}'.format(dst)
-            return False, err
-
-        isdir = os.path.isdir(src)
-        if self.debug:
-            self.log.dbg('install {} to {}'.format(src, dst))
-            self.log.dbg('\"{}\" is a directory: {}'.format(src, isdir))
-        if isdir:
-            b, e = self._copy_dir(templater, src, dst,
-                                  actionexec=actionexec,
-                                  noempty=noempty, ignore=ignore,
-                                  template=template,
-                                  chmod=chmod)
-            return b, e
-        b, e = self._copy_file(templater, src, dst,
-                               actionexec=actionexec,
-                               noempty=noempty, ignore=ignore,
-                               template=template,
-                               chmod=chmod)
-        return b, e
-
-    def _link(self, templater, src, dst, actionexec=None,
-              template=True):
+    def _link(self, templater, src, dst, actionexec=None, template=True):
         """install link:link"""
-        self.action_executed = False
-        src = os.path.join(self.base, src)
-        if not os.path.exists(src):
-            err = 'source dotfile does not exist: {}'.format(src)
-            return False, err
-        if self.totemp:
-            # ignore actions
-            b, e = self.install(templater, src, dst, actionexec=None,
-                                template=template)
-            return b, e
-
         if template and Templategen.is_template(src):
             if self.debug:
-                self.log.dbg('dotfile is a template')
-                self.log.dbg('install to {} and symlink'.format(self.workdir))
+                self.log.dbg('is a template')
+                self.log.dbg('install to {}'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
-            i, err = self.install(templater, src, tmp, actionexec=actionexec,
+            r, err = self.install(templater, src, tmp,
+                                  LinkTypes.NOLINK,
+                                  actionexec=actionexec,
                                   template=template)
-            if not i and not os.path.exists(tmp):
-                return i, err
+            if not r and not os.path.exists(tmp):
+                return r, err
             src = tmp
-        b, e = self._symlink(src, dst, actionexec=actionexec)
-        return b, e
+        r, err = self._symlink(src, dst, actionexec=actionexec)
+        return r, err
 
-    def _link_children(self, templater, src, dst, actionexec=None,
-                       template=True, chmod=None):
+    def _link_children(self, templater, src, dst,
+                       actionexec=None, template=True):
         """install link:link_children"""
-        if not dst or not src:
-            if self.debug:
-                self.log.dbg('empty dst for {}'.format(src))
-            return True, None
-        self.action_executed = False
         parent = os.path.join(self.base, src)
-
-        # Fail if source doesn't exist
-        if not os.path.exists(parent):
-            err = 'source dotfile does not exist: {}'.format(parent)
-            return False, err
-
-        # Fail if source not a directory
-        if not os.path.isdir(parent):
-            if self.debug:
-                self.log.dbg('symlink children of {} to {}'.format(src, dst))
-
-            err = 'source dotfile is not a directory: {}'.format(parent)
-            return False, err
-
         if not os.path.lexists(dst):
             self.log.sub('creating directory "{}"'.format(dst))
             os.makedirs(dst)
@@ -313,7 +254,7 @@ class Installer:
                 err = 'ignoring "{}", not installed'.format(dst)
                 return False, err
             os.unlink(dst)
-            os.mkdir(dst)
+            self._create_dirs(dst)
 
         children = os.listdir(parent)
         srcs = [os.path.normpath(os.path.join(parent, child))
@@ -331,11 +272,12 @@ class Installer:
 
             if template and Templategen.is_template(subsrc):
                 if self.debug:
-                    self.log.dbg('dotfile is a template')
+                    self.log.dbg('child is a template')
                     self.log.dbg('install to {} and symlink'
                                  .format(self.workdir))
                 tmp = self._pivot_path(subdst, self.workdir, striphome=True)
                 r, e = self.install(templater, subsrc, tmp,
+                                    LinkTypes.NOLINK,
                                     actionexec=actionexec,
                                     template=template)
                 if not r and e and not os.path.exists(tmp):
@@ -351,10 +293,6 @@ class Installer:
             else:
                 if err:
                     return ret, err
-
-        if chmod and not self.dry:
-            # apply mode
-            utils.chmod(dst, chmod, debug=self.debug)
 
         return installed > 0, None
 
@@ -430,6 +368,11 @@ class Installer:
             self.log.dbg('template: {}'.format(template))
             self.log.dbg('no empty: {}'.format(noempty))
 
+        # check no loop
+        if utils.samefile(src, dst):
+            err = 'dotfile points to itself: {}'.format(dst)
+            return False, err
+
         if utils.must_ignore([src, dst], ignore, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring install of {} to {}'.format(src, dst))
@@ -483,7 +426,7 @@ class Installer:
         if ret == 0:
             # success
             if not self.dry and not self.comparing:
-                self.log.sub('copied {} to {}'.format(src, dst))
+                self.log.sub('install {} to {}'.format(src, dst))
             return True, None
         # error
         err = 'installing {} to {}'.format(src, dst)
@@ -499,8 +442,6 @@ class Installer:
         ret = False, None
 
         # create the directory anyway
-        if self.debug:
-            self.log.dbg('mkdir -p {}'.format(dst))
         if not self._create_dirs(dst):
             err = 'creating directory for {}'.format(dst)
             return False, err
@@ -542,10 +483,6 @@ class Installer:
                 elif res:
                     # something got installed
                     ret = True, None
-
-        if chmod and not self.dry:
-            # apply mode
-            utils.chmod(dst, chmod, debug=self.debug)
         return ret
 
     def _write(self, src, dst, content=None,
@@ -629,9 +566,6 @@ class Installer:
                 shutil.copymode(src, dst)
             except Exception as e:
                 return -1, str(e)
-
-        if chmod:
-            utils.chmod(dst, chmod, debug=self.debug)
         return 0, None
 
     ########################################################
@@ -714,6 +648,7 @@ class Installer:
             return True
         if self.debug:
             self.log.dbg('mkdir -p {}'.format(directory))
+        self.log.sub('create directory {}'.format(directory))
 
         os.makedirs(directory, exist_ok=True)
         return os.path.exists(directory)
@@ -762,32 +697,6 @@ class Installer:
                 self.log.dbg('install: IGNORED')
         return boolean, err
 
-    def _check_chmod(self, src, dst, chmod):
-        """
-        check chmod needs change
-        returns True to continue installation
-        """
-        if chmod:
-            return True
-        if not os.path.exists(dst):
-            return True
-        if not os.path.exists(src):
-            return True
-        sperms = utils.get_file_perm(src)
-        dperms = utils.get_file_perm(dst)
-        if sperms == dperms:
-            return True
-        elif self.safe:
-            # this only happens if no
-            # chmod is provided
-            # and dst/src modes differ
-            if self.safe:
-                msg = 'Set mode {:o} to \"{}\"'
-                msg = msg.format(sperms, dst)
-                if not self.log.ask(msg):
-                    return False
-        return True
-
     def _check_paths(self, src, dst, chmod):
         """
         check and normalize param
@@ -806,10 +715,5 @@ class Installer:
 
         dst = os.path.expanduser(dst)
         dst = os.path.normpath(dst)
-
-        # check chmod
-        if not self._check_chmod(src, dst, chmod):
-            err = 'ignoring "{}", not installed'.format(dst)
-            return None, None, False, err
 
         return src, dst, True, None
