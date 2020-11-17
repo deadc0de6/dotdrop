@@ -147,7 +147,13 @@ class Installer:
                                              template=template)
 
         # handle chmod
-        if r and not err and chmod and not self.dry:
+        # - on success (r, not err)
+        # - no change (not r, not err)
+        # but not when
+        # - error (not r, err)
+        # - aborted (not r, err)
+        if (r or (not r and not err)) \
+                and chmod and not self.dry:
             dstperms = utils.get_file_perm(dst)
             if dstperms != chmod:
                 # apply mode
@@ -218,7 +224,15 @@ class Installer:
     ########################################################
 
     def _link(self, templater, src, dst, actionexec=None, template=True):
-        """install link:link"""
+        """
+        install link:link
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
         if template and Templategen.is_template(src):
             if self.debug:
                 self.log.dbg('is a template')
@@ -236,7 +250,15 @@ class Installer:
 
     def _link_children(self, templater, src, dst,
                        actionexec=None, template=True):
-        """install link:link_children"""
+        """
+        install link:link_children
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
         parent = os.path.join(self.base, src)
         if not os.path.lexists(dst):
             self.log.sub('creating directory "{}"'.format(dst))
@@ -249,8 +271,7 @@ class Installer:
             ]).format(dst)
 
             if self.safe and not self.log.ask(msg):
-                err = 'ignoring "{}", not installed'.format(dst)
-                return False, err
+                return False, 'aborted'
             os.unlink(dst)
             self._create_dirs(dst)
 
@@ -303,9 +324,10 @@ class Installer:
         set src as a link target of dst
 
         return
-        - True, None: success
-        - False, error_msg: error
-        - False, None, ignored
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
         """
         overwrite = not self.safe
         if os.path.lexists(dst):
@@ -321,8 +343,7 @@ class Installer:
                 self._show_diff_before_write(src, dst)
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
-                err = 'ignoring "{}", link was not created'.format(dst)
-                return False, err
+                return False, 'aborted'
             overwrite = True
             try:
                 utils.removepath(dst)
@@ -343,8 +364,7 @@ class Installer:
         if os.path.lexists(dst):
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not overwrite and not self.log.ask(msg):
-                err = 'ignoring "{}", link was not created'.format(dst)
-                return False, err
+                return False, 'aborted'
             try:
                 utils.removepath(dst)
             except OSError as e:
@@ -358,7 +378,15 @@ class Installer:
                    actionexec=None, noempty=False,
                    ignore=[], template=True,
                    chmod=None):
-        """install src to dst when is a file"""
+        """
+        install src to dst when is a file
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
         if self.debug:
             self.log.dbg('deploy file: {}'.format(src))
             self.log.dbg('ignore empty: {}'.format(noempty))
@@ -411,29 +439,23 @@ class Installer:
                                actionexec=actionexec,
                                template=template,
                                chmod=chmod)
-
-        # build return values
-        if ret < 0:
-            # error
-            return False, err
-        if ret > 0:
-            # already exists
-            if self.debug:
-                self.log.dbg('ignoring {}'.format(dst))
-            return False, None
-        if ret == 0:
-            # success
+        if ret and not err:
             if not self.dry and not self.comparing:
                 self.log.sub('install {} to {}'.format(src, dst))
-            return True, None
-        # error
-        err = 'installing {} to {}'.format(src, dst)
-        return False, err
+        return ret, err
 
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
                   ignore=[], template=True, chmod=None):
-        """install src to dst when is a directory"""
+        """
+        install src to dst when is a directory
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
         if self.debug:
             self.log.dbg('deploy dir {}'.format(src))
         # default to nothing installed and no error
@@ -488,16 +510,19 @@ class Installer:
                chmod=None):
         """
         copy dotfile / write content to file
-        return  0, None:  for success,
-                1, None:  when already exists
-               -1, err: when error
         content is always empty if template is False
         and is to be ignored
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
         """
         overwrite = not self.safe
         if self.dry:
             self.log.dry('would install {}'.format(dst))
-            return 0, None
+            return True, None
 
         if os.path.lexists(dst):
             try:
@@ -506,7 +531,7 @@ class Installer:
                 if e.errno == errno.ENOENT:
                     # broken symlink
                     err = 'broken symlink {}'.format(dst)
-                    return -1, err
+                    return False, err
 
             src_mode = chmod
             if not src_mode:
@@ -517,7 +542,7 @@ class Installer:
                                           src_mode=src_mode):
                     if self.debug:
                         self.log.dbg('{} is the same'.format(dst))
-                    return 1, None
+                    return False, None
             if self.safe:
                 if self.debug:
                     self.log.dbg('change detected for {}'.format(dst))
@@ -526,25 +551,24 @@ class Installer:
                     self._show_diff_before_write(src, dst,
                                                  content=content)
                 if not self.log.ask('Overwrite \"{}\"'.format(dst)):
-                    self.log.warn('ignoring {}'.format(dst))
-                    return 1, None
+                    return False, 'aborted'
                 overwrite = True
         if self.backup and os.path.lexists(dst):
             self._backup(dst)
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
             err = 'creating directory for {}'.format(dst)
-            return -1, err
+            return False, err
         r, e = self._exec_pre_actions(actionexec)
         if not r:
-            return -1, e
+            return False, e
         if self.debug:
             self.log.dbg('install file to \"{}\"'.format(dst))
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
                 self.log.warn('ignoring {}'.format(dst))
-                return 1, None
+                return False, 'aborted'
 
         if template:
             # write content the file
@@ -554,17 +578,17 @@ class Installer:
                 shutil.copymode(src, dst)
             except NotADirectoryError as e:
                 err = 'opening dest file: {}'.format(e)
-                return -1, err
+                return False, err
             except Exception as e:
-                return -1, str(e)
+                return False, str(e)
         else:
             # copy file
             try:
                 shutil.copyfile(src, dst)
                 shutil.copymode(src, dst)
             except Exception as e:
-                return -1, str(e)
-        return 0, None
+                return False, str(e)
+        return True, None
 
     ########################################################
     # helpers
