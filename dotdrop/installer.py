@@ -114,8 +114,6 @@ class Installer:
             self.log.dbg('install {} to {}'.format(src, dst))
             self.log.dbg('\"{}\" is a directory: {}'.format(src, isdir))
 
-        # TODO remove template and set templater
-        # to None when no template should occur
         if linktype == LinkTypes.NOLINK:
             # normal file
             if isdir:
@@ -149,7 +147,7 @@ class Installer:
                                              template=template)
 
         # handle chmod
-        if chmod and not self.dry:
+        if r and not err and chmod and not self.dry:
             dstperms = utils.get_file_perm(dst)
             if dstperms != chmod:
                 # apply mode
