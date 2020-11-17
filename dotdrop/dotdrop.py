@@ -264,11 +264,6 @@ def cmd_install(o):
     dotfiles = o.dotfiles
     prof = o.conf.get_profile()
 
-    # ensure parallel is unattended
-    if o.workers > 1 and o.safe:
-        LOG.err('\"-w --workers\" must be used with \"-f --force\"')
-        return False
-
     pro_pre_actions = prof.get_pre_actions() if prof else []
     pro_post_actions = prof.get_post_actions() if prof else []
 
@@ -360,7 +355,6 @@ def cmd_install(o):
 
 def cmd_compare(o, tmp):
     """compare dotfiles and return True if all identical"""
-    # ensure parallel is unattended
     dotfiles = o.dotfiles
     if not dotfiles:
         msg = 'no dotfile defined for this profile (\"{}\")'
@@ -382,7 +376,6 @@ def cmd_compare(o, tmp):
         # in parallel
         if o.debug:
             LOG.dbg('run with {} workers'.format(o.workers))
-
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for dotfile in selected:
@@ -412,11 +405,6 @@ def cmd_compare(o, tmp):
 
 def cmd_update(o):
     """update the dotfile(s) from path(s) or key(s)"""
-    # ensure parallel is unattended
-    if o.workers > 1 and o.safe:
-        LOG.err('\"-w --workers\" must be used with \"-f --force\"')
-        return False
-
     cnt = 0
     paths = o.update_path
     iskey = o.update_iskey
@@ -448,7 +436,6 @@ def cmd_update(o):
         # in parallel
         if o.debug:
             LOG.dbg('run with {} workers'.format(o.workers))
-
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for path in paths:
