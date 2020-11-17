@@ -10,17 +10,6 @@
 # exit on first error
 set -e
 
-# $1 path
-# $2 rights
-has_rights()
-{
-  echo "testing ${1} is ${2}"
-  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
-  local mode=`stat -L -c '%a' "$1"`
-  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} VS expected ${2})" && exit 1
-  true
-}
-
 # all this crap to get current path
 rl="readlink -f"
 if ! ${rl} "${0}" >/dev/null 2>&1; then
@@ -57,6 +46,17 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 # this is the test
 ################################################################
+
+# $1 path
+# $2 rights
+has_rights()
+{
+  echo "testing ${1} is ${2}"
+  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
+  local mode=`stat -L -c '%a' "$1"`
+  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} VS expected ${2})" && exit 1
+  true
+}
 
 get_file_mode()
 {
