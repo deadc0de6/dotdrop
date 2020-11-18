@@ -575,7 +575,8 @@ def cmd_remove(o):
             k = dotfile.key
             # ignore if uses any type of link
             if dotfile.link != LinkTypes.NOLINK:
-                LOG.warn('dotfile uses link, remove manually')
+                msg = '{} uses link/link_children, remove manually'
+                LOG.warn(msg.format(k))
                 continue
 
             if o.debug:
