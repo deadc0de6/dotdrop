@@ -133,25 +133,34 @@ def _dotfile_compare(o, dotfile, tmp):
             LOG.dbg('points to itself')
         return True
 
-    # install dotfile to temporary dir and compare
-    ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
-                                             template=dotfile.template,
-                                             chmod=dotfile.chmod)
-    if not ret:
-        # failed to install to tmp
-        line = '=> compare {}: error'
-        LOG.log(line.format(dotfile.key, err))
-        LOG.err(err)
-        return False
+    if dotfile.template or Templategen.is_template(src):
+        # install dotfile to temporary dir for compare
+        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
+                                                 template=dotfile.template,
+                                                 chmod=dotfile.chmod)
+        if not ret:
+            # failed to install to tmp
+            line = '=> compare {} error: {}'
+            LOG.log(line.format(dotfile.key, err))
+            LOG.err(err)
+            return False
+        src = insttmp
+
+    # compare
     ignores = list(set(o.compare_ignore + dotfile.cmpignore))
     ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
-    diff = comp.compare(insttmp, dotfile.dst, ignore=ignores)
+    diff = comp.compare(src, dotfile.dst, ignore=ignores)
 
     # clean tmp transformed dotfile if any
     if tmpsrc:
         tmpsrc = os.path.join(o.dotpath, tmpsrc)
         if os.path.exists(tmpsrc):
             removepath(tmpsrc, LOG)
+
+    # clean tmp template dotfile if any
+    if insttmp:
+        if os.path.exists(insttmp):
+            removepath(insttmp, LOG)
 
     if diff != '':
         # print diff results
