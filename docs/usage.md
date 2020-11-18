@@ -226,6 +226,28 @@ dotdrop. It will:
 
 For more options, see the usage with `dotdrop --help`
 
+## Concurrency
+
+The command line switch `-w --workers` if set to a value greater than one allows to use
+multiple concurrent workers to execute an operation. It can be applied to the following
+commands:
+
+* `install`
+* `compare`
+* `update`
+
+It should be set to a maximum of the number of cores available (usually returned
+on linux by the command `nproc`).
+
+It may speed up the operation but cannot be used interractively (it needs `-f --force` to be set)
+and cannot be used with `-d --dry`. Also information printed to stdout/stderr will
+probably be messed up.
+
+**WARNING** this feature hasn't been extensively tested and is to be used at your own risk.
+If you try it out and find any issue, please [open an issue](https://github.com/deadc0de6/dotdrop/issues).
+Also if you find it useful and have been able to successfully speed up your operation when using
+`-w --workers`, do please also report it [in an issue](https://github.com/deadc0de6/dotdrop/issues).
+
 ## Environment variables
 
 Following environment variables can be used to specify different CLI options.
