@@ -191,7 +191,7 @@ _EOF
 
 # install
 echo "first install round"
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V ${i}
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
 
 has_rights "${tmpd}/f777" "777"
 has_rights "${tmpd}/link" "777"
@@ -224,7 +224,7 @@ chmod 700 ${tmpd}/linkchildren
 chmod 600 ${tmpd}/symlinktemplate
 
 echo "second install round"
-cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -f -V ${i}
+cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -f -V
 
 has_rights "${tmpd}/exists" "777"
 has_rights "${tmpd}/existslink" "777"
