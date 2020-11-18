@@ -179,7 +179,7 @@ class Installer:
         @chmod: rights to apply if any
 
         return
-        - success, error-if-any, dir-where-installed
+        - success, error-if-any, dotfile-installed-path
         """
         if self.debug:
             self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
