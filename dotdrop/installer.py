@@ -261,8 +261,11 @@ class Installer:
         """
         parent = os.path.join(self.base, src)
         if not os.path.lexists(dst):
-            self.log.sub('creating directory "{}"'.format(dst))
-            os.makedirs(dst)
+            if self.dry:
+                self.log.dry('would create directory "{}"'.format(dst))
+            else:
+                self.log.sub('creating directory "{}"'.format(dst))
+                os.makedirs(dst)
 
         if os.path.isfile(dst):
             msg = ''.join([
