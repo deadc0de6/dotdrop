@@ -77,11 +77,12 @@ On `import` the following rules are applied:
 On `install` the following rules are applied:
 
 * if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
+* otherwise the permissions of the dotfile in the `dotpath` are applied.
 
 On `update`:
 
 * if the permissions of the file in the filesystem differ from the dotfile in the `dotpath`
-  then the dotfile entry `chmod` is updated accordingly
+  then the dotfile entry `chmod` is added/updated accordingly
 
 ## Symlink dotfiles
 

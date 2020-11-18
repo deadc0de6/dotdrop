@@ -28,7 +28,7 @@
 
 ## Manage system dotfiles
 
-[Manage system dotfiles](global-config-files.md)
+[Manage system dotfiles](system-config-files.md)
 
 ## Merge files on install
 
