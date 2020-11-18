@@ -67,8 +67,8 @@ config:
 actions:
   pre:
     first: 'echo first > ${tmpa}/cookie'
-    second: 'echo second >> ${tmpa}/cookie'
-    third: 'echo third >> ${tmpa}/cookie'
+    second: 'sleep 1; echo second >> ${tmpa}/cookie'
+    third: 'sleep 1; echo third >> ${tmpa}/cookie'
 dotfiles:
   f_first:
     dst: ${tmpd}/first

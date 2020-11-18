@@ -6,6 +6,9 @@ jinja2 template generator
 """
 
 import os
+import io
+import re
+import mmap
 from jinja2 import Environment, FileSystemLoader, \
     ChoiceLoader, FunctionLoader, TemplateNotFound, \
     StrictUndefined
@@ -244,16 +247,19 @@ class Templategen:
         """test if file pointed by path is a template"""
         if not os.path.isfile(path):
             return False
+        if os.stat(path).st_size == 0:
+            return False
+        markers = [BLOCK_START, VAR_START, COMMENT_START]
+        patterns = [re.compile(marker.encode()) for marker in markers]
         try:
-            with open(path, 'r') as f:
-                data = f.read()
+            with io.open(path, "r", encoding="utf-8") as f:
+                m = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                for pattern in patterns:
+                    if pattern.search(m):
+                        return True
         except UnicodeDecodeError:
             # is binary so surely no template
             return False
-        markers = [BLOCK_START, VAR_START, COMMENT_START]
-        for marker in markers:
-            if marker in data:
-                return True
         return False
 
     def _debug_dict(self, title, elems):
