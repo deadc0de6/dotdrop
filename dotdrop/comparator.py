@@ -44,6 +44,8 @@ class Comparator:
         # test content
         if not os.path.isdir(left):
             if self.debug:
+                self.log.dbg('{} is a file'.format(left))
+            if self.debug:
                 self.log.dbg('is file')
             ret = self._comp_file(left, right, ignore)
             if not ret:
@@ -51,7 +53,7 @@ class Comparator:
             return ret
 
         if self.debug:
-            self.log.dbg('is directory')
+            self.log.dbg('{} is a directory'.format(left))
 
         ret = self._comp_dir(left, right, ignore)
         if not ret:
@@ -64,7 +66,11 @@ class Comparator:
         right_mode = get_file_perm(right)
         if left_mode == right_mode:
             return ''
-        ret = 'modes differ ({:o} vs {:o})\n'.format(left_mode, right_mode)
+        if self.debug:
+            msg = 'mode differ {} ({:o}) and {} ({:o})'
+            self.log.dbg(msg.format(left, left_mode, right, right_mode))
+        ret = 'modes differ for {} ({:o}) vs {:o}\n'
+        ret.format(right, right_mode, left_mode)
         return ret
 
     def _comp_file(self, left, right, ignore):
