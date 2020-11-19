@@ -145,23 +145,35 @@ class Installer:
                                              actionexec=actionexec,
                                              is_template=is_template)
 
+        if self.debug:
+            self.log.dbg('before chmod: {} err:{}'.format(r, err))
+
+        if self.dry:
+            return self._log_install(r, err)
+
         # handle chmod
         # - on success (r, not err)
         # - no change (not r, not err)
         # but not when
         # - error (not r, err)
         # - aborted (not r, err)
-        if (r or (not r and not err)) \
-                and chmod and not self.dry:
+        if (r or (not r and not err)):
+            if not chmod:
+                chmod = utils.get_file_perm(src)
             dstperms = utils.get_file_perm(dst)
             if dstperms != chmod:
                 # apply mode
-                self.log.sub('chmod {} to {:o}'.format(dst, chmod))
-                if utils.chmod(dst, chmod, debug=self.debug):
-                    r = True
-                else:
+                msg = 'chmod {} to {:o}'.format(dst, chmod)
+                if self.safe and not self.log.ask(msg):
                     r = False
-                    err = 'chmod failed'
+                    err = 'aborted'
+                else:
+                    self.log.sub('chmod {} to {:o}'.format(dst, chmod))
+                    if utils.chmod(dst, chmod, debug=self.debug):
+                        r = True
+                    else:
+                        r = False
+                        err = 'chmod failed'
 
         return self._log_install(r, err)
 
@@ -536,9 +548,7 @@ class Installer:
             if not src_mode:
                 src_mode = utils.get_file_perm(src)
             if self.diff:
-                if not self._is_different(src, dst,
-                                          content=content,
-                                          src_mode=src_mode):
+                if not self._is_different(src, dst, content=content):
                     if self.debug:
                         self.log.dbg('{} is the same'.format(dst))
                     return False, None
@@ -599,29 +609,11 @@ class Installer:
         tmp['_dotfile_sub_abs_dst'] = dst
         return tmp
 
-    def _is_different(self, src, dst, src_mode=None, content=None):
+    def _is_different(self, src, dst, content=None):
         """
         returns True if file is different and
         needs to be installed
         """
-        # check file size
-        src_size = os.stat(src).st_size
-        dst_size = os.stat(dst).st_size
-        if src_size != dst_size:
-            if self.debug:
-                self.log.dbg('size differ')
-            return True
-
-        # check file mode
-        if not src_mode:
-            src_mode = utils.get_file_perm(src)
-        dst_mode = utils.get_file_perm(dst)
-        if src_mode != dst_mode:
-            if self.debug:
-                m = 'mode differ ({:o} vs {:o})'
-                self.log.dbg(m.format(src_mode, dst_mode))
-            return True
-
         # check file content
         if content:
             tmp = utils.write_to_tmpfile(content)

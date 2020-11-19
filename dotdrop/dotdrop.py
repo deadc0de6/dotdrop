@@ -510,7 +510,7 @@ def cmd_list_profiles(o):
     LOG.log('')
 
 
-def cmd_list_files(o):
+def cmd_files(o):
     """list all dotfiles for a specific profile"""
     if o.profile not in [p.key for p in o.profiles]:
         LOG.warn('unknown profile \"{}\"'.format(o.profile))
@@ -525,17 +525,21 @@ def cmd_list_files(o):
             if not Templategen.is_template(src):
                 continue
         if o.files_grepable:
-            fmt = '{},dst:{},src:{},link:{},chmod:{}'
+            fmt = '{},dst:{},src:{},link:{}'
             fmt = fmt.format(dotfile.key, dotfile.dst,
-                             dotfile.src, dotfile.link.name.lower(),
-                             dotfile.chmod)
+                             dotfile.src, dotfile.link.name.lower())
+            if dotfile.chmod:
+                fmt += ',chmod:{:o}'
+            else:
+                fmt += ',chmod:None'
             LOG.raw(fmt)
         else:
             LOG.log('{}'.format(dotfile.key), bold=True)
             LOG.sub('dst: {}'.format(dotfile.dst))
             LOG.sub('src: {}'.format(dotfile.src))
             LOG.sub('link: {}'.format(dotfile.link.name.lower()))
-            LOG.sub('chmod: {}'.format(dotfile.chmod))
+            if dotfile.chmod:
+                LOG.sub('chmod: {:o}'.format(dotfile.chmod))
     LOG.log('')
 
 
@@ -773,7 +777,7 @@ def main():
             command = 'files'
             if o.debug:
                 LOG.dbg('running cmd: {}'.format(command))
-            cmd_list_files(o)
+            cmd_files(o)
 
         elif o.cmd_install:
             # install the dotfiles stored in dotdrop

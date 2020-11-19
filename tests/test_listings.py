@@ -9,7 +9,7 @@ import unittest
 import os
 
 from dotdrop.dotdrop import cmd_list_profiles
-from dotdrop.dotdrop import cmd_list_files
+from dotdrop.dotdrop import cmd_files
 from dotdrop.dotdrop import cmd_detail
 from dotdrop.dotdrop import cmd_importer
 
@@ -87,9 +87,9 @@ class TestListings(unittest.TestCase):
 
         # list files
         o.files_templateonly = False
-        cmd_list_files(o)
+        cmd_files(o)
         o.files_templateonly = True
-        cmd_list_files(o)
+        cmd_files(o)
 
         # details
         o.detail_keys = None

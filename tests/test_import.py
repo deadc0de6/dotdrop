@@ -10,7 +10,7 @@ import os
 
 from dotdrop.dotdrop import cmd_importer
 from dotdrop.dotdrop import cmd_list_profiles
-from dotdrop.dotdrop import cmd_list_files
+from dotdrop.dotdrop import cmd_files
 from dotdrop.dotdrop import cmd_update
 from dotdrop.linktypes import LinkTypes
 
@@ -184,7 +184,7 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(s4))
 
         cmd_list_profiles(o)
-        cmd_list_files(o)
+        cmd_files(o)
 
         # fake test update
         editcontent = 'edited'
