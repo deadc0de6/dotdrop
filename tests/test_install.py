@@ -6,7 +6,7 @@ basic unittest for the install function
 
 import os
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import filecmp
 
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
@@ -460,8 +460,7 @@ exec bspwm
             'Remove regular file {} and replace with empty directory?'
             .format(dst))
 
-    @patch('dotdrop.installer.Templategen')
-    def test_runs_templater(self, mocked_templategen):
+    def test_runs_templater(self):
         """test runs templater"""
         # create source dir
         src_dir = get_tempdir()
@@ -480,8 +479,6 @@ exec bspwm
         installer = Installer()
         templater = MagicMock()
         templater.generate.return_value = b'content'
-        # make templategen treat everything as a template
-        mocked_templategen.is_template.return_value = True
 
         installer.install(templater=templater, src=src_dir, dst=dst_dir,
                           linktype=LinkTypes.LINK_CHILDREN, actionexec=None)

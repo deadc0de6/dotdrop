@@ -12,7 +12,6 @@ import shutil
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.linktypes import LinkTypes
-from dotdrop.templategen import Templategen
 import dotdrop.utils as utils
 from dotdrop.exceptions import UndefinedException
 
@@ -66,7 +65,7 @@ class Installer:
 
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
-                ignore=[], template=True,
+                ignore=[], is_template=True,
                 chmod=None):
         """
         install src to dst
@@ -78,7 +77,7 @@ class Installer:
         @actionexec: action executor callback
         @noempty: render empty template flag
         @ignore: pattern to ignore when installing
-        @template: template this dotfile
+        @is_template: this dotfile is a template
         @chmod: rights to apply if any
 
         return
@@ -105,7 +104,7 @@ class Installer:
         # and ignore any actions
         if self.totemp:
             r, err, _ = self.install_to_temp(templater, self.totemp,
-                                             src, dst, template=template,
+                                             src, dst, is_template=is_template,
                                              chmod=chmod)
             return self._log_install(r, err)
 
@@ -120,19 +119,19 @@ class Installer:
                 r, err = self._copy_dir(templater, src, dst,
                                         actionexec=actionexec,
                                         noempty=noempty, ignore=ignore,
-                                        template=template,
+                                        is_template=is_template,
                                         chmod=chmod)
             else:
                 r, err = self._copy_file(templater, src, dst,
                                          actionexec=actionexec,
                                          noempty=noempty, ignore=ignore,
-                                         template=template,
+                                         is_template=is_template,
                                          chmod=chmod)
         elif linktype == LinkTypes.LINK:
             # symlink
             r, err = self._link(templater, src, dst,
                                 actionexec=actionexec,
-                                template=template)
+                                is_template=is_template)
         elif linktype == LinkTypes.LINK_CHILDREN:
             # symlink direct children
             if not isdir:
@@ -144,7 +143,7 @@ class Installer:
             else:
                 r, err = self._link_children(templater, src, dst,
                                              actionexec=actionexec,
-                                             template=template)
+                                             is_template=is_template)
 
         # handle chmod
         # - on success (r, not err)
@@ -167,7 +166,7 @@ class Installer:
         return self._log_install(r, err)
 
     def install_to_temp(self, templater, tmpdir, src, dst,
-                        template=True, chmod=None):
+                        is_template=True, chmod=None):
         """
         install a dotfile to a tempdir
 
@@ -175,7 +174,7 @@ class Installer:
         @tmpdir: where to install
         @src: dotfile source path in dotpath
         @dst: dotfile destination path in the FS
-        @template: template this dotfile
+        @is_template: this dotfile is a template
         @chmod: rights to apply if any
 
         return
@@ -205,7 +204,8 @@ class Installer:
         tmpdst = self._pivot_path(dst, tmpdir)
         ret, err = self.install(templater, src, tmpdst,
                                 LinkTypes.NOLINK,
-                                template=template, chmod=chmod)
+                                is_template=is_template,
+                                chmod=chmod)
         if self.debug:
             if ret:
                 self.log.dbg('tmp installed in {}'.format(tmpdst))
@@ -223,7 +223,7 @@ class Installer:
     # low level accessors for public methods
     ########################################################
 
-    def _link(self, templater, src, dst, actionexec=None, template=True):
+    def _link(self, templater, src, dst, actionexec=None, is_template=True):
         """
         install link:link
 
@@ -233,7 +233,7 @@ class Installer:
         - False, None       : ignored
         - False, 'aborted'    : user aborted
         """
-        if template and Templategen.is_template(src):
+        if is_template:
             if self.debug:
                 self.log.dbg('is a template')
                 self.log.dbg('install to {}'.format(self.workdir))
@@ -241,7 +241,7 @@ class Installer:
             r, err = self.install(templater, src, tmp,
                                   LinkTypes.NOLINK,
                                   actionexec=actionexec,
-                                  template=template)
+                                  is_template=is_template)
             if not r and not os.path.exists(tmp):
                 return r, err
             src = tmp
@@ -249,7 +249,7 @@ class Installer:
         return r, err
 
     def _link_children(self, templater, src, dst,
-                       actionexec=None, template=True):
+                       actionexec=None, is_template=True):
         """
         install link:link_children
 
@@ -292,7 +292,7 @@ class Installer:
             if self.debug:
                 self.log.dbg('symlink child {} to {}'.format(subsrc, subdst))
 
-            if template and Templategen.is_template(subsrc):
+            if is_template:
                 if self.debug:
                     self.log.dbg('child is a template')
                     self.log.dbg('install to {} and symlink'
@@ -301,7 +301,7 @@ class Installer:
                 r, e = self.install(templater, subsrc, tmp,
                                     LinkTypes.NOLINK,
                                     actionexec=actionexec,
-                                    template=template)
+                                    is_template=is_template)
                 if not r and e and not os.path.exists(tmp):
                     continue
                 subsrc = tmp
@@ -379,7 +379,7 @@ class Installer:
 
     def _copy_file(self, templater, src, dst,
                    actionexec=None, noempty=False,
-                   ignore=[], template=True,
+                   ignore=[], is_template=True,
                    chmod=None):
         """
         install src to dst when is a file
@@ -394,7 +394,7 @@ class Installer:
             self.log.dbg('deploy file: {}'.format(src))
             self.log.dbg('ignore empty: {}'.format(noempty))
             self.log.dbg('ignore pattern: {}'.format(ignore))
-            self.log.dbg('template: {}'.format(template))
+            self.log.dbg('is_template: {}'.format(is_template))
             self.log.dbg('no empty: {}'.format(noempty))
 
         # check no loop
@@ -418,7 +418,7 @@ class Installer:
 
         # handle the file
         content = None
-        if template:
+        if is_template:
             # template the file
             saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
             try:
@@ -440,7 +440,6 @@ class Installer:
         ret, err = self._write(src, dst,
                                content=content,
                                actionexec=actionexec,
-                               template=template,
                                chmod=chmod)
         if ret and not err:
             if not self.dry and not self.comparing:
@@ -449,7 +448,7 @@ class Installer:
 
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
-                  ignore=[], template=True, chmod=None):
+                  ignore=[], is_template=True, chmod=None):
         """
         install src to dst when is a directory
 
@@ -481,7 +480,7 @@ class Installer:
                                            actionexec=actionexec,
                                            noempty=noempty,
                                            ignore=ignore,
-                                           template=template,
+                                           is_template=is_template,
                                            chmod=None)
                 if not res and err:
                     # error occured
@@ -497,7 +496,7 @@ class Installer:
                                           actionexec=actionexec,
                                           noempty=noempty,
                                           ignore=ignore,
-                                          template=template,
+                                          is_template=is_template,
                                           chmod=None)
                 if not res and err:
                     # error occured
@@ -509,12 +508,9 @@ class Installer:
         return ret
 
     def _write(self, src, dst, content=None,
-               actionexec=None, template=True,
-               chmod=None):
+               actionexec=None, chmod=None):
         """
         copy dotfile / write content to file
-        content is always empty if template is False
-        and is to be ignored
 
         return
         - True, None        : success
@@ -573,7 +569,7 @@ class Installer:
                 self.log.warn('ignoring {}'.format(dst))
                 return False, 'aborted'
 
-        if template:
+        if content:
             # write content the file
             try:
                 with open(dst, 'wb') as f:

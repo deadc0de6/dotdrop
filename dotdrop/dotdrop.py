@@ -133,10 +133,11 @@ def _dotfile_compare(o, dotfile, tmp):
             LOG.dbg('points to itself')
         return True
 
-    if dotfile.template or Templategen.is_template(src):
+    insttmp = None
+    if dotfile.template and Templategen.is_template(src):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
-                                                 template=dotfile.template,
+                                                 is_template=True,
                                                  chmod=dotfile.chmod)
         if not ret:
             # failed to install to tmp
@@ -205,12 +206,13 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
         LOG.dbg(dotfile.prt())
 
+    is_template = dotfile.template and Templategen.is_template(dotfile.src)
     if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
         # link
         r, err = inst.install(t, dotfile.src, dotfile.dst,
                               dotfile.link,
                               actionexec=pre_actions_exec,
-                              template=dotfile.template,
+                              is_template=is_template,
                               chmod=dotfile.chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
@@ -218,7 +220,7 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         r, err = inst.install(t, dotfile.src, dotfile.dst,
                               dotfile.link,
                               actionexec=pre_actions_exec,
-                              template=dotfile.template,
+                              is_template=is_template,
                               chmod=dotfile.chmod)
     else:
         # nolink
@@ -236,7 +238,7 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               actionexec=pre_actions_exec,
                               noempty=dotfile.noempty,
                               ignore=ignores,
-                              template=dotfile.template,
+                              is_template=is_template,
                               chmod=dotfile.chmod)
         if tmp:
             tmp = os.path.join(o.dotpath, tmp)
@@ -677,7 +679,7 @@ def _detail(dotpath, dotfile):
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
         template = 'no'
-        if Templategen.is_template(path):
+        if dotfile.template and Templategen.is_template(path):
             template = 'yes'
         LOG.sub('{} (template:{})'.format(path, template))
     else:
@@ -685,7 +687,7 @@ def _detail(dotpath, dotfile):
             for f in files:
                 p = os.path.join(root, f)
                 template = 'no'
-                if Templategen.is_template(p):
+                if dotfile.template and Templategen.is_template(p):
                     template = 'yes'
                 LOG.sub('{} (template:{})'.format(p, template))
 
