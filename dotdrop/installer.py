@@ -279,7 +279,7 @@ class Installer:
             else:
                 if not self.comparing:
                     self.log.sub('creating directory "{}"'.format(dst))
-                os.makedirs(dst)
+                self._create_dirs(dst)
 
         if os.path.isfile(dst):
             msg = ''.join([
