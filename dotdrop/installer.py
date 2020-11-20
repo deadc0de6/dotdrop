@@ -168,7 +168,8 @@ class Installer:
                     r = False
                     err = 'aborted'
                 else:
-                    self.log.sub('chmod {} to {:o}'.format(dst, chmod))
+                    if not self.comparing:
+                        self.log.sub('chmod {} to {:o}'.format(dst, chmod))
                     if utils.chmod(dst, chmod, debug=self.debug):
                         r = True
                     else:
@@ -276,7 +277,8 @@ class Installer:
             if self.dry:
                 self.log.dry('would create directory "{}"'.format(dst))
             else:
-                self.log.sub('creating directory "{}"'.format(dst))
+                if not self.comparing:
+                    self.log.sub('creating directory "{}"'.format(dst))
                 os.makedirs(dst)
 
         if os.path.isfile(dst):
@@ -386,7 +388,8 @@ class Installer:
                 err = 'something went wrong with {}: {}'.format(src, e)
                 return False, err
         os.symlink(src, dst)
-        self.log.sub('linked {} to {}'.format(dst, src))
+        if not self.comparing:
+            self.log.sub('linked {} to {}'.format(dst, src))
         return True, None
 
     def _copy_file(self, templater, src, dst,
@@ -661,7 +664,8 @@ class Installer:
             return True
         if self.debug:
             self.log.dbg('mkdir -p {}'.format(directory))
-        self.log.sub('create directory {}'.format(directory))
+        if not self.comparing:
+            self.log.sub('create directory {}'.format(directory))
 
         os.makedirs(directory, exist_ok=True)
         return os.path.exists(directory)
