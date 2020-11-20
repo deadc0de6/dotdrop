@@ -70,8 +70,7 @@ class Comparator:
             msg = 'mode differ {} ({:o}) and {} ({:o})'
             self.log.dbg(msg.format(left, left_mode, right, right_mode))
         ret = 'modes differ for {} ({:o}) vs {:o}\n'
-        ret.format(right, right_mode, left_mode)
-        return ret
+        return ret.format(right, right_mode, left_mode)
 
     def _comp_file(self, left, right, ignore):
         """compare a file"""
