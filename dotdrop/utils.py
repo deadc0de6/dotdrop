@@ -331,3 +331,12 @@ def chmod(path, mode, debug=False):
         LOG.dbg('chmod {} {}'.format(oct(mode), path))
     os.chmod(path, mode)
     return get_file_perm(path) == mode
+
+
+def adapt_workers(options, logger):
+    if options.safe and options.workers > 1:
+        logger.warn('workers set to 1 when --force is not used')
+        options.workers = 1
+    if options.dry and options.workers > 1:
+        logger.warn('workers set to 1 when --dry is used')
+        options.workers = 1

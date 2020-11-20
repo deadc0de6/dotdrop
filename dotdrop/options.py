@@ -227,13 +227,6 @@ class Options(AttrMonitor):
             self.log.err('bad option for --workers')
             sys.exit(USAGE)
 
-        if self.safe and self.workers > 1:
-            self.log.warn('workers set to 1 when --force is not used')
-            self.workers = 1
-        if self.dry and self.workers > 1:
-            self.log.warn('workers set to 1 when --dry is used')
-            self.workers = 1
-
         # import link default value
         self.import_link = self.link_on_import
         if self.args['--link']:

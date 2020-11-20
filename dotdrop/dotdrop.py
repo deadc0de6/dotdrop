@@ -19,7 +19,8 @@ from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
 from dotdrop.utils import get_tmpdir, removepath, \
-    uniq_list, patch_ignores, dependencies_met
+    uniq_list, patch_ignores, dependencies_met, \
+    adapt_workers
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, UndefinedException
 
@@ -278,6 +279,8 @@ def cmd_install(o):
     dotfiles = o.dotfiles
     prof = o.conf.get_profile()
 
+    adapt_workers(o, LOG)
+
     pro_pre_actions = prof.get_pre_actions() if prof else []
     pro_post_actions = prof.get_post_actions() if prof else []
 
@@ -422,6 +425,8 @@ def cmd_update(o):
     cnt = 0
     paths = o.update_path
     iskey = o.update_iskey
+
+    adapt_workers(o, LOG)
 
     if not paths:
         # update the entire profile
