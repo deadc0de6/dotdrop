@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2020, deadc0de6
 #
-# test global ignore update
-# returns 1 in case of error
+# test chmod on compare
 #
 
 # exit on first error
@@ -46,63 +45,73 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-# dotdrop directory
+# the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-dt="${tmps}/dotfiles"
-mkdir -p ${dt}
-mkdir -p ${dt}/a/{b,c}
-echo 'a' > ${dt}/a/b/abfile
-echo 'a' > ${dt}/a/c/acfile
-
-# fs dotfiles
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-cp -r ${dt}/a ${tmpd}/
+#echo "dotfile destination: ${tmpd}"
+
+# create the dotfile
+dnormal="${tmpd}/dir_normal"
+mkdir -p ${dnormal}
+echo "dir_normal/f1" > ${dnormal}/file1
+echo "dir_normal/f2" > ${dnormal}/file2
+chmod 777 ${dnormal}
+
+dlink="${tmpd}/dir_link"
+mkdir -p ${dlink}
+echo "dir_link/f1" > ${dlink}/file1
+echo "dir_link/f2" > ${dlink}/file2
+chmod 777 ${dlink}
+
+dlinkchildren="${tmpd}/dir_link_children"
+mkdir -p ${dlinkchildren}
+echo "dir_linkchildren/f1" > ${dlinkchildren}/file1
+echo "dir_linkchildren/f2" > ${dlinkchildren}/file2
+chmod 777 ${dlinkchildren}
+
+fnormal="${tmpd}/filenormal"
+echo "filenormal" > ${fnormal}
+chmod 777 ${fnormal}
+
+flink="${tmpd}/filelink"
+echo "filelink" > ${flink}
+chmod 777 ${flink}
+
+toimport="${dnormal} ${dlink} ${dlinkchildren} ${fnormal} ${flink}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
+
 cat > ${cfg} << _EOF
 config:
-  backup: false
+  backup: true
   create: true
   dotpath: dotfiles
-  upignore:
-  - "*/cfile"
-  - "*/newfile"
-  - "*/newdir"
 dotfiles:
-  f_abc:
-    dst: ${tmpd}/a
-    src: a
 profiles:
-  p1:
-    dotfiles:
-    - f_abc
 _EOF
 #cat ${cfg}
 
-#tree ${dt}
+# import
+for i in ${toimport}; do
+  cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 ${i}
+done
 
-# edit/add files
-echo "[+] edit/add files"
-touch ${tmpd}/a/newfile
-echo 'b' > ${tmpd}/a/c/acfile
-mkdir -p ${tmpd}/a/newdir/b
-touch ${tmpd}/a/newdir/b/c
+#cat ${cfg}
 
-#tree ${tmpd}/a
+# patch rights
+chmod 700 ${dnormal}
+chmod 700 ${dlink}
+chmod 700 ${dlinkchildren}
+chmod 700 ${fnormal}
+chmod 700 ${flink}
 
-# update
-echo "[+] update"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
-
-#tree ${dt}
-
-# check files haven't been updated
-[ ! -e ${dt}/a/c/acfile ] && echo "acfile not found" && exit 1
 set +e
-grep 'b' ${dt}/a/c/acfile || (echo "acfile not updated" && exit 1)
+cnt=`cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 2>&1 | grep 'modes differ' | wc -l`
 set -e
-[ -e ${dt}/a/newfile ] && echo "newfile found" && exit 1
+[ "${cnt}" != "5" ] && echo "compare modes failed (${cnt})" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2020, deadc0de6
 #
-# test global ignore update
-# returns 1 in case of error
+# test chmod on import
+# with files and directories
+# with different link
 #
 
 # exit on first error
@@ -46,63 +47,78 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-# dotdrop directory
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-dt="${tmps}/dotfiles"
-mkdir -p ${dt}
-mkdir -p ${dt}/a/{b,c}
-echo 'a' > ${dt}/a/b/abfile
-echo 'a' > ${dt}/a/c/acfile
+# $1 path
+# $2 rights
+has_rights()
+{
+  echo "testing ${1} is ${2}"
+  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
+  local mode=`stat -L -c '%a' "$1"`
+  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} instead of ${2})" && exit 1
+  true
+}
 
-# fs dotfiles
+# $1 file
+chmod_to_umask()
+{
+  u=`umask`
+  u=`echo ${u} | sed 's/^0*//'`
+  if [ -d ${1} ]; then
+    v=$((777 - u))
+  else
+    v=$((666 - u))
+  fi
+  chmod ${v} ${1}
+}
+
+# the dotfile source
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmps}/dotfiles
+# the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-cp -r ${dt}/a ${tmpd}/
+#echo "dotfile destination: ${tmpd}"
+
+# create the dotfiles
+f1="${tmpd}/f1"
+touch ${f1}
+chmod 777 ${f1}
+stat -c '%a' ${f1}
+
+f2="${tmpd}/f2"
+touch ${f2}
+chmod 644 ${f2}
+stat -c '%a' ${f2}
+
+toimport="${f1} ${f2}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
+
 cat > ${cfg} << _EOF
 config:
-  backup: false
+  backup: true
   create: true
   dotpath: dotfiles
-  upignore:
-  - "*/cfile"
-  - "*/newfile"
-  - "*/newdir"
 dotfiles:
-  f_abc:
-    dst: ${tmpd}/a
-    src: a
 profiles:
-  p1:
-    dotfiles:
-    - f_abc
 _EOF
 #cat ${cfg}
 
-#tree ${dt}
+# import without --preserve-mode
+for i in ${toimport}; do
+  stat -c '%a' ${i}
+  cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
+done
 
-# edit/add files
-echo "[+] edit/add files"
-touch ${tmpd}/a/newfile
-echo 'b' > ${tmpd}/a/c/acfile
-mkdir -p ${tmpd}/a/newdir/b
-touch ${tmpd}/a/newdir/b/c
+cat ${cfg}
 
-#tree ${tmpd}/a
+has_rights "${tmpd}/f1" "777"
+has_rights "${tmps}/dotfiles/${tmpd}/f1" "777"
+has_rights "${tmpd}/f2" "644"
+has_rights "${tmps}/dotfiles/${tmpd}/f2" "644"
 
-# update
-echo "[+] update"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
-
-#tree ${dt}
-
-# check files haven't been updated
-[ ! -e ${dt}/a/c/acfile ] && echo "acfile not found" && exit 1
-set +e
-grep 'b' ${dt}/a/c/acfile || (echo "acfile not updated" && exit 1)
-set -e
-[ -e ${dt}/a/newfile ] && echo "newfile found" && exit 1
+# install
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V | grep '0 dotfile(s) installed' || (echo "should not install" && exit 1)
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

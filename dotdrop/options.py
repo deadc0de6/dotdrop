@@ -25,6 +25,7 @@ ENV_NOBANNER = 'DOTDROP_NOBANNER'
 ENV_DEBUG = 'DOTDROP_DEBUG'
 ENV_NODEBUG = 'DOTDROP_FORCE_NODEBUG'
 ENV_XDG = 'XDG_CONFIG_HOME'
+ENV_WORKERS = 'DOTDROP_WORKERS'
 BACKUP_SUFFIX = '.dotdropbak'
 
 PROFILE = socket.gethostname()
@@ -54,12 +55,12 @@ USAGE = """
 Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>]
                                 [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdf]     [-c <path>] [-p <profile>] [-s <path>]
+  dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] <path>...
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
-                                [-C <file>...] [-i <pattern>...]
+                                [-w <nb>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
-                                [-i <pattern>...] [<path>...]
+                                [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
   dotdrop files     [-VbTG]     [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
@@ -73,15 +74,16 @@ Options:
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
   -d --dry                Dry run.
-  -l --link=<link>        Link option (nolink|link|link_children).
-  -L --file-only          Do not show diff but only the files that differ.
-  -p --profile=<profile>  Specify the profile to use [default: {}].
   -D --showdiff           Show a diff before overwriting.
   -f --force              Do not ask user confirmation for anything.
   -G --grepable           Grepable output.
   -i --ignore=<pattern>   Pattern to ignore.
   -k --key                Treat <path> as a dotfile key.
+  -l --link=<link>        Link option (nolink|link|link_children).
+  -L --file-only          Do not show diff but only the files that differ.
+  -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
   -n --nodiff             Do not diff when installing.
+  -p --profile=<profile>  Specify the profile to use [default: {}].
   -P --show-patch         Provide a one-liner to manually patch template.
   -s --as=<path>          Import as a different path from actual path.
   -t --temp               Install to a temporary directory for review.
@@ -129,6 +131,9 @@ class Options(AttrMonitor):
         if not self.confpath:
             raise YamlException('no config file found')
         if self.debug:
+            self.log.dbg('#################################################')
+            self.log.dbg('#################### DOTDROP ####################')
+            self.log.dbg('#################################################')
             self.log.dbg('version: {}'.format(VERSION))
             self.log.dbg('command: {}'.format(' '.join(sys.argv)))
             self.log.dbg('config file: {}'.format(self.confpath))
@@ -212,6 +217,16 @@ class Options(AttrMonitor):
         # adapt attributes based on arguments
         self.safe = not self.args['--force']
 
+        try:
+            if ENV_WORKERS in os.environ:
+                workers = int(os.environ[ENV_WORKERS])
+            else:
+                workers = int(self.args['--workers'])
+            self.workers = workers
+        except ValueError:
+            self.log.err('bad option for --workers')
+            sys.exit(USAGE)
+
         # import link default value
         self.import_link = self.link_on_import
         if self.args['--link']:
@@ -241,14 +256,6 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
-        try:
-            self.install_parallel = int(self.args['--workers'])
-        except ValueError:
-            self.log.err('bad option for --workers')
-            sys.exit(USAGE)
-        if self.safe and self.install_parallel > 1:
-            self.log.err('\"-w --workers\" must be used with \"-f --force\"')
-            sys.exit(USAGE)
 
         # "compare" specifics
         self.compare_focus = self.args['--file']
@@ -261,6 +268,7 @@ class Options(AttrMonitor):
         # "import" specifics
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
+        self.import_mode = self.args['--preserve-mode']
 
         # "update" specifics
         self.update_path = self.args['<path>']

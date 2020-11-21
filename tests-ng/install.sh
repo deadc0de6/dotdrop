@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2019, deadc0de6
+# Copyright (c) 2020, deadc0de6
 #
-# test install to temp
+# test install
 # returns 1 in case of error
 #
 
@@ -46,12 +46,33 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+get_file_mode()
+{
+  u=`umask`
+  u=`echo ${u} | sed 's/^0*//'`
+  v=$((666 - u))
+  echo "${v}"
+}
+
+# $1 path
+# $2 rights
+has_rights()
+{
+  echo "testing ${1} is ${2}"
+  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
+  local mode=`stat -L -c '%a' "$1"`
+  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} VS expected ${2})" && exit 1
+  true
+}
+
 # dotdrop directory
 basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${basedir}/dotfiles
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
+tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+
+echo "content" > ${basedir}/dotfiles/x
 
 # create the config file
 cfg="${basedir}/config.yaml"
@@ -64,31 +85,43 @@ dotfiles:
   f_x:
     src: x
     dst: ${tmpd}/x
-  f_y:
-    src: y
-    dst: ${tmpd}/y
-    link: link
-  f_z:
-    src: z
-    dst: ${tmpd}/z
 profiles:
   p1:
     dotfiles:
     - f_x
-    - f_y
-    - f_z
 _EOF
 
-echo 'test_x' > ${basedir}/dotfiles/x
-echo 'test_y' > ${basedir}/dotfiles/y
-echo "00000000  01 02 03 04 05" | xxd -r - ${basedir}/dotfiles/z
-
 echo "[+] install"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --showdiff --verbose --temp | grep '^3 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
+[ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
+
+# update chmod
+chmod 666 ${tmpd}/x
+cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 --verbose ${tmpd}/x
+
+# chmod updated
+cat ${cfg} | grep "chmod: '666'"
+
+chmod 644 ${tmpd}/x
+
+mode=`get_file_mode ${tmpd}/x`
+echo "[+] re-install with no"
+cd ${ddpath} | printf "N\n" | ${bin} install -c ${cfg} -p p1 --verbose
+[ "$?" != "0" ] && exit 1
+
+# if user answers N, chmod should not be done
+has_rights "${tmpd}/x" "${mode}"
+
+echo "[+] re-install with yes"
+cd ${ddpath} | printf "y\n" | ${bin} install -c ${cfg} -p p1 --verbose
+[ "$?" != "0" ] && exit 1
+
+has_rights "${tmpd}/x" "666"
+
 ## CLEANING
-rm -rf ${basedir}
+rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

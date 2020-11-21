@@ -55,6 +55,7 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # temporary
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+export DOTDROP_WORKERS=1
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -66,8 +67,8 @@ config:
 actions:
   pre:
     first: 'echo first > ${tmpa}/cookie'
-    second: 'echo second >> ${tmpa}/cookie'
-    third: 'echo third >> ${tmpa}/cookie'
+    second: 'sleep 1; echo second >> ${tmpa}/cookie'
+    third: 'sleep 1; echo third >> ${tmpa}/cookie'
 dotfiles:
   f_first:
     dst: ${tmpd}/first
@@ -115,9 +116,9 @@ for ((i=0;i<${attempts};i++)); do
   echo "second timestamp: `stat -c %y ${tmpd}/second`"
   echo "third timestamp: `stat -c %y ${tmpd}/third`"
 
-  ts_first=`date "+%S%N" -d "$(stat -c %y ${tmpd}/first)"`
-  ts_second=`date "+%S%N" -d "$(stat -c %y ${tmpd}/second)"`
-  ts_third=`date "+%S%N" -d "$(stat -c %y ${tmpd}/third)"`
+  ts_first=`date "+%s" -d "$(stat -c %y ${tmpd}/first)"`
+  ts_second=`date "+%s" -d "$(stat -c %y ${tmpd}/second)"`
+  ts_third=`date "+%s" -d "$(stat -c %y ${tmpd}/third)"`
 
   #echo "first ts: ${ts_first}"
   #echo "second ts: ${ts_second}"

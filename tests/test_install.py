@@ -6,7 +6,7 @@ basic unittest for the install function
 
 import os
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import filecmp
 
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
@@ -349,8 +349,9 @@ exec bspwm
         srcs = [create_random_file(src_dir)[0] for _ in range(3)]
 
         installer = Installer()
-        installer.link_children(templater=MagicMock(), src=src_dir,
-                                dst=dst_dir, actionexec=None)
+        installer.install(templater=MagicMock(), src=src_dir,
+                          dst=dst_dir, linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None)
 
         # Ensure all destination files point to source
         for src in srcs:
@@ -365,8 +366,10 @@ exec bspwm
         # logger = MagicMock()
         # installer.log.err = logger
 
-        res, err = installer.link_children(templater=MagicMock(), src=src,
-                                           dst='/dev/null', actionexec=None)
+        res, err = installer.install(templater=MagicMock(), src=src,
+                                     dst='/dev/null',
+                                     linktype=LinkTypes.LINK_CHILDREN,
+                                     actionexec=None)
 
         self.assertFalse(res)
         e = 'source dotfile does not exist: {}'.format(src)
@@ -387,8 +390,10 @@ exec bspwm
         # installer.log.err = logger
 
         # pass src file not src dir
-        res, err = installer.link_children(templater=templater, src=src,
-                                           dst='/dev/null', actionexec=None)
+        res, err = installer.install(templater=templater, src=src,
+                                     dst='/dev/null',
+                                     linktype=LinkTypes.LINK_CHILDREN,
+                                     actionexec=None)
 
         # ensure nothing performed
         self.assertFalse(res)
@@ -410,8 +415,9 @@ exec bspwm
         self.assertFalse(os.path.exists(dst_dir))
 
         installer = Installer()
-        installer.link_children(templater=MagicMock(), src=src_dir,
-                                dst=dst_dir, actionexec=None)
+        installer.install(templater=MagicMock(), src=src_dir,
+                          dst=dst_dir, linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None)
 
         # ensure dst dir created
         self.assertTrue(os.path.exists(dst_dir))
@@ -442,8 +448,9 @@ exec bspwm
         installer.safe = True
         installer.log.ask = ask
 
-        installer.link_children(templater=MagicMock(), src=src_dir, dst=dst,
-                                actionexec=None)
+        installer.install(templater=MagicMock(), src=src_dir,
+                          dst=dst, linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None)
 
         # ensure destination now a directory
         self.assertTrue(os.path.isdir(dst))
@@ -453,8 +460,7 @@ exec bspwm
             'Remove regular file {} and replace with empty directory?'
             .format(dst))
 
-    @patch('dotdrop.installer.Templategen')
-    def test_runs_templater(self, mocked_templategen):
+    def test_runs_templater(self):
         """test runs templater"""
         # create source dir
         src_dir = get_tempdir()
@@ -473,11 +479,9 @@ exec bspwm
         installer = Installer()
         templater = MagicMock()
         templater.generate.return_value = b'content'
-        # make templategen treat everything as a template
-        mocked_templategen.is_template.return_value = True
 
-        installer.link_children(templater=templater, src=src_dir, dst=dst_dir,
-                                actionexec=None)
+        installer.install(templater=templater, src=src_dir, dst=dst_dir,
+                          linktype=LinkTypes.LINK_CHILDREN, actionexec=None)
 
         for src in srcs:
             dst = os.path.join(dst_dir, os.path.basename(src))

@@ -89,6 +89,7 @@ dotfiles:
     src: ghi
     trans: uncompress
     trans_write: compress
+    chmod: 700
 profiles:
   p1:
     dotfiles:
@@ -125,40 +126,43 @@ tar -tf ${tmps}/dotfiles/ghi
 # test install and compare
 ###########################
 
+echo "[+] run install"
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 
 # check canary dotfile
-[ ! -e ${tmpd}/def ] && exit 1
+[ ! -e ${tmpd}/def ] && echo "def does not exist" && exit 1
 
 # check base64 dotfile
-[ ! -e ${tmpd}/abc ] && exit 1
+[ ! -e ${tmpd}/abc ] && echo "abc does not exist" && exit 1
 content=`cat ${tmpd}/abc`
-[ "${content}" != "${token}" ] && exit 1
+[ "${content}" != "${token}" ] && echo "bad content for abc" && exit 1
 
 # check directory dotfile
-[ ! -e ${tmpd}/ghi/a/dir1/otherfile ] && exit 1
+[ ! -e ${tmpd}/ghi/a/dir1/otherfile ] && echo "otherfile does not exist" && exit 1
 content=`cat ${tmpd}/ghi/a/somefile`
-[ "${content}" != "${tokend}" ] && exit 1
+[ "${content}" != "${tokend}" ] && echo "bad content for somefile" && exit 1
 content=`cat ${tmpd}/ghi/a/dir1/otherfile`
-[ "${content}" != "${tokend}" ] && exit 1
+[ "${content}" != "${tokend}" ] && echo "bad content for otherfile" && exit 1
 
 # compare
+set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
-[ "$?" != "0" ] && exit 1
+[ "$?" != "0" ] && echo "compare failed (0)" && exit 1
+set -e
 
 # change base64 deployed file
 echo ${touched} > ${tmpd}/abc
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
-[ "$?" != "1" ] && exit 1
+[ "$?" != "1" ] && echo "compare failed (1)" && exit 1
 set -e
 
 # change uncompressed deployed dotfile
 echo ${touched} > ${tmpd}/ghi/a/somefile
 set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
-[ "$?" != "1" ] && exit 1
+[ "$?" != "1" ] && echo "compare failed (2)" && exit 1
 set -e
 
 ###########################
@@ -167,38 +171,44 @@ set -e
 
 # update single file
 echo 'update' > ${tmpd}/def
+set +e
 cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V f_def
-[ "$?" != "0" ] && exit 1
+[ "$?" != "0" ] && echo "update failed (1)" && exit 1
+set -e
 [ ! -e  ${tmpd}/def ] && echo 'dotfile in FS removed' && exit 1
 [ ! -e  ${tmps}/dotfiles/def ] && echo 'dotfile in dotpath removed' && exit 1
 
 # update single file
+set +e
 cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V f_abc
-[ "$?" != "0" ] && exit 1
+[ "$?" != "0" ] && echo "update failed (2)" && exit 1
+set -e
 
 # test updated file
-[ ! -e ${tmps}/dotfiles/abc ] && exit 1
+[ ! -e ${tmps}/dotfiles/abc ] && echo "abc does not exist" && exit 1
 content=`cat ${tmps}/dotfiles/abc`
 bcontent=`echo ${touched} | base64`
-[ "${content}" != "${bcontent}" ] && exit 1
+[ "${content}" != "${bcontent}" ] && echo "bad content for abc" && exit 1
 
 # update directory
 echo ${touched} > ${tmpd}/ghi/b/newfile
 rm -r ${tmpd}/ghi/c
 cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V d_ghi
-[ "$?" != "0" ] && exit 1
+[ "$?" != "0" ] && echo "update failed" && exit 1
 
 # test updated directory
-tar -tf ${tmps}/dotfiles/ghi | grep './b/newfile'
-tar -tf ${tmps}/dotfiles/ghi | grep './a/dir1/otherfile'
+set +e
+tar -tf ${tmps}/dotfiles/ghi | grep './b/newfile' || (echo "newfile not found in tar" && exit 1)
+tar -tf ${tmps}/dotfiles/ghi | grep './a/dir1/otherfile' || (echo "otherfile not found in tar" && exit 1)
+set -e
 
 tmpy=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 tar -xf ${tmps}/dotfiles/ghi -C ${tmpy}
 content=`cat ${tmpy}/a/somefile`
-[ "${content}" != "${touched}" ] && exit 1
+[ "${content}" != "${touched}" ] && echo "bad content" && exit 1
 
 # check canary dotfile
-[ ! -e ${tmps}/dotfiles/def ] && exit 1
+[ ! -e ${tmps}/dotfiles/def ] && echo "def not found" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpx} ${tmpy}

@@ -12,6 +12,7 @@ import uuid
 import fnmatch
 import inspect
 import importlib
+import filecmp
 from shutil import rmtree, which
 
 # local import
@@ -32,7 +33,7 @@ DONOTDELETE = [
 NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
 
 
-def run(cmd, raw=True, debug=False, checkerr=False):
+def run(cmd, debug=False):
     """run a command (expects a list)"""
     if debug:
         LOG.dbg('exec: {}'.format(' '.join(cmd)))
@@ -42,13 +43,6 @@ def run(cmd, raw=True, debug=False, checkerr=False):
     ret = p.returncode
     out = out.splitlines(keepends=True)
     lines = ''.join([x.decode('utf-8', 'replace') for x in out])
-    if checkerr and ret != 0:
-        c = ' '.join(cmd)
-        errl = lines.rstrip()
-        m = '\"{}\" returned non zero ({}): {}'.format(c, ret, errl)
-        LOG.err(m)
-    if raw:
-        return ret == 0, out
     return ret == 0, lines
 
 
@@ -73,7 +67,12 @@ def shell(cmd, debug=False):
     return ret == 0, out
 
 
-def diff(original, modified, raw=True,
+def fastdiff(left, right):
+    """fast compare files and returns True if different"""
+    return not filecmp.cmp(left, right, shallow=False)
+
+
+def diff(original, modified,
          diff_cmd='', debug=False):
     """compare two files, returns '' if same"""
     if not diff_cmd:
@@ -86,7 +85,7 @@ def diff(original, modified, raw=True,
         "{modified}": modified,
     }
     cmd = [replacements.get(x, x) for x in diff_cmd.split()]
-    _, out = run(cmd, raw=raw, debug=debug)
+    _, out = run(cmd, debug=debug)
     return out
 
 
@@ -310,5 +309,44 @@ def dependencies_met():
 
 def mirror_file_rights(src, dst):
     """mirror file rights of src to dst (can rise exc)"""
-    rights = os.stat(src).st_mode
+    if not os.path.exists(src) or not os.path.exists(dst):
+        return
+    rights = get_file_perm(src)
     os.chmod(dst, rights)
+
+
+def get_umask():
+    """return current umask value"""
+    cur = os.umask(0)
+    os.umask(cur)
+    # return 0o777 - cur
+    return cur
+
+
+def get_default_file_perms(path, umask):
+    """get default rights for a file"""
+    base = 0o666
+    if os.path.isdir(path):
+        base = 0o777
+    return base - umask
+
+
+def get_file_perm(path):
+    """return file permission"""
+    return os.stat(path).st_mode & 0o777
+
+
+def chmod(path, mode, debug=False):
+    if debug:
+        LOG.dbg('chmod {} {}'.format(oct(mode), path))
+    os.chmod(path, mode)
+    return get_file_perm(path) == mode
+
+
+def adapt_workers(options, logger):
+    if options.safe and options.workers > 1:
+        logger.warn('workers set to 1 when --force is not used')
+        options.workers = 1
+    if options.dry and options.workers > 1:
+        logger.warn('workers set to 1 when --dry is used')
+        options.workers = 1

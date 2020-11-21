@@ -87,7 +87,7 @@ profiles:
 _EOF
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose | grep '^5 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^5 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 ## CLEANING

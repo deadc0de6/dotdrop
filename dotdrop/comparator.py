@@ -10,7 +10,8 @@ import filecmp
 
 # local imports
 from dotdrop.logger import Logger
-from dotdrop.utils import must_ignore, uniq_list, diff
+from dotdrop.utils import must_ignore, uniq_list, diff, \
+    get_file_perm
 
 
 class Comparator:
@@ -31,6 +32,7 @@ class Comparator:
         if self.debug:
             self.log.dbg('comparing {} and {}'.format(left, right))
             self.log.dbg('ignore pattern(s): {}'.format(ignore))
+
         # test type of file
         if os.path.isdir(left) and not os.path.isdir(right):
             return '\"{}\" is a dir while \"{}\" is a file\n'.format(left,
@@ -38,14 +40,37 @@ class Comparator:
         if not os.path.isdir(left) and os.path.isdir(right):
             return '\"{}\" is a file while \"{}\" is a dir\n'.format(left,
                                                                      right)
+
         # test content
         if not os.path.isdir(left):
             if self.debug:
+                self.log.dbg('{} is a file'.format(left))
+            if self.debug:
                 self.log.dbg('is file')
-            return self._comp_file(left, right, ignore)
+            ret = self._comp_file(left, right, ignore)
+            if not ret:
+                ret = self._comp_mode(left, right)
+            return ret
+
         if self.debug:
-            self.log.dbg('is directory')
-        return self._comp_dir(left, right, ignore)
+            self.log.dbg('{} is a directory'.format(left))
+
+        ret = self._comp_dir(left, right, ignore)
+        if not ret:
+            ret = self._comp_mode(left, right)
+        return ret
+
+    def _comp_mode(self, left, right):
+        """compare mode"""
+        left_mode = get_file_perm(left)
+        right_mode = get_file_perm(right)
+        if left_mode == right_mode:
+            return ''
+        if self.debug:
+            msg = 'mode differ {} ({:o}) and {} ({:o})'
+            self.log.dbg(msg.format(left, left_mode, right, right_mode))
+        ret = 'modes differ for {} ({:o}) vs {:o}\n'
+        return ret.format(right, right_mode, left_mode)
 
     def _comp_file(self, left, right, ignore):
         """compare a file"""
@@ -123,7 +148,7 @@ class Comparator:
 
     def _diff(self, left, right, header=False):
         """diff two files"""
-        out = diff(modified=left, original=right, raw=False,
+        out = diff(modified=left, original=right,
                    diff_cmd=self.diff_cmd, debug=self.debug)
         if header:
             lshort = os.path.basename(left)

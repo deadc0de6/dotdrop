@@ -89,7 +89,7 @@ _EOF
 cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V --link=link_children ${dt}
 
 # check is set to link_children
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${dt}`" | grep ',link:link_children$'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${dt}`" | grep ',link:link_children,'
 
 # checks file exists in dotpath
 [ ! -e ${dotpath}/${dt} ] && echo "dotfile not imported" && exit 1

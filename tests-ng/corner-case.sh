@@ -56,6 +56,8 @@ basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
+export DOTDROP_WORKERS=1
+
 # create the config file
 cfg="${basedir}/config.yaml"
 cat > ${cfg} << _EOF
@@ -89,7 +91,7 @@ cd ${ddpath} | ${bin} install -D -c ${cfg} -p p1 --verbose f_x
 [ "$?" != "0" ] && exit 1
 
 echo "[+] test install not existing src"
-cd ${ddpath} | ${bin} install -c ${cfg} --dry -p p1 --verbose f_y
+cd ${ddpath} | ${bin} install -c ${cfg} -f --dry -p p1 --verbose f_y
 
 echo "[+] test install to temp"
 cd ${ddpath} | ${bin} install -t -c ${cfg} -p p1 --verbose f_x

@@ -20,15 +20,24 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r tests-requirements.txt
+        pip install --user --upgrade coverage
         pip install -r requirements.txt
         npm install -g remark-cli remark-validate-links
         npm install -g markdown-link-check
-    - name: Run tests
+    - name: Run sequential tests
       run: |
         ./tests.sh
       env:
         DOTDROP_FORCE_NODEBUG: yes
         DOTDROP_NOBANNER: yes
+        DOTDROP_WORKERS: 1
+    - name: Run parallel tests
+      run: |
+        ./tests.sh
+      env:
+        DOTDROP_FORCE_NODEBUG: yes
+        DOTDROP_NOBANNER: yes
+        DOTDROP_WORKERS: 4
     - name: Coveralls
       run: |
         coveralls

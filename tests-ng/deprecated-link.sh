@@ -126,12 +126,12 @@ set -e
 
 # test values have been correctly updated
 echo "========> test for updated entries"
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_link'      | head -1 | grep ',link:link$'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink'    | head -1 | grep ',link:nolink$'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink1'   | head -1 | grep ',link:nolink$'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children'  | head -1 | grep ',link:link_children$'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children2' | head -1 | grep ',link:link_children$'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children3' | head -1 | grep ',link:nolink$'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_link' | head -1 | grep ',link:link,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink'    | head -1 | grep ',link:nolink,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink1'   | head -1 | grep ',link:nolink,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children'  | head -1 | grep ',link:link_children,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children2' | head -1 | grep ',link:link_children,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children3' | head -1 | grep ',link:nolink,'
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd}

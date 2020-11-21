@@ -81,7 +81,7 @@ echo "modified" > ${tmpd}/singlefile
 # default diff (unified)
 echo "[+] comparing with default diff (unified)"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} 2>&1 | grep -v '=>' | grep -v '^+++\|^---' > ${tmpd}/normal
+cd ${ddpath} | ${bin} compare -c ${cfg} 2>&1 | grep -v '=>' | grep -v '\->' | grep -v 'dotfile(s) compared' | sed '$d' | grep -v '^+++\|^---' > ${tmpd}/normal
 diff -u -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile | grep -v '^+++\|^---' > ${tmpd}/real
 set -e
 
@@ -96,7 +96,7 @@ sed '/dotpath: dotfiles/a \ \ diff_command: "diff -r {0} {1}"' ${cfg} > ${cfg2}
 # normal diff
 echo "[+] comparing with normal diff"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg2} 2>&1 | grep -v '=>' > ${tmpd}/unified
+cd ${ddpath} | ${bin} compare -c ${cfg2} 2>&1 | grep -v '=>' | grep -v '\->' | grep -v 'dotfile(s) compared' | sed '$d' > ${tmpd}/unified
 diff -r ${tmpd}/singlefile ${basedir}/dotfiles/${tmpd}/singlefile > ${tmpd}/real
 set -e
 
@@ -113,7 +113,7 @@ sed '/dotpath: dotfiles/a \ \ diff_command: "echo fakediff"' ${cfg} > ${cfg3}
 # fake diff
 echo "[+] comparing with fake diff"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg3} 2>&1 | grep -v '=>' > ${tmpd}/fake
+cd ${ddpath} | ${bin} compare -c ${cfg3} 2>&1 | grep -v '=>' | grep -v '\->' | grep -v 'dotfile(s) compared' | sed '$d' > ${tmpd}/fake
 set -e
 
 # verify

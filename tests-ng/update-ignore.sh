@@ -46,6 +46,15 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
+# $1 pattern
+# $2 path
+grep_or_fail()
+{
+  set +e
+  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
+  set -e
+}
+
 # dotdrop directory
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 dt="${tmps}/dotfiles"
@@ -98,7 +107,7 @@ cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 #tree ${dt}
 
 # check files haven't been updated
-grep 'b' ${dt}/a/c/acfile >/dev/null
+grep_or_fail 'b' "${dt}/a/c/acfile"
 [ -e ${dt}/a/newfile ] && echo "should not have been updated" && exit 1
 
 ## CLEANING

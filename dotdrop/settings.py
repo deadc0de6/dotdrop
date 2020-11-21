@@ -5,9 +5,14 @@ Copyright (c) 2019, deadc0de6
 settings block
 """
 
+import os
+
 # local imports
 from dotdrop.linktypes import LinkTypes
 from dotdrop.dictparser import DictParser
+
+
+ENV_WORKDIR = 'DOTDROP_WORKDIR'
 
 
 class Settings(DictParser):
@@ -68,6 +73,8 @@ class Settings(DictParser):
         self.cmpignore = cmpignore
         self.instignore = instignore
         self.workdir = workdir
+        if ENV_WORKDIR in os.environ:
+            self.workdir = os.environ[ENV_WORKDIR]
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
         self.minversion = minversion

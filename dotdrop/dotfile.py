@@ -22,7 +22,7 @@ class Dotfile(DictParser):
                  actions=[], trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, noempty=False,
                  cmpignore=[], upignore=[],
-                 instignore=[], template=True):
+                 instignore=[], template=True, chmod=None):
         """
         constructor
         @key: dotfile key
@@ -37,6 +37,7 @@ class Dotfile(DictParser):
         @cmpignore: patterns to ignore when comparing
         @instignore: patterns to ignore when installing
         @template: template this dotfile
+        @chmod: file permission
         """
         self.actions = actions
         self.dst = dst
@@ -50,6 +51,7 @@ class Dotfile(DictParser):
         self.cmpignore = cmpignore
         self.instignore = instignore
         self.template = template
+        self.chmod = chmod
 
         if self.link != LinkTypes.NOLINK and \
                 (
@@ -113,6 +115,8 @@ class Dotfile(DictParser):
         msg += ', dst:\"{}\"'.format(self.dst)
         msg += ', link:\"{}\"'.format(str(self.link))
         msg += ', template:{}'.format(self.template)
+        if self.chmod:
+            msg += ', chmod:{:o}'.format(self.chmod)
         return msg
 
     def prt(self):
@@ -123,6 +127,8 @@ class Dotfile(DictParser):
         out += '\n{}dst: \"{}\"'.format(indent, self.dst)
         out += '\n{}link: \"{}\"'.format(indent, str(self.link))
         out += '\n{}template: \"{}\"'.format(indent, str(self.template))
+        if self.chmod:
+            out += '\n{}chmod: \"{:o}\"'.format(indent, self.chmod)
 
         out += '\n{}pre-action:'.format(indent)
         some = self.get_pre_actions()

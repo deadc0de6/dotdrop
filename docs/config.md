@@ -59,6 +59,31 @@ Here are some rules on the use of variables in configs:
 * external/imported `(dyn)variables` take precedence over
   `(dyn)variables` defined inside the main config file
 
+## Permissions
+
+Dotdrop allows to control the permission applied to a dotfile using the
+config dotfile entry [chmod](config-format.md#dotfiles-entry).
+A [chmod](config-format.md#dotfiles-entry) entry on a directory is applied to the
+directory only, not recursively.
+
+On `import` the following rules are applied:
+
+* if the `-m --preserve-mode` switch is provided the imported file permissions are
+  stored in a `chmod` entry
+* if imported file permissions differ from umask then its permissions are automatically
+  stored in the `chmod` entry
+* otherwise no `chmod` entry is added
+
+On `install` the following rules are applied:
+
+* if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
+* otherwise the permissions of the dotfile in the `dotpath` are applied.
+
+On `update`:
+
+* if the permissions of the file in the filesystem differ from the dotfile in the `dotpath`
+  then the dotfile entry `chmod` is added/updated accordingly
+
 ## Symlink dotfiles
 
 Dotdrop is able to install dotfiles in three different ways

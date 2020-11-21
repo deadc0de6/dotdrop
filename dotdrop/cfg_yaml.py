@@ -58,6 +58,7 @@ class CfgYaml:
     key_dotfile_actions = 'actions'
     key_dotfile_noempty = 'ignoreempty'
     key_dotfile_template = 'template'
+    key_dotfile_chmod = 'chmod'
 
     # profile
     key_profile_dotfiles = 'dotfiles'
@@ -316,7 +317,29 @@ class CfgYaml:
         """return all existing dotfile keys"""
         return self.dotfiles.keys()
 
-    def add_dotfile(self, key, src, dst, link):
+    def update_dotfile(self, key, chmod):
+        """update an existing dotfile"""
+        if key not in self.dotfiles.keys():
+            return False
+        df = self._yaml_dict[self.key_dotfiles][key]
+        old = None
+        if self.key_dotfile_chmod in df:
+            old = df[self.key_dotfile_chmod]
+        if old == chmod:
+            return False
+        if self._debug:
+            self._dbg('update dotfile: {}'.format(key))
+            self._dbg('old chmod value: {}'.format(old))
+            self._dbg('new chmod value: {}'.format(chmod))
+        df = self._yaml_dict[self.key_dotfiles][key]
+        if not chmod:
+            del df[self.key_dotfile_chmod]
+        else:
+            df[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+        self._dirty = True
+        return True
+
+    def add_dotfile(self, key, src, dst, link, chmod=None):
         """add a new dotfile"""
         if key in self.dotfiles.keys():
             return False
@@ -324,16 +347,25 @@ class CfgYaml:
             self._dbg('adding new dotfile: {}'.format(key))
             self._dbg('new dotfile src: {}'.format(src))
             self._dbg('new dotfile dst: {}'.format(dst))
-
+            self._dbg('new dotfile link: {}'.format(link))
+            self._dbg('new dotfile chmod: {}'.format(chmod))
         df_dict = {
             self.key_dotfile_src: src,
             self.key_dotfile_dst: dst,
         }
+        # link
         dfl = self.settings[self.key_settings_link_dotfile_default]
         if str(link) != dfl:
             df_dict[self.key_dotfile_link] = str(link)
+
+        # chmod
+        if chmod:
+            df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+
+        # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict
         self._dirty = True
+        return True
 
     def del_dotfile(self, key):
         """remove this dotfile from config"""
@@ -593,7 +625,7 @@ class CfgYaml:
         return new
 
     def _norm_dotfiles(self, dotfiles):
-        """normalize dotfiles entries"""
+        """normalize and check dotfiles entries"""
         if not dotfiles:
             return dotfiles
         new = {}
@@ -623,6 +655,27 @@ class CfgYaml:
             if self.key_dotfile_template not in v:
                 val = self.settings.get(self.key_settings_template, True)
                 v[self.key_dotfile_template] = val
+            # validate value of chmod if defined
+            if self.key_dotfile_chmod in v:
+                val = str(v[self.key_dotfile_chmod])
+                if len(val) < 3:
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+                try:
+                    int(val)
+                except Exception:
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+                for x in list(val):
+                    y = int(x)
+                    if y >= 0 or y <= 7:
+                        continue
+                    err = 'bad format for chmod: {}'.format(val)
+                    self._log.err(err)
+                    raise YamlException('config content error: {}'.format(err))
+                v[self.key_dotfile_chmod] = int(val, 8)
 
         return new
 
