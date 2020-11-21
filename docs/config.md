@@ -61,10 +61,23 @@ Here are some rules on the use of variables in configs:
 
 ## Permissions
 
-Dotdrop allows to control the permission applied to a dotfile using the
+Dotdrop allows to control the permissions applied to a dotfile using the
 config dotfile entry [chmod](config-format.md#dotfiles-entry).
-A [chmod](config-format.md#dotfiles-entry) entry on a directory is applied to the
-directory only, not recursively.
+A [chmod](config-format.md#dotfiles-entry) entry on a directory
+is applied to the directory only, not recursively.
+
+For example
+```yaml
+dotfiles:
+  f_file:
+    src: file
+    dst: ~/file
+    chmod: 644
+  f_dir:
+    src: dir
+    dst: ~/dir
+    chmod: 744
+```
 
 On `import` the following rules are applied:
 

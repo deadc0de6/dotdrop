@@ -46,7 +46,7 @@ Entry    | Description
 `src` | dotfile path within the `dotpath` (dotfile with empty `src` are ignored and considered installed, can use `variables` and `dynvariables`, make sure to quote)
 `link` | define how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) (defaults to value of `link_dotfile_default`)
 `actions` | list of action keys that need to be defined in the **actions** entry below (see [actions](config-details.md#entry-actions))
-`chmod` | defines the file permission in octal notation to apply during installation (see [permissions](config.md#permissions))
+`chmod` | defines the file permissions in octal notation to apply during installation (see [permissions](config.md#permissions))
 `cmpignore` | list of patterns to ignore when comparing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
 `ignoreempty` | if true empty template will not be deployed (defaults to value of `ignoreempty`)
 `instignore` | list of patterns to ignore when installing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
@@ -73,6 +73,7 @@ Entry    | Description
   actions:
     - <action-key>
   template: (true|false)
+  chmod: '<file-permissions>'
   trans_read: <transformation-key>
   trans_write: <transformation-key>
 ```
