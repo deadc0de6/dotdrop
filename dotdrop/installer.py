@@ -87,7 +87,8 @@ class Installer:
         """
         if not src or not dst:
             # fake dotfile
-            self.log.dbg('fake dotfile installed')
+            if self.debug:
+                self.log.dbg('fake dotfile installed')
             self._exec_pre_actions(actionexec)
             return True, None
         if self.debug:
