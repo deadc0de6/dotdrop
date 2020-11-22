@@ -85,6 +85,11 @@ class Installer:
         - False, error_msg  : error
         - False, None       : ignored
         """
+        if not src or not dst:
+            # fake dotfile
+            self.log.dbg('fake dotfile installed')
+            self._exec_pre_actions(actionexec)
+            return True, None
         if self.debug:
             msg = 'installing \"{}\" to \"{}\" (link: {})'
             self.log.dbg(msg.format(src, dst, str(linktype)))

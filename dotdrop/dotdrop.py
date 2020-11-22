@@ -298,7 +298,7 @@ def cmd_install(o):
     if o.install_temporary:
         tmpdir = get_tmpdir()
 
-    installed = 0
+    installed = []
 
     # execute profile pre-action
     if o.debug:
@@ -317,43 +317,29 @@ def cmd_install(o):
 
         wait_for = []
         for dotfile in dotfiles:
-            if not dotfile.src or not dotfile.dst:
-                # fake dotfile are always considered installed
-                if o.debug:
-                    LOG.dbg('fake dotfile installed')
-                installed += 1
-            else:
-                j = ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
-                wait_for.append(j)
+            j = ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
+            wait_for.append(j)
         # check result
         for f in futures.as_completed(wait_for):
             r, key, err = f.result()
             if r:
-                installed += 1
+                installed.append(key)
             elif err:
                 LOG.err('installing \"{}\" failed: {}'.format(key,
                                                               err))
     else:
         # sequentially
         for dotfile in dotfiles:
-            if not dotfile.src or not dotfile.dst:
-                # fake dotfile are always considered installed
-                if o.debug:
-                    LOG.dbg('fake dotfile installed')
-                key = dotfile.key
-                r = True
-                err = None
-            else:
-                r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
             # check result
             if r:
-                installed += 1
+                installed.append(key)
             elif err:
                 LOG.err('installing \"{}\" failed: {}'.format(key,
                                                               err))
 
     # execute profile post-action
-    if installed > 0 or o.install_force_action:
+    if len(installed) > 0 or o.install_force_action:
         if o.debug:
             msg = 'run {} profile post actions'
             LOG.dbg(msg.format(len(pro_post_actions)))
@@ -362,11 +348,11 @@ def cmd_install(o):
             return False
 
     if o.debug:
-        LOG.dbg('install done - {} installed'.format(installed))
+        LOG.dbg('install done: installed \"{}\"'.format(','.join(installed)))
 
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
-    LOG.log('\n{} dotfile(s) installed.'.format(installed))
+    LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
 
 

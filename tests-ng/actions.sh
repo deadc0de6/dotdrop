@@ -62,11 +62,13 @@ actions:
   pre:
     preaction: echo 'pre' > ${tmpa}/pre
     preaction2: echo 'pre2' > ${tmpa}/pre2
+    fake_pre: echo 'fake pre' > ${tmpa}/fake_pre
   post:
     postaction: echo 'post' > ${tmpa}/post
     postaction2: echo 'post2' > ${tmpa}/post2
   nakedaction: echo 'naked' > ${tmpa}/naked
   _silentaction: echo 'silent'
+  fakeaction: echo 'fake' > ${tmpa}/fake
 config:
   backup: true
   create: true
@@ -82,10 +84,17 @@ dotfiles:
       - preaction2
       - postaction2
       - _silentaction
+  f_fake:
+    dst:
+    src:
+    actions:
+      - fakeaction
+      - fake_pre
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - f_fake
 _EOF
 #cat ${cfg}
 
@@ -110,6 +119,12 @@ grep post ${tmpa}/post2 >/dev/null
 grep "executing \"echo 'naked' > ${tmpa}/naked" ${tmpa}/log >/dev/null
 grep "executing \"echo 'silent'" ${tmpa}/log >/dev/null && false
 grep "executing silent action \"_silentaction\"" ${tmpa}/log >/dev/null
+
+# fake action
+[ ! -e ${tmpa}/fake ] && echo 'fake post action not executed' && exit 1
+grep fake ${tmpa}/fake >/dev/null
+[ ! -e ${tmpa}/fake_pre ] && echo 'fake pre action not executed' && exit 1
+grep 'fake pre' ${tmpa}/fake_pre >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}
