@@ -92,7 +92,7 @@ move_to_base()
   if [ "$?" ]; then
     # dotdrop is a submodule
     echo "dotdrop used as a submodule"
-    cd dotdrop || echo "cannot change directory to dotdrop" && exit 1
+    cd dotdrop || (echo "cannot change directory to dotdrop" && exit 1)
     return
   fi
 
