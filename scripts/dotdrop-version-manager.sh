@@ -23,7 +23,7 @@ get_current()
 # get current tag
 get_current_tag()
 {
-  git describe --tags 2>/dev/null
+  git describe --tags --long 2>/dev/null
 }
 
 get_current_branch()
@@ -52,10 +52,16 @@ get_branches()
 need_update()
 {
   git fetch origin >/dev/null 2>&1
+  last=$(get_latest)
   cur=$(get_current_tag)
-  if [ "${cur}" != "" ]; then
-    last=$(get_latest)
-    [ "${last}" != "${cur}" ] && echo "new version available: ${last}" && return
+  # get short tag if on a lightweight tag
+  echo "you are on ${cur}"
+  tag=$(echo "$cur" | sed 's/\(v.*\)-.-.*$/\1/g')
+  #nb=$(echo "$cur" | sed 's/v.*-\(.\)-.*$/\1/g')
+  #commit=$(echo "$cur" | sed 's/v.*-.-\(.*\)$/\1/g')
+  # compare
+  if [ "${tag}" != "${last}" ]; then
+    echo "new version available: ${last}" && return
   fi
   changes=$(git status -s)
   [ "${changes}" != "" ] && echo "new updates available" && return
