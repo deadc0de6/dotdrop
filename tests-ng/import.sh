@@ -123,9 +123,6 @@ mkfifo ${d}/fifo
 # import
 cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${d}
 
-cat ${cfg}
-tree ${tmps}/dotfiles
-
 # ensure exists and is not link
 [ ! -d ${tmps}/dotfiles/${d} ] && echo "not a directory" && exit 1
 [ ! -e ${tmps}/dotfiles/${d}/file1 ] && echo "not exist" && exit 1
