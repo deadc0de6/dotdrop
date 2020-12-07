@@ -182,8 +182,9 @@ class Importer:
                 else:
                     shutil.copy2(dst, srcf)
             except shutil.Error as e:
+                src = e.args[0][0][0]
                 why = e.args[0][0][2]
-                self.log.err('importing \"{}\" failed: {}'.format(dst, why))
+                self.log.err('importing \"{}\" failed: {}'.format(src, why))
 
         return True
 
