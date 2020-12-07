@@ -100,4 +100,4 @@ fi
 #fi
 
 ## done
-echo "All test finished successfully in ${SECONDS}s"
+echo "All test finished successfully"

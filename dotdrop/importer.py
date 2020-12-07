@@ -173,13 +173,17 @@ class Importer:
         if self.dry:
             self.log.dry('would copy {} to {}'.format(dst, srcf))
         else:
-            # copy the file to the dotpath
-            if os.path.isdir(dst):
-                if os.path.exists(srcf):
-                    shutil.rmtree(srcf)
-                shutil.copytree(dst, srcf)
-            else:
-                shutil.copy2(dst, srcf)
+            try:
+                # copy the file to the dotpath
+                if os.path.isdir(dst):
+                    if os.path.exists(srcf):
+                        shutil.rmtree(srcf)
+                    shutil.copytree(dst, srcf)
+                else:
+                    shutil.copy2(dst, srcf)
+            except shutil.Error as e:
+                why = e.args[0][0][2]
+                self.log.err('importing \"{}\" failed: {}'.format(dst, why))
 
         return True
 
