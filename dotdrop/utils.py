@@ -202,13 +202,15 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg('must ignore? {} against {}'.format(paths, ignores))
+        LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
     for p in paths:
         for i in ignores:
             if fnmatch.fnmatch(p, i):
                 if debug:
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
                 return True
+    if debug:
+        LOG.dbg('NOT ignoring {}'.format(paths))
     return False
 
 

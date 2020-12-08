@@ -467,7 +467,7 @@ def cmd_importer(o):
     paths = o.import_path
     importer = Importer(o.profile, o.conf, o.dotpath, o.diff_command,
                         dry=o.dry, safe=o.safe, debug=o.debug,
-                        keepdot=o.keepdot)
+                        keepdot=o.keepdot, ignore=o.import_ignore)
 
     for path in paths:
         r = importer.import_path(path, import_as=o.import_as,

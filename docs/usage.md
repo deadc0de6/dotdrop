@@ -68,6 +68,8 @@ dotfiles management.
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test
 ```
 
+To ignore specific pattern during import see [the ignore patterns](config.md#ignore-patterns)
+
 For more options, see the usage with `dotdrop --help`
 
 ## Install dotfiles

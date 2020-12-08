@@ -56,7 +56,7 @@ Usage:
   dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>]
                                 [-w <nb>] [<key>...]
   dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
-                                [-l <link>] <path>...
+                                [-l <link>] [-i <pattern>...] <path>...
   dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
   dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
@@ -269,6 +269,10 @@ class Options(AttrMonitor):
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
         self.import_mode = self.args['--preserve-mode']
+        self.import_ignore = self.args['--ignore']
+        self.import_ignore.extend(self.impignore)
+        self.import_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.import_ignore = uniq_list(self.import_ignore)
 
         # "update" specifics
         self.update_path = self.args['<path>']

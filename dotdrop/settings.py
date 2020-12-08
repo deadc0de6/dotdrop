@@ -32,6 +32,7 @@ class Settings(DictParser):
     key_link_on_import = 'link_on_import'
     key_showdiff = 'showdiff'
     key_upignore = 'upignore'
+    key_impignore = 'impignore'
     key_cmpignore = 'cmpignore'
     key_instignore = 'instignore'
     key_workdir = 'workdir'
@@ -52,7 +53,7 @@ class Settings(DictParser):
                  import_variables=[], keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
-                 upignore=[], cmpignore=[], instignore=[],
+                 upignore=[], cmpignore=[], instignore=[], impignore=[],
                  workdir='~/.config/dotdrop', showdiff=False,
                  minversion=None, func_file=[], filter_file=[],
                  diff_command='diff -r -u {0} {1}',
@@ -72,6 +73,7 @@ class Settings(DictParser):
         self.upignore = upignore
         self.cmpignore = cmpignore
         self.instignore = instignore
+        self.impignore = impignore
         self.workdir = workdir
         if ENV_WORKDIR in os.environ:
             self.workdir = os.environ[ENV_WORKDIR]
@@ -113,6 +115,7 @@ class Settings(DictParser):
         self._serialize_seq(self.key_cmpignore, dic)
         self._serialize_seq(self.key_upignore, dic)
         self._serialize_seq(self.key_instignore, dic)
+        self._serialize_seq(self.key_impignore, dic)
         self._serialize_seq(self.key_func_file, dic)
         self._serialize_seq(self.key_filter_file, dic)
 

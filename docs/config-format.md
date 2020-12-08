@@ -21,6 +21,7 @@ Entry    | Description | Default
 `filter_file` | list of paths to load templating filters from (see [Templating available filters](templating.md#template-filters)) | -
 `func_file` | list of paths to load templating functions from (see [Templating available methods](templating.md#template-methods)) | -
 `ignoreempty` | do not deploy template if empty | false
+`impignore` | list of patterns to ignore when importing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
 `import_actions` | list of paths to load actions from (absolute path or relative to the config file location, see [Import actions from file](config-details.md#entry-import_actions)) | -
 `import_configs` | list of config file paths to be imported in the current config (absolute path or relative to the current config file location, see [Import config files](config-details.md#entry-import_configs)) | -
 `import_variables` | list of paths to load variables from (absolute path or relative to the config file location see [Import variables from file](config-details.md#entry-import_variables)) | -

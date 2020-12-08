@@ -151,11 +151,12 @@ profiles:
 
 ## Ignore patterns
 
-It is possible to ignore specific patterns when using dotdrop. For example for `compare` when temporary
-files don't need to appear in the output.
+It is possible to ignore specific patterns when using dotdrop.
 
 * for [install](usage.md#install-dotfiles)
     * using `instignore` in the config file
+* for [import](usage.md#import-dotfiles)
+    * using `impignore` in the config file
 * for [compare](usage.md#compare-dotfiles)
     * using `cmpignore` in the config file
     * using the command line switch `-i --ignore`
@@ -207,3 +208,11 @@ dotfiles:
       - '*sub_directory_to_ignore'
 ```
 
+To ignore specific file `testfile` and directory `testdir` when importing:
+```yaml
+config:
+  impignore:
+  - "*/testfile"
+  - "testdir"
+...
+```

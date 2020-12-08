@@ -11,7 +11,7 @@ import shutil
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home, get_default_file_perms, \
-    get_file_perm, get_umask
+    get_file_perm, get_umask, must_ignore
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
 
@@ -20,7 +20,7 @@ class Importer:
 
     def __init__(self, profile, conf, dotpath, diff_cmd,
                  dry=False, safe=True, debug=False,
-                 keepdot=True):
+                 keepdot=True, ignore=[]):
         """constructor
         @profile: the selected profile
         @conf: configuration manager
@@ -30,6 +30,7 @@ class Importer:
         @safe: ask for overwrite if True
         @debug: enable debug
         @keepdot: keep dot prefix
+        @ignore: patterns to ignore when importing
         """
         self.profile = profile
         self.conf = conf
@@ -39,6 +40,7 @@ class Importer:
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
+        self.ignore = ignore
 
         self.umask = get_umask()
         self.log = Logger()
@@ -74,6 +76,10 @@ class Importer:
         # normalize path
         dst = path.rstrip(os.sep)
         dst = os.path.abspath(dst)
+
+        # test if must be ignored
+        if self._ignore(dst):
+            return 0
 
         # ask confirmation for symlinks
         if self.safe:
@@ -141,6 +147,12 @@ class Importer:
     def _prepare_hierarchy(self, src, dst):
         """prepare hierarchy for dotfile"""
         srcf = os.path.join(self.dotpath, src)
+        if self._ignore(srcf):
+            return False
+
+        srcfd = os.path.dirname(srcf)
+        if self._ignore(srcfd):
+            return False
 
         # a dotfile in dotpath already exists at that spot
         if os.path.exists(srcf):
@@ -160,12 +172,12 @@ class Importer:
                         self.log.dbg('will overwrite existing file')
 
         # create directory hierarchy
-        cmd = 'mkdir -p {}'.format(os.path.dirname(srcf))
         if self.dry:
+            cmd = 'mkdir -p {}'.format(srcfd)
             self.log.dry('would run: {}'.format(cmd))
         else:
             try:
-                os.makedirs(os.path.dirname(srcf), exist_ok=True)
+                os.makedirs(srcfd, exist_ok=True)
             except Exception:
                 self.log.err('importing \"{}\" failed!'.format(dst))
                 return False
@@ -177,11 +189,19 @@ class Importer:
             if os.path.isdir(dst):
                 if os.path.exists(srcf):
                     shutil.rmtree(srcf)
-                shutil.copytree(dst, srcf)
+                shutil.copytree(dst, srcf, copy_function=self._cp,
+                                ignore=shutil.ignore_patterns(*self.ignore))
             else:
                 shutil.copy2(dst, srcf)
 
         return True
+
+    def _cp(self, src, dst):
+        """the copy function for copytree"""
+        # test if must be ignored
+        if self._ignore(src):
+            return
+        shutil.copy2(src, dst)
 
     def _already_exists(self, src, dst):
         """
@@ -200,4 +220,12 @@ class Importer:
                 # different src
                 self.log.err('duplicate dotfile for this profile')
                 return True
+        return False
+
+    def _ignore(self, path):
+        if must_ignore([path], self.ignore, debug=self.debug):
+            if self.debug:
+                self.log.dbg('ignoring import of {}'.format(path))
+            self.log.warn('{} ignored'.format(path))
+            return True
         return False
