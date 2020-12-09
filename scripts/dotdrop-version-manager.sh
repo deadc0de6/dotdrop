@@ -55,10 +55,17 @@ need_update()
   last=$(get_latest)
   cur=$(get_current_tag)
   # get short tag if on a lightweight tag
-  echo "you are on ${cur}"
-  tag=$(echo "$cur" | sed 's/\(v.*\)-.-.*$/\1/g')
-  #nb=$(echo "$cur" | sed 's/v.*-\(.\)-.*$/\1/g')
-  #commit=$(echo "$cur" | sed 's/v.*-.-\(.*\)$/\1/g')
+
+  tag=$(echo "$cur" | sed 's/\(v.*\)-[0-9]*.-.*$/\1/g')
+  nb=$(echo "$cur" | sed 's/v.*-\([0-9]*\)-.*$/\1/g')
+  commit=$(echo "$cur" | sed 's/v.*-[0-9]*-\(.*\)$/\1/g')
+
+  if [ "${commit}" != "" ]; then
+    echo "you are on ${tag} commit ${commit}"
+  else
+    echo "you are on ${cur}"
+  fi
+
   # compare
   if [ "${tag}" != "${last}" ]; then
     echo "new version available: ${last}" && return
