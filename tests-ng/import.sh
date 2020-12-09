@@ -101,6 +101,35 @@ cntpost=`find ${tmps}/dotfiles -type f | wc -l`
 
 [ "${cntpost}" != "${cntpre}" ] && echo "import issue" && exit 1
 
+#######################################
+# import directory with named pipe
+
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+profiles:
+_EOF
+
+# create the dotfile
+d="${tmpd}/with_named_pipe"
+mkdir -p ${d}
+echo "file1" > ${d}/file1
+echo "fil2" > ${d}/file2
+mkfifo ${d}/fifo
+
+# import
+cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${d}
+
+# ensure exists and is not link
+[ ! -d ${tmps}/dotfiles/${d} ] && echo "not a directory" && exit 1
+[ ! -e ${tmps}/dotfiles/${d}/file1 ] && echo "not exist" && exit 1
+[ ! -e ${tmps}/dotfiles/${d}/file2 ] && echo "not exist" && exit 1
+
+cat ${cfg} | grep ${d} >/dev/null 2>&1
+
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
 

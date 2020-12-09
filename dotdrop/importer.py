@@ -186,13 +186,20 @@ class Importer:
             self.log.dry('would copy {} to {}'.format(dst, srcf))
         else:
             # copy the file to the dotpath
-            if os.path.isdir(dst):
-                if os.path.exists(srcf):
-                    shutil.rmtree(srcf)
-                shutil.copytree(dst, srcf, copy_function=self._cp,
-                                ignore=shutil.ignore_patterns(*self.ignore))
-            else:
-                shutil.copy2(dst, srcf)
+            try:
+                if os.path.isdir(dst):
+                    if os.path.exists(srcf):
+                        shutil.rmtree(srcf)
+                    ig = shutil.ignore_patterns(*self.ignore)
+                    shutil.copytree(dst, srcf,
+                                    copy_function=self._cp,
+                                    ignore=ig)
+                else:
+                    shutil.copy2(dst, srcf)
+            except shutil.Error as e:
+                src = e.args[0][0][0]
+                why = e.args[0][0][2]
+                self.log.err('importing \"{}\" failed: {}'.format(src, why))
 
         return True
 
