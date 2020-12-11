@@ -16,7 +16,8 @@ from dotdrop.utils import must_ignore, uniq_list, diff, \
 
 class Comparator:
 
-    def __init__(self, diff_cmd='', debug=False, ignore_missing_in_dotdrop=False):
+    def __init__(self, diff_cmd='', debug=False,
+                 ignore_missing_in_dotdrop=False):
         """constructor
         @diff_cmd: diff command to use
         @debug: enable debug
