@@ -43,7 +43,7 @@ OPT_LINK = {
     LinkTypes.LINK.name.lower(): LinkTypes.LINK,
     LinkTypes.LINK_CHILDREN.name.lower(): LinkTypes.LINK_CHILDREN}
 
-BANNER = """     _       _      _
+BANNER = r"""     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
  \__,_|\___/ \__\__,_|_|  \___/| .__/  v{}
@@ -57,9 +57,9 @@ Usage:
                                 [-w <nb>] [<key>...]
   dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
                                 [-l <link>] [-i <pattern>...] <path>...
-  dotdrop compare   [-LVb]      [-c <path>] [-p <profile>]
+  dotdrop compare   [-LVbz]     [-c <path>] [-p <profile>]
                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-VbfdkP]   [-c <path>] [-p <profile>]
+  dotdrop update    [-VbfdkPz]  [-c <path>] [-p <profile>]
                                 [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
   dotdrop files     [-VbTG]     [-c <path>] [-p <profile>]
@@ -73,6 +73,7 @@ Options:
   -b --no-banner          Do not display the banner.
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
+  -z --ignore-missing     Ignore files in installed folders that are missing.
   -d --dry                Dry run.
   -D --showdiff           Show a diff before overwriting.
   -f --force              Do not ask user confirmation for anything.
@@ -123,6 +124,7 @@ class Options(AttrMonitor):
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
+        self.ignore_missing_in_dotdrop = self.args['--ignore-missing']
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False

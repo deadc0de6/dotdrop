@@ -25,7 +25,8 @@ class Updater:
 
     def __init__(self, dotpath, variables, conf,
                  dry=False, safe=True, debug=False,
-                 ignore=[], showpatch=False):
+                 ignore=[], showpatch=False,
+                 ignore_missing_in_dotdrop=False):
         """constructor
         @dotpath: path where dotfiles are stored
         @variables: dictionary of variables for the templates
@@ -44,6 +45,7 @@ class Updater:
         self.debug = debug
         self.ignore = ignore
         self.showpatch = showpatch
+        self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
         self.templater = Templategen(variables=self.variables,
                                      base=self.dotpath,
                                      debug=self.debug)
@@ -403,7 +405,10 @@ class Updater:
         return True
 
     def _ignore(self, paths):
-        if must_ignore(paths, self.ignores, debug=self.debug):
+        if must_ignore(
+            paths, self.ignores, debug=self.debug,
+            ignore_missing_in_dotdrop=self.ignore_missing_in_dotdrop,
+        ):
             if self.debug:
                 self.log.dbg('ignoring update for {}'.format(paths))
             return True

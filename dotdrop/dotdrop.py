@@ -80,7 +80,8 @@ def _dotfile_update(o, path, key=False):
     updater = Updater(o.dotpath, o.variables, o.conf,
                       dry=o.dry, safe=o.safe, debug=o.debug,
                       ignore=o.update_ignore,
-                      showpatch=o.update_showpatch)
+                      showpatch=o.update_showpatch,
+                      ignore_missing_in_dotdrop=o.ignore_missing_in_dotdrop)
     if key:
         return updater.update_key(path)
     return updater.update_path(path)
@@ -97,7 +98,8 @@ def _dotfile_compare(o, dotfile, tmp):
                      workdir=o.workdir, debug=o.debug,
                      backup_suffix=o.install_backup_suffix,
                      diff_cmd=o.diff_command)
-    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug)
+    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug,
+                      ignore_missing_in_dotdrop=o.ignore_missing_in_dotdrop)
 
     # add dotfile variables
     newvars = dotfile.get_dotfile_variables()

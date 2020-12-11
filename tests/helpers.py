@@ -135,6 +135,7 @@ def _fake_args():
     args['--file-only'] = False
     args['--workers'] = 1
     args['--preserve-mode'] = False
+    args['--ignore-missing'] = False
     # cmds
     args['profiles'] = False
     args['files'] = False

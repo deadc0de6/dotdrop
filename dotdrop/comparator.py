@@ -16,7 +16,7 @@ from dotdrop.utils import must_ignore, uniq_list, diff, \
 
 class Comparator:
 
-    def __init__(self, diff_cmd='', debug=False):
+    def __init__(self, diff_cmd='', debug=False, ignore_missing_in_dotdrop=False):
         """constructor
         @diff_cmd: diff command to use
         @debug: enable debug
@@ -24,6 +24,7 @@ class Comparator:
         self.diff_cmd = diff_cmd
         self.debug = debug
         self.log = Logger()
+        self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
     def compare(self, left, right, ignore=[]):
         """diff left (dotdrop dotfile) and right (deployed file)"""
@@ -111,7 +112,9 @@ class Comparator:
             if must_ignore([os.path.join(right, i)],
                            ignore, debug=self.debug):
                 continue
-            ret.append('=> \"{}\" does not exist in dotdrop\n'.format(i))
+
+            if not self.ignore_missing_in_dotdrop:
+                ret.append('=> \"{}\" does not exist in dotdrop\n'.format(i))
 
         # same left and right but different type
         funny = comp.common_funny
