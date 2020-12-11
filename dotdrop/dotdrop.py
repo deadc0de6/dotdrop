@@ -207,7 +207,13 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
         LOG.dbg(dotfile.prt())
 
-    is_template = dotfile.template and Templategen.is_template(dotfile.src)
+    ignores = list(set(o.install_ignore + dotfile.instignore))
+    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+
+    is_template = dotfile.template and Templategen.is_template(
+        dotfile.src,
+        ignore=ignores,
+    )
     if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
         # link
         r, err = inst.install(t, dotfile.src, dotfile.dst,
@@ -222,7 +228,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               dotfile.link,
                               actionexec=pre_actions_exec,
                               is_template=is_template,
-                              chmod=dotfile.chmod)
+                              chmod=dotfile.chmod,
+                              ignore=ignores)
     else:
         # nolink
         src = dotfile.src
