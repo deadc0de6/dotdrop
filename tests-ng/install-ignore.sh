@@ -53,6 +53,7 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmps="${basedir}"
 
 # some files
 mkdir -p ${tmpd}/{program,config,vscode}
@@ -120,6 +121,55 @@ echo "(3) found ${nb} README.md file(s)"
 echo "showdiff" > ${tmpd}/program/a
 cd ${ddpath} | echo "y" | ${bin} install --showdiff -c ${cfg} --verbose -f
 [ "$?" != "0" ] && exit 1
+
+# test templated subdir
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+dotfiles:
+profiles:
+_EOF
+
+mkdir -p ${tmpd}/nvim
+mkdir -p ${tmpd}/nvim/dir1
+echo "f1" > ${tmpd}/nvim/dir1/file1
+mkdir -p ${tmpd}/nvim/dir2
+echo "f1" > ${tmpd}/nvim/dir2/file2
+echo "ftop" > ${tmpd}/nvim/ftop
+
+echo "[+] import top"
+cd ${ddpath} | ${bin} import -c ${cfg} -l link_children -p p1 ${tmpd}/nvim
+
+# add sub dir
+mkdir -p ${tmpd}/nvim/templated
+echo "noprofile" > ${tmpd}/nvim/templated/ftemplated
+
+echo "[+] import sub"
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${tmpd}/nvim/templated
+
+cfg2="${basedir}/config2.yaml"
+sed '/d_nvim:/a \ \ \ \ instignore:\n\ \ \ \ - "*templated*"' ${cfg} > ${cfg2}
+cat ${cfg2}
+
+## clean destination files
+rm -rf ${tmpd}/nvim
+## patch template file
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/${tmpd}/nvim/templated/ftemplated
+
+echo "[+] install link_children"
+cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V d_nvim
+
+[ -d ${tmpd}/nvim/templated ] && echo "templated should not be installed" && exit 1
+[ -e ${tmpd}/nvim/templated/ftemplated ] && echo "templated file should not be installed" && exit 1
+
+echo "[+] install sub"
+cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V d_templated
+
+[ ! -d ${tmpd}/nvim/templated ] && echo "templated not installed" && exit 1
+[ ! -e ${tmpd}/nvim/templated/ftemplated ] && echo "templated file not installed" && exit 1
+grep 'p1' ${tmpd}/nvim/templated/ftemplated
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
