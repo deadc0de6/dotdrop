@@ -134,8 +134,11 @@ def _dotfile_compare(o, dotfile, tmp):
             LOG.dbg('points to itself')
         return True
 
+    ignores = list(set(o.compare_ignore + dotfile.cmpignore))
+    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+
     insttmp = None
-    if dotfile.template and Templategen.is_template(src):
+    if dotfile.template and Templategen.is_template(src, ignore=ignores):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
                                                  is_template=True,
@@ -149,8 +152,6 @@ def _dotfile_compare(o, dotfile, tmp):
         src = insttmp
 
     # compare
-    ignores = list(set(o.compare_ignore + dotfile.cmpignore))
-    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
     diff = comp.compare(src, dotfile.dst, ignore=ignores)
 
     # clean tmp transformed dotfile if any
@@ -220,6 +221,7 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               dotfile.link,
                               actionexec=pre_actions_exec,
                               is_template=is_template,
+                              ignore=ignores,
                               chmod=dotfile.chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
@@ -239,8 +241,6 @@ def _dotfile_install(o, dotfile, tmpdir=None):
             if not tmp:
                 return False, dotfile.key, None
             src = tmp
-        ignores = list(set(o.install_ignore + dotfile.instignore))
-        ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
         r, err = inst.install(t, src, dotfile.dst,
                               LinkTypes.NOLINK,
                               actionexec=pre_actions_exec,

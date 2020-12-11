@@ -111,7 +111,7 @@ class Installer:
         if self.totemp:
             r, err, _ = self.install_to_temp(templater, self.totemp,
                                              src, dst, is_template=is_template,
-                                             chmod=chmod)
+                                             chmod=chmod, ignore=ignore)
             return self._log_install(r, err)
 
         isdir = os.path.isdir(src)
@@ -186,7 +186,7 @@ class Installer:
         return self._log_install(r, err)
 
     def install_to_temp(self, templater, tmpdir, src, dst,
-                        is_template=True, chmod=None):
+                        is_template=True, chmod=None, ignore=[]):
         """
         install a dotfile to a tempdir
 
@@ -196,6 +196,7 @@ class Installer:
         @dst: dotfile destination path in the FS
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
+        @ignore: patterns to ignore
 
         return
         - success, error-if-any, dotfile-installed-path
@@ -225,7 +226,7 @@ class Installer:
         ret, err = self.install(templater, src, tmpdst,
                                 LinkTypes.NOLINK,
                                 is_template=is_template,
-                                chmod=chmod)
+                                chmod=chmod, ignore=ignore)
         if self.debug:
             if ret:
                 self.log.dbg('tmp installed in {}'.format(tmpdst))
@@ -243,7 +244,8 @@ class Installer:
     # low level accessors for public methods
     ########################################################
 
-    def _link(self, templater, src, dst, actionexec=None, is_template=True):
+    def _link(self, templater, src, dst, actionexec=None,
+              is_template=True):
         """
         install link:link
 

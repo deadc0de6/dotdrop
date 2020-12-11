@@ -148,7 +148,7 @@ class Updater:
         return tmp
 
     def _is_template(self, path):
-        if not Templategen.is_template(path):
+        if not Templategen.is_template(path, ignore=self.ignores):
             if self.debug:
                 self.log.dbg('{} is NO template'.format(path))
             return False
