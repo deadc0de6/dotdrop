@@ -149,7 +149,8 @@ class Installer:
             else:
                 r, err = self._link_children(templater, src, dst,
                                              actionexec=actionexec,
-                                             is_template=is_template)
+                                             is_template=is_template,
+                                             ignore=ignore)
 
         if self.debug:
             self.log.dbg('before chmod: {} err:{}'.format(r, err))
@@ -268,7 +269,7 @@ class Installer:
         return r, err
 
     def _link_children(self, templater, src, dst,
-                       actionexec=None, is_template=True):
+                       actionexec=None, is_template=True, ignore=[]):
         """
         install link:link_children
 
@@ -308,6 +309,13 @@ class Installer:
         for i in range(len(children)):
             subsrc = srcs[i]
             subdst = dsts[i]
+
+            if utils.must_ignore([subsrc, subdst], ignore, debug=self.debug):
+                if self.debug:
+                    self.log.dbg(
+                        'ignoring install of {} to {}'.format(src, dst),
+                    )
+                continue
 
             if self.debug:
                 self.log.dbg('symlink child {} to {}'.format(subsrc, subdst))
