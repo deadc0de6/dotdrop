@@ -145,31 +145,39 @@ cd ${ddpath} | ${bin} import -c ${cfg} -l link_children -p p1 ${tmpd}/nvim
 # add sub dir
 mkdir -p ${tmpd}/nvim/templated
 echo "noprofile" > ${tmpd}/nvim/templated/ftemplated
+echo "noprofile" > ${tmpd}/nvim/template
 
 echo "[+] import sub"
 cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${tmpd}/nvim/templated
+cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${tmpd}/nvim/template
 
 cfg2="${basedir}/config2.yaml"
-sed '/d_nvim:/a \ \ \ \ instignore:\n\ \ \ \ - "*templated*"' ${cfg} > ${cfg2}
+sed '/d_nvim:/a \ \ \ \ instignore:\n\ \ \ \ - "*template*"' ${cfg} > ${cfg2}
 cat ${cfg2}
 
 ## clean destination files
 rm -rf ${tmpd}/nvim
 ## patch template file
 echo "{{@@ profile @@}}" > ${tmps}/dotfiles/${tmpd}/nvim/templated/ftemplated
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/${tmpd}/nvim/template
 
 echo "[+] install link_children"
 cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V d_nvim
 
 [ -d ${tmpd}/nvim/templated ] && echo "templated should not be installed" && exit 1
 [ -e ${tmpd}/nvim/templated/ftemplated ] && echo "templated file should not be installed" && exit 1
+[ -e ${tmpd}/nvim/template ] && echo "template file should not be installed" && exit 1
 
 echo "[+] install sub"
 cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V d_templated
+echo "[+] install template"
+cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V f_template
 
 [ ! -d ${tmpd}/nvim/templated ] && echo "templated not installed" && exit 1
 [ ! -e ${tmpd}/nvim/templated/ftemplated ] && echo "templated file not installed" && exit 1
+[ ! -e ${tmpd}/nvim/template ] && echo "template file not installed" && exit 1
 grep 'p1' ${tmpd}/nvim/templated/ftemplated
+grep 'p1' ${tmpd}/nvim/template
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}

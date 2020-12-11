@@ -98,13 +98,9 @@ echo 'b' > ${tmpd}/a/c/acfile
 mkdir -p ${tmpd}/a/newdir/b
 touch ${tmpd}/a/newdir/b/c
 
-#tree ${tmpd}/a
-
 # update
 echo "[+] update"
 cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
-
-#tree ${dt}
 
 # check files haven't been updated
 grep_or_fail 'b' "${dt}/a/c/acfile"
