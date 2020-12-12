@@ -124,7 +124,6 @@ class Options(AttrMonitor):
         self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.dry = self.args['--dry']
-        self.ignore_missing_in_dotdrop = self.args['--ignore-missing']
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False
@@ -266,6 +265,8 @@ class Options(AttrMonitor):
         self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
         self.compare_ignore = uniq_list(self.compare_ignore)
         self.compare_fileonly = self.args['--file-only']
+        self.ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            self.args['--ignore-missing']
 
         # "import" specifics
         self.import_path = self.args['<path>']
