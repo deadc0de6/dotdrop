@@ -93,13 +93,15 @@ def _dotfile_compare(o, dotfile, tmp):
     returns True if same
     """
     t = _get_templater(o)
+    ignore_missing_in_dotdrop = o.ignore_missing_in_dotdrop or \
+        dotfile.ignore_missing_in_dotdrop
     inst = Installer(create=o.create, backup=o.backup,
                      dry=o.dry, base=o.dotpath,
                      workdir=o.workdir, debug=o.debug,
                      backup_suffix=o.install_backup_suffix,
                      diff_cmd=o.diff_command)
     comp = Comparator(diff_cmd=o.diff_command, debug=o.debug,
-                      ignore_missing_in_dotdrop=o.ignore_missing_in_dotdrop)
+                      ignore_missing_in_dotdrop=ignore_missing_in_dotdrop)
 
     # add dotfile variables
     newvars = dotfile.get_dotfile_variables()
