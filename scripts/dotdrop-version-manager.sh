@@ -106,7 +106,7 @@ need_update_stable()
   # get short tag if on a lightweight tag
   tag=$(echo "$cur" | sed 's/\(v.*\)-[0-9]*.-.*$/\1/g')
   if [ "${tag}" != "${last}" ]; then
-    echo "new stable version available: ${last}" && return
+    echo "new stable version available: ${last}" && exit 1
   fi
   echo "your version is up-to-date"
 }
@@ -119,7 +119,7 @@ need_update()
 
   # compare
   changes=$(git log HEAD..origin --oneline)
-  [ "${changes}" != "" ] && echo "new updates available" && return
+  [ "${changes}" != "" ] && echo "new updates available" && exit 1
   echo "your version is up-to-date"
 }
 
