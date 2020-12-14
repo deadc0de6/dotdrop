@@ -112,7 +112,7 @@ class Updater:
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             dotfile.ignore_missing_in_dotdrop
         if (ignore_missing_in_dotdrop and not os.path.exists(local_path)) or \
-                self._ignore([deployed_path, local_path], dotfile):
+                self._ignore([deployed_path, local_path]):
             self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
         # apply write transformation if any
@@ -211,7 +211,7 @@ class Updater:
 
     def _handle_file(self, deployed_path, local_path, dotfile, compare=True):
         """sync path (deployed file) and local_path (dotdrop dotfile path)"""
-        if self._ignore([deployed_path, local_path], dotfile):
+        if self._ignore([deployed_path, local_path]):
             self.log.sub('\"{}\" ignored'.format(local_path))
             return True
         if self.debug:
@@ -272,7 +272,7 @@ class Updater:
         # paths must be absolute (no tildes)
         path = os.path.expanduser(deployed_path)
         local_path = os.path.expanduser(local_path)
-        if self._ignore([path, local_path], dotfile):
+        if self._ignore([path, local_path]):
             self.log.sub('\"{}\" ignored'.format(local_path))
             return True
         # find the differences
@@ -287,7 +287,7 @@ class Updater:
         left, right = diff.left, diff.right
         if self.debug:
             self.log.dbg('sync dir {} to {}'.format(left, right))
-        if self._ignore([left, right], dotfile):
+        if self._ignore([left, right]):
             return True
 
         # create dirs that don't exist in dotdrop
@@ -298,7 +298,7 @@ class Updater:
                 continue
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
-            if self._ignore([exist, new], dotfile):
+            if self._ignore([exist, new]):
                 self.log.sub('\"{}\" ignored'.format(exist))
                 continue
             if self.dry:
@@ -331,7 +331,7 @@ class Updater:
             if not os.path.isdir(old):
                 # ignore files for now
                 continue
-            if self._ignore([old], dotfile):
+            if self._ignore([old]):
                 continue
             if self.dry:
                 self.log.dry('would rm -r {}'.format(old))
@@ -351,7 +351,7 @@ class Updater:
         for f in fdiff:
             fleft = os.path.join(left, f)
             fright = os.path.join(right, f)
-            if self._ignore([fleft, fright], dotfile):
+            if self._ignore([fleft, fright]):
                 continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
@@ -367,7 +367,7 @@ class Updater:
                 # ignore dirs, done above
                 continue
             new = os.path.join(right, toadd)
-            if self._ignore([exist, new], dotfile):
+            if self._ignore([exist, new]):
                 continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(exist, new))
@@ -386,7 +386,7 @@ class Updater:
             if os.path.isdir(new):
                 # ignore dirs, done above
                 continue
-            if self._ignore([new], dotfile):
+            if self._ignore([new]):
                 continue
             if self.dry:
                 self.log.dry('would rm {}'.format(new))
@@ -424,7 +424,7 @@ class Updater:
             return False
         return True
 
-    def _ignore(self, paths, dotfile):
+    def _ignore(self, paths):
         if must_ignore(paths, self.ignores, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring update for {}'.format(paths))
