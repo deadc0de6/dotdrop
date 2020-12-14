@@ -247,7 +247,10 @@ class Updater:
             return False
         try:
             if self.dry:
-                self.log.dry('would cp {} {}'.format(deployed_path, local_path))
+                self.log.dry('would cp {} {}'.format(
+                    deployed_path,
+                    local_path,
+                ))
             else:
                 if self.debug:
                     self.log.dbg('cp {} {}'.format(deployed_path, local_path))

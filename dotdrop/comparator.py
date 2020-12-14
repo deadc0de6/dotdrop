@@ -90,7 +90,8 @@ class Comparator:
                 local_path,
                 deployed_path,
             ))
-        if (self.ignore_missing_in_dotdrop and not os.path.exists(local_path)) \
+        if (self.ignore_missing_in_dotdrop and not
+                os.path.exists(local_path)) \
                 or must_ignore([local_path, deployed_path], ignore,
                                debug=self.debug):
             if self.debug:
@@ -110,7 +111,8 @@ class Comparator:
             ))
         if not os.path.exists(deployed_path):
             return ''
-        if (self.ignore_missing_in_dotdrop and not os.path.exists(local_path)) \
+        if (self.ignore_missing_in_dotdrop and not
+                os.path.exists(local_path)) \
                 or must_ignore([local_path, deployed_path], ignore,
                                debug=self.debug):
             if self.debug:
