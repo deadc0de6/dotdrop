@@ -44,6 +44,7 @@ class Updater:
         self.safe = safe
         self.debug = debug
         self.ignore = ignore
+        self.ignores = None
         self.showpatch = showpatch
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
         self.templater = Templategen(variables=self.variables,
