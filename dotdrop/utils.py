@@ -198,12 +198,8 @@ def strip_home(path):
     return path
 
 
-def must_ignore(paths, ignores, debug=False, ignore_missing_in_dotdrop=False):
+def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
-    if ignore_missing_in_dotdrop and \
-            len(paths) >= 2 and not os.path.exists(paths[1]):
-        return True
-
     if not ignores:
         return False
     if debug:

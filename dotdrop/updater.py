@@ -94,49 +94,52 @@ class Updater:
         if self.debug:
             self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
-        path = os.path.expanduser(path)
-        dtpath = os.path.join(self.dotpath, dotfile.src)
-        dtpath = os.path.expanduser(dtpath)
+        deployed_path = os.path.expanduser(path)
+        local_path = os.path.join(self.dotpath, dotfile.src)
+        local_path = os.path.expanduser(local_path)
 
-        if not os.path.exists(path):
+        if not os.path.exists(deployed_path):
             msg = '\"{}\" does not exist'
-            self.log.err(msg.format(path))
+            self.log.err(msg.format(deployed_path))
             return False
 
-        if not os.path.exists(dtpath):
+        if not os.path.exists(local_path):
             msg = '\"{}\" does not exist, import it first'
-            self.log.err(msg.format(dtpath))
+            self.log.err(msg.format(local_path))
             return False
 
-        if self._ignore([path, dtpath], dotfile):
+        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            dotfile.ignore_missing_in_dotdrop
+        if (ignore_missing_in_dotdrop and not os.path.exists(local_path)) or \
+                self._ignore([deployed_path, local_path], dotfile):
             self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
         # apply write transformation if any
-        new_path = self._apply_trans_w(path, dotfile)
+        new_path = self._apply_trans_w(deployed_path, dotfile)
         if not new_path:
             return False
 
         # save current rights
-        fsmode = get_file_perm(path)
-        dfmode = get_file_perm(dtpath)
+        deployed_mode = get_file_perm(deployed_path)
+        local_mode = get_file_perm(local_path)
 
         # handle the pointed file
         if os.path.isdir(new_path):
-            ret = self._handle_dir(new_path, dtpath, dotfile)
+            ret = self._handle_dir(new_path, local_path, dotfile)
         else:
-            ret = self._handle_file(new_path, dtpath, dotfile)
+            ret = self._handle_file(new_path, local_path, dotfile)
 
-        if fsmode != dfmode:
+        if deployed_mode != local_mode:
             # mirror rights
             if self.debug:
                 m = 'adopt mode {:o} for {}'
-                self.log.dbg(m.format(fsmode, dotfile.key))
-            r = self.conf.update_dotfile(dotfile.key, fsmode)
+                self.log.dbg(m.format(deployed_mode, dotfile.key))
+            r = self.conf.update_dotfile(dotfile.key, deployed_mode)
             if r:
                 ret = True
 
         # clean temporary files
-        if new_path != path and os.path.exists(new_path):
+        if new_path != deployed_path and os.path.exists(new_path):
             removepath(new_path, logger=self.log)
         return ret
 
@@ -205,61 +208,77 @@ class Updater:
         except OSError as e:
             self.log.err(e)
 
-    def _handle_file(self, path, dtpath, dotfile, compare=True):
-        """sync path (deployed file) and dtpath (dotdrop dotfile path)"""
-        if self._ignore([path, dtpath], dotfile):
-            self.log.sub('\"{}\" ignored'.format(dtpath))
+    def _handle_file(self, deployed_path, local_path, dotfile, compare=True):
+        """sync path (deployed file) and local_path (dotdrop dotfile path)"""
+        if self._ignore([deployed_path, local_path], dotfile):
+            self.log.sub('\"{}\" ignored'.format(local_path))
             return True
         if self.debug:
-            self.log.dbg('update for file {} and {}'.format(path, dtpath))
-        if self._is_template(dtpath):
+            self.log.dbg('update for file {} and {}'.format(
+                deployed_path,
+                local_path,
+            ))
+        if self._is_template(local_path):
             # dotfile is a template
             if self.debug:
-                self.log.dbg('{} is a template'.format(dtpath))
+                self.log.dbg('{} is a template'.format(local_path))
             if self.showpatch:
                 try:
-                    self._show_patch(path, dtpath)
+                    self._show_patch(deployed_path, local_path)
                 except UndefinedException as e:
-                    msg = 'unable to show patch for {}: {}'.format(path, e)
+                    msg = 'unable to show patch for {}: {}'.format(
+                        deployed_path,
+                        e,
+                    )
                     self.log.warn(msg)
             return False
-        if compare and filecmp.cmp(path, dtpath, shallow=False) and \
-                self._same_rights(path, dtpath):
+        if compare and \
+                filecmp.cmp(deployed_path, local_path, shallow=False) and \
+                self._same_rights(deployed_path, local_path):
             # no difference
             if self.debug:
-                self.log.dbg('identical files: {} and {}'.format(path, dtpath))
+                self.log.dbg('identical files: {} and {}'.format(
+                    deployed_path,
+                    local_path,
+                ))
             return True
-        if not self._overwrite(path, dtpath):
+        if not self._overwrite(deployed_path, local_path):
             return False
         try:
             if self.dry:
-                self.log.dry('would cp {} {}'.format(path, dtpath))
+                self.log.dry('would cp {} {}'.format(deployed_path, local_path))
             else:
                 if self.debug:
-                    self.log.dbg('cp {} {}'.format(path, dtpath))
-                shutil.copyfile(path, dtpath)
-                self._mirror_rights(path, dtpath)
-                self.log.sub('\"{}\" updated'.format(dtpath))
+                    self.log.dbg('cp {} {}'.format(deployed_path, local_path))
+                shutil.copyfile(deployed_path, local_path)
+                self._mirror_rights(deployed_path, local_path)
+                self.log.sub('\"{}\" updated'.format(local_path))
         except IOError as e:
-            self.log.warn('{} update failed, do manually: {}'.format(path, e))
+            self.log.warn('{} update failed, do manually: {}'.format(
+                deployed_path,
+                e
+            ))
             return False
         return True
 
-    def _handle_dir(self, path, dtpath, dotfile):
-        """sync path (deployed dir) and dtpath (dotdrop dir path)"""
+    def _handle_dir(self, deployed_path, local_path, dotfile):
+        """sync path (local dir) and local_path (dotdrop dir path)"""
         if self.debug:
-            self.log.dbg('handle update for dir {} to {}'.format(path, dtpath))
+            self.log.dbg('handle update for dir {} to {}'.format(
+                deployed_path,
+                local_path,
+            ))
         # paths must be absolute (no tildes)
-        path = os.path.expanduser(path)
-        dtpath = os.path.expanduser(dtpath)
-        if self._ignore([path, dtpath], dotfile):
-            self.log.sub('\"{}\" ignored'.format(dtpath))
+        path = os.path.expanduser(deployed_path)
+        local_path = os.path.expanduser(local_path)
+        if self._ignore([path, local_path], dotfile):
+            self.log.sub('\"{}\" ignored'.format(local_path))
             return True
         # find the differences
-        diff = filecmp.dircmp(path, dtpath, ignore=None)
+        diff = filecmp.dircmp(path, local_path, ignore=None)
         # handle directories diff
         ret = self._merge_dirs(diff, dotfile)
-        self._mirror_rights(path, dtpath)
+        self._mirror_rights(path, local_path)
         return ret
 
     def _merge_dirs(self, diff, dotfile):
@@ -405,12 +424,7 @@ class Updater:
         return True
 
     def _ignore(self, paths, dotfile):
-        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
-            dotfile.ignore_missing_in_dotdrop
-        if must_ignore(
-            paths, self.ignores, debug=self.debug,
-            ignore_missing_in_dotdrop=ignore_missing_in_dotdrop,
-        ):
+        if must_ignore(paths, self.ignores, debug=self.debug):
             if self.debug:
                 self.log.dbg('ignoring update for {}'.format(paths))
             return True
