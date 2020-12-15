@@ -220,6 +220,7 @@ def must_ignore(paths, ignores, debug=False):
             if fnmatch.fnmatch(p, ni):
                 if debug:
                     LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p))
+                # TODO: catch error and report it
                 ignore_matches.remove(p)
         if ignore_matches:
             return True
