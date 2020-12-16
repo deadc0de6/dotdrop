@@ -6,7 +6,7 @@
 #
 
 # exit on first error
-#set -e
+set -e
 
 # all this crap to get current path
 if [ $(uname) = Darwin ]; then
@@ -55,6 +55,7 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
+hash coverage 2>/dev/null && bin="converage run -a --source=dotdrop -m dotdrop.dotdrop" || true
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -88,7 +89,7 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program
 
 # adding ignore in dotfile
 cfg2="${basedir}/config2.yaml"
