@@ -88,7 +88,7 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program
 
 # make some changes to generate a diff
 echo "some other data" > ${tmpd}/program/a
