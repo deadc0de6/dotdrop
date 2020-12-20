@@ -73,12 +73,24 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 # this is the test
 ################################################################
+
+# $1 pattern
+# $2 path
+grep_or_fail()
+{
+  set +e
+  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
+  set -e
+}
+
 # dotdrop directory
 basedir=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 mkdir -p ${basedir}/dotfiles/a/{b,c}
-echo 'a' > ${basedir}/dotfiles/a/b/abfile
+echo 'a' > ${basedir}/dotfiles/a/b/abfile1
+echo 'a' > ${basedir}/dotfiles/a/b/abfile2
+echo 'a' > ${basedir}/dotfiles/a/b/abfile3
 echo 'a' > ${basedir}/dotfiles/a/c/acfile
 
 # the dotfile to be updated
@@ -99,6 +111,8 @@ dotfiles:
     upignore:
     - "*/newdir/b/*"
     - "!*/newdir/b/d"
+    - "*/abfile?"
+    - "!*/abfile3"
 profiles:
   p1:
     dotfiles:
@@ -108,6 +122,10 @@ _EOF
 # edit/add files
 echo "[+] edit/add files"
 mkdir -p ${tmpd}/a/newdir/b
+echo 'b' > ${tmpd}/a/b/abfile1
+echo 'b' > ${tmpd}/a/b/abfile2
+echo 'b' > ${tmpd}/a/b/abfile3
+echo 'b' > ${tmpd}/a/b/abfile4
 touch ${tmpd}/a/newdir/b/{c,d}
 
 # update
@@ -115,9 +133,12 @@ echo "[+] update"
 cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 
 # check files haven't been updated
-lsd --tree ${basedir}
-[ -e ${basedir}/dotfiles/a/newdir/b/c ] && echo "should not have been updated" && exit 1
-[ ! -e ${basedir}/dotfiles/a/newdir/b/d ] && echo "should have been updated" && exit 1
+grep_or_fail a ${basedir}/dotfiles/a/b/abfile1
+grep_or_fail a ${basedir}/dotfiles/a/b/abfile2
+grep_or_fail b ${basedir}/dotfiles/a/b/abfile3
+[ -e ${basedir}/dotfiles/a/b/abfile4 ] && echo "abfile4 should not have been updated" && exit 1
+[ -e ${basedir}/dotfiles/a/newdir/b/c ] && echo "newdir/b/c should not have been updated" && exit 1
+[ ! -e ${basedir}/dotfiles/a/newdir/b/d ] && echo "newdir/b/d should have been updated" && exit 1
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
