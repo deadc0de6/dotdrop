@@ -48,7 +48,7 @@ else
 fi
 cur=$(dirname "$(${rl} "${0}")")
 
-# dotdrop can be pass as argument
+# dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
 [ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1

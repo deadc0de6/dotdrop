@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # author: jtt9340 (https://github.com/jtt9340)
 #
-# test negative ignore update
+# test global negative ignore update
 # returns 1 in case of error
 #
 
@@ -48,15 +48,10 @@ else
 fi
 cur=$(dirname "$(${rl} "${0}")")
 
-#hash dotdrop >/dev/null 2>&1
-#[ "$?" != "0" ] && echo "install dotdrop to run tests" && exit 1
-
-#echo "called with ${1}"
-
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && exho "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -73,15 +68,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 ################################################################
 # this is the test
 ################################################################
-
-# $1 pattern
-# $2 path
-grep_or_fail()
-{
-  set +e
-  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
-  set -e
-}
 
 # dotdrop directory
 basedir=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
@@ -104,15 +90,15 @@ config:
   backup: false
   create: true
   dotpath: dotfiles
+  upignore:
+  - "*/newdir/b/*"
+  - "!*/newdir/b/d"
+  - "*/abfile?"
+  - "!*/abfile3"
 dotfiles:
   f_abc:
     dst: ${tmpd}/a
     src: a
-    upignore:
-    - "*/newdir/b/*"
-    - "!*/newdir/b/d"
-    - "*/abfile?"
-    - "!*/abfile3"
 profiles:
   p1:
     dotfiles:
@@ -133,9 +119,11 @@ echo "[+] update"
 cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 
 # check files haven't been updated
-grep_or_fail a ${basedir}/dotfiles/a/b/abfile1
-grep_or_fail a ${basedir}/dotfiles/a/b/abfile2
-grep_or_fail b ${basedir}/dotfiles/a/b/abfile3
+set +e
+grep 'a' ${basedir}/dotfiles/a/b/abfile1 >/dev/null 2>&1 || (echo "abfile1 should not have been updated" && exit 1)
+grep 'a' ${basedir}/dotfiles/a/b/abfile2 >/dev/null 2>&1 || (echo "abfile2 should not have been updated" && exit 1)
+grep 'b' ${basedir}/dotfiles/a/b/abfile3 >/dev/null 2>&1 || (echo "abfile3 was not updated" && exit 1)
+set -e
 [ -e ${basedir}/dotfiles/a/b/abfile4 ] && echo "abfile4 should not have been updated" && exit 1
 [ -e ${basedir}/dotfiles/a/newdir/b/c ] && echo "newdir/b/c should not have been updated" && exit 1
 [ ! -e ${basedir}/dotfiles/a/newdir/b/d ] && echo "newdir/b/d should have been updated" && exit 1
