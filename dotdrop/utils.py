@@ -204,7 +204,8 @@ def must_ignore(paths, ignores, debug=False):
         return False
     if debug:
         LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
-    ignored_negative, ignored = categorize(lambda ign: ign.startswith('!'), ignores)
+    ignored_negative, ignored = categorize(
+        lambda ign: ign.startswith('!'), ignores)
     for p in paths:
         ignore_matches = []
         # First ignore dotfiles
@@ -387,5 +388,5 @@ def categorize(function, iterable):
     function(element) is true for each element and
     for which function(element) is false for each
     element"""
-    return tuple(filter(function, iterable)),\
-           tuple(itertools.filterfalse(function, iterable))
+    return (tuple(filter(function, iterable)),
+            tuple(itertools.filterfalse(function, iterable)))

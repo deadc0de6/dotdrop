@@ -281,7 +281,8 @@ class Updater:
                 for ignore in self.ignores:
                     for name in names:
                         path = os.path.join(src, name)
-                        if ignore.startswith('!') and fnmatch.fnmatch(path, ignore[1:]):
+                        if ignore.startswith('!') and \
+                                fnmatch.fnmatch(path, ignore[1:]):
                             # add to whitelist
                             whitelist.add(name)
                         elif fnmatch.fnmatch(path, ignore):
