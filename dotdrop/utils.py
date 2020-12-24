@@ -221,8 +221,14 @@ def must_ignore(paths, ignores, debug=False):
             if fnmatch.fnmatch(p, ni):
                 if debug:
                     LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p))
-                # TODO: catch error and report it
-                ignore_matches.remove(p)
+                try:
+                    ignore_matches.remove(p)
+                except ValueError:
+                    LOG.warn('no files that are currently being ignored match '
+                             '\"{}\". In order for a negative ignore pattern '
+                             'to work, it must match a file that is being '
+                             'ignored by a previous ignore pattern.'.format(ni)
+                             )
         if ignore_matches:
             return True
     if debug:
