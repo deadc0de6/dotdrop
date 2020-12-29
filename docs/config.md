@@ -229,7 +229,7 @@ dotfiles:
   d_zsh:
     src: zsh
     dst: ~/.config/zsh
-	impignore:
+    impignore:
     - "plugins/*"
     - "!plugins/custom_plugin.zsh"
 ```
