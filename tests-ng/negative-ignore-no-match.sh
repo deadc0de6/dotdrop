@@ -104,7 +104,8 @@ rm -rf ${tmpd}
 echo "[+] install with negative ignore in dotfile"
 echo '(1) expect dotdrop install to warn when negative ignore pattern does not match an already-ignored file'
 
-patt="[WARN] no files that are currently being ignored match \"*/ignore_me/c\". In order for a negative ignore pattern to work, it must match a file that is being ignored by a previous ignore pattern."
+patt="[WARN] no files that are currently being ignored match \"*/ignore_me/c\". In order for a negative ignore
+pattern to work, it must match a file that is being ignored by a previous ignore pattern."
 cd ${ddpath} | ${bin} install -c ${cfg2} --verbose 2>&1 >/dev/null | grep -F "${patt}" ||
   (echo "dotdrop did not warn when negative ignore pattern did not match an already-ignored file" && exit 1)
 
