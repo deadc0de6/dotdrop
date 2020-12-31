@@ -8,6 +8,7 @@ handle the update of dotfiles
 import os
 import shutil
 import filecmp
+import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
@@ -273,8 +274,23 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('cp -r {} {}'.format(exist, new))
+
             # Newly created directory should be copied as is (for efficiency).
-            shutil.copytree(exist, new)
+            def ig(src, names):
+                whitelist, blacklist = set(), set()
+                for ignore in self.ignores:
+                    for name in names:
+                        path = os.path.join(src, name)
+                        if ignore.startswith('!') and \
+                                fnmatch.fnmatch(path, ignore[1:]):
+                            # add to whitelist
+                            whitelist.add(name)
+                        elif fnmatch.fnmatch(path, ignore):
+                            # add to blacklist
+                            blacklist.add(name)
+                return blacklist - whitelist
+
+            shutil.copytree(exist, new, ignore=ig)
             self.log.sub('\"{}\" dir added'.format(new))
 
         # remove dirs that don't exist in deployed version

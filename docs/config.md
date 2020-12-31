@@ -169,6 +169,12 @@ Make sure to quote those when using wildcards in the config file.
 
 Patterns used on a specific dotfile can be specified relative to the dotfile destination (`dst`).
 
+Similar to a `.gitignore` file, you can prefix ignore patterns with an exclamation point (`!`).
+This so-called "negative ignore pattern" will cause any files that match that pattern to __not__ be ignored,
+provided they *would have* been ignored by an earlier ignore pattern (dotdrop will warn if that is not the
+case). This feature allows you to, for example, ignore all files within a certain directory, except for one
+particular one (see example below). 
+
 ```yaml
 config:
   cmpignore:
@@ -215,4 +221,15 @@ config:
   - "*/testfile"
   - "testdir"
 ...
+```
+
+To ignore all files within a certain directory relative to `dst`, except one called `custom_plugin.zsh`:
+```yaml
+dotfiles:
+  d_zsh:
+    src: zsh
+    dst: ~/.config/zsh
+    impignore:
+    - "plugins/*"
+    - "!plugins/custom_plugin.zsh"
 ```
