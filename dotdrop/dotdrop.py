@@ -419,6 +419,10 @@ def cmd_update(o):
     paths = o.update_path
     iskey = o.update_iskey
 
+    if o.profile not in [p.key for p in o.profiles]:
+        LOG.err('no such profile \"{}\"'.format(o.profile))
+        return False
+
     adapt_workers(o, LOG)
 
     if not paths:

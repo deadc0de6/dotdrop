@@ -95,6 +95,16 @@ class Updater:
         dtpath = os.path.join(self.dotpath, dotfile.src)
         dtpath = os.path.expanduser(dtpath)
 
+        if not os.path.exists(path):
+            msg = '\"{}\" does not exist'
+            self.log.err(msg.format(path))
+            return False
+
+        if not os.path.exists(dtpath):
+            msg = '\"{}\" does not exist, import it first'
+            self.log.err(msg.format(dtpath))
+            return False
+
         if self._ignore([path, dtpath]):
             self.log.sub('\"{}\" ignored'.format(dotfile.key))
             return True
