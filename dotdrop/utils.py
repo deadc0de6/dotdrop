@@ -13,6 +13,7 @@ import fnmatch
 import inspect
 import importlib
 import filecmp
+import itertools
 from shutil import rmtree, which
 
 # local import
@@ -203,12 +204,33 @@ def must_ignore(paths, ignores, debug=False):
         return False
     if debug:
         LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
+    ignored_negative, ignored = categorize(
+        lambda ign: ign.startswith('!'), ignores)
     for p in paths:
-        for i in ignores:
+        ignore_matches = []
+        # First ignore dotfiles
+        for i in ignored:
             if fnmatch.fnmatch(p, i):
                 if debug:
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
-                return True
+                ignore_matches.append(p)
+        # Then remove any matches that actually shouldn't be ignored
+        for ni in ignored_negative:
+            # Each of these will start with an '!' so we need to remove that
+            ni = ni[1:]
+            if fnmatch.fnmatch(p, ni):
+                if debug:
+                    LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p))
+                try:
+                    ignore_matches.remove(p)
+                except ValueError:
+                    LOG.warn('no files that are currently being ignored match '
+                             '\"{}\". In order for a negative ignore pattern '
+                             'to work, it must match a file that is being '
+                             'ignored by a previous ignore pattern.'.format(ni)
+                             )
+        if ignore_matches:
+            return True
     if debug:
         LOG.dbg('NOT ignoring {}'.format(paths))
     return False
@@ -229,18 +251,31 @@ def patch_ignores(ignores, prefix, debug=False):
     if debug:
         LOG.dbg('ignores before patching: {}'.format(ignores))
     for ignore in ignores:
+        negative = ignore.startswith('!')
+        if negative:
+            ignore = ignore[1:]
+
         if os.path.isabs(ignore):
             # is absolute
-            new.append(ignore)
+            if negative:
+                new.append('!' + ignore)
+            else:
+                new.append(ignore)
             continue
         if STAR in ignore:
             if ignore.startswith(STAR) or ignore.startswith(os.sep):
                 # is glob
-                new.append(ignore)
+                if negative:
+                    new.append('!' + ignore)
+                else:
+                    new.append(ignore)
                 continue
         # patch ignore
         path = os.path.join(prefix, ignore)
-        new.append(path)
+        if negative:
+            new.append('!' + path)
+        else:
+            new.append(path)
     if debug:
         LOG.dbg('ignores after patching: {}'.format(new))
     return new
@@ -352,3 +387,12 @@ def adapt_workers(options, logger):
     if options.dry and options.workers > 1:
         logger.warn('workers set to 1 when --dry is used')
         options.workers = 1
+
+
+def categorize(function, iterable):
+    """separate an iterable into elements for which
+    function(element) is true for each element and
+    for which function(element) is false for each
+    element"""
+    return (tuple(filter(function, iterable)),
+            tuple(itertools.filterfalse(function, iterable)))
