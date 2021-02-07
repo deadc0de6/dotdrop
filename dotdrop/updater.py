@@ -360,7 +360,7 @@ class Updater:
             fleft = os.path.join(left, f)
             fright = os.path.join(right, f)
             if (ignore_missing_in_dotdrop and not os.path.exists(fright)) or \
-                    self._ignore([exist, new]):
+                    self._ignore([fleft, fright]):
                 continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
