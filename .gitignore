@@ -21,3 +21,5 @@ stage/
 
 # Source archive packed by `snapcraft cleanbuild` before pushing to the LXD container
 /packages/*_source.tar.bz2
+
+venv
