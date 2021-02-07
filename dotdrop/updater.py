@@ -273,16 +273,17 @@ class Updater:
                 local_path,
             ))
         # paths must be absolute (no tildes)
-        path = os.path.expanduser(deployed_path)
+        deployed_path = os.path.expanduser(deployed_path)
         local_path = os.path.expanduser(local_path)
-        if self._ignore([path, local_path]):
+
+        if self._ignore([deployed_path, local_path]):
             self.log.sub('\"{}\" ignored'.format(local_path))
             return True
         # find the differences
-        diff = filecmp.dircmp(path, local_path, ignore=None)
+        diff = filecmp.dircmp(deployed_path, local_path, ignore=None)
         # handle directories diff
         ret = self._merge_dirs(diff, dotfile)
-        self._mirror_rights(path, local_path)
+        self._mirror_rights(deployed_path, local_path)
         return ret
 
     def _merge_dirs(self, diff, dotfile):
@@ -293,6 +294,9 @@ class Updater:
         if self._ignore([left, right]):
             return True
 
+        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            dotfile.ignore_missing_in_dotdrop
+
         # create dirs that don't exist in dotdrop
         for toadd in diff.left_only:
             exist = os.path.join(left, toadd)
@@ -301,7 +305,8 @@ class Updater:
                 continue
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
-            if self._ignore([exist, new]):
+            if (ignore_missing_in_dotdrop and not os.path.exists(new)) or \
+                    self._ignore([exist, new]):
                 self.log.sub('\"{}\" ignored'.format(exist))
                 continue
             if self.dry:
@@ -354,7 +359,8 @@ class Updater:
         for f in fdiff:
             fleft = os.path.join(left, f)
             fright = os.path.join(right, f)
-            if self._ignore([fleft, fright]):
+            if (ignore_missing_in_dotdrop and not os.path.exists(fright)) or \
+                    self._ignore([exist, new]):
                 continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
@@ -370,7 +376,8 @@ class Updater:
                 # ignore dirs, done above
                 continue
             new = os.path.join(right, toadd)
-            if self._ignore([exist, new]):
+            if (ignore_missing_in_dotdrop and not os.path.exists(new)) or \
+                    self._ignore([exist, new]):
                 continue
             if self.dry:
                 self.log.dry('would cp {} {}'.format(exist, new))
