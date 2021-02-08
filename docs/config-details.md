@@ -648,7 +648,7 @@ dotfiles:
 
 ## Ignoring missing files
 
-The [ignore missing files setting](./usage/#ignoring-missing-files)
+The [ignore missing files setting](usage.md#ignoring-missing-files)
 can be configured globally or on a specific dotfile.
 
 To configure globally, place the following in `config.yaml`:

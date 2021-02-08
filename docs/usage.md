@@ -305,4 +305,4 @@ Maybe the program changes these files quite often and creates unnecessary diffs 
 
 In these cases, you can use the `ingore-missing` option.
 This option is available as a flag (`--ignore-missing` or `-z`) to the `update` and `compare` commands,
-or [as a configuration option either globally or on a specific dotfile](./config-details/#ignoring-missing-files).
+or [as a configuration option either globally or on a specific dotfile](config-details.md#ignoring-missing-files).
