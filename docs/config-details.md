@@ -645,3 +645,21 @@ dotfiles:
     trans_read: r_echo_var
     trans_write: w_echo_var
 ```
+
+## Ignoring missing files
+
+The [ignore missing files setting](./usage/#ignoring-missing-files)
+can be configured globally or on a specific dotfile.
+
+To configure globally, place the following in `config.yaml`:
+```yaml
+config:
+  ignore_missing_in_dotdrop: True
+```
+
+To configure per dotfile:
+```yaml
+dotfiles:
+  f_abc:
+    ignore_missing_in_dotdrop: True
+```
