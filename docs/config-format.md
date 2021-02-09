@@ -20,6 +20,7 @@ Entry    | Description | Default
 `dotpath` | path to the directory containing the dotfiles to be managed by dotdrop (absolute path or relative to the config file location) | `dotfiles`
 `filter_file` | list of paths to load templating filters from (see [Templating available filters](templating.md#template-filters)) | -
 `func_file` | list of paths to load templating functions from (see [Templating available methods](templating.md#template-methods)) | -
+`ignore_missing_in_dotdrop` | ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing)) | false
 `ignoreempty` | do not deploy template if empty | false
 `impignore` | list of patterns to ignore when importing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
 `import_actions` | list of paths to load actions from (absolute path or relative to the config file location, see [Import actions from file](config-details.md#entry-import_actions)) | -
@@ -49,6 +50,7 @@ Entry    | Description
 `actions` | list of action keys that need to be defined in the **actions** entry below (see [actions](config-details.md#entry-actions))
 `chmod` | defines the file permissions in octal notation to apply during installation (see [permissions](config.md#permissions))
 `cmpignore` | list of patterns to ignore when comparing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
+`ignore_missing_in_dotdrop` | ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing))
 `ignoreempty` | if true empty template will not be deployed (defaults to value of `ignoreempty`)
 `instignore` | list of patterns to ignore when installing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
 `template` | if false disable template for this dotfile (defaults to value of `template_dotfile_default`)

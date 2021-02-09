@@ -104,12 +104,13 @@ diff command using the config entry `diff_command`.
 
 To ignore specific pattern, see [the ignore patterns](config.md#ignore-patterns)
 
+To completely ignore all files not present in `dotpath` see [ignore missing](#ignore-missing).
+
 It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
 the local version by using `install` and the `-t` switch.
 
 For more options, see the usage with `dotdrop --help`.
-See also [ignoring missing files](#ignoring-missing-files).
 
 ## List profiles
 
@@ -173,8 +174,9 @@ $ dotdrop update --key f_vimrc
 
 If not argument is provided, all dotfiles for the selected profile are updated.
 
-To ignore specific pattern,
-see [the dedicated page](config.md#ignore-patterns)
+To ignore specific pattern, see [the dedicated page](config.md#ignore-patterns)
+
+To completely ignore all files not present in `dotpath` see [ignore missing](#ignore-missing).
 
 There are two cases when updating a dotfile:
 
@@ -218,8 +220,6 @@ $ dotdrop install -t -t f_vimrc
 Installed to tmp /tmp/dotdrop-6ajz7565
 $ diff ~/.vimrc /tmp/dotdrop-6ajz7565/home/user/.vimrc
 ```
-
-See also [ignoring missing files](#ignoring-missing-files).
 
 ## Remove dotfiles
 
@@ -291,7 +291,7 @@ export DOTDROP_WORKDIR="/tmp/dotdrop-workdir"
 export DOTDROP_WORKERS="10"
 ```
 
-## Ignoring missing files
+## Ignore missing
 
 Sometimes, it is nice to have [`update`](#update-dotfiles) not copy all the files in the installed directory
 or [`compare`](#compare-dotfiles) diff them.
@@ -303,6 +303,19 @@ such as a cache.
 Maybe you only want to change one file and don't want the others cluttering your repository.
 Maybe the program changes these files quite often and creates unnecessary diffs in your dotfiles.
 
-In these cases, you can use the `ingore-missing` option.
+In these cases, you can use the [ingore-missing](config-format.md) option.
 This option is available as a flag (`--ignore-missing` or `-z`) to the `update` and `compare` commands,
-or [as a configuration option either globally or on a specific dotfile](config-details.md#ignoring-missing-files).
+or [as a configuration option either globally or on a specific dotfile](config-format.md).
+
+To configure globally, place the following in `config.yaml`:
+```yaml
+config:
+  ignore_missing_in_dotdrop: true
+```
+
+To configure per dotfile:
+```yaml
+dotfiles:
+  f_abc:
+    ignore_missing_in_dotdrop: true
+```
