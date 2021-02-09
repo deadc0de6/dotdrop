@@ -22,7 +22,8 @@ class Dotfile(DictParser):
                  actions=[], trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, noempty=False,
                  cmpignore=[], upignore=[],
-                 instignore=[], template=True, chmod=None):
+                 instignore=[], template=True, chmod=None,
+                 ignore_missing_in_dotdrop=False):
         """
         constructor
         @key: dotfile key
@@ -52,6 +53,7 @@ class Dotfile(DictParser):
         self.instignore = instignore
         self.template = template
         self.chmod = chmod
+        self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
         if self.link != LinkTypes.NOLINK and \
                 (

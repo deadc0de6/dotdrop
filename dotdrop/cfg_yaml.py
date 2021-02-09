@@ -59,6 +59,7 @@ class CfgYaml:
     key_dotfile_noempty = 'ignoreempty'
     key_dotfile_template = 'template'
     key_dotfile_chmod = 'chmod'
+    key_dotfile_ignore_missing = 'ignore_missing_in_dotdrop'
 
     # profile
     key_profile_dotfiles = 'dotfiles'

@@ -108,7 +108,8 @@ It is also possible to install all dotfiles for a specific profile
 in a temporary directory in order to manually compare them with
 the local version by using `install` and the `-t` switch.
 
-For more options, see the usage with `dotdrop --help`
+For more options, see the usage with `dotdrop --help`.
+See also [ignoring missing files](#ignoring-missing-files).
 
 ## List profiles
 
@@ -218,6 +219,8 @@ Installed to tmp /tmp/dotdrop-6ajz7565
 $ diff ~/.vimrc /tmp/dotdrop-6ajz7565/home/user/.vimrc
 ```
 
+See also [ignoring missing files](#ignoring-missing-files).
+
 ## Remove dotfiles
 
 The command `remove` allows to stop managing a specific dotfile with
@@ -287,3 +290,19 @@ export DOTDROP_WORKDIR="/tmp/dotdrop-workdir"
 ```bash
 export DOTDROP_WORKERS="10"
 ```
+
+## Ignoring missing files
+
+Sometimes, it is nice to have [`update`](#update-dotfiles) not copy all the files in the installed directory
+or [`compare`](#compare-dotfiles) diff them.
+
+For example,
+maybe you only want to include a single configuration file in your repository
+and don't want to include other files the program uses,
+such as a cache.
+Maybe you only want to change one file and don't want the others cluttering your repository.
+Maybe the program changes these files quite often and creates unnecessary diffs in your dotfiles.
+
+In these cases, you can use the `ingore-missing` option.
+This option is available as a flag (`--ignore-missing` or `-z`) to the `update` and `compare` commands,
+or [as a configuration option either globally or on a specific dotfile](config-details.md#ignoring-missing-files).
