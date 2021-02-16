@@ -13,11 +13,6 @@ function __fish_dotdrop_comp_sub
         -n "not __fish_seen_subcommand_from $commands"\
         $argv
 end
-function __fish_dotdrop_comp_opt -a "command"
-    complete -c dotdrop\
-        -n "__fish_seen_subcommand_from $command"\
-        $argv[2..-1]
-end
 
 function __fish_dotdrop_list_profiles
     dotdrop profiles \
@@ -61,114 +56,79 @@ __fish_dotdrop_comp_sub -s h -l help
 __fish_dotdrop_comp_sub -s v -l version
 
 
-# Common options to all subcommands
-#
-__fish_dotdrop_comp_opt "$commands"\
-    -s V -l Verbose\
-    -d "Show version"
-
-__fish_dotdrop_comp_opt "$commands"\
-    -s b -l no-banner\
-    -d "Do not display the banner"
-
-__fish_dotdrop_comp_opt "$commands"\
-    -rF -s c -l cfg\
-    -d "Path to the config"
-
-
-# Subcommand specific options
-#
-__fish_dotdrop_comp_opt "install import update remove detail"\
-    -s f -l force\
-    -d "Do not ask user confirmation for anything"
-
-__fish_dotdrop_comp_opt "install import  update remove"\
-    -s d -l dry\
-    -d "Dry run"
-
-__fish_dotdrop_comp_opt "update remove"\
-    -s k -l key\
-    -d "Treat <path> as a dotfile key"
-
-__fish_dotdrop_comp_opt "files"\
-    -s T -l template\
-    -d "Only template dotfiles"
-
-__fish_dotdrop_comp_opt "install"\
-    -s t -l temp\
-    -d "Install to a temporary directory for review"
-
-__fish_dotdrop_comp_opt "install"\
-    -s n -l nodiff\
-    -d "Do not diff when installing"
-
-__fish_dotdrop_comp_opt "install"\
-    -s D -l showdiff\
-    -d "Show a diff before overwriting"
-
-__fish_dotdrop_comp_opt "install"\
-    -s a -l force-actions\
-    -d "Execute all actions even if no dotfile is installed"
-
-__fish_dotdrop_comp_opt "update"\
-    -s P -l show-patch\
-    -d "Provide a one-liner to manually patch template"
-
-__fish_dotdrop_comp_opt "files profiles"\
-    -s G -l grepable\
-    -d "Grepable output"
-
-
-# Command specific options with parameters
-#
-
 if test -z "$DOTDROP_PROFILE"
     set -l DOTDROP_PROFILE (uname -n)
 end
 
-__fish_dotdrop_comp_opt "install import compare update remove files detail"\
-    -x -s p -l profile\
-    -d "Specify the profile to use [default: $DOTDROP_PROFILE]"\
-    -a "(__fish_dotdrop_list_profiles)"
-
-__fish_dotdrop_comp_opt "compare update"\
-    -x -s i -l ignore\
-    -d "Pattern to ignore"
-
-__fish_dotdrop_comp_opt "compare"\
-    -rF -s C -l file\
-    -d "Path of dotfile to compare"
-
-__fish_dotdrop_comp_opt "import"\
-    -rf -s l -l link\
-    -a "nolink link link_children"\
-    -d "Link option"
-
-__fish_dotdrop_comp_opt "import"\
-    -rF -s s -l as\
-    -d "Import as a different path from actual path"
-
-
-# Subcommand arguments
+# Short and Long options and their Descriptions
 #
-__fish_dotdrop_comp_opt "import"\
-    -rF
+set -l  a -s a -l force-actions  -d "Execute all actions even if no dotfile is installed."
+set -l  b -s b -l no-banner      -d "Do not display the banner."
+set -l  c -s c -l cfg            -d "Path to the config."
+set -l  C -s C -l file           -d "Path of dotfile to compare."
+set -l  d -s d -l dry            -d "Dry run."
+set -l  D -s D -l showdiff       -d "Show a diff before overwriting."
+set -l  f -s f -l force          -d "Do not ask user confirmation for anything."
+set -l  G -s G -l grepable       -d "Grepable output."
+set -l  i -s i -l ignore         -d "Pattern to ignore."
+set -l  k -s k -l key            -d "Treat <path> as a dotfile key."
+set -l  l -s l -l link           -d "Link option (nolink|link|link_children)."
+set -l  L -s L -l file-only      -d "Do not show diff but only the files that differ."
+set -l  m -s m -l preserve-mode  -d "Insert a chmod entry in the dotfile with its mode."
+set -l  n -s n -l nodiff         -d "Do not diff when installing."
+set -l  p -s p -l profile        -d "Specify the profile to use [default: $DOTDROP_PROFILE]."
+set -l  P -s P -l show-patch     -d "Provide a one-liner to manually patch template."
+set -l  s -s s -l as             -d "Import as a different path from actual path."
+set -l  t -s t -l temp           -d "Install to a temporary directory for review."
+set -l  T -s T -l template       -d "Only template dotfiles."
+set -l  V -s V -l verbose        -d "Be verbose."
+set -l  w -s w -l workers        -d "Number of concurrent workers [default: 1]."
+set -l  v -s v -l version        -d "Show version."
+set -l  h -s h -l help           -d "Show this screen."
 
-__fish_dotdrop_comp_opt "update"\
-    -F
+# Configuration for arguments
+#
+set -al c -rF
+set -al C -rF
+set -al i -x
+set -al l -x -a "nolink link link_children"
+set -al p -x -a "(__fish_dotdrop_list_profiles)"
+set -al s -rF
+set -al w -x
 
-__fish_dotdrop_comp_opt "remove"\
-    -F
+# Parameters for main commands
+#
+set -l mustfile -rF
+set -l nofile   -F
+set -l nofile   -F
+set -l files -d "File"       -a "(__fish_dotdrop_list_test_keys -f)"
+set -l dirs  -d "Directory"  -a "(__fish_dotdrop_list_test_keys -d)"
 
-__fish_dotdrop_comp_opt "install detail"\
-    -f\
-    -d "File"\
-    -a "(__fish_dotdrop_list_test_keys -f)"
+# Column 1 represents to what subcommands thes following options will be applied
+# Column 2 is a list which will be used for lookup from tables before
+for line in "install:   V b t f n d D a c p w" \
+            "import:    V b d f m c p s l" \
+            "compare:   L V b c p w C i" \
+            "update:    V b f d k P c p w i" \
+            "remove:    V b f d k c p" \
+            "files:     V b T G c p" \
+            "detail:    V b c p" \
+            "profiles:  V b G c" \
+            "install:   files dirs" \
+            "detail:    files dirs" \
+            "import:    mustfile" \
+            "update:    nofile" \
+            "remove:    nofile" \
+            # I'm here so no one is hurt by sharp backslashes
 
-__fish_dotdrop_comp_opt "install detail"\
-    -f\
-    -d "Directory"\
-    -a "(__fish_dotdrop_list_test_keys -d)"
+    set -l command (echo "$line" | cut -d: -f1 )
+
+    for opt in (echo "$line" | cut -d: -f2 | string split -n ' ')
+        complete -c dotdrop\
+            -n "__fish_seen_subcommand_from $command" $$opt
+    end
+end
+
 
 # dotdrop.sh
 #
