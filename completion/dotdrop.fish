@@ -8,25 +8,20 @@ set commands\
 
 # Aliases to avoid walls of text
 #
-function comp_sub
+function __fish_dotdrop_comp_sub
     complete -f -c dotdrop\
         -n "not __fish_seen_subcommand_from $commands"\
         $argv
 end
-function comp_opt -a "command"
-    complete -c dotdrop\
-        -n "__fish_seen_subcommand_from $command"\
-        $argv[2..-1]
-end
 
-function list_profiles
+function __fish_dotdrop_list_profiles
     dotdrop profiles \
         --grepable \
         --no-banner \
         2> /dev/null
 end
 
-function list_test_keys -a "test_arg"
+function __fish_dotdrop_list_test_keys -a "test_arg"
     # Return only dotdrop keys in which the src field matches a test(1) criteria
     #        ^⌣ ^  ← "Slide Time!!"
     dotdrop files \
@@ -46,124 +41,94 @@ end
 
 # Complete subcommands
 #
-comp_sub -k -a "profiles" -d "List available profiles"
-comp_sub -k -a "detail"   -d "List managed dotfiles details"
-comp_sub -k -a "files"    -d "List managed dotfiles"
-comp_sub -k -a "remove"   -d "Remove a managed dotfile"
-comp_sub -k -a "update"   -d "Update a managed dotfile"
-comp_sub -k -a "compare"  -d "Compare your local dotfiles with managed dotfiles"
-comp_sub -k -a "import"   -d "Import dotfiles into dotdrop"
-comp_sub -k -a "install"  -d "Install dotfiles"
+__fish_dotdrop_comp_sub  -k -a "profiles" -d "List available profiles"
+__fish_dotdrop_comp_sub  -k -a "detail"   -d "List managed dotfiles details"
+__fish_dotdrop_comp_sub  -k -a "files"    -d "List managed dotfiles"
+__fish_dotdrop_comp_sub  -k -a "remove"   -d "Remove a managed dotfile"
+__fish_dotdrop_comp_sub  -k -a "update"   -d "Update a managed dotfile"
+__fish_dotdrop_comp_sub  -k -a "compare"  -d "Compare your local dotfiles with managed dotfiles"
+__fish_dotdrop_comp_sub  -k -a "import"   -d "Import dotfiles into dotdrop"
+__fish_dotdrop_comp_sub  -k -a "install"  -d "Install dotfiles"
 
 # Lone options
 #
-comp_sub -s h -l help
-comp_sub -s v -l version
+__fish_dotdrop_comp_sub -s h -l help
+__fish_dotdrop_comp_sub -s v -l version
 
 
-# Common options to all subcommands
+if test -z "$DOTDROP_PROFILE"
+    set -l DOTDROP_PROFILE (uname -n)
+end
+
+# Short and Long options and their Descriptions
 #
-comp_opt "$commands"\
-    -s V -l Verbose\
-    -d "Show version"
+set -l  a -s a -l force-actions  -d "Execute all actions even if no dotfile is installed."
+set -l  b -s b -l no-banner      -d "Do not display the banner."
+set -l  c -s c -l cfg            -d "Path to the config."
+set -l  C -s C -l file           -d "Path of dotfile to compare."
+set -l  d -s d -l dry            -d "Dry run."
+set -l  D -s D -l showdiff       -d "Show a diff before overwriting."
+set -l  f -s f -l force          -d "Do not ask user confirmation for anything."
+set -l  G -s G -l grepable       -d "Grepable output."
+set -l  i -s i -l ignore         -d "Pattern to ignore."
+set -l  k -s k -l key            -d "Treat <path> as a dotfile key."
+set -l  l -s l -l link           -d "Link option (nolink|link|link_children)."
+set -l  L -s L -l file-only      -d "Do not show diff but only the files that differ."
+set -l  m -s m -l preserve-mode  -d "Insert a chmod entry in the dotfile with its mode."
+set -l  n -s n -l nodiff         -d "Do not diff when installing."
+set -l  p -s p -l profile        -d "Specify the profile to use [default: $DOTDROP_PROFILE]."
+set -l  P -s P -l show-patch     -d "Provide a one-liner to manually patch template."
+set -l  s -s s -l as             -d "Import as a different path from actual path."
+set -l  t -s t -l temp           -d "Install to a temporary directory for review."
+set -l  T -s T -l template       -d "Only template dotfiles."
+set -l  V -s V -l verbose        -d "Be verbose."
+set -l  w -s w -l workers        -d "Number of concurrent workers [default: 1]."
+set -l  v -s v -l version        -d "Show version."
+set -l  h -s h -l help           -d "Show this screen."
 
-comp_opt "$commands"\
-    -s b -l no-banner\
-    -d "Do not display the banner"
-
-comp_opt "$commands"\
-    -rF -s c -l cfg\
-    -d "Path to the config"
-
-
-# Subcommand specific options
+# Configuration for arguments
 #
-comp_opt "install import update remove detail"\
-    -s f -l force\
-    -d "Do not ask user confirmation for anything"
+set -al c -rF
+set -al C -rF
+set -al i -x
+set -al l -x -a "nolink link link_children"
+set -al p -x -a "(__fish_dotdrop_list_profiles)"
+set -al s -rF
+set -al w -x
 
-comp_opt "install import  update remove"\
-    -s d -l dry\
-    -d "Dry run"
-
-comp_opt "update remove"\
-    -s k -l key\
-    -d "Treat <path> as a dotfile key"
-
-comp_opt "files"\
-    -s T -l template\
-    -d "Only template dotfiles"
-
-comp_opt "install"\
-    -s t -l temp\
-    -d "Install to a temporary directory for review"
-
-comp_opt "install"\
-    -s n -l nodiff\
-    -d "Do not diff when installing"
-
-comp_opt "install"\
-    -s D -l showdiff\
-    -d "Show a diff before overwriting"
-
-comp_opt "install"\
-    -s a -l force-actions\
-    -d "Execute all actions even if no dotfile is installed"
-
-comp_opt "update"\
-    -s P -l show-patch\
-    -d "Provide a one-liner to manually patch template"
-
-comp_opt "files profiles"\
-    -s G -l grepable\
-    -d "Grepable output"
-
-
-# Command specific options with parameters
+# Parameters for main commands
 #
-comp_opt "install import compare update remove files detail"\
-    -x -s p -l profile\
-    -d "Specify the profile to use [default: "(uname -n)"]"\
-    -a "(list_profiles)"
+set -l mustfile -rF
+set -l nofile   -F
+set -l nofile   -F
+set -l files -d "File"       -a "(__fish_dotdrop_list_test_keys -f)"
+set -l dirs  -d "Directory"  -a "(__fish_dotdrop_list_test_keys -d)"
 
-comp_opt "compare update"\
-    -x -s i -l ignore\
-    -d "Pattern to ignore"
+# Column 1 represents to what subcommands thes following options will be applied
+# Column 2 is a list which will be used for lookup from tables before
+for line in "install:   V b t f n d D a c p w" \
+            "import:    V b d f m c p s l" \
+            "compare:   L V b c p w C i" \
+            "update:    V b f d k P c p w i" \
+            "remove:    V b f d k c p" \
+            "files:     V b T G c p" \
+            "detail:    V b c p" \
+            "profiles:  V b G c" \
+            "install:   files dirs" \
+            "detail:    files dirs" \
+            "import:    mustfile" \
+            "update:    nofile" \
+            "remove:    nofile" \
+            # I'm here so no one is hurt by sharp backslashes
 
-comp_opt "compare"\
-    -rF -s C -l file\
-    -d "Path of dotfile to compare"
+    set -l command (echo "$line" | cut -d: -f1 )
 
-comp_opt "import"\
-    -rf -s l -l link\
-    -a "nolink link link_children"\
-    -d "Link option"
+    for opt in (echo "$line" | cut -d: -f2 | string split -n ' ')
+        complete -c dotdrop\
+            -n "__fish_seen_subcommand_from $command" $$opt
+    end
+end
 
-comp_opt "import"\
-    -rF -s s -l as\
-    -d "Import as a different path from actual path"
-
-
-# Subcommand arguments
-#
-comp_opt "import"\
-    -rF
-
-comp_opt "update"\
-    -F
-
-comp_opt "remove"\
-    -F
-
-comp_opt "install detail"\
-    -f\
-    -d "File"\
-    -a "(list_test_keys -f)"
-
-comp_opt "install detail"\
-    -f\
-    -d "Directory"\
-    -a "(list_test_keys -d)"
 
 # dotdrop.sh
 #
