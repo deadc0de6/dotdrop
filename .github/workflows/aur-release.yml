@@ -4,7 +4,7 @@ on:
     types: [created]
 jobs:
   aur_publish:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: Prepare AUR package
@@ -15,7 +15,7 @@ jobs:
         sed -i "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD
         cat packages/arch-dotdrop/PKGBUILD
     - name: Publish to aur
-      uses: KSXGitHub/github-actions-deploy-aur@v2.0.2
+      uses: KSXGitHub/github-actions-deploy-aur@v2.2.3
       with:
         pkgname: dotdrop
         pkgbuild: ./packages/arch-dotdrop/PKGBUILD
