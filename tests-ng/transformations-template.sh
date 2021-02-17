@@ -61,6 +61,7 @@ cat > ${cfg} << _EOF
 trans_read:
   r_echo_abs_src: echo "\$(cat {0}); {{@@ _dotfile_abs_src @@}}" > {1}
   r_echo_var: echo "\$(cat {0}); {{@@ r_var @@}}" > {1}
+  reverse_it: cat {0} | rev > {1}
 trans_write:
   w_echo_key: echo "\$(cat {0}); {{@@ _dotfile_key @@}}" > {1}
   w_echo_var: echo "\$(cat {0}); {{@@ w_var @@}}" > {1}
@@ -85,12 +86,17 @@ dotfiles:
     src: ghi
     trans_read: r_echo_var
     trans_write: w_echo_var
+  f_rev:
+    dst: ${tmpd}/rev
+    src: rev
+    trans_read: reverse_it
 profiles:
   p1:
     dotfiles:
     - f_abc
     - f_def
     - f_ghi
+    - f_rev
 _EOF
 #cat ${cfg}
 
@@ -98,6 +104,7 @@ _EOF
 echo 'abc' > ${tmps}/dotfiles/abc
 echo 'marker' > ${tmps}/dotfiles/def
 echo 'ghi' > ${tmps}/dotfiles/ghi
+echo '{{@@ profile @@}}' | rev > ${tmps}/dotfiles/rev
 
 ###########################
 # test install and compare
@@ -110,11 +117,14 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 [ ! -e ${tmpd}/def ] && exit 1
 [ ! -e ${tmpd}/abc ] && exit 1
 [ ! -e ${tmpd}/ghi ] && exit 1
+[ ! -e ${tmpd}/rev ] && exit 1
 grep marker ${tmpd}/def
 cat ${tmpd}/abc
 grep "^abc; ${tmps}/dotfiles/abc$" ${tmpd}/abc
 cat ${tmpd}/ghi
 grep "^ghi; readvar$" ${tmpd}/ghi
+cat ${tmpd}/rev
+grep "^p1$" ${tmpd}/rev
 
 ###########################
 # test update
@@ -127,6 +137,7 @@ cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V
 [ ! -e ${tmps}/dotfiles/def ] && exit 1
 [ ! -e ${tmps}/dotfiles/abc ] && exit 1
 [ ! -e ${tmps}/dotfiles/ghi ] && exit 1
+[ ! -e ${tmps}/dotfiles/rev ] && exit 1
 grep marker ${tmps}/dotfiles/def
 cat ${tmps}/dotfiles/abc
 grep "^abc; ${tmps}/dotfiles/abc; f_abc$" ${tmps}/dotfiles/abc

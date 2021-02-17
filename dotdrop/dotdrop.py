@@ -245,6 +245,11 @@ def _dotfile_install(o, dotfile, tmpdir=None):
             if not tmp:
                 return False, dotfile.key, None
             src = tmp
+        # make sure to re-evaluate if is template
+        is_template = dotfile.template and Templategen.is_template(
+            src,
+            ignore=ignores,
+        )
         r, err = inst.install(t, src, dotfile.dst,
                               LinkTypes.NOLINK,
                               actionexec=pre_actions_exec,

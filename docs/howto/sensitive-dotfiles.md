@@ -47,6 +47,8 @@ $ cp <encrypted-version-of-secret> dotfiles/secret
 
 * commit and push the changes
 
+See [transformations](../config-details.md#entry-transformations).
+
 ## Load passphrase from file
 
 Passphrase is retrieved using a script:
@@ -64,3 +66,5 @@ variables:
 trans_read:
   _gpg: "gpg2 --batch --yes --passphrase-file <(cat {{@@ gpg_password_file @@}}) -q --for-your-eyes-only --no-tty -d {0} > {1}"
 ```
+
+See [transformations](../config-details.md#entry-transformations).

@@ -123,11 +123,13 @@ echo "{{@@ header() @@}}" > ${tmps}/dotfiles/fl
 
 # create the normal dotfile
 echo "before" > ${tmps}/dotfiles/fn
-echo "{#@@ should not be stripped @@#}" >> ${tmps}/dotfiles/fn
+echo "{#@@ should be stripped @@#}" >> ${tmps}/dotfiles/fn
 echo "after" >> ${tmps}/dotfiles/fn
 
 # install
+echo "installing"
 cd ${ddpath} | ${bin} install -f --showdiff -c ${cfg} -p p1 -V
+echo "comparing"
 cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
 
 # simple file
@@ -170,7 +172,7 @@ grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 # normal dotfile
 echo "* normal dotfile"
 [ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
-grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
+grep 'should be stripped' ${tmpd}/fn && echo "not templated" && exit 1
 
 # test backup done
 echo "before" > ${tmps}/dotfiles/f1
