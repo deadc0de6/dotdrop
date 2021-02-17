@@ -4,7 +4,7 @@ on:
     types: [created]
 jobs:
   aur_publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Prepare AUR package
