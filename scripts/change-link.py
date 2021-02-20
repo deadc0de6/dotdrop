@@ -48,8 +48,13 @@ def main():
             continue
         v[entry] = value
 
-    ret = yaml.dump(content, default_flow_style=False, indent=2)
-    print(ret)
+    output = io.StringIO()
+    y = yaml()
+    y.default_flow_style = False
+    y.indent = 2
+    y.typ = 'rt'
+    y.dump(content, output)
+    print(output)
 
 
 if __name__ == '__main__':
