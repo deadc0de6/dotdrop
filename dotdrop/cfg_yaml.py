@@ -669,13 +669,15 @@ class CfgYaml:
                     err = 'bad format for chmod: {}'.format(val)
                     self._log.err(err)
                     raise YamlException('config content error: {}'.format(err))
+                # normalize chmod value
                 for x in list(val):
                     y = int(x)
-                    if y >= 0 or y <= 7:
-                        continue
-                    err = 'bad format for chmod: {}'.format(val)
-                    self._log.err(err)
-                    raise YamlException('config content error: {}'.format(err))
+                    if y < 0 or y > 7:
+                        err = 'bad format for chmod: {}'.format(val)
+                        self._log.err(err)
+                        raise YamlException(
+                            'config content error: {}'.format(err)
+                        )
                 v[self.key_dotfile_chmod] = int(val, 8)
 
         return new
@@ -1028,7 +1030,6 @@ class CfgYaml:
         if not yamldict[self.key_dotfiles]:
             return
         for k, dotfile in yamldict[self.key_dotfiles].items():
-            new = self.lnk_nolink
             if self.key_dotfile_link in dotfile and \
                     type(dotfile[self.key_dotfile_link]) is bool:
                 # patch link: <bool>

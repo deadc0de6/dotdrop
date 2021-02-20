@@ -64,8 +64,8 @@ class Dotfile(DictParser):
             msg = '[{}] transformations disabled'.format(key)
             msg += ' because dotfile is linked'
             self.log.warn(msg)
-            trans_r = []
-            trans_w = []
+            self.trans_r = []
+            self.trans_w = []
 
     def get_dotfile_variables(self):
         """return this dotfile specific variables"""

@@ -563,9 +563,6 @@ class Installer:
                     err = 'broken symlink {}'.format(dst)
                     return False, err
 
-            src_mode = chmod
-            if not src_mode:
-                src_mode = utils.get_file_perm(src)
             if self.diff:
                 if not self._is_different(src, dst, content=content):
                     if self.debug:
