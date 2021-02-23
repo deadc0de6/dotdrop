@@ -11,7 +11,6 @@ usage example:
 """
 
 from docopt import docopt
-import sys
 import os
 from ruamel.yaml import YAML as yaml
 
