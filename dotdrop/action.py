@@ -36,7 +36,7 @@ class Cmd(DictParser):
             try:
                 action = templater.generate_string(self.action)
             except UndefinedException as e:
-                err = 'bad {}: {}'.format(self.descr, e)
+                err = 'undefined variable for {}: \"{}\"'.format(self.descr, e)
                 self.log.warn(err)
                 return False
             if debug:
@@ -51,8 +51,8 @@ class Cmd(DictParser):
                 try:
                     args = [templater.generate_string(a) for a in args]
                 except UndefinedException as e:
-                    err = 'bad arguments for {}: {}'.format(self.descr, e)
-                    self.log.warn(err)
+                    err = 'undefined arguments for {}: {}'
+                    self.log.warn(err.format(self.descr, e))
                     return False
         if debug and args:
             self.log.dbg('action args:')
@@ -60,13 +60,14 @@ class Cmd(DictParser):
                 self.log.dbg('\targs[{}]: {}'.format(cnt, arg))
         try:
             cmd = action.format(*args)
-        except IndexError:
-            err = 'bad {}: \"{}\"'.format(self.descr, action)
+        except IndexError as e:
+            err = 'index error for {}: \"{}\"'.format(self.descr, action)
             err += ' with \"{}\"'.format(args)
+            err += ': {}'.format(e)
             self.log.warn(err)
             return False
-        except KeyError:
-            err = 'bad {}: \"{}\"'.format(self.descr, action)
+        except KeyError as e:
+            err = 'key error for {}: \"{}\": {}'.format(self.descr, action, e)
             err += ' with \"{}\"'.format(args)
             self.log.warn(err)
             return False
