@@ -16,8 +16,12 @@ Four types of actions can be defined:
 * [Profile actions](#profile-actions)
 * [Fake dotfiles and actions](#fake-dotfile-and-actions)
 
-**Note**: any action with a key starting with an underscore (`_`) won't be shown in output.
-This can be useful when working with sensitive data containing passwords for example.
+**Notes**:
+
+* Any action with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords for example.
+* Make sure to quote your actions to avoid bad surprises
+* Actions are executed using the default shell (`$SHELL`)
+* To use shell variables in your actions you need to escape the curly brackets (`${HOME}` becomes `${{HOME}}`)
 
 ### Dotfile actions
 
@@ -181,8 +185,12 @@ For examples of transformation uses, see
 * [Handle compressed directories](howto/store-compressed-directories.md)
 * [Handle secrets](howto/sensitive-dotfiles.md)
 
-**Note**: any transformation with a key starting with an underscore (`_`) won't be shown in output.
-This can be useful when working with sensitive data containing passwords for example.
+**Notes**:
+
+* Any transformation with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords for example.
+* Make sure to quote your transformations to avoid bad surprises
+* Transformations are executed using the default shell (`$SHELL`)
+* To use shell variables in your transformations you need to escape the curly brackets (`${HOME}` becomes `${{HOME}}`)
 
 There are two types of transformations available:
 

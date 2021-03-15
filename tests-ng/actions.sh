@@ -63,6 +63,7 @@ actions:
     preaction: echo 'pre' > ${tmpa}/pre
     preaction2: echo 'pre2' > ${tmpa}/pre2
     fake_pre: echo 'fake pre' > ${tmpa}/fake_pre
+    expandvariable: "myvar=xxx; echo \${{myvar}} > ${tmpa}/expandvariable"
   post:
     postaction: echo 'post' > ${tmpa}/post
     postaction2: echo 'post2' > ${tmpa}/post2
@@ -84,6 +85,7 @@ dotfiles:
       - preaction2
       - postaction2
       - _silentaction
+      - expandvariable
   f_fake:
     dst:
     src:
@@ -119,6 +121,8 @@ grep post ${tmpa}/post2 >/dev/null
 grep "executing \"echo 'naked' > ${tmpa}/naked" ${tmpa}/log >/dev/null
 grep "executing \"echo 'silent'" ${tmpa}/log >/dev/null && false
 grep "executing silent action \"_silentaction\"" ${tmpa}/log >/dev/null
+[ ! -e ${tmpa}/expandvariable ] && exit 1
+grep xxx ${tmpa}/expandvariable >/dev/null
 
 # fake action
 [ ! -e ${tmpa}/fake ] && echo 'fake post action not executed' && exit 1
