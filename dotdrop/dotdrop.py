@@ -226,7 +226,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               actionexec=pre_actions_exec,
                               is_template=is_template,
                               ignore=ignores,
-                              chmod=dotfile.chmod)
+                              chmod=dotfile.chmod,
+                              force_chmod=o.install_force_chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
         # link_children
@@ -235,7 +236,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               actionexec=pre_actions_exec,
                               is_template=is_template,
                               chmod=dotfile.chmod,
-                              ignore=ignores)
+                              ignore=ignores,
+                              force_chmod=o.install_force_chmod)
     else:
         # nolink
         src = dotfile.src
@@ -256,7 +258,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
                               noempty=dotfile.noempty,
                               ignore=ignores,
                               is_template=is_template,
-                              chmod=dotfile.chmod)
+                              chmod=dotfile.chmod,
+                              force_chmod=o.install_force_chmod)
         if tmp:
             tmp = os.path.join(o.dotpath, tmp)
             if os.path.exists(tmp):

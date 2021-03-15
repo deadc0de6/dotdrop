@@ -66,7 +66,7 @@ class Installer:
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=[], is_template=True,
-                chmod=None):
+                chmod=None, force_chmod=False):
         """
         install src to dst
 
@@ -79,6 +79,7 @@ class Installer:
         @ignore: pattern to ignore when installing
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
+        @force_chmod: do not ask user to chmod
 
         return
         - True, None        : success
@@ -171,7 +172,7 @@ class Installer:
             if dstperms != chmod:
                 # apply mode
                 msg = 'chmod {} to {:o}'.format(dst, chmod)
-                if self.safe and not self.log.ask(msg):
+                if not force_chmod and self.safe and not self.log.ask(msg):
                     r = False
                     err = 'aborted'
                 else:

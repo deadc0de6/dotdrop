@@ -121,6 +121,7 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  force_chmod: true
 dotfiles:
   f_f777:
     src: f777
@@ -191,7 +192,8 @@ _EOF
 
 # install
 echo "first install round"
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
+#cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -p p1 -V
 
 has_rights "${tmpd}/f777" "777"
 has_rights "${tmpd}/link" "777"

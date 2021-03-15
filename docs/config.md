@@ -91,11 +91,14 @@ On `install` the following rules are applied:
 
 * if `chmod` is specified in the dotfile, it will be applied to the installed dotfile
 * otherwise the permissions of the dotfile in the `dotpath` are applied.
+* if the global setting `force_chmod` is set to true dotdrop will not ask
+  for confirmation to apply permission
 
 On `update`:
 
 * if the permissions of the file in the filesystem differ from the dotfile in the `dotpath`
   then the dotfile entry `chmod` is added/updated accordingly
+
 
 ## Symlink dotfiles
 
@@ -173,7 +176,7 @@ Similar to a `.gitignore` file, you can prefix ignore patterns with an exclamati
 This so-called "negative ignore pattern" will cause any files that match that pattern to __not__ be ignored,
 provided they *would have* been ignored by an earlier ignore pattern (dotdrop will warn if that is not the
 case). This feature allows you to, for example, ignore all files within a certain directory, except for one
-particular one (see example below). 
+particular one (see example below).
 
 ```yaml
 config:

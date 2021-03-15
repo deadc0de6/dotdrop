@@ -257,6 +257,7 @@ class Options(AttrMonitor):
         self.install_default_actions_post = [a for a in self.default_actions
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
+        self.install_force_chmod = self.force_chmod
 
         # "compare" specifics
         self.compare_focus = self.args['--file']
