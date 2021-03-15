@@ -19,7 +19,7 @@ Entry    | Description | Default
 `diff_command` | the diff command to use for diffing files | `diff -r -u {0} {1}`
 `dotpath` | path to the directory containing the dotfiles to be managed by dotdrop (absolute path or relative to the config file location) | `dotfiles`
 `filter_file` | list of paths to load templating filters from (see [Templating available filters](templating.md#template-filters)) | -
-`force_chmod` | if true, do not ask confirmation to apply permissions on install | `false`
+`force_chmod` | if true, do not ask confirmation to apply permissions on install | false
 `func_file` | list of paths to load templating functions from (see [Templating available methods](templating.md#template-methods)) | -
 `ignore_missing_in_dotdrop` | ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing)) | false
 `ignoreempty` | do not deploy template if empty | false
