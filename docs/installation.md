@@ -189,3 +189,8 @@ automatically update dotdrop back to the latest commit.
 Completion scripts exist for `bash`, `zsh` and `fish`,
 see [the related doc](https://github.com/deadc0de6/dotdrop/blob/master/completion/README.md).
 
+## Highlighters
+
+Highlighters for dotdrop templates are available [here](https://github.com/deadc0de6/dotdrop/tree/master/highlighters).
+
+
