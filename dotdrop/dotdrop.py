@@ -646,7 +646,7 @@ def cmd_remove(o):
                         break
                     removepath(parent, LOG)
                 parent = os.path.dirname(parent)
-            removed.append(dotfile.key)
+            removed.append(dotfile)
 
     if o.dry:
         LOG.dry('new config file would be:')
@@ -654,7 +654,10 @@ def cmd_remove(o):
     else:
         o.conf.save()
     if removed:
-        LOG.log('\ndotfile(s) removed: {}'.format(','.join(removed)))
+        LOG.log('\nFollowing dotfile(s) are not tracked anymore:')
+        entries = ['- \"{}\" (was tracked as \"{}\")'.format(r.dst, r.key)
+                   for r in removed]
+        LOG.log('\n'.join(entries))
     else:
         LOG.log('\nno dotfile removed')
     return True
