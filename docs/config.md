@@ -1,3 +1,5 @@
+# Config
+
 ## Location
 
 The config file used by dotdrop is

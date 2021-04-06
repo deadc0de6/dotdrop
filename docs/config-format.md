@@ -1,11 +1,11 @@
-## Syntax
+# Config format
 
 Dotdrop config file uses [yaml](https://yaml.org/) syntax.
 
 Here is a minimal config file to start with:
 [config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
 
-### config entry
+## config entry
 
 The **config** entry (mandatory) contains settings for the deployment
 
@@ -39,7 +39,7 @@ Entry    | Description | Default
 `workdir` | path to the directory where templates are installed before being symlinked when using `link:link` or `link:link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
 <s>link_by_default</s> | when importing a dotfile set `link` to that value per default | false
 
-### dotfiles entry
+## dotfiles entry
 
 The **dotfiles** entry (mandatory) contains a list of dotfiles managed by dotdrop
 
@@ -82,7 +82,7 @@ Entry    | Description
   trans_write: <transformation-key>
 ```
 
-### profiles entry
+## profiles entry
 
 The **profiles** entry (mandatory) contains a list of profiles with the different dotfiles that
   need to be managed
@@ -118,7 +118,7 @@ Entry    | Description
   - ...
 ```
 
-### actions entry
+## actions entry
 
 The **actions** entry (optional) contains a list of actions (see [actions](config-details.md#entry-actions))
 
@@ -141,7 +141,7 @@ actions:
     <action-key>: <command-to-execute>
 ```
 
-### trans_read entry
+## trans_read entry
 
 The **trans_read** entry (optional) contains a list of transformations (see [transformations](config-details.md#entry-transformations))
 
@@ -150,7 +150,7 @@ trans_read:
    <trans-key>: <command-to-execute>
 ```
 
-### trans_write entry
+## trans_write entry
 
 The **trans_write** entry (optional) contains a list of write transformations (see [transformations](config-details.md#entry-transformations))
 
@@ -159,7 +159,7 @@ trans_write:
    <trans-key>: <command-to-execute>
 ```
 
-### variables entry
+## variables entry
 
 The **variables** entry (optional) contains a list of variables (see [variables](config.md#variables))
 
@@ -168,7 +168,7 @@ variables:
   <variable-name>: <variable-content>
 ```
 
-### dynvariables entry
+## dynvariables entry
 
 The **dynvariables** entry (optional) contains a list of interpreted variables
 (see [Interpreted variables](config-details.md#entry-dynvariables))

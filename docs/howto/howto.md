@@ -1,3 +1,5 @@
+# HowTo
+
 ## Append text to a dotfile on install
 
 [Append text to a dotfile on install](append.md)

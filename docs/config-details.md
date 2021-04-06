@@ -1,3 +1,5 @@
+# Config details
+
 ## Entry actions
 
 Actions can be either `post` or `pre`
