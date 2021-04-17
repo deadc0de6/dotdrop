@@ -7,5 +7,6 @@ For more examples, see how people are using dotdrop
 * [https://github.com/Eluminae/dotfiles](https://github.com/Eluminae/dotfiles)
 * [https://github.com/davla/dotfiles](https://github.com/davla/dotfiles) and [https://github.com/davla/setup](https://github.com/davla/setup)
 
-Or search directly on [github](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code)
-for config examples.
+Dotfiles repository using dotdrop on [github](https://github.com/topics/dotdrop?o=desc&s=updated) and [gitlab](https://gitlab.com/search?search=dotdrop).
+
+Or search directly on [github](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code) for config examples.
