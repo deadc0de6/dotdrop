@@ -330,7 +330,12 @@ class Updater:
                             blacklist.add(name)
                 return blacklist - whitelist
 
-            shutil.copytree(exist, new, ignore=ig)
+            try:
+                shutil.copytree(exist, new, ignore=ig)
+            except OSError as e:
+                msg = 'error copying dir {}'.format(exist)
+                self.log.err('{}: {}'.format(msg, e))
+                continue
             self.log.sub('\"{}\" dir added'.format(new))
 
         # remove dirs that don't exist in deployed version
@@ -384,7 +389,13 @@ class Updater:
                 continue
             if self.debug:
                 self.log.dbg('cp {} {}'.format(exist, new))
-            shutil.copyfile(exist, new)
+            try:
+                shutil.copyfile(exist, new)
+            except OSError as e:
+                msg = 'error copying file {}'.format(exist)
+                self.log.err('{}: {}'.format(msg, e))
+                continue
+
             self._mirror_rights(exist, new)
             self.log.sub('\"{}\" added'.format(new))
 
