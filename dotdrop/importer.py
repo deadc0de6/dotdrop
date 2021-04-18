@@ -138,7 +138,7 @@ class Importer:
         # add file to config file
         retconf = self.conf.new_dotfile(src, dst, linktype, chmod=chmod)
         if not retconf:
-            self.log.warn('\"{}\" ignored'.format(path))
+            self.log.warn('\"{}\" ignored during import'.format(path))
             return 0
 
         self.log.sub('\"{}\" imported'.format(path))
