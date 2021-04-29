@@ -38,10 +38,10 @@ def run(cmd, debug=False):
     """run a command (expects a list)"""
     if debug:
         LOG.dbg('exec: {}'.format(' '.join(cmd)), force=True)
-    p = subprocess.Popen(cmd, shell=False,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out, _ = p.communicate()
-    ret = p.returncode
+    proc = subprocess.Popen(cmd, shell=False,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, _ = proc.communicate()
+    ret = proc.returncode
     out = out.splitlines(keepends=True)
     lines = ''.join([x.decode('utf-8', 'replace') for x in out])
     return ret == 0, lines
@@ -50,8 +50,8 @@ def run(cmd, debug=False):
 def write_to_tmpfile(content):
     """write some content to a tmp file"""
     path = get_tmpfile()
-    with open(path, 'wb') as f:
-        f.write(content)
+    with open(path, 'wb') as file:
+        file.write(content)
     return path
 
 
@@ -92,25 +92,27 @@ def diff(original, modified,
 
 def get_tmpdir():
     """create and return the temporary directory"""
+# pylint: disable=W0603
     global TMPDIR
+# pylint: enable=W0603
     if TMPDIR:
         return TMPDIR
-    t = _get_tmpdir()
-    TMPDIR = t
-    return t
+    tmp = _get_tmpdir()
+    TMPDIR = tmp
+    return tmp
 
 
 def _get_tmpdir():
     """create the tmpdir"""
     try:
         if ENV_TEMP in os.environ:
-            t = os.environ[ENV_TEMP]
-            t = os.path.expanduser(t)
-            t = os.path.abspath(t)
-            t = os.path.normpath(t)
-            os.makedirs(t, exist_ok=True)
-            return t
-    except Exception:
+            tmp = os.environ[ENV_TEMP]
+            tmp = os.path.expanduser(tmp)
+            tmp = os.path.abspath(tmp)
+            tmp = os.path.normpath(tmp)
+            os.makedirs(tmp, exist_ok=True)
+            return tmp
+    except OSError:
         pass
     return tempfile.mkdtemp(prefix='dotdrop-')
 
@@ -159,12 +161,12 @@ def removepath(path, logger=None):
         else:
             err = 'Unsupported file type for deletion: {}'.format(path)
             raise OSError(err)
-    except Exception as e:
-        err = str(e)
+    except Exception as exc:
+        err = str(exc)
         if logger:
             logger.warn(err)
             return
-        raise OSError(err)
+        raise OSError(err) from exc
 
 
 def samefile(path1, path2):
@@ -207,29 +209,32 @@ def must_ignore(paths, ignores, debug=False):
                 force=True)
     ignored_negative, ignored = categorize(
         lambda ign: ign.startswith('!'), ignores)
-    for p in paths:
+    for path in paths:
         ignore_matches = []
         # First ignore dotfiles
         for i in ignored:
-            if fnmatch.fnmatch(p, i):
+            if fnmatch.fnmatch(path, i):
                 if debug:
-                    LOG.dbg('ignore \"{}\" match: {}'.format(i, p), force=True)
-                ignore_matches.append(p)
-        # Then remove any matches that actually shouldn't be ignored
-        for ni in ignored_negative:
-            # Each of these will start with an '!' so we need to remove that
-            ni = ni[1:]
-            if fnmatch.fnmatch(p, ni):
-                if debug:
-                    LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p),
+                    LOG.dbg('ignore \"{}\" match: {}'.format(i, path),
                             force=True)
+                ignore_matches.append(path)
+        # Then remove any matches that actually shouldn't be ignored
+        for nign in ignored_negative:
+            # Each of these will start with an '!' so we need to remove that
+            nign = nign[1:]
+            if fnmatch.fnmatch(path, nign):
+                if debug:
+                    msg = 'negative ignore \"{}\" match: {}'.format(nign, path)
+                    LOG.dbg(msg, force=True)
                 try:
-                    ignore_matches.remove(p)
+                    ignore_matches.remove(path)
                 except ValueError:
-                    LOG.warn('no files that are currently being ignored match '
-                             '\"{}\". In order for a negative ignore pattern '
-                             'to work, it must match a file that is being '
-                             'ignored by a previous ignore pattern.'.format(ni)
+                    LOG.warn('no files that are currently being '
+                             'ignored match \"{}\". In order '
+                             'for a negative ignore pattern '
+                             'to work, it must match a file '
+                             'that is being ignored by a '
+                             'previous ignore pattern.'.format(nign)
                              )
         if ignore_matches:
             return True
@@ -241,9 +246,9 @@ def must_ignore(paths, ignores, debug=False):
 def uniq_list(a_list):
     """unique elements of a list while preserving order"""
     new = []
-    for a in a_list:
-        if a not in new:
-            new.append(a)
+    for elem in a_list:
+        if elem not in new:
+            new.append(elem)
     return new
 
 
@@ -286,8 +291,8 @@ def patch_ignores(ignores, prefix, debug=False):
 def get_module_functions(mod):
     """return a list of fonction from a module"""
     funcs = []
-    for m in inspect.getmembers(mod):
-        name, func = m
+    for memb in inspect.getmembers(mod):
+        name, func = memb
         if not inspect.isfunction(func):
             continue
         funcs.append((name, func))
@@ -315,10 +320,11 @@ def dependencies_met():
     # check python deps
     err = 'missing python module \"{}\"'
 
+# pylint: disable=C0415
     # python-magic
     try:
         import magic
-        assert(magic)
+        assert magic
         if not hasattr(magic, 'from_file'):
             LOG.warn(err.format('python-magic'))
     except ImportError:
@@ -327,23 +333,24 @@ def dependencies_met():
     # docopt
     try:
         from docopt import docopt
-        assert(docopt)
-    except ImportError:
-        raise Exception(err.format('docopt'))
+        assert docopt
+    except ImportError as exc:
+        raise Exception(err.format('docopt')) from exc
 
     # jinja2
     try:
         import jinja2
-        assert(jinja2)
-    except ImportError:
-        raise Exception(err.format('jinja2'))
+        assert jinja2
+    except ImportError as exc:
+        raise Exception(err.format('jinja2')) from exc
 
     # ruamel.yaml
     try:
         from ruamel.yaml import YAML
-        assert(YAML)
-    except ImportError:
-        raise Exception(err.format('ruamel.yaml'))
+        assert YAML
+    except ImportError as exc:
+        raise Exception(err.format('ruamel.yaml')) from exc
+# pylint: enable=C0415
 
 
 def mirror_file_rights(src, dst):
@@ -376,6 +383,7 @@ def get_file_perm(path):
 
 
 def chmod(path, mode, debug=False):
+    """change mode of file"""
     if debug:
         LOG.dbg('chmod {} {}'.format(oct(mode), path), force=True)
     os.chmod(path, mode)
@@ -383,6 +391,7 @@ def chmod(path, mode, debug=False):
 
 
 def adapt_workers(options, logger):
+    """adapt number of workers if safe/dry"""
     if options.safe and options.workers > 1:
         logger.warn('workers set to 1 when --force is not used')
         options.workers = 1
