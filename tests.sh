@@ -19,6 +19,9 @@ echo "testing with pyflakes"
 pyflakes dotdrop/
 pyflakes tests/
 
+# pylint
+#pylint --disable=R0902 --disable=R0913 --disable=R0903 dotdrop/
+
 # retrieve the nosetests binary
 nosebin="nosetests"
 which ${nosebin} >/dev/null 2>&1
