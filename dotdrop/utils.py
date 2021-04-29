@@ -398,3 +398,26 @@ def categorize(function, iterable):
     element"""
     return (tuple(filter(function, iterable)),
             tuple(itertools.filterfalse(function, iterable)))
+
+
+def debug_list(title, elems, debug):
+    """pretty print list"""
+    if not debug:
+        return
+    LOG.dbg('{}:'.format(title))
+    for elem in elems:
+        LOG.dbg('\t- {}'.format(elem))
+
+
+def debug_dict(title, elems, debug):
+    """pretty print dict"""
+    if not debug:
+        return
+    LOG.dbg('{}:'.format(title))
+    for k, val in elems.items():
+        if isinstance(val, list):
+            LOG.dbg('\t- \"{}\":'.format(k))
+            for i in val:
+                LOG.dbg('\t\t- {}'.format(i))
+        else:
+            LOG.dbg('\t- \"{}\": {}'.format(k, val))

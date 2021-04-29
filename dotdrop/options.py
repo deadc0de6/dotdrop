@@ -5,6 +5,8 @@ Copyright (c) 2017, deadc0de6
 stores all options to use across dotdrop
 """
 
+# pylint: disable=W0201
+
 import os
 import sys
 import socket
@@ -16,7 +18,7 @@ from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.action import Action
-from dotdrop.utils import uniq_list
+from dotdrop.utils import uniq_list, debug_list, debug_dict
 from dotdrop.exceptions import YamlException
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
@@ -97,25 +99,38 @@ Options:
 
 
 class AttrMonitor:
+    """monitor attribute setter"""
     _set_attr_err = False
 
+# pylint: disable=W0235
     def __setattr__(self, key, value):
         """monitor attribute setting"""
-        if not hasattr(self, key) and self._set_attr_err:
-            self._attr_change(key)
-        super(AttrMonitor, self).__setattr__(key, value)
+        super().__setattr__(key, value)
+# pylint: enable=W0235
 
     def _attr_set(self, attr):
         """do something when unexistent attr is set"""
-        pass
 
 
 class Options(AttrMonitor):
+    """dotdrop options manager"""
 
     def __init__(self, args=None):
         """constructor
         @args: argument dictionary (if None use sys)
         """
+        # attributes gotten from self.conf.get_settings()
+        self.banner = None
+        self.showdiff = None
+        self.default_actions = []
+        self.instignore = None
+        self.force_chmod = None
+        self.cmpignore = None
+        self.impignore = None
+        self.upignore = None
+        self.link_on_import = None
+
+        # args parsing
         self.args = {}
         if not args:
             self.args = docopt(USAGE, version=VERSION)
@@ -149,6 +164,7 @@ class Options(AttrMonitor):
         # start monitoring for bad attribute
         self._set_attr_err = True
 
+# pylint: disable=R0911
     def _get_config_path(self):
         """get the config path"""
         # cli provided
@@ -187,6 +203,7 @@ class Options(AttrMonitor):
             return path
 
         return ''
+# pylint: enable=R0911
 
     def _header(self):
         """display the header"""
@@ -198,9 +215,73 @@ class Options(AttrMonitor):
         self.conf = Cfg(self.confpath, self.profile, debug=self.debug,
                         dry=self.dry)
         # transform the config settings to self attribute
-        self._debug_dict('effective settings', self.conf.get_settings())
-        for k, v in self.conf.get_settings().items():
-            setattr(self, k, v)
+        debug_dict('effective settings', self.conf.get_settings(), self.debug)
+        for k, val in self.conf.get_settings().items():
+            setattr(self, k, val)
+
+    def _apply_args_files(self):
+        """files specifics"""
+        self.files_templateonly = self.args['--template']
+        self.files_grepable = self.args['--grepable']
+
+    def _apply_args_install(self):
+        """install specifics"""
+        self.install_force_action = self.args['--force-actions']
+        self.install_temporary = self.args['--temp']
+        self.install_keys = self.args['<key>']
+        self.install_diff = not self.args['--nodiff']
+        self.install_showdiff = self.showdiff or self.args['--showdiff']
+        self.install_backup_suffix = BACKUP_SUFFIX
+        self.install_default_actions_pre = [a for a in self.default_actions
+                                            if a.kind == Action.pre]
+        self.install_default_actions_post = [a for a in self.default_actions
+                                             if a.kind == Action.post]
+        self.install_ignore = self.instignore
+        self.install_force_chmod = self.force_chmod
+
+    def _apply_args_compare(self):
+        """compare specifics"""
+        self.compare_focus = self.args['--file']
+        self.compare_ignore = self.args['--ignore']
+        self.compare_ignore.extend(self.cmpignore)
+        self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.compare_ignore = uniq_list(self.compare_ignore)
+        self.compare_fileonly = self.args['--file-only']
+        self.ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            self.args['--ignore-missing']
+
+    def _apply_args_import(self):
+        """import specifics"""
+        self.import_path = self.args['<path>']
+        self.import_as = self.args['--as']
+        self.import_mode = self.args['--preserve-mode']
+        self.import_ignore = self.args['--ignore']
+        self.import_ignore.extend(self.impignore)
+        self.import_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.import_ignore = uniq_list(self.import_ignore)
+
+    def _apply_args_update(self):
+        """update specifics"""
+        self.update_path = self.args['<path>']
+        self.update_iskey = self.args['--key']
+        self.update_ignore = self.args['--ignore']
+        self.update_ignore.extend(self.upignore)
+        self.update_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.update_ignore = uniq_list(self.update_ignore)
+        self.update_showpatch = self.args['--show-patch']
+
+    def _apply_args_profiles(self):
+        """profiles specifics"""
+        self.profiles_grepable = self.args['--grepable']
+
+    def _apply_args_remove(self):
+        """remove specifics"""
+        self.remove_path = self.args['<path>']
+        self.remove_iskey = self.args['--key']
+
+    def _apply_args_detail(self):
+        """detail specifics"""
+        self.detail_keys = self.args['<key>']
 
     def _apply_args(self):
         """apply cli args as attribute"""
@@ -238,60 +319,28 @@ class Options(AttrMonitor):
             self.import_link = OPT_LINK[link]
 
         # "files" specifics
-        self.files_templateonly = self.args['--template']
-        self.files_grepable = self.args['--grepable']
-
-        # "profiles" specifics
-        self.profiles_grepable = self.args['--grepable']
+        self._apply_args_files()
 
         # "install" specifics
-        self.install_force_action = self.args['--force-actions']
-        self.install_temporary = self.args['--temp']
-        self.install_keys = self.args['<key>']
-        self.install_diff = not self.args['--nodiff']
-        self.install_showdiff = self.showdiff or self.args['--showdiff']
-        self.install_backup_suffix = BACKUP_SUFFIX
-        self.install_default_actions_pre = [a for a in self.default_actions
-                                            if a.kind == Action.pre]
-        self.install_default_actions_post = [a for a in self.default_actions
-                                             if a.kind == Action.post]
-        self.install_ignore = self.instignore
-        self.install_force_chmod = self.force_chmod
+        self._apply_args_install()
 
         # "compare" specifics
-        self.compare_focus = self.args['--file']
-        self.compare_ignore = self.args['--ignore']
-        self.compare_ignore.extend(self.cmpignore)
-        self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
-        self.compare_ignore = uniq_list(self.compare_ignore)
-        self.compare_fileonly = self.args['--file-only']
-        self.ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
-            self.args['--ignore-missing']
+        self._apply_args_compare()
 
         # "import" specifics
-        self.import_path = self.args['<path>']
-        self.import_as = self.args['--as']
-        self.import_mode = self.args['--preserve-mode']
-        self.import_ignore = self.args['--ignore']
-        self.import_ignore.extend(self.impignore)
-        self.import_ignore.append('*{}'.format(self.install_backup_suffix))
-        self.import_ignore = uniq_list(self.import_ignore)
+        self._apply_args_import()
 
         # "update" specifics
-        self.update_path = self.args['<path>']
-        self.update_iskey = self.args['--key']
-        self.update_ignore = self.args['--ignore']
-        self.update_ignore.extend(self.upignore)
-        self.update_ignore.append('*{}'.format(self.install_backup_suffix))
-        self.update_ignore = uniq_list(self.update_ignore)
-        self.update_showpatch = self.args['--show-patch']
+        self._apply_args_update()
+
+        # "profiles" specifics
+        self._apply_args_profiles()
 
         # "detail" specifics
-        self.detail_keys = self.args['<key>']
+        self._apply_args_detail()
 
         # "remove" specifics
-        self.remove_path = self.args['<path>']
-        self.remove_iskey = self.args['--key']
+        self._apply_args_remove()
 
     def _fill_attr(self):
         """create attributes from conf"""
@@ -313,34 +362,13 @@ class Options(AttrMonitor):
             val = getattr(self, att)
             if callable(val):
                 continue
-            if type(val) is list:
-                self._debug_list('-> {}'.format(att), val)
-            elif type(val) is dict:
-                self._debug_dict('-> {}'.format(att), val)
+            if isinstance(val, list):
+                debug_list('-> {}'.format(att), val, self.debug)
+            elif isinstance(val, dict):
+                debug_dict('-> {}'.format(att), val, self.debug)
             else:
                 self.log.dbg('-> {}: {}'.format(att, val))
 
     def _attr_set(self, attr):
         """error when some inexistent attr is set"""
         raise Exception('bad option: {}'.format(attr))
-
-    def _debug_list(self, title, elems):
-        """pretty print list"""
-        if not self.debug:
-            return
-        self.log.dbg('{}:'.format(title))
-        for e in elems:
-            self.log.dbg('\t- {}'.format(e))
-
-    def _debug_dict(self, title, elems):
-        """pretty print dict"""
-        if not self.debug:
-            return
-        self.log.dbg('{}:'.format(title))
-        for k, v in elems.items():
-            if type(v) is list:
-                self.log.dbg('\t- \"{}\":'.format(k))
-                for i in v:
-                    self.log.dbg('\t\t- {}'.format(i))
-            else:
-                self.log.dbg('\t- \"{}\": {}'.format(k, v))
