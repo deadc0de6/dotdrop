@@ -20,7 +20,7 @@ pyflakes dotdrop/
 pyflakes tests/
 
 # pylint
-#pylint --disable=R0902 --disable=R0913 --disable=R0903 dotdrop/
+#pylint --disable=R0902 --disable=R0913 --disable=R0903 --disable=R0914 dotdrop/
 
 # retrieve the nosetests binary
 nosebin="nosetests"
@@ -46,18 +46,21 @@ if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
   PYTHONPATH="dotdrop" ${nosebin} -s --processes=-1 --with-coverage --cover-package=dotdrop
+  #export DOTDROP_DEBUG=yes
+  #unset DOTDROP_FORCE_NODEBUG
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
   PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
+  #unset DOTDROP_DEBUG=
+  #export DOTDROP_FORCE_NODEBUG=yes
 fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
 
-# enable debug logs
-export DOTDROP_DEBUG=yes
-unset DOTDROP_FORCE_NODEBUG
-# do not print debugs when running tests (faster)
-#export DOTDROP_FORCE_NODEBUG=yes
+# disable debug logs
+unset DOTDROP_DEBUG=
+export DOTDROP_FORCE_NODEBUG=yes
+
 export DOTDROP_WORKDIR=/tmp/dotdrop-tests-workdir
 
 if [ ! -z ${workers} ]; then

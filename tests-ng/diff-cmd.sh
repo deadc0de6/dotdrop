@@ -68,9 +68,6 @@ dotfiles:
 profiles:
 _EOF
 
-export DOTDROP_FORCE_NODEBUG=yes
-export DOTDROP_NOBANNER=yes
-
 # import
 echo "[+] import"
 cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/singlefile
@@ -122,9 +119,6 @@ grep fakediff ${tmpd}/fake &> /dev/null || exit 1
 
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
-
-unset DOTDROP_NOBANNER
-unset DOTDROP_FORCE_NODEBUG
 
 echo "OK"
 exit 0
