@@ -10,6 +10,7 @@ import inspect
 
 
 class Logger:
+    """logging facility for dotdrop"""
 
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -25,67 +26,82 @@ class Logger:
         self.debug = debug
 
     def log(self, string, end='\n', pre='', bold=False):
-        cs = self._color(self.BLUE)
-        ce = self._color(self.RESET)
+        """normal log"""
+        cstart = self._color(self.BLUE)
+        cend = self._color(self.RESET)
         if bold:
-            bl = self._color(self.BOLD)
-            fmt = '{}{}{}{}{}{}{}'.format(pre, cs, bl,
-                                          string, ce,
-                                          end, ce)
+            bold = self._color(self.BOLD)
+            fmt = '{}{}{}{}{}'.format(pre, cstart, bold,
+                                      string, cend)
+            fmt += '{}{}'.format(end, cend)
         else:
-            fmt = '{}{}{}{}{}'.format(pre, cs, string, end, ce)
+            fmt = '{}{}{}{}{}'.format(pre, cstart, string, end, cend)
         sys.stdout.write(fmt)
 
     def sub(self, string, end='\n'):
-        cs = self._color(self.BLUE)
-        ce = self._color(self.RESET)
-        sys.stdout.write('\t{}->{} {}{}'.format(cs, ce, string, end))
+        """sub log"""
+        cstart = self._color(self.BLUE)
+        cend = self._color(self.RESET)
+        sys.stdout.write('\t{}->{} {}{}'.format(cstart, cend, string, end))
 
     def emph(self, string):
-        cs = self._color(self.EMPH)
-        ce = self._color(self.RESET)
-        sys.stderr.write('{}{}{}'.format(cs, string, ce))
+        """emphasis log"""
+        cstart = self._color(self.EMPH)
+        cend = self._color(self.RESET)
+        sys.stderr.write('{}{}{}'.format(cstart, string, cend))
 
     def err(self, string, end='\n'):
-        cs = self._color(self.RED)
-        ce = self._color(self.RESET)
+        """error log"""
+        cstart = self._color(self.RED)
+        cend = self._color(self.RESET)
         msg = '{} {}'.format(string, end)
-        sys.stderr.write('{}[ERR] {}{}'.format(cs, msg, ce))
+        sys.stderr.write('{}[ERR] {}{}'.format(cstart, msg, cend))
 
     def warn(self, string, end='\n'):
-        cs = self._color(self.YELLOW)
-        ce = self._color(self.RESET)
-        sys.stderr.write('{}[WARN] {} {}{}'.format(cs, string, end, ce))
+        """warning log"""
+        cstart = self._color(self.YELLOW)
+        cend = self._color(self.RESET)
+        sys.stderr.write('{}[WARN] {} {}{}'.format(cstart, string, end, cend))
 
     def dbg(self, string, force=False):
+        """debug log"""
         if not force and not self.debug:
             return
         frame = inspect.stack()[1]
         mod = inspect.getmodule(frame[0]).__name__
         func = inspect.stack()[1][3]
-        cs = self._color(self.MAGENTA)
-        ce = self._color(self.RESET)
-        cl = self._color(self.LMAGENTA)
-        bl = self._color(self.BOLD)
+        cstart = self._color(self.MAGENTA)
+        cend = self._color(self.RESET)
+        clight = self._color(self.LMAGENTA)
+        bold = self._color(self.BOLD)
         line = '{}{}[DEBUG][{}.{}]{}{} {}{}\n'
-        sys.stderr.write(line.format(bl, cl, mod, func, ce, cs, string, ce))
+        sys.stderr.write(line.format(bold, clight,
+                                     mod, func,
+                                     cend, cstart,
+                                     string, cend))
 
     def dry(self, string, end='\n'):
-        cs = self._color(self.GREEN)
-        ce = self._color(self.RESET)
-        sys.stdout.write('{}[DRY] {} {}{}'.format(cs, string, end, ce))
+        """dry run log"""
+        cstart = self._color(self.GREEN)
+        cend = self._color(self.RESET)
+        sys.stdout.write('{}[DRY] {} {}{}'.format(cstart, string, end, cend))
 
-    def raw(self, string, end='\n'):
+    @classmethod
+    def raw(cls, string, end='\n'):
+        """raw log"""
         sys.stdout.write('{}{}'.format(string, end))
 
     def ask(self, query):
-        cs = self._color(self.BLUE)
-        ce = self._color(self.RESET)
-        q = '{}{}{}'.format(cs, query + ' [y/N] ? ', ce)
-        r = input(q)
-        return r == 'y'
+        """ask user for confirmation"""
+        cstart = self._color(self.BLUE)
+        cend = self._color(self.RESET)
+        query = '{}{}{}'.format(cstart, query + ' [y/N] ? ', cend)
+        resp = input(query)
+        return resp == 'y'
 
-    def _color(self, col):
+    @classmethod
+    def _color(cls, col):
+        """is color supported"""
         if not sys.stdout.isatty():
             return ''
         return col
