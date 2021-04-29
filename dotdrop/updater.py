@@ -22,10 +22,11 @@ TILD = '~'
 
 
 class Updater:
+    """dotfiles updater"""
 
     def __init__(self, dotpath, variables, conf,
                  dry=False, safe=True, debug=False,
-                 ignore=[], showpatch=False,
+                 ignore=None, showpatch=False,
                  ignore_missing_in_dotdrop=False):
         """constructor
         @dotpath: path where dotfiles are stored
@@ -43,7 +44,7 @@ class Updater:
         self.dry = dry
         self.safe = safe
         self.debug = debug
-        self.ignore = ignore
+        self.ignore = ignore or []
         self.ignores = None
         self.showpatch = showpatch
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
@@ -125,14 +126,13 @@ class Updater:
         if os.path.isdir(new_path):
             ret = self._handle_dir(new_path, local_path, dotfile)
         else:
-            ret = self._handle_file(new_path, local_path, dotfile)
+            ret = self._handle_file(new_path, local_path)
 
         if deployed_mode != local_mode:
             # mirror rights
-            m = 'adopt mode {:o} for {}'
-            self.log.dbg(m.format(deployed_mode, dotfile.key))
-            r = self.conf.update_dotfile(dotfile.key, deployed_mode)
-            if r:
+            msg = 'adopt mode {:o} for {}'
+            self.log.dbg(msg.format(deployed_mode, dotfile.key))
+            if self.conf.update_dotfile(dotfile.key, deployed_mode):
                 ret = True
 
         # clean temporary files
@@ -186,8 +186,8 @@ class Updater:
             lefts = get_file_perm(left)
             rights = get_file_perm(right)
             return lefts == rights
-        except OSError as e:
-            self.log.err(e)
+        except OSError as exc:
+            self.log.err(exc)
             return False
 
     def _mirror_rights(self, src, dst):
@@ -199,10 +199,10 @@ class Updater:
         self.log.dbg(msg.format(src, srcr, dst, dstr))
         try:
             mirror_file_rights(src, dst)
-        except OSError as e:
-            self.log.err(e)
+        except OSError as exc:
+            self.log.err(exc)
 
-    def _handle_file(self, deployed_path, local_path, dotfile, compare=True):
+    def _handle_file(self, deployed_path, local_path, compare=True):
         """sync path (deployed file) and local_path (dotdrop dotfile path)"""
         if self._ignore([deployed_path, local_path]):
             self.log.sub('\"{}\" ignored'.format(local_path))
@@ -217,10 +217,10 @@ class Updater:
             if self.showpatch:
                 try:
                     self._show_patch(deployed_path, local_path)
-                except UndefinedException as e:
+                except UndefinedException as exc:
                     msg = 'unable to show patch for {}: {}'.format(
                         deployed_path,
-                        e,
+                        exc,
                     )
                     self.log.warn(msg)
             return False
@@ -246,10 +246,10 @@ class Updater:
                 shutil.copyfile(deployed_path, local_path)
                 self._mirror_rights(deployed_path, local_path)
                 self.log.sub('\"{}\" updated'.format(local_path))
-        except IOError as e:
+        except IOError as exc:
             self.log.warn('{} update failed, do manually: {}'.format(
                 deployed_path,
-                e
+                exc
             ))
             return False
         return True
@@ -274,17 +274,9 @@ class Updater:
         self._mirror_rights(deployed_path, local_path)
         return ret
 
-    def _merge_dirs(self, diff, dotfile):
-        """Synchronize directories recursively."""
-        left, right = diff.left, diff.right
-        self.log.dbg('sync dir {} to {}'.format(left, right))
-        if self._ignore([left, right]):
-            return True
-
-        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
-            dotfile.ignore_missing_in_dotdrop
-
-        # create dirs that don't exist in dotdrop
+    def _merge_dirs_create_left_only(self, diff, left, right,
+                                     ignore_missing_in_dotdrop):
+        """create dirs that don't exist in dotdrop"""
         for toadd in diff.left_only:
             exist = os.path.join(left, toadd)
             if not os.path.isdir(exist):
@@ -302,7 +294,7 @@ class Updater:
             self.log.dbg('cp -r {} {}'.format(exist, new))
 
             # Newly created directory should be copied as is (for efficiency).
-            def ig(src, names):
+            def ign(src, names):
                 whitelist, blacklist = set(), set()
                 for ignore in self.ignores:
                     for name in names:
@@ -317,14 +309,16 @@ class Updater:
                 return blacklist - whitelist
 
             try:
-                shutil.copytree(exist, new, ignore=ig)
-            except OSError as e:
+                shutil.copytree(exist, new, ignore=ign)
+            except OSError as exc:
                 msg = 'error copying dir {}'.format(exist)
-                self.log.err('{}: {}'.format(msg, e))
+                self.log.err('{}: {}'.format(msg, exc))
                 continue
             self.log.sub('\"{}\" dir added'.format(new))
 
-        # remove dirs that don't exist in deployed version
+    def _merge_dirs_remove_right_only(self, diff, left, right,
+                                      ignore_missing_in_dotdrop):
+        """remove dirs that don't exist in deployed version"""
         for toremove in diff.right_only:
             old = os.path.join(right, toremove)
             if not os.path.isdir(old):
@@ -346,9 +340,9 @@ class Updater:
         fdiff = diff.diff_files
         fdiff.extend(diff.funny_files)
         fdiff.extend(diff.common_funny)
-        for f in fdiff:
-            fleft = os.path.join(left, f)
-            fright = os.path.join(right, f)
+        for file in fdiff:
+            fleft = os.path.join(left, file)
+            fright = os.path.join(right, file)
             if (ignore_missing_in_dotdrop and not os.path.exists(fright)) or \
                     self._ignore([fleft, fright]):
                 continue
@@ -356,9 +350,11 @@ class Updater:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
                 continue
             self.log.dbg('cp {} {}'.format(fleft, fright))
-            self._handle_file(fleft, fright, dotfile, compare=False)
+            self._handle_file(fleft, fright, compare=False)
 
-        # copy files that don't exist in dotdrop
+    def _merge_dirs_copy_left_only(self, diff, left, right,
+                                   ignore_missing_in_dotdrop):
+        """copy files that don't exist in dotdrop"""
         for toadd in diff.left_only:
             exist = os.path.join(left, toadd)
             if os.path.isdir(exist):
@@ -374,15 +370,16 @@ class Updater:
             self.log.dbg('cp {} {}'.format(exist, new))
             try:
                 shutil.copyfile(exist, new)
-            except OSError as e:
+            except OSError as exc:
                 msg = 'error copying file {}'.format(exist)
-                self.log.err('{}: {}'.format(msg, e))
+                self.log.err('{}: {}'.format(msg, exc))
                 continue
 
             self._mirror_rights(exist, new)
             self.log.sub('\"{}\" added'.format(new))
 
-        # remove files that don't exist in deployed version
+    def _merge_dirs_remove_right_only_2(self, diff, right):
+        """remove files that don't exist in deployed version"""
         for toremove in diff.right_only:
             new = os.path.join(right, toremove)
             if not os.path.exists(new):
@@ -398,6 +395,24 @@ class Updater:
             self.log.dbg('rm {}'.format(new))
             removepath(new, logger=self.log)
             self.log.sub('\"{}\" removed'.format(new))
+
+    def _merge_dirs(self, diff, dotfile):
+        """Synchronize directories recursively."""
+        left, right = diff.left, diff.right
+        self.log.dbg('sync dir {} to {}'.format(left, right))
+        if self._ignore([left, right]):
+            return True
+
+        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            dotfile.ignore_missing_in_dotdrop
+
+        self._merge_dirs_create_left_only(diff, left, right,
+                                          ignore_missing_in_dotdrop)
+        self._merge_dirs_remove_right_only(diff, left, right,
+                                           ignore_missing_in_dotdrop)
+        self._merge_dirs_copy_left_only(diff, left, right,
+                                        ignore_missing_in_dotdrop)
+        self._merge_dirs_remove_right_only_2(diff, right)
 
         # compare rights
         for common in diff.common_files:
