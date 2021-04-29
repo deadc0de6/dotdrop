@@ -15,6 +15,7 @@ from dotdrop.utils import must_ignore, uniq_list, diff, \
 
 
 class Comparator:
+    """compare dotfiles helper"""
 
     def __init__(self, diff_cmd='', debug=False,
                  ignore_missing_in_dotdrop=False):
@@ -27,9 +28,11 @@ class Comparator:
         self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
-    def compare(self, local_path, deployed_path, ignore=[]):
+    def compare(self, local_path, deployed_path, ignore=None):
         """diff local_path (dotdrop dotfile) and
         deployed_path (destination file)"""
+        if not ignore:
+            ignore = []
         local_path = os.path.expanduser(local_path)
         deployed_path = os.path.expanduser(deployed_path)
         self.log.dbg('comparing {} and {}'.format(
@@ -113,15 +116,19 @@ class Comparator:
             return ''
         if not os.path.isdir(deployed_path):
             return '\"{}\" is a file\n'.format(deployed_path)
+
+        return self._compare_dirs(local_path, deployed_path, ignore)
+
+    def _compare_dirs(self, local_path, deployed_path, ignore):
+        """compare directories"""
         self.log.dbg('compare {} and {}'.format(local_path, deployed_path))
         ret = []
         comp = filecmp.dircmp(local_path, deployed_path)
 
         # handle files only in deployed dir
         for i in comp.left_only:
-            if self.ignore_missing_in_dotdrop:
-                continue
-            if must_ignore([os.path.join(local_path, i)],
+            if self.ignore_missing_in_dotdrop or \
+               must_ignore([os.path.join(local_path, i)],
                            ignore, debug=self.debug):
                 continue
             ret.append('=> \"{}\" does not exist on destination\n'.format(i))

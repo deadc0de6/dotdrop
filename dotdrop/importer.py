@@ -41,9 +41,7 @@ class Importer:
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
-        if not ignore:
-            ignore = []
-        self.ignore = ignore
+        self.ignore = ignore or []
 
         self.umask = get_umask()
         self.log = Logger(debug=self.debug)

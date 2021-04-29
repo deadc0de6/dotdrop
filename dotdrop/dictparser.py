@@ -9,6 +9,7 @@ from dotdrop.logger import Logger
 
 
 class DictParser:
+    """a dict parser"""
 
     log = Logger()
 

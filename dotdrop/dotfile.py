@@ -19,10 +19,10 @@ class Dotfile(DictParser):
     key_template = 'template'
 
     def __init__(self, key, dst, src,
-                 actions=[], trans_r=None, trans_w=None,
+                 actions=None, trans_r=None, trans_w=None,
                  link=LinkTypes.NOLINK, noempty=False,
-                 cmpignore=[], upignore=[],
-                 instignore=[], template=True, chmod=None,
+                 cmpignore=None, upignore=None,
+                 instignore=None, template=True, chmod=None,
                  ignore_missing_in_dotdrop=False):
         """
         constructor
@@ -40,7 +40,7 @@ class Dotfile(DictParser):
         @template: template this dotfile
         @chmod: file permission
         """
-        self.actions = actions
+        self.actions = actions or []
         self.dst = dst
         self.key = key
         self.link = LinkTypes.get(link)
@@ -48,9 +48,9 @@ class Dotfile(DictParser):
         self.src = src
         self.trans_r = trans_r
         self.trans_w = trans_w
-        self.upignore = upignore
-        self.cmpignore = cmpignore
-        self.instignore = instignore
+        self.upignore = upignore or []
+        self.cmpignore = cmpignore or []
+        self.instignore = instignore or []
         self.template = template
         self.chmod = chmod
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
@@ -135,14 +135,14 @@ class Dotfile(DictParser):
         out += '\n{}pre-action:'.format(indent)
         some = self.get_pre_actions()
         if some:
-            for a in some:
-                out += '\n{}- {}'.format(2 * indent, a)
+            for act in some:
+                out += '\n{}- {}'.format(2 * indent, act)
 
         out += '\n{}post-action:'.format(indent)
         some = self.get_post_actions()
         if some:
-            for a in some:
-                out += '\n{}- {}'.format(2 * indent, a)
+            for act in some:
+                out += '\n{}- {}'.format(2 * indent, act)
 
         out += '\n{}trans_r:'.format(indent)
         some = self.get_trans_r()

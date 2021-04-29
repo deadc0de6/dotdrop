@@ -16,6 +16,7 @@ ENV_WORKDIR = 'DOTDROP_WORKDIR'
 
 
 class Settings(DictParser):
+    """Settings block in config"""
     # key in yaml file
     key_yaml = 'config'
 
@@ -50,14 +51,15 @@ class Settings(DictParser):
     key_import_variables = 'import_variables'
 
     def __init__(self, backup=True, banner=True,
-                 create=True, default_actions=[], dotpath='dotfiles',
-                 ignoreempty=False, import_actions=[], import_configs=[],
-                 import_variables=[], keepdot=False,
+                 create=True, default_actions=None, dotpath='dotfiles',
+                 ignoreempty=False, import_actions=None, import_configs=None,
+                 import_variables=None, keepdot=False,
                  link_dotfile_default=LinkTypes.NOLINK,
                  link_on_import=LinkTypes.NOLINK, longkey=False,
-                 upignore=[], cmpignore=[], instignore=[], impignore=[],
-                 workdir='~/.config/dotdrop', showdiff=False,
-                 minversion=None, func_file=[], filter_file=[],
+                 upignore=None, cmpignore=None, instignore=None,
+                 impignore=None, workdir='~/.config/dotdrop',
+                 showdiff=False, minversion=None,
+                 func_file=None, filter_file=None,
                  diff_command='diff -r -u {0} {1}',
                  template_dotfile_default=True,
                  ignore_missing_in_dotdrop=False,
@@ -65,27 +67,27 @@ class Settings(DictParser):
         self.backup = backup
         self.banner = banner
         self.create = create
-        self.default_actions = default_actions
+        self.default_actions = default_actions or []
         self.dotpath = dotpath
         self.ignoreempty = ignoreempty
-        self.import_actions = import_actions
-        self.import_configs = import_configs
-        self.import_variables = import_variables
+        self.import_actions = import_actions or []
+        self.import_configs = import_configs or []
+        self.import_variables = import_variables or []
         self.keepdot = keepdot
         self.longkey = longkey
         self.showdiff = showdiff
-        self.upignore = upignore
-        self.cmpignore = cmpignore
-        self.instignore = instignore
-        self.impignore = impignore
+        self.upignore = upignore or []
+        self.cmpignore = cmpignore or []
+        self.instignore = instignore or []
+        self.impignore = impignore or []
         self.workdir = workdir
         if ENV_WORKDIR in os.environ:
             self.workdir = os.environ[ENV_WORKDIR]
         self.link_dotfile_default = LinkTypes.get(link_dotfile_default)
         self.link_on_import = LinkTypes.get(link_on_import)
         self.minversion = minversion
-        self.func_file = func_file
-        self.filter_file = filter_file
+        self.func_file = func_file or []
+        self.filter_file = filter_file or []
         self.diff_command = diff_command
         self.template_dotfile_default = template_dotfile_default
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop

@@ -10,13 +10,14 @@ from dotdrop.action import Action
 
 
 class Profile(DictParser):
+    """dotdrop profile"""
 
     # profile keys
     key_include = 'include'
     key_import = 'import'
 
-    def __init__(self, key, actions=[], dotfiles=[],
-                 variables=[], dynvariables=[]):
+    def __init__(self, key, actions=None, dotfiles=None,
+                 variables=None, dynvariables=None):
         """
         constructor
         @key: profile key
@@ -26,10 +27,10 @@ class Profile(DictParser):
         @dynvariables: list of interpreted variable keys
         """
         self.key = key
-        self.actions = actions
-        self.dotfiles = dotfiles
-        self.variables = variables
-        self.dynvariables = dynvariables
+        self.actions = actions or []
+        self.dotfiles = dotfiles or []
+        self.variables = variables or []
+        self.dynvariables = dynvariables or []
 
     def get_pre_actions(self):
         """return all 'pre' actions"""
@@ -51,8 +52,7 @@ class Profile(DictParser):
 
     def __hash__(self):
         return (hash(self.key) ^
-                hash(tuple(self.dotfiles)) ^
-                hash(tuple(self.included_profiles)))
+                hash(tuple(self.dotfiles)))
 
     def __str__(self):
         msg = 'key:"{}"'

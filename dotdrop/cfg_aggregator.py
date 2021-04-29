@@ -312,7 +312,8 @@ class CfgAggregator:
             return self._get_long_key(path, existing_keys)
         return self._get_short_key(path, existing_keys)
 
-    def _norm_key_elem(self, elem):
+    @classmethod
+    def _norm_key_elem(cls, elem):
         """normalize path element for sanity"""
         elem = elem.lstrip('.')
         elem = elem.replace(' ', '-')
@@ -369,7 +370,8 @@ class CfgAggregator:
         self._load()
         self.debug = olddebug
 
-    def _norm_path(self, path):
+    @classmethod
+    def _norm_path(cls, path):
         if not path:
             return path
         path = os.path.expanduser(path)
