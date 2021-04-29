@@ -4,10 +4,11 @@ Copyright (c) 2017, deadc0de6
 """
 
 import sys
+import dotdrop.dotdrop
 
 
 def main():
-    import dotdrop.dotdrop
+    """entry point"""
     if dotdrop.dotdrop.main():
         sys.exit(0)
     sys.exit(1)

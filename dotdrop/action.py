@@ -15,6 +15,9 @@ from dotdrop.exceptions import UndefinedException
 
 
 class Cmd(DictParser):
+    """A command to execute"""
+
+    args = []
     eq_ignore = ('log',)
     descr = 'command'
 
@@ -28,46 +31,58 @@ class Cmd(DictParser):
         self.action = action
         self.silent = key.startswith('_')
 
+    def _get_action(self, templater, debug):
+        action = None
+        try:
+            action = templater.generate_string(self.action)
+        except UndefinedException as exc:
+            err = 'undefined variable for {}: \"{}\"'.format(self.descr, exc)
+            self.log.warn(err)
+            return False
+        if debug:
+            self.log.dbg('{}:'.format(self.descr))
+            self.log.dbg('  - raw       \"{}\"'.format(self.action))
+            self.log.dbg('  - templated \"{}\"'.format(action))
+        return action
+
+    def _get_args(self, templater):
+        args = []
+        if not self.args:
+            return args
+        args = self.args
+        if templater:
+            try:
+                args = [templater.generate_string(a) for a in args]
+            except UndefinedException as exc:
+                err = 'undefined arguments for {}: {}'
+                self.log.warn(err.format(self.descr, exc))
+                return False
+        return args
+
     def execute(self, templater=None, debug=False):
         """execute the command in the shell"""
         ret = 1
         action = self.action
         if templater:
-            try:
-                action = templater.generate_string(self.action)
-            except UndefinedException as e:
-                err = 'undefined variable for {}: \"{}\"'.format(self.descr, e)
-                self.log.warn(err)
-                return False
-            if debug:
-                self.log.dbg('{}:'.format(self.descr))
-                self.log.dbg('  - raw       \"{}\"'.format(self.action))
-                self.log.dbg('  - templated \"{}\"'.format(action))
+            action = self._get_action(templater, debug)
         cmd = action
-        args = []
-        if self.args:
-            args = self.args
-            if templater:
-                try:
-                    args = [templater.generate_string(a) for a in args]
-                except UndefinedException as e:
-                    err = 'undefined arguments for {}: {}'
-                    self.log.warn(err.format(self.descr, e))
-                    return False
+        args = self._get_args(templater)
         if debug and args:
             self.log.dbg('action args:')
             for cnt, arg in enumerate(args):
                 self.log.dbg('\targs[{}]: {}'.format(cnt, arg))
         try:
             cmd = action.format(*args)
-        except IndexError as e:
+        except IndexError as exc:
             err = 'index error for {}: \"{}\"'.format(self.descr, action)
             err += ' with \"{}\"'.format(args)
-            err += ': {}'.format(e)
+            err += ': {}'.format(exc)
             self.log.warn(err)
             return False
-        except KeyError as e:
-            err = 'key error for {}: \"{}\": {}'.format(self.descr, action, e)
+        except KeyError as exc:
+            err = 'key error for {}: \"{}\": {}'.format(self.descr,
+                                                        action,
+                                                        exc)
             err += ' with \"{}\"'.format(args)
             self.log.warn(err)
             return False
@@ -96,6 +111,7 @@ class Cmd(DictParser):
 
 
 class Action(Cmd):
+    """An action to execute"""
 
     pre = 'pre'
     post = 'post'
@@ -107,7 +123,7 @@ class Action(Cmd):
         @kind: type of action (pre or post)
         @action: action string
         """
-        super(Action, self).__init__(key, action)
+        super().__init__(key, action)
         self.kind = kind
         self.args = []
 
@@ -120,9 +136,9 @@ class Action(Cmd):
     @classmethod
     def parse(cls, key, value):
         """parse key value into object"""
-        v = {}
-        v['kind'], v['action'] = value
-        return cls(key=key, **v)
+        val = {}
+        val['kind'], val['action'] = value
+        return cls(key=key, **val)
 
     def __str__(self):
         out = '{}: [{}] \"{}\"'
@@ -133,6 +149,8 @@ class Action(Cmd):
 
 
 class Transform(Cmd):
+    """A transformation on a dotfile"""
+
     descr = 'transformation'
 
     def __init__(self, key, action):
@@ -140,7 +158,7 @@ class Transform(Cmd):
         @key: action key
         @trans: action string
         """
-        super(Transform, self).__init__(key, action)
+        super().__init__(key, action)
         self.args = []
 
     def copy(self, args):

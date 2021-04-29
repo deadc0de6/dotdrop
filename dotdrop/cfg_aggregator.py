@@ -24,6 +24,7 @@ TILD = '~'
 
 
 class CfgAggregator:
+    """The config aggregator class"""
 
     file_prefix = 'f'
     dir_prefix = 'd'
@@ -106,10 +107,10 @@ class CfgAggregator:
         """
         dotfiles = []
         dst = self._norm_path(dst)
-        for d in self.dotfiles:
-            left = self._norm_path(d.dst)
+        for dotfile in self.dotfiles:
+            left = self._norm_path(dotfile.dst)
             if left == dst:
-                dotfiles.append(d)
+                dotfiles.append(dotfile)
         return dotfiles
 
     def get_dotfile_by_src_dst(self, src, dst):
@@ -120,14 +121,14 @@ class CfgAggregator:
         """
         try:
             src = self.cfgyaml.resolve_dotfile_src(src)
-        except UndefinedException as e:
+        except UndefinedException as exc:
             err = 'unable to resolve {}: {}'
-            self.log.err(err.format(src, e))
+            self.log.err(err.format(src, exc))
             return None
         dotfiles = self.get_dotfile_by_dst(dst)
-        for d in dotfiles:
-            if d.src == src:
-                return d
+        for dotfile in dotfiles:
+            if dotfile.src == src:
+                return dotfile
         return None
 
     def save(self):
@@ -162,10 +163,10 @@ class CfgAggregator:
     def get_profiles_by_dotfile_key(self, key):
         """return all profiles having this dotfile"""
         res = []
-        for p in self.profiles:
-            keys = [d.key for d in p.dotfiles]
+        for profile in self.profiles:
+            keys = [dotfile.key for dotfile in profile.dotfiles]
             if key in keys:
-                res.append(p)
+                res.append(profile)
         return res
 
     def get_dotfiles(self):
@@ -282,27 +283,27 @@ class CfgAggregator:
             return
         if self.debug:
             self.log.dbg('patching {} ...'.format(keys))
-        for c in containers:
+        for container in containers:
             objects = []
-            okeys = getattr(c, keys)
+            okeys = getattr(container, keys)
             if not okeys:
                 continue
             if not islist:
                 okeys = [okeys]
-            for k in okeys:
-                o = get_by_key(k)
-                if not o:
-                    err = '{} does not contain'.format(c)
-                    err += ' a {} entry named {}'.format(keys, k)
+            for key in okeys:
+                obj = get_by_key(key)
+                if not obj:
+                    err = '{} does not contain'.format(container)
+                    err += ' a {} entry named {}'.format(keys, key)
                     self.log.err(err)
                     raise Exception(err)
-                objects.append(o)
+                objects.append(obj)
             if not islist:
                 objects = objects[0]
             # if self.debug:
             #     er = 'patching {}.{} with {}'
             #     self.log.dbg(er.format(c, keys, objects))
-            setattr(c, keys, objects)
+            setattr(container, keys, objects)
 
     ########################################################
     # dotfile key
@@ -341,8 +342,8 @@ class CfgAggregator:
         dirs.reverse()
         prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
         entries = []
-        for d in dirs:
-            entries.insert(0, d)
+        for dri in dirs:
+            entries.insert(0, dri)
             key = self.key_sep.join([prefix] + entries)
             if key not in keys:
                 return key
@@ -384,12 +385,12 @@ class CfgAggregator:
 
     def _split_path_for_key(self, path):
         """return a list of path elements, excluded home path"""
-        p = strip_home(path)
+        path = strip_home(path)
         dirs = []
         while True:
-            p, f = os.path.split(p)
-            dirs.append(f)
-            if not p or not f:
+            path, file = os.path.split(path)
+            dirs.append(file)
+            if not path or not file:
                 break
         dirs.reverse()
         # remove empty entries
@@ -453,13 +454,13 @@ class CfgAggregator:
         if not self.debug:
             return
         self.log.dbg('{}:'.format(title))
-        for e in elems:
-            self.log.dbg('\t- {}'.format(e))
+        for elem in elems:
+            self.log.dbg('\t- {}'.format(elem))
 
     def _debug_dict(self, title, elems):
         """pretty print dict"""
         if not self.debug:
             return
         self.log.dbg('{}:'.format(title))
-        for k, v in elems.items():
-            self.log.dbg('\t- \"{}\": {}'.format(k, v))
+        for k, val in elems.items():
+            self.log.dbg('\t- \"{}\": {}'.format(k, val))
