@@ -17,10 +17,11 @@ from dotdrop.comparator import Comparator
 
 
 class Importer:
+    """dotfile importer"""
 
     def __init__(self, profile, conf, dotpath, diff_cmd,
                  dry=False, safe=True, debug=False,
-                 keepdot=True, ignore=[]):
+                 keepdot=True, ignore=None):
         """constructor
         @profile: the selected profile
         @conf: configuration manager
@@ -40,6 +41,8 @@ class Importer:
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
+        if not ignore:
+            ignore = []
         self.ignore = ignore
 
         self.umask = get_umask()
@@ -124,6 +127,16 @@ class Importer:
         if not self._prepare_hierarchy(src, dst):
             return -1
 
+        return self._import_it(path, src, dst, perm, linktype, import_mode)
+
+    def _import_it(self, path, src, dst, perm, linktype, import_mode):
+        """
+        import path
+        returns:
+            1: 1 dotfile imported
+            0: ignored
+        """
+
         # handle file mode
         chmod = None
         dflperm = get_default_file_perms(dst, self.umask)
@@ -147,19 +160,16 @@ class Importer:
     def _prepare_hierarchy(self, src, dst):
         """prepare hierarchy for dotfile"""
         srcf = os.path.join(self.dotpath, src)
-        if self._ignore(srcf):
-            return False
-
         srcfd = os.path.dirname(srcf)
-        if self._ignore(srcfd):
+        if self._ignore(srcf) or self._ignore(srcfd):
             return False
 
         # a dotfile in dotpath already exists at that spot
         if os.path.exists(srcf):
             if self.safe:
-                c = Comparator(debug=self.debug,
+                cmp = Comparator(debug=self.debug,
                                diff_cmd=self.diff_cmd)
-                diff = c.compare(srcf, dst)
+                diff = cmp.compare(srcf, dst)
                 if diff != '':
                     # files are different, dunno what to do
                     self.log.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
@@ -178,7 +188,7 @@ class Importer:
         else:
             try:
                 os.makedirs(srcfd, exist_ok=True)
-            except Exception:
+            except OSError:
                 self.log.err('importing \"{}\" failed!'.format(dst))
                 return False
 
@@ -190,15 +200,15 @@ class Importer:
                 if os.path.isdir(dst):
                     if os.path.exists(srcf):
                         shutil.rmtree(srcf)
-                    ig = shutil.ignore_patterns(*self.ignore)
+                    ign = shutil.ignore_patterns(*self.ignore)
                     shutil.copytree(dst, srcf,
                                     copy_function=self._cp,
-                                    ignore=ig)
+                                    ignore=ign)
                 else:
                     shutil.copy2(dst, srcf)
-            except shutil.Error as e:
-                src = e.args[0][0][0]
-                why = e.args[0][0][2]
+            except shutil.Error as exc:
+                src = exc.args[0][0][0]
+                why = exc.args[0][0][2]
                 self.log.err('importing \"{}\" failed: {}'.format(src, why))
 
         return True
@@ -218,8 +228,8 @@ class Importer:
         dfs = self.conf.get_dotfile_by_dst(dst)
         if not dfs:
             return False
-        for df in dfs:
-            profiles = self.conf.get_profiles_by_dotfile_key(df.key)
+        for dotfile in dfs:
+            profiles = self.conf.get_profiles_by_dotfile_key(dotfile.key)
             profiles = [x.key for x in profiles]
             if self.profile in profiles and \
                     not self.conf.get_dotfile_by_src_dst(src, dst):
