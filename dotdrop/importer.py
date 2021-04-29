@@ -150,6 +150,26 @@ class Importer:
         self.log.sub('\"{}\" imported'.format(path))
         return 1
 
+    def _prepare_hier_when_exists(self, srcf, dst):
+        """a dotfile in dotpath already exists at that spot"""
+        if not os.path.exists(srcf):
+            return True
+        if not self.safe:
+            return True
+        cmp = Comparator(debug=self.debug,
+                         diff_cmd=self.diff_cmd)
+        diff = cmp.compare(srcf, dst)
+        if diff != '':
+            # files are different, dunno what to do
+            self.log.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
+            self.log.emph(diff)
+            # ask user
+            msg = 'Dotfile \"{}\" already exists, overwrite?'
+            if not self.log.ask(msg.format(srcf)):
+                return False
+            self.log.dbg('will overwrite existing file')
+        return True
+
     def _prepare_hierarchy(self, src, dst):
         """prepare hierarchy for dotfile"""
         srcf = os.path.join(self.dotpath, src)
@@ -157,21 +177,8 @@ class Importer:
         if self._ignore(srcf) or self._ignore(srcfd):
             return False
 
-        # a dotfile in dotpath already exists at that spot
-        if os.path.exists(srcf):
-            if self.safe:
-                cmp = Comparator(debug=self.debug,
-                                 diff_cmd=self.diff_cmd)
-                diff = cmp.compare(srcf, dst)
-                if diff != '':
-                    # files are different, dunno what to do
-                    self.log.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
-                    self.log.emph(diff)
-                    # ask user
-                    msg = 'Dotfile \"{}\" already exists, overwrite?'
-                    if not self.log.ask(msg.format(srcf)):
-                        return False
-                    self.log.dbg('will overwrite existing file')
+        if not self._prepare_hier_when_exists(srcf, dst):
+            return False
 
         # create directory hierarchy
         if self.dry:
