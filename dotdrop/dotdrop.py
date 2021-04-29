@@ -48,8 +48,7 @@ def action_executor(o, actions, defactions, templater, post=False):
                 LOG.dry('would execute def-{}-action: {}'.format(s,
                                                                  action))
                 continue
-            if o.debug:
-                LOG.dbg('executing def-{}-action: {}'.format(s, action))
+            LOG.dbg('executing def-{}-action: {}'.format(s, action))
             ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = 'def-{}-action \"{}\" failed'.format(s, action.key)
@@ -61,8 +60,7 @@ def action_executor(o, actions, defactions, templater, post=False):
             if o.dry:
                 LOG.dry('would execute {}-action: {}'.format(s, action))
                 continue
-            if o.debug:
-                LOG.dbg('executing {}-action: {}'.format(s, action))
+            LOG.dbg('executing {}-action: {}'.format(s, action))
             ret = action.execute(templater=templater, debug=o.debug)
             if not ret:
                 err = '{}-action \"{}\" failed'.format(s, action.key)
@@ -108,8 +106,7 @@ def _dotfile_compare(o, dotfile, tmp):
     t.add_tmp_vars(newvars=newvars)
 
     # dotfiles does not exist / not installed
-    if o.debug:
-        LOG.dbg('comparing {}'.format(dotfile))
+    LOG.dbg('comparing {}'.format(dotfile))
 
     src = dotfile.src
     if not os.path.lexists(os.path.expanduser(dotfile.dst)):
@@ -120,8 +117,7 @@ def _dotfile_compare(o, dotfile, tmp):
     # apply transformation
     tmpsrc = None
     if dotfile.trans_r:
-        if o.debug:
-            LOG.dbg('applying transformation before comparing')
+        LOG.dbg('applying transformation before comparing')
         tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
         if not tmpsrc:
             # could not apply trans
@@ -132,10 +128,9 @@ def _dotfile_compare(o, dotfile, tmp):
     asrc = os.path.join(o.dotpath, os.path.expanduser(src))
     adst = os.path.expanduser(dotfile.dst)
     if os.path.samefile(asrc, adst):
-        if o.debug:
-            line = '=> compare {}: diffing with \"{}\"'
-            LOG.dbg(line.format(dotfile.key, dotfile.dst))
-            LOG.dbg('points to itself')
+        line = '=> compare {}: diffing with \"{}\"'
+        LOG.dbg(line.format(dotfile.key, dotfile.dst))
+        LOG.dbg('points to itself')
         return True
 
     ignores = list(set(o.compare_ignore + dotfile.cmpignore))
@@ -179,10 +174,9 @@ def _dotfile_compare(o, dotfile, tmp):
             LOG.emph(diff)
         return False
     # no difference
-    if o.debug:
-        line = '=> compare {}: diffing with \"{}\"'
-        LOG.dbg(line.format(dotfile.key, dotfile.dst))
-        LOG.dbg('same file')
+    line = '=> compare {}: diffing with \"{}\"'
+    LOG.dbg(line.format(dotfile.key, dotfile.dst))
+    LOG.dbg('same file')
     return True
 
 
@@ -208,9 +202,8 @@ def _dotfile_install(o, dotfile, tmpdir=None):
     pre_actions_exec = action_executor(o, preactions, defactions,
                                        t, post=False)
 
-    if o.debug:
-        LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
-        LOG.dbg(dotfile.prt())
+    LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
+    LOG.dbg(dotfile.prt())
 
     ignores = list(set(o.install_ignore + dotfile.instignore))
     ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
@@ -278,12 +271,10 @@ def _dotfile_install(o, dotfile, tmpdir=None):
         # dotfile was NOT installed
         if o.install_force_action:
             # pre-actions
-            if o.debug:
-                LOG.dbg('force pre action execution ...')
+            LOG.dbg('force pre action execution ...')
             pre_actions_exec()
             # post-actions
-            if o.debug:
-                LOG.dbg('force post action execution ...')
+            LOG.dbg('force post action execution ...')
             defactions = o.install_default_actions_post
             postactions = dotfile.get_post_actions()
             post_actions_exec = action_executor(o, postactions, defactions,
@@ -320,8 +311,7 @@ def cmd_install(o):
     installed = []
 
     # execute profile pre-action
-    if o.debug:
-        LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
+    LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
     t = _get_templater(o)
     ret, err = action_executor(o, pro_pre_actions, [], t, post=False)()
     if not ret:
@@ -330,8 +320,7 @@ def cmd_install(o):
     # install each dotfile
     if o.workers > 1:
         # in parallel
-        if o.debug:
-            LOG.dbg('run with {} workers'.format(o.workers))
+        LOG.dbg('run with {} workers'.format(o.workers))
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
 
         wait_for = []
@@ -359,15 +348,13 @@ def cmd_install(o):
 
     # execute profile post-action
     if len(installed) > 0 or o.install_force_action:
-        if o.debug:
-            msg = 'run {} profile post actions'
-            LOG.dbg(msg.format(len(pro_post_actions)))
+        msg = 'run {} profile post actions'
+        LOG.dbg(msg.format(len(pro_post_actions)))
         ret, err = action_executor(o, pro_post_actions, [], t, post=False)()
         if not ret:
             return False
 
-    if o.debug:
-        LOG.dbg('install done: installed \"{}\"'.format(','.join(installed)))
+    LOG.dbg('install done: installed \"{}\"'.format(','.join(installed)))
 
     if o.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
@@ -396,8 +383,7 @@ def cmd_compare(o, tmp):
     cnt = 0
     if o.workers > 1:
         # in parallel
-        if o.debug:
-            LOG.dbg('run with {} workers'.format(o.workers))
+        LOG.dbg('run with {} workers'.format(o.workers))
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for dotfile in selected:
@@ -440,12 +426,10 @@ def cmd_update(o):
     if not paths:
         # update the entire profile
         if iskey:
-            if o.debug:
-                LOG.dbg('update by keys: {}'.format(paths))
+            LOG.dbg('update by keys: {}'.format(paths))
             paths = [d.key for d in o.dotfiles]
         else:
-            if o.debug:
-                LOG.dbg('update by paths: {}'.format(paths))
+            LOG.dbg('update by paths: {}'.format(paths))
             paths = [d.dst for d in o.dotfiles]
         msg = 'Update all dotfiles for profile \"{}\"'.format(o.profile)
         if o.safe and not LOG.ask(msg):
@@ -456,14 +440,12 @@ def cmd_update(o):
         LOG.log('\nno dotfile to update')
         return True
 
-    if o.debug:
-        LOG.dbg('dotfile to update: {}'.format(paths))
+    LOG.dbg('dotfile to update: {}'.format(paths))
 
     # update each dotfile
     if o.workers > 1:
         # in parallel
-        if o.debug:
-            LOG.dbg('run with {} workers'.format(o.workers))
+        LOG.dbg('run with {} workers'.format(o.workers))
         ex = futures.ThreadPoolExecutor(max_workers=o.workers)
         wait_for = []
         for path in paths:
@@ -581,8 +563,7 @@ def cmd_remove(o):
     if not paths:
         LOG.log('no dotfile to remove')
         return False
-    if o.debug:
-        LOG.dbg('dotfile(s) to remove: {}'.format(','.join(paths)))
+    LOG.dbg('dotfile(s) to remove: {}'.format(','.join(paths)))
 
     removed = []
     for key in paths:
@@ -608,8 +589,7 @@ def cmd_remove(o):
                 LOG.warn(msg.format(k))
                 continue
 
-            if o.debug:
-                LOG.dbg('removing {}'.format(key))
+            LOG.dbg('removing {}'.format(key))
 
             # make sure is part of the profile
             if dotfile.key not in [d.key for d in o.dotfiles]:
@@ -624,8 +604,7 @@ def cmd_remove(o):
             msg = 'Remove \"{}\" from all these profiles: {}'.format(k, pkeys)
             if o.safe and not LOG.ask(msg):
                 return False
-            if o.debug:
-                LOG.dbg('remove dotfile: {}'.format(dotfile))
+            LOG.dbg('remove dotfile: {}'.format(dotfile))
 
             for profile in profiles:
                 if not o.conf.del_dotfile_from_profile(dotfile, profile):
@@ -736,8 +715,7 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
     src = dotfile.src
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
     trans = dotfile.trans_r
-    if debug:
-        LOG.dbg('executing transformation: {}'.format(trans))
+    LOG.dbg('executing transformation: {}'.format(trans))
     s = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
     if not trans.transform(s, temp, templater=templater, debug=debug):
@@ -774,6 +752,7 @@ def main():
         return False
 
     if o.debug:
+        LOG.debug = o.debug
         LOG.dbg('\n\n')
     options_time = time.time() - t0
 
@@ -785,29 +764,25 @@ def main():
         if o.cmd_profiles:
             # list existing profiles
             command = 'profiles'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             cmd_list_profiles(o)
 
         elif o.cmd_files:
             # list files for selected profile
             command = 'files'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             cmd_files(o)
 
         elif o.cmd_install:
             # install the dotfiles stored in dotdrop
             command = 'install'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_install(o)
 
         elif o.cmd_compare:
             # compare local dotfiles with dotfiles stored in dotdrop
             command = 'compare'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             tmp = get_tmpdir()
             ret = cmd_compare(o, tmp)
             # clean tmp directory
@@ -816,29 +791,25 @@ def main():
         elif o.cmd_import:
             # import dotfile(s)
             command = 'import'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_importer(o)
 
         elif o.cmd_update:
             # update a dotfile
             command = 'update'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             ret = cmd_update(o)
 
         elif o.cmd_detail:
             # detail files
             command = 'detail'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             cmd_detail(o)
 
         elif o.cmd_remove:
             # remove dotfile
             command = 'remove'
-            if o.debug:
-                LOG.dbg('running cmd: {}'.format(command))
+            LOG.dbg('running cmd: {}'.format(command))
             cmd_remove(o)
 
     except KeyboardInterrupt:
@@ -846,16 +817,14 @@ def main():
         ret = False
     cmd_time = time.time() - t0
 
-    if o.debug:
-        LOG.dbg('done executing command \"{}\"'.format(command))
-        LOG.dbg('options loaded in {}'.format(options_time))
-        LOG.dbg('command executed in {}'.format(cmd_time))
+    LOG.dbg('done executing command \"{}\"'.format(command))
+    LOG.dbg('options loaded in {}'.format(options_time))
+    LOG.dbg('command executed in {}'.format(cmd_time))
 
     if ret and o.conf.save():
         LOG.log('config file updated')
 
-    if o.debug:
-        LOG.dbg('return {}'.format(ret))
+    LOG.dbg('return {}'.format(ret))
     return ret
 
 

@@ -52,7 +52,7 @@ class Updater:
                                      debug=self.debug)
         # save template vars
         self.tvars = self.templater.add_tmp_vars()
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
 
     def update_path(self, path):
         """update the dotfile installed on path"""
@@ -69,9 +69,8 @@ class Updater:
                 self.log.err(msg.format(dotfile.key))
                 return False
 
-            if self.debug:
-                msg = 'updating {} from path \"{}\"'
-                self.log.dbg(msg.format(dotfile, path))
+            msg = 'updating {} from path \"{}\"'
+            self.log.dbg(msg.format(dotfile, path))
             if not self._update(path, dotfile):
                 return False
         return True
@@ -81,8 +80,7 @@ class Updater:
         dotfile = self.conf.get_dotfile(key)
         if not dotfile:
             return False
-        if self.debug:
-            self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
+        self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
         path = self.conf.path_to_dotfile_dst(dotfile.dst)
         return self._update(path, dotfile)
 
@@ -92,8 +90,7 @@ class Updater:
         new_path = None
         ignores = list(set(self.ignore + dotfile.upignore))
         self.ignores = patch_ignores(ignores, dotfile.dst, debug=self.debug)
-        if self.debug:
-            self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
+        self.log.dbg('ignore pattern(s): {}'.format(self.ignores))
 
         deployed_path = os.path.expanduser(path)
         local_path = os.path.join(self.dotpath, dotfile.src)
@@ -132,9 +129,8 @@ class Updater:
 
         if deployed_mode != local_mode:
             # mirror rights
-            if self.debug:
-                m = 'adopt mode {:o} for {}'
-                self.log.dbg(m.format(deployed_mode, dotfile.key))
+            m = 'adopt mode {:o} for {}'
+            self.log.dbg(m.format(deployed_mode, dotfile.key))
             r = self.conf.update_dotfile(dotfile.key, deployed_mode)
             if r:
                 ret = True
@@ -149,8 +145,7 @@ class Updater:
         trans = dotfile.get_trans_w()
         if not trans:
             return path
-        if self.debug:
-            self.log.dbg('executing write transformation {}'.format(trans))
+        self.log.dbg('executing write transformation {}'.format(trans))
         tmp = get_unique_tmp_name()
         self.templater.restore_vars(self.tvars)
         newvars = dotfile.get_dotfile_variables()
@@ -166,8 +161,7 @@ class Updater:
 
     def _is_template(self, path):
         if not Templategen.is_template(path, ignore=self.ignores):
-            if self.debug:
-                self.log.dbg('{} is NO template'.format(path))
+            self.log.dbg('{} is NO template'.format(path))
             return False
         self.log.warn('{} uses template, update manually'.format(path))
         return True
@@ -201,9 +195,8 @@ class Updater:
         dstr = get_file_perm(dst)
         if srcr == dstr:
             return
-        if self.debug:
-            msg = 'copy rights from {} ({:o}) to {} ({:o})'
-            self.log.dbg(msg.format(src, srcr, dst, dstr))
+        msg = 'copy rights from {} ({:o}) to {} ({:o})'
+        self.log.dbg(msg.format(src, srcr, dst, dstr))
         try:
             mirror_file_rights(src, dst)
         except OSError as e:
@@ -214,15 +207,13 @@ class Updater:
         if self._ignore([deployed_path, local_path]):
             self.log.sub('\"{}\" ignored'.format(local_path))
             return True
-        if self.debug:
-            self.log.dbg('update for file {} and {}'.format(
-                deployed_path,
-                local_path,
-            ))
+        self.log.dbg('update for file {} and {}'.format(
+            deployed_path,
+            local_path,
+        ))
         if self._is_template(local_path):
             # dotfile is a template
-            if self.debug:
-                self.log.dbg('{} is a template'.format(local_path))
+            self.log.dbg('{} is a template'.format(local_path))
             if self.showpatch:
                 try:
                     self._show_patch(deployed_path, local_path)
@@ -237,11 +228,10 @@ class Updater:
                 filecmp.cmp(deployed_path, local_path, shallow=False) and \
                 self._same_rights(deployed_path, local_path):
             # no difference
-            if self.debug:
-                self.log.dbg('identical files: {} and {}'.format(
-                    deployed_path,
-                    local_path,
-                ))
+            self.log.dbg('identical files: {} and {}'.format(
+                deployed_path,
+                local_path,
+            ))
             return True
         if not self._overwrite(deployed_path, local_path):
             return False
@@ -252,8 +242,7 @@ class Updater:
                     local_path,
                 ))
             else:
-                if self.debug:
-                    self.log.dbg('cp {} {}'.format(deployed_path, local_path))
+                self.log.dbg('cp {} {}'.format(deployed_path, local_path))
                 shutil.copyfile(deployed_path, local_path)
                 self._mirror_rights(deployed_path, local_path)
                 self.log.sub('\"{}\" updated'.format(local_path))
@@ -267,11 +256,10 @@ class Updater:
 
     def _handle_dir(self, deployed_path, local_path, dotfile):
         """sync path (local dir) and local_path (dotdrop dir path)"""
-        if self.debug:
-            self.log.dbg('handle update for dir {} to {}'.format(
-                deployed_path,
-                local_path,
-            ))
+        self.log.dbg('handle update for dir {} to {}'.format(
+            deployed_path,
+            local_path,
+        ))
         # paths must be absolute (no tildes)
         deployed_path = os.path.expanduser(deployed_path)
         local_path = os.path.expanduser(local_path)
@@ -289,8 +277,7 @@ class Updater:
     def _merge_dirs(self, diff, dotfile):
         """Synchronize directories recursively."""
         left, right = diff.left, diff.right
-        if self.debug:
-            self.log.dbg('sync dir {} to {}'.format(left, right))
+        self.log.dbg('sync dir {} to {}'.format(left, right))
         if self._ignore([left, right]):
             return True
 
@@ -312,8 +299,7 @@ class Updater:
             if self.dry:
                 self.log.dry('would cp -r {} {}'.format(exist, new))
                 continue
-            if self.debug:
-                self.log.dbg('cp -r {} {}'.format(exist, new))
+            self.log.dbg('cp -r {} {}'.format(exist, new))
 
             # Newly created directory should be copied as is (for efficiency).
             def ig(src, names):
@@ -349,8 +335,7 @@ class Updater:
             if self.dry:
                 self.log.dry('would rm -r {}'.format(old))
                 continue
-            if self.debug:
-                self.log.dbg('rm -r {}'.format(old))
+            self.log.dbg('rm -r {}'.format(old))
             if not self._confirm_rm_r(old):
                 continue
             removepath(old, logger=self.log)
@@ -370,8 +355,7 @@ class Updater:
             if self.dry:
                 self.log.dry('would cp {} {}'.format(fleft, fright))
                 continue
-            if self.debug:
-                self.log.dbg('cp {} {}'.format(fleft, fright))
+            self.log.dbg('cp {} {}'.format(fleft, fright))
             self._handle_file(fleft, fright, dotfile, compare=False)
 
         # copy files that don't exist in dotdrop
@@ -387,8 +371,7 @@ class Updater:
             if self.dry:
                 self.log.dry('would cp {} {}'.format(exist, new))
                 continue
-            if self.debug:
-                self.log.dbg('cp {} {}'.format(exist, new))
+            self.log.dbg('cp {} {}'.format(exist, new))
             try:
                 shutil.copyfile(exist, new)
             except OSError as e:
@@ -412,8 +395,7 @@ class Updater:
             if self.dry:
                 self.log.dry('would rm {}'.format(new))
                 continue
-            if self.debug:
-                self.log.dbg('rm {}'.format(new))
+            self.log.dbg('rm {}'.format(new))
             removepath(new, logger=self.log)
             self.log.sub('\"{}\" removed'.format(new))
 
@@ -447,7 +429,6 @@ class Updater:
 
     def _ignore(self, paths):
         if must_ignore(paths, self.ignores, debug=self.debug):
-            if self.debug:
-                self.log.dbg('ignoring update for {}'.format(paths))
+            self.log.dbg('ignoring update for {}'.format(paths))
             return True
         return False

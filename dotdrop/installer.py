@@ -57,7 +57,7 @@ class Installer:
         # when using install_to_tmp for comparing
         self.comparing = False
 
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
 
     ########################################################
     # public methods
@@ -88,13 +88,11 @@ class Installer:
         """
         if not src or not dst:
             # fake dotfile
-            if self.debug:
-                self.log.dbg('fake dotfile installed')
+            self.log.dbg('fake dotfile installed')
             self._exec_pre_actions(actionexec)
             return True, None
-        if self.debug:
-            msg = 'installing \"{}\" to \"{}\" (link: {})'
-            self.log.dbg(msg.format(src, dst, str(linktype)))
+        msg = 'installing \"{}\" to \"{}\" (link: {})'
+        self.log.dbg(msg.format(src, dst, str(linktype)))
         src, dst, cont, err = self._check_paths(src, dst, chmod)
         if not cont:
             return self._log_install(cont, err)
@@ -116,9 +114,8 @@ class Installer:
             return self._log_install(r, err)
 
         isdir = os.path.isdir(src)
-        if self.debug:
-            self.log.dbg('install {} to {}'.format(src, dst))
-            self.log.dbg('\"{}\" is a directory: {}'.format(src, isdir))
+        self.log.dbg('install {} to {}'.format(src, dst))
+        self.log.dbg('\"{}\" is a directory: {}'.format(src, isdir))
 
         if linktype == LinkTypes.NOLINK:
             # normal file
@@ -142,9 +139,8 @@ class Installer:
         elif linktype == LinkTypes.LINK_CHILDREN:
             # symlink direct children
             if not isdir:
-                if self.debug:
-                    msg = 'symlink children of {} to {}'
-                    self.log.dbg(msg.format(src, dst))
+                msg = 'symlink children of {} to {}'
+                self.log.dbg(msg.format(src, dst))
                 err = 'source dotfile is not a directory: {}'.format(src)
                 r = False
             else:
@@ -153,8 +149,7 @@ class Installer:
                                              is_template=is_template,
                                              ignore=ignore)
 
-        if self.debug:
-            self.log.dbg('before chmod: {} err:{}'.format(r, err))
+        self.log.dbg('before chmod: {} err:{}'.format(r, err))
 
         if self.dry:
             return self._log_install(r, err)
@@ -202,8 +197,7 @@ class Installer:
         return
         - success, error-if-any, dotfile-installed-path
         """
-        if self.debug:
-            self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
+        self.log.dbg('tmp install {} (defined dst: {})'.format(src, dst))
         src, dst, cont, err = self._check_paths(src, dst, chmod)
         if not cont:
             return self._log_install(cont, err)
@@ -228,9 +222,8 @@ class Installer:
                                 LinkTypes.NOLINK,
                                 is_template=is_template,
                                 chmod=chmod, ignore=ignore)
-        if self.debug:
-            if ret:
-                self.log.dbg('tmp installed in {}'.format(tmpdst))
+        if ret:
+            self.log.dbg('tmp installed in {}'.format(tmpdst))
 
         # restore flags
         self.dry = drysaved
@@ -257,9 +250,8 @@ class Installer:
         - False, 'aborted'    : user aborted
         """
         if is_template:
-            if self.debug:
-                self.log.dbg('is a template')
-                self.log.dbg('install to {}'.format(self.workdir))
+            self.log.dbg('is a template')
+            self.log.dbg('install to {}'.format(self.workdir))
             tmp = self._pivot_path(dst, self.workdir, striphome=True)
             r, err = self.install(templater, src, tmp,
                                   LinkTypes.NOLINK,
@@ -314,20 +306,17 @@ class Installer:
             subdst = dsts[i]
 
             if utils.must_ignore([subsrc, subdst], ignore, debug=self.debug):
-                if self.debug:
-                    self.log.dbg(
-                        'ignoring install of {} to {}'.format(src, dst),
-                    )
+                self.log.dbg(
+                    'ignoring install of {} to {}'.format(src, dst),
+                )
                 continue
 
-            if self.debug:
-                self.log.dbg('symlink child {} to {}'.format(subsrc, subdst))
+            self.log.dbg('symlink child {} to {}'.format(subsrc, subdst))
 
             if is_template:
-                if self.debug:
-                    self.log.dbg('child is a template')
-                    self.log.dbg('install to {} and symlink'
-                                 .format(self.workdir))
+                self.log.dbg('child is a template')
+                self.log.dbg('install to {} and symlink'
+                             .format(self.workdir))
                 tmp = self._pivot_path(subdst, self.workdir, striphome=True)
                 r, e = self.install(templater, subsrc, tmp,
                                     LinkTypes.NOLINK,
@@ -367,8 +356,7 @@ class Installer:
         if os.path.lexists(dst):
             if os.path.realpath(dst) == os.path.realpath(src):
                 msg = 'ignoring "{}", link already exists'.format(dst)
-                if self.debug:
-                    self.log.dbg(msg)
+                self.log.dbg(msg)
                 return False, None
             if self.dry:
                 self.log.dry('would remove {} and link to {}'.format(dst, src))
@@ -422,12 +410,11 @@ class Installer:
         - False, None       : ignored
         - False, 'aborted'    : user aborted
         """
-        if self.debug:
-            self.log.dbg('deploy file: {}'.format(src))
-            self.log.dbg('ignore empty: {}'.format(noempty))
-            self.log.dbg('ignore pattern: {}'.format(ignore))
-            self.log.dbg('is_template: {}'.format(is_template))
-            self.log.dbg('no empty: {}'.format(noempty))
+        self.log.dbg('deploy file: {}'.format(src))
+        self.log.dbg('ignore empty: {}'.format(noempty))
+        self.log.dbg('ignore pattern: {}'.format(ignore))
+        self.log.dbg('is_template: {}'.format(is_template))
+        self.log.dbg('no empty: {}'.format(noempty))
 
         # check no loop
         if utils.samefile(src, dst):
@@ -435,8 +422,7 @@ class Installer:
             return False, err
 
         if utils.must_ignore([src, dst], ignore, debug=self.debug):
-            if self.debug:
-                self.log.dbg('ignoring install of {} to {}'.format(src, dst))
+            self.log.dbg('ignoring install of {} to {}'.format(src, dst))
             return False, None
 
         if utils.samefile(src, dst):
@@ -461,8 +447,7 @@ class Installer:
                 templater.restore_vars(saved)
             # test is empty
             if noempty and utils.content_empty(content):
-                if self.debug:
-                    self.log.dbg('ignoring empty template: {}'.format(src))
+                self.log.dbg('ignoring empty template: {}'.format(src))
                 return False, None
             if content is None:
                 err = 'empty template {}'.format(src)
@@ -490,8 +475,7 @@ class Installer:
         - False, None       : ignored
         - False, 'aborted'    : user aborted
         """
-        if self.debug:
-            self.log.dbg('deploy dir {}'.format(src))
+        self.log.dbg('deploy dir {}'.format(src))
         # default to nothing installed and no error
         ret = False, None
 
@@ -503,8 +487,7 @@ class Installer:
         # handle all files in dir
         for entry in os.listdir(src):
             f = os.path.join(src, entry)
-            if self.debug:
-                self.log.dbg('deploy sub from {}: {}'.format(dst, entry))
+            self.log.dbg('deploy sub from {}: {}'.format(dst, entry))
             if not os.path.isdir(f):
                 # is file
                 res, err = self._copy_file(templater, f,
@@ -566,12 +549,10 @@ class Installer:
 
             if self.diff:
                 if not self._is_different(src, dst, content=content):
-                    if self.debug:
-                        self.log.dbg('{} is the same'.format(dst))
+                    self.log.dbg('{} is the same'.format(dst))
                     return False, None
             if self.safe:
-                if self.debug:
-                    self.log.dbg('change detected for {}'.format(dst))
+                self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
                     # get diff
                     self._show_diff_before_write(src, dst,
@@ -588,8 +569,7 @@ class Installer:
         r, e = self._exec_pre_actions(actionexec)
         if not r:
             return False, e
-        if self.debug:
-            self.log.dbg('install file to \"{}\"'.format(dst))
+        self.log.dbg('install file to \"{}\"'.format(dst))
         # re-check in case action created the file
         if self.safe and not overwrite and os.path.lexists(dst):
             if not self.log.ask('Overwrite \"{}\"'.format(dst)):
@@ -637,8 +617,7 @@ class Installer:
             src = tmp
         r = utils.fastdiff(src, dst)
         if r:
-            if self.debug:
-                self.log.dbg('content differ')
+            self.log.dbg('content differ')
         return r
 
     def _show_diff_before_write(self, src, dst, content=None):
@@ -668,16 +647,14 @@ class Installer:
     def _create_dirs(self, directory):
         """mkdir -p <directory>"""
         if not self.create and not os.path.exists(directory):
-            if self.debug:
-                self.log.dbg('no mkdir as \"create\" set to false in config')
+            self.log.dbg('no mkdir as \"create\" set to false in config')
             return False
         if os.path.exists(directory):
             return True
         if self.dry:
             self.log.dry('would mkdir -p {}'.format(directory))
             return True
-        if self.debug:
-            self.log.dbg('mkdir -p {}'.format(directory))
+        self.log.dbg('mkdir -p {}'.format(directory))
         if not self.comparing:
             self.log.sub('create directory {}'.format(directory))
 
@@ -694,15 +671,13 @@ class Installer:
 
     def _pivot_path(self, path, newdir, striphome=False):
         """change path to be under newdir"""
-        if self.debug:
-            self.log.dbg('pivot new dir: \"{}\"'.format(newdir))
-            self.log.dbg('strip home: {}'.format(striphome))
+        self.log.dbg('pivot new dir: \"{}\"'.format(newdir))
+        self.log.dbg('strip home: {}'.format(striphome))
         if striphome:
             path = utils.strip_home(path)
         sub = path.lstrip(os.sep)
         new = os.path.join(newdir, sub)
-        if self.debug:
-            self.log.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
+        self.log.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
         return new
 
     def _exec_pre_actions(self, actionexec):
@@ -736,8 +711,7 @@ class Installer:
         # check both path are valid
         if not dst or not src:
             err = 'empty dst or src for {}'.format(src)
-            if self.debug:
-                self.log.dbg(err)
+            self.log.dbg(err)
             return None, None, False, err
 
         # normalize src and dst

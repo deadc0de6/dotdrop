@@ -21,8 +21,8 @@ class Logger:
     EMPH = '\033[33m'
     BOLD = '\033[1m'
 
-    def __init__(self):
-        pass
+    def __init__(self, debug=False):
+        self.debug = debug
 
     def log(self, string, end='\n', pre='', bold=False):
         cs = self._color(self.BLUE)
@@ -57,7 +57,9 @@ class Logger:
         ce = self._color(self.RESET)
         sys.stderr.write('{}[WARN] {} {}{}'.format(cs, string, end, ce))
 
-    def dbg(self, string):
+    def dbg(self, string, force=False):
+        if not force and not self.debug:
+            return
         frame = inspect.stack()[1]
         mod = inspect.getmodule(frame[0]).__name__
         func = inspect.stack()[1][3]

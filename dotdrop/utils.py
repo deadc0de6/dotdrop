@@ -37,7 +37,7 @@ NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
 def run(cmd, debug=False):
     """run a command (expects a list)"""
     if debug:
-        LOG.dbg('exec: {}'.format(' '.join(cmd)))
+        LOG.dbg('exec: {}'.format(' '.join(cmd)), force=True)
     p = subprocess.Popen(cmd, shell=False,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out, _ = p.communicate()
@@ -61,10 +61,10 @@ def shell(cmd, debug=False):
     returns True|False, output
     """
     if debug:
-        LOG.dbg('shell exec: \"{}\"'.format(cmd))
+        LOG.dbg('shell exec: \"{}\"'.format(cmd), force=True)
     ret, out = subprocess.getstatusoutput(cmd)
     if debug:
-        LOG.dbg('shell result ({}): {}'.format(ret, out))
+        LOG.dbg('shell result ({}): {}'.format(ret, out), force=True)
     return ret == 0, out
 
 
@@ -203,7 +203,8 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores))
+        LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores),
+                force=True)
     ignored_negative, ignored = categorize(
         lambda ign: ign.startswith('!'), ignores)
     for p in paths:
@@ -212,7 +213,7 @@ def must_ignore(paths, ignores, debug=False):
         for i in ignored:
             if fnmatch.fnmatch(p, i):
                 if debug:
-                    LOG.dbg('ignore \"{}\" match: {}'.format(i, p))
+                    LOG.dbg('ignore \"{}\" match: {}'.format(i, p), force=True)
                 ignore_matches.append(p)
         # Then remove any matches that actually shouldn't be ignored
         for ni in ignored_negative:
@@ -220,7 +221,8 @@ def must_ignore(paths, ignores, debug=False):
             ni = ni[1:]
             if fnmatch.fnmatch(p, ni):
                 if debug:
-                    LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p))
+                    LOG.dbg('negative ignore \"{}\" match: {}'.format(ni, p),
+                            force=True)
                 try:
                     ignore_matches.remove(p)
                 except ValueError:
@@ -232,7 +234,7 @@ def must_ignore(paths, ignores, debug=False):
         if ignore_matches:
             return True
     if debug:
-        LOG.dbg('NOT ignoring {}'.format(paths))
+        LOG.dbg('NOT ignoring {}'.format(paths), force=True)
     return False
 
 
@@ -249,7 +251,7 @@ def patch_ignores(ignores, prefix, debug=False):
     """allow relative ignore pattern"""
     new = []
     if debug:
-        LOG.dbg('ignores before patching: {}'.format(ignores))
+        LOG.dbg('ignores before patching: {}'.format(ignores), force=True)
     for ignore in ignores:
         negative = ignore.startswith('!')
         if negative:
@@ -277,7 +279,7 @@ def patch_ignores(ignores, prefix, debug=False):
         else:
             new.append(path)
     if debug:
-        LOG.dbg('ignores after patching: {}'.format(new))
+        LOG.dbg('ignores after patching: {}'.format(new), force=True)
     return new
 
 
@@ -375,7 +377,7 @@ def get_file_perm(path):
 
 def chmod(path, mode, debug=False):
     if debug:
-        LOG.dbg('chmod {} {}'.format(oct(mode), path))
+        LOG.dbg('chmod {} {}'.format(oct(mode), path), force=True)
     os.chmod(path, mode)
     return get_file_perm(path) == mode
 

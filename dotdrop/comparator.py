@@ -24,7 +24,7 @@ class Comparator:
         """
         self.diff_cmd = diff_cmd
         self.debug = debug
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
     def compare(self, local_path, deployed_path, ignore=[]):
@@ -32,12 +32,11 @@ class Comparator:
         deployed_path (destination file)"""
         local_path = os.path.expanduser(local_path)
         deployed_path = os.path.expanduser(deployed_path)
-        if self.debug:
-            self.log.dbg('comparing {} and {}'.format(
-                local_path,
-                deployed_path,
-            ))
-            self.log.dbg('ignore pattern(s): {}'.format(ignore))
+        self.log.dbg('comparing {} and {}'.format(
+            local_path,
+            deployed_path,
+        ))
+        self.log.dbg('ignore pattern(s): {}'.format(ignore))
 
         # test type of file
         if os.path.isdir(local_path) and not os.path.isdir(deployed_path):
@@ -53,17 +52,13 @@ class Comparator:
 
         # test content
         if not os.path.isdir(local_path):
-            if self.debug:
-                self.log.dbg('{} is a file'.format(local_path))
-            if self.debug:
-                self.log.dbg('is file')
+            self.log.dbg('{} is a file'.format(local_path))
             ret = self._comp_file(local_path, deployed_path, ignore)
             if not ret:
                 ret = self._comp_mode(local_path, deployed_path)
             return ret
 
-        if self.debug:
-            self.log.dbg('{} is a directory'.format(local_path))
+        self.log.dbg('{} is a directory'.format(local_path))
 
         ret = self._comp_dir(local_path, deployed_path, ignore)
         if not ret:
@@ -76,55 +71,49 @@ class Comparator:
         deployed_mode = get_file_perm(deployed_path)
         if local_mode == deployed_mode:
             return ''
-        if self.debug:
-            msg = 'mode differ {} ({:o}) and {} ({:o})'
-            self.log.dbg(msg.format(local_path, local_mode, deployed_path,
-                                    deployed_mode))
+        msg = 'mode differ {} ({:o}) and {} ({:o})'
+        self.log.dbg(msg.format(local_path, local_mode, deployed_path,
+                                deployed_mode))
         ret = 'modes differ for {} ({:o}) vs {:o}\n'
         return ret.format(deployed_path, deployed_mode, local_mode)
 
     def _comp_file(self, local_path, deployed_path, ignore):
         """compare a file"""
-        if self.debug:
-            self.log.dbg('compare file {} with {}'.format(
-                local_path,
-                deployed_path,
-            ))
+        self.log.dbg('compare file {} with {}'.format(
+            local_path,
+            deployed_path,
+        ))
         if (self.ignore_missing_in_dotdrop and not
                 os.path.exists(local_path)) \
                 or must_ignore([local_path, deployed_path], ignore,
                                debug=self.debug):
-            if self.debug:
-                self.log.dbg('ignoring diff {} and {}'.format(
-                    local_path,
-                    deployed_path,
-                ))
+            self.log.dbg('ignoring diff {} and {}'.format(
+                local_path,
+                deployed_path,
+            ))
             return ''
         return self._diff(local_path, deployed_path)
 
     def _comp_dir(self, local_path, deployed_path, ignore):
         """compare a directory"""
-        if self.debug:
-            self.log.dbg('compare directory {} with {}'.format(
-                local_path,
-                deployed_path,
-            ))
+        self.log.dbg('compare directory {} with {}'.format(
+            local_path,
+            deployed_path,
+        ))
         if not os.path.exists(deployed_path):
             return ''
         if (self.ignore_missing_in_dotdrop and not
                 os.path.exists(local_path)) \
                 or must_ignore([local_path, deployed_path], ignore,
                                debug=self.debug):
-            if self.debug:
-                self.log.dbg('ignoring diff {} and {}'.format(
-                    local_path,
-                    deployed_path,
-                ))
+            self.log.dbg('ignoring diff {} and {}'.format(
+                local_path,
+                deployed_path,
+            ))
             return ''
         if not os.path.isdir(deployed_path):
             return '\"{}\" is a file\n'.format(deployed_path)
-        if self.debug:
-            self.log.dbg('compare {} and {}'.format(local_path, deployed_path))
+        self.log.dbg('compare {} and {}'.format(local_path, deployed_path))
         ret = []
         comp = filecmp.dircmp(local_path, deployed_path)
 

@@ -46,7 +46,7 @@ class Importer:
         self.ignore = ignore
 
         self.umask = get_umask()
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
 
     def import_path(self, path, import_as=None,
                     import_link=LinkTypes.NOLINK, import_mode=False):
@@ -57,8 +57,7 @@ class Importer:
             0: ignored
             -1: error
         """
-        if self.debug:
-            self.log.dbg('import {}'.format(path))
+        self.log.dbg('import {}'.format(path))
         if not os.path.exists(path):
             self.log.err('\"{}\" does not exist, ignored!'.format(path))
             return -1
@@ -100,8 +99,7 @@ class Importer:
             src = src.rstrip(os.sep)
             src = os.path.abspath(src)
             src = strip_home(src)
-            if self.debug:
-                self.log.dbg('import src for {} as {}'.format(dst, src))
+            self.log.dbg('import src for {} as {}'.format(dst, src))
         # with or without dot prefix
         strip = '.' + os.sep
         if self.keepdot:
@@ -121,8 +119,7 @@ class Importer:
         if self._already_exists(src, dst):
             return -1
 
-        if self.debug:
-            self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
+        self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
 
         if not self._prepare_hierarchy(src, dst):
             return -1
@@ -140,12 +137,10 @@ class Importer:
         # handle file mode
         chmod = None
         dflperm = get_default_file_perms(dst, self.umask)
-        if self.debug:
-            self.log.dbg('import mode: {}'.format(import_mode))
+        self.log.dbg('import mode: {}'.format(import_mode))
         if import_mode or perm != dflperm:
-            if self.debug:
-                msg = 'adopt mode {:o} (umask {:o})'
-                self.log.dbg(msg.format(perm, dflperm))
+            msg = 'adopt mode {:o} (umask {:o})'
+            self.log.dbg(msg.format(perm, dflperm))
             chmod = perm
 
         # add file to config file
@@ -168,7 +163,7 @@ class Importer:
         if os.path.exists(srcf):
             if self.safe:
                 cmp = Comparator(debug=self.debug,
-                               diff_cmd=self.diff_cmd)
+                                 diff_cmd=self.diff_cmd)
                 diff = cmp.compare(srcf, dst)
                 if diff != '':
                     # files are different, dunno what to do
@@ -178,8 +173,7 @@ class Importer:
                     msg = 'Dotfile \"{}\" already exists, overwrite?'
                     if not self.log.ask(msg.format(srcf)):
                         return False
-                    if self.debug:
-                        self.log.dbg('will overwrite existing file')
+                    self.log.dbg('will overwrite existing file')
 
         # create directory hierarchy
         if self.dry:
@@ -241,8 +235,7 @@ class Importer:
 
     def _ignore(self, path):
         if must_ignore([path], self.ignore, debug=self.debug):
-            if self.debug:
-                self.log.dbg('ignoring import of {}'.format(path))
+            self.log.dbg('ignoring import of {}'.format(path))
             self.log.warn('{} ignored'.format(path))
             return True
         return False

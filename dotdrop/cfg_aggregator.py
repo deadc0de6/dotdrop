@@ -41,7 +41,7 @@ class CfgAggregator:
         self.profile_key = profile_key
         self.debug = debug
         self.dry = dry
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
         self._load()
 
     ########################################################
@@ -74,7 +74,7 @@ class CfgAggregator:
 
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
-        if ret and self.debug:
+        if ret:
             msg = 'new dotfile {} to profile {}'
             self.log.dbg(msg.format(key, self.profile_key))
 
@@ -196,8 +196,7 @@ class CfgAggregator:
         """create a new dotfile"""
         # get a new dotfile with a unique key
         key = self._get_new_dotfile_key(dst)
-        if self.debug:
-            self.log.dbg('new dotfile key: {}'.format(key))
+        self.log.dbg('new dotfile key: {}'.format(key))
         # add the dotfile
         if not self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod):
             return None
@@ -260,9 +259,9 @@ class CfgAggregator:
         # patch actions in settings default_actions
         self._patch_keys_to_objs([self.settings],
                                  "default_actions", self._get_action_w_args)
-        if self.debug:
-            msg = 'default actions: {}'.format(self.settings.default_actions)
-            self.log.dbg(msg)
+
+        msg = 'default actions: {}'.format(self.settings.default_actions)
+        self.log.dbg(msg)
 
         # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.dotfiles,
@@ -281,8 +280,7 @@ class CfgAggregator:
         """
         if not containers:
             return
-        if self.debug:
-            self.log.dbg('patching {} ...'.format(keys))
+        self.log.dbg('patching {} ...'.format(keys))
         for container in containers:
             objects = []
             okeys = getattr(container, keys)
@@ -300,9 +298,6 @@ class CfgAggregator:
                 objects.append(obj)
             if not islist:
                 objects = objects[0]
-            # if self.debug:
-            #     er = 'patching {}.{} with {}'
-            #     self.log.dbg(er.format(c, keys, objects))
             setattr(container, keys, objects)
 
     ########################################################
@@ -368,8 +363,7 @@ class CfgAggregator:
         if self.dry:
             return
         self.save()
-        if self.debug:
-            self.log.dbg('reloading config')
+        self.log.dbg('reloading config')
         olddebug = self.debug
         self.debug = False
         self._load()
@@ -411,9 +405,8 @@ class CfgAggregator:
         if len(fields) > 1:
             # we have args
             key, *args = fields
-            if self.debug:
-                msg = 'action with parm: {} and {}'
-                self.log.dbg(msg.format(key, args))
+            msg = 'action with parm: {} and {}'
+            self.log.dbg(msg.format(key, args))
             action = self._get_action(key).copy(args)
         else:
             action = self._get_action(key)
@@ -426,9 +419,8 @@ class CfgAggregator:
             if len(fields) > 1:
                 # we have args
                 key, *args = fields
-                if self.debug:
-                    msg = 'trans with parm: {} and {}'
-                    self.log.dbg(msg.format(key, args))
+                msg = 'trans with parm: {} and {}'
+                self.log.dbg(msg.format(key, args))
                 trans = getter(key).copy(args)
             else:
                 trans = getter(key)

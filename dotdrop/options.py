@@ -121,8 +121,8 @@ class Options(AttrMonitor):
             self.args = docopt(USAGE, version=VERSION)
         if args:
             self.args = args.copy()
-        self.log = Logger()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
+        self.log = Logger(debug=self.debug)
         self.dry = self.args['--dry']
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
@@ -131,13 +131,12 @@ class Options(AttrMonitor):
         self.confpath = self._get_config_path()
         if not self.confpath:
             raise YamlException('no config file found')
-        if self.debug:
-            self.log.dbg('#################################################')
-            self.log.dbg('#################### DOTDROP ####################')
-            self.log.dbg('#################################################')
-            self.log.dbg('version: {}'.format(VERSION))
-            self.log.dbg('command: {}'.format(' '.join(sys.argv)))
-            self.log.dbg('config file: {}'.format(self.confpath))
+        self.log.dbg('#################################################')
+        self.log.dbg('#################### DOTDROP ####################')
+        self.log.dbg('#################################################')
+        self.log.dbg('version: {}'.format(VERSION))
+        self.log.dbg('command: {}'.format(' '.join(sys.argv)))
+        self.log.dbg('config file: {}'.format(self.confpath))
 
         self._read_config()
         self._apply_args()

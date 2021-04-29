@@ -106,7 +106,7 @@ class CfgYaml:
         self._path = os.path.abspath(path)
         self._profile = profile
         self._debug = debug
-        self._log = Logger()
+        self._log = Logger(debug=self._debug)
         # config needs to be written
         self._dirty = False
         # indicates the config has been updated

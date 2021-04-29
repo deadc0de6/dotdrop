@@ -42,7 +42,7 @@ class Templategen:
         """
         self.base = base.rstrip(os.sep)
         self.debug = debug
-        self.log = Logger()
+        self.log = Logger(debug=self.debug)
         self.variables = {}
         loader1 = FileSystemLoader(self.base)
         loader2 = FunctionLoader(self._template_loader)
@@ -66,18 +66,15 @@ class Templategen:
         # adding header method
         self.env.globals['header'] = self._header
         # adding helper methods
-        if self.debug:
-            self.log.dbg('load global functions:')
+        self.log.dbg('load global functions:')
         self._load_funcs_to_dic(jhelpers, self.env.globals)
         if func_file:
             for f in func_file:
-                if self.debug:
-                    self.log.dbg('load custom functions from {}'.format(f))
+                self.log.dbg('load custom functions from {}'.format(f))
                 self._load_path_to_dic(f, self.env.globals)
         if filter_file:
             for f in filter_file:
-                if self.debug:
-                    self.log.dbg('load custom filters from {}'.format(f))
+                self.log.dbg('load custom filters from {}'.format(f))
                 self._load_path_to_dic(f, self.env.filters)
         if self.debug:
             self._debug_dict('template additional variables', variables)
@@ -139,8 +136,7 @@ class Templategen:
             return
         funcs = utils.get_module_functions(mod)
         for name, func in funcs:
-            if self.debug:
-                self.log.dbg('load function \"{}\"'.format(name))
+            self.log.dbg('load function \"{}\"'.format(name))
             dic[name] = func
 
     def _header(self, prepend=''):
@@ -152,20 +148,16 @@ class Templategen:
         try:
             import magic
             filetype = magic.from_file(src, mime=True)
-            if self.debug:
-                self.log.dbg('using \"magic\" for filetype identification')
+            self.log.dbg('using \"magic\" for filetype identification')
         except ImportError:
             # fallback
             _, filetype = utils.run(['file', '-b', '--mime-type', src],
                                     debug=self.debug)
-            if self.debug:
-                self.log.dbg('using \"file\" for filetype identification')
+            self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
         istext = self._is_text(filetype)
-        if self.debug:
-            self.log.dbg('filetype \"{}\": {}'.format(src, filetype))
-        if self.debug:
-            self.log.dbg('is text \"{}\": {}'.format(src, istext))
+        self.log.dbg('filetype \"{}\": {}'.format(src, filetype))
+        self.log.dbg('is text \"{}\": {}'.format(src, istext))
         if not istext:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
