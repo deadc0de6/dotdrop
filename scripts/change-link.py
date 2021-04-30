@@ -10,8 +10,9 @@ usage example:
     ./change-link.py --true ../config.yaml --ignore f_vimrc --ignore f_xinitrc
 """
 
-from docopt import docopt
 import os
+import io
+from docopt import docopt
 from ruamel.yaml import YAML as yaml
 
 USAGE = """
@@ -26,11 +27,12 @@ Options:
 
 """
 
-key = 'dotfiles'
-entry = 'link'
+KEY = 'dotfiles'
+ENTRY = 'link'
 
 
 def main():
+    """entry point"""
     args = docopt(USAGE)
     path = os.path.expanduser(args['<config.yaml>'])
     if args['--true']:
@@ -40,19 +42,19 @@ def main():
 
     ignores = args['--ignore']
 
-    with open(path, 'r') as f:
-        content = yaml(typ='safe').load(f)
-    for k, v in content[key].items():
+    with open(path, 'r') as file:
+        content = yaml(typ='safe').load(file)
+    for k, val in content[KEY].items():
         if k in ignores:
             continue
-        v[entry] = value
+        val[ENTRY] = value
 
     output = io.StringIO()
-    y = yaml()
-    y.default_flow_style = False
-    y.indent = 2
-    y.typ = 'rt'
-    y.dump(content, output)
+    data = yaml()
+    data.default_flow_style = False
+    data.indent = 2
+    data.typ = 'rt'
+    data.dump(content, output)
     print(output)
 
 

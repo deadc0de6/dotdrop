@@ -333,6 +333,7 @@ def cmd_install(opts):
         # check result
         for fut in futures.as_completed(wait_for):
             tmpret, key, err = fut.result()
+            # check result
             if tmpret:
                 installed.append(key)
             elif err:

@@ -56,7 +56,7 @@ def write_to_tmpfile(content):
     return path
 
 
-def shell(cmd, debug=False):
+def shellrun(cmd, debug=False):
     """
     run a command in the shell (expects a string)
     returns True|False, output
@@ -256,8 +256,7 @@ def uniq_list(a_list):
 def patch_ignores(ignores, prefix, debug=False):
     """allow relative ignore pattern"""
     new = []
-    if debug:
-        LOG.dbg('ignores before patching: {}'.format(ignores), force=True)
+    LOG.dbg('ignores before patching: {}'.format(ignores), force=debug)
     for ignore in ignores:
         negative = ignore.startswith('!')
         if negative:
@@ -284,8 +283,7 @@ def patch_ignores(ignores, prefix, debug=False):
             new.append('!' + path)
         else:
             new.append(path)
-    if debug:
-        LOG.dbg('ignores after patching: {}'.format(new), force=True)
+    LOG.dbg('ignores after patching: {}'.format(new), force=debug)
     return new
 
 
@@ -305,8 +303,12 @@ def get_module_from_path(path):
     if not path or not os.path.exists(path):
         return None
     module_name = os.path.basename(path).rstrip('.py')
-    loader = importlib.machinery.SourceFileLoader(module_name, path)
-    mod = loader.load_module()
+    # allow any type of files
+    importlib.machinery.SOURCE_SUFFIXES.append('')
+    # import module
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
     return mod
 
 

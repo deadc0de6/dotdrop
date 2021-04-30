@@ -5,6 +5,7 @@ Copyright (c) 2017, deadc0de6
 stores all options to use across dotdrop
 """
 
+# attribute-defined-outside-init
 # pylint: disable=W0201
 
 import os
@@ -164,7 +165,27 @@ class Options(AttrMonitor):
         # start monitoring for bad attribute
         self._set_attr_err = True
 
-# pylint: disable=R0911
+    @classmethod
+    def _get_config_from_fs(cls):
+        """get config from filesystem"""
+        # look in ~/.config/dotdrop
+        cfg = os.path.expanduser(HOMECFG)
+        path = os.path.join(cfg, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        # look in /etc/xdg/dotdrop
+        path = os.path.join(ETCXDGCFG, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        # look in /etc/dotdrop
+        path = os.path.join(ETCCFG, CONFIG)
+        if os.path.exists(path):
+            return path
+
+        return ''
+
     def _get_config_path(self):
         """get the config path"""
         # cli provided
@@ -186,24 +207,7 @@ class Options(AttrMonitor):
             if os.path.exists(path):
                 return path
 
-        # look in ~/.config/dotdrop
-        cfg = os.path.expanduser(HOMECFG)
-        path = os.path.join(cfg, CONFIG)
-        if os.path.exists(path):
-            return path
-
-        # look in /etc/xdg/dotdrop
-        path = os.path.join(ETCXDGCFG, CONFIG)
-        if os.path.exists(path):
-            return path
-
-        # look in /etc/dotdrop
-        path = os.path.join(ETCCFG, CONFIG)
-        if os.path.exists(path):
-            return path
-
-        return ''
-# pylint: enable=R0911
+        return self._get_config_from_fs()
 
     def _header(self):
         """display the header"""

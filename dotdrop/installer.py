@@ -356,7 +356,9 @@ class Installer:
         - False, 'aborted'    : user aborted
         """
         overwrite = not self.safe
+
         if os.path.lexists(dst):
+            # symlink exists
             if os.path.realpath(dst) == os.path.realpath(src):
                 msg = 'ignoring "{}", link already exists'.format(dst)
                 self.log.dbg(msg)
@@ -369,22 +371,29 @@ class Installer:
             msg = 'Remove "{}" for link creation?'.format(dst)
             if self.safe and not self.log.ask(msg):
                 return False, 'aborted'
+
+            # remove symlink
             overwrite = True
             try:
                 utils.removepath(dst)
             except OSError as exc:
                 err = 'something went wrong with {}: {}'.format(src, exc)
                 return False, err
+
         if self.dry:
             self.log.dry('would link {} to {}'.format(dst, src))
             return True, None
+
         base = os.path.dirname(dst)
         if not self._create_dirs(base):
             err = 'error creating directory for {}'.format(dst)
             return False, err
+
+        # execute pre-actions
         ret, err = self._exec_pre_actions(actionexec)
         if not ret:
             return False, err
+
         # re-check in case action created the file
         if os.path.lexists(dst):
             msg = 'Remove "{}" for link creation?'.format(dst)
@@ -395,6 +404,8 @@ class Installer:
             except OSError as exc:
                 err = 'something went wrong with {}: {}'.format(src, exc)
                 return False, err
+
+        # create symlink
         os.symlink(src, dst)
         if not self.comparing:
             self.log.sub('linked {} to {}'.format(dst, src))
@@ -418,20 +429,17 @@ class Installer:
         self.log.dbg('is_template: {}'.format(is_template))
         self.log.dbg('no empty: {}'.format(noempty))
 
+        # ignore file
+        if utils.must_ignore([src, dst], ignore, debug=self.debug):
+            self.log.dbg('ignoring install of {} to {}'.format(src, dst))
+            return False, None
+
         # check no loop
         if utils.samefile(src, dst):
             err = 'dotfile points to itself: {}'.format(dst)
             return False, err
 
-        if utils.must_ignore([src, dst], ignore, debug=self.debug):
-            self.log.dbg('ignoring install of {} to {}'.format(src, dst))
-            return False, None
-
-        if utils.samefile(src, dst):
-            # loop
-            err = 'dotfile points to itself: {}'.format(dst)
-            return False, err
-
+        # check source file exists
         if not os.path.exists(src):
             err = 'source dotfile does not exist: {}'.format(src)
             return False, err
@@ -499,9 +507,9 @@ class Installer:
                                            is_template=is_template)
                 if not res and err:
                     # error occured
-                    ret = res, err
-                    break
-                elif res:
+                    return res, err
+
+                if res:
                     # something got installed
                     ret = True, None
             else:
@@ -514,9 +522,9 @@ class Installer:
                                           is_template=is_template)
                 if not res and err:
                     # error occured
-                    ret = res, err
-                    break
-                elif res:
+                    return res, err
+
+                if res:
                     # something got installed
                     ret = True, None
         return ret
@@ -563,6 +571,7 @@ class Installer:
             return True, None
 
         if os.path.lexists(dst):
+            # file/symlink exists
             try:
                 os.stat(dst)
             except OSError as exc:
@@ -575,6 +584,7 @@ class Installer:
                 if not self._is_different(src, dst, content=content):
                     self.log.dbg('{} is the same'.format(dst))
                     return False, None
+
             if self.safe:
                 self.log.dbg('change detected for {}'.format(dst))
                 if self.showdiff:
@@ -585,8 +595,8 @@ class Installer:
                     return False, 'aborted'
                 overwrite = True
 
-        if self.backup and os.path.lexists(dst):
-            self._backup(dst)
+            if self.backup:
+                self._backup(dst)
 
         # create hierarchy
         base = os.path.dirname(dst)

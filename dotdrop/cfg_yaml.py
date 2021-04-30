@@ -18,6 +18,8 @@ the upper layer:
 Additionally a few methods are exported.
 """
 
+# pylint: disable=C0302
+
 import os
 import glob
 import io
@@ -31,7 +33,7 @@ from dotdrop.settings import Settings
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import shell, uniq_list
+from dotdrop.utils import shellrun, uniq_list
 from dotdrop.exceptions import YamlException, UndefinedException
 
 
@@ -96,7 +98,7 @@ class CfgYaml:
     allowed_link_val = [lnk_nolink, lnk_link, lnk_children]
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
-    def __init__(self, path, profile=None, addprofiles=[], debug=False):
+    def __init__(self, path, profile=None, addprofiles=None, debug=False):
         """
         config parser
         @path: config file path
@@ -115,7 +117,7 @@ class CfgYaml:
         # profile variables
         self._profilevarskeys = []
         # included profiles
-        self._inc_profiles = addprofiles
+        self._inc_profiles = addprofiles or []
 
         # init the dictionaries
         self.settings = {}
@@ -180,11 +182,11 @@ class CfgYaml:
 
         # include the profile's variables/dynvariables last
         # as it overwrites existing ones
-        self._inc_profiles, pv, pvd = self._get_profile_included_vars()
-        self._add_variables(pv, prio=True)
-        self._add_variables(pvd, shell=True, prio=True)
-        self._profilevarskeys.extend(pv.keys())
-        self._profilevarskeys.extend(pvd.keys())
+        self._inc_profiles, pvar, pdvar = self._get_profile_included_vars()
+        self._add_variables(pvar, prio=True)
+        self._add_variables(pdvar, shell=True, prio=True)
+        self._profilevarskeys.extend(pvar.keys())
+        self._profilevarskeys.extend(pdvar.keys())
 
         # template variables
         self.variables = self._template_dict(self.variables)
@@ -232,11 +234,11 @@ class CfgYaml:
         self._resolve_profile_includes()
 
         # add the current profile variables
-        _, pv, pvd = self._get_profile_included_vars()
-        self._add_variables(pv, prio=False)
-        self._add_variables(pvd, shell=True, prio=False)
-        self._profilevarskeys.extend(pv.keys())
-        self._profilevarskeys.extend(pvd.keys())
+        _, pvar, pdvar = self._get_profile_included_vars()
+        self._add_variables(pvar, prio=False)
+        self._add_variables(pdvar, shell=True, prio=False)
+        self._profilevarskeys.extend(pvar.keys())
+        self._profilevarskeys.extend(pdvar.keys())
 
         # resolve variables
         self._clear_profile_vars(newvars)
@@ -322,21 +324,21 @@ class CfgYaml:
         """update an existing dotfile"""
         if key not in self.dotfiles.keys():
             return False
-        df = self._yaml_dict[self.key_dotfiles][key]
+        dotfile = self._yaml_dict[self.key_dotfiles][key]
         old = None
-        if self.key_dotfile_chmod in df:
-            old = df[self.key_dotfile_chmod]
+        if self.key_dotfile_chmod in dotfile:
+            old = dotfile[self.key_dotfile_chmod]
         if old == chmod:
             return False
         if self._debug:
             self._dbg('update dotfile: {}'.format(key))
             self._dbg('old chmod value: {}'.format(old))
             self._dbg('new chmod value: {}'.format(chmod))
-        df = self._yaml_dict[self.key_dotfiles][key]
+        dotfile = self._yaml_dict[self.key_dotfiles][key]
         if not chmod:
-            del df[self.key_dotfile_chmod]
+            del dotfile[self.key_dotfile_chmod]
         else:
-            df[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+            dotfile[self.key_dotfile_chmod] = str(format(chmod, 'o'))
         self._dirty = True
         return True
 
@@ -426,11 +428,12 @@ class CfgYaml:
         if self._debug:
             self._dbg('saving to {}'.format(self._path))
         try:
-            with open(self._path, 'w') as f:
-                self._yaml_dump(content, f)
-        except Exception as e:
-            self._log.err(e)
-            raise YamlException('error saving config: {}'.format(self._path))
+            with open(self._path, 'w') as file:
+                self._yaml_dump(content, file)
+        except Exception as exc:
+            self._log.err(exc)
+            err = 'error saving config: {}'.format(self._path)
+            raise YamlException(err) from exc
 
         if self._dirty_deprecated:
             warn = 'your config contained deprecated entries'
@@ -587,11 +590,11 @@ class CfgYaml:
             self.settings[self.key_import_variables] = new
 
         # profile's import
-        for k, v in self.profiles.items():
-            entries = v.get(self.key_import_profile_dfs, [])
+        for _, val in self.profiles.items():
+            entries = val.get(self.key_import_profile_dfs, [])
             new = self._template_list(entries)
             if new:
-                v[self.key_import_profile_dfs] = new
+                val[self.key_import_profile_dfs] = new
 
     def _norm_actions(self, actions):
         """
@@ -601,12 +604,12 @@ class CfgYaml:
         if not actions:
             return actions
         new = {}
-        for k, v in actions.items():
-            if k == self.action_pre or k == self.action_post:
-                for key, action in v.items():
+        for k, val in actions.items():
+            if k in (self.action_pre, self.action_post):
+                for key, action in val.items():
                     new[key] = (k, action)
             else:
-                new[k] = (self.action_post, v)
+                new[k] = (self.action_post, val)
         return new
 
     def _norm_profiles(self, profiles):
@@ -614,14 +617,14 @@ class CfgYaml:
         if not profiles:
             return profiles
         new = {}
-        for k, v in profiles.items():
-            if not v:
+        for k, val in profiles.items():
+            if not val:
                 # no dotfiles
                 continue
             # add dotfiles entry if not present
-            if self.key_profile_dotfiles not in v:
-                v[self.key_profile_dotfiles] = []
-            new[k] = v
+            if self.key_profile_dotfiles not in val:
+                val[self.key_profile_dotfiles] = []
+            new[k] = val
         return new
 
     def _norm_dotfiles(self, dotfiles):
@@ -629,55 +632,56 @@ class CfgYaml:
         if not dotfiles:
             return dotfiles
         new = {}
-        for k, v in dotfiles.items():
+        for k, val in dotfiles.items():
             # add 'src' as key' if not present
-            if self.key_dotfile_src not in v:
-                v[self.key_dotfile_src] = k
-                new[k] = v
+            if self.key_dotfile_src not in val:
+                val[self.key_dotfile_src] = k
+                new[k] = val
             else:
-                new[k] = v
+                new[k] = val
             # fix deprecated trans key
-            if self.old_key_trans_r in v:
+            if self.old_key_trans_r in val:
                 msg = '\"trans\" is deprecated, please use \"trans_read\"'
                 self._log.warn(msg)
-                v[self.key_trans_r] = v[self.old_key_trans_r]
-                del v[self.old_key_trans_r]
-                new[k] = v
-            if self.key_dotfile_link not in v:
+                val[self.key_trans_r] = val[self.old_key_trans_r]
+                del val[self.old_key_trans_r]
+                new[k] = val
+            if self.key_dotfile_link not in val:
                 # apply link value if undefined
-                val = self.settings[self.key_settings_link_dotfile_default]
-                v[self.key_dotfile_link] = val
+                value = self.settings[self.key_settings_link_dotfile_default]
+                val[self.key_dotfile_link] = value
             # apply noempty if undefined
-            if self.key_dotfile_noempty not in v:
-                val = self.settings.get(self.key_settings_noempty, False)
-                v[self.key_dotfile_noempty] = val
+            if self.key_dotfile_noempty not in val:
+                value = self.settings.get(self.key_settings_noempty, False)
+                val[self.key_dotfile_noempty] = value
             # apply template if undefined
-            if self.key_dotfile_template not in v:
-                val = self.settings.get(self.key_settings_template, True)
-                v[self.key_dotfile_template] = val
+            if self.key_dotfile_template not in val:
+                value = self.settings.get(self.key_settings_template, True)
+                val[self.key_dotfile_template] = value
             # validate value of chmod if defined
-            if self.key_dotfile_chmod in v:
-                val = str(v[self.key_dotfile_chmod])
-                if len(val) < 3:
-                    err = 'bad format for chmod: {}'.format(val)
+            if self.key_dotfile_chmod in val:
+                value = str(val[self.key_dotfile_chmod])
+                if len(value) < 3:
+                    err = 'bad format for chmod: {}'.format(value)
                     self._log.err(err)
                     raise YamlException('config content error: {}'.format(err))
                 try:
-                    int(val)
-                except Exception:
-                    err = 'bad format for chmod: {}'.format(val)
+                    int(value)
+                except Exception as exc:
+                    err = 'bad format for chmod: {}'.format(value)
                     self._log.err(err)
-                    raise YamlException('config content error: {}'.format(err))
+                    err = 'config content error: {}'.format(err)
+                    raise YamlException(err) from exc
                 # normalize chmod value
-                for x in list(val):
-                    y = int(x)
-                    if y < 0 or y > 7:
-                        err = 'bad format for chmod: {}'.format(val)
+                for chmodv in list(value):
+                    chmodint = int(chmodv)
+                    if chmodint < 0 or chmodint > 7:
+                        err = 'bad format for chmod: {}'.format(value)
                         self._log.err(err)
                         raise YamlException(
                             'config content error: {}'.format(err)
                         )
-                v[self.key_dotfile_chmod] = int(val, 8)
+                val[self.key_dotfile_chmod] = int(value, 8)
 
         return new
 
@@ -719,13 +723,13 @@ class CfgYaml:
         if profile:
             variables['profile'] = profile
         # add some more variables
-        p = self.settings.get(self.key_settings_dotpath)
-        p = self._norm_path(p)
-        variables['_dotdrop_dotpath'] = p
+        path = self.settings.get(self.key_settings_dotpath)
+        path = self._norm_path(path)
+        variables['_dotdrop_dotpath'] = path
         variables['_dotdrop_cfgpath'] = self._norm_path(self._path)
-        p = self.settings.get(self.key_settings_workdir)
-        p = self._norm_path(p)
-        variables['_dotdrop_workdir'] = p
+        path = self.settings.get(self.key_settings_workdir)
+        path = self._norm_path(path)
+        variables['_dotdrop_workdir'] = path
         return variables
 
     def _get_profile_included_item(self, keyitem):
@@ -765,18 +769,18 @@ class CfgYaml:
     def _resolve_profile_all(self):
         """resolve some other parts of the config"""
         # profile -> ALL
-        for k, v in self.profiles.items():
-            dfs = v.get(self.key_profile_dotfiles, None)
+        for k, val in self.profiles.items():
+            dfs = val.get(self.key_profile_dotfiles, None)
             if not dfs:
                 continue
             if self.key_all in dfs:
                 if self._debug:
                     self._dbg('add ALL to profile \"{}\"'.format(k))
-                v[self.key_profile_dotfiles] = self.dotfiles.keys()
+                val[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
         """resolve profile(s) including other profiles"""
-        for k, v in self.profiles.items():
+        for k, _ in self.profiles.items():
             self._rec_resolve_profile_include(k)
 
     def _rec_resolve_profile_include(self, profile):
@@ -860,7 +864,7 @@ class CfgYaml:
         """import external variables from paths"""
         paths = self.settings.get(self.key_import_variables, None)
         if not paths:
-            return
+            return None
         paths = self._resolve_paths(paths)
         newvars = {}
         for path in paths:
@@ -899,18 +903,18 @@ class CfgYaml:
 
     def _import_profiles_dotfiles(self):
         """import profile dotfiles"""
-        for k, v in self.profiles.items():
-            imp = v.get(self.key_import_profile_dfs, None)
+        for k, val in self.profiles.items():
+            imp = val.get(self.key_import_profile_dfs, None)
             if not imp:
                 continue
             if self._debug:
                 self._dbg('import dotfiles for profile {}'.format(k))
             paths = self._resolve_paths(imp)
             for path in paths:
-                current = v.get(self.key_dotfiles, [])
+                current = val.get(self.key_dotfiles, [])
                 new = self._import_sub(path, self.key_dotfiles,
                                        mandatory=False)
-                v[self.key_dotfiles] = new + current
+                val[self.key_dotfiles] = new + current
 
     def _import_config(self, path):
         """import config from path"""
@@ -999,7 +1003,6 @@ class CfgYaml:
             return
         self._fix_deprecated_link_by_default(yamldict)
         self._fix_deprecated_dotfile_link(yamldict)
-        return yamldict
 
     def _fix_deprecated_link_by_default(self, yamldict):
         """fix deprecated link_by_default"""
@@ -1028,9 +1031,9 @@ class CfgYaml:
             return
         if not yamldict[self.key_dotfiles]:
             return
-        for k, dotfile in yamldict[self.key_dotfiles].items():
+        for _, dotfile in yamldict[self.key_dotfiles].items():
             if self.key_dotfile_link in dotfile and \
-                    type(dotfile[self.key_dotfile_link]) is bool:
+                    isinstance(dotfile[self.key_dotfile_link], bool):
                 # patch link: <bool>
                 cur = dotfile[self.key_dotfile_link]
                 new = self.lnk_nolink
@@ -1042,7 +1045,7 @@ class CfgYaml:
                 self._log.warn('deprecated \"link\" value')
 
             elif old_key in dotfile and \
-                    type(dotfile[old_key]) is bool:
+                    isinstance(dotfile[old_key], bool):
                 # patch link_children: <bool>
                 cur = dotfile[old_key]
                 new = self.lnk_nolink
@@ -1076,16 +1079,17 @@ class CfgYaml:
         if self._debug:
             self._dbg('----------start:{}----------'.format(path))
             cfg = '\n'
-            with open(path, 'r') as f:
-                for line in f:
+            with open(path, 'r') as file:
+                for line in file:
                     cfg += line
             self._dbg(cfg.rstrip())
             self._dbg('----------end:{}----------'.format(path))
         try:
             content = self._yaml_load(path)
-        except Exception as e:
-            self._log.err(e)
-            raise YamlException('config yaml error: {}'.format(path))
+        except Exception as exc:
+            self._log.err(exc)
+            err = 'config yaml error: {}'.format(path)
+            raise YamlException(err) from exc
 
         return content
 
@@ -1095,9 +1099,9 @@ class CfgYaml:
             return
 
         # check top entries
-        for e in self.top_entries:
-            if e not in yamldict:
-                err = 'no {} entry found'.format(e)
+        for entry in self.top_entries:
+            if entry not in yamldict:
+                err = 'no {} entry found'.format(entry)
                 self._log.err(err)
                 raise YamlException('config format error: {}'.format(err))
 
@@ -1117,21 +1121,23 @@ class CfgYaml:
             self._log.err(err)
             raise YamlException('config content error: {}'.format(err))
 
-    def _yaml_load(self, path):
+    @classmethod
+    def _yaml_load(cls, path):
         """load from yaml"""
-        with open(path, 'r') as f:
-            y = yaml()
-            y.typ = 'rt'
-            content = y.load(f)
+        with open(path, 'r') as file:
+            data = yaml()
+            data.typ = 'rt'
+            content = data.load(file)
         return content
 
-    def _yaml_dump(self, content, where):
+    @classmethod
+    def _yaml_dump(cls, content, where):
         """dump to yaml"""
-        y = yaml()
-        y.default_flow_style = False
-        y.indent = 2
-        y.typ = 'rt'
-        y.dump(content, where)
+        data = yaml()
+        data.default_flow_style = False
+        data.indent = 2
+        data.typ = 'rt'
+        data.dump(content, where)
 
     ########################################################
     # templating
@@ -1156,9 +1162,9 @@ class CfgYaml:
             val = item
             while Templategen.var_is_template(val):
                 val = self._tmpl.generate_string(val)
-        except UndefinedException as e:
+        except UndefinedException as exc:
             if exc_if_fail:
-                raise e
+                raise exc
         return val
 
     def _template_list(self, entries):
@@ -1459,7 +1465,7 @@ class CfgYaml:
             keys = dic.keys()
         for k in keys:
             val = dic[k]
-            ret, out = shell(val, debug=self._debug)
+            ret, out = shellrun(val, debug=self._debug)
             if not ret:
                 err = 'var \"{}: {}\" failed: {}'.format(k, val, out)
                 self._log.err(err)
