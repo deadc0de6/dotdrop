@@ -29,6 +29,7 @@ pylint \
   --disable=R0915 \
   --disable=R0912 \
   --disable=R0911 \
+  --disable=R1732 \
   dotdrop/
 
 # retrieve the nosetests binary
