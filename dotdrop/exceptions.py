@@ -12,3 +12,7 @@ class YamlException(Exception):
 
 class UndefinedException(Exception):
     """exception in templating"""
+
+
+class UnmetDependency(Exception):
+    """unmet dependency"""

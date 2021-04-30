@@ -36,6 +36,7 @@ from dotdrop.exceptions import YamlException, UndefinedException
 
 
 class CfgYaml:
+    """yaml config file parser"""
 
     # global entries
     key_settings = Settings.key_yaml
@@ -437,7 +438,6 @@ class CfgYaml:
             self._log.warn(warn)
 
         self._dirty = False
-        self.cfg_updated = False
         return True
 
     def dump(self):
@@ -464,20 +464,20 @@ class CfgYaml:
             self._check_minversion(minversion)
 
         # normalize paths
-        p = self._norm_path(settings[self.key_settings_dotpath])
-        settings[self.key_settings_dotpath] = p
-        p = self._norm_path(settings[self.key_settings_workdir])
-        settings[self.key_settings_workdir] = p
-        p = [
-            self._norm_path(p)
-            for p in settings[Settings.key_filter_file]
+        paths = self._norm_path(settings[self.key_settings_dotpath])
+        settings[self.key_settings_dotpath] = paths
+        paths = self._norm_path(settings[self.key_settings_workdir])
+        settings[self.key_settings_workdir] = paths
+        paths = [
+            self._norm_path(path)
+            for path in settings[Settings.key_filter_file]
         ]
-        settings[Settings.key_filter_file] = p
-        p = [
-            self._norm_path(p)
-            for p in settings[Settings.key_func_file]
+        settings[Settings.key_filter_file] = paths
+        paths = [
+            self._norm_path(path)
+            for path in settings[Settings.key_func_file]
         ]
-        settings[Settings.key_func_file] = p
+        settings[Settings.key_func_file] = paths
         if self._debug:
             self._debug_dict('settings block:', settings)
         return settings
@@ -1166,11 +1166,11 @@ class CfgYaml:
         new = []
         if not entries:
             return new
-        for e in entries:
-            et = self._template_item(e)
-            if self._debug and e != et:
-                self._dbg('resolved: {} -> {}'.format(e, et))
-            new.append(et)
+        for entry in entries:
+            newe = self._template_item(entry)
+            if self._debug and entry != newe:
+                self._dbg('resolved: {} -> {}'.format(entry, newe))
+            new.append(newe)
         return new
 
     def _template_dict(self, entries):
@@ -1178,11 +1178,11 @@ class CfgYaml:
         new = {}
         if not entries:
             return new
-        for k, v in entries.items():
-            vt = self._template_item(v)
-            if self._debug and v != vt:
-                self._dbg('resolved: {} -> {}'.format(v, vt))
-            new[k] = vt
+        for k, val in entries.items():
+            newv = self._template_item(val)
+            if self._debug and val != newv:
+                self._dbg('resolved: {} -> {}'.format(val, newv))
+            new[k] = newv
         return new
 
     def _template_dotfiles_entries(self):
@@ -1226,9 +1226,9 @@ class CfgYaml:
         if self.key_all not in pdfs:
             # take a subset of the dotfiles
             newdotfiles = {}
-            for k, v in dotfiles.items():
+            for k, val in dotfiles.items():
                 if k in pdfs:
-                    newdotfiles[k] = v
+                    newdotfiles[k] = val
             dotfiles = newdotfiles
 
         for dotfile in dotfiles.values():
@@ -1246,26 +1246,29 @@ class CfgYaml:
         var = self._enrich_vars(variables, self._profile)
         # use a separated templategen to handle variables
         # resolved outside the main config
-        t = Templategen(variables=var,
-                        func_file=self.settings[Settings.key_func_file],
-                        filter_file=self.settings[Settings.key_filter_file])
+        func_files = self.settings[Settings.key_func_file]
+        filter_files = self.settings[Settings.key_filter_file]
+        templ = Templategen(variables=var,
+                            func_file=func_files,
+                            filter_file=filter_files)
         for k in variables.keys():
             val = variables[k]
             while Templategen.var_is_template(val):
-                val = t.generate_string(val)
+                val = templ.generate_string(val)
                 variables[k] = val
-                t.update_variables(variables)
+                templ.update_variables(variables)
         if variables is self.variables:
             self._redefine_templater()
 
     def _get_profile_included_vars(self):
         """resolve profile included variables/dynvariables"""
-        for k, v in self.profiles.items():
-            if self.key_profile_include in v and v[self.key_profile_include]:
+        for _, val in self.profiles.items():
+            if self.key_profile_include in val and \
+                    val[self.key_profile_include]:
                 new = []
-                for x in v[self.key_profile_include]:
-                    new.append(self._tmpl.generate_string(x))
-                v[self.key_profile_include] = new
+                for entry in val[self.key_profile_include]:
+                    new.append(self._tmpl.generate_string(entry))
+                val[self.key_profile_include] = new
 
         # now get the included ones
         pro_var = self._get_profile_included_item(self.key_profile_variables)
@@ -1291,7 +1294,8 @@ class CfgYaml:
         """
         if not dic:
             return
-        [dic.pop(k, None) for k in self._profilevarskeys]
+        for k in self._profilevarskeys:
+            dic.pop(k, None)
 
     def _parse_extended_import_path(self, path_entry):
         """Parse an import path in a tuple (path, fatal_not_found)."""
@@ -1369,7 +1373,8 @@ class CfgYaml:
         processed_paths = (self._process_path(p) for p in paths)
         return list(chain.from_iterable(processed_paths))
 
-    def _merge_dict(self, high, low):
+    @classmethod
+    def _merge_dict(cls, high, low):
         """merge high and low dict"""
         if not high:
             high = {}
@@ -1377,7 +1382,8 @@ class CfgYaml:
             low = {}
         return {**low, **high}
 
-    def _get_entry(self, dic, key, mandatory=True):
+    @classmethod
+    def _get_entry(cls, dic, key, mandatory=True):
         """return copy of entry from yaml dictionary"""
         if key not in dic:
             if mandatory:
@@ -1393,19 +1399,19 @@ class CfgYaml:
     def _clear_none(self, dic):
         """recursively delete all none/empty values in a dictionary."""
         new = {}
-        for k, v in dic.items():
+        for k, val in dic.items():
             if k == self.key_dotfile_src:
                 # allow empty dotfile src
-                new[k] = v
+                new[k] = val
                 continue
             if k == self.key_dotfile_dst:
                 # allow empty dotfile dst
-                new[k] = v
+                new[k] = val
                 continue
-            newv = v
-            if isinstance(v, dict):
+            newv = val
+            if isinstance(val, dict):
                 # recursive travers dict
-                newv = self._clear_none(v)
+                newv = self._clear_none(val)
                 if not newv:
                     # no empty dict
                     continue
@@ -1418,7 +1424,8 @@ class CfgYaml:
             new[k] = newv
         return new
 
-    def _is_glob(self, path):
+    @classmethod
+    def _is_glob(cls, path):
         """Quick test if path is a glob."""
         return '*' in path or '?' in path
 
@@ -1435,8 +1442,8 @@ class CfgYaml:
             return path
         path = os.path.expanduser(path)
         if not os.path.isabs(path):
-            d = os.path.dirname(self._path)
-            ret = os.path.join(d, path)
+            dirn = os.path.dirname(self._path)
+            ret = os.path.join(dirn, path)
             if self._debug:
                 msg = 'normalizing relative to cfg: {} -> {}'
                 self._dbg(msg.format(path, ret))
@@ -1446,30 +1453,31 @@ class CfgYaml:
             self._dbg('normalizing: {} -> {}'.format(path, ret))
         return ret
 
-    def _shell_exec_dvars(self, dic, keys=[]):
+    def _shell_exec_dvars(self, dic, keys=None):
         """shell execute dynvariables in-place"""
         if not keys:
             keys = dic.keys()
         for k in keys:
-            v = dic[k]
-            ret, out = shell(v, debug=self._debug)
+            val = dic[k]
+            ret, out = shell(val, debug=self._debug)
             if not ret:
-                err = 'var \"{}: {}\" failed: {}'.format(k, v, out)
+                err = 'var \"{}: {}\" failed: {}'.format(k, val, out)
                 self._log.err(err)
                 raise YamlException(err)
             if self._debug:
-                self._dbg('{}: `{}` -> {}'.format(k, v, out))
+                self._dbg('{}: `{}` -> {}'.format(k, val, out))
             dic[k] = out
 
-    def _check_minversion(self, minversion):
+    @classmethod
+    def _check_minversion(cls, minversion):
         if not minversion:
             return
         try:
-            cur = tuple([int(x) for x in VERSION.split('.')])
-            cfg = tuple([int(x) for x in minversion.split('.')])
-        except Exception:
+            cur = ([int(x) for x in VERSION.split('.')])
+            cfg = ([int(x) for x in minversion.split('.')])
+        except Exception as exc:
             err = 'bad version: \"{}\" VS \"{}\"'.format(VERSION, minversion)
-            raise YamlException(err)
+            raise YamlException(err) from exc
         if cur < cfg:
             err = 'current dotdrop version is too old for that config file.'
             err += ' Please update.'
@@ -1495,8 +1503,8 @@ class CfgYaml:
         self._dbg('{}:'.format(title))
         if not elems:
             return
-        for k, v in elems.items():
-            self._dbg('\t- \"{}\": {}'.format(k, v))
+        for k, val in elems.items():
+            self._dbg('\t- \"{}\": {}'.format(k, val))
 
     def _dbg(self, content):
         pre = os.path.basename(self._path)

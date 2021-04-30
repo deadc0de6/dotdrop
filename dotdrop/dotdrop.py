@@ -22,7 +22,8 @@ from dotdrop.utils import get_tmpdir, removepath, \
     uniq_list, patch_ignores, dependencies_met, \
     adapt_workers
 from dotdrop.linktypes import LinkTypes
-from dotdrop.exceptions import YamlException, UndefinedException
+from dotdrop.exceptions import YamlException, \
+    UndefinedException, UnmetDependency
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
@@ -32,7 +33,7 @@ TRANS_SUFFIX = 'trans'
 ###########################################################
 
 
-def action_executor(o, actions, defactions, templater, post=False):
+def action_executor(opts, actions, defactions, templater, post=False):
     """closure for action execution"""
     def execute():
         """
@@ -40,70 +41,71 @@ def action_executor(o, actions, defactions, templater, post=False):
         True, None if ok
         False, errstring if issue
         """
-        s = 'pre' if not post else 'post'
+        actiontype = 'pre' if not post else 'post'
 
         # execute default actions
         for action in defactions:
-            if o.dry:
-                LOG.dry('would execute def-{}-action: {}'.format(s,
+            if opts.dry:
+                LOG.dry('would execute def-{}-action: {}'.format(actiontype,
                                                                  action))
                 continue
-            LOG.dbg('executing def-{}-action: {}'.format(s, action))
-            ret = action.execute(templater=templater, debug=o.debug)
+            LOG.dbg('executing def-{}-action: {}'.format(actiontype, action))
+            ret = action.execute(templater=templater, debug=opts.debug)
             if not ret:
-                err = 'def-{}-action \"{}\" failed'.format(s, action.key)
-                LOG.err(err)
+                err = 'def-{}-action \"{}\" failed'
+                LOG.err(err.format(actiontype, action.key))
                 return False, err
 
         # execute actions
         for action in actions:
-            if o.dry:
-                LOG.dry('would execute {}-action: {}'.format(s, action))
+            if opts.dry:
+                err = 'would execute {}-action: {}'
+                LOG.dry(err.format(actiontype, action))
                 continue
-            LOG.dbg('executing {}-action: {}'.format(s, action))
-            ret = action.execute(templater=templater, debug=o.debug)
+            LOG.dbg('executing {}-action: {}'.format(actiontype, action))
+            ret = action.execute(templater=templater, debug=opts.debug)
             if not ret:
-                err = '{}-action \"{}\" failed'.format(s, action.key)
+                err = '{}-action \"{}\" failed'.format(actiontype, action.key)
                 LOG.err(err)
                 return False, err
         return True, None
     return execute
 
 
-def _dotfile_update(o, path, key=False):
+def _dotfile_update(opts, path, key=False):
     """
     update a dotfile pointed by path
     if key is false or by key (in path)
     """
-    updater = Updater(o.dotpath, o.variables, o.conf,
-                      dry=o.dry, safe=o.safe, debug=o.debug,
-                      ignore=o.update_ignore,
-                      showpatch=o.update_showpatch,
-                      ignore_missing_in_dotdrop=o.ignore_missing_in_dotdrop)
+    updater = Updater(opts.dotpath, opts.variables, opts.conf,
+                      dry=opts.dry, safe=opts.safe, debug=opts.debug,
+                      ignore=opts.update_ignore,
+                      showpatch=opts.update_showpatch,
+                      ignore_missing_in_dotdrop=opts.ignore_missing_in_dotdrop)
     if key:
         return updater.update_key(path)
     return updater.update_path(path)
 
 
-def _dotfile_compare(o, dotfile, tmp):
+def _dotfile_compare(opts, dotfile, tmp):
     """
     compare a dotfile
     returns True if same
     """
-    t = _get_templater(o)
-    ignore_missing_in_dotdrop = o.ignore_missing_in_dotdrop or \
+    templ = _get_templater(opts)
+    ignore_missing_in_dotdrop = opts.ignore_missing_in_dotdrop or \
         dotfile.ignore_missing_in_dotdrop
-    inst = Installer(create=o.create, backup=o.backup,
-                     dry=o.dry, base=o.dotpath,
-                     workdir=o.workdir, debug=o.debug,
-                     backup_suffix=o.install_backup_suffix,
-                     diff_cmd=o.diff_command)
-    comp = Comparator(diff_cmd=o.diff_command, debug=o.debug,
+    inst = Installer(create=opts.create, backup=opts.backup,
+                     dry=opts.dry, base=opts.dotpath,
+                     workdir=opts.workdir, debug=opts.debug,
+                     backup_suffix=opts.install_backup_suffix,
+                     diff_cmd=opts.diff_command)
+    comp = Comparator(diff_cmd=opts.diff_command, debug=opts.debug,
                       ignore_missing_in_dotdrop=ignore_missing_in_dotdrop)
 
     # add dotfile variables
     newvars = dotfile.get_dotfile_variables()
-    t.add_tmp_vars(newvars=newvars)
+    templ.add_tmp_vars(newvars=newvars)
 
     # dotfiles does not exist / not installed
     LOG.dbg('comparing {}'.format(dotfile))
@@ -118,14 +120,14 @@ def _dotfile_compare(o, dotfile, tmp):
     tmpsrc = None
     if dotfile.trans_r:
         LOG.dbg('applying transformation before comparing')
-        tmpsrc = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
+        tmpsrc = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
         if not tmpsrc:
             # could not apply trans
             return False
         src = tmpsrc
 
     # is a symlink pointing to itself
-    asrc = os.path.join(o.dotpath, os.path.expanduser(src))
+    asrc = os.path.join(opts.dotpath, os.path.expanduser(src))
     adst = os.path.expanduser(dotfile.dst)
     if os.path.samefile(asrc, adst):
         line = '=> compare {}: diffing with \"{}\"'
@@ -133,13 +135,13 @@ def _dotfile_compare(o, dotfile, tmp):
         LOG.dbg('points to itself')
         return True
 
-    ignores = list(set(o.compare_ignore + dotfile.cmpignore))
-    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+    ignores = list(set(opts.compare_ignore + dotfile.cmpignore))
+    ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
 
     insttmp = None
     if dotfile.template and Templategen.is_template(src, ignore=ignores):
         # install dotfile to temporary dir for compare
-        ret, err, insttmp = inst.install_to_temp(t, tmp, src, dotfile.dst,
+        ret, err, insttmp = inst.install_to_temp(templ, tmp, src, dotfile.dst,
                                                  is_template=True,
                                                  chmod=dotfile.chmod)
         if not ret:
@@ -151,28 +153,29 @@ def _dotfile_compare(o, dotfile, tmp):
         src = insttmp
 
     # compare
+    # need to be executed before cleaning
     diff = comp.compare(src, dotfile.dst, ignore=ignores)
 
     # clean tmp transformed dotfile if any
     if tmpsrc:
-        tmpsrc = os.path.join(o.dotpath, tmpsrc)
+        tmpsrc = os.path.join(opts.dotpath, tmpsrc)
         if os.path.exists(tmpsrc):
             removepath(tmpsrc, LOG)
 
     # clean tmp template dotfile if any
-    if insttmp:
-        if os.path.exists(insttmp):
-            removepath(insttmp, LOG)
+    if insttmp and os.path.exists(insttmp):
+        removepath(insttmp, LOG)
 
     if diff != '':
         # print diff results
         line = '=> compare {}: diffing with \"{}\"'
         LOG.log(line.format(dotfile.key, dotfile.dst))
-        if o.compare_fileonly:
+        if opts.compare_fileonly:
             LOG.raw('<files are different>')
         else:
             LOG.emph(diff)
         return False
+
     # no difference
     line = '=> compare {}: diffing with \"{}\"'
     LOG.dbg(line.format(dotfile.key, dotfile.dst))
@@ -180,33 +183,33 @@ def _dotfile_compare(o, dotfile, tmp):
     return True
 
 
-def _dotfile_install(o, dotfile, tmpdir=None):
+def _dotfile_install(opts, dotfile, tmpdir=None):
     """
     install a dotfile
     returns <success, dotfile key, err>
     """
     # installer
-    inst = _get_install_installer(o, tmpdir=tmpdir)
+    inst = _get_install_installer(opts, tmpdir=tmpdir)
 
     # templater
-    t = _get_templater(o)
+    templ = _get_templater(opts)
 
     # add dotfile variables
     newvars = dotfile.get_dotfile_variables()
-    t.add_tmp_vars(newvars=newvars)
+    templ.add_tmp_vars(newvars=newvars)
 
     preactions = []
-    if not o.install_temporary:
+    if not opts.install_temporary:
         preactions.extend(dotfile.get_pre_actions())
-    defactions = o.install_default_actions_pre
-    pre_actions_exec = action_executor(o, preactions, defactions,
-                                       t, post=False)
+    defactions = opts.install_default_actions_pre
+    pre_actions_exec = action_executor(opts, preactions, defactions,
+                                       templ, post=False)
 
     LOG.dbg('installing dotfile: \"{}\"'.format(dotfile.key))
     LOG.dbg(dotfile.prt())
 
-    ignores = list(set(o.install_ignore + dotfile.instignore))
-    ignores = patch_ignores(ignores, dotfile.dst, debug=o.debug)
+    ignores = list(set(opts.install_ignore + dotfile.instignore))
+    ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
 
     is_template = dotfile.template and Templategen.is_template(
         dotfile.src,
@@ -214,29 +217,29 @@ def _dotfile_install(o, dotfile, tmpdir=None):
     )
     if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
         # link
-        r, err = inst.install(t, dotfile.src, dotfile.dst,
-                              dotfile.link,
-                              actionexec=pre_actions_exec,
-                              is_template=is_template,
-                              ignore=ignores,
-                              chmod=dotfile.chmod,
-                              force_chmod=o.install_force_chmod)
+        ret, err = inst.install(templ, dotfile.src, dotfile.dst,
+                                dotfile.link,
+                                actionexec=pre_actions_exec,
+                                is_template=is_template,
+                                ignore=ignores,
+                                chmod=dotfile.chmod,
+                                force_chmod=opts.install_force_chmod)
     elif hasattr(dotfile, 'link') and \
             dotfile.link == LinkTypes.LINK_CHILDREN:
         # link_children
-        r, err = inst.install(t, dotfile.src, dotfile.dst,
-                              dotfile.link,
-                              actionexec=pre_actions_exec,
-                              is_template=is_template,
-                              chmod=dotfile.chmod,
-                              ignore=ignores,
-                              force_chmod=o.install_force_chmod)
+        ret, err = inst.install(templ, dotfile.src, dotfile.dst,
+                                dotfile.link,
+                                actionexec=pre_actions_exec,
+                                is_template=is_template,
+                                chmod=dotfile.chmod,
+                                ignore=ignores,
+                                force_chmod=opts.install_force_chmod)
     else:
         # nolink
         src = dotfile.src
         tmp = None
         if dotfile.trans_r:
-            tmp = apply_trans(o.dotpath, dotfile, t, debug=o.debug)
+            tmp = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
             if not tmp:
                 return False, dotfile.key, None
             src = tmp
@@ -245,92 +248,92 @@ def _dotfile_install(o, dotfile, tmpdir=None):
             src,
             ignore=ignores,
         )
-        r, err = inst.install(t, src, dotfile.dst,
-                              LinkTypes.NOLINK,
-                              actionexec=pre_actions_exec,
-                              noempty=dotfile.noempty,
-                              ignore=ignores,
-                              is_template=is_template,
-                              chmod=dotfile.chmod,
-                              force_chmod=o.install_force_chmod)
+        ret, err = inst.install(templ, src, dotfile.dst,
+                                LinkTypes.NOLINK,
+                                actionexec=pre_actions_exec,
+                                noempty=dotfile.noempty,
+                                ignore=ignores,
+                                is_template=is_template,
+                                chmod=dotfile.chmod,
+                                force_chmod=opts.install_force_chmod)
         if tmp:
-            tmp = os.path.join(o.dotpath, tmp)
+            tmp = os.path.join(opts.dotpath, tmp)
             if os.path.exists(tmp):
                 removepath(tmp, LOG)
 
     # check result of installation
-    if r:
+    if ret:
         # dotfile was installed
-        if not o.install_temporary:
-            defactions = o.install_default_actions_post
+        if not opts.install_temporary:
+            defactions = opts.install_default_actions_post
             postactions = dotfile.get_post_actions()
-            post_actions_exec = action_executor(o, postactions, defactions,
-                                                t, post=True)
+            post_actions_exec = action_executor(opts, postactions, defactions,
+                                                templ, post=True)
             post_actions_exec()
     else:
         # dotfile was NOT installed
-        if o.install_force_action:
+        if opts.install_force_action:
             # pre-actions
             LOG.dbg('force pre action execution ...')
             pre_actions_exec()
             # post-actions
             LOG.dbg('force post action execution ...')
-            defactions = o.install_default_actions_post
+            defactions = opts.install_default_actions_post
             postactions = dotfile.get_post_actions()
-            post_actions_exec = action_executor(o, postactions, defactions,
-                                                t, post=True)
+            post_actions_exec = action_executor(opts, postactions, defactions,
+                                                templ, post=True)
             post_actions_exec()
 
-    return r, dotfile.key, err
+    return ret, dotfile.key, err
 
 
-def cmd_install(o):
+def cmd_install(opts):
     """install dotfiles for this profile"""
-    dotfiles = o.dotfiles
-    prof = o.conf.get_profile()
+    dotfiles = opts.dotfiles
+    prof = opts.conf.get_profile()
 
-    adapt_workers(o, LOG)
+    adapt_workers(opts, LOG)
 
     pro_pre_actions = prof.get_pre_actions() if prof else []
     pro_post_actions = prof.get_post_actions() if prof else []
 
-    if o.install_keys:
+    if opts.install_keys:
         # filtered dotfiles to install
-        uniq = uniq_list(o.install_keys)
+        uniq = uniq_list(opts.install_keys)
         dotfiles = [d for d in dotfiles if d.key in uniq]
     if not dotfiles:
         msg = 'no dotfile to install for this profile (\"{}\")'
-        LOG.warn(msg.format(o.profile))
+        LOG.warn(msg.format(opts.profile))
         return False
 
     # the installer
     tmpdir = None
-    if o.install_temporary:
+    if opts.install_temporary:
         tmpdir = get_tmpdir()
 
     installed = []
 
     # execute profile pre-action
     LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
-    t = _get_templater(o)
-    ret, err = action_executor(o, pro_pre_actions, [], t, post=False)()
+    templ = _get_templater(opts)
+    ret, _ = action_executor(opts, pro_pre_actions, [], templ, post=False)()
     if not ret:
         return False
 
     # install each dotfile
-    if o.workers > 1:
+    if opts.workers > 1:
         # in parallel
-        LOG.dbg('run with {} workers'.format(o.workers))
-        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
+        LOG.dbg('run with {} workers'.format(opts.workers))
+        ex = futures.ThreadPoolExecutor(max_workers=opts.workers)
 
         wait_for = []
         for dotfile in dotfiles:
-            j = ex.submit(_dotfile_install, o, dotfile, tmpdir=tmpdir)
+            j = ex.submit(_dotfile_install, opts, dotfile, tmpdir=tmpdir)
             wait_for.append(j)
         # check result
-        for f in futures.as_completed(wait_for):
-            r, key, err = f.result()
-            if r:
+        for fut in futures.as_completed(wait_for):
+            tmpret, key, err = fut.result()
+            if tmpret:
                 installed.append(key)
             elif err:
                 LOG.err('installing \"{}\" failed: {}'.format(key,
@@ -338,42 +341,43 @@ def cmd_install(o):
     else:
         # sequentially
         for dotfile in dotfiles:
-            r, key, err = _dotfile_install(o, dotfile, tmpdir=tmpdir)
+            tmpret, key, err = _dotfile_install(opts, dotfile, tmpdir=tmpdir)
             # check result
-            if r:
+            if tmpret:
                 installed.append(key)
             elif err:
                 LOG.err('installing \"{}\" failed: {}'.format(key,
                                                               err))
 
     # execute profile post-action
-    if len(installed) > 0 or o.install_force_action:
+    if len(installed) > 0 or opts.install_force_action:
         msg = 'run {} profile post actions'
         LOG.dbg(msg.format(len(pro_post_actions)))
-        ret, err = action_executor(o, pro_post_actions, [], t, post=False)()
+        ret, _ = action_executor(opts, pro_post_actions,
+                                 [], templ, post=False)()
         if not ret:
             return False
 
     LOG.dbg('install done: installed \"{}\"'.format(','.join(installed)))
 
-    if o.install_temporary:
+    if opts.install_temporary:
         LOG.log('\ninstalled to tmp \"{}\".'.format(tmpdir))
     LOG.log('\n{} dotfile(s) installed.'.format(len(installed)))
     return True
 
 
-def cmd_compare(o, tmp):
+def cmd_compare(opts, tmp):
     """compare dotfiles and return True if all identical"""
-    dotfiles = o.dotfiles
+    dotfiles = opts.dotfiles
     if not dotfiles:
         msg = 'no dotfile defined for this profile (\"{}\")'
-        LOG.warn(msg.format(o.profile))
+        LOG.warn(msg.format(opts.profile))
         return True
 
     # compare only specific files
     selected = dotfiles
-    if o.compare_focus:
-        selected = _select(o.compare_focus, dotfiles)
+    if opts.compare_focus:
+        selected = _select(opts.compare_focus, dotfiles)
 
     if len(selected) < 1:
         LOG.log('\nno dotfile to compare')
@@ -381,20 +385,20 @@ def cmd_compare(o, tmp):
 
     same = True
     cnt = 0
-    if o.workers > 1:
+    if opts.workers > 1:
         # in parallel
-        LOG.dbg('run with {} workers'.format(o.workers))
-        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
+        LOG.dbg('run with {} workers'.format(opts.workers))
+        ex = futures.ThreadPoolExecutor(max_workers=opts.workers)
         wait_for = []
         for dotfile in selected:
-            j = ex.submit(_dotfile_compare, o, dotfile, tmp)
-            wait_for.append(j)
-        # check result
-        for f in futures.as_completed(wait_for):
             if not dotfile.src and not dotfile.dst:
                 # ignore fake dotfile
                 continue
-            if not f.result():
+            j = ex.submit(_dotfile_compare, opts, dotfile, tmp)
+            wait_for.append(j)
+        # check result
+        for fut in futures.as_completed(wait_for):
+            if not fut.result():
                 same = False
             cnt += 1
     else:
@@ -403,7 +407,7 @@ def cmd_compare(o, tmp):
             if not dotfile.src and not dotfile.dst:
                 # ignore fake dotfile
                 continue
-            if not _dotfile_compare(o, dotfile, tmp):
+            if not _dotfile_compare(opts, dotfile, tmp):
                 same = False
             cnt += 1
 
@@ -411,31 +415,32 @@ def cmd_compare(o, tmp):
     return same
 
 
-def cmd_update(o):
+def cmd_update(opts):
     """update the dotfile(s) from path(s) or key(s)"""
     cnt = 0
-    paths = o.update_path
-    iskey = o.update_iskey
+    paths = opts.update_path
+    iskey = opts.update_iskey
 
-    if o.profile not in [p.key for p in o.profiles]:
-        LOG.err('no such profile \"{}\"'.format(o.profile))
+    if opts.profile not in [p.key for p in opts.profiles]:
+        LOG.err('no such profile \"{}\"'.format(opts.profile))
         return False
 
-    adapt_workers(o, LOG)
+    adapt_workers(opts, LOG)
 
     if not paths:
         # update the entire profile
         if iskey:
             LOG.dbg('update by keys: {}'.format(paths))
-            paths = [d.key for d in o.dotfiles]
+            paths = [d.key for d in opts.dotfiles]
         else:
             LOG.dbg('update by paths: {}'.format(paths))
-            paths = [d.dst for d in o.dotfiles]
-        msg = 'Update all dotfiles for profile \"{}\"'.format(o.profile)
-        if o.safe and not LOG.ask(msg):
+            paths = [d.dst for d in opts.dotfiles]
+        msg = 'Update all dotfiles for profile \"{}\"'.format(opts.profile)
+        if opts.safe and not LOG.ask(msg):
             LOG.log('\n{} file(s) updated.'.format(cnt))
             return False
 
+    # check there's something to do
     if not paths:
         LOG.log('\nno dotfile to update')
         return True
@@ -443,84 +448,87 @@ def cmd_update(o):
     LOG.dbg('dotfile to update: {}'.format(paths))
 
     # update each dotfile
-    if o.workers > 1:
+    if opts.workers > 1:
         # in parallel
-        LOG.dbg('run with {} workers'.format(o.workers))
-        ex = futures.ThreadPoolExecutor(max_workers=o.workers)
+        LOG.dbg('run with {} workers'.format(opts.workers))
+        ex = futures.ThreadPoolExecutor(max_workers=opts.workers)
         wait_for = []
         for path in paths:
-            j = ex.submit(_dotfile_update, o, path, key=iskey)
+            j = ex.submit(_dotfile_update, opts, path, key=iskey)
             wait_for.append(j)
         # check result
-        for f in futures.as_completed(wait_for):
-            if f.result():
+        for fut in futures.as_completed(wait_for):
+            if fut.result():
                 cnt += 1
     else:
         # sequentially
         for path in paths:
-            if _dotfile_update(o, path, key=iskey):
+            if _dotfile_update(opts, path, key=iskey):
                 cnt += 1
 
     LOG.log('\n{} file(s) updated.'.format(cnt))
     return cnt == len(paths)
 
 
-def cmd_importer(o):
+def cmd_importer(opts):
     """import dotfile(s) from paths"""
     ret = True
     cnt = 0
-    paths = o.import_path
-    importer = Importer(o.profile, o.conf, o.dotpath, o.diff_command,
-                        dry=o.dry, safe=o.safe, debug=o.debug,
-                        keepdot=o.keepdot, ignore=o.import_ignore)
+    paths = opts.import_path
+    importer = Importer(opts.profile, opts.conf,
+                        opts.dotpath, opts.diff_command,
+                        dry=opts.dry, safe=opts.safe,
+                        debug=opts.debug,
+                        keepdot=opts.keepdot,
+                        ignore=opts.import_ignore)
 
     for path in paths:
-        r = importer.import_path(path, import_as=o.import_as,
-                                 import_link=o.import_link,
-                                 import_mode=o.import_mode)
-        if r < 0:
+        tmpret = importer.import_path(path, import_as=opts.import_as,
+                                      import_link=opts.import_link,
+                                      import_mode=opts.import_mode)
+        if tmpret < 0:
             ret = False
-        elif r > 0:
+        elif tmpret > 0:
             cnt += 1
 
-    if o.dry:
+    if opts.dry:
         LOG.dry('new config file would be:')
-        LOG.raw(o.conf.dump())
+        LOG.raw(opts.conf.dump())
     else:
-        o.conf.save()
+        opts.conf.save()
     LOG.log('\n{} file(s) imported.'.format(cnt))
 
     return ret
 
 
-def cmd_list_profiles(o):
+def cmd_list_profiles(opts):
     """list all profiles"""
     LOG.emph('Available profile(s):\n')
-    for p in o.profiles:
-        if o.profiles_grepable:
-            fmt = '{}'.format(p.key)
+    for profile in opts.profiles:
+        if opts.profiles_grepable:
+            fmt = '{}'.format(profile.key)
             LOG.raw(fmt)
         else:
-            LOG.sub(p.key, end='')
-            LOG.log(' ({} dotfiles)'.format(len(p.dotfiles)))
+            LOG.sub(profile.key, end='')
+            LOG.log(' ({} dotfiles)'.format(len(profile.dotfiles)))
     LOG.log('')
 
 
-def cmd_files(o):
+def cmd_files(opts):
     """list all dotfiles for a specific profile"""
-    if o.profile not in [p.key for p in o.profiles]:
-        LOG.warn('unknown profile \"{}\"'.format(o.profile))
+    if opts.profile not in [p.key for p in opts.profiles]:
+        LOG.warn('unknown profile \"{}\"'.format(opts.profile))
         return
     what = 'Dotfile(s)'
-    if o.files_templateonly:
+    if opts.files_templateonly:
         what = 'Template(s)'
-    LOG.emph('{} for profile \"{}\":\n'.format(what, o.profile))
-    for dotfile in o.dotfiles:
-        if o.files_templateonly:
-            src = os.path.join(o.dotpath, dotfile.src)
+    LOG.emph('{} for profile \"{}\":\n'.format(what, opts.profile))
+    for dotfile in opts.dotfiles:
+        if opts.files_templateonly:
+            src = os.path.join(opts.dotpath, dotfile.src)
             if not Templategen.is_template(src):
                 continue
-        if o.files_grepable:
+        if opts.files_grepable:
             fmt = '{},dst:{},src:{},link:{}'
             fmt = fmt.format(dotfile.key, dotfile.dst,
                              dotfile.src, dotfile.link.name.lower())
@@ -539,26 +547,26 @@ def cmd_files(o):
     LOG.log('')
 
 
-def cmd_detail(o):
+def cmd_detail(opts):
     """list details on all files for all dotfile entries"""
-    if o.profile not in [p.key for p in o.profiles]:
-        LOG.warn('unknown profile \"{}\"'.format(o.profile))
+    if opts.profile not in [p.key for p in opts.profiles]:
+        LOG.warn('unknown profile \"{}\"'.format(opts.profile))
         return
-    dotfiles = o.dotfiles
-    if o.detail_keys:
+    dotfiles = opts.dotfiles
+    if opts.detail_keys:
         # filtered dotfiles to install
-        uniq = uniq_list(o.details_keys)
+        uniq = uniq_list(opts.details_keys)
         dotfiles = [d for d in dotfiles if d.key in uniq]
-    LOG.emph('dotfiles details for profile \"{}\":\n'.format(o.profile))
-    for d in dotfiles:
-        _detail(o.dotpath, d)
+    LOG.emph('dotfiles details for profile \"{}\":\n'.format(opts.profile))
+    for dotfile in dotfiles:
+        _detail(opts.dotpath, dotfile)
     LOG.log('')
 
 
-def cmd_remove(o):
+def cmd_remove(opts):
     """remove dotfile from dotpath and from config"""
-    paths = o.remove_path
-    iskey = o.remove_iskey
+    paths = opts.remove_path
+    iskey = opts.remove_iskey
 
     if not paths:
         LOG.log('no dotfile to remove')
@@ -569,13 +577,13 @@ def cmd_remove(o):
     for key in paths:
         if not iskey:
             # by path
-            dotfiles = o.conf.get_dotfile_by_dst(key)
+            dotfiles = opts.conf.get_dotfile_by_dst(key)
             if not dotfiles:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
         else:
             # by key
-            dotfile = o.conf.get_dotfile(key)
+            dotfile = opts.conf.get_dotfile(key)
             if not dotfile:
                 LOG.warn('{} ignored, does not exist'.format(key))
                 continue
@@ -592,46 +600,46 @@ def cmd_remove(o):
             LOG.dbg('removing {}'.format(key))
 
             # make sure is part of the profile
-            if dotfile.key not in [d.key for d in o.dotfiles]:
+            if dotfile.key not in [d.key for d in opts.dotfiles]:
                 msg = '{} ignored, not associated to this profile'
                 LOG.warn(msg.format(key))
                 continue
-            profiles = o.conf.get_profiles_by_dotfile_key(k)
+            profiles = opts.conf.get_profiles_by_dotfile_key(k)
             pkeys = ','.join([p.key for p in profiles])
-            if o.dry:
+            if opts.dry:
                 LOG.dry('would remove {} from {}'.format(dotfile, pkeys))
                 continue
             msg = 'Remove \"{}\" from all these profiles: {}'.format(k, pkeys)
-            if o.safe and not LOG.ask(msg):
+            if opts.safe and not LOG.ask(msg):
                 return False
             LOG.dbg('remove dotfile: {}'.format(dotfile))
 
             for profile in profiles:
-                if not o.conf.del_dotfile_from_profile(dotfile, profile):
+                if not opts.conf.del_dotfile_from_profile(dotfile, profile):
                     return False
-            if not o.conf.del_dotfile(dotfile):
+            if not opts.conf.del_dotfile(dotfile):
                 return False
 
             # remove dotfile from dotpath
-            dtpath = os.path.join(o.dotpath, dotfile.src)
+            dtpath = os.path.join(opts.dotpath, dotfile.src)
             removepath(dtpath, LOG)
             # remove empty directory
             parent = os.path.dirname(dtpath)
             # remove any empty parent up to dotpath
-            while parent != o.dotpath:
+            while parent != opts.dotpath:
                 if os.path.isdir(parent) and not os.listdir(parent):
                     msg = 'Remove empty dir \"{}\"'.format(parent)
-                    if o.safe and not LOG.ask(msg):
+                    if opts.safe and not LOG.ask(msg):
                         break
                     removepath(parent, LOG)
                 parent = os.path.dirname(parent)
             removed.append(dotfile)
 
-    if o.dry:
+    if opts.dry:
         LOG.dry('new config file would be:')
-        LOG.raw(o.conf.dump())
+        LOG.raw(opts.conf.dump())
     else:
-        o.conf.save()
+        opts.conf.save()
     if removed:
         LOG.log('\nFollowing dotfile(s) are not tracked anymore:')
         entries = ['- \"{}\" (was tracked as \"{}\")'.format(r.dst, r.key)
@@ -647,25 +655,25 @@ def cmd_remove(o):
 ###########################################################
 
 
-def _get_install_installer(o, tmpdir=None):
+def _get_install_installer(opts, tmpdir=None):
     """get an installer instance for cmd_install"""
-    inst = Installer(create=o.create, backup=o.backup,
-                     dry=o.dry, safe=o.safe,
-                     base=o.dotpath, workdir=o.workdir,
-                     diff=o.install_diff, debug=o.debug,
+    inst = Installer(create=opts.create, backup=opts.backup,
+                     dry=opts.dry, safe=opts.safe,
+                     base=opts.dotpath, workdir=opts.workdir,
+                     diff=opts.install_diff, debug=opts.debug,
                      totemp=tmpdir,
-                     showdiff=o.install_showdiff,
-                     backup_suffix=o.install_backup_suffix,
-                     diff_cmd=o.diff_command)
+                     showdiff=opts.install_showdiff,
+                     backup_suffix=opts.install_backup_suffix,
+                     diff_cmd=opts.diff_command)
     return inst
 
 
-def _get_templater(o):
+def _get_templater(opts):
     """get an templater instance"""
-    t = Templategen(base=o.dotpath, variables=o.variables,
-                    func_file=o.func_file, filter_file=o.filter_file,
-                    debug=o.debug)
-    return t
+    templ = Templategen(base=opts.dotpath, variables=opts.variables,
+                        func_file=opts.func_file, filter_file=opts.filter_file,
+                        debug=opts.debug)
+    return templ
 
 
 def _detail(dotpath, dotfile):
@@ -684,24 +692,24 @@ def _detail(dotpath, dotfile):
         LOG.sub('{} (template:{})'.format(path, template))
     else:
         for root, _, files in os.walk(path):
-            for f in files:
-                p = os.path.join(root, f)
+            for file in files:
+                fpath = os.path.join(root, file)
                 template = 'no'
-                if dotfile.template and Templategen.is_template(p):
+                if dotfile.template and Templategen.is_template(fpath):
                     template = 'yes'
-                LOG.sub('{} (template:{})'.format(p, template))
+                LOG.sub('{} (template:{})'.format(fpath, template))
 
 
 def _select(selections, dotfiles):
     selected = []
     for selection in selections:
-        df = next(
+        dotfile = next(
             (x for x in dotfiles
                 if os.path.expanduser(x.dst) == os.path.expanduser(selection)),
             None
         )
-        if df:
-            selected.append(df)
+        if dotfile:
+            selected.append(dotfile)
         else:
             LOG.err('no dotfile matches \"{}\"'.format(selection))
     return selected
@@ -716,9 +724,9 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
     new_src = '{}.{}'.format(src, TRANS_SUFFIX)
     trans = dotfile.trans_r
     LOG.dbg('executing transformation: {}'.format(trans))
-    s = os.path.join(dotpath, src)
+    srcpath = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
-    if not trans.transform(s, temp, templater=templater, debug=debug):
+    if not trans.transform(srcpath, temp, templater=templater, debug=debug):
         msg = 'transformation \"{}\" failed for {}'
         LOG.err(msg.format(trans.key, dotfile.key))
         if new_src and os.path.exists(new_src):
@@ -731,97 +739,103 @@ def apply_trans(dotpath, dotfile, templater, debug=False):
 # main
 ###########################################################
 
+def _exec_command(opts):
+    """execute command"""
+    ret = True
+    command = ''
+    try:
+
+        if opts.cmd_profiles:
+            # list existing profiles
+            command = 'profiles'
+            LOG.dbg('running cmd: {}'.format(command))
+            cmd_list_profiles(opts)
+
+        elif opts.cmd_files:
+            # list files for selected profile
+            command = 'files'
+            LOG.dbg('running cmd: {}'.format(command))
+            cmd_files(opts)
+
+        elif opts.cmd_install:
+            # install the dotfiles stored in dotdrop
+            command = 'install'
+            LOG.dbg('running cmd: {}'.format(command))
+            ret = cmd_install(opts)
+
+        elif opts.cmd_compare:
+            # compare local dotfiles with dotfiles stored in dotdrop
+            command = 'compare'
+            LOG.dbg('running cmd: {}'.format(command))
+            tmp = get_tmpdir()
+            ret = cmd_compare(opts, tmp)
+            # clean tmp directory
+            removepath(tmp, LOG)
+
+        elif opts.cmd_import:
+            # import dotfile(s)
+            command = 'import'
+            LOG.dbg('running cmd: {}'.format(command))
+            ret = cmd_importer(opts)
+
+        elif opts.cmd_update:
+            # update a dotfile
+            command = 'update'
+            LOG.dbg('running cmd: {}'.format(command))
+            ret = cmd_update(opts)
+
+        elif opts.cmd_detail:
+            # detail files
+            command = 'detail'
+            LOG.dbg('running cmd: {}'.format(command))
+            cmd_detail(opts)
+
+        elif opts.cmd_remove:
+            # remove dotfile
+            command = 'remove'
+            LOG.dbg('running cmd: {}'.format(command))
+            cmd_remove(opts)
+
+    except KeyboardInterrupt:
+        LOG.err('interrupted')
+        ret = False
+
+    return ret, command
+
 
 def main():
     """entry point"""
     # check dependencies are met
     try:
         dependencies_met()
-    except Exception as e:
-        LOG.err(e)
+    except UnmetDependency as exc:
+        LOG.err(exc)
         return False
 
-    t0 = time.time()
+    time0 = time.time()
     try:
-        o = Options()
-    except YamlException as e:
-        LOG.err('config error: {}'.format(str(e)))
+        opts = Options()
+    except YamlException as exc:
+        LOG.err('config error: {}'.format(str(exc)))
         return False
-    except UndefinedException as e:
-        LOG.err('config error: {}'.format(str(e)))
+    except UndefinedException as exc:
+        LOG.err('config error: {}'.format(str(exc)))
         return False
 
-    if o.debug:
-        LOG.debug = o.debug
+    if opts.debug:
+        LOG.debug = opts.debug
         LOG.dbg('\n\n')
-    options_time = time.time() - t0
+    options_time = time.time() - time0
 
-    ret = True
-    t0 = time.time()
-    command = ''
-    try:
-
-        if o.cmd_profiles:
-            # list existing profiles
-            command = 'profiles'
-            LOG.dbg('running cmd: {}'.format(command))
-            cmd_list_profiles(o)
-
-        elif o.cmd_files:
-            # list files for selected profile
-            command = 'files'
-            LOG.dbg('running cmd: {}'.format(command))
-            cmd_files(o)
-
-        elif o.cmd_install:
-            # install the dotfiles stored in dotdrop
-            command = 'install'
-            LOG.dbg('running cmd: {}'.format(command))
-            ret = cmd_install(o)
-
-        elif o.cmd_compare:
-            # compare local dotfiles with dotfiles stored in dotdrop
-            command = 'compare'
-            LOG.dbg('running cmd: {}'.format(command))
-            tmp = get_tmpdir()
-            ret = cmd_compare(o, tmp)
-            # clean tmp directory
-            removepath(tmp, LOG)
-
-        elif o.cmd_import:
-            # import dotfile(s)
-            command = 'import'
-            LOG.dbg('running cmd: {}'.format(command))
-            ret = cmd_importer(o)
-
-        elif o.cmd_update:
-            # update a dotfile
-            command = 'update'
-            LOG.dbg('running cmd: {}'.format(command))
-            ret = cmd_update(o)
-
-        elif o.cmd_detail:
-            # detail files
-            command = 'detail'
-            LOG.dbg('running cmd: {}'.format(command))
-            cmd_detail(o)
-
-        elif o.cmd_remove:
-            # remove dotfile
-            command = 'remove'
-            LOG.dbg('running cmd: {}'.format(command))
-            cmd_remove(o)
-
-    except KeyboardInterrupt:
-        LOG.err('interrupted')
-        ret = False
-    cmd_time = time.time() - t0
+    time0 = time.time()
+    ret, command = _exec_command(opts)
+    cmd_time = time.time() - time0
 
     LOG.dbg('done executing command \"{}\"'.format(command))
     LOG.dbg('options loaded in {}'.format(options_time))
     LOG.dbg('command executed in {}'.format(cmd_time))
 
-    if ret and o.conf.save():
+    if ret and opts.conf.save():
         LOG.log('config file updated')
 
     LOG.dbg('return {}'.format(ret))

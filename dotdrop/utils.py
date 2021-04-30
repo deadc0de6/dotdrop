@@ -18,6 +18,7 @@ from shutil import rmtree, which
 
 # local import
 from dotdrop.logger import Logger
+from dotdrop.exceptions import UnmetDependency
 
 LOG = Logger()
 STAR = '*'
@@ -316,7 +317,7 @@ def dependencies_met():
     err = 'The tool \"{}\" was not found in the PATH!'
     for dep in deps:
         if not which(dep):
-            raise Exception(err.format(dep))
+            raise UnmetDependency(err.format(dep))
     # check python deps
     err = 'missing python module \"{}\"'
 

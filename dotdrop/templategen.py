@@ -30,9 +30,10 @@ COMMENT_END = '@@#}'
 
 
 class Templategen:
+    """dotfile templater"""
 
-    def __init__(self, base='.', variables={},
-                 func_file=[], filter_file=[], debug=False):
+    def __init__(self, base='.', variables=None,
+                 func_file=None, filter_file=None, debug=False):
         """constructor
         @base: directory path where to search for templates
         @variables: dictionary of variables for templates
@@ -69,13 +70,13 @@ class Templategen:
         self.log.dbg('load global functions:')
         self._load_funcs_to_dic(jhelpers, self.env.globals)
         if func_file:
-            for f in func_file:
-                self.log.dbg('load custom functions from {}'.format(f))
-                self._load_path_to_dic(f, self.env.globals)
+            for ffile in func_file:
+                self.log.dbg('load custom functions from {}'.format(ffile))
+                self._load_path_to_dic(ffile, self.env.globals)
         if filter_file:
-            for f in filter_file:
-                self.log.dbg('load custom filters from {}'.format(f))
-                self._load_path_to_dic(f, self.env.filters)
+            for ffile in filter_file:
+                self.log.dbg('load custom filters from {}'.format(ffile))
+                self._load_path_to_dic(ffile, self.env.filters)
         if self.debug:
             self._debug_dict('template additional variables', variables)
 
@@ -89,9 +90,9 @@ class Templategen:
             return ''
         try:
             return self._handle_file(src)
-        except UndefinedError as e:
-            err = 'undefined variable: {}'.format(e.message)
-            raise UndefinedException(err)
+        except UndefinedError as exc:
+            err = 'undefined variable: {}'.format(exc.message)
+            raise UndefinedException(err) from exc
 
     def generate_string(self, string):
         """
@@ -103,11 +104,11 @@ class Templategen:
             return ''
         try:
             return self.env.from_string(string).render(self.variables)
-        except UndefinedError as e:
-            err = 'undefined variable: {}'.format(e.message)
-            raise UndefinedException(err)
+        except UndefinedError as exc:
+            err = 'undefined variable: {}'.format(exc.message)
+            raise UndefinedException(err) from exc
 
-    def add_tmp_vars(self, newvars={}):
+    def add_tmp_vars(self, newvars=None):
         """add vars to the globals, make sure to call restore_vars"""
         saved_variables = self.variables.copy()
         if not newvars:
@@ -139,13 +140,15 @@ class Templategen:
             self.log.dbg('load function \"{}\"'.format(name))
             dic[name] = func
 
-    def _header(self, prepend=''):
+    @classmethod
+    def _header(cls, prepend=''):
         """add a comment usually in the header of a dotfile"""
         return '{}{}'.format(prepend, utils.header())
 
     def _handle_file(self, src):
         """generate the file content from template"""
         try:
+            # pylint: disable=C0415
             import magic
             filetype = magic.from_file(src, mime=True)
             self.log.dbg('using \"magic\" for filetype identification')
@@ -162,7 +165,8 @@ class Templategen:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
 
-    def _is_text(self, fileoutput):
+    @classmethod
+    def _is_text(cls, fileoutput):
         """return if `file -b` output is ascii text"""
         out = fileoutput.lower()
         if out.startswith('text'):
@@ -179,8 +183,8 @@ class Templategen:
         path = os.path.normpath(path)
         if not os.path.exists(path):
             raise TemplateNotFound(path)
-        with open(path, 'r') as f:
-            content = f.read()
+        with open(path, 'r') as file:
+            content = file.read()
         return content
 
     def _handle_text_file(self, src):
@@ -199,18 +203,19 @@ class Templategen:
         # this is dirty
         if not src.startswith(self.base):
             src = os.path.join(self.base, src)
-        with open(src, 'rb') as f:
-            content = f.read()
+        with open(src, 'rb') as file:
+            content = file.read()
         return content
 
-    def _read_bad_encoded_text(self, path):
+    @classmethod
+    def _read_bad_encoded_text(cls, path):
         """decode non utf-8 data"""
-        with open(path, 'rb') as f:
-            data = f.read()
+        with open(path, 'rb') as file:
+            data = file.read()
         return data.decode('utf-8', 'replace')
 
     @staticmethod
-    def is_template(path, ignore=[]):
+    def is_template(path, ignore=None):
         """recursively check if any file is a template within path"""
         path = os.path.expanduser(path)
 
@@ -250,10 +255,11 @@ class Templategen:
         markers = [BLOCK_START, VAR_START, COMMENT_START]
         patterns = [re.compile(marker.encode()) for marker in markers]
         try:
-            with io.open(path, "r", encoding="utf-8") as f:
-                m = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+            with io.open(path, "r", encoding="utf-8") as file:
+                mapf = mmap.mmap(file.fileno(), 0,
+                                 access=mmap.ACCESS_READ)
                 for pattern in patterns:
-                    if pattern.search(m):
+                    if pattern.search(mapf):
                         return True
         except UnicodeDecodeError:
             # is binary so surely no template
@@ -267,5 +273,5 @@ class Templategen:
         self.log.dbg('{}:'.format(title))
         if not elems:
             return
-        for k, v in elems.items():
-            self.log.dbg('  - \"{}\": {}'.format(k, v))
+        for k, val in elems.items():
+            self.log.dbg('  - \"{}\": {}'.format(k, val))
