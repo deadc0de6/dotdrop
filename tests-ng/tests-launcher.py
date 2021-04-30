@@ -10,6 +10,7 @@ import os
 import sys
 import subprocess
 from concurrent import futures
+from halo import Halo
 
 
 MAX_JOBS = 10
@@ -52,6 +53,9 @@ def main():
 
     tests = get_tests()
 
+    print()
+    spinner = Halo(text='Testing', spinner='bouncingBall')
+    spinner.start()
     with futures.ThreadPoolExecutor(max_workers=MAX_JOBS) as ex:
         wait_for = []
         for test in tests:
@@ -68,10 +72,12 @@ def main():
                 print(log)
                 print('test {} failed ({})'.format(p, reason))
                 return False
-            else:
-                sys.stdout.write('.')
-                sys.stdout.flush()
+            #else:
+            #    sys.stdout.write('.')
+            #    sys.stdout.flush()
         sys.stdout.write('\n')
+    spinner.stop()
+    print()
     return True
 
 
