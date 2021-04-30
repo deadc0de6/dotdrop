@@ -20,7 +20,16 @@ pyflakes dotdrop/
 pyflakes tests/
 
 # pylint
-#pylint --disable=R0902 --disable=R0913 --disable=R0903 --disable=R0914 dotdrop/
+echo "testing with pylint"
+pylint \
+  --disable=R0902 \
+  --disable=R0913 \
+  --disable=R0903 \
+  --disable=R0914 \
+  --disable=R0915 \
+  --disable=R0912 \
+  --disable=R0911 \
+  dotdrop/
 
 # retrieve the nosetests binary
 nosebin="nosetests"
