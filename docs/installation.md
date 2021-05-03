@@ -115,6 +115,12 @@ snap install dotdrop
 
 Then follow the [doc to setup your repository](repository-setup.md).
 
+If you encounter warnings like `Warning: using regular magic file`
+try defining the following environment variable:
+```bash
+export MAGIC=$SNAP/usr/share/file/magic.mgc
+```
+
 ## From source
 
 Clone the repository
