@@ -15,7 +15,7 @@ jobs:
         sed -i "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD
         cat packages/arch-dotdrop/PKGBUILD
     - name: Publish to aur
-      uses: KSXGitHub/github-actions-deploy-aur@v2.2.3
+      uses: KSXGitHub/github-actions-deploy-aur@v2.2.4
       with:
         pkgname: dotdrop
         pkgbuild: ./packages/arch-dotdrop/PKGBUILD
