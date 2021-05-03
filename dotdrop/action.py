@@ -65,7 +65,6 @@ class Cmd(DictParser):
         action = self.action
         if templater:
             action = self._get_action(templater, debug)
-        cmd = action
         args = self._get_args(templater)
         if debug and args:
             self.log.dbg('action args:')
