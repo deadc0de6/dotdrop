@@ -168,11 +168,12 @@ def _dotfile_compare(opts, dotfile, tmp):
 
     if diff != '':
         # print diff results
-        line = '=> compare {}: diffing with \"{}\"'
-        LOG.log(line.format(dotfile.key, dotfile.dst))
         if opts.compare_fileonly:
-            LOG.raw('<files are different>')
+            line = '=> differ: \"{}\" \"{}\"'.format(dotfile.src, dotfile.dst)
+            LOG.log(line.format(dotfile.key, dotfile.dst))
         else:
+            line = '=> compare {}: diffing with \"{}\"'
+            LOG.log(line.format(dotfile.key, dotfile.dst))
             LOG.emph(diff)
         return False
 
