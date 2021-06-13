@@ -115,6 +115,12 @@ cd ${ddpath} | ${bin} compare -c ${cfg} --verbose
 [ "$?" = "0" ] && exit 1
 set -e
 
+echo "[+] comparing with file-only"
+set +e
+cd ${ddpath} | ${bin} compare -c ${cfg} -L
+[ "$?" = "0" ] && exit 1
+set -e
+
 ## CLEANING
 rm -rf ${basedir} ${tmpd}
 
