@@ -30,8 +30,10 @@ Four types of actions can be defined:
 It is sometimes useful to execute some kind of action
 when deploying a dotfile.
 
-Note that dotfile actions are only
-executed when the dotfile is installed.
+Note that a dotfile's actions are only
+executed when the dotfile is installed (that is when
+the version present in dotdrop differs from the one
+in the filesystem).
 
 For example let's consider
 [Vundle](https://github.com/VundleVim/Vundle.vim) is used
