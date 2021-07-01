@@ -12,7 +12,7 @@ import shutil
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.linktypes import LinkTypes
-import dotdrop.utils as utils
+from dotdrop import utils
 from dotdrop.exceptions import UndefinedException
 
 

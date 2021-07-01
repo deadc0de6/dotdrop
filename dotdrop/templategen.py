@@ -16,9 +16,9 @@ from jinja2.exceptions import UndefinedError
 
 
 # local imports
-import dotdrop.utils as utils
+from dotdrop import utils
+from dotdrop import jhelpers
 from dotdrop.logger import Logger
-import dotdrop.jhelpers as jhelpers
 from dotdrop.exceptions import UndefinedException
 
 BLOCK_START = '{%@@'
