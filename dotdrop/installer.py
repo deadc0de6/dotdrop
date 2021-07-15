@@ -137,7 +137,8 @@ class Installer:
             # symlink
             ret, err = self._link(templater, src, dst,
                                   actionexec=actionexec,
-                                  is_template=is_template)
+                                  is_template=is_template,
+                                  ignore=ignore)
         elif linktype == LinkTypes.LINK_CHILDREN:
             # symlink direct children
             if not isdir:
@@ -162,7 +163,7 @@ class Installer:
         # but not when
         # - error (not r, err)
         # - aborted (not r, err)
-        if (ret or (not ret and not err)):
+        if os.path.exists(dst) and (ret or (not ret and not err)):
             if not chmod:
                 chmod = utils.get_file_perm(src)
             dstperms = utils.get_file_perm(dst)
@@ -242,7 +243,7 @@ class Installer:
     ########################################################
 
     def _link(self, templater, src, dst, actionexec=None,
-              is_template=True):
+              is_template=True, ignore=None):
         """
         install link:link
 
@@ -490,11 +491,6 @@ class Installer:
         # default to nothing installed and no error
         ret = False, None
 
-        # create the directory anyway
-        if not self._create_dirs(dst):
-            err = 'creating directory for {}'.format(dst)
-            return False, err
-
         # handle all files in dir
         for entry in os.listdir(src):
             fpath = os.path.join(src, entry)
@@ -534,6 +530,7 @@ class Installer:
     @classmethod
     def _write_content_to_file(cls, content, src, dst):
         """write content to file"""
+
         if content:
             # write content the file
             try:
