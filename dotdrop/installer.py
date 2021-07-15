@@ -259,7 +259,8 @@ class Installer:
             ret, err = self.install(templater, src, tmp,
                                     LinkTypes.NOLINK,
                                     actionexec=actionexec,
-                                    is_template=is_template)
+                                    is_template=is_template,
+                                    ignore=ignore)
             if not ret and not os.path.exists(tmp):
                 return ret, err
             src = tmp
@@ -324,7 +325,8 @@ class Installer:
                 ret2, err2 = self.install(templater, subsrc, tmp,
                                           LinkTypes.NOLINK,
                                           actionexec=actionexec,
-                                          is_template=is_template)
+                                          is_template=is_template,
+                                          ignore=ignore)
                 if not ret2 and err2 and not os.path.exists(tmp):
                     continue
                 subsrc = tmp
@@ -680,8 +682,6 @@ class Installer:
             self.log.dry('would mkdir -p {}'.format(directory))
             return True
         self.log.dbg('mkdir -p {}'.format(directory))
-        if not self.comparing:
-            self.log.sub('create directory {}'.format(directory))
 
         os.makedirs(directory, exist_ok=True)
         return os.path.exists(directory)
