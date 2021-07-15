@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-set -e
+set -ev
 
 # all this crap to get current path
 rl="readlink -f"
@@ -90,11 +90,11 @@ echo "{{@@ profile @@}}" > ${tmps}/dotfiles/dir1/sub/empty/that.ignore
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 #cat ${cfg}
 
-# checks normal
+# check normal
 [ ! -d ${tmpd}/dir1 ] && exit 1
-[ ! -d ${tmpd}/dir1/empty ] && exit 1
-[ ! -d ${tmpd}/dir1/sub ] && exit 1
-[ ! -d ${tmpd}/dir1/sub/empty ] && exit 1
+[ -d ${tmpd}/dir1/empty ] && exit 1
+[ -d ${tmpd}/dir1/sub ] && exit 1
+[ -d ${tmpd}/dir1/sub/empty ] && exit 1
 [ ! -d ${tmpd}/dir1/not-empty ] && exit 1
 
 [ ! -e ${tmpd}/dir1/not-empty/file ] && exit 1

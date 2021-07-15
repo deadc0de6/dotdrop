@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-set -e
+set -ev
 
 # all this crap to get current path
 rl="readlink -f"
@@ -151,8 +151,7 @@ grep "file" ${tmpd}/dir1/not-empty/file
 [ ! -d ${tmpd}/dir2/not-empty ] && exit 1
 [ ! -h ${tmpd}/dir2/not-empty ] && exit 1
 [ ! -e ${tmpd}/dir2/not-empty/file ] && exit 1
-[ ! -d ${tmpd}/dir2/sub ] && exit 1
-[ ! -h ${tmpd}/dir2/sub ] && exit 1
+[ -d ${tmpd}/dir2/sub ] && exit 1
 [ -d ${tmpd}/dir2/sub/empty ] && exit 1
 [ -e ${tmpd}/dir2/sub/empty/that.ignore ] && exit 1
 grep "p1" ${tmpd}/dir2/not-empty/file
@@ -171,8 +170,6 @@ grep "p1" ${tmpd}/dir3/not-empty/file
 
 # second install won't trigger the action
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V  # 2>&1 | tee ${tmpa}/log
-
-set -e
 
 # check normal
 [ -d ${tmpd}/dir1/empty ] && echo "empty directory not cleaned" && exit 1
