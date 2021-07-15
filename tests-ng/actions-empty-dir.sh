@@ -59,7 +59,7 @@ cfg="${tmps}/config.yaml"
 
 cat > ${cfg} << _EOF
 actions:
-  clearemptydir: find -L '{0}' -empty -type d -delete
+  clearemptydir: find -L '{0}' -empty -xtype d -delete
 config:
   backup: true
   create: true
@@ -82,11 +82,21 @@ dotfiles:
       - clearemptydir ${tmpd}/dir2
     instignore:
       - '*ignore'
+  f_dir3:
+    dst: ${tmpd}/dir3
+    src: dir3
+    link: link
+    ignoreempty: true
+    actions:
+      - clearemptydir ${tmpd}/dir3
+    instignore:
+      - '*ignore'
 profiles:
   p1:
     dotfiles:
     - f_dir1
     - f_dir2
+    - f_dir3
 _EOF
 #cat ${cfg}
 
@@ -110,8 +120,18 @@ mkdir ${tmps}/dotfiles/dir2/sub
 mkdir ${tmps}/dotfiles/dir2/sub/empty
 echo "{{@@ profile @@}}" > ${tmps}/dotfiles/dir2/sub/empty/that.ignore
 
+# create the dotfile
+mkdir ${tmps}/dotfiles/dir3
+mkdir ${tmps}/dotfiles/dir3/empty
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/dir3/empty/this.ignore
+mkdir ${tmps}/dotfiles/dir3/not-empty
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/dir3/not-empty/file
+mkdir ${tmps}/dotfiles/dir3/sub
+mkdir ${tmps}/dotfiles/dir3/sub/empty
+echo "{{@@ profile @@}}" > ${tmps}/dotfiles/dir3/sub/empty/that.ignore
+
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V  # 2>&1 | tee ${tmpa}/log
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
 # checks normal
 [ ! -d ${tmpd}/dir1 ] && exit 1
@@ -137,8 +157,22 @@ grep "file" ${tmpd}/dir1/not-empty/file
 [ -e ${tmpd}/dir2/sub/empty/that.ignore ] && exit 1
 grep "p1" ${tmpd}/dir2/not-empty/file
 
+# checks link
+[ ! -d ${tmpd}/dir3 ] && exit 1
+[ ! -h ${tmpd}/dir3 ] && exit 1
+[ -d ${tmpd}/dir3/empty ] && exit 1
+[ -e ${tmpd}/dir3/empty/this.ignore ] && exit 1
+[ ! -d ${tmpd}/dir3/not-empty ] && exit 1
+[ ! -e ${tmpd}/dir3/not-empty/file ] && exit 1
+[ -d ${tmpd}/dir3/sub ] && exit 1
+[ -d ${tmpd}/dir3/sub/empty ] && exit 1
+[ -e ${tmpd}/dir3/sub/empty/that.ignore ] && exit 1
+grep "p1" ${tmpd}/dir3/not-empty/file
+
 # second install won't trigger the action
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V  # 2>&1 | tee ${tmpa}/log
+
+set -e
 
 # check normal
 [ -d ${tmpd}/dir1/empty ] && echo "empty directory not cleaned" && exit 1
@@ -147,6 +181,10 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V  # 2>&1 | tee ${tmpa}/log
 # check link_children
 [ -d ${tmpd}/dir2/empty ] && echo "empty directory not cleaned" && exit 1
 [ -d ${tmpd}/dir2/sub/empty ] && echo "empty directory not cleaned" && exit 1
+
+# check link
+[ -d ${tmpd}/dir3/empty ] && echo "empty directory not cleaned" && exit 1
+[ -d ${tmpd}/dir3/sub/empty ] && echo "empty directory not cleaned" && exit 1
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${tmpa}
