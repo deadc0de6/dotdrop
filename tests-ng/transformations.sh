@@ -118,6 +118,8 @@ echo ${tokend} > ${tmpx}/a/somefile
 echo ${tokend} > ${tmpx}/b/somefile
 echo ${tokend} > ${tmpx}/c/somefile
 echo ${tokend} > ${tmpx}/a/dir1/otherfile
+# create a fake file to ensure dir is created
+echo ${tokend} > ${tmpx}/a/dir2/token
 tar -cf ${tmps}/dotfiles/ghi -C ${tmpx} .
 rm -rf ${tmpx}
 tar -tf ${tmps}/dotfiles/ghi
