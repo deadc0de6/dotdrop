@@ -1,0 +1,7 @@
+.coverage
+build/
+dist/
+dotdrop.egg-info/
+dotdrop/
+htmlcov/
+tests/
