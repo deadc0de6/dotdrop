@@ -2,11 +2,12 @@
 layout: default
 ---
 
-[Dotdrop](https://github.com/deadc0de6/dotdrop) is a dotfile manager written in Python3
-that provides efficient ways of managing your dotfiles. It is especially powerful when
-it comes to managing those across different hosts.
+[Dotdrop](https://github.com/deadc0de6/dotdrop) is a dotfile manager that provides efficient ways of managing your dotfiles.
+It is especially powerful when it comes to managing those across different hosts.
 
-The main idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different content on different hosts/setups. To achieve this, it uses a templating engine that allows to specify, during the dotfile installation with dotdrop, based on a selected profile, how (with what content) each dotfile will be installed.
+The main idea of dotdrop is to have the ability to store each dotfile only once and deploy them with a different content on different hosts/setups.
+To achieve this, it uses a templating engine that allows to specify, during the dotfile installation with dotdrop, based on a selected profile,
+how (with what content) each dotfile will be installed.
 
 * [✔] **VERSIONED**
 
