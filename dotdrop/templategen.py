@@ -183,7 +183,7 @@ class Templategen:
         path = os.path.normpath(path)
         if not os.path.exists(path):
             raise TemplateNotFound(path)
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf8') as file:
             content = file.read()
         return content
 

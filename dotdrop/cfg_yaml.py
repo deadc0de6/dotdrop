@@ -436,7 +436,7 @@ class CfgYaml:
         if self._debug:
             self._dbg('saving to {}'.format(self._path))
         try:
-            with open(self._path, 'w') as file:
+            with open(self._path, 'w', encoding='utf8') as file:
                 self._yaml_dump(content, file)
         except Exception as exc:
             self._log.err(exc)
@@ -581,9 +581,9 @@ class CfgYaml:
 
         uvars = {}
         if not self._reloading and uvariables:
-            for k, v in uvariables.items():
-                content = userinput(v, debug=self._debug)
-                uvars[k] = content
+            for name, prompt in uvariables.items():
+                content = userinput(prompt, debug=self._debug)
+                uvars[name] = content
 
             if uvars:
                 uvars = uvars.copy()
@@ -1105,7 +1105,7 @@ class CfgYaml:
         if self._debug:
             self._dbg('----------start:{}----------'.format(path))
             cfg = '\n'
-            with open(path, 'r') as file:
+            with open(path, 'r', encoding='utf8') as file:
                 for line in file:
                     cfg += line
             self._dbg(cfg.rstrip())
@@ -1150,7 +1150,7 @@ class CfgYaml:
     @classmethod
     def _yaml_load(cls, path):
         """load from yaml"""
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf8') as file:
             data = yaml()
             data.typ = 'rt'
             content = data.load(file)
