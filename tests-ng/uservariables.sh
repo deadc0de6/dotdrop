@@ -61,6 +61,12 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+variables:
+  var1: abc
+  var2: def
+dynvariables:
+  var1: "echo ghi"
+  var2: "echo jkl"
 uservariables:
   var1: "var1"
   var2: "var2"

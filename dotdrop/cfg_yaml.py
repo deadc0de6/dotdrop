@@ -169,7 +169,7 @@ class CfgYaml:
 
         # parse the "uservariables" block
         uvariables = self._parse_blk_uservariables(self._yaml_dict)
-        self._add_variables(uvariables, template=False)
+        self._add_variables(uvariables, template=False, prio=True)
 
         # now template variables and dynvariables from the same pool
         self._rec_resolve_variables(self.variables)
