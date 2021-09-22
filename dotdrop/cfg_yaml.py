@@ -1308,7 +1308,7 @@ class CfgYaml:
 
         # the included profiles
         inc_profiles = []
-        if self._profile and self._profile in self.profiles.keys():
+        if self._profile and self._profile in self.profiles:
             pentry = self.profiles.get(self._profile)
             inc_profiles = pentry.get(self.key_profile_include, [])
 
