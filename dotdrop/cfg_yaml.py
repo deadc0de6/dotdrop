@@ -33,7 +33,7 @@ from dotdrop.settings import Settings
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import shellrun, uniq_list
+from dotdrop.utils import shellrun, uniq_list, userinput
 from dotdrop.exceptions import YamlException, UndefinedException
 
 
@@ -50,6 +50,7 @@ class CfgYaml:
     key_trans_w = 'trans_write'
     key_variables = 'variables'
     key_dvariables = 'dynvariables'
+    key_uvariables = 'uservariables'
 
     action_pre = 'pre'
     action_post = 'post'
@@ -98,16 +99,19 @@ class CfgYaml:
     allowed_link_val = [lnk_nolink, lnk_link, lnk_children]
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
-    def __init__(self, path, profile=None, addprofiles=None, debug=False):
+    def __init__(self, path, profile=None, addprofiles=None,
+                 reloading=False, debug=False):
         """
         config parser
         @path: config file path
         @profile: the selected profile
         @addprofiles: included profiles
+        @reloading: true when reloading
         @debug: debug flag
         """
         self._path = os.path.abspath(path)
         self._profile = profile
+        self._reloading = reloading
         self._debug = debug
         self._log = Logger(debug=self._debug)
         # config needs to be written
@@ -162,6 +166,10 @@ class CfgYaml:
         # parse the "dynvariables" block
         dvariables = self._parse_blk_dynvariables(self._yaml_dict)
         self._add_variables(dvariables, template=False)
+
+        # parse the "uservariables" block
+        uvariables = self._parse_blk_uservariables(self._yaml_dict)
+        self._add_variables(uvariables, template=False)
 
         # now template variables and dynvariables from the same pool
         self._rec_resolve_variables(self.variables)
@@ -564,6 +572,24 @@ class CfgYaml:
         if self._debug:
             self._debug_dict('dynvariables block', dvariables)
         return dvariables
+
+    def _parse_blk_uservariables(self, dic):
+        """parse the "uservariables" block"""
+        uvariables = self._get_entry(dic,
+                                     self.key_uvariables,
+                                     mandatory=False)
+
+        uvars = {}
+        if not self._reloading and uvariables:
+            for k, v in uvariables.items():
+                content = userinput(v, debug=self._debug)
+                uvars[k] = content
+
+            if uvars:
+                uvars = uvars.copy()
+        if self._debug:
+            self._debug_dict('uservariables block', uvars)
+        return uvars
 
     ########################################################
     # parsing helpers

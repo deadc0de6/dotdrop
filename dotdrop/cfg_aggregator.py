@@ -206,10 +206,11 @@ class CfgAggregator:
     # parsing
     ########################################################
 
-    def _load(self):
+    def _load(self, reloading=False):
         """load lower level config"""
         self.cfgyaml = CfgYaml(self.path,
                                self.profile_key,
+                               reloading=reloading,
                                debug=self.debug)
 
         # settings
@@ -361,7 +362,7 @@ class CfgAggregator:
         self.log.dbg('reloading config')
         olddebug = self.debug
         self.debug = False
-        self._load()
+        self._load(reloading=True)
         self.debug = olddebug
 
     @classmethod
