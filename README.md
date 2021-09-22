@@ -85,7 +85,7 @@ to your dotfiles git tree. Having dotdrop as a submodule guarantees that anywher
 you are cloning your dotfiles git tree from you'll have dotdrop shipped with it.
 
 Below instructions show how to install dotdrop as a submodule. For alternative
-installation instructions (with virtualenv, pypi, aur, snap, etc) see the
+installation instructions see the
 [installation documentation](https://dotdrop.readthedocs.io/en/latest/installation/).
 
 Dotdrop is also available on
@@ -211,8 +211,7 @@ profiles:
 ```
 
 Then adapt any dotfile using the [templating](https://dotdrop.readthedocs.io/en/latest/templating/)
-feature (if needed). For example you might want different fonts sizes on polybar for the different
-hosts:
+feature (if needed). For example you might want different fonts sizes on polybar for each host.
 
 edit `<dotpath>/config/polybar/config`
 ```bash
@@ -225,6 +224,39 @@ font0 = sans:size=14;0
 font1 = "Material Design Icons:style=Regular:size=14;0"
 font2 = "unifont:size=6;0"
 …
+```
+
+You also want to have the correct interface set on the wireless network in
+the polybar config.
+
+Add a [variable](https://dotdrop.readthedocs.io/en/latest/config/#variables)
+to the config file (with below example *home* gets the default `wlan0` value for
+the variable `wifi` while *office* gets `wlp2s0`):
+```yaml
+…
+variables:
+  wifi: "wlan0"
+…
+profiles:
+  home:
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
+    - d_polybar
+  office:
+    dotfiles:
+    - f_xinitrc
+    - d_polybar
+    variables:
+      wifi: "wlp2s0"
+```
+
+Then you can adapt the polybar config file so that the
+variable `wifi` gets correctly replaced during installation
+```bash
+[module/wireless-network]
+type = internal/network
+interface = {{@@ wifi @@}}
 ```
 
 Also the home computer is running [awesomeWM](https://awesomewm.org/)
@@ -249,30 +281,47 @@ exec bspwm
 {%@@ endif @@%}
 ```
 
-The *if branch* on above template examples will define
-which part is deployed based on the
-hostname of the host on which dotdrop is run from
-(or the selected profile).
+Finally you want everything installed with the *office* profile
+to be logged, you thus add an action to the config file:
+```yaml
+…
+actions:
+  loginstall: "echo {{@@ _dotfile_abs_src @@}} installed to {{@@ _dotfile_abs_dst @@}} >> {0}"
+…
+profiles:
+  home:
+    dotfiles:
+    - f_vimrc
+    - f_xinitrc
+    - d_polybar
+  office:
+    dotfiles:
+    - f_xinitrc
+    - d_polybar
+    variables:
+      wifi: "wlp2s0"
+    actions:
+      - loginstall "/tmp/dotdrop-installation.log"
+```
 
 When done, you can install your dotfiles using
 ```bash
 $ dotdrop install
 ```
+
 If you are unsure, you can always run `dotdrop compare` to see
 how your local dotfiles would be updated by dotdrop before running
-`install` or run install with `--dry`.
+`install` or you could run install with `--dry`.
 
 That's it, a single repository with all your dotfiles for your different hosts.
 
-You can then
+For more see the [doc](https://dotdrop.readthedocs.io)
 
 * [create actions](https://dotdrop.readthedocs.io/en/latest/config-details/#entry-actions)
 * [use transformations](https://dotdrop.readthedocs.io/en/latest/config-details/#entry-transformations)
 * [use variables](https://dotdrop.readthedocs.io/en/latest/config/#variables)
 * [symlink dotfiles](https://dotdrop.readthedocs.io/en/latest/config/#symlink-dotfiles)
 * [and more](https://dotdrop.readthedocs.io/en/latest/howto/howto/)
-
-For more options see `dotdrop --help` and the [documentation](https://dotdrop.readthedocs.io).
 
 # Documentation
 
