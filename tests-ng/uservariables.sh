@@ -62,14 +62,14 @@ config:
   create: true
   dotpath: dotfiles
 variables:
-  var1: abc
-  var2: def
+  var4: "variables_var4"
 dynvariables:
-  var1: "echo ghi"
-  var2: "echo jkl"
+  var3: "echo dynvariables_var3"
 uservariables:
   var1: "var1"
   var2: "var2"
+  var3: "var3"
+  var4: "var4"
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -84,14 +84,18 @@ _EOF
 # create the dotfile
 echo "var1: {{@@ var1 @@}}" > ${tmps}/dotfiles/abc
 echo "var2: {{@@ var2 @@}}" >> ${tmps}/dotfiles/abc
+echo "var3: {{@@ var3 @@}}" >> ${tmps}/dotfiles/abc
+echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | echo -e 'var1contentxxx\nvar2contentyyy\n' | ${bin} install -f -c ${cfg} -p p1 -V
+cd ${ddpath} | echo -e 'var1contentxxx\nvar2contentyyy\nvar3\nvar4\n' | ${bin} install -f -c ${cfg} -p p1 -V
 
 cat ${tmpd}/abc
 
 grep '^var1: var1contentxxx$' ${tmpd}/abc >/dev/null
 grep '^var2: var2contentyyy$' ${tmpd}/abc >/dev/null
+grep '^var3: dynvariables_var3$' ${tmpd}/abc >/dev/null
+grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${scr}
