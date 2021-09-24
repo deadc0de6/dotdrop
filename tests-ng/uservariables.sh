@@ -102,13 +102,9 @@ grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
 
 [ ! -e "${tmps}/uservariables.yaml" ] && exit 1
 
-cat > "${tmps}/diff.yaml" << _EOF
-variables:
-  var1: var1contentxxx
-  var2: var2contentyyy
-_EOF
-diff "${tmps}/diff.yaml" "${tmps}/uservariables.yaml"
-
+grep '^variables:' ${tmps}/uservariables.yaml >/dev/null
+grep '^  var1: var1contentxxx$' ${tmps}/uservariables.yaml >/dev/null
+grep '^  var2: var2contentyyy$' ${tmps}/uservariables.yaml >/dev/null
 
 cat > "${tmps}/uservariables.yaml" << _EOF
 variables:
