@@ -43,3 +43,7 @@
 ## Symlink dotfiles
 
 [Symlink dotfiles](symlink-dotfiles.md)
+
+## Prompt user for variables
+
+[Prompt user for variables](prompt-user-for-variables.md)

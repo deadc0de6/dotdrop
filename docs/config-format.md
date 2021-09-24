@@ -45,8 +45,8 @@ The **dotfiles** entry (mandatory) contains a list of dotfiles managed by dotdro
 
 Entry    | Description
 -------- | -------------
-`dst` | where this dotfile needs to be deployed (dotfile with empty `dst` are ignored and considered installed, can use `variables` and `dynvariables`, make sure to quote)
-`src` | dotfile path within the `dotpath` (dotfile with empty `src` are ignored and considered installed, can use `variables` and `dynvariables`, make sure to quote)
+`dst` | where this dotfile needs to be deployed (dotfile with empty `dst` are ignored and considered installed, can use `variables`, make sure to quote)
+`src` | dotfile path within the `dotpath` (dotfile with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
 `link` | define how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) (defaults to value of `link_dotfile_default`)
 `actions` | list of action keys that need to be defined in the **actions** entry below (see [actions](config-details.md#entry-actions))
 `chmod` | defines the file permissions in octal notation to apply during installation (see [permissions](config.md#permissions))
@@ -176,4 +176,15 @@ The **dynvariables** entry (optional) contains a list of interpreted variables
 ```yaml
 dynvariables:
   <variable-name>: <shell-oneliner>
+```
+
+## uservariables entry
+
+The **uservariables** entry (optional) contains a list of variables
+to be queried to the user for their values.
+(see [User variables](config-details.md#entry-uservariables))
+
+```yaml
+uservariables:
+  <variable-name>: <prompt>
 ```

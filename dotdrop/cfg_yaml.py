@@ -33,7 +33,7 @@ from dotdrop.settings import Settings
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.linktypes import LinkTypes
-from dotdrop.utils import shellrun, uniq_list
+from dotdrop.utils import shellrun, uniq_list, userinput
 from dotdrop.exceptions import YamlException, UndefinedException
 
 
@@ -50,9 +50,12 @@ class CfgYaml:
     key_trans_w = 'trans_write'
     key_variables = 'variables'
     key_dvariables = 'dynvariables'
+    key_uvariables = 'uservariables'
 
     action_pre = 'pre'
     action_post = 'post'
+
+    save_uservariables_name = 'uservariables{}.yaml'
 
     # profiles/dotfiles entries
     key_dotfile_src = 'src'
@@ -98,16 +101,19 @@ class CfgYaml:
     allowed_link_val = [lnk_nolink, lnk_link, lnk_children]
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
-    def __init__(self, path, profile=None, addprofiles=None, debug=False):
+    def __init__(self, path, profile=None, addprofiles=None,
+                 reloading=False, debug=False):
         """
         config parser
         @path: config file path
         @profile: the selected profile
         @addprofiles: included profiles
+        @reloading: true when reloading
         @debug: debug flag
         """
         self._path = os.path.abspath(path)
         self._profile = profile
+        self._reloading = reloading
         self._debug = debug
         self._log = Logger(debug=self._debug)
         # config needs to be written
@@ -249,6 +255,12 @@ class CfgYaml:
         # template dotfiles entries
         self._template_dotfiles_entries()
 
+        # parse the "uservariables" block
+        uvariables = self._parse_blk_uservariables(self._yaml_dict,
+                                                   self.variables)
+        self._add_variables(uvariables, template=False, prio=False)
+
+        # end of parsing
         if self._debug:
             self._dbg('########### {} ###########'.format('final config'))
             self._debug_entries()
@@ -428,7 +440,7 @@ class CfgYaml:
         if self._debug:
             self._dbg('saving to {}'.format(self._path))
         try:
-            with open(self._path, 'w') as file:
+            with open(self._path, 'w', encoding='utf8') as file:
                 self._yaml_dump(content, file)
         except Exception as exc:
             self._log.err(exc)
@@ -564,6 +576,41 @@ class CfgYaml:
         if self._debug:
             self._debug_dict('dynvariables block', dvariables)
         return dvariables
+
+    def _parse_blk_uservariables(self, dic, current):
+        """parse the "uservariables" block"""
+        uvariables = self._get_entry(dic,
+                                     self.key_uvariables,
+                                     mandatory=False)
+
+        uvars = {}
+        if not self._reloading and uvariables:
+            try:
+                for name, prompt in uvariables.items():
+                    if name in current:
+                        # ignore if already defined
+                        if self._debug:
+                            self._dbg('ignore uservariables {}'.format(name))
+                        continue
+                    content = userinput(prompt, debug=self._debug)
+                    uvars[name] = content
+            except KeyboardInterrupt as exc:
+                raise YamlException('interrupted') from exc
+
+            if uvars:
+                uvars = uvars.copy()
+        if self._debug:
+            self._debug_dict('uservariables block', uvars)
+
+        # save uservariables
+        if uvars:
+            try:
+                self._save_uservariables(uvars)
+            except YamlException:
+                # ignore
+                pass
+
+        return uvars
 
     ########################################################
     # parsing helpers
@@ -1079,7 +1126,7 @@ class CfgYaml:
         if self._debug:
             self._dbg('----------start:{}----------'.format(path))
             cfg = '\n'
-            with open(path, 'r') as file:
+            with open(path, 'r', encoding='utf8') as file:
                 for line in file:
                     cfg += line
             self._dbg(cfg.rstrip())
@@ -1124,7 +1171,7 @@ class CfgYaml:
     @classmethod
     def _yaml_load(cls, path):
         """load from yaml"""
-        with open(path, 'r') as file:
+        with open(path, 'r', encoding='utf8') as file:
             data = yaml()
             data.typ = 'rt'
             content = data.load(file)
@@ -1282,7 +1329,7 @@ class CfgYaml:
 
         # the included profiles
         inc_profiles = []
-        if self._profile and self._profile in self.profiles.keys():
+        if self._profile and self._profile in self.profiles:
             pentry = self.profiles.get(self._profile)
             inc_profiles = pentry.get(self.key_profile_include, [])
 
@@ -1355,7 +1402,7 @@ class CfgYaml:
         - Checks for path existence, taking in account fatal_not_found.
         This method always returns a list containing only absolute paths
         existing on the filesystem. If the input is not a glob, the list
-        contains at most one element, otheriwse it could hold more.
+        contains at most one element, otherwise it could hold more.
         """
         path, fatal_not_found = self._parse_extended_import_path(path_entry)
         path = self._norm_path(path)
@@ -1515,3 +1562,34 @@ class CfgYaml:
     def _dbg(self, content):
         pre = os.path.basename(self._path)
         self._log.dbg('[{}] {}'.format(pre, content))
+
+    def _save_uservariables(self, uvars):
+        """save uservariables to file"""
+        parent = os.path.dirname(self._path)
+        # find a unique path
+        path = None
+        cnt = 0
+        while True:
+            if cnt == 0:
+                name = self.save_uservariables_name.format('')
+            else:
+                name = self.save_uservariables_name.format('-{}'.format(cnt))
+            cnt += 1
+
+            path = os.path.join(parent, name)
+            if not os.path.exists(path):
+                break
+
+        # save the config
+        content = {'variables': uvars}
+        try:
+            if self._debug:
+                self._dbg('saving uservariables values to {}'.format(path))
+            with open(path, 'w', encoding='utf8') as file:
+                self._yaml_dump(content, file)
+        except Exception as exc:
+            # self._log.err(exc)
+            err = 'error saving uservariables to {}'.format(path)
+            self._log.err(err)
+            raise YamlException(err) from exc
+        self._log.log('uservariables values saved to {}'.format(path))

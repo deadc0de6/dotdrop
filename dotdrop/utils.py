@@ -69,6 +69,20 @@ def shellrun(cmd, debug=False):
     return ret == 0, out
 
 
+def userinput(prompt, debug=False):
+    """
+    get user input
+    return user input
+    """
+    if debug:
+        LOG.dbg('get user input for \"{}\"'.format(prompt), force=True)
+    pre = 'Please provide the value for \"{}\": '.format(prompt)
+    res = input(pre)
+    if debug:
+        LOG.dbg('user input result: {}'.format(res), force=True)
+    return res
+
+
 def fastdiff(left, right):
     """fast compare files and returns True if different"""
     return not filecmp.cmp(left, right, shallow=False)

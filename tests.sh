@@ -6,6 +6,14 @@
 #set -ev
 set -e
 
+# versions
+echo "pylint version:"
+pylint --version
+echo "pycodestyle version:"
+pycodestyle --version
+echo "pyflakes version:"
+pyflakes --version
+
 # PEP8 tests
 which pycodestyle >/dev/null 2>&1
 [ "$?" != "0" ] && echo "Install pycodestyle" && exit 1
@@ -30,6 +38,7 @@ pylint \
   --disable=R0912 \
   --disable=R0911 \
   --disable=R1732 \
+  --disable=C0209 \
   dotdrop/
 
 # retrieve the nosetests binary
@@ -38,6 +47,8 @@ which ${nosebin} >/dev/null 2>&1
 [ "$?" != "0" ] && nosebin="nosetests3"
 which ${nosebin} >/dev/null 2>&1
 [ "$?" != "0" ] && echo "Install nosetests" && exit 1
+echo "nose version:"
+${nosebin} --version
 
 # do not print debugs when running tests (faster)
 export DOTDROP_FORCE_NODEBUG=yes
