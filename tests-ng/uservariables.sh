@@ -61,6 +61,8 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
+  import_variables:
+    - uservariables.yaml:optional
 variables:
   var4: "variables_var4"
 dynvariables:
@@ -88,6 +90,7 @@ echo "var3: {{@@ var3 @@}}" >> ${tmps}/dotfiles/abc
 echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
 
 # install
+echo "step 1"
 cd ${ddpath} | echo -e 'var1contentxxx\nvar2contentyyy\nvar3\nvar4\n' | ${bin} install -f -c ${cfg} -p p1 -V
 
 cat ${tmpd}/abc
@@ -99,12 +102,27 @@ grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
 
 [ ! -e "${tmps}/uservariables.yaml" ] && exit 1
 
-cat > ${tmps}/diff.yaml << _EOF
+cat > "${tmps}/diff.yaml" << _EOF
 variables:
   var1: var1contentxxx
   var2: var2contentyyy
 _EOF
 diff "${tmps}/diff.yaml" "${tmps}/uservariables.yaml"
+
+
+cat > "${tmps}/uservariables.yaml" << _EOF
+variables:
+  var1: editedvar1
+  var2: editedvar2
+_EOF
+
+echo "step 2"
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+
+grep '^var1: editedvar1$' ${tmpd}/abc >/dev/null
+grep '^var2: editedvar2$' ${tmpd}/abc >/dev/null
+grep '^var3: dynvariables_var3$' ${tmpd}/abc >/dev/null
+grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
 
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${scr}
