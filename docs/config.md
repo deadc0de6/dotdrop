@@ -39,6 +39,7 @@ Following variables are available in the config files:
 
 * [variables defined in the config](config-details.md#entry-variables)
 * [interpreted variables defined in the config](config-details.md#entry-dynvariables)
+* [user variables defined in the config](config-details.md#entry-uservariables)
 * [profile variables defined in the config](config-details.md#entry-profile-variables)
 * environment variables: `{{@@ env['MY_VAR'] @@}}`
 * dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
@@ -60,6 +61,8 @@ Here are some rules on the use of variables in configs:
 * profile `(dyn)variables` take precedence over profile's included `(dyn)variables`
 * external/imported `(dyn)variables` take precedence over
   `(dyn)variables` defined inside the main config file
+* [user variables](config-details.md#entry-uservariables) are ignored if
+  any other variable with the same key is defined
 
 ## Permissions
 

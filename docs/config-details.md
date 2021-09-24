@@ -287,6 +287,37 @@ variables:
 
 They have the same properties as [Variables](config.md#variables).
 
+## Entry uservariables
+
+If you want to manually enter variables values, you can use the
+`uservariables` entry. Each variable will be prompted to the user.
+
+For example
+```yaml
+uservariables:
+  emailvar: "email"
+```
+
+will prompt the user to enter a value for the variable `emailvar`:
+```
+Please provide the value for "email":
+```
+
+And store the entered text as the value for the variable `email`.
+The variable can then be used as any other [variables](config.md#variables).
+
+`uservariables` are eventually saved to `uservariables.yaml` (relatively to the
+config file).
+This allow to use the following construct to prompt once for some specific variables and
+then store them in a file. You might also want to add `uservariables.yaml` to your `.gitignore`.
+```yaml
+uservariables:
+  emailvar: "email"
+config:
+  import_variables:
+    - uservariables.yaml:optional
+```
+
 ## Entry profile variables
 
 Profile variables will take precedence over globally defined variables.
