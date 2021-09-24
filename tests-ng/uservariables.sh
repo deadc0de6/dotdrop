@@ -97,6 +97,15 @@ grep '^var2: var2contentyyy$' ${tmpd}/abc >/dev/null
 grep '^var3: dynvariables_var3$' ${tmpd}/abc >/dev/null
 grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
 
+[ ! -e "${tmps}/uservariables.yaml" ] && exit 1
+
+cat > ${tmps}/diff.yaml << _EOF
+variables:
+  var1: var1contentxxx
+  var2: var2contentyyy
+_EOF
+diff "${tmps}/diff.yaml" "${tmps}/uservariables.yaml"
+
 ## CLEANING
 rm -rf ${tmps} ${tmpd} ${scr}
 
