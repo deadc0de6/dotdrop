@@ -1,4 +1,5 @@
 name:           dotdrop
+base:           core18
 adopt-info:     version
 summary:        Save your dotfiles once, deploy them everywhere
 description: |
