@@ -318,6 +318,8 @@ config:
     - uservariables.yaml:optional
 ```
 
+For an example, see [prompt user for variables](howto/prompt-user-for-variables.md)
+
 ## Entry profile variables
 
 Profile variables will take precedence over globally defined variables.
