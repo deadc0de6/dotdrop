@@ -150,6 +150,11 @@ For MacOS users, make sure to install below packages through [homebrew](https://
 * [coreutils](https://formulae.brew.sh/formula/coreutils) (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) which uses realpath)
 * [libmagic](https://formulae.brew.sh/formula/libmagic) (for python-magic)
 
+For WSL (Windows Subsystem for Linux), make sure to install `python-magic-bin`:
+```bash
+pip install python-magic-bin
+```
+
 ## Update dotdrop submodule
 
 If using dotdrop as a submodule, one can control if dotdrop
