@@ -23,9 +23,9 @@ actions:
   post:
     append: "cat {0} >> {1}; rm -f {0}"
 ```
-During installation, the `strip` action is executed before the installation and strips everything from the pattern `# my pattern` to the end of the file. Then the dotfile `somefile` is installed in a temporary location (here `tmpfile`) and finally the post action `append` will append the content of the `tmpfile` to the final dotfile pointed by `somefile_final`
+During installation, the `strip` action is executed before the installation, and it strips everything from the pattern `# my pattern` to the end of the file. Then the dotfile `somefile` is installed in a temporary location (here `tmpfile`) and finally the post action `append` will append the contents of the `tmpfile` to the final dotfile pointed to by `somefile_final`.
 
-Obviously the dotfile in the dotpath should start with a unique pattern (here `# my pattern`):
+Obviously, the dotfile in the dotpath should start with a unique pattern (here `# my pattern`):
 ```
 # my pattern
 this is the end

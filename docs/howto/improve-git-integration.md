@@ -1,6 +1,6 @@
-# Improve git integration
+# Improve Git integration
 
-The below aliases can help with the process of updating your dotfiles between multiple hosts. Add those to your `~/.zshrc` or `~/.bashrc`. You can then simply run `dotsync` to push or pull from your dotfile repository.
+The below aliases can help with the process of updating your dotfiles between multiple hosts. Add them to your `~/.zshrc` or `~/.bashrc`. You can then simply run `dotsync` to push or pull from your dotfile repository.
 
 ```
 # Your dotdrop git repository location
@@ -11,4 +11,4 @@ alias dotgit="git -C $DOTREPO"
 alias dotsync="dotgit pull && dotgit add -A && dotgit commit && dotgit push; dotdrop install"
 ```
 
-Provided by [ReekyMarko](https://github.com/ReekyMarko)
+Provided by [ReekyMarko](https://github.com/ReekyMarko).

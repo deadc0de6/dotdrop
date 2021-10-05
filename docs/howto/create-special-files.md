@@ -1,9 +1,9 @@
 # Create files on install
 
-One way for creating symlinks (or any other special files) is to use a combination of
+One way to create symlinks (or any other special file) is to use a combination of
 [actions](../config-details.md#entry-actions) and a *fake* dotfile.
 
-Let's say for example you have a list of directories you want to link
+Let's say, for example, you have a list of directories you want to link
 from under `~/.original` to `~/symlinks`.
 ```bash
 $ tree ~/.original
@@ -13,19 +13,19 @@ $ tree ~/.original
 └── dir3
 ```
 
-First you would store these directories names in a text file in your `<dotpath>/links.txt`
+First you would store these directory names in a text file in your `<dotpath>/links.txt`:
 ```
 dir1
 dir2
 dir3
 ```
 
-The config file would contain different elements
+The config file would contain different elements:
 
-* a `dynvariables` that will read the above text file
-* a few `variables` for the source and destination
-* an action that will create the destination directory and symlink those directories
-* a *fake* dotfile (with no `src` and no `dst` values) that will be always installed with the above action
+* A `dynvariables` that will read the above text file
+* A few `variables` for the source and destination
+* An action that will create the destination directory and symlink those directories
+* A *fake* dotfile (with no `src` and no `dst` values) that will be always installed with the above action
 
 ```yaml
 dynvariables:
@@ -45,7 +45,7 @@ actions:
       - symlink_them '{{@@ links_list @@}}' '{{@@ links_dst @@}}'
 ```
 
-The result would be
+The result would be:
 ```bash
 $ tree ~/.symlinks
 /home/user/.symlinks
@@ -54,4 +54,4 @@ $ tree ~/.symlinks
 └── dir3 -> /home/user/.original/dir3
 ```
 
-For reference, see [issue 243](https://github.com/deadc0de6/dotdrop/issues/243)
+For reference, see [issue 243](https://github.com/deadc0de6/dotdrop/issues/243).

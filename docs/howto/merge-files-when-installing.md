@@ -1,14 +1,14 @@
 # Merge files on install
 
-Dotdrop allows to merge multiple files into one using the jinja2's `include` directive.
+Dotdrop allows you to merge multiple files into one using Jinja2's `include` directive.
 
-For example let's consider you want to keep your `vimrc` split into multiple parts in dotdrop
+For example, let's assume you want to keep your `.vimrc` split into multiple parts in dotdrop:
 * `<dotpath>/vimrc.d/top`: top part of the file
 * `<dotpath>/vimrc.d/bottom`: bottom part of the file
 
-And you want dotdrop to merge all those files into `~/.vimrc` whenever you process your vimrc with dotdrop.
+And you want dotdrop to merge all those files into `~/.vimrc` whenever you process your .vimrc with dotdrop.
 
-First make sure `~/.vimrc` is present in your config file
+First make sure `~/.vimrc` is present in your config file:
 ```yaml
 ...
 dotfiles:
@@ -49,7 +49,7 @@ Dotdrop will then automagically include the files into your vimrc when handling 
 
 To include all files in a directory, a combination of
 [dynvariables](../config-details.md#entry-dynvariables)
-and [jinja2 directives](https://jinja.palletsprojects.com/en/2.11.x/) have to be used.
+and [Jinja2 directives](https://jinja.palletsprojects.com/en/2.11.x/) have to be used.
 
 Let's say all files in `<dotpath>/toinclude` need to be included into a dotfile.
 
@@ -61,9 +61,9 @@ dynvariables:
 ```
 
 Note that `_dotdrop_dotpath` is part of the built-in variables
-(for more see [template variables](../templating.md#template-variables)).
+(For more, see [template variables](../templating.md#template-variables)).
 
-And then use the generated list in the dotfile template:
+Then use the generated list in the dotfile template:
 ```
 {%@@ for f in allfiles.split() @@%}
   {%@@ include f @@%}

@@ -8,7 +8,7 @@ The provided values are then automatically saved by dotdrop to `uservariables.ya
 which can be included in the main config as a file from which variables are imported
 using [import_variables](../config-details.md#entry-import_variables).
 
-Let's say for example that you want to provide manually the email value
+Let's say, for example, that you want to manually provide the email value
 on new hosts you deploy your dotfiles to.
 
 You'd add the following elements to your config:

@@ -1,6 +1,6 @@
 # Handle compressed directories
 
-This is an example on how to use transformations (`trans_read` and `trans_write`) to store
+This is an example of how to use transformations (`trans_read` and `trans_write`) to store
 compressed directories and deploy them with dotdrop.
 
 Config file:
@@ -25,12 +25,12 @@ profiles:
     - d_somedir
 ```
 
-The *read* transformation `uncompress` is used to execute below command before deploying the dotfile (where `{0}` is the source and `{1}` the destination)
+The *read* transformation `uncompress` is used to execute the below command before deploying the dotfile (where `{0}` is the source and `{1}` the destination):
 ```
 mkdir -p {1} && tar -xf {0} -C {1}
 ```
 
-And the *write* transformation `compress` is run when updating the dotfile directory by compressing it (where `{0}` is the source and `{1}` the destination)
+And the *write* transformation `compress` is run when updating the dotfile directory by compressing it (where `{0}` is the source and `{1}` the destination):
 ```
 tar -cf {1} -C {0} .
 ```

@@ -1,4 +1,4 @@
-# HowTo
+# How To
 
 ## Append text to a dotfile on install
 
@@ -20,13 +20,13 @@
 
 [Handle special chars](special-chars.md)
 
-## Improve git integration
+## Improve Git integration
 
-[Improve git integration](improve-git-integration.md)
+[Improve Git integration](improve-git-integration.md)
 
-## Include file or template in template
+## Include files or templates in templates
 
-[Include file or template in template](include-in-template.md)
+[Include files or templates in templates](include-in-template.md)
 
 ## Manage system dotfiles
 

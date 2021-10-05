@@ -1,65 +1,65 @@
 # Config format
 
-Dotdrop config file uses [yaml](https://yaml.org/) syntax.
+The dotdrop config file uses [YAML](https://yaml.org/) syntax.
 
 Here is a minimal config file to start with:
 [config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
 
 ## config entry
 
-The **config** entry (mandatory) contains settings for the deployment
+The **config** entry (mandatory) contains settings for the deployment.
 
 Entry    | Description | Default
 -------- | ------------- | ------------
-`backup` | create a backup of the dotfile in case it differs from the one that will be installed by dotdrop  | true
-`banner` | display the banner  | true
-`cmpignore` | list of patterns to ignore when comparing, apply to all dotfiles (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
-`create` | create directory hierarchy when installing dotfiles if it doesn't exist | true
-`default_actions` | list of action's keys to execute for all installed dotfile (see [actions](config-details.md#entry-actions)) | -
-`diff_command` | the diff command to use for diffing files | `diff -r -u {0} {1}`
-`dotpath` | path to the directory containing the dotfiles to be managed by dotdrop (absolute path or relative to the config file location) | `dotfiles`
-`filter_file` | list of paths to load templating filters from (see [Templating available filters](templating.md#template-filters)) | -
-`force_chmod` | if true, do not ask confirmation to apply permissions on install | false
-`func_file` | list of paths to load templating functions from (see [Templating available methods](templating.md#template-methods)) | -
-`ignore_missing_in_dotdrop` | ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing)) | false
-`ignoreempty` | do not deploy template if empty | false
-`impignore` | list of patterns to ignore when importing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
-`import_actions` | list of paths to load actions from (absolute path or relative to the config file location, see [Import actions from file](config-details.md#entry-import_actions)) | -
-`import_configs` | list of config file paths to be imported in the current config (absolute path or relative to the current config file location, see [Import config files](config-details.md#entry-import_configs)) | -
-`import_variables` | list of paths to load variables from (absolute path or relative to the config file location see [Import variables from file](config-details.md#entry-import_variables)) | -
-`instignore` | list of patterns to ignore when installing, apply to all dotfiles (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
-`keepdot` | preserve leading dot when importing hidden file in the `dotpath` | false
-`link_dotfile_default` | set dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
-`link_on_import` | set dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
-`longkey` | use long keys for dotfiles when importing (see [Import dotfiles](usage.md#import-dotfiles)) | false
-`minversion` | (*for internal use, do not modify*) provides the minimal dotdrop version to use | -
-`showdiff` | on install show a diff before asking to overwrite (see `--showdiff`) | false
-`template_dotfile_default` | disable templating on all dotfiles when set to false | true
-`upignore` | list of patterns to ignore when updating, apply to all dotfiles (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns)) | -
-`workdir` | path to the directory where templates are installed before being symlinked when using `link:link` or `link:link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
-<s>link_by_default</s> | when importing a dotfile set `link` to that value per default | false
+`backup` | Create a backup of the dotfile in case it differs from the one that will be installed by dotdrop  | true
+`banner` | Display the banner  | true
+`cmpignore` | List of patterns to ignore when comparing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
+`create` | Create a directory hierarchy when installing dotfiles if it doesn't exist | true
+`default_actions` | List of action keys to execute for all installed dotfiles (See [actions](config-details.md#actions-entry)) | -
+`diff_command` | The diff command to use for diffing files | `diff -r -u {0} {1}`
+`dotpath` | Path to the directory containing the dotfiles to be managed by dotdrop (absolute path or relative to the config file location) | `dotfiles`
+`filter_file` | List of paths to load templating filters from (See [Templating available filters](templating.md#template-filters)) | -
+`force_chmod` | If true, do not ask confirmation to apply permissions on install | false
+`func_file` | List of paths to load templating functions from (See [Templating available methods](templating.md#template-methods)) | -
+`ignore_missing_in_dotdrop` | Ignore missing files in dotdrop when comparing and importing (See [Ignore missing](usage.md#ignore-missing)) | false
+`ignoreempty` | Do not deploy template if empty | false
+`impignore` | List of patterns to ignore when importing (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
+`import_actions` | List of paths to load actions from (absolute path or relative to the config file location; see [Import actions from file](config-details.md#import_actions-entry)) | -
+`import_configs` | List of config file paths to be imported into the current config (absolute paths or relative to the current config file location; see [Import config files](config-details.md#import_configs-entry)) | -
+`import_variables` | List of paths to load variables from (absolute paths or relative to the config file location; see [Import variables from file](config-details.md#import_variables-entry)) | -
+`instignore` | List of patterns to ignore when installing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
+`keepdot` | Preserve leading dot when importing hidden file in the `dotpath` | false
+`link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (See [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
+`link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
+`longkey` | Use long keys for dotfiles when importing (See [Import dotfiles](usage.md#import-dotfiles)) | false
+`minversion` | (*for internal use, do not modify*) Provides the minimal dotdrop version to use | -
+`showdiff` | On install, show a diff before asking to overwrite (See `--showdiff`) | false
+`template_dotfile_default` | Disable templating on all dotfiles when set to false | true
+`upignore` | List of patterns to ignore when updating, appled to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
+`workdir` | Path to the directory where templates are installed before being symlinked when using `link:link` or `link:link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
+<s>link_by_default</s> | When importing a dotfile, set `link` to this value by default | false
 
 ## dotfiles entry
 
-The **dotfiles** entry (mandatory) contains a list of dotfiles managed by dotdrop
+The **dotfiles** entry (mandatory) contains a YAML object with subobjects for the dotfiles managed by dotdrop.  The entries in the subobjects are as follows:
 
 Entry    | Description
 -------- | -------------
-`dst` | where this dotfile needs to be deployed (dotfile with empty `dst` are ignored and considered installed, can use `variables`, make sure to quote)
-`src` | dotfile path within the `dotpath` (dotfile with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
-`link` | define how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (see [Symlinking dotfiles](config.md#symlink-dotfiles)) (defaults to value of `link_dotfile_default`)
-`actions` | list of action keys that need to be defined in the **actions** entry below (see [actions](config-details.md#entry-actions))
-`chmod` | defines the file permissions in octal notation to apply during installation (see [permissions](config.md#permissions))
-`cmpignore` | list of patterns to ignore when comparing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
-`ignore_missing_in_dotdrop` | ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing))
-`ignoreempty` | if true empty template will not be deployed (defaults to value of `ignoreempty`)
-`instignore` | list of patterns to ignore when installing (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
-`template` | if false disable template for this dotfile (defaults to value of `template_dotfile_default`)
-`trans_read` | transformation key to apply when installing this dotfile (must be defined in the **trans_read** entry below, see [transformations](config-details.md#entry-transformations))
-`trans_write` | transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below, see [transformations](config-details.md#entry-transformations))
-`upignore` | list of patterns to ignore when updating (enclose in quotes when using wildcards, see [ignore patterns](config.md#ignore-patterns))
-<s>link_children</s> | replaced by `link: link_children`
-<s>trans</s> | replaced by `trans_read`
+`dst` | Where this dotfile needs to be deployed (dotfiles with empty `dst` are ignored and considered installed, can use `variables`, make sure to quote)
+`src` | Dotfile path within the `dotpath` (dotfiles with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
+`link` | Defines how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (See [Symlinking dotfiles](config.md#symlink-dotfiles)) (defaults to value of `link_dotfile_default`)
+`actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-details.md#actions-entry))
+`chmod` | Defines the file permissions in octal notation to apply during installation (See [permissions](config.md#permissions))
+`cmpignore` | List of patterns to ignore when comparing (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns))
+`ignore_missing_in_dotdrop` | Ignore missing files in dotdrop when comparing and importing (see [Ignore missing](usage.md#ignore-missing))
+`ignoreempty` | If true, an empty template will not be deployed (defaults to the value of `ignoreempty`)
+`instignore` | List of patterns to ignore when installing (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns))
+`template` | If false, disable templating for this dotfile (defaults to the value of `template_dotfile_default`)
+`trans_read` | Transformation key to apply when installing this dotfile (must be defined in the **trans_read** entry below; see [transformations](config-details.md#transformations-entry))
+`trans_write` | Transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below; see [transformations](config-details.md#transformations-entry))
+`upignore` | List of patterns to ignore when updating (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns))
+<s>link_children</s> | Replaced by `link: link_children`
+<s>trans</s> | Replaced by `trans_read`
 
 ```yaml
 <dotfile-key-name>:
@@ -84,17 +84,16 @@ Entry    | Description
 
 ## profiles entry
 
-The **profiles** entry (mandatory) contains a list of profiles with the different dotfiles that
-  need to be managed
+The **profiles** entry (mandatory) contains a YAML object with subobjects for the profiles for the different dotfiles that need to be managed.  The entries in the subobjects are as follows:
 
 Entry    | Description
 -------- | -------------
-`dotfiles` | the dotfiles associated to this profile
-`import` | list of paths containing dotfiles keys for this profile (absolute path or relative to the config file location, see [Import profile dotfiles from file](config-details.md#entry-profile-import)).
-`include` | include all elements (dotfiles, actions, (dyn)variables, etc) from another profile (see [Include dotfiles from another profile](config-details.md#entry-profile-include))
-`variables` | profile specific variables (see [Variables](config.md#variables))
-`dynvariables` | profile specific interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables))
-`actions` | list of action keys that need to be defined in the **actions** entry below (see [actions](config-details.md#entry-actions))
+`dotfiles` | The dotfiles associated with this profile
+`import` | List of paths containing dotfile keys for this profile (absolute path or relative to the config file location; see [Import profile dotfiles from file](config-details.md#profile-import-entry)).
+`include` | Include all elements (dotfiles, actions, (dyn)variables, etc) from another profile (See [Include dotfiles from another profile](config-details.md#profile-include-entry))
+`variables` | Profile-specific variables (See [Variables](config.md#variables))
+`dynvariables` | Profile-specific interpreted variables (See [Interpreted variables](config-details.md#dynvariables-entry))
+`actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-details.md#actions-entry))
 
 ```yaml
 <some-profile-name-usually-the-hostname>:
@@ -120,21 +119,21 @@ Entry    | Description
 
 ## actions entry
 
-The **actions** entry (optional) contains a list of actions (see [actions](config-details.md#entry-actions))
+The **actions** entry (optional) contains an actions mapping (See [actions](config-details.md#actions-entry)).
 
 ```yaml
 actions:
   <action-key>: <command-to-execute>
 ```
 
-*pre* actions
+*pre* actions:
 ```yaml
 actions:
   pre:
     <action-key>: <command-to-execute>
 ```
 
-*post* actions
+*post* actions:
 ```yaml
 actions:
   post:
@@ -143,7 +142,7 @@ actions:
 
 ## trans_read entry
 
-The **trans_read** entry (optional) contains a list of transformations (see [transformations](config-details.md#entry-transformations))
+The **trans_read** entry (optional) contains a transformations mapping (See [transformations](config-details.md#transformations-entry)).
 
 ```yaml
 trans_read:
@@ -152,7 +151,7 @@ trans_read:
 
 ## trans_write entry
 
-The **trans_write** entry (optional) contains a list of write transformations (see [transformations](config-details.md#entry-transformations))
+The **trans_write** entry (optional) contains a write transformations mapping (See [transformations](config-details.md#transformations-entry)).
 
 ```yaml
 trans_write:
@@ -161,7 +160,7 @@ trans_write:
 
 ## variables entry
 
-The **variables** entry (optional) contains a list of variables (see [variables](config.md#variables))
+The **variables** entry (optional) contains a variables mapping (See [variables](config.md#variables)).
 
 ```yaml
 variables:
@@ -170,8 +169,8 @@ variables:
 
 ## dynvariables entry
 
-The **dynvariables** entry (optional) contains a list of interpreted variables
-(see [Interpreted variables](config-details.md#entry-dynvariables))
+The **dynvariables** entry (optional) contains an interpreted variables mapping
+(See [Interpreted variables](config-details.md#dynvariables-entry)).
 
 ```yaml
 dynvariables:
@@ -180,9 +179,9 @@ dynvariables:
 
 ## uservariables entry
 
-The **uservariables** entry (optional) contains a list of variables
-to be queried to the user for their values.
-(see [User variables](config-details.md#entry-uservariables))
+The **uservariables** entry (optional) contains a collection of variables
+whose values are queried from the user
+(See [User variables](config-details.md#uservariables-entry)).
 
 ```yaml
 uservariables:

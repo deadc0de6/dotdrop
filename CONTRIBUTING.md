@@ -1,147 +1,147 @@
-Content
+Contents
 
-* [code base](#code-base)
-* [config parsing](#config-parsing)
-  * [lower layer](#lower-layer)
-  * [higher layer](#higher-layer)
+* [Code base](#code-base)
+* [Config parsing](#config-parsing)
+  * [Lower layer](#lower-layer)
+  * [Higher layer](#higher-layer)
   * [Precedence](#precedence)
-  * [variables resolution](#variables-resolution)
-  * [rules](#rules)
-* [testing](#testing)
-  * [testing with unittest](#testing-with-unittest)
-  * [testing with bash scripts](#testing-with-bash-scripts)
-* [documentation](#documentation)
+  * [Variable resolution](#variable-resolution)
+  * [Rules](#rules)
+* [Testing](#testing)
+  * [Testing with unittest](#testing-with-unittest)
+  * [Testing with bash scripts](#testing-with-bash-scripts)
+* [Documentation](#documentation)
 
 Thanks for helping out!
 
-Feature requests, bug reports and PRs are always welcome!
+Feature requests, bug reports, and PRs are always welcome!
 
 This file provides a few pointers on how to contribute to dotdrop
-and where to find information. For any question, feel free to open an issue.
+and where to find information. For any questions, feel free to open an issue.
 
-For PR adding new features, I'd be very thankful if you could add either
+For PRs adding new features, I'd be very thankful if you could add either
 a unittest for the added feature or a bash script test (see [testing](#testing)), thanks!
 
-# code base
+# Code base
 
 Dotdrop's code base is located in the [dotdrop directory](/dotdrop).
 
-Here's an overview of the different files and their role:
+Here's an overview of the different files and their roles:
 
-* **action.py**: represent the actions and transformations
+* **action.py**: represents the actions and transformations
 * **cfg_yaml.py**: the lower level config parser (see [lower layer](#lower-layer))
 * **cfg_aggregator.py**: the higher level config parser (see [higher layer](#higher-layer))
 * **comparator.py**: the class handling the comparison for `compare`
 * **dictparser.py**: abstract class for parsing dictionaries
-* **dotdrop.py**: the entry point and where the different cli commands are executed
+* **dotdrop.py**: the entry point and where the different CLI commands are executed
 * **dotfile.py**: represent a dotfile
 * **installer.py**: the class handling the installation of dotfile for `install`
-* **jhelpers.py**: list of methods available in templates with jinja2
+* **jhelpers.py**: list of methods available in templates with Jinja2
 * **linktypes.py**: enum for the three types of linking (none, symlink, children)
 * **logger.py**: the custom logger
 * **options.py**: the class embedding all the different options across dotdrop
-* **profile.py**: represent a profile
-* **settings.py**: represent the config settings
-* **templategen.py**: the jinja2 templating class
+* **profile.py**: represents a profile
+* **settings.py**: represents the config settings
+* **templategen.py**: the Jinja2 templating class
 * **updater.py**: the class handling the update of dotfiles for `update`
 * **utils.py**: some useful methods used across the code base
 
-# config parsing
+# Config parsing
 
-The configuration file (yaml) is parsed using two layers:
+The configuration file (YAML) is parsed using two layers:
 
-  * first in the lower layer in [cfg_yaml.py](/dotdrop/cfg_yaml.py)
-  * then in the higher layer in [cfg_aggregator.py](/dotdrop/cfg_aggregator.py)
+  * First in the lower layer in [cfg_yaml.py](/dotdrop/cfg_yaml.py)
+  * Then in the higher layer in [cfg_aggregator.py](/dotdrop/cfg_aggregator.py)
 
 Only the higher layer is accessible to other classes of dotdrop.
 
-## lower layer
+## Lower layer
 
-This is done in [cfg_yaml.py](/dotdrop/cfg_yaml.py)
+This is done in [cfg_yaml.py](/dotdrop/cfg_yaml.py).
 
-The lower layer part is only taking care of basic types
+The lower layer part only takes care of basic types
 and does the following:
-  * normalize all config entries
-    * resolve paths (dotfiles src, dotpath, etc)
-    * refactor actions/transformations to a common format
-    * etc
-  * import any data from external files (configs, variables, etc)
-  * apply variable substitutions
-  * complete any data if needed (add the "profile" variable, etc)
-  * execute intrepreted variables through the shell
-  * write new entries (dotfile, profile) into the dictionary and save it to a file
-  * fix any deprecated entries (link_by_default, etc)
-  * clear empty entries
+  * Normalize all config entries
+    * Resolve paths (dotfiles src, dotpath, etc)
+    * Refactor actions/transformations to a common format
+    * Etc.
+  * Import any data from external files (configs, variables, etc)
+  * Apply variable substitutions
+  * Complete any data if needed (add the "profile" variable, etc)
+  * Execute intrepreted variables through the shell
+  * Write new entries (dotfile, profile) into the dictionary and save it to a file
+  * Fix any deprecated entries (link_by_default, etc)
+  * Clear empty entries
 
-In the end it builds a cleaned and normalized dictionary to be accessed by the higher layer.
+In the end, it builds a cleaned and normalized dictionary to be accessed by the higher layer.
 
-## higher layer
+## Higher layer
 
-This is done in [cfg_aggregator.py](/dotdrop/cfg_aggregator.py)
+This is done in [cfg_aggregator.py](/dotdrop/cfg_aggregator.py).
 
 The higher layer will transform the dictionary parsed by the lower layer
 into objects (profiles, dotfiles, actions, transformations, etc).
-The higher layer has no notion of inclusion (profile included for example) or
-file importing (import actions, etc) or even interpreted variables
+The higher layer has no notion of inclusion (profile included, for example) or
+file importing (import actions etc.) or even interpreted variables
 (it only sees variables that have already been interpreted).
 
 It does the following:
-  * transform dictionaries into objects
-  * patch list of keys with its corresponding object (for example dotfile's actions)
-  * provide getters for every other classes of dotdrop needing to access elements
+  * Transform dictionaries into objects
+  * Patch lists of keys with their corresponding objects (For example, dotfile's actions)
+  * Provide getters for every dotdrop class that needs to access elements
 
-Note that any change to the yaml dictionary (adding a new profile or a new dotfile for
+Note that any changes to the YAML dictionary (adding a new profile or a new dotfile for
 example) won't be *seen* by the higher layer until the config is reloaded. Consider the
 `dirty` flag as a sign the file needs to be written and its representation in higher
 levels in not accurate anymore.
 
-## precedence
+## Precedence
 
 * `dynvariables` > `variables`
-* profile `(dyn)variables` > any other `(dyn)variables`
-* profile `(dyn)variables` > profile's included `(dyn)variables`
-* imported `variables`/`dynvariables` > `(dyn)variables`
+* Profile `(dyn)variables` > any other `(dyn)variables`
+* Profile `(dyn)variables` > profile's included `(dyn)variables`
+* Imported `variables`/`dynvariables` > `(dyn)variables`
 
-## variables resolution
+## Variable resolution
 
-How variables are resolved (through jinja2's
+How variables are resolved (through Jinja2's
 templating) in the config file.
 
-* resolve main config file variables
-  * merge `variables` and `dynvariables` (allowing cycling reference)
-  * recursively template merged `variables` and `dynvariables`
+* Resolve main config file variables
+  * Merge `variables` and `dynvariables` (allowing cyclic references)
+  * Recursively template merged `variables` and `dynvariables`
   * `dynvariables` are executed
-  * profile's `variables` and `dynvariables` are merged
-* resolve *included* entries (see below)
-  * paths and entries are templated
-    (allows to use something like `include {{@@ os @@}}.variables.yaml`)
+  * Profile's `variables` and `dynvariables` are merged
+* Resolve *included* entries (see below)
+  * Paths and entries are templated
+    (allows using something like `include {{@@ os @@}}.variables.yaml`)
 * *included* entries are processed
   * dyn-/variables are all resolved in their own file
 
-potential *included* entries
+Potential *included* entries:
 
-* entry *import_actions*
-* entry *import_configs*
-* entry *import_variables*
-* profile's *import*
-* profile's *include*
+* Entry *import_actions*
+* Entry *import_configs*
+* Entry *import_variables*
+* Profile's *import*
+* Profile's *include*
 
 Variables are then used to resolve different elements in the config file:
-see [this](docs/config.md#variables)
+see [this](docs/config.md#variables).
 
-## rules
+## Rules
 
 * `dynvariables` are executed in their own config file
-* since `variables` and `dynvariables` are templated before the `dynvariables`
-  are executed, this means that `dynvariables` can safely reference `variables` however
-  `variables` referencing `dynvariables` will result with the *not-executed* value of the
-  referenced `dynvariables` (see examples below)
-* profile cannot include profiles defined above in the import tree
-* config files do not have access to variables defined above in the import tree
-* actions/transformations using variables are resolved at runtime
-  (when action/transformation is executed) and not when loading the config
+* Since `variables` and `dynvariables` are templated before the `dynvariables`
+  are executed, this means that `dynvariables` can safely reference `variables`; however,
+  `variables` referencing `dynvariables` will result in the *not-executed* value of the
+  referenced `dynvariables` (see examples below).
+* Profiles cannot include profiles defined above in the import tree
+* Config files do not have access to variables defined above in the import tree
+* Actions/transformations using variables are resolved at runtime
+  (when the action/transformation is executed) and not when loading the config
 
-This will result with `dvar0 = "test"` and `var0 = "echo test"` (**not** `var0 = test`)
+This will result in `dvar0 = "test"` and `var0 = "echo test"` (**not** `var0 = test`):
 ```yaml
 variables:
   var0: "{{@@ dvar0 @@}}"
@@ -149,7 +149,7 @@ dynvariables:
   dvar0: "echo test"
 ```
 
-This will result with `dvar0 = "test"` and `var0 = "test"`
+This will result in `dvar0 = "test"` and `var0 = "test"`:
 ```yaml
 variables:
   var0: "test"
@@ -158,31 +158,31 @@ dynvariables:
 ```
 
 
-# testing
+# Testing
 
 Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.
 
-* test for PEP8 compliance with `pycodestyle` and `pyflakes`
-* run the unittest available in [tests directory](/tests)
-* run the bash script tests in [tests-ng directory](tests-ng)
+* Test for PEP8 compliance with `pycodestyle` and `pyflakes`
+* Run the unittest available in [tests directory](/tests)
+* Run the bash script tests in [tests-ng directory](tests-ng)
 
-## testing with unittest
+## Testing with unittest
 
-All unittests are available in [tests directory](/tests)
-and use [python unittest](https://docs.python.org/3/library/unittest.html).
+All unittests are available in [the tests directory](/tests)
+and use [Python's unittest](https://docs.python.org/3/library/unittest.html).
 
 The file [helpers.py](/tests/helpers.py) provides different helper methods
 for the tests.
 
-## testing with bash scripts
+## Testing with bash scripts
 
 The bash scripts are available in [tests-ng directory](tests-ng).
 These test entire workflows by simulating the use of dotdrop from end to end
 for different use-cases (usually described in their filename or in the file header).
 
-Each script starts with the same boiler plate code that you can paste at the
+Each script starts with the same boilerplate code that you can paste at the
 start of your new test (see the head of the file down to `# this is the test`).
 
-# documentation
+# Documentation
 
 Dotdrop documentation is available under [https://dotdrop.readthedocs.io/](https://dotdrop.readthedocs.io/).
