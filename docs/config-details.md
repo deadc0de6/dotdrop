@@ -365,7 +365,7 @@ profiles:
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
 For more advanced use-cases, variables
-([variables](config.md#variables) and [dynvariables](#entry-dynvariables))
+([variables](config.md#variables) and [dynvariables](#dynvariables-entry))
 can be used to specify the profile to include in a profile:
 
 For example:

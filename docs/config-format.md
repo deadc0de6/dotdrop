@@ -29,8 +29,8 @@ Entry    | Description | Default
 `import_variables` | List of paths to load variables from (absolute paths or relative to the config file location; see [Import variables from file](config-details.md#import_variables-entry)) | -
 `instignore` | List of patterns to ignore when installing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
 `keepdot` | Preserve leading dot when importing hidden file in the `dotpath` | false
-`link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (See [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
-`link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlink-dotfiles)) | `nolink`
+`link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (See [Symlinking dotfiles](config.md#symlinking-dotfiles)) | `nolink`
+`link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlinking-dotfiles)) | `nolink`
 `longkey` | Use long keys for dotfiles when importing (See [Import dotfiles](usage.md#import-dotfiles)) | false
 `minversion` | (*for internal use, do not modify*) Provides the minimal dotdrop version to use | -
 `showdiff` | On install, show a diff before asking to overwrite (See `--showdiff`) | false
@@ -47,7 +47,7 @@ Entry    | Description
 -------- | -------------
 `dst` | Where this dotfile needs to be deployed (dotfiles with empty `dst` are ignored and considered installed, can use `variables`, make sure to quote)
 `src` | Dotfile path within the `dotpath` (dotfiles with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
-`link` | Defines how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (See [Symlinking dotfiles](config.md#symlink-dotfiles)) (defaults to value of `link_dotfile_default`)
+`link` | Defines how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (See [Symlinking dotfiles](config.md#symlinking-dotfiles)) (defaults to value of `link_dotfile_default`)
 `actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-details.md#actions-entry))
 `chmod` | Defines the file permissions in octal notation to apply during installation (See [permissions](config.md#permissions))
 `cmpignore` | List of patterns to ignore when comparing (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns))

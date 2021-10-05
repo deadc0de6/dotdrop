@@ -2,7 +2,7 @@
 
 Sometimes it might be useful to be able to append some text to a
 file. Dotdrop is able to do that with the help of
-[actions](../config-details.md#entry-actions) and a temporary file.
+[actions](../config-details.md#actions-entry) and a temporary file.
 
 Below is a config example to append to a file:
 ```yaml

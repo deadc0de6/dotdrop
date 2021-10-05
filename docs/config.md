@@ -37,10 +37,10 @@ but those are resolved when the action/transformation is executed
 
 The following variables are available in the config files:
 
-* [Variables defined in the config](config-details.md#entry-variables)
-* [Interpreted variables defined in the config](config-details.md#entry-dynvariables)
-* [User variables defined in the config](config-details.md#entry-uservariables)
-* [Profile variables defined in the config](config-details.md#entry-profile-variables)
+* [Variables defined in the config](config-details.md#variables-entry)
+* [Interpreted variables defined in the config](config-details.md#dynvariables-entry)
+* [User variables defined in the config](config-details.md#uservariables-entry)
+* [Profile variables defined in the config](config-details.md#profile-variables-entry)
 * Environment variables: `{{@@ env['MY_VAR'] @@}}`
 * Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
 
@@ -51,17 +51,17 @@ then be available during [templating](templating.md).
 
 Here are some rules on the use of variables in configs:
 
-* [Interpreted variables](config-details.md#entry-dynvariables) are executed in their own file.
-* [Interpreted variables](config-details.md#entry-dynvariables) and
-  [variables](config-details.md#entry-variables) are templated before
-  [interpreted variables](config-details.md#entry-dynvariables) are executed.
+* [Interpreted variables](config-details.md#dynvariables-entry) are executed in their own file.
+* [Interpreted variables](config-details.md#dynvariables-entry) and
+  [variables](config-details.md#variables-entry) are templated before
+  [interpreted variables](config-details.md#dynvariables-entry) are executed.
 * Config files do not have access to variables defined above in the import tree.
 * `dynvariables` take precedence over `variables`.
 * Profile `(dyn)variables` take precedence over any other `(dyn)variables`.
 * Profile `(dyn)variables` take precedence over profile's included `(dyn)variables`.
 * External/imported `(dyn)variables` take precedence over
   `(dyn)variables` defined inside the main config file.
-* [User variables](config-details.md#entry-uservariables) are ignored if
+* [User variables](config-details.md#uservariables-entry) are ignored if
   any other variable with the same key is defined.
 
 ## Permissions

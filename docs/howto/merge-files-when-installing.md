@@ -48,12 +48,12 @@ Dotdrop will then automagically include the files into your vimrc when handling 
 ## Merge all files in a directory
 
 To include all files in a directory, a combination of
-[dynvariables](../config-details.md#entry-dynvariables)
+[dynvariables](../config-details.md#dynvariables-entry)
 and [Jinja2 directives](https://jinja.palletsprojects.com/en/2.11.x/) have to be used.
 
 Let's say all files in `<dotpath>/toinclude` need to be included into a dotfile.
 
-First define a [dynvariables](../config-details.md#entry-dynvariables)
+First define a [dynvariables](../config-details.md#dynvariables-entry)
 in the config file which will look for files to include in the above directory:
 ```yaml
 dynvariables:
