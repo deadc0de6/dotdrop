@@ -1,17 +1,13 @@
 from setuptools import setup, find_packages
-from codecs import open
 from os import path
 from dotdrop.version import __version__ as VERSION
 
 readme = 'README.md'
 here = path.abspath(path.dirname(__file__))
 
-try:
-    from pypandoc import convert_file
-    read_readme = lambda f: convert_file(f, 'rst')
-except ImportError:
-    print('\n[WARNING] pypandoc not found, could not convert \"{}\"\n'.format(readme))
-    read_readme = lambda f: open(f, 'r').read()
+def read_readme(f):
+    with open(f, encoding="utf-8") as fp:
+        return fp.read()
 
 REQUIRES_PYTHON = '>=3'
 
@@ -21,6 +17,7 @@ setup(
 
     description='Save your dotfiles once, deploy them everywhere',
     long_description=read_readme(readme),
+    long_description_content_type="text/markdown; variant=GFM",
     url='https://github.com/deadc0de6/dotdrop',
     download_url = 'https://github.com/deadc0de6/dotdrop/archive/v'+VERSION+'.tar.gz',
 
