@@ -13,10 +13,8 @@ jobs:
         python-version: 3.8
     - name: Install Tools
       run: |
-        sudo apt update
-        sudo apt -y install python3-pypandoc pandoc
         python -m pip install --upgrade pip
-        pip install setuptools wheel twine pypandoc
+        pip install setuptools wheel twine
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Build and Publish
       env:
