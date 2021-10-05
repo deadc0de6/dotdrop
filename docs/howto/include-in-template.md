@@ -1,6 +1,6 @@
-# Include file or template in template
+# Include files or templates in templates
 
-[Jinja2](https://jinja.palletsprojects.com/en/2.11.x/templates/) provides the ability to include an external file/template from within a template with the directive `include`. See the [related doc](https://jinja.palletsprojects.com/en/2.11.x/templates/#include) for more. The path must be relative to the `dotpath`.
+[Jinja2](https://jinja.palletsprojects.com/en/2.11.x/templates/) provides the ability to include an external file/template from within a template with the directive `include`. See the [related docs](https://jinja.palletsprojects.com/en/2.11.x/templates/#include) for more. The path must be relative to the `dotpath`.
 
 For example:
 ```yaml

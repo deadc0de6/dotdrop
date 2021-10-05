@@ -3,9 +3,9 @@
 There are cases in which two or more dotfiles are very similar. For example,
 two files exporting environment variables for two projects built with the same
 technology (eg. two node.js web servers deployed on AWS). In these cases it's
-nice to share as much code as possible across the dotfiles, by leveraging
-templating and merging them in the same dotfile in Dotdrop's `dotpath`. Here
-are a few suggestions about how to achieve this.
+nice to share as much code as possible across the dotfiles by leveraging
+templating and merging them into the same dotfile in dotdrop's `dotpath`. Here
+are a few suggestions about how to achieve this:
 
 * [Brute force templating](#brute-force-templating)
 * [Profile variables](#profile-variables)
@@ -13,7 +13,7 @@ are a few suggestions about how to achieve this.
 
 ## Brute force templating
 
-The first approach is sheer use of templating and variables
+The first approach is sheer use of templating and variables.
 In order to do this, we need to:
 
 1. Create the merged dotfile with an arbitrary name somewhere in `dotpath`.
@@ -38,7 +38,7 @@ export DB_HOST='{{@@ aws_db_host @@}}'
 export DB_PORT='{{@@ aws_db_port @@}}'
 ```
 
-Part of Dotdrop `config.yaml` file:
+Part of dotdrop `config.yaml` file:
 ```yaml
 # config.yaml
 
@@ -63,10 +63,10 @@ export DB_PORT='4521'
 
 ## Profile variables
 
-Albeit flexible, the previous method is a bit cumbersome for some use cases.
+The previous method, albeit flexible, is a bit cumbersome for some use cases.
 For example, when the dotfiles belong to different profiles, the cleanest
-solution consists in using
-[profile variables](../config-details.md#entry-profile-variables). This is achieved by:
+solution consists of using
+[profile variables](../config-details.md#profile-variables-entry). This is achieved by:
 
 1. Creating the merged dotfile with an arbitrary name somewhere in `dotpath`.
 2. Adding some variables in the merged dotfile via templating.
@@ -79,7 +79,7 @@ solution consists in using
 
 An example:
 
-The merged dotfile (`dotpath/projects/env`)
+The merged dotfile (`dotpath/projects/env`):
 ```bash
 # .env
 
@@ -87,7 +87,7 @@ export DB_HOST='{{@@ aws_db_host @@}}'
 export DB_PORT='{{@@ aws_db_port @@}}'
 ```
 
-Part of Dotdrop `config.yaml` file:
+Part of dotdrop `config.yaml` file:
 ```yaml
 # config.yaml
 
@@ -128,26 +128,26 @@ export DB_PORT='9632'
 
 Even though it has cleaner dotfiles, the profile-variable-based procedure can't
 be used in two scenarios: when the dotfiles belong to the same profile, and
-when variable values require some complex computations. In both cases the brute
+when variable values require some complex computations. In both cases, the brute
 force templating approach can be used, but in the latter one it also makes the
 dotfiles bloated with "bookkeeping" logic, thus hard to read.
 
 A solution for this relies in leveraging Jinja macros. This method is a
-variation of the brute force templating one, where the merged dotfile is
-included from many different dotfiles in `dotpath` via jinja macros, rather
+variation of the brute force templating one where the merged dotfile is
+included from many different dotfiles in `dotpath` via Jinja macros rather
 than via many `dotfile` entries with the same `src` attribute. This way, the
-merged original dotfiles stays clean as in the profile variables solution,
+merged original dotfiles stays clean as in the profile variables solution
 because computations are in other files.
 
 The steps to achieve this are:
 
 1. Creating the merged dotfile with an arbitrary name somewhere in `dotpath`.
-2. Wrapping the whole content of the merged dotfile in a jinja macro, with the
+2. Wrapping the whole content of the merged dotfile in a Jinja macro with the
     necessary parameters.
-3. Calling the macro in each original dotfiles, computing the parameters there.
+3. Calling the macro in each original dotfile, computing the parameters there.
 
-**NOTE**: The merged dotfile will be empty, as it only contains a jinja macro.
-    If it needs not to be deployed, the `ignoreempty` entry can be set to
+**NOTE**: The merged dotfile will be empty, as it only contains a Jinja macro.
+    If it needs to not be deployed, the `ignoreempty` entry can be set to
     `true` in `config.yaml`.
 
 As usual, an example:
@@ -162,7 +162,7 @@ export DB_PORT='{{@@ db_port @@}}'
 {%@@ endmacro @@%}
 ```
 
-Server0's environment file (`projects/server0/.env`)
+Server0's environment file (`projects/server0/.env`):
 ```jinja2
 {%@@ from projects/env import env @@%}
 
@@ -182,14 +182,14 @@ Server0's environment file (`projects/server0/.env`)
 {{@@ env(db_host, db_port) @@}}
 ```
 
-Server1's environment file (`projects/server1/.env`)
+Server1's environment file (`projects/server1/.env`):
 ```jinja2
 {%@@ from projects/env import env @@%}
 
 {{@@ env('average-host.com', 9632) @@}}
 ```
 
-Part of Dotdrop `config.yaml` file:
+Part of dotdrop `config.yaml` file:
 ```yaml
 # config.yaml
 
@@ -203,7 +203,6 @@ dotfiles:
   server1-env:
     src: projects/server1/.env
     dst: ~/projects/server1/.env
-
 ```
 
 With this configuration, installing the dotfile `server0-env-local-dbg` will

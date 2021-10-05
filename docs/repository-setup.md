@@ -1,6 +1,6 @@
 # Repository setup
 
-Either create a git repository on your prefered platform and clone it or create one locally.
+Either create a Git repository on your prefered platform and clone it or create one locally.
 This repository will contain two main elements, dotdrop's config file (`config.yaml`)
 and a directory containing all your dotfiles managed by dotdrop.
 ```bash
@@ -15,12 +15,12 @@ $ mkdir dotfiles
 
 Then add a config file. You can get a
 [minimal config file](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml)
-from dotdrop's repository with
+from dotdrop's repository with:
 ```bash
 $ wget https://raw.githubusercontent.com/deadc0de6/dotdrop/master/config.yaml
 ```
 It is recommended to store your config file directly within your repository
-(*my-dotfiles* in the example above) but you could save it in different places if you wish,
+(*my-dotfiles* in the example above), but you could save it in different places if you wish;
 see [config location](config.md#location) for more.
 
 ```bash

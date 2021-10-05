@@ -1,49 +1,49 @@
 # Templating
 
-Dotdrop leverage the power of [jinja2](https://palletsprojects.com/p/jinja/) to handle the
-templating of dotfiles. See [jinja2 template doc](https://jinja.palletsprojects.com/en/2.11.x/templates/)
+Dotdrop leverages the power of [Jinja2](https://palletsprojects.com/p/jinja/) to handle the
+templating of dotfiles. See [the Jinja2 templates docs](https://jinja.palletsprojects.com/en/2.11.x/templates/)
 or the below sections for more information on how to template your dotfiles.
 
 ## Templating or not templating
 
 The dotfile config entry [template](config-format.md#dotfiles-entry)
 and the global config entry [template_dotfile_default](config-format.md#config-entry)
-allow to control if a dotfile is being process by the templating engine.
+allow you to control whether a dotfile is processed by the templating engine.
 
-Obviously if the dotfile uses template directives, it needs to be templated. However if it
+Obviously, if the dotfile uses template directives, it needs to be templated. However, if it
 is not, disabling templating will speed up its installation (since it won't have to be
 processed by the engine).
 
 For dotfiles being symlinked (`link` or `link_children`), see
-[the dedicated doc](howto/symlink-dotfiles.md#templating-symlinked-dotfiles)
+[the dedicated doc](howto/symlink-dotfiles.md#templating-symlinked-dotfiles).
 
 ## Delimiters
 
 Dotdrop uses different delimiters than
-[jinja2](https://palletsprojects.com/p/jinja/)'s defaults:
+[Jinja2](https://palletsprojects.com/p/jinja/)'s defaults:
 
-* block/statement start = `{%@@`
-* block/statement end = `@@%}`
-* variable/expression start = `{{@@`
-* variable/expression end = `@@}}`
-* comment start = `{#@@`
-* comment end = `@@#}`
+* Block/statement start = `{%@@`
+* Block/statement end = `@@%}`
+* Variable/expression start = `{{@@`
+* Variable/expression end = `@@}}`
+* Comment start = `{#@@`
+* Comment end = `@@#}`
 
-More info in [jinja2 templating doc](https://jinja.palletsprojects.com/en/2.11.x/templates/?highlight=delimiter)
+More info in [Jinja2 templating docs](https://jinja.palletsprojects.com/en/2.11.x/templates/?highlight=delimiter)
 
 ## Template variables
 
-Following variables are available in templates:
+The following variables are available in templates:
 
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
-* `{{@@ header() @@}}` contains dotdrop header (see [Dotdrop header](#dotdrop-header)).
+* `{{@@ header() @@}}` contains the dotdrop header (see [Dotdrop header](#dotdrop-header)).
 * `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-format.md) absolute path.
 * `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config.md).
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-format.md) absolute path.
-* dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* all defined config variables (see [Variables](config.md#variables)).
-* all defined config interpreted variables (see [Interpreted variables](config-details.md#entry-dynvariables)).
+* Dotfile specific variables (see [Dotfile variables](#dotfile-variables))
+* All defined config variables (see [Variables](config.md#variables))
+* All defined config interpreted variables (see [Interpreted variables](config-details.md#dynvariables-entry))
 
 ## Dotfile variables
 
@@ -54,20 +54,20 @@ When a dotfile is handled by dotdrop, the following variables are added:
 * `{{@@ _dotfile_key @@}}` contains the processed dotfile key.
 * `{{@@ _dotfile_link @@}}` contains the processed dotfile `link` string value.
 
-Additionally to the above, the following variables are set in each file processed by dotdrop.
+In addition to the above, the following variables are set in each file processed by dotdrop:
 
 * `{{@@ _dotfile_sub_abs_src @@}}` contains the absolute source path of each file when handled by dotdrop.
 * `{{@@ _dotfile_sub_abs_dst @@}}` contains the absolute destination path of each file when handled by dotdrop.
 
-For example a directory dotfile (like `~/.ssh`) would process several files
+For example, a directory dotfile (like `~/.ssh`) would process several files
+(`~/.ssh/config` and `~/.ssh/authorized_keys`, for example). In `~/.ssh/config`:
 
-(`~/.ssh/config` and `~/.ssh/authorized_keys` for example). In `~/.ssh/config`:
 * `_dotfile_abs_dst` would be `/home/user/.ssh`
 * `_dotfile_sub_abs_dst` would be `/home/user/.ssh/config`
 
 ## Environment variables
 
-It's possible to access environment variables inside the templates.
+It's possible to access environment variables inside the templates:
 ```
 {{@@ env['MY_VAR'] @@}}
 ```
@@ -75,14 +75,14 @@ It's possible to access environment variables inside the templates.
 This allows for storing host-specific properties and/or secrets in environment variables.
 It is recommended to use `variables` (see [config variables](config.md#variables))
 instead of environment variables unless these contain sensitive information that
-shouldn't be versioned in git.
+shouldn't be versioned in Git.
 
-For example you can have a `.env` file in the directory where your `config.yaml` lies:
+For example, you can have an `.env` file in the directory where your `config.yaml` lies:
 ```
 ## Some secrets
 pass="verysecurepassword"
 ```
-If this file contains secrets that should not be tracked by git,
+If this file contains secrets that should not be tracked by Git,
 put it in your `.gitignore`.
 
 You can then invoke dotdrop with the help of an alias
@@ -99,30 +99,30 @@ The above aliases load all the variables from `~/dotfiles/.env`
 
 ## Template methods
 
-Beside [jinja2 global functions](https://jinja.palletsprojects.com/en/2.11.x/templates/#list-of-global-functions)
-the following methods can be used within the templates:
+Besides [Jinja2 global functions](https://jinja.palletsprojects.com/en/2.11.x/templates/#list-of-global-functions),
+the following methods can be used within templates:
 
-* `exists(path)`: return true when path exists
+* `exists(path)`: returns true when path exists
 ```
 {%@@ if exists('/dev/null') @@%}
 it does exist
 {%@@ endif @@%}
 ```
 
-* `exists_in_path(name, path=None)`: return true when executable exists in `$PATH`
+* `exists_in_path(name, path=None)`: returns true when executable exists in `$PATH`
 ```
 {%@@ if exists_in_path('exa') @@%}
 alias ls='exa --git --color=always'
 {%@@ endif @@%}
 ```
 
-* `basename(path)`: return the `basename` of the path argument
+* `basename(path)`: returns the `basename` of the path argument
 ```
 {%@@ set dotfile_filename = basename( _dotfile_abs_dst ) @@%}
 dotfile dst filename: {{@@ dotfile_filename @@}}
 ```
 
-* `dirname(path)`: return the `dirname` of the path argument
+* `dirname(path)`: returns the `dirname` of the path argument
 ```
 {%@@ set dotfile_dirname = dirname( _dotfile_abs_dst ) @@%}
 dotfile dst dirname: {{@@ dotfile_dirname @@}}
@@ -133,20 +133,20 @@ config entry `func_file`.
 
 Example:
 
-the config file
+The config file:
 ```yaml
 config:
   func_file:
   - /tmp/myfuncs_file.py
 ```
 
-the python function under `/tmp/myfuncs_file.py`
+The python function under `/tmp/myfuncs_file.py`:
 ```python
 def myfunc(arg):
   return not arg
 ```
 
-the dotfile content
+The dotfile content:
 ```
 {%@@ if myfunc(False) @@%}
 this should exist
@@ -155,44 +155,44 @@ this should exist
 
 ## Template filters
 
-Beside [jinja2 builtin filters](https://jinja.palletsprojects.com/en/2.11.x/templates/#builtin-filters)
+Besides [Jinja2 builtin filters](https://jinja.palletsprojects.com/en/2.11.x/templates/#builtin-filters),
 custom user-defined filter functions can be loaded using the config entry `filter_file`:
 
 Example:
 
-the config file
+The config file:
 ```yaml
 config:
   filter_file:
   - /tmp/myfilter_file.py
 ```
 
-the python filter under `/tmp/myfilter_file.py`
+The python filter under `/tmp/myfilter_file.py`:
 ```python
 def myfilter(arg1):
   return str(int(arg1) - 10)
 ```
 
-the dotfile content
+The dotfile content:
 ```
 {{@@ "13" | myfilter() @@}}
 ```
 
 For more information on how to create filters,
-see [jinja2 official doc](https://jinja.palletsprojects.com/en/2.11.x/api/#writing-filters).
+see [the Jinja2 official docs](https://jinja.palletsprojects.com/en/2.11.x/api/#writing-filters).
 
-## Import macros
+## Importing macros
 
 Macros must be imported `with context` in order to have access to the variables:
 ```
 {%@@ from 'macro_file' import macro with context @@%}
 ```
 
-For more see the [dedicated jinja2 doc](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros).
+For more information, see the [dedicated Jinja2 docs](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros).
 
 ## Dotdrop header
 
-Dotdrop is able to insert a header in the generated dotfiles. This allows
+Dotdrop is able to insert a header in the generated dotfiles. This allows you
 to remind anyone opening the file for editing that this file is managed by dotdrop.
 
 Here's what it looks like:
@@ -205,13 +205,13 @@ The header can be automatically added with:
 {{@@ header() @@}}
 ```
 
-Properly commenting the header in templates is the responsibility of the user
-as [jinja2](https://palletsprojects.com/p/jinja/) has no way of knowing what is the proper char(s) used for comments.
+Properly commenting the header in templates is the responsibility of the user,
+as [Jinja2](https://palletsprojects.com/p/jinja/) has no way of knowing what is the proper char(s) used for comments.
 Either prepend the directive with the commenting char(s) used in the dotfile
 (for example `# {{@@ header() @@}}`) or provide it as an argument `{{@@ header('# ') @@}}`.
-The result is equivalent.
+The results are equivalent.
 
-## Debug templates
+## Debugging templates
 
 To debug the result of a template, one can install the dotfiles to a temporary
 directory with the `install` command and the `-t` switch:

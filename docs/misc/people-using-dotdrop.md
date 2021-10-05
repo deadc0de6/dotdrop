@@ -1,4 +1,4 @@
-For more examples, see how people are using dotdrop
+For more examples, see how people are using dotdrop:
 
 * [https://github.com/open-dynaMIX/dotfiles](https://github.com/open-dynaMIX/dotfiles)
 * [https://github.com/moyiz/dotfiles](https://github.com/moyiz/dotfiles)
@@ -7,6 +7,6 @@ For more examples, see how people are using dotdrop
 * [https://github.com/Eluminae/dotfiles](https://github.com/Eluminae/dotfiles)
 * [https://github.com/davla/dotfiles](https://github.com/davla/dotfiles) and [https://github.com/davla/setup](https://github.com/davla/setup)
 
-Dotfiles repository using dotdrop on [github](https://github.com/topics/dotdrop?o=desc&s=updated) and [gitlab](https://gitlab.com/search?search=dotdrop).
+Dotfiles repositories using dotdrop on [GitHub](https://github.com/topics/dotdrop?o=desc&s=updated) and [GitLab](https://gitlab.com/search?search=dotdrop).
 
-Or search directly on [github](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code) for config examples.
+Or search directly on [GitHub](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code) for config examples.

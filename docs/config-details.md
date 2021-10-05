@@ -1,13 +1,13 @@
 # Config details
 
-## Entry actions
+## actions entry
 
-Actions can be either `post` or `pre`
+Actions can be either `post` or `pre`.
 
-* `post` action will be executed after the dotfile deployment
-* `pre` action will be executed before the dotfile deployment
+* `post` action will be executed after the dotfile deployment.
+* `pre` action will be executed before the dotfile deployment.
 
-If you don't specify neither `post` nor `pre`, the action will be executed
+If you don't specify either `post` or `pre`, the action will be executed
 after the dotfile deployment (which is equivalent to `post`).
 Actions cannot obviously be named `pre` or `post`.
 
@@ -20,10 +20,10 @@ Four types of actions can be defined:
 
 **Notes**:
 
-* Any action with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords for example.
+* Any action with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords, for example.
 * Make sure to quote your actions to avoid bad surprises
 * Actions are executed using the default shell (`$SHELL`)
-* To use shell variables in your actions you need to escape the curly brackets (`${HOME}` becomes `${{HOME}}`)
+* To use shell variables in your actions, you need to escape the curly brackets (`${HOME}` becomes `${{HOME}}`)
 
 ### Dotfile actions
 
@@ -31,13 +31,13 @@ It is sometimes useful to execute some kind of action
 when deploying a dotfile.
 
 Note that a dotfile's actions are only
-executed when the dotfile is installed (that is when
+executed when the dotfile is installed (that is, when
 the version present in dotdrop differs from the one
 in the filesystem).
 
-For example let's consider
-[Vundle](https://github.com/VundleVim/Vundle.vim) is used
-to manage vim's plugins, the following action could
+For example, let's consider
+[Vundle](https://github.com/VundleVim/Vundle.vim), used
+to manage Vim's plugins.  The following action could
 be set to update and install the plugins when `vimrc` is
 deployed:
 
@@ -60,7 +60,7 @@ profiles:
     - f_vimrc
 ```
 
-Thus when `f_vimrc` is installed, the command
+Thus, when `f_vimrc` is installed, the command
 `vim +VundleClean! +VundleInstall +VundleInstall! +qall` will
 be executed.
 
@@ -135,7 +135,7 @@ when xinitrc is installed.
 
 ### Default actions
 
-Dotdrop allows to execute an action for any dotfile installation. These actions work as any other action (`pre` or `post`).
+Dotdrop allows you to execute an action for any dotfile installation. These actions work as any other action (`pre` or `post`).
 
 For example, the below action will log each dotfile installation to a file.
 
@@ -161,8 +161,8 @@ profiles:
 
 ### Profile actions
 
-A profile action can be either `pre` or `post` action (see [actions](config-details.md#entry-actions)).
-Those are executed before any dotfile installation (for `pre`) and after all dotfiles installation (for `post`)
+A profile action can be either a `pre` or `post` action (see [actions](config-details.md#actions-entry)).
+These are executed before any dotfile installation (for `pre`) and after all dotfile installations (for `post`)
 only if at least one dotfile has been installed.
 
 ### Fake dotfile and actions
@@ -182,43 +182,43 @@ dotfiles:
     - always_action
 ```
 
-## Entry transformations
+## transformations entry
 
-For examples of transformation uses, see
+For examples of transformation uses, see:
 
 * [Handle compressed directories](howto/store-compressed-directories.md)
 * [Handle secrets](howto/sensitive-dotfiles.md)
 
 **Notes**:
 
-* Any transformation with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords for example.
+* Any transformation with a key starting with an underscore (`_`) won't be shown in output. This can be useful when working with sensitive data containing passwords, for example.
 * Make sure to quote your transformations to avoid bad surprises
 * Transformations are executed using the default shell (`$SHELL`)
 * To use shell variables in your transformations you need to escape the curly brackets (`${HOME}` becomes `${{HOME}}`)
 
 There are two types of transformations available:
 
-* **read transformations**: used to transform dotfiles before they are installed ([format](config-format.md) key `trans_read`)
+* **Read transformations**: used to transform dotfiles before they are installed ([format](config-format.md) key `trans_read`)
     * Used for commands `install` and `compare`
     * They have two arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
-    * Happens **before** the dotfile is templated with jinja2 (see [templating](templating.md))
+    * Happens **before** the dotfile is templated with Jinja2 (see [templating](templating.md))
 
-* **write transformations**: used to transform files before updating a dotfile ([format](config-format.md) key `trans_write`)
+* **Write transformations**: used to transform files before updating a dotfile ([format](config-format.md) key `trans_write`)
     * Used for command `update`
     * They have two arguments:
         * **{0}** will be replaced with the file path to update the dotfile with
         * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when dotfiles need to be
-stored encrypted or compressed. For more see [the howto](howto/howto.md).
+stored encrypted or compressed. For more, see [the howto](howto/howto.md).
 
-Note that transformations cannot be used if the dotfiles is to be linked (when `link: link` or `link: link_children`).
+Note that transformations cannot be used if the dotfile is to be linked (when `link: link` or `link: link_children`).
 
-Transformations also support additional positional arguments that must start from 2 (since `{0}` and `{1}` are added automatically). The transformations itself as well as its arguments can also be templated.
+Transformations also support additional positional arguments that must start from 2 (since `{0}` and `{1}` are added automatically). The transformations themselves as well as their arguments can also be templated.
 
-For example
+For example:
 ```yaml
 trans_read:
   targ: echo "$(basename {0}); {{@@ _dotfile_key @@}}; {2}; {3}" > {1}
@@ -233,14 +233,14 @@ profiles:
     - f_abc
 ```
 
-will result in `abc; f_abc; p1; lastarg`
+will result in `abc; f_abc; p1; lastarg`.
 
-## Entry variables
+## variables entry
 
 Variables defined in the `variables` entry are made available within the config file.
 
-Config variables are recursively evaluated what means that
-a config like the below
+Config variables are recursively evaluated, which means that
+a config like the below:
 ```yaml
 variables:
   var1: "var1"
@@ -265,9 +265,9 @@ will result in the following available variables:
 * dvar3: `dvar1 dvar2 dvar3`
 * dvar4: `var1 var2 var3`
 
-## Entry dynvariables
+## dynvariables entry
 
-It is also possible to have *dynamic* variables in the sense that their
+It is also possible to have *dynamic* variables, in the sense that their
 content will be interpreted by the shell before being substituted.
 
 These need to be defined in the config file under the entry `dynvariables`.
@@ -287,12 +287,12 @@ variables:
 
 They have the same properties as [Variables](config.md#variables).
 
-## Entry uservariables
+## uservariables entry
 
-If you want to manually enter variables values, you can use the
+If you want to manually enter variables' values, you can use the
 `uservariables` entry. Each variable will be prompted to the user.
 
-For example
+For example:
 ```yaml
 uservariables:
   emailvar: "email"
@@ -304,11 +304,11 @@ Please provide the value for "email":
 ```
 
 And store the entered text as the value for the variable `email`.
-The variable can then be used as any other [variables](config.md#variables).
+The variable can then be used as any other [variable](config.md#variables).
 
 `uservariables` are eventually saved to `uservariables.yaml` (relatively to the
 config file).
-This allow to use the following construct to prompt once for some specific variables and
+This allows you to use the following construct to prompt once for some specific variables and
 then store them in a file. You might also want to add `uservariables.yaml` to your `.gitignore`.
 ```yaml
 uservariables:
@@ -318,9 +318,9 @@ config:
     - uservariables.yaml:optional
 ```
 
-For an example, see [prompt user for variables](howto/prompt-user-for-variables.md)
+For an example, see [prompt user for variables](howto/prompt-user-for-variables.md).
 
-## Entry profile variables
+## Profile variables entry
 
 Profile variables will take precedence over globally defined variables.
 This means that you could do something like this:
@@ -342,7 +342,7 @@ profiles:
     - f_gitconfig
 ```
 
-## Entry profile include
+## Profile include entry
 
 If one profile is using the entire set of another profile, one can use
 the `include` entry to avoid redundancy.
@@ -364,9 +364,9 @@ profiles:
 ```
 Here profile *host1* contains all the dotfiles defined for *host2* plus `f_xinitrc`.
 
-For more advanced use-cases variables
-([variables](config.md#variables) and [dynvariables](#entry-dynvariables))
-can be used to specify the profile to include in a profile
+For more advanced use-cases, variables
+([variables](config.md#variables) and [dynvariables](#dynvariables-entry))
+can be used to specify the profile to include in a profile:
 
 For example:
 ```yaml
@@ -389,12 +389,12 @@ profiles:
     - "profile_{{@@ var1 @@}}"
 ```
 
-Note that profile cannot include other profiles defined above in
-the import tree (profile exists in another file and is imported using `import_configs` for example).
+Note that profiles cannot include other profiles defined above in
+the import tree (for example, when a profile exists in another file and is imported using `import_configs`).
 
-## Entry profile import
+## Profile import entry
 
-Profile's dotfiles list can be loaded from external files
+A profile's dotfiles list can be loaded from external files
 by specifying their paths in the config entry `import` under the specific profile.
 
 The paths can be absolute or relative to the config file location.
@@ -426,13 +426,13 @@ dotfiles:
   - f_xyz
 ```
 
-Variables can be used in `import` and would allow to do something like
+Variables can be used in `import`, which allow you to do something like:
 ```yaml
 import:
 - profiles.d/{{@@ profile @@}}.yaml
 ```
 
-## Entry import_variables
+## import_variables entry
 
 It is possible to load variables/dynvariables from external files by providing their
 paths in the config entry `import_variables`.
@@ -458,13 +458,13 @@ dynvariables:
 ```
 
 Dotdrop will fail if an imported path points to a non-existing file.
-It is possible to make non-existing paths not fatal by appending the path with `:optional`
+It is possible to make non-existing paths not fatal by appending `:optional` to the path:
 ```yaml
 import_variables:
 - variables.d/myvars.yaml:optional
 ```
 
-## Entry import_actions
+## import_actions entry
 
 It is possible to load actions from external files by providing their
 paths in the config entry `import_actions`.
@@ -497,13 +497,13 @@ External/imported variables will take precedence over variables defined
 inside the main config file.
 
 Dotdrop will fail if an imported path points to a non-existing file.
-It is possible to make non-existing paths not fatal by appending the path with `:optional`
+It is possible to make non-existing paths not fatal by appending `:optional` to the path:
 ```yaml
 import_actions:
 - actions.d/myactions.yaml:optional
 ```
 
-## Entry import_configs
+## import_configs entry
 
 Entire config files can be imported using the `import_configs` entry.
 This means making the following available from the imported config file in the original config file:
@@ -569,13 +569,13 @@ actions:
     show: less
 ```
 
-In this example `config.yaml` imports `other-config.yaml`. The dotfile `f_def`
+In this example, `config.yaml` imports `other-config.yaml`. The dotfile `f_def`
 used in the profile `my-host` is defined in `other-config.yaml`, and so is the
 profile `other-host` included from `my-haskell`. The action `show` is defined
 in `actions.yaml`, which is in turn imported by `other-config.yaml`.
 
 Dotdrop will fail if an imported path points to a non-existing file.
-It is possible to make non-existing paths not fatal by appending the path with `:optional`
+It is possible to make non-existing paths not fatal by appending `:optional` to the path.
 ```yaml
 import_configs:
 - other-config.yaml:optional
@@ -583,10 +583,10 @@ import_configs:
 
 ## Dynamic dotfile paths
 
-Dotfile source (`src`) and destination (`dst`) can be dynamically constructed using
+Dotfile source (`src`) and destination (`dst`) paths can be dynamically constructed using
 defined variables ([variables and dynvariables](config.md#variables)).
 
-For example to have a dotfile deployed on the unique firefox profile where the
+For example, to have a dotfile deployed on a unique Firefox profile where the
 profile path is dynamically found using a shell oneliner stored in a dynvariable:
 ```yaml
 dynvariables:
@@ -603,10 +603,10 @@ profiles:
 
 ## Dynamic dotfile link value
 
-Dotfile `link` value can be dynamically constructed using
-define variables ([variables and dynvariables](config.md#variables)).
+Dotfile `link` values can be dynamically constructed using
+defined variables ([variables and dynvariables](config.md#variables)).
 
-For example
+For example:
 ```yaml
 variables:
   link_value: "nolink"
