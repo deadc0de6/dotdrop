@@ -13,6 +13,7 @@ Entry    | Description | Default
 -------- | ------------- | ------------
 `backup` | Create a backup of the dotfile in case it differs from the one that will be installed by dotdrop  | true
 `banner` | Display the banner  | true
+`check_version` | Check if a new version of dotdrop is available on github | false
 `chmod_on_import` | Always add a chmod entry on newly imported dotfiles (see `--preserve-mode`) | false
 `cmpignore` | List of patterns to ignore when comparing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
 `create` | Create a directory hierarchy when installing dotfiles if it doesn't exist | true

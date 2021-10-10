@@ -15,10 +15,14 @@ import importlib
 import filecmp
 import itertools
 from shutil import rmtree, which
+import json
+import requests
+from packaging import version
 
 # local import
 from dotdrop.logger import Logger
 from dotdrop.exceptions import UnmetDependency
+from dotdrop.version import __version__ as VERSION
 
 LOG = Logger()
 STAR = '*'
@@ -447,3 +451,22 @@ def debug_dict(title, elems, debug):
                 LOG.dbg('\t\t- {}'.format(i))
         else:
             LOG.dbg('\t- \"{}\": {}'.format(k, val))
+
+
+def check_version():
+    """check dotdrop version on github and compare with current"""
+    url = 'https://api.github.com/repos/deadc0de6/dotdrop/releases/latest'
+    req = requests.get(url, timeout=1)
+    if not req:
+        return
+    try:
+        latest = req.json()['name']
+    except json.decoder.JSONDecodeError:
+        return
+    except ValueError:
+        return
+    if latest.startswith('v'):
+        latest = latest[1:]
+    if version.parse(VERSION) < version.parse(latest):
+        msg = 'A new version of dotdrop is available ({})'
+        LOG.warn(msg.format(latest))

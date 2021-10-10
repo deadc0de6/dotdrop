@@ -45,6 +45,7 @@ class Settings(DictParser):
     key_template_dotfile_default = 'template_dotfile_default'
     key_ignore_missing_in_dotdrop = 'ignore_missing_in_dotdrop'
     key_chmod_on_import = 'chmod_on_import'
+    key_check_version = 'check_version'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -65,7 +66,8 @@ class Settings(DictParser):
                  template_dotfile_default=True,
                  ignore_missing_in_dotdrop=False,
                  force_chmod=False,
-                 chmod_on_import=False):
+                 chmod_on_import=False,
+                 check_version=False):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -95,6 +97,7 @@ class Settings(DictParser):
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
         self.force_chmod = force_chmod
         self.chmod_on_import = chmod_on_import
+        self.check_version = check_version
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -121,6 +124,7 @@ class Settings(DictParser):
             self.key_ignore_missing_in_dotdrop: self.ignore_missing_in_dotdrop,
             self.key_force_chmod: self.force_chmod,
             self.key_chmod_on_import: self.chmod_on_import,
+            self.key_check_version: self.check_version,
         }
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)

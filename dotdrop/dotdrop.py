@@ -20,7 +20,7 @@ from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
 from dotdrop.utils import get_tmpdir, removepath, \
     uniq_list, patch_ignores, dependencies_met, \
-    adapt_workers
+    adapt_workers, check_version
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, \
     UndefinedException, UnmetDependency
@@ -828,6 +828,9 @@ def main():
         LOG.debug = opts.debug
         LOG.dbg('\n\n')
     options_time = time.time() - time0
+
+    if opts.check_version:
+        check_version()
 
     time0 = time.time()
     ret, command = _exec_command(opts)

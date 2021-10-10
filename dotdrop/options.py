@@ -131,6 +131,7 @@ class Options(AttrMonitor):
         self.upignore = None
         self.link_on_import = None
         self.chmod_on_import = None
+        self.check_version = None
 
         # args parsing
         self.args = {}
