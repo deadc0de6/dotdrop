@@ -86,7 +86,8 @@ dotfiles:
 
 On `import`, the following rules are applied:
 
-* If the `-m`/`--preserve-mode` switch is provided, the imported file's permissions are
+* If the `-m`/`--preserve-mode` switch is provided or the config option
+  `chmod_on_import` is true, the imported file's permissions are
   stored in a `chmod` entry
 * If the imported file's permissions differ from the umask, then the permissions are automatically
   stored in the `chmod` entry.

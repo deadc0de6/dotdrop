@@ -212,6 +212,37 @@ cd ${ddpath} | ${bin} detail -c ${cfg} -p p1 -V
 cnt=`cat ${cfg} | grep chmod | wc -l`
 [ "${cnt}" != "0" ] && echo "chmod inserted but not needed" && exit 1
 
+## with config option chmod_on_import
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  chmod_on_import: true
+dotfiles:
+profiles:
+_EOF
+
+# clean
+rm -rf ${tmps}/dotfiles
+mkdir -p ${tmps}/dotfiles
+
+# import
+for i in ${toimport}; do
+  chmod_to_umask ${i}
+  cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
+done
+
+cat ${cfg}
+
+# list files
+cd ${ddpath} | ${bin} detail -c ${cfg} -p p1 -V
+
+cat ${cfg}
+tot=`echo ${toimport} | wc -w`
+cnt=`cat ${cfg} | grep "chmod: " | wc -l`
+[ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (3)" && exit 1
+
 ## CLEANING
 rm -rf ${tmps} ${tmpd}
 

@@ -130,6 +130,7 @@ class Options(AttrMonitor):
         self.impignore = None
         self.upignore = None
         self.link_on_import = None
+        self.chmod_on_import = None
 
         # args parsing
         self.args = {}
@@ -258,7 +259,7 @@ class Options(AttrMonitor):
         """import specifics"""
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
-        self.import_mode = self.args['--preserve-mode']
+        self.import_mode = self.args['--preserve-mode'] or self.chmod_on_import
         self.import_ignore = self.args['--ignore']
         self.import_ignore.extend(self.impignore)
         self.import_ignore.append('*{}'.format(self.install_backup_suffix))
