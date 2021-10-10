@@ -1,4 +1,4 @@
-# DOTDROP
+# ![dotdrop logo](dotdrop.svg){:height="100px" width="100px"} dotdrop
 
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
