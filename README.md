@@ -1,5 +1,6 @@
 # <img src="https://raw.githubusercontent.com/deadc0de6/dotdrop/master/dotdrop.svg" width="100" height="100" align="left"> dotdrop
 <br/>
+<br/>
 
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
