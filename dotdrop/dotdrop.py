@@ -145,7 +145,8 @@ def _dotfile_compare(opts, dotfile, tmp):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(templ, tmp, src, dotfile.dst,
                                                  is_template=True,
-                                                 chmod=dotfile.chmod)
+                                                 chmod=dotfile.chmod,
+                                                 set_create=True)
         if not ret:
             # failed to install to tmp
             line = '=> compare {} error: {}'

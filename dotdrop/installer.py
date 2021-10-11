@@ -185,7 +185,8 @@ class Installer:
         return self._log_install(ret, err)
 
     def install_to_temp(self, templater, tmpdir, src, dst,
-                        is_template=True, chmod=None, ignore=None):
+                        is_template=True, chmod=None, ignore=None,
+                        set_create=False):
         """
         install a dotfile to a tempdir
 
@@ -196,6 +197,7 @@ class Installer:
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
         @ignore: patterns to ignore
+        @set_create: force create to True
 
         return
         - success, error-if-any, dotfile-installed-path
@@ -215,8 +217,9 @@ class Installer:
         self.dry = False
         diffsaved = self.diff
         self.diff = False
-        createsaved = self.create
-        self.create = True
+        if set_create:
+            createsaved = self.create
+            self.create = True
         totemp = self.totemp
         self.totemp = None
 
@@ -232,7 +235,8 @@ class Installer:
         # restore flags
         self.dry = drysaved
         self.diff = diffsaved
-        self.create = createsaved
+        if set_create:
+            self.create = createsaved
         self.comparing = False
         self.totemp = totemp
 
