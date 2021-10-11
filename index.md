@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<img src="./dotdrop.svg" width="50%" height="50%" align="center">
+<img src="./dotdrop.svg" width="100%" height="100%" align="center">
 
 [Dotdrop](https://github.com/deadc0de6/dotdrop) is a dotfiles manager that provides efficient ways of managing your precious config files.
 It is especially powerful when it comes to managing those across different hosts.
