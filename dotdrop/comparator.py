@@ -126,6 +126,7 @@ class Comparator:
         comp = filecmp.dircmp(local_path, deployed_path)
 
         # handle files only in deployed dir
+        self.log.dbg('files only in deployed dir: {}'.format(comp.left_only))
         for i in comp.left_only:
             if self.ignore_missing_in_dotdrop or \
                must_ignore([os.path.join(local_path, i)],
@@ -134,6 +135,7 @@ class Comparator:
             ret.append('=> \"{}\" does not exist on destination\n'.format(i))
 
         # handle files only in dotpath dir
+        self.log.dbg('files only in dotpath dir: {}'.format(comp.right_only))
         for i in comp.right_only:
             if must_ignore([os.path.join(deployed_path, i)],
                            ignore, debug=self.debug):
@@ -144,6 +146,7 @@ class Comparator:
 
         # same local_path and deployed_path but different type
         funny = comp.common_funny
+        self.log.dbg('files with different types: {}'.format(funny))
         for i in funny:
             source_file = os.path.join(local_path, i)
             deployed_file = os.path.join(deployed_path, i)
@@ -161,6 +164,7 @@ class Comparator:
         funny = comp.diff_files
         funny.extend(comp.funny_files)
         funny = uniq_list(funny)
+        self.log.dbg('files with different content: {}'.format(funny))
         for i in funny:
             source_file = os.path.join(local_path, i)
             deployed_file = os.path.join(deployed_path, i)
