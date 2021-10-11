@@ -176,14 +176,6 @@ It is possible to ignore specific patterns when using dotdrop.
 The ignore pattern must follow Unix shell-style wildcards, like, for example `*/path/to/file`.
 Make sure to quote these when using wildcards in the config file.
 
-Patterns used for a specific dotfile can be specified relative to the dotfile destination (`dst`).
-
-Similar to a `.gitignore` file, you can prefix ignore patterns with an exclamation point (`!`).
-This so-called "negative ignore pattern" will cause any files that match that pattern to __not__ be ignored,
-provided they *would have* been ignored by an earlier ignore pattern (dotdrop will warn if that is not the
-case). This feature allows you to, for example, ignore all files within a certain directory, except for one
-particular one (See example below).
-
 ```yaml
 config:
   cmpignore:
@@ -198,10 +190,18 @@ dotfiles:
     dst: ~/.vim
     src: vim
     upignore:
-    - "*/undo-dir"
-    - "*/plugged"
+    - '*/undo-dir'
+    - '*/plugged'
 ...
 ```
+
+Patterns used for a specific dotfile can be specified relative to the dotfile destination (`dst`).
+
+Similar to a `.gitignore` file, you can prefix ignore patterns with an exclamation point (`!`).
+This so-called "negative ignore pattern" will cause any files that match that pattern to __not__ be ignored,
+provided they *would have* been ignored by an earlier ignore pattern (dotdrop will warn if that is not the
+case). This feature allows you to, for example, ignore all files within a certain directory, except for a
+particular one (See examples below).
 
 To completely ignore comparison of a specific dotfile:
 ```yaml
@@ -210,7 +210,7 @@ dotfiles:
     dst: ~/.vim
     src: vim
     cmpignore:
-    - "*"
+      - '*'
 ```
 
 To ignore a specific directory when updating:
@@ -227,9 +227,8 @@ To ignore a specific file `testfile` and directory `testdir` when importing:
 ```yaml
 config:
   impignore:
-  - "*/testfile"
-  - "testdir"
-...
+    - "*/testfile"
+    - "testdir"
 ```
 
 To ignore all files within a certain directory relative to `dst`, except one called `custom_plugin.zsh`:
@@ -239,6 +238,17 @@ dotfiles:
     src: zsh
     dst: ~/.config/zsh
     upignore:
-    - "plugins/*"
-    - "!plugins/custom_plugin.zsh"
+      - "plugins/*"
+      - "!plugins/custom_plugin.zsh"
+```
+
+To ignore everything except a single file named `file`:
+```yaml
+dotfiles:
+  d_dir
+    src: dir
+    dst: ~/dir
+    cmpignore:
+      - '!file'
+      - '[a-zA-Z0-9]*'
 ```
