@@ -84,7 +84,7 @@ A dotfile will be installed only if it differs from the version already present 
 Some available options:
 
 * `-t`/`--temp`: Install the dotfile(s) to a temporary directory for review (helping to debug templating issues, for example).
-  Note that actions are not executed in this mode.
+  Note that actions are not executed in this mode and the config entry `create` is always considered to be `true`.
 * `-a`/`--force-actions`: Force the execution of actions even if the dotfiles are not installed
 * `-f`/`--force`: Do not ask for any confirmation
 
