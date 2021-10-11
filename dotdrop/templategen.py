@@ -27,6 +27,7 @@ VAR_START = '{{@@'
 VAR_END = '@@}}'
 COMMENT_START = '{#@@'
 COMMENT_END = '@@#}'
+LOG = Logger()
 
 
 class Templategen:
@@ -215,26 +216,34 @@ class Templategen:
         return data.decode('utf-8', 'replace')
 
     @staticmethod
-    def is_template(path, ignore=None):
+    def is_template(path, ignore=None, debug=False):
         """recursively check if any file is a template within path"""
+        if debug:
+            LOG.dbg('is template: {}'.format(path), force=True)
         path = os.path.expanduser(path)
 
-        if utils.must_ignore([path], ignore, debug=False):
-            return False
         if not os.path.exists(path):
+            # does not exist
             return False
+
+        if utils.must_ignore([path], ignore, debug=debug):
+            # must be ignored
+            return False
+
         if os.path.isfile(path):
             # is file
-            return Templategen._is_template(path, ignore=ignore)
+            return Templategen._is_template(path, ignore=ignore, debug=debug)
+
+        # is a directory
         for entry in os.listdir(path):
             fpath = os.path.join(path, entry)
             if not os.path.isfile(fpath):
                 # recursively explore directory
-                if Templategen.is_template(fpath, ignore=ignore):
+                if Templategen.is_template(fpath, ignore=ignore, debug=debug):
                     return True
             else:
                 # check if file is a template
-                if Templategen._is_template(fpath, ignore=ignore):
+                if Templategen._is_template(fpath, ignore=ignore, debug=debug):
                     return True
         return False
 
@@ -244,9 +253,9 @@ class Templategen:
         return VAR_START in str(string)
 
     @staticmethod
-    def _is_template(path, ignore):
+    def _is_template(path, ignore, debug=False):
         """test if file pointed by path is a template"""
-        if utils.must_ignore([path], ignore, debug=False):
+        if utils.must_ignore([path], ignore, debug=debug):
             return False
         if not os.path.isfile(path):
             return False

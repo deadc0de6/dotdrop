@@ -221,6 +221,8 @@ def strip_home(path):
 
 def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
+    if debug:
+        LOG.dbg('must_ignore called', force=True)
     if not ignores:
         return False
     if debug:
@@ -237,10 +239,14 @@ def must_ignore(paths, ignores, debug=False):
                     LOG.dbg('ignore \"{}\" match: {}'.format(i, path),
                             force=True)
                 ignore_matches.append(path)
+
         # Then remove any matches that actually shouldn't be ignored
         for nign in ignored_negative:
             # Each of these will start with an '!' so we need to remove that
             nign = nign[1:]
+            if debug:
+                msg = 'trying to match :\"{}\" with non-ignore-pattern:\"{}\"'
+                LOG.dbg(msg.format(path, nign))
             if fnmatch.fnmatch(path, nign):
                 if debug:
                     msg = 'negative ignore \"{}\" match: {}'.format(nign, path)
@@ -256,6 +262,8 @@ def must_ignore(paths, ignores, debug=False):
                              'previous ignore pattern.'.format(nign)
                              )
         if ignore_matches:
+            if debug:
+                LOG.dbg('ignoring {}'.format(paths), force=True)
             return True
     if debug:
         LOG.dbg('NOT ignoring {}'.format(paths), force=True)

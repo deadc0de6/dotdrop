@@ -139,7 +139,9 @@ def _dotfile_compare(opts, dotfile, tmp):
     ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
 
     insttmp = None
-    if dotfile.template and Templategen.is_template(src, ignore=ignores):
+    if dotfile.template and Templategen.is_template(src,
+                                                    ignore=ignores,
+                                                    debug=opts.debug):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(templ, tmp, src, dotfile.dst,
                                                  is_template=True,
