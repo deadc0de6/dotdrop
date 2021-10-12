@@ -50,9 +50,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # $2 path
 grep_or_fail()
 {
-  set +e
   grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
-  set -e
 }
 
 # the dotfile source
