@@ -102,6 +102,11 @@ $ dotdrop compare
 The diffing is done with the UNIX tool `diff` as the backend; one can provide a specific
 diff command using the config entry `diff_command`.
 
+You can specify against which destination file to compare:
+```bash
+$ dotdrop compare -C ~/.vimrc
+```
+
 To ignore specific patterns, see [the ignore patterns](config.md#ignore-patterns).
 
 To completely ignore all files not present in `dotpath` see [Ignore missing](#ignore-missing).
