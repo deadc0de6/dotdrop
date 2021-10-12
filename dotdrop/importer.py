@@ -224,7 +224,7 @@ class Importer:
         test no other dotfile exists with same
         dst for this profile but different src
         """
-        dfs = self.conf.get_dotfile_by_dst(dst)
+        dfs = self.conf.get_dotfile_by_dst(dst, profile_key=self.profile)
         if not dfs:
             return False
         for dotfile in dfs:

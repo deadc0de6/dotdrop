@@ -25,13 +25,14 @@ class Updater:
     """dotfiles updater"""
 
     def __init__(self, dotpath, variables, conf,
-                 dry=False, safe=True, debug=False,
-                 ignore=None, showpatch=False,
+                 profile_key, dry=False, safe=True,
+                 debug=False, ignore=None, showpatch=False,
                  ignore_missing_in_dotdrop=False):
         """constructor
         @dotpath: path where dotfiles are stored
         @variables: dictionary of variables for the templates
         @conf: configuration manager
+        @profile_key: the profile key
         @dry: simulate
         @safe: ask for overwrite if True
         @debug: enable debug
@@ -41,6 +42,7 @@ class Updater:
         self.dotpath = dotpath
         self.variables = variables
         self.conf = conf
+        self.profile_key = profile_key
         self.dry = dry
         self.safe = safe
         self.debug = debug
@@ -61,7 +63,8 @@ class Updater:
         if not os.path.lexists(path):
             self.log.err('\"{}\" does not exist!'.format(path))
             return False
-        dotfiles = self.conf.get_dotfile_by_dst(path)
+        dotfiles = self.conf.get_dotfile_by_dst(path,
+                                                profile_key=self.profile_key)
         if not dotfiles:
             return False
         for dotfile in dotfiles:
@@ -78,8 +81,11 @@ class Updater:
 
     def update_key(self, key):
         """update the dotfile referenced by key"""
-        dotfile = self.conf.get_dotfile(key)
+        dotfile = self.conf.get_dotfile(key, profile_key=self.profile_key)
         if not dotfile:
+            self.log.dbg('no such dotfile: \"{}\"'.format(key))
+            msg = 'invalid dotfile for update: {}'
+            self.log.err(msg.format(key))
             return False
         self.log.dbg('updating {} from key \"{}\"'.format(dotfile, key))
         path = self.conf.path_to_dotfile_dst(dotfile.dst)

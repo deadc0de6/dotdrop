@@ -100,14 +100,17 @@ class CfgAggregator:
             path = os.path.join(TILD, path)
         return path
 
-    def get_dotfile_by_dst(self, dst):
+    def get_dotfile_by_dst(self, dst, profile_key=None):
         """
         get a list of dotfiles by dst
         @dst: dotfile dst (on filesystem)
         """
         dotfiles = []
         dst = self._norm_path(dst)
-        for dotfile in self.dotfiles:
+        dfs = self.dotfiles
+        if profile_key:
+            dfs = self.get_dotfiles(profile_key=profile_key)
+        for dotfile in dfs:
             left = self._norm_path(dotfile.dst)
             if left == dst:
                 dotfiles.append(dotfile)
@@ -153,10 +156,14 @@ class CfgAggregator:
         """return profiles"""
         return self.profiles
 
-    def get_profile(self):
+    def get_profile(self, key=None):
         """return profile object"""
+        pro = self.profile_key
+        if key:
+            pro = key
+
         try:
-            return next(x for x in self.profiles if x.key == self.profile_key)
+            return next(x for x in self.profiles if x.key == pro)
         except StopIteration:
             return None
 
@@ -169,21 +176,27 @@ class CfgAggregator:
                 res.append(profile)
         return res
 
-    def get_dotfiles(self):
-        """get all dotfiles for this profile"""
+    def get_dotfiles(self, profile_key=None):
+        """get all dotfiles for this profile or specified profile key"""
         dotfiles = []
-        profile = self.get_profile()
+        profile = self.get_profile(key=profile_key)
         if not profile:
             return dotfiles
         return profile.dotfiles
 
-    def get_dotfile(self, key):
+    def get_dotfile(self, key, profile_key=None):
         """
         return dotfile object by key
         @key: the dotfile key to look for
         """
+        dfs = self.dotfiles
+        if profile_key:
+            profile = self.get_profile(key=profile_key)
+            if not profile:
+                return None
+            dfs = profile.dotfiles
         try:
-            return next(x for x in self.dotfiles
+            return next(x for x in dfs
                         if x.key == key)
         except StopIteration:
             return None

@@ -77,7 +77,7 @@ def _dotfile_update(opts, path, key=False):
     update a dotfile pointed by path
     if key is false or by key (in path)
     """
-    updater = Updater(opts.dotpath, opts.variables, opts.conf,
+    updater = Updater(opts.dotpath, opts.variables, opts.conf, opts.profile,
                       dry=opts.dry, safe=opts.safe, debug=opts.debug,
                       ignore=opts.update_ignore,
                       showpatch=opts.update_showpatch,
