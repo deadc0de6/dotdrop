@@ -76,7 +76,6 @@ Options:
   -b --no-banner          Do not display the banner.
   -c --cfg=<path>         Path to the config.
   -C --file=<path>        Path of dotfile to compare.
-  -z --ignore-missing     Ignore files in installed folders that are missing.
   -d --dry                Dry run.
   -D --showdiff           Show a diff before overwriting.
   -f --force              Do not ask user confirmation for anything.
@@ -94,6 +93,7 @@ Options:
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
   -w --workers=<nb>       Number of concurrent workers [default: 1].
+  -z --ignore-missing     Ignore files in installed folders that are missing.
   -v --version            Show version.
   -h --help               Show this screen.
 """.format(BANNER, PROFILE)
