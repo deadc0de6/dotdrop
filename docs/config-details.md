@@ -601,6 +601,27 @@ profiles:
     - f_somefile
 ```
 
+Or when you need to select the dotfile to deploy depending on
+the profile used (`ssh_config.perso` for the profile `perso` and
+`ssh_config.work` for the `work` profile):
+```yaml
+dotfiles:
+  f_ssh_config:
+    src: "{{@@ ssh_config_file @@}}"
+    dst: ~/.ssh/config
+profiles:
+  perso:
+    dotfiles:
+    - f_ssh_config
+    variables:
+    - ssh_config_file: "ssh_config.perso"
+  work:
+    dotfiles:
+    - f_ssh_config
+    variables:
+    - ssh_config_file: "ssh_config.work"
+```
+
 ## Dynamic dotfile link value
 
 Dotfile `link` values can be dynamically constructed using
