@@ -87,7 +87,13 @@ echo 'test_y' > ${basedir}/dotfiles/y
 echo "00000000  01 02 03 04 05" | xxd -r - ${basedir}/dotfiles/z
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --showdiff --verbose --temp | grep '^3 dotfile(s) installed.$'
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --showdiff --verbose --temp > ${basedir}/log
+
+tmpfile=`cat ${basedir}/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/'`
+echo "tmpfile: ${tmpfile}"
+clear_on_exit "${tmpfile}"
+
+cat $log | grep '^3 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 echo "OK"
