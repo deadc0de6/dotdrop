@@ -93,6 +93,10 @@ echo 'a' > ${basedir}/dotfiles/a/c/acfile
 
 # the dotfile to be updated
 tmpd=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
+
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 cp -r ${basedir}/dotfiles/a ${tmpd}/
 
 # create the config file
@@ -137,9 +141,6 @@ grep_or_fail b ${basedir}/dotfiles/a/b/abfile3
 [ -e ${basedir}/dotfiles/a/b/abfile4 ] && echo "abfile4 should not have been updated" && exit 1
 [ -e ${basedir}/dotfiles/a/newdir/b/c ] && echo "newdir/b/c should not have been updated" && exit 1
 [ ! -e ${basedir}/dotfiles/a/newdir/b/d ] && echo "newdir/b/d should have been updated" && exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

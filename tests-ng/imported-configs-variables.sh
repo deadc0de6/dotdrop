@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 extcfg="${tmps}/ext-config.yaml"
 cfg="${tmps}/config.yaml"
@@ -131,9 +134,6 @@ grep '^varx: profvarx' ${tmpd}/abc >/dev/null
 grep '^provar: provar' ${tmpd}/abc >/dev/null
 grep '^dvarx: dprofvarx' ${tmpd}/abc >/dev/null
 grep '^dprovar: dprovar' ${tmpd}/abc >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

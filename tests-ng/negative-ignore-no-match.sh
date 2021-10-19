@@ -78,6 +78,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 mkdir -p ${tmpd}/program/ignore_me
 echo "some data" > ${tmpd}/program/a
@@ -108,9 +111,6 @@ patt="[WARN] no files that are currently being ignored match \"*/ignore_me/c\". 
 pattern to work, it must match a file that is being ignored by a previous ignore pattern."
 cd ${ddpath} | ${bin} install -c ${cfg2} --verbose 2>&1 >/dev/null | grep -F "${patt}" ||
   (echo "dotdrop did not warn when negative ignore pattern did not match an already-ignored file" && exit 1)
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

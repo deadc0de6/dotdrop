@@ -54,6 +54,10 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -135,9 +139,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 grep "${tmpd}/abc" ${tmpa}/pre >/dev/null
 grep "${tmpd}/abc" ${tmpa}/post >/dev/null
 grep "${tmpd}/abc" ${tmpa}/naked >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

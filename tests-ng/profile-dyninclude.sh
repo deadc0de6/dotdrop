@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cfg2="${tmps}/sub.yaml"
@@ -137,9 +140,6 @@ grep 'subcontent' ${tmpd}/abc >/dev/null || (echo "variables 2 not resolved" && 
 grep 'subdyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 2 not resolved" && exit 1)
 #cat ${tmpd}/abc
 [ ! -e ${tmpd}/ghi ] && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

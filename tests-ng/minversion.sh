@@ -50,6 +50,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
 config:
@@ -126,9 +129,6 @@ cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
 # test
 cat ${cfg}
 grep 'minversion' ${cfg} && echo "minversion added, not needed" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

@@ -55,6 +55,9 @@ echo "dotfiles source (dotpath): ${tmps}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -109,9 +112,6 @@ cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
 ret="$?"
 set -e
 [ "$ret" = "0" ] && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpx} ${tmpy}
 
 echo "OK"
 exit 0

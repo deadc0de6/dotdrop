@@ -54,6 +54,10 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 act="${tmps}/actions.yaml"
 cat > ${act} << _EOF
 actions:
@@ -115,9 +119,6 @@ echo "naked is ok"
 [ ! -e ${tmpa}/write ] && exit 1
 grep over ${tmpa}/write >/dev/null
 echo "write is ok"
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

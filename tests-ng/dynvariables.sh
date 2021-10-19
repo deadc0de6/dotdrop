@@ -53,11 +53,15 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create a shell script
 export TESTENV="this is my testenv"
 scr=`mktemp --suffix='-dotdrop-tests' || mktemp -d`
 chmod +x ${scr}
 echo -e "#!/bin/bash\necho $TESTENV\n" >> ${scr}
+clear_on_exit "${scr}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -106,9 +110,6 @@ grep "^${TESTENV}" ${tmpd}/abc > /dev/null
 grep '^4ravd_eht' ${tmpd}/abc >/dev/null
 
 #cat ${tmpd}/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
 
 echo "OK"
 exit 0

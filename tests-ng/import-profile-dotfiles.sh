@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 extdotfiles="${tmps}/df_p1.yaml"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 dynextdotfiles_name="d_uid_dynvar"
 dynextdotfiles="${tmps}/ext_${dynextdotfiles_name}"
 
@@ -120,9 +123,6 @@ grep 'abc' ${tmpd}/abc >/dev/null 2>&1
 grep 'def' ${tmpd}/def >/dev/null 2>&1
 grep 'xyz' ${tmpd}/xyz >/dev/null 2>&1
 grep 'dyn' ${tmpd}/dyn >/dev/null 2>&1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

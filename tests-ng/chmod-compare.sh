@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 dnormal="${tmpd}/dir_normal"
 mkdir -p ${dnormal}
@@ -112,9 +115,6 @@ set +e
 cnt=`cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 2>&1 | grep 'modes differ' | wc -l`
 set -e
 [ "${cnt}" != "5" ] && echo "compare modes failed (${cnt})" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

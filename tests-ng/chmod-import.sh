@@ -67,6 +67,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfiles
 dnormal="${tmpd}/dir_normal"
 mkdir -p ${dnormal}
@@ -242,9 +245,6 @@ cat ${cfg}
 tot=`echo ${toimport} | wc -w`
 cnt=`cat ${cfg} | grep "chmod: " | wc -l`
 [ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (3)" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

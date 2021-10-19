@@ -60,6 +60,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # dotdrop directory
 mkdir -p ${tmpd}
 mkdir -p ${tmpd}/a/{b,c}
@@ -92,9 +95,6 @@ cd ${ddpath} | ${bin} import -c ${cfg} --verbose --profile=p1 ${tmpd}/a
 [ -d ${tmps}/dotfiles/newdir ] && echo "newdir not ignored" && exit 1
 [ -e ${tmps}/dotfiles/newdir/newfile ] && echo "newfile not ignored" && exit 1
 [ -e ${tmps}/dotfiles/a/b/newfile ] && echo "newfile not ignored" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

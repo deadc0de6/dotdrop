@@ -67,6 +67,9 @@ echo "config file: ${cfg}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmp}"
+clear_on_exit "${tmpd}"
+
 ## RELATIVE
 echo "RUNNING RELATIVE"
 cat > ${cfg} << _EOF
@@ -124,6 +127,9 @@ echo "config file: ${cfg}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmp}"
+clear_on_exit "${tmpd}"
+
 cat > ${cfg} << _EOF
 config:
   backup: true
@@ -176,6 +182,9 @@ echo "config file: ${cfg}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmp}"
+clear_on_exit "${tmpd}"
+
 cat > ${cfg} << _EOF
 config:
   backup: true
@@ -205,9 +214,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 #grep -r ${string} ${tmpw} >/dev/null
 [ ! -e ${tmpd}/abc ] && echo "[ERROR] dotfile not installed" && exit 1
 [ ! -h ${tmpd}/abc ] && echo "[ERROR] dotfile is not a symlink" && exit 1
-
-## CLEANING
-rm -rf ${tmp} ${tmpd}
 
 echo "OK"
 exit 0

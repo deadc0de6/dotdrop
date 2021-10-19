@@ -54,6 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 echo "original" > ${tmpd}/singlefile
 
@@ -116,9 +119,6 @@ set -e
 # verify
 #cat ${tmpd}/fake
 grep fakediff ${tmpd}/fake &> /dev/null || exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

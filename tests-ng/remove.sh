@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
@@ -172,9 +175,6 @@ cat ${cfg}
 
 
 cat ${cfg}
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

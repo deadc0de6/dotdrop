@@ -54,6 +54,10 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmpa}"
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -111,9 +115,6 @@ grep empty ${tmpa}/empty >/dev/null
 
 [ ! -e ${tmpa}/tgt ] && echo "tgt arg action not found" && exit 1
 grep tgt ${tmpa}/tgt >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

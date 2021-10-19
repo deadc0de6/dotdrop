@@ -83,6 +83,9 @@ echo 'a' > ${basedir}/dotfiles/a/c/acfile
 tmpd=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 cp -r ${basedir}/dotfiles/a ${tmpd}/
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${basedir}/config.yaml"
 cat > ${cfg} << _EOF
@@ -127,9 +130,6 @@ set -e
 [ -e ${basedir}/dotfiles/a/b/abfile4 ] && echo "abfile4 should not have been updated" && exit 1
 [ -e ${basedir}/dotfiles/a/newdir/b/c ] && echo "newdir/b/c should not have been updated" && exit 1
 [ ! -e ${basedir}/dotfiles/a/newdir/b/d ] && echo "newdir/b/d should have been updated" && exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

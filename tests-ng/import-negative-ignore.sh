@@ -75,6 +75,9 @@ mkdir -p ${basedir}/dotfiles
 # the dotfile destination
 tmpd=`mkdir -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # dotdrop directory
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
@@ -108,9 +111,6 @@ cd ${ddpath} | ${bin} import -f -c ${cfg2} --verbose --profile=p1 ${tmpd}/a --as
 [ -e ${basedir}/dotfiles/a/b/abfile1 ] && echo "abfile1 should not have been imported" && exit 1
 [ -e ${basedir}/dotfiles/a/b/abfile2 ] && echo "abfile2 should not have been imported" && exit 1
 [ ! -e ${basedir}/dotfiles/a/b/abfile3 ] && echo "abfile3 should have been imported" && exit 1
-
-## CLEANING
-rm -rf ${tmpd} ${basedir}
 
 echo "OK"
 exit 0

@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -461,9 +464,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -h ${df}/file ] && echo "file is not a symlink" && exit 1
 [ ! -h ${df}/directory ] && echo "directory is not a symlink" && exit 1
 [ -h ${df}/directory/file ] && echo "directory/file is a symlink" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

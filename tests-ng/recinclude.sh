@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -134,9 +137,6 @@ set +e
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p host -V
 [ "$?" = 0 ] && exit 1
 set -e
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

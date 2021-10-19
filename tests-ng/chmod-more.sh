@@ -78,6 +78,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfiles
 f1="${tmpd}/f1"
 touch ${f1}
@@ -119,9 +122,6 @@ has_rights "${tmps}/dotfiles/${tmpd}/f2" "644"
 
 # install
 cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V | grep '0 dotfile(s) installed' || (echo "should not install" && exit 1)
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

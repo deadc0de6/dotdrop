@@ -54,6 +54,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -87,9 +90,6 @@ grep '^# This dotfile is managed using dotdrop' ${tmpd}/abc >/dev/null
 grep '^// This dotfile is managed using dotdrop' ${tmpd}/abc >/dev/null
 
 #cat ${tmpd}/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

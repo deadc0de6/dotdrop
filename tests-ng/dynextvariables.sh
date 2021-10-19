@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 extvars="${tmps}/variables.yaml"
 extdvars="${tmps}/dynvariables.yaml"
@@ -147,9 +150,6 @@ grep '^dvarb: extdvar2' ${tmpd}/abc >/dev/null
 grep '^pvar: pvar1' ${tmpd}/abc >/dev/null
 grep '^pdvar: pdvar1' ${tmpd}/abc >/dev/null
 grep '^test: profileok' ${tmpd}/abc >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

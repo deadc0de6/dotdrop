@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -97,9 +100,6 @@ cd ${ddpath} | ${bin} import --verbose -c ${cfg} -p p2 \
 # count dotfiles for p2
 cnt=`cd ${ddpath} | ${bin} files --verbose -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
 [ "${cnt}" != "4" ] && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

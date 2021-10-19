@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles-other
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg1="${tmps}/config1.yaml"
 cfg2="${tmps}/config2.yaml"
@@ -174,9 +177,6 @@ profiles:
 _EOF
 cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V -f
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

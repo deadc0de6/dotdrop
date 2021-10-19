@@ -55,6 +55,10 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # the action temp
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -130,9 +134,6 @@ nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
 [ "${nb}" -gt "1" ] && echo "action post2 executed twice" && exit 1
 nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
 [ "${nb}" -gt "1" ] && echo "action naked executed twice" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

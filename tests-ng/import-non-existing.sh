@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 echo "test" > ${tmps}/dotfiles/abc
 
@@ -295,9 +298,6 @@ set +e
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
 [ "$?" = "0" ] && echo "configs glob" && exit 1
 set -e
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

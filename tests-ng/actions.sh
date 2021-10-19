@@ -54,6 +54,10 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -129,9 +133,6 @@ grep xxx ${tmpa}/expandvariable >/dev/null
 grep fake ${tmpa}/fake >/dev/null
 [ ! -e ${tmpa}/fake_pre ] && echo 'fake pre action not executed' && exit 1
 grep 'fake pre' ${tmpa}/fake_pre >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

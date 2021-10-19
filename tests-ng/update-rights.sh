@@ -56,6 +56,9 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # the dotfile file to be imported
 tmpf=`mktemp`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # single file
 echo 'file' > ${tmpf}
 
@@ -94,9 +97,6 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f --verbose ${tmpd}
 # test change applied
 [ "`stat -c '%a' ${tmpd}/dir1/newfile`" != "`stat -c '%a' ${basedir}/dotfiles/${tmpd}/dir1/newfile`" ] && exit 1
 [ "`stat -c '%a' ${tmpd}/dir1/file2`" != "`stat -c '%a' ${basedir}/dotfiles/${tmpd}/dir1/file2`" ] && exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

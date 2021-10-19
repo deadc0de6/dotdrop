@@ -56,6 +56,9 @@ echo "dotfiles source (dotpath): ${tmps}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -110,6 +113,7 @@ echo 'marker' > ${tmps}/dotfiles/def
 
 # create the compressed dotfile
 tmpx=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+clear_on_exit "${tmpx}"
 mkdir -p ${tmpx}/{a,b,c}
 mkdir -p ${tmpx}/a/{dir1,dir2}
 # ambiguous redirect ??
@@ -205,15 +209,13 @@ tar -tf ${tmps}/dotfiles/ghi | grep './a/dir1/otherfile' || (echo "otherfile not
 set -e
 
 tmpy=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+clear_on_exit "${tmpy}"
 tar -xf ${tmps}/dotfiles/ghi -C ${tmpy}
 content=`cat ${tmpy}/a/somefile`
 [ "${content}" != "${touched}" ] && echo "bad content" && exit 1
 
 # check canary dotfile
 [ ! -e ${tmps}/dotfiles/def ] && echo "def not found" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpx} ${tmpy}
 
 echo "OK"
 exit 0

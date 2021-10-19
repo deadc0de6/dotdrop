@@ -54,6 +54,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -279,10 +282,6 @@ grep 'header' ${tmpd}/f1 || (echo "header stripped" && exit 1)
 echo "* normal dotfile"
 [ ! -e ${tmpd}/fn ] && echo 'not installed' && exit 1
 grep 'should not be stripped' ${tmpd}/fn && echo "no templated" && exit 1
-
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

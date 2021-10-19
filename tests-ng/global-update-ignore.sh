@@ -58,6 +58,9 @@ echo 'a' > ${dt}/a/c/acfile
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 cp -r ${dt}/a ${tmpd}/
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
@@ -103,9 +106,6 @@ set +e
 grep 'b' ${dt}/a/c/acfile || (echo "acfile not updated" && exit 1)
 set -e
 [ -e ${dt}/a/newfile ] && echo "newfile found" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

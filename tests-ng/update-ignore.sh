@@ -63,6 +63,10 @@ echo 'a' > ${dt}/a/c/acfile
 
 # fs dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 cp -r ${dt}/a ${tmpd}/
 
 # create the config file
@@ -103,9 +107,6 @@ cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key f_abc
 # check files haven't been updated
 grep_or_fail 'b' "${dt}/a/c/acfile"
 [ -e ${dt}/a/newfile ] && echo "should not have been updated" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

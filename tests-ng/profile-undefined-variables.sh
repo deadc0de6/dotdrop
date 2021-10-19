@@ -54,6 +54,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -116,9 +119,6 @@ rm -f ${tmpd}/abc
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p pinclude -V
 [ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
 grep main ${tmpd}/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr} ${scr2}
 
 echo "OK"
 exit 0

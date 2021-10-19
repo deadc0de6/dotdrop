@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 dnormal="${tmpd}/dir_normal"
 mkdir -p ${dnormal}
@@ -149,9 +152,6 @@ cd ${ddpath} | ${bin} update -c ${cfg} -f -p p1 -V ${flink}
 [ "`stat -c '%a' ${tmps}/dotfiles/${tmpd}/$(basename ${flink})`" != "777" ] && echo "rights not updated (5)" && exit 1
 cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
 [ "${cnt}" != "5" ] && echo "chmod not updated (5)" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

@@ -55,6 +55,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 tmps="${basedir}"
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 mkdir -p ${tmpd}/{program,config,vscode}
 echo "some data" > ${tmpd}/program/a
@@ -178,9 +181,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg2} -p p1 -V f_template
 [ ! -e ${tmpd}/nvim/template ] && echo "template file not installed" && exit 1
 grep 'p1' ${tmpd}/nvim/templated/ftemplated
 grep 'p1' ${tmpd}/nvim/template
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

@@ -81,6 +81,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -269,9 +272,6 @@ chmod 700 ${tmpd}/nomode
 cd ${ddpath} | printf 'y\ny\n' | ${bin} install -f -c ${cfg} -p p2 -V f_nomode
 echo "different mode (2)"
 has_rights "${tmpd}/nomode" "600"
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

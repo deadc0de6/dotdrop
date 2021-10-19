@@ -53,6 +53,9 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${basedir}/config.yaml"
 cat > ${cfg} << _EOF
@@ -86,9 +89,6 @@ echo "00000000  01 02 03 04 05" | xxd -r - ${basedir}/dotfiles/z
 echo "[+] install"
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --showdiff --verbose --temp | grep '^3 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
-
-## CLEANING
-rm -rf ${basedir}
 
 echo "OK"
 exit 0

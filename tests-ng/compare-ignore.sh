@@ -54,6 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 mkdir -p ${tmpd}/{program,config}
 touch ${tmpd}/program/a
@@ -193,9 +196,6 @@ sed '/^config:$/a\ \ cmpignore:\n\ \ - "*/.DS_Store"' ${cfg} > ${cfg2}
 cat ${cfg2}
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
 [ "$?" != "0" ] && exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

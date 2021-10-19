@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # dotpath
 dotpath="${tmps}/dotfiles"
 mkdir -p ${dotpath}
@@ -122,9 +125,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -h ${dtsub1} ] && echo "dtsub1 is not a symlink" && exit 1
 [ ! -h ${dtsub2} ] && echo "dtsub2 is not a symlink" && exit 1
 [ -h ${dtsub3} ] && echo "dtsub3 is not a regular directory" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

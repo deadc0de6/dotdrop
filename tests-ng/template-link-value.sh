@@ -54,6 +54,9 @@ echo "dotfiles source (dotpath): ${tmps}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -144,9 +147,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 [ ! -h ${tmpd}/f/1 ] && echo "[ERROR] children f/1 not linked" && exit 1
 [ ! -h ${tmpd}/f/2 ] && echo "[ERROR] children f/2 not linked" && exit 1
 [ ! -h ${tmpd}/f/3 ] && echo "[ERROR] children f/3 not linked" && exit 1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

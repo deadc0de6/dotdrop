@@ -54,6 +54,9 @@ echo "dotdrop dir: ${basedir}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 create_dir ${tmpd}
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${basedir}/config.yaml"
 create_conf ${cfg} # sets token
@@ -68,9 +71,6 @@ echo "changed" > ${token}
 cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd} --verbose
 
 grep 'changed' ${token} >/dev/null 2>&1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

@@ -56,6 +56,12 @@ filter_file=`mktemp`
 filter_file2=`mktemp`
 filter_file3=`mktemp`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${filter_file}"
+clear_on_exit "${filter_file2}"
+clear_on_exit "${filter_file3}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cfgext="${tmps}/ext.yaml"
@@ -134,9 +140,6 @@ set +e
 grep '^something$' ${tmpd}/abc >/dev/null && exit 1
 set -e
 grep '^filteredvariable$' ${tmpd}/abc > /dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${filter_file} ${filter_file2} ${filter_file3}
 
 echo "OK"
 exit 0

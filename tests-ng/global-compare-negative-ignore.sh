@@ -77,6 +77,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 mkdir -p ${tmpd}/{program,config}
 touch ${tmpd}/program/a
@@ -111,9 +114,6 @@ set +e
 cd ${ddpath} | ${bin} compare -c ${cfg2} --verbose
 [ "$?" = "0" ] && exit 1
 set -e
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

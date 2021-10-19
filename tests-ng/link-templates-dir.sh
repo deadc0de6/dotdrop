@@ -57,6 +57,9 @@ echo "dotfiles destination: ${tmpd}"
 tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "workdir: ${tmpw}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -96,9 +99,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
 set +e
 grep '{{@@' ${tmpd}/abc/template >/dev/null 2>&1 && echo "[ERROR] template in dir not replace" && exit 1
 set -e
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpw}
 
 echo "OK"
 exit 0

@@ -56,6 +56,8 @@ basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
+clear_on_exit "${basedir}"
+
 export DOTDROP_WORKERS=1
 
 # create the config file
@@ -94,11 +96,13 @@ echo "[+] test install not existing src"
 cd ${ddpath} | ${bin} install -c ${cfg} -f --dry -p p1 --verbose f_y
 
 echo "[+] test install to temp"
-cd ${ddpath} | ${bin} install -t -c ${cfg} -p p1 --verbose f_x
-[ "$?" != "0" ] && exit 1
+cd ${ddpath} | ${bin} install -t -c ${cfg} -p p1 --verbose f_x > ${basedir}/log 2>&1
+[ "$?" != "0" ] && echo "install to tmp failed" && exit 1
 
-## CLEANING
-rm -rf ${basedir}
+# cleaning
+tmpfile=`cat ${basedir}/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/'`
+echo "tmpfile: ${tmpfile}"
+rm -rf "${tmpfile}"
 
 echo "OK"
 exit 0

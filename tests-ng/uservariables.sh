@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -119,9 +122,6 @@ grep '^var1: editedvar1$' ${tmpd}/abc >/dev/null
 grep '^var2: editedvar2$' ${tmpd}/abc >/dev/null
 grep '^var3: dynvariables_var3$' ${tmpd}/abc >/dev/null
 grep '^var4: variables_var4$' ${tmpd}/abc >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr}
 
 echo "OK"
 exit 0

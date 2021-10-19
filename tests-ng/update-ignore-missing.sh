@@ -60,6 +60,9 @@ cp -r ${dt}/folder ${tmpd}/
 touch ${tmpd}/folder/b
 mkdir ${tmpd}/folder/c
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
@@ -158,9 +161,6 @@ cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key thedotfil
 
 [ -e ${dt}/folder/b ] && echo "should not have been updated" && exit 1
 [ -e ${dt}/folder/c ] && echo "should not have been updated" && exit 1
-
-# CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

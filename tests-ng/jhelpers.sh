@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -136,9 +139,6 @@ set -e
 # test def
 grep "dotfile dst filename: `basename ${tmpd}/def`" ${tmpd}/def
 grep "dotfile dst dirname: `dirname ${tmpd}/def`" ${tmpd}/def
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

@@ -77,6 +77,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 mkdir -p ${tmpd}/program/ignore_me
 echo "some data" > ${tmpd}/program/a
@@ -117,9 +120,6 @@ echo "(1) found program/a ... good"
 echo "(1) didn't find program/b ... good"
 [[ -n "$(find ${tmpd}/program/ignore_me -name c)" ]] || exit 1
 echo "(1) found program/c ... good"
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

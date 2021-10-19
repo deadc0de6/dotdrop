@@ -54,6 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # single file
 echo 'unique' > ${tmpd}/uniquefile
 
@@ -120,9 +123,6 @@ set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} -L
 [ "$?" = "0" ] && exit 1
 set -e
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

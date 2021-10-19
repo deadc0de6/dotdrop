@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 touch ${tmpd}/.colors
 mkdir -p ${tmpd}/.mutt
@@ -102,9 +105,6 @@ cat ${cfg}
 
 cat ${cfg} | grep ${tmpd}/.mutt/colors >/dev/null 2>&1
 cat ${cfg} | grep ${tmpd}/.colors >/dev/null 2>&1
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

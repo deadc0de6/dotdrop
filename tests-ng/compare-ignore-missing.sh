@@ -52,6 +52,9 @@ touch ${dt}/folder/a
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # some files
 cp -r ${dt}/folder ${tmpd}/
 mkdir -p ${tmpd}/folder
@@ -150,9 +153,6 @@ set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --profile=p1
 [ "$?" != "0" ] && exit 1
 set -e
-
-# CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

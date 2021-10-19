@@ -56,6 +56,12 @@ func_file=`mktemp`
 func_file2=`mktemp`
 func_file3=`mktemp`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${func_file}"
+clear_on_exit "${func_file2}"
+clear_on_exit "${func_file3}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cfgext="${tmps}/ext.yaml"
@@ -150,9 +156,6 @@ set +e
 grep '^nope$' ${tmpd}/abc >/dev/null && exit 1
 set -e
 grep '^Falseadded$' ${tmpd}/abc >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${func_file} ${func_file2} ${func_file3}
 
 echo "OK"
 exit 0

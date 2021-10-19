@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create a shell script
 export TESTENV="this is my global testenv"
 scr=`mktemp --suffix='-dotdrop-tests' || mktemp -d`
@@ -63,6 +66,9 @@ export TESTENV2="this is my profile testenv"
 scr2=`mktemp --suffix='-dotdrop-tests' || mktemp -d`
 chmod +x ${scr2}
 echo -e "#!/bin/bash\necho $TESTENV2\n" >> ${scr2}
+
+clear_on_exit "${scr}"
+clear_on_exit "${scr2}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -123,9 +129,6 @@ grep "^${TESTENV2}" ${tmpd}/abc > /dev/null
 grep "^cba" ${tmpd}/abc >/dev/null
 
 #cat ${tmpd}/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${scr} ${scr2}
 
 echo "OK"
 exit 0

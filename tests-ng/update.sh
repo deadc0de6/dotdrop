@@ -54,6 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # single file
 echo 'unique' > ${tmpd}/uniquefile
 
@@ -125,9 +128,6 @@ mkdir -p ${basedir}/dotfiles/${tmpd}/dir1/file_in_dir1
 diff ${tmpd}/dir1 ${basedir}/dotfiles/${tmpd}/dir1
 diff ${tmpd}/uniquefile ${basedir}/dotfiles/${tmpd}/uniquefile
 [ ! -e ${basedir}/dotfiles/${tmpd}/dir1/sub1/sub2/sub3/file ] && echo "sub does not exist" && exit 1
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

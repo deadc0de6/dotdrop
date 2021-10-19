@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 mkdir -p ${tmps}/dotfiles/abc
 echo "test link_dotfile_default 1" > ${tmps}/dotfiles/abc/file1
@@ -158,9 +161,6 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ ! -e ${tmpd}/abc/file2 ] && echo "not exist" && exit 1
 [ ! -h ${tmpd}/abc/file2 ] && echo "not a symlink" && exit 1
 rm -rf ${tmpd}/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

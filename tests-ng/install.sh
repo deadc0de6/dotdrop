@@ -72,6 +72,9 @@ echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 echo "content" > ${basedir}/dotfiles/x
 
 # create the config file
@@ -119,9 +122,6 @@ cd ${ddpath} | printf "y\n" | ${bin} install -c ${cfg} -p p1 --verbose
 [ "$?" != "0" ] && exit 1
 
 has_rights "${tmpd}/x" "666"
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

@@ -57,6 +57,9 @@ echo "dotfiles destination: ${tmpd}"
 tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "workdir: ${tmpw}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -101,9 +104,6 @@ patch=`echo ${patch} | sed 's/^.*: //g'`
 echo "patching with: ${patch}"
 eval ${patch}
 #cat ${tmps}/dotfiles/abc
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpw}
 
 echo "OK"
 exit 0

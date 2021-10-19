@@ -56,6 +56,9 @@ echo "${yori}" > ${dt}/file_y
 tmpd=`mktemp -d --suffix='-dotdrop-tests-dest' || mktemp -d`
 touch ${tmpd}/file
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 cat > ${cfg} << _EOF
@@ -139,9 +142,6 @@ set +e
 cd ${ddpath} | ${bin} compare -c ${cfg} --verbose -p y
 [ "$?" = "0" ] && exit 1
 set -e
-
-# CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

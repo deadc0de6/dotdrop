@@ -52,6 +52,9 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -132,9 +135,6 @@ cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink1'   | head -1 |
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children'  | head -1 | grep ',link:link_children,'
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children2' | head -1 | grep ',link:link_children,'
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children3' | head -1 | grep ',link:nolink,'
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

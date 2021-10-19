@@ -54,6 +54,9 @@ echo "dotfiles source (dotpath): ${tmps}"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -143,9 +146,6 @@ cat ${tmps}/dotfiles/abc
 grep "^abc; ${tmps}/dotfiles/abc; f_abc$" ${tmps}/dotfiles/abc
 cat ${tmps}/dotfiles/ghi
 grep "^ghi; readvar; writevar$" ${tmps}/dotfiles/ghi
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0

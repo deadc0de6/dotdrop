@@ -54,6 +54,9 @@ echo "[+] dotpath dir: ${basedir}/dotfiles"
 # the dotfile to be imported
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${basedir}"
+clear_on_exit "${tmpd}"
+
 # originally imported directory
 echo 'unique' > ${tmpd}/uniquefile
 uniquefile_key="f_uniquefile"
@@ -97,9 +100,6 @@ cd ${ddpath} | ${bin} update -c ${cfg} -k -f --verbose
 
 # ensure all changes applied
 diff ${tmpd} ${basedir}/dotfiles/${tmpd}
-
-## CLEANING
-rm -rf ${basedir} ${tmpd}
 
 echo "OK"
 exit 0

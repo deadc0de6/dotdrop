@@ -57,6 +57,10 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # temporary
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 ###########
 # test globs in import_actions
 ###########
@@ -106,9 +110,6 @@ cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
 grep fromaction1 ${tmpa}/fromaction1
 [ ! -e  ${tmpa}/fromaction2 ] && echo "action2 not executed" && exit 1
 grep fromaction2 ${tmpa}/fromaction2
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

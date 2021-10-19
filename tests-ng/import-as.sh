@@ -45,17 +45,17 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 # this is the test
 ################################################################
 
-clean()
-{
-  rm -rf ${tmps} ${tmpd} ~/.dotdrop.test ~/.dotdrop-dotfiles-test
-}
-
 # the dotfile source
 tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
+
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "~/.dotdrop.test"
+clear_on_exit "~/.dotdrop-dotfiles-test"
 
 # create the dotfile
 mkdir -p ${tmpd}/adir
@@ -140,11 +140,8 @@ _EOF
 cd ${ddpath} | ${bin} import -b -c ${cfg} -p test -V ~/.dotdrop.test --as=~/.whatever
 #cat ${cfg}
 
-[ ! -e ~/.dotdrop-dotfiles-test/dotfiles/whatever ] && clean && echo 'tild imported' && exit 1
-cat ${cfg} | grep '~/.whatever' && clean && echo 'import with tild failed' && exit 1
-
-## CLEANING
-clean
+[ ! -e ~/.dotdrop-dotfiles-test/dotfiles/whatever ] && echo 'tild imported' && exit 1
+cat ${cfg} | grep '~/.whatever' && echo 'import with tild failed' && exit 1
 
 echo "OK"
 exit 0

@@ -68,6 +68,10 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -136,9 +140,6 @@ should_grep naked_var ${tmpa}/naked
 should_grep profile_var ${tmpa}/profile
 should_grep profile_var_2 ${tmpa}/profile
 should_grep "$USER" ${tmpa}/dyn
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

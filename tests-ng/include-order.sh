@@ -55,6 +55,10 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # temporary
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpa}"
+
 export DOTDROP_WORKERS=1
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -136,9 +140,6 @@ for ((i=0;i<${attempts};i++)); do
   rm ${tmpa}/cookie
   rm ${tmpd}/first ${tmpd}/second ${tmpd}/third
 done
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpa}
 
 echo "OK"
 exit 0

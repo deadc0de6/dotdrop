@@ -55,6 +55,11 @@ tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 # temp
 tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
+clear_on_exit "${tmpa}"
+
 # -----------------------------
 # test install
 # -----------------------------
@@ -311,9 +316,6 @@ cd ${ddpath} | ${bin} remove -c ${cfg} -f -p p1 -V --dry ${dotfiles}
 [ ! -e ${tmps}/dotfiles/dirchildren/f2 ] && echo "dry remove failed (7)" && exit 1
 
 diff ${cfg} ${tmpa}/config.yaml || (echo "dry remove failed (8)" && exit 1)
-
-## CLEANING
-rm -rf ${tmps} ${tmpd} ${tmpw} ${tmpa}
 
 echo "OK"
 exit 0

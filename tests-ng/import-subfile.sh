@@ -53,6 +53,9 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
 # create the dotfile
 mkdir -p ${tmpd}/adir
 echo "first" > ${tmpd}/adir/file1
@@ -83,9 +86,6 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir/file1
 #cat ${tmps}/dotfiles/${tmpd}/adir/file1
 [ ! -e ${tmps}/dotfiles/${tmpd}/adir/file1 ] && echo "not exist" && exit 1
 grep 'second' ${tmps}/dotfiles/${tmpd}/adir/file1 >/dev/null
-
-## CLEANING
-rm -rf ${tmps} ${tmpd}
 
 echo "OK"
 exit 0
