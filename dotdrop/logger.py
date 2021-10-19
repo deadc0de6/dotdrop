@@ -44,11 +44,15 @@ class Logger:
         cend = self._color(self.RESET)
         sys.stdout.write('\t{}->{} {}{}'.format(cstart, cend, string, end))
 
-    def emph(self, string):
+    def emph(self, string, stdout=True):
         """emphasis log"""
         cstart = self._color(self.EMPH)
         cend = self._color(self.RESET)
-        sys.stderr.write('{}{}{}'.format(cstart, string, cend))
+        content = '{}{}{}'.format(cstart, string, cend)
+        if not stdout:
+            sys.stderr.write(content)
+        else:
+            sys.stdout.write(content)
 
     def err(self, string, end='\n'):
         """error log"""
