@@ -90,6 +90,8 @@ if [ ! -z ${workers} ]; then
 fi
 
 # run bash tests
+workdir_tmp="no"
+[ -d "~/.config/dotdrop/tmp" ] && workdir_tmp="yes"
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
@@ -99,6 +101,7 @@ else
   export COVERAGE_FILE="${cur}/.coverage"
   tests-ng/tests-launcher.py 1
 fi
+[ "${workdir_tmp}" = "no" ] && rm -rf ~/.config/dotdrop/tmp
 
 ## test the doc with remark
 ## https://github.com/remarkjs/remark-validate-links
