@@ -647,7 +647,8 @@ class Installer:
         ret = utils.fastdiff(src, dst)
         if ret:
             self.log.dbg('content differ')
-        utils.removepath(tmp)
+        if content:
+            utils.removepath(tmp)
         return ret
 
     def _show_diff_before_write(self, src, dst, content=None):
