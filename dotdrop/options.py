@@ -56,18 +56,18 @@ USAGE = """
 {}
 
 Usage:
-  dotdrop install   [-VbtfndDa] [-c <path>] [-p <profile>]
-                                [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdfm]    [-c <path>] [-p <profile>] [-s <path>]
-                                [-l <link>] [-i <pattern>...] <path>...
-  dotdrop compare   [-LVbz]     [-c <path>] [-p <profile>]
-                                [-w <nb>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-VbfdkPz]  [-c <path>] [-p <profile>]
-                                [-w <nb>] [-i <pattern>...] [<path>...]
-  dotdrop remove    [-Vbfdk]    [-c <path>] [-p <profile>] [<path>...]
-  dotdrop files     [-VbTG]     [-c <path>] [-p <profile>]
-  dotdrop detail    [-Vb]       [-c <path>] [-p <profile>] [<key>...]
-  dotdrop profiles  [-VbG]      [-c <path>]
+  dotdrop install   [-VbtfndDaW] [-c <path>] [-p <profile>]
+                                 [-w <nb>] [<key>...]
+  dotdrop import    [-Vbdfm]     [-c <path>] [-p <profile>] [-s <path>]
+                                 [-l <link>] [-i <pattern>...] <path>...
+  dotdrop compare   [-LVbz]      [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
+  dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
+  dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
+  dotdrop profiles  [-VbG]       [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -93,6 +93,7 @@ Options:
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
   -w --workers=<nb>       Number of concurrent workers [default: 1].
+  -W --workdir-clear      Clear the workdir.
   -z --ignore-missing     Ignore files in installed folders that are missing.
   -v --version            Show version.
   -h --help               Show this screen.
@@ -244,6 +245,7 @@ class Options(AttrMonitor):
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
         self.install_force_chmod = self.force_chmod
+        self.install_clear_workdir = self.args['--workdir-clear'] or self.clear_workdir
 
     def _apply_args_compare(self):
         """compare specifics"""
