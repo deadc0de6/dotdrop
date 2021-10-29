@@ -79,30 +79,30 @@ profiles:
     - f_x
 _EOF
 
-echo "[+] install"
+echo "[+] install (1)"
 cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir" && exit 1
+[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
 
 # add file
 touch ${tmpw}/new
 
-echo "[+] re-install with clear-workdir"
+echo "[+] re-install with clear-workdir in cli"
 cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
 [ "$?" != "0" ] && exit 1
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir" && exit 1
-[ -e ${tmpw}/new ] && echo "workdir not cleared" && exit 1
+[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
+[ -e ${tmpw}/new ] && echo "workdir not cleared (1)" && exit 1
 
 # add file
 touch ${tmpw}/new
 
-echo "[+] re-install with config clear-workdir"
+echo "[+] re-install with config clear-workdir in config"
 cat > ${cfg} << _EOF
 config:
   backup: true
@@ -125,8 +125,8 @@ cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir" && exit 1
-[ -e ${tmpw}/new ] && echo "workdir not cleared" && exit 1
+[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
+[ -e ${tmpw}/new ] && echo "workdir not cleared (2)" && exit 1
 
 echo "OK"
 exit 0
