@@ -85,6 +85,7 @@ cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s)
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
+ls -l ${tmpd}/x
 [ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
 
 # add file
