@@ -133,6 +133,7 @@ class Options(AttrMonitor):
         self.link_on_import = None
         self.chmod_on_import = None
         self.check_version = None
+        self.clear_workdir = None
 
         # args parsing
         self.args = {}
@@ -245,7 +246,8 @@ class Options(AttrMonitor):
                                              if a.kind == Action.post]
         self.install_ignore = self.instignore
         self.install_force_chmod = self.force_chmod
-        self.install_clear_workdir = self.args['--workdir-clear'] or self.clear_workdir
+        self.install_clear_workdir = self.args['--workdir-clear'] or \
+            self.clear_workdir
 
     def _apply_args_compare(self):
         """compare specifics"""
