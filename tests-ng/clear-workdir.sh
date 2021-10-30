@@ -52,11 +52,14 @@ mkdir -p ${basedir}/dotfiles
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+if [ -z "${DOTDROP_WORKDIR}" ]; then
+  tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+  export DOTDROP_WORKDIR="${tmpw}"
+  clear_on_exit "${tmpw}"
+fi
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
-clear_on_exit "${tmpw}"
 
 echo "{{@@ profile @@}}" > ${basedir}/dotfiles/x
 
@@ -67,7 +70,6 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: ${tmpw}
 dotfiles:
   f_x:
     src: x
@@ -85,11 +87,10 @@ cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s)
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-ls -l ${tmpd}/x
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
+[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
 
 # add file
-touch ${tmpw}/new
+touch ${DOTDROP_WORKDIR}/new
 
 echo "[+] re-install with clear-workdir in cli"
 cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
@@ -97,11 +98,11 @@ cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
-[ -e ${tmpw}/new ] && echo "workdir not cleared (1)" && exit 1
+[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
+[ -e ${DOTDROP_WORKDIR}/new ] && echo "workdir not cleared (1)" && exit 1
 
 # add file
-touch ${tmpw}/new
+touch ${DOTDROP_WORKDIR}/new
 
 echo "[+] re-install with config clear-workdir in config"
 cat > ${cfg} << _EOF
@@ -109,7 +110,6 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-  workdir: ${tmpw}
   clear_workdir: true
 dotfiles:
   f_x:
@@ -126,8 +126,8 @@ cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
 
 [ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
 [ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${tmpw}/${tmpd}/x ] && echo "f_x not in workdir (${tmpw}/${tmpd})" && exit 1
-[ -e ${tmpw}/new ] && echo "workdir not cleared (2)" && exit 1
+[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
+[ -e ${DOTDROP_WORKDIR}/new ] && echo "workdir not cleared (2)" && exit 1
 
 echo "OK"
 exit 0
