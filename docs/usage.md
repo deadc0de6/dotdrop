@@ -87,6 +87,7 @@ Some available options:
   Note that actions are not executed in this mode.
 * `-a`/`--force-actions`: Force the execution of actions even if the dotfiles are not installed
 * `-f`/`--force`: Do not ask for any confirmation
+* `-W`/`--workdir-clear`: Clear the `workdir` before installing dotfiles (see config entry `clear_workdir`)
 
 To ignore specific patterns during installation, see [the ignore patterns](config.md#ignore-patterns).
 
