@@ -15,6 +15,7 @@ Entry    | Description | Default
 `banner` | Display the banner  | true
 `check_version` | Check if a new version of dotdrop is available on github | false
 `chmod_on_import` | Always add a chmod entry on newly imported dotfiles (see `--preserve-mode`) | false
+`clear_workdir` | On `install` clear the `workdir` before installing dotfiles (see `--workdir-clear`) | false
 `cmpignore` | List of patterns to ignore when comparing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
 `create` | Create a directory hierarchy when installing dotfiles if it doesn't exist | true
 `default_actions` | List of action keys to execute for all installed dotfiles (See [actions](config-details.md#actions-entry)) | -

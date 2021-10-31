@@ -82,7 +82,8 @@ fi
 unset DOTDROP_DEBUG=
 export DOTDROP_FORCE_NODEBUG=yes
 
-export DOTDROP_WORKDIR=/tmp/dotdrop-tests-workdir
+tmpworkdir="/tmp/dotdrop-tests-workdir"
+export DOTDROP_WORKDIR="${tmpworkdir}"
 
 if [ ! -z ${workers} ]; then
   DOTDROP_WORKERS=${workers}
@@ -90,8 +91,8 @@ if [ ! -z ${workers} ]; then
 fi
 
 # run bash tests
-workdir_tmp="no"
-[ -d "~/.config/dotdrop/tmp" ] && workdir_tmp="yes"
+workdir_tmp_exists="no"
+[ -d "~/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
@@ -101,7 +102,11 @@ else
   export COVERAGE_FILE="${cur}/.coverage"
   tests-ng/tests-launcher.py 1
 fi
-[ "${workdir_tmp}" = "no" ] && rm -rf ~/.config/dotdrop/tmp
+
+# clear workdir
+[ "${workdir_tmp_exists}" = "no" ] && rm -rf ~/.config/dotdrop/tmp
+# clear temp workdir
+rm -rf "${tmpworkdir}"
 
 ## test the doc with remark
 ## https://github.com/remarkjs/remark-validate-links

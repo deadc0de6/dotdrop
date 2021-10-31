@@ -317,6 +317,14 @@ def cmd_install(opts):
 
     installed = []
 
+    # clear the workdir
+    if opts.install_clear_workdir and not opts.dry:
+        LOG.dbg('clearing the workdir under {}'.format(opts.workdir))
+        for root, _, files in os.walk(opts.workdir):
+            for file in files:
+                fpath = os.path.join(root, file)
+                removepath(fpath, logger=LOG)
+
     # execute profile pre-action
     LOG.dbg('run {} profile pre actions'.format(len(pro_pre_actions)))
     templ = _get_templater(opts)
