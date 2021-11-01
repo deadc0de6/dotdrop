@@ -112,6 +112,9 @@ To ignore specific patterns, see [the ignore patterns](config.md#ignore-patterns
 
 To completely ignore all files not present in `dotpath` see [Ignore missing](#ignore-missing).
 
+If you want to get notified on files present in the `workdir` but not tracked
+by dotdrop see the [compare_workdir](config-format.md).
+
 For more options, see the usage with `dotdrop --help`.
 
 ## List profiles
