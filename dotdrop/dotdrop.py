@@ -8,6 +8,7 @@ entry point
 import os
 import sys
 import time
+import fnmatch
 from concurrent import futures
 
 # local imports
@@ -20,7 +21,7 @@ from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
 from dotdrop.utils import get_tmpdir, removepath, \
     uniq_list, patch_ignores, dependencies_met, \
-    adapt_workers, check_version
+    adapt_workers, check_version, pivot_path
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, \
     UndefinedException, UnmetDependency
@@ -379,6 +380,44 @@ def cmd_install(opts):
     return True
 
 
+def _workdir_enum(opts):
+    workdir_files = []
+    for root, dirs, files in os.walk(opts.workdir):
+        for file in files:
+            fpath = os.path.join(root, file)
+            workdir_files.append(fpath)
+
+    for dotfile in opts.dotfiles:
+        src = os.path.join(opts.dotpath, dotfile.src)
+        if dotfile.link == LinkTypes.NOLINK:
+            # ignore not link files
+            continue
+        if not Templategen.is_template(src):
+            # ignore not template
+            continue
+        newpath = pivot_path(dotfile.dst, opts.workdir,
+                             striphome=True, logger=None)
+        if os.path.isdir(newpath):
+            # recursive
+            pattern = '{}/*'.format(newpath)
+            files = workdir_files.copy()
+            for f in files:
+                if fnmatch.fnmatch(f, pattern):
+                    workdir_files.remove(f)
+            # only checks children
+            children = [f.path for f in os.scandir(newpath)]
+            for c in children:
+                if c in workdir_files:
+                    workdir_files.remove(c)
+        else:
+            if newpath in workdir_files:
+                workdir_files.remove(newpath)
+    for w in workdir_files:
+        line = '=> \"{}\" does not exist in dotdrop'
+        LOG.log(line.format(w))
+    return len(workdir_files)
+
+
 def cmd_compare(opts, tmp):
     """compare dotfiles and return True if all identical"""
     dotfiles = opts.dotfiles
@@ -423,6 +462,10 @@ def cmd_compare(opts, tmp):
             if not _dotfile_compare(opts, dotfile, tmp):
                 same = False
             cnt += 1
+
+    # TODO
+    if  _workdir_enum(opts) > 0:
+        same = False
 
     LOG.log('\n{} dotfile(s) compared.'.format(cnt))
     return same

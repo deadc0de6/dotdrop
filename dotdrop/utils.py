@@ -478,3 +478,17 @@ def check_version():
     if version.parse(VERSION) < version.parse(latest):
         msg = 'A new version of dotdrop is available ({})'
         LOG.warn(msg.format(latest))
+
+
+def pivot_path(path, newdir, striphome=False, logger=None):
+    """change path to be under newdir"""
+    if logger:
+        logger.dbg('pivot new dir: \"{}\"'.format(newdir))
+        logger.dbg('strip home: {}'.format(striphome))
+    if striphome:
+        path = strip_home(path)
+    sub = path.lstrip(os.sep)
+    new = os.path.join(newdir, sub)
+    if logger:
+        logger.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
+    return new
