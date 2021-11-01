@@ -382,7 +382,7 @@ def cmd_install(opts):
 
 def _workdir_enum(opts):
     workdir_files = []
-    for root, dirs, files in os.walk(opts.workdir):
+    for root, _, files in os.walk(opts.workdir):
         for file in files:
             fpath = os.path.join(root, file)
             workdir_files.append(fpath)
@@ -401,20 +401,20 @@ def _workdir_enum(opts):
             # recursive
             pattern = '{}/*'.format(newpath)
             files = workdir_files.copy()
-            for f in files:
-                if fnmatch.fnmatch(f, pattern):
-                    workdir_files.remove(f)
+            for file in files:
+                if fnmatch.fnmatch(file, pattern):
+                    workdir_files.remove(file)
             # only checks children
             children = [f.path for f in os.scandir(newpath)]
-            for c in children:
-                if c in workdir_files:
-                    workdir_files.remove(c)
+            for child in children:
+                if child in workdir_files:
+                    workdir_files.remove(child)
         else:
             if newpath in workdir_files:
                 workdir_files.remove(newpath)
-    for w in workdir_files:
+    for wfile in workdir_files:
         line = '=> \"{}\" does not exist in dotdrop'
-        LOG.log(line.format(w))
+        LOG.log(line.format(wfile))
     return len(workdir_files)
 
 
@@ -463,8 +463,7 @@ def cmd_compare(opts, tmp):
                 same = False
             cnt += 1
 
-    # TODO
-    if  _workdir_enum(opts) > 0:
+    if _workdir_enum(opts) > 0:
         same = False
 
     LOG.log('\n{} dotfile(s) compared.'.format(cnt))
