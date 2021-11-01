@@ -76,7 +76,7 @@ config:
   create: true
   dotpath: dotfiles
   workdir: ${tmpw}
-  workdir_compare: true
+  compare_workdir: true
 dotfiles:
   f_a:
     dst: ${tmpd}/a
