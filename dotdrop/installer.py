@@ -224,7 +224,7 @@ class Installer:
         self.totemp = None
 
         # install the dotfile to a temp directory
-        tmpdst = self._pivot_path(dst, tmpdir)
+        tmpdst = utils.pivot_path(dst, tmpdir, logger=self.log)
         ret, err = self.install(templater, src, tmpdst,
                                 LinkTypes.NOLINK,
                                 is_template=is_template,
@@ -260,7 +260,8 @@ class Installer:
         if is_template:
             self.log.dbg('is a template')
             self.log.dbg('install to {}'.format(self.workdir))
-            tmp = self._pivot_path(dst, self.workdir, striphome=True)
+            tmp = utils.pivot_path(dst, self.workdir,
+                                   striphome=True, logger=self.log)
             ret, err = self.install(templater, src, tmp,
                                     LinkTypes.NOLINK,
                                     actionexec=actionexec,
@@ -326,7 +327,8 @@ class Installer:
                 self.log.dbg('child is a template')
                 self.log.dbg('install to {} and symlink'
                              .format(self.workdir))
-                tmp = self._pivot_path(subdst, self.workdir, striphome=True)
+                tmp = utils.pivot_path(subdst, self.workdir,
+                                       striphome=True, logger=self.log)
                 ret2, err2 = self.install(templater, subsrc, tmp,
                                           LinkTypes.NOLINK,
                                           actionexec=actionexec,
@@ -697,17 +699,6 @@ class Installer:
         dst = path.rstrip(os.sep) + self.backup_suffix
         self.log.log('backup {} to {}'.format(path, dst))
         os.rename(path, dst)
-
-    def _pivot_path(self, path, newdir, striphome=False):
-        """change path to be under newdir"""
-        self.log.dbg('pivot new dir: \"{}\"'.format(newdir))
-        self.log.dbg('strip home: {}'.format(striphome))
-        if striphome:
-            path = utils.strip_home(path)
-        sub = path.lstrip(os.sep)
-        new = os.path.join(newdir, sub)
-        self.log.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
-        return new
 
     def _exec_pre_actions(self, actionexec):
         """execute action executor"""
