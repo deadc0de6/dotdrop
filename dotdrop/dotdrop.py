@@ -463,7 +463,7 @@ def cmd_compare(opts, tmp):
                 same = False
             cnt += 1
 
-    if _workdir_enum(opts) > 0:
+    if opts.compare_workdir and _workdir_enum(opts) > 0:
         same = False
 
     LOG.log('\n{} dotfile(s) compared.'.format(cnt))
