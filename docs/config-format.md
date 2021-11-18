@@ -45,7 +45,7 @@ Entry    | Description | Default
 
 ## dotfiles entry
 
-The **dotfiles** entry (mandatory) contains a YAML object with subobjects for the dotfiles managed by dotdrop.  The entries in the subobjects are as follows:
+The **dotfiles** entry (mandatory) contains a YAML object with sub-objects for the dotfiles managed by dotdrop.  The entries in the sub-objects are as follows:
 
 Entry    | Description
 -------- | -------------
@@ -88,7 +88,7 @@ Entry    | Description
 
 ## profiles entry
 
-The **profiles** entry (mandatory) contains a YAML object with subobjects for the profiles for the different dotfiles that need to be managed.  The entries in the subobjects are as follows:
+The **profiles** entry (mandatory) contains a YAML object with sub-objects for the profiles for the different dotfiles that need to be managed.  The entries in the sub-objects are as follows:
 
 Entry    | Description
 -------- | -------------
