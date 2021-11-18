@@ -1444,17 +1444,17 @@ class CfgYaml:
             return {**low, **high}
 
         final = high.copy()
-        for k, v in low.items():
-            if isinstance(v, dict):
+        for k, val in low.items():
+            if isinstance(val, dict):
                 # content is dict, recurse
                 if k not in final:
                     final[k] = {}
-                final[k] = cls._merge_dict(v, final[k], deep=True)
-            elif isinstance(v, list):
+                final[k] = cls._merge_dict(val, final[k], deep=True)
+            elif isinstance(val, list):
                 # content is list, merge
                 if k not in final:
                     final[k] = []
-                final[k] += v
+                final[k] += val
             else:
                 # don't know how to handle
                 err = 'unable to merge'
