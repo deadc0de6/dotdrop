@@ -137,20 +137,26 @@ mkdir -p ${tmps}/dotfiles-other/subdir/sub
 echo "subsub" > ${tmps}/dotfiles-other/subdir/sub/asub
 echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles-other/subdir/sub/asub
 
-# install
-cd ${ddpath} | ${bin} files -c ${cfg1} -p p0 -V | grep f_def
-cd ${ddpath} | ${bin} files -c ${cfg1} -p p1 -V | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg1} -p p2 -V | grep f_def
-cd ${ddpath} | ${bin} files -c ${cfg1} -p p3 -V | grep f_zzz
-cd ${ddpath} | ${bin} files -c ${cfg1} -p pup -V | grep f_sub
-cd ${ddpath} | ${bin} files -c ${cfg1} -p psubsub -V | grep f_sub
+# files comparison
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p p0 | grep '^f_def'
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p p1 | grep '^f_abc'
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p p2 | grep '^f_def'
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p p3 | grep '^f_zzz'
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p pup | grep '^f_sub'
+cd ${ddpath} | ${bin} files -c ${cfg1} -G -p psubsub | grep '^f_sub'
 
 # test compare too
 cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V -f
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
 
+[ ! -s ${tmpd}/def ] && echo "def not installed" && exit 1
+[ ! -s ${tmpd}/subdir/sub/asub ] && echo "asub not installed" && exit 1
+
 # test with non-existing dotpath this time
+
 rm -rf ${tmps}/dotfiles
+rm -rf ${tmpd}/*
+
 cat > ${cfg1} << _EOF
 config:
   backup: true
@@ -175,8 +181,71 @@ profiles:
     dotfiles:
     - f_asub
 _EOF
+
 cd ${ddpath} | ${bin} install -c ${cfg1} -p p2 -V -f
 cd ${ddpath} | ${bin} compare -c ${cfg1} -p p2 -V
+
+# test with same profile defined in both
+rm -rf ${tmps}/dotfiles
+rm -rf ${tmpd}/*
+
+cat > ${cfg1} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  import_configs:
+  - ${cfg2}
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+_EOF
+cat > ${cfg2} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles-other
+dotfiles:
+  f_def:
+    dst: ${tmpd}/def
+    src: def
+profiles:
+  p1:
+    dotfiles:
+    - f_def
+_EOF
+
+# create the source
+mkdir -p ${tmps}/dotfiles/
+
+echo "abc" > ${tmps}/dotfiles/abc
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/abc
+rm -f ${tmpd}/abc
+
+echo "def" > ${tmps}/dotfiles/def
+echo "{{@@ _dotfile_abs_dst @@}}" >> ${tmps}/dotfiles/def
+rm -f ${tmpd}/def
+
+# files listing
+echo "file listing"
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p1 -G | grep '^f_abc'
+cd ${ddpath} | ${bin} files -c ${cfg1} -p p1 -G | grep '^f_def'
+
+# install and compare
+echo "installing ..."
+cd ${ddpath} | ${bin} install -c ${cfg1} -p p1 -V -f
+echo "comparing ..."
+cd ${ddpath} | ${bin} compare -c ${cfg1} -p p1 -V
+
+# check exists
+[ ! -s ${tmpd}/abc ] && echo "(same) abc not installed" && exit 1
+[ ! -s ${tmpd}/def ] && echo "(same) def not installed" && exit 1
+
 
 echo "OK"
 exit 0

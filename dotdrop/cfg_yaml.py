@@ -984,7 +984,8 @@ class CfgYaml:
 
         # merge top entries
         self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
-        self.profiles = self._merge_dict(self.profiles, sub.profiles)
+        self.profiles = self._merge_dict(self.profiles, sub.profiles,
+                                         deep=True)
         self.actions = self._merge_dict(self.actions, sub.actions)
         self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
         self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
@@ -1427,13 +1428,38 @@ class CfgYaml:
         return list(chain.from_iterable(processed_paths))
 
     @classmethod
-    def _merge_dict(cls, high, low):
-        """merge high and low dict"""
+    def _merge_dict(cls, high, low, deep=False):
+        """
+        both dict must be the same form/type
+        if deep is True, then merge recursively
+        """
         if not high:
             high = {}
         if not low:
             low = {}
-        return {**low, **high}
+        if not high and not low:
+            return {}
+
+        if not deep:
+            return {**low, **high}
+
+        final = high.copy()
+        for k, v in low.items():
+            if isinstance(v, dict):
+                # content is dict, recurse
+                if k not in final:
+                    final[k] = {}
+                final[k] = cls._merge_dict(v, final[k], deep=True)
+            elif isinstance(v, list):
+                # content is list, merge
+                if k not in final:
+                    final[k] = []
+                final[k] += v
+            else:
+                # don't know how to handle
+                err = 'unable to merge'
+                raise YamlException(err)
+        return final
 
     @classmethod
     def _get_entry(cls, dic, key, mandatory=True):
@@ -1500,7 +1526,7 @@ class CfgYaml:
             if self._debug:
                 msg = 'normalizing relative to cfg: {} -> {}'
                 self._dbg(msg.format(path, ret))
-            return ret
+            path = ret
         ret = os.path.normpath(path)
         if self._debug and path != ret:
             self._dbg('normalizing: {} -> {}'.format(path, ret))
