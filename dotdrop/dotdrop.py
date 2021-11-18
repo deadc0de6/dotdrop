@@ -306,10 +306,14 @@ def cmd_install(opts):
         # filtered dotfiles to install
         uniq = uniq_list(opts.install_keys)
         dotfiles = [d for d in dotfiles if d.key in uniq]
+
     if not dotfiles:
         msg = 'no dotfile to install for this profile (\"{}\")'
         LOG.warn(msg.format(opts.profile))
         return False
+
+    LOG.dbg('dotfiles registered for install: {}'.format(
+        [k.key for k in dotfiles]))
 
     # the installer
     tmpdir = None

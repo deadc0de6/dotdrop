@@ -45,6 +45,7 @@ class Templategen:
         self.base = base.rstrip(os.sep)
         self.debug = debug
         self.log = Logger(debug=self.debug)
+        self.log.dbg('loading templategen')
         self.variables = {}
         loader1 = FileSystemLoader(self.base)
         loader2 = FunctionLoader(self._template_loader)
