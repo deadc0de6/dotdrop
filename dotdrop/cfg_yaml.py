@@ -181,7 +181,8 @@ class CfgYaml:
         self._redefine_templater()
 
         if self._debug:
-            self._debug_dict('current variables defined', self.variables)
+            title = 'current variables defined'
+            self._debug_dict(title, self.variables)
 
         # parse the "profiles" block
         self.profiles = self._parse_blk_profiles(self._yaml_dict)
@@ -197,7 +198,8 @@ class CfgYaml:
         # template variables
         self.variables = self._template_dict(self.variables)
         if self._debug:
-            self._debug_dict('current variables defined', self.variables)
+            title = 'variables defined (after template dict)'
+            self._debug_dict(title, self.variables)
 
         ##################################################
         # template the "include" entries
@@ -205,7 +207,8 @@ class CfgYaml:
 
         self._template_include_entry()
         if self._debug:
-            self._debug_dict('current variables defined', self.variables)
+            title = 'variables defined (after template include)'
+            self._debug_dict(title, self.variables)
 
         ##################################################
         # parse the other blocks
@@ -1583,10 +1586,16 @@ class CfgYaml:
         if not elems:
             return
         for k, val in elems.items():
-            self._dbg('\t- \"{}\": {}'.format(k, val))
+            if isinstance(val, dict):
+                self._dbg('  - \"{}\"'.format(k))
+                for x, sub in val.items():
+                    self._dbg('    * {}: \"{}\"'.format(x, sub))
+            else:
+                self._dbg('  - \"{}\": {}'.format(k, val))
 
     def _dbg(self, content):
-        pre = os.path.basename(self._path)
+        directory = os.path.basename(os.path.dirname(self._path))
+        pre = os.path.join(directory, os.path.basename(self._path))
         self._log.dbg('[{}] {}'.format(pre, content))
 
     def _save_uservariables(self, uvars):
