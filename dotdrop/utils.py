@@ -273,6 +273,8 @@ def must_ignore(paths, ignores, debug=False):
 def uniq_list(a_list):
     """unique elements of a list while preserving order"""
     new = []
+    if not a_list:
+        return new
     for elem in a_list:
         if elem not in new:
             new.append(elem)
