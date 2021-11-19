@@ -1600,8 +1600,8 @@ class CfgYaml:
         for k, val in elems.items():
             if isinstance(val, dict):
                 self._dbg('  - \"{}\"'.format(k))
-                for x, sub in val.items():
-                    self._dbg('    * {}: \"{}\"'.format(x, sub))
+                for subkey, sub in val.items():
+                    self._dbg('    * {}: \"{}\"'.format(subkey, sub))
             else:
                 self._dbg('  - \"{}\": {}'.format(k, val))
 
