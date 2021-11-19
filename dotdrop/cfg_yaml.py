@@ -106,8 +106,8 @@ class CfgYaml:
         """
         config parser
         @path: config file path
-        @profile: the selected profile
-        @addprofiles: included profiles
+        @profile: the selected profile names
+        @addprofiles: included profiles names (list)
         @reloading: true when reloading
         @debug: debug flag
         """
@@ -139,6 +139,11 @@ class CfgYaml:
             if self._debug:
                 self._dbg(err)
             raise YamlException(err)
+
+        self._dbg('START of config parsing')
+        self._dbg('reloading: {}'.format(reloading))
+        self._dbg('profile: {}'.format(profile))
+        self._dbg('included profiles: {}'.format(','.join(self._inc_profiles)))
 
         self._yaml_dict = self._load_yaml(self._path)
         # live patch deprecated entries
@@ -189,7 +194,8 @@ class CfgYaml:
 
         # include the profile's variables/dynvariables last
         # as it overwrites existing ones
-        self._inc_profiles, pvar, pdvar = self._get_profile_included_vars()
+        incpro, pvar, pdvar = self._get_profile_included_vars()
+        self._inc_profiles = uniq_list(self._inc_profiles + incpro)
         self._add_variables(pvar, prio=True)
         self._add_variables(pdvar, shell=True, prio=True)
         self._profilevarskeys.extend(pvar.keys())
@@ -267,6 +273,7 @@ class CfgYaml:
         if self._debug:
             self._dbg('########### {} ###########'.format('final config'))
             self._debug_entries()
+            self._dbg('END of config parsing')
 
     ########################################################
     # public methods
@@ -970,6 +977,8 @@ class CfgYaml:
         """import config from path"""
         if self._debug:
             self._dbg('import config from {}'.format(path))
+            self._dbg('profile: {}'.format(self._profile))
+            self._dbg('included profiles: {}'.format(self._inc_profiles))
         sub = CfgYaml(path, profile=self._profile,
                       addprofiles=self._inc_profiles,
                       debug=self._debug)
@@ -1128,7 +1137,7 @@ class CfgYaml:
         """load a yaml file to a dict"""
         content = {}
         if self._debug:
-            self._dbg('----------start:{}----------'.format(path))
+            self._dbg('----------dump:{}----------'.format(path))
             cfg = '\n'
             with open(path, 'r', encoding='utf8') as file:
                 for line in file:
@@ -1272,6 +1281,8 @@ class CfgYaml:
         pro = self.profiles.get(self._profile, [])
         if pro:
             pdfs = list(pro.get(self.key_profile_dotfiles, []))
+
+        # and any included profiles
         for addpro in self._inc_profiles:
             pro = self.profiles.get(addpro, [])
             if not pro:
@@ -1280,6 +1291,7 @@ class CfgYaml:
             pdfs.extend(pdfsalt)
             pdfs = uniq_list(pdfs)
 
+        # if ALL is defined
         if self.key_all not in pdfs:
             # take a subset of the dotfiles
             newdotfiles = {}
