@@ -42,12 +42,13 @@ $ dotdrop import ~/.xinitrc
 ```
 
 You can control how the dotfile key is generated in the config file
-with the config entry `longkey` (defaults to *false*).
+with the following config entries:
 
-Two formats are available:
-
-* *short format* (default): take the shortest unique path
-* *long format*: take the full path
+* `longkey`
+  * *short format* (default): take the shortest unique path
+  * *long format*: take the full path
+* `key_prefix`: defines if the key is prefixed with `f<key_separator>` for file and `d<key_separator>` for directory
+* `key_separator`: defines the separator to use (defaults to `_`)
 
 For example, `~/.config/awesome/rc.lua` gives:
 

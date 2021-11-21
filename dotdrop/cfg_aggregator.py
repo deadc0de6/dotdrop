@@ -28,7 +28,6 @@ class CfgAggregator:
 
     file_prefix = 'f'
     dir_prefix = 'd'
-    key_sep = '_'
 
     def __init__(self, path, profile_key, debug=False, dry=False):
         """
@@ -228,6 +227,8 @@ class CfgAggregator:
 
         # settings
         self.settings = Settings.parse(None, self.cfgyaml.settings)
+        self.key_prefix = self.settings.key_prefix
+        self.key_separator = self.settings.key_separator
 
         # dotfiles
         self.dotfiles = Dotfile.parse_dict(self.cfgyaml.dotfiles)
@@ -333,8 +334,12 @@ class CfgAggregator:
         absolute path of path
         """
         dirs = self._split_path_for_key(path)
-        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
-        key = self.key_sep.join([prefix] + dirs)
+        prefix = []
+        if self.key_prefix:
+            prefix = [self.file_prefix]
+            if os.path.isdir(path):
+                prefix = [self.dir_prefix]
+        key = self.key_separator.join(prefix + dirs)
         return self._uniq_key(key, keys)
 
     def _get_short_key(self, path, keys):
@@ -344,11 +349,15 @@ class CfgAggregator:
         """
         dirs = self._split_path_for_key(path)
         dirs.reverse()
-        prefix = self.dir_prefix if os.path.isdir(path) else self.file_prefix
+        prefix = []
+        if self.key_prefix:
+            prefix = [self.file_prefix]
+            if os.path.isdir(path):
+                prefix = [self.dir_prefix]
         entries = []
         for dri in dirs:
             entries.insert(0, dri)
-            key = self.key_sep.join([prefix] + entries)
+            key = self.key_separator.join(prefix + entries)
             if key not in keys:
                 return key
         return self._uniq_key(key, keys)
@@ -360,7 +369,7 @@ class CfgAggregator:
         while newkey in keys:
             # if unable to get a unique path
             # get a random one
-            newkey = self.key_sep.join([key, str(cnt)])
+            newkey = self.key_separator.join([key, str(cnt)])
             cnt += 1
         return newkey
 

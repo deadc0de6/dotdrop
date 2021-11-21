@@ -134,6 +134,8 @@ class Options(AttrMonitor):
         self.chmod_on_import = None
         self.check_version = None
         self.clear_workdir = None
+        self.key_prefix = None
+        self.key_separator = None
 
         # args parsing
         self.args = {}
@@ -223,8 +225,9 @@ class Options(AttrMonitor):
         self.conf = Cfg(self.confpath, self.profile, debug=self.debug,
                         dry=self.dry)
         # transform the config settings to self attribute
-        debug_dict('effective settings', self.conf.get_settings(), self.debug)
-        for k, val in self.conf.get_settings().items():
+        settings = self.conf.get_settings()
+        debug_dict('effective settings', settings, self.debug)
+        for k, val in settings.items():
             setattr(self, k, val)
 
     def _apply_args_files(self):

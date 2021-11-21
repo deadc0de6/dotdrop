@@ -33,6 +33,8 @@ Entry    | Description | Default
 `import_variables` | List of paths to load variables from (absolute paths or relative to the config file location; see [Import variables from file](config-details.md#import_variables-entry)) | -
 `instignore` | List of patterns to ignore when installing, applied to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config.md#ignore-patterns)) | -
 `keepdot` | Preserve leading dot when importing hidden file in the `dotpath` | false
+`key_prefix` | Prefix dotfile key on `import` with `f<key_separator>` for file and `d<key_separator>` for directory | true
+`key_separator` | Separator to use on dotfile key generation on `import` | `_`
 `link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (See [Symlinking dotfiles](config.md#symlinking-dotfiles)) | `nolink`
 `link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config.md#symlinking-dotfiles)) | `nolink`
 `longkey` | Use long keys for dotfiles when importing (See [Import dotfiles](usage.md#import-dotfiles)) | false

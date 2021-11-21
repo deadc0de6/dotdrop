@@ -48,6 +48,8 @@ class Settings(DictParser):
     key_check_version = 'check_version'
     key_clear_workdir = 'clear_workdir'
     key_compare_workdir = 'compare_workdir'
+    key_key_prefix = 'key_prefix'
+    key_key_separator = 'key_separator'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -69,7 +71,8 @@ class Settings(DictParser):
                  ignore_missing_in_dotdrop=False,
                  force_chmod=False, chmod_on_import=False,
                  check_version=False, clear_workdir=False,
-                 compare_workdir=False):
+                 compare_workdir=False, key_prefix=True,
+                 key_separator='_'):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -102,6 +105,8 @@ class Settings(DictParser):
         self.check_version = check_version
         self.clear_workdir = clear_workdir
         self.compare_workdir = compare_workdir
+        self.key_prefix = key_prefix
+        self.key_separator = key_separator
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""
@@ -131,6 +136,8 @@ class Settings(DictParser):
             self.key_check_version: self.check_version,
             self.key_clear_workdir: self.clear_workdir,
             self.key_compare_workdir: self.compare_workdir,
+            self.key_key_prefix: self.key_prefix,
+            self.key_key_separator: self.key_separator,
         }
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)

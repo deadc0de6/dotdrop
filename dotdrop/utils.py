@@ -246,7 +246,7 @@ def must_ignore(paths, ignores, debug=False):
             nign = nign[1:]
             if debug:
                 msg = 'trying to match :\"{}\" with non-ignore-pattern:\"{}\"'
-                LOG.dbg(msg.format(path, nign))
+                LOG.dbg(msg.format(path, nign), force=True)
             if fnmatch.fnmatch(path, nign):
                 if debug:
                     msg = 'negative ignore \"{}\" match: {}'.format(nign, path)
@@ -444,23 +444,23 @@ def debug_list(title, elems, debug):
     """pretty print list"""
     if not debug:
         return
-    LOG.dbg('{}:'.format(title))
+    LOG.dbg('{}:'.format(title), force=debug)
     for elem in elems:
-        LOG.dbg('\t- {}'.format(elem))
+        LOG.dbg('\t- {}'.format(elem), force=debug)
 
 
 def debug_dict(title, elems, debug):
     """pretty print dict"""
     if not debug:
         return
-    LOG.dbg('{}:'.format(title))
+    LOG.dbg('{}:'.format(title), force=debug)
     for k, val in elems.items():
         if isinstance(val, list):
-            LOG.dbg('\t- \"{}\":'.format(k))
+            LOG.dbg('\t- \"{}\":'.format(k), force=debug)
             for i in val:
-                LOG.dbg('\t\t- {}'.format(i))
+                LOG.dbg('\t\t- {}'.format(i), force=debug)
         else:
-            LOG.dbg('\t- \"{}\": {}'.format(k, val))
+            LOG.dbg('\t- \"{}\": {}'.format(k, val), force=debug)
 
 
 def check_version():
