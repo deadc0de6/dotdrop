@@ -1,18 +1,46 @@
 /*
- * from https://github.com/readthedocs/sphinx_rtd_theme/issues/117#issuecomment-153083280
+ * from https://github.com/AaltoSciComp/scicomp-docs/blob/master/_static/theme_overrides.css
  */
 
-/* override table width restrictions */
+/* override table width restrictions:
+   https://github.com/rtfd/sphinx_rtd_theme/issues/117 */
+.wy-table-responsive table td, .wy-table-responsive table th {
+  white-space: normal !important;
+}
+
 @media screen and (min-width: 767px) {
-
-  .wy-table-responsive table td {
-    /* !important prevents the common CSS stylesheets from
-       overriding this as on RTD they are loaded after this stylesheet */
-    white-space: normal !important;
-  }
-
   .wy-table-responsive {
-    overflow: visible !important;
+    max-width: 100%  !important;
+    overflow: visible  !important;
   }
+}
 
+/* RST has an extra space after sub-lists in unordered lists.  This */
+/* fixes that annoying problem. */
+.rst-content .section ul p {
+    margin-bottom: 0px;
+}
+.rst-content .section li ol {
+    margin-bottom: 0px;
+}
+
+/* Strikethrough */
+/* https://stackoverflow.com/questions/6518788/rest-strikethrough */
+.strike {
+    text-decoration: line-through;
+}
+
+/*  */
+.wy-side-nav-search > a img.logo, .wy-side-nav-search .wy-dropdown > a img.logo {
+    max-width: 70%;
+}
+
+details summary {
+    font-size: large;
+    font-weight: bold;
+    margin-bottom:12px
+}
+
+details {
+    margin-bottom:20px
 }
