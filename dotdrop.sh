@@ -36,7 +36,7 @@ hash ${pybin} 2>/dev/null || pybin="python"
 [[ "`${pybin} -V 2>&1`" =~ "Python 3" ]] || { echo "install Python 3" && exit 1; }
 
 # launch dotdrop
-PYTHONPATH=dotdrop ${pybin} -m dotdrop.dotdrop "${args[@]}"
+PYTHONPATH=dotdrop:${PYTHONPATH} ${pybin} -m dotdrop.dotdrop "${args[@]}"
 ret="$?"
 
 # pivot back
