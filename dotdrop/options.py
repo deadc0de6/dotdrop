@@ -326,7 +326,7 @@ class Options(AttrMonitor):
         if self.args['--link']:
             # overwrite default import link with cli switch
             link = self.args['--link']
-            if link not in OPT_LINK.keys():
+            if link not in OPT_LINK:
                 self.log.err('bad option for --link: {}'.format(link))
                 sys.exit(USAGE)
             self.import_link = OPT_LINK[link]
