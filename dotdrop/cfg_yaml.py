@@ -102,13 +102,14 @@ class CfgYaml:
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
     def __init__(self, path, profile=None, addprofiles=None,
-                 reloading=False, debug=False):
+                 reloading=False, debug=False, imported_configs=None):
         """
         config parser
         @path: config file path
         @profile: the selected profile names
         @addprofiles: included profiles names (list)
         @reloading: true when reloading
+        @imported_configs: paths of config files that have been imported so far
         @debug: debug flag
         """
         self._path = os.path.abspath(path)
@@ -124,6 +125,8 @@ class CfgYaml:
         self._profilevarskeys = []
         # included profiles
         self._inc_profiles = addprofiles or []
+        # imported configs
+        self.imported_configs = imported_configs or []
 
         # init the dictionaries
         self.settings = {}
@@ -981,7 +984,8 @@ class CfgYaml:
             self._dbg('included profiles: {}'.format(self._inc_profiles))
         sub = CfgYaml(path, profile=self._profile,
                       addprofiles=self._inc_profiles,
-                      debug=self._debug)
+                      debug=self._debug,
+                      imported_configs=self.imported_configs)
 
         # settings are ignored from external file
         # except for filter_file and func_file
@@ -1003,6 +1007,9 @@ class CfgYaml:
         self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
         self._clear_profile_vars(sub.variables)
 
+        self.imported_configs.append(path)
+        self.imported_configs += sub.imported_configs
+
         if self._debug:
             self._debug_dict('add import_configs var', sub.variables)
         self._add_variables(sub.variables, prio=True)
@@ -1015,6 +1022,10 @@ class CfgYaml:
             return
         paths = self._resolve_paths(imp)
         for path in paths:
+            if path in self.imported_configs:
+                err = '{} imported more than once in {}'.format(path,
+                                                                self._path)
+                raise YamlException(err)
             self._import_config(path)
 
     def _import_sub(self, path, key, mandatory=False, patch_func=None):
