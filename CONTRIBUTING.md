@@ -140,6 +140,7 @@ see [this](docs/config.md#variables).
 * Config files do not have access to variables defined above in the import tree
 * Actions/transformations using variables are resolved at runtime
   (when the action/transformation is executed) and not when loading the config
+* The same config file cannot be imported twice
 
 This will result in `dvar0 = "test"` and `var0 = "echo test"` (**not** `var0 = test`):
 ```yaml
