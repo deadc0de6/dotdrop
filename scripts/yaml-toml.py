@@ -10,6 +10,7 @@ import json
 
 # pip install toml deepdiff
 
+
 def _yaml_load(path):
     """load from yaml"""
     with open(path, 'r', encoding='utf8') as file:
@@ -17,6 +18,7 @@ def _yaml_load(path):
         data.typ = 'rt'
         content = data.load(file)
     return content
+
 
 def _yaml_dump(content, where):
     """dump to yaml"""
@@ -26,6 +28,7 @@ def _yaml_dump(content, where):
     data.typ = 'rt'
     data.dump(content, where)
 
+
 def _toml_load(path):
     """load from toml"""
     with open(path, 'r', encoding='utf8') as file:
@@ -33,9 +36,11 @@ def _toml_load(path):
     content = toml.loads(data)
     return content
 
+
 def _toml_dump(content, where):
     with open(where, 'w') as f:
         toml.dump(content, f)
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
