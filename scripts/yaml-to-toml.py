@@ -28,7 +28,11 @@ def replace_None(content):
     """replace any occurence of None with empty string"""
     n = {}
     for k in content:
-        if not content[k]:
+        if content[k] is None:
+            if k == 'dotfiles':
+                continue
+            if k == 'profiles':
+                continue
             n[k] = ""
             continue
         if isinstance(content[k], dict):
@@ -50,6 +54,7 @@ if __name__ == '__main__':
 
     path = sys.argv[1]
     content = yaml_load(path)
+    #print(content)
     content = replace_None(content)
     out = toml_dump(content)
     print(out)
