@@ -1250,11 +1250,11 @@ class CfgYaml:
     @classmethod
     def _yaml_dump(cls, content, file, fmt='yaml'):
         """dump config file"""
-        if 'toml':
+        if fmt == 'toml':
             return cls.__toml_dump(content, file)
-        if 'yaml':
-            return cls.__yaml_dump(content, file)   
-        raise YamlException("unsupported format")       
+        if fmt == 'yaml':
+            return cls.__yaml_dump(content, file)
+        raise YamlException("unsupported format")
 
     @classmethod
     def __yaml_dump(cls, content, file):
