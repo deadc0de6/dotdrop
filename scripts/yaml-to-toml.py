@@ -54,7 +54,6 @@ if __name__ == '__main__':
 
     path = sys.argv[1]
     content = yaml_load(path)
-    #print(content)
     content = replace_None(content)
     out = toml_dump(content)
     print(out)
