@@ -54,7 +54,15 @@ ${nosebin} --version
 export DOTDROP_FORCE_NODEBUG=yes
 
 # coverage file location
-cur=`dirname $(readlink -f "${0}")`
+rl="readlink -f"
+if ! ${rl} "${0}" >/dev/null 2>&1; then
+  rl="realpath"
+
+  if ! hash ${rl}; then
+    echo "\"${rl}\" not found!" && exit 1
+  fi
+fi
+cur=`dirname $(${rl} "${0}")`
 
 workers=${DOTDROP_WORKERS}
 if [ ! -z ${workers} ]; then
