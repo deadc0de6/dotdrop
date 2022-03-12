@@ -26,6 +26,7 @@ import io
 from copy import deepcopy
 from itertools import chain
 from ruamel.yaml import YAML as yaml
+import toml
 
 # local imports
 from dotdrop.version import __version__ as VERSION
@@ -1210,6 +1211,17 @@ class CfgYaml:
 
     @classmethod
     def _yaml_load(cls, path):
+        """load config file"""
+        is_yaml = path.lower().endswith(".yaml")
+        if is_yaml:
+            return cls.__yaml_load(path)
+        is_toml = path.lower().endswith(".toml")
+        if is_toml:
+            return cls.__toml_load(path)
+        raise YamlException("unsupported format")
+
+    @classmethod
+    def __yaml_load(cls, path):
         """load from yaml"""
         with open(path, 'r', encoding='utf8') as file:
             data = yaml()
@@ -1218,13 +1230,38 @@ class CfgYaml:
         return content
 
     @classmethod
+    def __toml_load(cls, path):
+        """load from toml"""
+        with open(path, 'r', encoding='utf8') as file:
+            data = file.read()
+        content = toml.loads(data)
+        return content
+
+    @classmethod
     def _yaml_dump(cls, content, where):
+        """dump config file"""
+        is_yaml = where.lower().endswith(".yaml")
+        if is_yaml:
+            return cls.__yaml_dump(content, where)
+        is_toml = where.lower().endswith(".toml")
+        if is_toml:
+            return cls.__toml_dump(content, where)
+        raise YamlException("unsupported format")
+
+    @classmethod
+    def __yaml_dump(cls, content, where):
         """dump to yaml"""
         data = yaml()
         data.default_flow_style = False
         data.indent = 2
         data.typ = 'rt'
         data.dump(content, where)
+
+    @classmethod
+    def __toml_dump(cls, content, where):
+        """dump to toml"""
+        with open(where, 'w', encoding='utf8') as file:
+            toml.dump(content, file)
 
     ########################################################
     # templating
