@@ -1216,13 +1216,10 @@ class CfgYaml:
     @classmethod
     def _yaml_load(cls, path):
         """load config file"""
-        is_yaml = path.lower().endswith(".yaml")
-        if is_yaml:
-            return cls.__yaml_load(path), 'yaml'
         is_toml = path.lower().endswith(".toml")
         if is_toml:
             return cls.__toml_load(path), 'toml'
-        raise YamlException("unsupported format")
+        return cls.__yaml_load(path), 'yaml'
 
     @classmethod
     def __yaml_load(cls, path):
