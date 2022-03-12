@@ -118,6 +118,8 @@ class CfgYaml:
         self._reloading = reloading
         self._debug = debug
         self._log = Logger(debug=self._debug)
+        # config format
+        self._config_format = 'yaml'
         # config needs to be written
         self._dirty = False
         # indicates the config has been updated
@@ -468,7 +470,7 @@ class CfgYaml:
             self._dbg('saving to {}'.format(self._path))
         try:
             with open(self._path, 'w', encoding='utf8') as file:
-                self._yaml_dump(content, file)
+                self._yaml_dump(content, file, fmt=self._config_format)
         except Exception as exc:
             self._log.err(exc)
             err = 'error saving config: {}'.format(self._path)
@@ -486,7 +488,7 @@ class CfgYaml:
         """dump the config dictionary"""
         output = io.StringIO()
         content = self._prepare_to_save(self._yaml_dict.copy())
-        self._yaml_dump(content, output)
+        self._yaml_dump(content, output, fmt=self._config_format)
         return output.getvalue()
 
     ########################################################
@@ -1173,12 +1175,14 @@ class CfgYaml:
             self._dbg(cfg.rstrip())
             self._dbg('----------end:{}----------'.format(path))
         try:
-            content = self._yaml_load(path)
+            content, fmt = self._yaml_load(path)
+            self._config_format = fmt
         except Exception as exc:
             self._log.err(exc)
             err = 'config yaml error: {}'.format(path)
             raise YamlException(err) from exc
-
+        if self._debug:
+            self._dbg('format: {}'.format(self._config_format))
         return content
 
     def _validate(self, yamldict):
@@ -1214,10 +1218,10 @@ class CfgYaml:
         """load config file"""
         is_yaml = path.lower().endswith(".yaml")
         if is_yaml:
-            return cls.__yaml_load(path)
+            return cls.__yaml_load(path), 'yaml'
         is_toml = path.lower().endswith(".toml")
         if is_toml:
-            return cls.__toml_load(path)
+            return cls.__toml_load(path), 'toml'
         raise YamlException("unsupported format")
 
     @classmethod
@@ -1235,33 +1239,36 @@ class CfgYaml:
         with open(path, 'r', encoding='utf8') as file:
             data = file.read()
         content = toml.loads(data)
+        # handle inexistent dotfiles/profiles
+        # since toml doesn't have a nul/nil/null/none
+        if cls.key_dotfiles not in content:
+            content[cls.key_dotfiles] = None
+        if cls.key_profiles not in content:
+            content[cls.key_profiles] = None
         return content
 
     @classmethod
-    def _yaml_dump(cls, content, where):
+    def _yaml_dump(cls, content, file, fmt='yaml'):
         """dump config file"""
-        is_yaml = where.lower().endswith(".yaml")
-        if is_yaml:
-            return cls.__yaml_dump(content, where)
-        is_toml = where.lower().endswith(".toml")
-        if is_toml:
-            return cls.__toml_dump(content, where)
-        raise YamlException("unsupported format")
+        if 'toml':
+            return cls.__toml_dump(content, file)
+        if 'yaml':
+            return cls.__yaml_dump(content, file)   
+        raise YamlException("unsupported format")       
 
     @classmethod
-    def __yaml_dump(cls, content, where):
+    def __yaml_dump(cls, content, file):
         """dump to yaml"""
         data = yaml()
         data.default_flow_style = False
         data.indent = 2
         data.typ = 'rt'
-        data.dump(content, where)
+        data.dump(content, file)
 
     @classmethod
-    def __toml_dump(cls, content, where):
+    def __toml_dump(cls, content, file):
         """dump to toml"""
-        with open(where, 'w', encoding='utf8') as file:
-            toml.dump(content, file)
+        toml.dump(content, file)
 
     ########################################################
     # templating
@@ -1697,7 +1704,7 @@ class CfgYaml:
             if self._debug:
                 self._dbg('saving uservariables values to {}'.format(path))
             with open(path, 'w', encoding='utf8') as file:
-                self._yaml_dump(content, file)
+                self._yaml_dump(content, file, fmt=self._config_format)
         except Exception as exc:
             # self._log.err(exc)
             err = 'error saving uservariables to {}'.format(path)
