@@ -96,7 +96,7 @@ profiles:
 _EOF
 
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 --verbose ${dftoimport}
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 --verbose ${dftoimport}
 [ "$?" != "0" ] && exit 1
 
 echo "[+] install"

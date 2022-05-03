@@ -75,7 +75,7 @@ variables:
   var1: "this is some test"
   var2: "the_dvar4"
 dynvariables:
-  dvar1: head -1 /proc/meminfo
+  dvar1: head -1 ${cur}/helpers
   dvar2: "echo 'this is some test' | rev | tr ' ' ','"
   dvar3: ${scr}
   dvar4: "echo {{@@ var2 @@}} | rev"
@@ -101,10 +101,12 @@ echo "test" >> ${tmps}/dotfiles/abc
 # install
 cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
+echo "-----"
 cat ${tmpd}/abc
+echo "-----"
 
 grep '^this is some test' ${tmpd}/abc >/dev/null
-grep "^MemTotal" ${tmpd}/abc >/dev/null
+grep '^# author: deadc0de6' ${tmpd}/abc >/dev/null
 grep '^tset,emos,si,siht' ${tmpd}/abc >/dev/null
 grep "^${TESTENV}" ${tmpd}/abc > /dev/null
 grep '^4ravd_eht' ${tmpd}/abc >/dev/null

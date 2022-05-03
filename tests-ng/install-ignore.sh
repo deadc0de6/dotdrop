@@ -71,9 +71,9 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/vscode
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/config
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/vscode
 
 # add files on filesystem
 echo "[+] add files"
@@ -143,7 +143,7 @@ echo "f1" > ${tmpd}/nvim/dir2/file2
 echo "ftop" > ${tmpd}/nvim/ftop
 
 echo "[+] import top"
-cd ${ddpath} | ${bin} import -c ${cfg} -l link_children -p p1 ${tmpd}/nvim
+cd ${ddpath} | ${bin} import -f -c ${cfg} -l link_children -p p1 ${tmpd}/nvim
 
 # add sub dir
 mkdir -p ${tmpd}/nvim/templated
@@ -151,8 +151,8 @@ echo "noprofile" > ${tmpd}/nvim/templated/ftemplated
 echo "noprofile" > ${tmpd}/nvim/template
 
 echo "[+] import sub"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${tmpd}/nvim/templated
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${tmpd}/nvim/template
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${tmpd}/nvim/templated
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${tmpd}/nvim/template
 
 cfg2="${basedir}/config2.yaml"
 sed '/d_nvim:/a \ \ \ \ instignore:\n\ \ \ \ - "*template*"' ${cfg} > ${cfg2}

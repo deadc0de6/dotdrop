@@ -93,8 +93,8 @@ _EOF
 cat ${cfg}
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/.mutt/colors
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/.colors
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/.mutt/colors
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/.colors
 
 cat ${cfg}
 

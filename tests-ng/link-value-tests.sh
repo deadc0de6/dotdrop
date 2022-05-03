@@ -79,7 +79,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -113,7 +113,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -147,7 +147,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V --link=nolink
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -181,7 +181,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V --link=link
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=link
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -215,7 +215,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -249,7 +249,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V --link=nolink
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -283,7 +283,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V --link=nolink
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -317,7 +317,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V --link=nolink
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -349,7 +349,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} --link=link -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -382,7 +382,7 @@ _EOF
 # import
 df="${tmpd}/qwert"
 set +e
-cd ${ddpath} | ${bin} import -c ${cfg} --link=link_children -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link_children -p p1 ${df} -V
 [ "$?" = "0" ] && echo "link_children with file should fail" && exit 1
 set -e
 
@@ -410,7 +410,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} --link=link_children -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link_children -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
@@ -450,7 +450,7 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V

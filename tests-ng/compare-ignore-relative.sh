@@ -70,9 +70,9 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/program || exit 1
-cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/config || exit 1
-cd ${ddpath} | ${bin} import --verbose -c ${cfg} ${tmpd}/vscode || exit 1
+cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} ${tmpd}/program || exit 1
+cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} ${tmpd}/config || exit 1
+cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} ${tmpd}/vscode || exit 1
 
 # add files on filesystem
 echo "[+] add files"
@@ -149,7 +149,7 @@ mkdir -p ${tmpd}/.zsh/plugins
 touch ${tmpd}/.zsh/plugins/someplugin
 
 echo "[+] import .zsh"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/.zsh
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/.zsh
 
 # no diff expected
 echo "[+] comparing .zsh"

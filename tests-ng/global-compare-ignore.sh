@@ -75,8 +75,8 @@ _EOF
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/config
 
 # add files
 echo "[+] add files"

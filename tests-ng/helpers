@@ -63,3 +63,33 @@ dotfiles:
 profiles:
 _EOF
 }
+
+# osx tricks
+# brew install coreutils gnu-sed
+if [[ $OSTYPE == 'darwin'* ]]; then
+  mktemp() {
+    gmktemp "$@"
+  }
+  stat() {
+    gstat "$@"
+  }
+  sed() {
+    gsed "$@"
+  }
+  wc() {
+    gwc "$@"
+  }
+  date() {
+    gdate "$@"
+  }
+  chmod() {
+    gchmod "$@"
+  }
+
+  export -f mktemp
+  export -f stat
+  export -f sed
+  export -f wc
+  export -f date
+  export -f chmod
+fi

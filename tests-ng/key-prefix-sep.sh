@@ -78,8 +78,8 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/top/.colors
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/.mutt/sub
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/top/.colors
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/.mutt/sub
 
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | cut -f1 -d',' | grep -q '_top_colors'
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | cut -f1 -d',' | grep -q '_mutt_sub'
@@ -103,8 +103,8 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/top/.colors
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/.mutt/sub
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/top/.colors
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/.mutt/sub
 
 cat ${cfg}
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G

@@ -90,7 +90,7 @@ mkdir -p ${tmpd}/sub/sub
 echo "test2" > ${tmpd}/sub/sub/abc
 
 # import
-cd ${ddpath} | ${bin} import --verbose -c ${cfg} -p p2 \
+cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} -p p2 \
   ${tmpd}/abc \
   ${tmpd}/sub/abc \
   ${tmpd}/sub/abc \

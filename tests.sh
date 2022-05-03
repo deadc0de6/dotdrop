@@ -87,7 +87,7 @@ fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
 
 # disable debug logs
-unset DOTDROP_DEBUG=
+unset DOTDROP_DEBUG
 export DOTDROP_FORCE_NODEBUG=yes
 
 tmpworkdir="/tmp/dotdrop-tests-workdir"

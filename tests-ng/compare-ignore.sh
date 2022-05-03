@@ -71,9 +71,9 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/config
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/vscode
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/config
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/vscode
 
 # add files
 echo "[+] add files"
@@ -174,7 +174,7 @@ create_conf ${cfg} # sets token
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/program ${tmpd}/config ${tmpd}/vscode
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/program ${tmpd}/config ${tmpd}/vscode
 
 # create the files to ignore
 touch ${tmpd}/program/.DS_Store

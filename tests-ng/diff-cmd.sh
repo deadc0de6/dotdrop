@@ -73,7 +73,7 @@ _EOF
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/singlefile
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/singlefile
 
 # modify the file
 echo "modified" > ${tmpd}/singlefile

@@ -58,13 +58,13 @@ tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmpd}
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # dotdrop directory
-mkdir -p ${tmpd}
 mkdir -p ${tmpd}/a/{b,c}
 echo 'a' > ${tmpd}/a/b/abfile
 echo 'a' > ${tmpd}/a/c/acfile
@@ -90,7 +90,7 @@ _EOF
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} --verbose --profile=p1 ${tmpd}/a
+cd ${ddpath} | ${bin} import -c ${cfg} -f --verbose --profile=p1 ${tmpd}/a
 
 [ -d ${tmps}/dotfiles/newdir ] && echo "newdir not ignored" && exit 1
 [ -e ${tmps}/dotfiles/newdir/newfile ] && echo "newfile not ignored" && exit 1

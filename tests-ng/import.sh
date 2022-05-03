@@ -75,8 +75,8 @@ _EOF
 #cat ${cfg}
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/file3
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/file3
 
 cat ${cfg}
 
@@ -97,8 +97,8 @@ nb=`cat ${cfg} | grep f_file3 | wc -l`
 cntpre=`find ${tmps}/dotfiles -type f | wc -l`
 
 # reimport
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/file3
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/file3
 
 cntpost=`find ${tmps}/dotfiles -type f | wc -l`
 
@@ -124,7 +124,7 @@ echo "fil2" > ${d}/file2
 mkfifo ${d}/fifo
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${d}
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p2 -V ${d}
 
 # ensure exists and is not link
 [ ! -d ${tmps}/dotfiles/${d} ] && echo "not a directory" && exit 1
