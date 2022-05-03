@@ -73,7 +73,7 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/abc
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/abc
 
 # checks
 inside="${tmps}/dotfiles/${tmpd}/abc"
@@ -95,7 +95,7 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/abc
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/abc
 
 # checks
 inside="${tmps}/dotfiles/${tmpd}/abc"

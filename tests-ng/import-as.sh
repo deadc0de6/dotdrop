@@ -77,17 +77,17 @@ _EOF
 #cat ${cfg}
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/adir
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V ${tmpd}/file3
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/adir
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/file3
 
 echo "import --as dotfiles"
-cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${tmpd}/adir --as ~/config/adir
-cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${tmpd}/file3 --as ~/config2/file3
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p2 -V ${tmpd}/adir --as ~/config/adir
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p2 -V ${tmpd}/file3 --as ~/config2/file3
 
 cat ${cfg}
 
 set +e
-cd ${ddpath} | ${bin} import -c ${cfg} -p p2 -V ${tmpd}/adir --as ~/config/should_not && echo "dual dst imported" && exit 1
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p2 -V ${tmpd}/adir --as ~/config/should_not && echo "dual dst imported" && exit 1
 set -e
 cat ${cfg} | grep should_not && echo "dual dst imported" && exit 1
 
@@ -137,7 +137,7 @@ dotfiles:
 profiles:
 _EOF
 
-cd ${ddpath} | ${bin} import -b -c ${cfg} -p test -V ~/.dotdrop.test --as=~/.whatever
+cd ${ddpath} | ${bin} import -f -b -c ${cfg} -p test -V ~/.dotdrop.test --as=~/.whatever
 #cat ${cfg}
 
 [ ! -e ~/.dotdrop-dotfiles-test/dotfiles/whatever ] && echo 'tild imported' && exit 1

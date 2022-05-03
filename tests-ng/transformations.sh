@@ -68,7 +68,7 @@ tokend="compressed archive"
 touched="touched"
 
 cat > ${cfg} << _EOF
-trans:
+trans_read:
   base64: cat {0} | base64 -d > {1}
   uncompress: mkdir -p {1} && tar -xf {0} -C {1}
 trans_write:
@@ -85,12 +85,12 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
-    trans: base64
+    trans_read: base64
     trans_write: base64
   d_ghi:
     dst: ${tmpd}/ghi
     src: ghi
-    trans: uncompress
+    trans_read: uncompress
     trans_write: compress
     chmod: 700
 profiles:

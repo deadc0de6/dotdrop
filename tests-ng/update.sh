@@ -97,8 +97,8 @@ create_conf ${cfg} # sets token
 
 # import dir1
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/dir1
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}/uniquefile
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/dir1
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}/uniquefile
 
 # let's see the dotpath
 #tree ${basedir}/dotfiles

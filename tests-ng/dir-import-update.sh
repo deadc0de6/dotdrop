@@ -62,7 +62,7 @@ cfg="${basedir}/config.yaml"
 create_conf ${cfg} # sets token
 
 # import the dir
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}
 
 # change token
 echo "changed" > ${token}

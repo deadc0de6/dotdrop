@@ -89,7 +89,7 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -c ${cfg} -p p1 -V --link=link_children ${dt}
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V --link=link_children ${dt}
 
 # check is set to link_children
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${dt}`" | grep ',link:link_children,'

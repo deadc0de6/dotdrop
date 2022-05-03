@@ -72,8 +72,8 @@ create_conf ${cfg} # sets token
 
 # import dir1
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpd}
-cd ${ddpath} | ${bin} import -c ${cfg} ${tmpf}
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}
+cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpf}
 
 # change file
 chmod +x ${tmpf}

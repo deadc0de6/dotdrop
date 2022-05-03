@@ -184,6 +184,11 @@ for different use-cases (usually described in their filename or in the file head
 Each script starts with the same boilerplate code that you can paste at the
 start of your new test (see the head of the file down to `# this is the test`).
 
+To run the tests on OSX, install following tools with homebrew
+```bash
+brew install coreutils gnu-sed
+```
+
 # Documentation
 
 Dotdrop documentation is available under [https://dotdrop.readthedocs.io/](https://dotdrop.readthedocs.io/).

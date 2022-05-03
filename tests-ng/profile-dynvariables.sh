@@ -82,7 +82,7 @@ variables:
   gvar1: "global1"
   gvar2: "global2"
 dynvariables:
-  gdvar1: head -1 /proc/meminfo
+  gdvar1: head -1 ${cur}/helpers
   gdvar2: "echo 'this is some test' | rev | tr ' ' ','"
   gdvar3: ${scr}
 dotfiles:
@@ -123,7 +123,7 @@ grep '^local1' ${tmpd}/abc >/dev/null
 grep '^global2' ${tmpd}/abc >/dev/null
 grep '^local2' ${tmpd}/abc >/dev/null
 # test dynvariables
-grep "^MemTotal" ${tmpd}/abc >/dev/null
+grep "^# author: deadc0de6" ${tmpd}/abc >/dev/null
 grep '^tset,emos,si,siht' ${tmpd}/abc >/dev/null
 grep "^${TESTENV2}" ${tmpd}/abc > /dev/null
 grep "^cba" ${tmpd}/abc >/dev/null
