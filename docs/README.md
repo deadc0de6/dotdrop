@@ -1,12 +1,11 @@
 # Dotdrop
 
-[Dotdrop](https://deadc0de.re/dotdrop/) is a dotfiles manager that provides efficient ways to manage your dotfiles.
-It is especially powerful when it comes to managing them across different hosts.
+[Dotdrop](https://deadc0de.re/dotdrop/) is a dotfiles manager that provides efficient
+ways to manage your dotfiles.
+It is especially powerful when it comes to managing those across different hosts.
 
-The idea of dotdrop is to have the ability to store each dotfile only once and deploy them with different
-content on different hosts/setups.
-To achieve this, it uses [Jinja2](https://palletsprojects.com/p/jinja/), which is a templating engine that allows you to specify
-during the dotfile installation how (with what content) each dotfile will be installed based on a selected profile.
+The idea of dotdrop is to have the ability to store each dotfile only once and deploy
+them with different content on different hosts/setups.
 
 Most information on using dotdrop is described in this documentation
 and in the [readme](https://github.com/deadc0de6/dotdrop/blob/master/README.md).

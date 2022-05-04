@@ -203,7 +203,7 @@ There are two types of transformations available:
     * They have two arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
-    * Happens **before** the dotfile is templated with Jinja2 (see [templating](templating.md))
+    * This Happens **before** the dotfile is templated (see [templating](templating.md))
 
 * **Write transformations**: used to transform files before updating a dotfile ([format](config-format.md) key `trans_write`)
     * Used for command `update`
