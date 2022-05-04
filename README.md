@@ -37,7 +37,7 @@ a slightly different version of some of the dotfiles.
 Features:
 
 * Sync once every dotfile in Git for different usages
-* Allow dotfile templating by leveraging [Jinja2](https://palletsprojects.com/p/jinja/)
+* Allow dotfile templating
 * Dynamically generated dotfile contents with pre-defined variables
 * Comparison between deployed and stored dotfiles
 * Handling multiple profiles with different sets of dotfiles
