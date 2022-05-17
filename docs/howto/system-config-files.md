@@ -1,6 +1,6 @@
 # Manage system dotfiles
 
-Dotdrop doesn't allow you to handle file owernership (at least not directly). Every file operation (create/copy file/directory, create symlinks, etc.) is executed with the rights of the user calling dotdrop.
+Dotdrop doesn't allow to handle file owernership (at least not directly). Every file operation (create/copy file/directory, create symlinks, etc.) is executed with the rights of the user calling dotdrop.
 
 Using dotdrop with `sudo` to manage unprivileged and privileged files in the same *session* is a bad idea as the resulting files will all have messed-up owners.
 

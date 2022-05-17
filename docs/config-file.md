@@ -1,8 +1,8 @@
-# Config
+# Config file
 
 ## Location
 
-The config file used by dotdrop is
+The default config file used by dotdrop is
 [config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
 
 Unless specified otherwise, dotdrop will look in the following places for its config file
@@ -22,25 +22,25 @@ or by defining the `DOTDROP_CONFIG` environment variable.
 Multiple variables can be used within the config file to
 parametrize the following elements of the config:
 
-* Dotfile `src` and `dst` paths (See [Dynamic dotfile paths](config-details.md#dynamic-dotfile-paths))
-* External path specifications
-  * `import_variables`
-  * `import_actions`
-  * `import_configs`
-  * Profiles' `import`
-  * Profiles' `include`
+* Dotfile `src` and `dst` paths (See [Dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths))
+* External paths
+    * `import_variables`
+    * `import_actions`
+    * `import_configs`
+    * Profiles' `import`
+    * Profiles' `include`
 
 `actions` and `transformations` also support the use of variables,
 but those are resolved when the action/transformation is executed
-(See [Dynamic actions](config-details.md#dynamic-actions),
-[Dynamic transformations](config-details.md#dynamic-transformations) and [Templating](templating.md)).
+(See [Dynamic actions](config-actions.md#dynamic-actions),
+[Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](templating.md)).
 
 The following variables are available in the config files:
 
-* [Variables defined in the config](config-details.md#variables-entry)
-* [Interpreted variables defined in the config](config-details.md#dynvariables-entry)
-* [User variables defined in the config](config-details.md#uservariables-entry)
-* [Profile variables defined in the config](config-details.md#profile-variables-entry)
+* [Variables defined in the config](config-variables.md)
+* [Interpreted variables defined in the config](config-dynvars.md)
+* [User variables defined in the config](config-variables.md)
+* [Profile variables defined in the config](config-profiles.md#profile-variables-entry)
 * Environment variables: `{{@@ env['MY_VAR'] @@}}`
 * Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
 
@@ -51,24 +51,24 @@ then be available during [templating](templating.md).
 
 Here are some rules on the use of variables in configs:
 
-* [Interpreted variables](config-details.md#dynvariables-entry) are executed in their own file.
-* [Interpreted variables](config-details.md#dynvariables-entry) and
-  [variables](config-details.md#variables-entry) are templated before
-  [interpreted variables](config-details.md#dynvariables-entry) are executed.
+* [Interpreted variables](config-dynvars.md) are executed in their own file.
+* [Interpreted variables](config-dynvars.md) and
+  [variables](config-dynvars.md) are templated before
+  [interpreted variables](config-dynvars.md) are executed.
 * Config files do not have access to variables defined above in the import tree.
 * `dynvariables` take precedence over `variables`.
 * Profile `(dyn)variables` take precedence over any other `(dyn)variables`.
 * Profile `(dyn)variables` take precedence over profile's included `(dyn)variables`.
 * External/imported `(dyn)variables` take precedence over
   `(dyn)variables` defined inside the main config file.
-* [User variables](config-details.md#uservariables-entry) are ignored if
+* [User variables](config-uservars.md) are ignored if
   any other variable with the same key is defined.
 
 ## Permissions
 
-Dotdrop allows you to control the permissions applied to a dotfile using the
-config dotfile entry [chmod](config-format.md#dotfiles-entry).
-A [chmod](config-format.md#dotfiles-entry) entry on a directory
+Dotdrop allows to control the permissions applied to a dotfile using the
+config dotfile entry [chmod](config-dotfiles.md).
+A [chmod](config-dotfiles.md) entry on a directory
 is applied to the directory only, not recursively.
 
 For example:
@@ -100,7 +100,7 @@ On `install`, the following rules are applied:
 * If the global setting `force_chmod` is set to true, dotdrop will not ask
   for confirmation to apply permissions.
 
-On `update`:
+On `update`, the following rule is applied:
 
 * If the permissions of the file in the filesystem differ from the dotfile in the `dotpath`,
   then the dotfile entry `chmod` is added/updated accordingly.
@@ -119,21 +119,21 @@ For more, see [this how-to](howto/symlink-dotfiles.md).
 
 ## Template config entries
 
-Some entries in the config can use the templating feature (See [templating](templating.md)):
+Some entries in the config can be templated (See [templating](templating.md)):
 
 Entry    | Related doc
 -------- | -------------
-dotfile src | [Dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
-dotfile dst | [Dynamic dotfile paths](config-details.md#dynamic-dotfile-paths)
-dotfile link | [Dynamic dotfile link value](config-details.md#dynamic-dotfile-link-value)
-variables | [variables](config-details.md#variables-entry)
-dynvariables | [dynvariables](config-details.md#dynvariables-entry)
-actions | [dynamic actions](config-details.md#dynamic-actions)
-profile include | [Profile include](config-details.md#profile-include-entry)
-profile import | [Profile import](config-details.md#profile-import-entry)
-import_variables | [import_variables](config-details.md#import_variables-entry)
-import_actions | [import_actions](config-details.md#import_actions-entry)
-import_configs | [import_configs](config-details.md#import_configs-entry)
+dotfile src | [Dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
+dotfile dst | [Dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
+dotfile link | [Dynamic dotfile link value](config-dotfiles.md#dynamic-dotfile-link-value)
+variables | [variables](config-variables.md)
+dynvariables | [dynvariables](config-dynvars.md)
+actions | [dynamic actions](config-dynvars.md)
+profile include | [Profile include](config-profiles.md#profile-include-entry)
+profile import | [Profile import](config-profiles.md#profile-import-entry)
+import_variables | [import_variables](config-config.md#import_variables-entry)
+import_actions | [import_actions](config-config.md#import_actions-entry)
+import_configs | [import_configs](config-config.md#import_configs-entry)
 
 ## All dotfiles for a profile
 
@@ -200,7 +200,7 @@ Patterns used for a specific dotfile can be specified relative to the dotfile de
 Similar to a `.gitignore` file, you can prefix ignore patterns with an exclamation point (`!`).
 This so-called "negative ignore pattern" will cause any files that match that pattern to __not__ be ignored,
 provided they *would have* been ignored by an earlier ignore pattern (dotdrop will warn if that is not the
-case). This feature allows you to, for example, ignore all files within a certain directory, except for a
+case). This feature allows to, for example, ignore all files within a certain directory, except for a
 particular one (See examples below).
 
 To completely ignore comparison of a specific dotfile:
@@ -251,4 +251,33 @@ dotfiles:
     cmpignore:
       - '!file'
       - '[a-zA-Z0-9]*'
+```
+
+## Ignore missing
+
+Sometimes, it is nice to have [update](usage.md#update-dotfiles) not copy all the files in the installed directory
+or [compare](usage.md#compare-dotfiles) diff them.
+
+For example,
+maybe you only want to include a single configuration file in your repository
+and don't want to include other files the program uses,
+such as a cached files.
+Maybe you only want to change one file and don't want the others cluttering your repository.
+Maybe the program changes these files quite often and creates unnecessary diffs in your dotfiles.
+
+In these cases, you can use the [ignore-missing](config-config.md) option.
+This option is available as a flag (`--ignore-missing` or `-z`) to the `update` and `compare` commands,
+or [as ignore-missing in the config](config-config.md).
+
+To configure globally, place the following in `config.yaml`:
+```yaml
+config:
+  ignore_missing_in_dotdrop: true
+```
+
+To configure per dotfile:
+```yaml
+dotfiles:
+  f_abc:
+    ignore_missing_in_dotdrop: true
 ```

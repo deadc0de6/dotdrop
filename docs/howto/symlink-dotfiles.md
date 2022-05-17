@@ -86,7 +86,7 @@ after  autoload  plugged  plugin  snippets  spell  swap  vimrc
 As a result, all files under `~/.vim` will be managed by
 dotdrop (including unwanted directories like `spell`, `swap`, etc.).
 
-A cleaner solution is to use `link_children` which allows you to only symlink
+A cleaner solution is to use `link_children` which allows to only symlink
 files under the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
 need to be managed in dotdrop. `~/.vim` is imported in dotdrop and cleaned of all unwanted
 files/directories, and then the `link` entry is set to `link_children` in the config file:
@@ -121,10 +121,10 @@ $ tree -L 1 ~/.vim
 ## Templating symlinked dotfiles
 
 Dotfiles not using any templating directives are directly linked
-to dotdrop's `dotpath` directory (see [Config](../config.md)).
+to dotdrop's `dotpath` directory (see [the config file doc](../config-file.md)).
 
 When using templating directives, however, the dotfiles are first installed into
-`workdir` (defaults to *~/.config/dotdrop*; see [Config format](../config-format.md))
+`workdir` (defaults to *~/.config/dotdrop*; see [the doc](../config-config.md))
 and then symlinked there.
 This applies to both dotfiles with `link: link` and `link: link_children`.
 

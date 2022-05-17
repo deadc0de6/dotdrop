@@ -19,7 +19,7 @@ trans_read:
   _gpg: gpg2 -q --for-your-eyes-only --no-tty -d {0} > {1}
 ```
 
-The above config allows you to store the dotfile `~/.secret` encrypted in the *dotpath*
+The above config allows to store the dotfile `~/.secret` encrypted in the *dotpath*
 directory and uses gpg to decrypt it when `install` is run.
 
 Here's how to deploy the above solution:
@@ -47,7 +47,7 @@ $ cp <encrypted-version-of-secret> dotfiles/secret
 
 * Commit and push the changes
 
-See [transformations](../config-details.md#transformations-entry).
+See [transformations](../config-transformations.md).
 
 ## Load passphrase from file
 
@@ -67,4 +67,4 @@ trans_read:
   _gpg: "gpg2 --batch --yes --passphrase-file <(cat {{@@ gpg_password_file @@}}) -q --for-your-eyes-only --no-tty -d {0} > {1}"
 ```
 
-See [transformations](../config-details.md#transformations-entry).
+See [transformations](../config-transformations.md).

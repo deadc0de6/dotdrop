@@ -13,8 +13,8 @@ and in the [readme](https://github.com/deadc0de6/dotdrop/blob/master/README.md).
 For more, check:
 
 * [A quick overview of dotdrop features](https://deadc0de.re/dotdrop/)
+* [The walkthrough example](https://github.com/deadc0de6/dotdrop#getting-started)
 * [The blogpost on dotdrop](https://deadc0de.re/articles/dotfiles.html)
-* [An example](https://github.com/deadc0de6/dotdrop#getting-started)
 * [How people are using dotdrop](misc/people-using-dotdrop.md)
 
-For more examples of config file, [search GitHub](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code).
+For more config files examples, [search GitHub](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code).

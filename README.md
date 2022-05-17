@@ -25,7 +25,7 @@
 It allows you to store your dotfiles in Git and automagically deploy
 different versions of the same file on different setups.
 
-It also allows you to manage different *sets* of dotfiles.
+It also allows to manage different *sets* of dotfiles.
 For example, you can have a set of dotfiles for your home laptop and
 a different set for your office desktop. Those sets may overlap, and different
 versions of the same dotfiles can be deployed using different predefined *profiles*.
@@ -68,8 +68,8 @@ A mirror of this repository is available on GitLab under <https://gitlab.com/dea
 ## Why dotdrop?
 
 There exist many tools to manage dotfiles; however, not
-many allow you to deploy different versions of the same dotfile
-on different hosts. Moreover, dotdrop allows you to specify the
+many allow to deploy different versions of the same dotfile
+on different hosts. Moreover, dotdrop allows to specify the
 set of dotfiles that need to be deployed for a specific profile.
 
 See the [example](#getting-started) for a concrete example of

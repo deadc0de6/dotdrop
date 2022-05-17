@@ -38,9 +38,9 @@ shell with the config file path; for example:
 alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
-## As a submodule in a virtualenv
+### As a submodule in a virtualenv
 
-To install in a [virtualenv](https://virtualenv.pypa.io):
+To install it in a [virtualenv](https://virtualenv.pypa.io):
 ```bash
 ## create the repository
 $ mkdir dotfiles; cd dotfiles
@@ -66,6 +66,46 @@ $ ./dotdrop.sh --help
 
 Then follow the instructions under [As a submodule](#as-a-submodule).
 
+### Upgrade dotdrop submodule
+
+If using dotdrop as a submodule, one can control if dotdrop
+is auto-updated through the [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh)
+script by defining the environment variable `DOTDROP_AUTOUPDATE=yes`.
+If undefined, `DOTDROP_AUTOUPDATE` will take the value `yes`.
+
+If used as a submodule, update it with:
+```bash
+$ git submodule update --init --recursive
+$ git submodule update --remote dotdrop
+```
+
+You will then need to commit the changes with:
+```bash
+$ git add dotdrop
+$ git commit -m 'update dotdrop'
+$ git push
+```
+
+### Downgrade dotdrop submodule
+
+If you wish to get a specific version of dotdrop when using
+it as a submodule, the following operations can be done.
+
+Here dotdrop is downgraded to the latest stable version:
+```bash
+## enter the repository containing the dotdrop submodule
+$ cd my-dotfiles
+## enter the dotdrop submodule
+$ cd dotdrop
+## update the list of tags
+$ git fetch --tags
+## checkout the latest stable version
+$ git checkout `git tag -l | tail -1`
+```
+
+If using the `dotdrop.sh` script, make sure it doesn't
+automatically update dotdrop back to the latest commit.
+
 ## PyPI package
 
 Install dotdrop:
@@ -73,9 +113,7 @@ Install dotdrop:
 $ pip3 install dotdrop --user
 ```
 
-and then [set up your repository](repository-setup.md).
-
-## PyPI package in a virtualenv
+### PyPI package in a virtualenv
 
 Install dotdrop from PyPI in a virtualenv:
 ```bash
@@ -109,8 +147,6 @@ Dotdrop is available on aur:
 
 Make sure to install the [python-magic-ahupp](https://aur.archlinux.org/packages/python-magic-ahupp/) from aur.
 
-Then follow the [doc to setup your repository](repository-setup.md).
-
 ## Snap package
 
 Dotdrop is available as a snap package: <https://snapcraft.io/dotdrop>.
@@ -119,8 +155,6 @@ Install it with:
 ```bash
 snap install dotdrop
 ```
-
-Then follow the [doc to setup your repository](repository-setup.md).
 
 If you encounter warnings like `Warning: using regular magic file`,
 try defining the following environment variable:
@@ -148,7 +182,7 @@ $ ./dotdrop.sh --cfg <my-config-file> files
 Beside the Python dependencies defined in [requirements.txt](https://github.com/deadc0de6/dotdrop/blob/master/requirements.txt),
 dotdrop depends on the following tools:
 
-* `diff` (unless a different tool is used, see [diff_command](config-format.md#config-entry))
+* `diff` (unless a different tool is used, see [diff_command](config-config.md#config-entry))
 * `git` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
 * `readlink` or `realpath` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
 
@@ -161,46 +195,6 @@ For WSL (Windows Subsystem for Linux), make sure to install `python-magic-bin`:
 ```bash
 pip install python-magic-bin
 ```
-
-## Update dotdrop submodule
-
-If using dotdrop as a submodule, one can control if dotdrop
-is auto-updated through the [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh)
-script by defining the environment variable `DOTDROP_AUTOUPDATE=yes`.
-If undefined, `DOTDROP_AUTOUPDATE` will take the value `yes`.
-
-If used as a submodule, update it with:
-```bash
-$ git submodule update --init --recursive
-$ git submodule update --remote dotdrop
-```
-
-You will then need to commit the changes with:
-```bash
-$ git add dotdrop
-$ git commit -m 'update dotdrop'
-$ git push
-```
-
-## Downgrade dotdrop submodule
-
-If you wish to get a specific version of dotdrop when using
-it as a submodule, the following operations can be done.
-
-Here dotdrop is downgraded to the latest stable version:
-```bash
-## enter the repository containing the dotdrop submodule
-$ cd my-dotfiles
-## enter the dotdrop submodule
-$ cd dotdrop
-## update the list of tags
-$ git fetch --tags
-## checkout the latest stable version
-$ git checkout `git tag -l | tail -1`
-```
-
-If using the `dotdrop.sh` script, make sure it doesn't
-automatically update dotdrop back to the latest commit.
 
 ## Shell completion
 
