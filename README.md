@@ -91,10 +91,12 @@ installation instructions, see the
 [installation documentation](https://dotdrop.readthedocs.io/en/latest/installation/).
 
 Dotdrop is also available on:
-* pypi: https://pypi.org/project/dotdrop/
-* aur (stable): https://aur.archlinux.org/packages/dotdrop/
-* aur (git version): https://aur.archlinux.org/packages/dotdrop-git/
-* snapcraft: https://snapcraft.io/dotdrop
+
+* PyPI: https://pypi.org/project/dotdrop/
+* Homebrew: https://formulae.brew.sh/formula/dotdrop
+* AUR (stable): https://aur.archlinux.org/packages/dotdrop/
+* AUR (git version): https://aur.archlinux.org/packages/dotdrop-git/
+* Snapcraft: https://snapcraft.io/dotdrop
 * pacstall: https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript
 
 ## As a submodule
