@@ -1,6 +1,6 @@
 # Merge files on install
 
-Dotdrop allows you to merge multiple files into one using Jinja2's `include` directive.
+Dotdrop allows to merge multiple files into one using Jinja2's `include` directive.
 
 For example, let's assume you want to keep your `.vimrc` split into multiple parts in dotdrop:
 * `<dotpath>/vimrc.d/top`: top part of the file
@@ -48,12 +48,12 @@ Dotdrop will then automagically include the files into your vimrc when handling 
 ## Merge all files in a directory
 
 To include all files in a directory, a combination of
-[dynvariables](../config-details.md#dynvariables-entry)
+[dynvariables](../config-dynvars.md)
 and [Jinja2 directives](https://jinja.palletsprojects.com/en/2.11.x/) have to be used.
 
 Let's say all files in `<dotpath>/toinclude` need to be included into a dotfile.
 
-First define a [dynvariables](../config-details.md#dynvariables-entry)
+First define a [dynvariables](../config-dynvars.md)
 in the config file which will look for files to include in the above directory:
 ```yaml
 dynvariables:

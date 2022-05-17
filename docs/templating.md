@@ -6,9 +6,9 @@ or the below sections for more information on how to template your dotfiles.
 
 ## Templating or not templating
 
-The dotfile config entry [template](config-format.md#dotfiles-entry)
-and the global config entry [template_dotfile_default](config-format.md#config-entry)
-allow you to control whether a dotfile is processed by the templating engine.
+The dotfile config entry [template](config-dotfiles.md#dotfiles-entry)
+and the global config entry [template_dotfile_default](config-config.md)
+allow to control whether a dotfile is processed by the templating engine.
 
 Obviously, if the dotfile uses template directives, it needs to be templated. However, if it
 is not, disabling templating will speed up its installation (since it won't have to be
@@ -38,16 +38,16 @@ The following variables are available in templates:
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` contains the dotdrop header (see [Dotdrop header](#dotdrop-header)).
-* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-format.md) absolute path.
-* `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config.md).
-* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-format.md) absolute path.
+* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-config.md) absolute path.
+* `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config-file.md).
+* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-config.md) absolute path.
 * Dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* All defined config variables (see [Variables](config.md#variables))
-* All defined config interpreted variables (see [Interpreted variables](config-details.md#dynvariables-entry))
+* All defined config variables (see [Variables](config-file.md#variables))
+* All defined config interpreted variables (see [Interpreted variables](config-dynvars.md#dynvariables-entry))
 
 ## Dotfile variables
 
-When a dotfile is handled by dotdrop, the following variables are added:
+When a dotfile is handled by dotdrop, the following variables are also available for templating:
 
 * `{{@@ _dotfile_abs_src @@}}` contains the processed dotfile absolute source path.
 * `{{@@ _dotfile_abs_dst @@}}` contains the processed dotfile absolute destination path.
@@ -73,7 +73,7 @@ It's possible to access environment variables inside the templates:
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
-It is recommended to use `variables` (see [config variables](config.md#variables))
+It is recommended to use `variables` (see [config variables](config-file.md#variables))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in Git.
 
@@ -192,7 +192,7 @@ For more information, see the [dedicated Jinja2 docs](https://jinja.palletsproje
 
 ## Dotdrop header
 
-Dotdrop is able to insert a header in the generated dotfiles. This allows you
+Dotdrop is able to insert a header in the generated dotfiles. This allows
 to remind anyone opening the file for editing that this file is managed by dotdrop.
 
 Here's what it looks like:

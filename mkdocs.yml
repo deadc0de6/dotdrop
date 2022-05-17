@@ -9,15 +9,24 @@ theme:
     collapse_navigation: false
 use_directory_urls: true
 nav:
-  - Dotdrop: 'README.md'
-  - Installation: 'installation.md'
-  - 'Repository setup': 'repository-setup.md'
-  - Usage: 'usage.md'
-  - Config: 'config.md'
-  - 'Config format': 'config-format.md'
-  - 'Config details': 'config-details.md'
-  - Templating: 'templating.md'
-  - HowTo: 'howto/howto.md'
+  - 'Dotdrop': 'README.md'
+  - 'Installation': 'installation.md'
+  - 'Getting started': 'getting-started.md'
+  - 'Usage': 'usage.md'
+  - 'Config':
+    - 'Config file': 'config-file.md'
+    - 'Config': 'config-config.md'
+    - 'Dotfiles': 'config-dotfiles.md'
+    - 'Profiles': 'config-profiles.md'
+    - 'Actions': 'config-actions.md'
+    - 'Transformations': 'config-transformations.md'
+    - 'Variables': 'config-variables.md'
+    - 'Dynvariables': 'config-dynvars.md'
+    - 'Uservariables': 'config-uservars.md'
+  - 'Templating':
+    - 'Templating': 'templating.md'
+  - 'More':
+    - 'HowTo': 'howto/howto.md'
 markdown_extensions:
   - meta
   - tables
