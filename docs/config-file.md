@@ -281,3 +281,13 @@ dotfiles:
   f_abc:
     ignore_missing_in_dotdrop: true
 ```
+
+## toml
+
+Dotdrop should be able to handle `toml` config file however this
+feature hasn't been extensively tested. A base [config.toml](/config.toml) is available to get started.
+
+The script ([yaml-to-toml.py](/scripts/yaml-to-toml.py)) allows to convert a `yaml` dotdrop
+config file to `toml`.
+
+For more see issue [#343](https://github.com/deadc0de6/dotdrop/issues/343).
