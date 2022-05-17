@@ -7,11 +7,9 @@ on:
 
 jobs:
   homebrew-core:
-    name: homebrew-core
     runs-on: macos-latest
-      steps:
-      - name: Update Homebrew formula
-        uses: dawidd6/action-homebrew-bump-formula@v3
+    steps:
+      - uses: dawidd6/action-homebrew-bump-formula@v3
         with:
           token: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
           formula: dotdrop
