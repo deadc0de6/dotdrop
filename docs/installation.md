@@ -93,6 +93,13 @@ $ dotdrop --help
 
 Then follow the instructions under [PyPI package](#pypi-package).
 
+## Homebrew package
+
+Install dotdrop from Homebrew with:
+```bash
+$ brew install dotdrop
+```
+
 ## Aur packages
 
 Dotdrop is available on aur:
