@@ -1,15 +1,13 @@
 name: PR Homebrew formula
-
 on:
   workflow_dispatch:
   release:
     types: [created]
-
 jobs:
   homebrew-core:
     runs-on: macos-latest
     steps:
-      - uses: dawidd6/action-homebrew-bump-formula@v3
-        with:
-          token: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
-          formula: dotdrop
+    - uses: dawidd6/action-homebrew-bump-formula@v3
+      with:
+        token: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
+        formula: dotdrop
