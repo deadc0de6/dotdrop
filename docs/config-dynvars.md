@@ -7,7 +7,15 @@ dynvariables:
   <variable-name>: <shell-oneliner>
 ```
 
-Dynvariables (*dynamic* variables) will be interpreted by the shell before being substituted.
+You can also use multi-line (see [yaml related doc](https://yaml-multiline.info/)).
+For example:
+```yaml
+dynvariables:
+  <variable-name>: >-
+    <line1>
+    <line2>
+    <line3>
+```
 
 For example:
 ```yaml
@@ -16,10 +24,13 @@ dynvariables:
   dvar2: "echo 'this is some test' | rev | tr ' ' ','"
   dvar3: /tmp/my_shell_script.sh
   user: "echo $USER"
-  config_file: test -f "{{@@ user_config @@}}" && echo "{{@@ user_config @@}}" || echo "{{@@ dfl_config @@}}"
+  config_file: >-
+    test -f "{{@@ base_config @@}}" &&
+    echo "{{@@ base_config @@}}" ||
+    echo "{{@@ dfl_config @@}}"
 variables:
-  user_config: "profile_{{@@ user @@}}_uid.yaml"
+  base_config: "profile_base.yaml"
   dfl_config: "profile_default.yaml"
 ```
 
-They have the same properties as [Variables](config-file.md#variables).
+They have the same properties as [Variables](config-variables.md).

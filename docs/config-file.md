@@ -29,9 +29,11 @@ parametrize the following elements of the config:
     * `import_configs`
     * Profiles' `import`
     * Profiles' `include`
+* `actions`
+* `transformations`
 
-`actions` and `transformations` also support the use of variables,
-but those are resolved when the action/transformation is executed
+Note that variables used in `actions` and `transformations`
+are resolved when the action/transformation is executed
 (See [Dynamic actions](config-actions.md#dynamic-actions),
 [Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](templating.md)).
 
@@ -51,18 +53,23 @@ then be available during [templating](templating.md).
 
 Here are some rules on the use of variables in configs:
 
-* [Interpreted variables](config-dynvars.md) are executed in their own file.
-* [Interpreted variables](config-dynvars.md) and
-  [variables](config-dynvars.md) are templated before
-  [interpreted variables](config-dynvars.md) are executed.
-* Config files do not have access to variables defined above in the import tree.
-* `dynvariables` take precedence over `variables`.
+* [dynvariables](config-dynvars.md) are executed in their own file.
+* [dynvariables](config-dynvars.md) and
+  [variables](config-variables.md) are templated before
+  [dynvariables](config-dynvars.md) are executed.
+* Config files do not have access to variables defined above in the import tree
+  (variables defined in importing config are not seen by the imported config file,
+  where *import* can be any of `import_configs`, `import_variables`, `import_actions`,
+  profile's `import` and profile's `include`)
+* [dynvariables](config-dynvars.md) take precedence over [variables](config-variables.md).
 * Profile `(dyn)variables` take precedence over any other `(dyn)variables`.
 * Profile `(dyn)variables` take precedence over profile's included `(dyn)variables`.
 * External/imported `(dyn)variables` take precedence over
   `(dyn)variables` defined inside the main config file.
-* [User variables](config-uservars.md) are ignored if
+* [uservariables](config-uservars.md) are ignored if
   any other variable with the same key is defined.
+
+For more see the [CONTRIBUTING doc](/CONTRIBUTING.md).
 
 ## Permissions
 
