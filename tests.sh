@@ -41,15 +41,6 @@ pylint \
   --disable=C0209 \
   dotdrop/
 
-# retrieve the nosetests binary
-nosebin="nosetests"
-which ${nosebin} >/dev/null 2>&1
-[ "$?" != "0" ] && nosebin="nosetests3"
-which ${nosebin} >/dev/null 2>&1
-[ "$?" != "0" ] && echo "Install nosetests" && exit 1
-echo "nose version:"
-${nosebin} --version
-
 # do not print debugs when running tests (faster)
 export DOTDROP_FORCE_NODEBUG=yes
 
@@ -74,15 +65,11 @@ fi
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
-  PYTHONPATH="dotdrop" ${nosebin} -s --processes=-1 --with-coverage --cover-package=dotdrop
-  #export DOTDROP_DEBUG=yes
-  #unset DOTDROP_FORCE_NODEBUG
+  PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop --plugin=nose2.plugins.mp -N0
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
-  PYTHONPATH="dotdrop" ${nosebin} --processes=0 --with-coverage --cover-package=dotdrop
-  #unset DOTDROP_DEBUG=
-  #export DOTDROP_FORCE_NODEBUG=yes
+  PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop
 fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
 
