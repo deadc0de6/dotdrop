@@ -107,7 +107,7 @@ echo '----------'
 cat ${cfg2}
 
 cnt=$(cd ${ddpath} | ${bin} files -G -c ${cfg} -p p1 | grep '^f_def' | wc -l)
-[ "${cnt}" != "1" ] && echo "imported twice!" && exit 1
+[ "${cnt}" != "1" ] && echo "imported twice! (${cnt})" && exit 1
 
 echo "OK"
 exit 0

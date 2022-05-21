@@ -115,7 +115,7 @@ class Importer:
             self.log.err('importing \"{}\" failed!'.format(path))
             return -1
 
-        if self._already_exists(path, dst):
+        if self._already_exists(src, dst):
             return -1
 
         self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
