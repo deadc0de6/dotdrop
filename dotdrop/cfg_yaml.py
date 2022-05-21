@@ -324,11 +324,16 @@ class CfgYaml:
 
     def add_dotfile_to_profile(self, dotfile_key, profile_key):
         """add an existing dotfile key to a profile_key"""
+        # create the profile if it doesn't exist
         self._new_profile(profile_key)
-        profile = self._yaml_dict[self.key_profiles][profile_key]
+        profile = self.profiles[profile_key]
+
+        # ensure profile dotfiles list is not None
         if self.key_profile_dotfiles not in profile or \
                 profile[self.key_profile_dotfiles] is None:
             profile[self.key_profile_dotfiles] = []
+
+        # add to the profile
         pdfs = profile[self.key_profile_dotfiles]
         if self.key_all not in pdfs and \
                 dotfile_key not in pdfs:
