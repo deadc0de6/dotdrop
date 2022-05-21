@@ -55,6 +55,7 @@ class Importer:
             0: ignored
             -1: error
         """
+        path = os.path.abspath(path)
         self.log.dbg('import {}'.format(path))
         if not os.path.exists(path):
             self.log.err('\"{}\" does not exist, ignored!'.format(path))
@@ -114,7 +115,7 @@ class Importer:
             self.log.err('importing \"{}\" failed!'.format(path))
             return -1
 
-        if self._already_exists(src, dst):
+        if self._already_exists(path, dst):
             return -1
 
         self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
@@ -135,7 +136,7 @@ class Importer:
         # handle file mode
         chmod = None
         dflperm = get_default_file_perms(dst, self.umask)
-        self.log.dbg('import mode: {}'.format(import_mode))
+        self.log.dbg('import chmod: {}'.format(import_mode))
         if import_mode or perm != dflperm:
             msg = 'adopt mode {:o} (umask {:o})'
             self.log.dbg(msg.format(perm, dflperm))
@@ -234,7 +235,8 @@ class Importer:
                     not self.conf.get_dotfile_by_src_dst(src, dst):
                 # same profile
                 # different src
-                self.log.err('duplicate dotfile for this profile')
+                msg = 'duplicate dotfile: {}'
+                self.log.err(msg.format(dotfile.key))
                 return True
         return False
 
