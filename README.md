@@ -3,11 +3,13 @@
 <br/>
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/deadc0de6/dotdrop)](https://github.com/deadc0de6/dotdrop/releases/latest)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
+
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
-[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
-[![Coverage Status](https://coveralls.io/repos/github/deadc0de6/dotdrop/badge.svg?branch=master)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/deadc0de6/dotdrop.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/deadc0de6/dotdrop/context:python)
+[![Coveralls](https://img.shields.io/coveralls/github/deadc0de6/dotdrop)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
+[![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/deadc0de6/dotdrop?label=code%20quality)](https://lgtm.com/projects/g/deadc0de6/dotdrop/context:python)
+
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
 
 [![PyPI version](https://badge.fury.io/py/dotdrop.svg)](https://badge.fury.io/py/dotdrop)
