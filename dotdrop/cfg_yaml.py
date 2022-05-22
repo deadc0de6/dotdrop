@@ -323,7 +323,12 @@ class CfgYaml:
         return newdst
 
     def add_dotfile_to_profile(self, dotfile_key, profile_key):
-        """add an existing dotfile key to a profile_key"""
+        """
+        add an existing dotfile key to a profile_key
+        we test using profiles variable since it merges
+        imported ones (include, etc) but insert in main
+        yaml only
+        """
         # create the profile if it doesn't exist
         self._new_profile(profile_key)
         profile = self.profiles[profile_key]
@@ -332,12 +337,15 @@ class CfgYaml:
         if self.key_profile_dotfiles not in profile or \
                 profile[self.key_profile_dotfiles] is None:
             profile[self.key_profile_dotfiles] = []
+            self._yaml_dict[self.key_profiles][profile_key] = []
 
         # add to the profile
         pdfs = profile[self.key_profile_dotfiles]
         if self.key_all not in pdfs and \
                 dotfile_key not in pdfs:
-            profile[self.key_profile_dotfiles].append(dotfile_key)
+            # append dotfile
+            pro = self._yaml_dict[self.key_profiles][profile_key]
+            pro[self.key_profile_dotfiles].append(dotfile_key)
             if self._debug:
                 msg = 'add \"{}\" to profile \"{}\"'.format(dotfile_key,
                                                             profile_key)
