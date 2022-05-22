@@ -4,6 +4,7 @@
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/deadc0de6/dotdrop)](https://github.com/deadc0de6/dotdrop/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
+[![GitHub Repo stars](https://img.shields.io/github/stars/deadc0de6/dotdrop?style=social)](https://github.com/deadc0de6/dotdrop/)
 
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
@@ -12,7 +13,7 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
 
-[![PyPI version](https://badge.fury.io/py/dotdrop.svg)](https://badge.fury.io/py/dotdrop)
+[![PyPI](https://img.shields.io/pypi/v/dotdrop)](https://badge.fury.io/py/dotdrop)
 [![Homebrew version](https://img.shields.io/homebrew/v/dotdrop)](https://formulae.brew.sh/formula/dotdrop)
 [![AUR](https://img.shields.io/aur/version/dotdrop.svg)](https://aur.archlinux.org/packages/dotdrop)
 
