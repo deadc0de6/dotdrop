@@ -160,7 +160,7 @@ def load_options(confpath, profile):
     o = Options(args=args)
     o.profile = profile
     o.dry = False
-    o.safe = True
+    o.safe = False
     o.install_diff = True
     o.import_link = LinkTypes.NOLINK
     o.install_showdiff = True

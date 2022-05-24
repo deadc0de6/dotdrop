@@ -356,7 +356,7 @@ exec bspwm
         # Ensure all destination files point to source
         for src in srcs:
             dst = os.path.join(dst_dir, src)
-            self.assertEqual(os.path.realpath(dst), src)
+            self.assertEqual(os.path.realpath(dst), os.path.realpath(src))
 
     def test_fails_without_src(self):
         """test fails without src"""
