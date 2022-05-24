@@ -114,7 +114,9 @@ class TestUpdate(unittest.TestCase):
                 src = os.path.join(o.dotpath, dotfile.src)
                 src = os.path.expanduser(src)
                 edit_content(src, '{{@@ profile @@}}')
-            if os.path.basename(dotfile.dst) == dirsubs:
+            left = os.path.realpath(os.path.basename(dotfile.dst))
+            right = os.path.realpath(dirsubs)
+            if left == right:
                 # retrieve the path of the sub in the dotpath
                 d1indotpath = os.path.join(o.dotpath, dotfile.src)
                 d1indotpath = os.path.expanduser(d1indotpath)

@@ -1073,6 +1073,9 @@ class CfgYaml:
             self._yaml_dict[self.key_profiles][key] = {
                 self.key_profile_dotfiles: []
             }
+            self.profiles[key] = {
+                self.key_profile_dotfiles: []
+            }
             if self._debug:
                 self._dbg('adding new profile: {}'.format(key))
             self._dirty = True
