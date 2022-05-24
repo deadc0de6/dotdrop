@@ -41,9 +41,6 @@ pylint \
   --disable=C0209 \
   dotdrop/
 
-# do not print debugs when running tests (faster)
-export DOTDROP_FORCE_NODEBUG=yes
-
 # coverage file location
 rl="readlink -f"
 if ! ${rl} "${0}" >/dev/null 2>&1; then
@@ -65,17 +62,18 @@ fi
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
+  # do not print debugs when running tests (faster)
+  unset DOTDROP_DEBUG
+  export DOTDROP_FORCE_NODEBUG=yes
+  # tests
   PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop --plugin=nose2.plugins.mp -N0
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
+  # tests
   PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop
 fi
 #PYTHONPATH="dotdrop" python3 -m pytest tests
-
-# disable debug logs
-unset DOTDROP_DEBUG
-export DOTDROP_FORCE_NODEBUG=yes
 
 tmpworkdir="/tmp/dotdrop-tests-workdir"
 export DOTDROP_WORKDIR="${tmpworkdir}"
