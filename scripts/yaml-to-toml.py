@@ -7,7 +7,6 @@ Copyright (c) 2022, deadc0de6
 convert yaml config file to toml
 """
 
-import os
 import sys
 # pip3 install ruamel.yaml
 from ruamel.yaml import YAML as yaml
