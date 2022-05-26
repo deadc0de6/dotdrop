@@ -82,6 +82,9 @@ flink="${tmpd}/filelink"
 echo "filelink" > ${flink}
 chmod 777 ${flink}
 
+echo "f777" > ${tmps}/dotfiles/f777
+chmod 700 ${tmps}/dotfiles/f777
+
 toimport="${dnormal} ${dlink} ${dlinkchildren} ${fnormal} ${flink}"
 
 # create the config file
@@ -93,9 +96,22 @@ config:
   create: true
   dotpath: dotfiles
 dotfiles:
+  f_f777:
+    src: f777
+    dst: ${tmpd}/f777
+    chmod: 777
 profiles:
+  p1:
+    dotfiles:
+    - f_f777
 _EOF
 #cat ${cfg}
+
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1
+
+# compare
+cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
 
 # import
 for i in ${toimport}; do

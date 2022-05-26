@@ -28,9 +28,12 @@ class Comparator:
         self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
-    def compare(self, local_path, deployed_path, ignore=None):
-        """diff local_path (dotdrop dotfile) and
-        deployed_path (destination file)"""
+    def compare(self, local_path, deployed_path, ignore=None, mode=None):
+        """
+        diff local_path (dotdrop dotfile) and
+        deployed_path (destination file)
+        If mode is None, rights will be read from local_path
+        """
         if not ignore:
             ignore = []
         local_path = os.path.expanduser(local_path)
@@ -58,19 +61,24 @@ class Comparator:
             self.log.dbg('{} is a file'.format(local_path))
             ret = self._comp_file(local_path, deployed_path, ignore)
             if not ret:
-                ret = self._comp_mode(local_path, deployed_path)
+                ret = self._comp_mode(local_path, deployed_path, mode=mode)
             return ret
 
         self.log.dbg('{} is a directory'.format(local_path))
 
         ret = self._comp_dir(local_path, deployed_path, ignore)
         if not ret:
-            ret = self._comp_mode(local_path, deployed_path)
+            ret = self._comp_mode(local_path, deployed_path, mode=mode)
         return ret
 
-    def _comp_mode(self, local_path, deployed_path):
-        """compare mode"""
-        local_mode = get_file_perm(local_path)
+    def _comp_mode(self, local_path, deployed_path, mode=None):
+        """
+        compare mode
+        If mode is None, rights will be read on local_path
+        """
+        local_mode = mode
+        if not local_mode:
+            local_mode = get_file_perm(local_path)
         deployed_mode = get_file_perm(deployed_path)
         if local_mode == deployed_mode:
             return ''

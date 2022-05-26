@@ -88,6 +88,7 @@ clear_on_exit "${tmpd}"
 cfg="${tmps}/config.yaml"
 
 echo 'f777' > ${tmps}/dotfiles/f777
+chmod 700 ${tmps}/dotfiles/f777
 echo 'link' > ${tmps}/dotfiles/link
 mkdir -p ${tmps}/dotfiles/dir
 echo "f1" > ${tmps}/dotfiles/dir/f1
