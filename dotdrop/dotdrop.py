@@ -158,7 +158,7 @@ def _dotfile_compare(opts, dotfile, tmp):
 
     # compare
     # need to be executed before cleaning
-    diff = comp.compare(src, dotfile.dst, ignore=ignores)
+    diff = comp.compare(src, dotfile.dst, ignore=ignores, mode=dotfile.chmod)
 
     # clean tmp transformed dotfile if any
     if tmpsrc:

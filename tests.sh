@@ -84,6 +84,8 @@ if [ ! -z ${workers} ]; then
 fi
 
 # run bash tests
+export DOTDROP_DEBUG="yes"
+unset DOTDROP_FORCE_NODEBUG
 workdir_tmp_exists="no"
 [ -d "~/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
 if [ -z ${GITHUB_WORKFLOW} ]; then
