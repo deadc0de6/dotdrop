@@ -223,6 +223,13 @@ class CfgYaml:
             self._debug_dict(title, self.variables)
 
         ##################################################
+        # template config entries
+        ##################################################
+        entry = self.settings[self.key_settings_dotpath]
+        val = self._template_item(entry)
+        self.settings[self.key_settings_dotpath] = val
+
+        ##################################################
         # parse the other blocks
         ##################################################
 
@@ -1273,8 +1280,12 @@ class CfgYaml:
 
     def _redefine_templater(self):
         """create templater based on current variables"""
-        fufile = self.settings[Settings.key_func_file]
-        fifile = self.settings[Settings.key_filter_file]
+        fufile = None
+        fifile = None
+        if Settings.key_func_file in self.settings:
+            fufile = self.settings[Settings.key_func_file]
+        if Settings.key_filter_file in self.settings:
+            fifile = self.settings[Settings.key_filter_file]
         self._tmpl = Templategen(variables=self.variables,
                                  func_file=fufile,
                                  filter_file=fifile)
