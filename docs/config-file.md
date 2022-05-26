@@ -130,9 +130,10 @@ Some entries in the config can be templated (See [templating](templating.md)):
 
 Entry    | Related doc
 -------- | -------------
-dotfile src | [Dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
-dotfile dst | [Dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
-dotfile link | [Dynamic dotfile link value](config-dotfiles.md#dynamic-dotfile-link-value)
+dotpath | [config entries](config-config.md#config-entry)
+dotfile src | [dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
+dotfile dst | [dynamic dotfile paths](config-dotfiles.md#dynamic-dotfile-paths)
+dotfile link | [dynamic dotfile link value](config-dotfiles.md#dynamic-dotfile-link-value)
 variables | [variables](config-variables.md)
 dynvariables | [dynvariables](config-dynvars.md)
 actions | [dynamic actions](config-dynvars.md)
