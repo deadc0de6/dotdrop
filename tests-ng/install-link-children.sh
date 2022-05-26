@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-set -ev
+set -e
 
 # all this crap to get current path
 rl="readlink -f"
