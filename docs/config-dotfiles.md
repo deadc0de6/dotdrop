@@ -1,4 +1,4 @@
-# Dotfiles entry
+# Dotfiles block
 
 The **dotfiles** entry (mandatory) contains a YAML object with sub-objects for the dotfiles managed by dotdrop.  The entries in the sub-objects are as follows:
 

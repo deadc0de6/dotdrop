@@ -15,14 +15,14 @@ nav:
   - 'Usage': 'usage.md'
   - 'Config':
     - 'Config file': 'config-file.md'
-    - 'Config': 'config-config.md'
-    - 'Dotfiles': 'config-dotfiles.md'
-    - 'Profiles': 'config-profiles.md'
-    - 'Actions': 'config-actions.md'
-    - 'Transformations': 'config-transformations.md'
-    - 'Variables': 'config-variables.md'
-    - 'Dynvariables': 'config-dynvars.md'
-    - 'Uservariables': 'config-uservars.md'
+    - 'Config block': 'config-config.md'
+    - 'Dotfiles block': 'config-dotfiles.md'
+    - 'Profiles block': 'config-profiles.md'
+    - 'Actions block': 'config-actions.md'
+    - 'Transformations block': 'config-transformations.md'
+    - 'Variables block': 'config-variables.md'
+    - 'Dynvariables block': 'config-dynvars.md'
+    - 'Uservariables block': 'config-uservars.md'
   - 'Templating':
     - 'Templating': 'templating.md'
   - 'More':

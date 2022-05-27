@@ -1,11 +1,11 @@
 # Installation
 
-* PyPI: https://pypi.org/project/dotdrop/
-* Homebrew: https://formulae.brew.sh/formula/dotdrop
-* AUR (stable): https://aur.archlinux.org/packages/dotdrop/
-* AUR (git version): https://aur.archlinux.org/packages/dotdrop-git/
-* Snapcraft: https://snapcraft.io/dotdrop
-* pacstall: https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript
+* [PyPI](https://pypi.org/project/dotdrop/)
+* [Homebrew](https://formulae.brew.sh/formula/dotdrop)
+* [AUR (stable)](https://aur.archlinux.org/packages/dotdrop/)
+* [AUR (git version)](https://aur.archlinux.org/packages/dotdrop-git/)
+* [Snapcraft](https://snapcraft.io/dotdrop)
+* [Pacstall](https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript)
 
 ## As a submodule
 

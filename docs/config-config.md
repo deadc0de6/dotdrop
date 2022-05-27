@@ -1,4 +1,4 @@
-# Config entry
+# Config block
 
 The **config** entry (mandatory) contains global settings.
 
