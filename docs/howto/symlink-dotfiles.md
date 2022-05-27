@@ -24,7 +24,7 @@ and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config-format/#con
 
 Import the file:
 ```bash
-$ ./dotdrop.sh import ~/.bashrc
+$ dotdrop import ~/.bashrc
 	-> "/home/user/.bashrc" imported
 ```
 
@@ -39,7 +39,7 @@ dotfiles:
 
 Install the dotfile, which will remove your `~/.bashrc` and replace it with a link to the file stored in dotdrop:
 ```bash
-$ ./dotdrop.sh install
+$ dotdrop install
 Remove "/home/user/.bashrc" for link creation? [y/N] ? y
 	-> linked /home/user/.bashrc to /home/user/dotdrop/dotfiles/bashrc
 

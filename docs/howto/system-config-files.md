@@ -15,15 +15,15 @@ For example:
 `config-user.yaml` is used when managing the user's dotfiles:
 ```bash
 ## user config file is config-user.yaml
-$ ./dotdrop.sh import --cfg config-user.yaml <some-dotfile>
-$ ./dotdrop.sh install --cfg config-user.yaml
+$ dotdrop import --cfg config-user.yaml <some-dotfile>
+$ dotdrop install --cfg config-user.yaml
 ...
 ```
 
 `config-root.yaml` is used when managing the system's dotfiles and is to be used with `sudo` or directly by the root user:
 ```bash
 ## root config file is config-root.yaml
-$ sudo ./dotdrop.sh import --cfg=config-root.yaml <some-dotfile>
-$ sudo ./dotdrop.sh install --cfg=config-root.yaml
+$ sudo dotdrop import --cfg=config-root.yaml <some-dotfile>
+$ sudo dotdrop install --cfg=config-root.yaml
 ...
 ```
