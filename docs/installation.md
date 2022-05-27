@@ -1,16 +1,20 @@
 # Installation
 
-Installing dotdrop [as a submodule](#as-a-submodule) is the recommended way.
-
-If you want to keep your Python environment clean, use the virtualenv installation instructions
-(see [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv) and
-[PyPI package in a virtualenv](#pypi-package-in-a-virtualenv)).
-In that case, the virtualenv environment might need to be loaded before any attempt to use dotdrop.
+* PyPI: https://pypi.org/project/dotdrop/
+* Homebrew: https://formulae.brew.sh/formula/dotdrop
+* AUR (stable): https://aur.archlinux.org/packages/dotdrop/
+* AUR (git version): https://aur.archlinux.org/packages/dotdrop-git/
+* Snapcraft: https://snapcraft.io/dotdrop
+* pacstall: https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript
 
 ## As a submodule
 
+Having dotdrop as a submodule guarantees that anywhere
+you are cloning your dotfiles Git tree from you will have dotdrop shipped with it.
+Note that when using dotdrop as a submodule you will be tracking the master branch (and not a specific version)
+
 The following will create a Git repository for your dotfiles and
-keep dotdrop as a submodule:
+keep dotdrop as a submodule. 
 ```bash
 ## create the repository
 $ mkdir dotfiles; cd dotfiles
@@ -28,9 +32,11 @@ $ ./dotdrop.sh --help
 For macOS users, make sure to install `realpath` through Homebrew
 (part of *coreutils*).
 
-Using this solution will require you to work with dotdrop by
+Using dotdrop as a submodule will require you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
-of your dotfiles repository.
+of your dotfiles repository. Note that this script updates the submodule
+automatically unless called with the environment variable `DOTDROP_AUTOUPDATE`
+set to `no`.
 
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell with the config file path; for example:
@@ -170,7 +176,7 @@ $ git clone https://github.com/deadc0de6/dotdrop.git
 ```
 
 Start using it directly through the `dotdrop.sh` script and
-use the `--cfg` to make it point to your config file.
+use the `--cfg` switch to make it point to your config file.
 
 ```bash
 $ cd dotdrop/

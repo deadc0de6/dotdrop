@@ -55,6 +55,7 @@ for more.
 
 Quick start:
 ```bash
+## using dotdrop as a submodule
 mkdir dotfiles && cd dotfiles
 git init
 git submodule add https://github.com/deadc0de6/dotdrop.git
@@ -86,16 +87,9 @@ why [dotdrop](https://github.com/deadc0de6/dotdrop) rocks.
 
 # Installation
 
-There are multiple ways to install and use dotdrop.
-It is recommended to install dotdrop [as a submodule](#as-a-submodule)
-to your dotfiles Git tree. Having dotdrop as a submodule guarantees that anywhere
-you are cloning your dotfiles Git tree from you'll have dotdrop shipped with it.
+See the [installation instructions](https://dotdrop.readthedocs.io/en/latest/installation/).
 
-The below instructions show how to install dotdrop as a submodule. For alternative
-installation instructions, see the
-[installation documentation](https://dotdrop.readthedocs.io/en/latest/installation/).
-
-Dotdrop is also available on:
+Dotdrop is available on:
 
 * PyPI: https://pypi.org/project/dotdrop/
 * Homebrew: https://formulae.brew.sh/formula/dotdrop
@@ -104,46 +98,11 @@ Dotdrop is also available on:
 * Snapcraft: https://snapcraft.io/dotdrop
 * pacstall: https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript
 
-## As a submodule
-
-The following will create a git repository for your dotfiles and
-keep dotdrop as a submodule:
-```bash
-## create the repository
-$ mkdir dotfiles; cd dotfiles
-$ git init
-
-## install dotdrop as a submodule
-$ git submodule add https://github.com/deadc0de6/dotdrop.git
-$ pip3 install -r dotdrop/requirements.txt --user
-$ ./dotdrop/bootstrap.sh
-
-## use dotdrop
-$ ./dotdrop.sh --help
-```
-
-For macOS users, make sure to install `realpath` through Homebrew
-(part of *coreutils*).
-
-Using dotdrop as a submodule will require you to work with dotdrop by
-using the generated script `dotdrop.sh` at the root
-of your dotfiles repository. Note that this script updates the submodule
-automatically unless called with the environment variable `DOTDROP_AUTOUPDATE`
-set to `no`.
-
-To ease the use of dotdrop, it is recommended to add an alias to it in your
-shell (*~/.bashrc*, *~/.zshrc*, etc.) with the config file path, for example:
-```
-alias dotdrop='<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
-```
-
-Completion scripts exist for `bash`, `zsh` and `fish`; see [the related doc](completion/README.md).
-
 # Getting started
 
 [Create a new repository](https://dotdrop.readthedocs.io/en/latest/repository-setup/)
 to store your dotfiles with dotdrop. *Init* or *clone* that new repository and
-[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/#as-a-submodule).
+[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation).
 
 Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
