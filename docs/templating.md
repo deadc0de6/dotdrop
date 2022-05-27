@@ -6,7 +6,7 @@ or the below sections for more information on how to template your dotfiles.
 
 ## Templating or not templating
 
-The dotfile config entry [template](config-dotfiles.md#dotfiles-entry)
+The dotfile config entry [template](config-dotfiles.md#dotfiles-block)
 and the global config entry [template_dotfile_default](config-config.md)
 allow to control whether a dotfile is processed by the templating engine.
 
