@@ -16,6 +16,8 @@ class LinkTypes(IntEnum):
     NOLINK = 0
     LINK = 1
     LINK_CHILDREN = 2
+    ABSOLUTE = 3
+    RELATIVE = 4
 
     @classmethod
     def get(cls, key, default=None):

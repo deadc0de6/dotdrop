@@ -133,12 +133,18 @@ class Installer:
                                            actionexec=actionexec,
                                            noempty=noempty, ignore=ignore,
                                            is_template=is_template)
-        elif linktype == LinkTypes.LINK:
+        elif linktype in (LinkTypes.LINK, LinkTypes.ABSOLUTE):
             # symlink
-            ret, err = self._link(templater, src, dst,
-                                  actionexec=actionexec,
-                                  is_template=is_template,
-                                  ignore=ignore)
+            ret, err = self._link_absolute(templater, src, dst,
+                                           actionexec=actionexec,
+                                           is_template=is_template,
+                                           ignore=ignore)
+        elif linktype == LinkTypes.RELATIVE:
+            # symlink
+            ret, err = self._link_relative(templater, src, dst,
+                                           actionexec=actionexec,
+                                           is_template=is_template,
+                                           ignore=ignore)
         elif linktype == LinkTypes.LINK_CHILDREN:
             # symlink direct children
             if not isdir:
@@ -246,10 +252,48 @@ class Installer:
     # low level accessors for public methods
     ########################################################
 
-    def _link(self, templater, src, dst, actionexec=None,
-              is_template=True, ignore=None):
+    def _link_absolute(self, templater, src, dst,
+                       actionexec=None,
+                       is_template=True,
+                       ignore=None):
         """
-        install link:link
+        install link:absolute|link
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
+        return self._link_dotfile(templater, src, dst,
+                                  actionexec=actionexec,
+                                  is_template=is_template,
+                                  ignore=ignore,
+                                  absolute=True)
+
+    def _link_relative(self, templater, src, dst,
+                       actionexec=None,
+                       is_template=True,
+                       ignore=None):
+        """
+        install link:relative
+
+        return
+        - True, None        : success
+        - False, error_msg  : error
+        - False, None       : ignored
+        - False, 'aborted'    : user aborted
+        """
+        return self._link_dotfile(templater, src, dst,
+                                  actionexec=actionexec,
+                                  is_template=is_template,
+                                  ignore=ignore,
+                                  absolute=False)
+
+    def _link_dotfile(self, templater, src, dst, actionexec=None,
+                      is_template=True, ignore=None, absolute=True):
+        """
+        symlink
 
         return
         - True, None        : success
@@ -270,7 +314,8 @@ class Installer:
             if not ret and not os.path.exists(tmp):
                 return ret, err
             src = tmp
-        ret, err = self._symlink(src, dst, actionexec=actionexec)
+        ret, err = self._symlink(src, dst, actionexec=actionexec,
+                                 absolute=absolute)
         return ret, err
 
     def _link_children(self, templater, src, dst,
@@ -354,7 +399,7 @@ class Installer:
     # file operations
     ########################################################
 
-    def _symlink(self, src, dst, actionexec=None):
+    def _symlink(self, src, dst, actionexec=None, absolute=True):
         """
         set src as a link target of dst
 
@@ -415,9 +460,20 @@ class Installer:
                 return False, err
 
         # create symlink
-        os.symlink(src, dst)
-        if not self.comparing:
-            self.log.sub('linked {} to {}'.format(dst, src))
+        if absolute:
+            # absolute symlink pointing to src named dst
+            os.symlink(src, dst)
+            if not self.comparing:
+                self.log.sub('linked {} to {}'.format(dst, src))
+        else:
+            # relative symlink
+            dstrel = dst
+            if not os.path.isdir(dstrel):
+                dstrel = os.path.dirname(dstrel)
+            rel = os.path.relpath(src, dstrel)
+            os.symlink(rel, dst)
+            if not self.comparing:
+                self.log.sub('linked {} to {}'.format(dst, rel))
         return True, None
 
     def _copy_file(self, templater, src, dst,
