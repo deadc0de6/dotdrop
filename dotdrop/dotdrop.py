@@ -220,24 +220,17 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         dotfile.src,
         ignore=ignores,
     )
-    if hasattr(dotfile, 'link') and dotfile.link == LinkTypes.LINK:
-        # link
+    if hasattr(dotfile, 'link') and dotfile.link in (
+        LinkTypes.LINK, LinkTypes.LINK_CHILDREN,
+        LinkTypes.RELATIVE, LinkTypes.ABSOLUTE
+    ):
+        # link|relative|absolute|link_children
         ret, err = inst.install(templ, dotfile.src, dotfile.dst,
                                 dotfile.link,
                                 actionexec=pre_actions_exec,
                                 is_template=is_template,
                                 ignore=ignores,
                                 chmod=dotfile.chmod,
-                                force_chmod=opts.install_force_chmod)
-    elif hasattr(dotfile, 'link') and \
-            dotfile.link == LinkTypes.LINK_CHILDREN:
-        # link_children
-        ret, err = inst.install(templ, dotfile.src, dotfile.dst,
-                                dotfile.link,
-                                actionexec=pre_actions_exec,
-                                is_template=is_template,
-                                chmod=dotfile.chmod,
-                                ignore=ignores,
                                 force_chmod=opts.install_force_chmod)
     else:
         # nolink

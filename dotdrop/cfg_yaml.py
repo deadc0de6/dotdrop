@@ -97,9 +97,12 @@ class CfgYaml:
     lnk_nolink = LinkTypes.NOLINK.name.lower()
     lnk_link = LinkTypes.LINK.name.lower()
     lnk_children = LinkTypes.LINK_CHILDREN.name.lower()
+    lnk_absolute = LinkTypes.ABSOLUTE.name.lower()
+    lnk_relative = LinkTypes.RELATIVE.name.lower()
 
     # checks
-    allowed_link_val = [lnk_nolink, lnk_link, lnk_children]
+    allowed_link_val = [lnk_nolink, lnk_link, lnk_children,
+                        lnk_absolute, lnk_relative]
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
     def __init__(self, path, profile=None, addprofiles=None,
@@ -297,8 +300,9 @@ class CfgYaml:
         newlink = self._template_item(link)
         # check link value
         if newlink not in self.allowed_link_val:
-            err = 'bad value: {}'.format(newlink)
+            err = 'bad link value: {}'.format(newlink)
             self._log.err(err)
+            self._log.err('allowed: {}'.format(self.allowed_link_val))
             raise YamlException('config content error: {}'.format(err))
         return newlink
 
@@ -1216,8 +1220,9 @@ class CfgYaml:
             return
         val = settings[self.key_settings_link_dotfile_default]
         if val not in self.allowed_link_val:
-            err = 'bad value: {}'.format(val)
+            err = 'bad link value: {}'.format(val)
             self._log.err(err)
+            self._log.err('allowed: {}'.format(self.allowed_link_val))
             raise YamlException('config content error: {}'.format(err))
 
     @classmethod
