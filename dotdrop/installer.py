@@ -460,20 +460,16 @@ class Installer:
                 return False, err
 
         # create symlink
-        if absolute:
-            # absolute symlink pointing to src named dst
-            os.symlink(src, dst)
-            if not self.comparing:
-                self.log.sub('linked {} to {}'.format(dst, src))
-        else:
+        lnk_src = src
+        if not absolute:
             # relative symlink
             dstrel = dst
             if not os.path.isdir(dstrel):
                 dstrel = os.path.dirname(dstrel)
-            rel = os.path.relpath(src, dstrel)
-            os.symlink(rel, dst)
-            if not self.comparing:
-                self.log.sub('linked {} to {}'.format(dst, rel))
+            lnk_src = os.path.relpath(src, dstrel)
+        os.symlink(lnk_src, dst)
+        if not self.comparing:
+            self.log.sub('linked {} to {}'.format(dst, lnk_src))
         return True, None
 
     def _copy_file(self, templater, src, dst,
