@@ -51,15 +51,22 @@ mkdir -p ${tmps}/dotfiles
 # the dotfile destination
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
+tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 ##################################################
 # test symlink directory
 ##################################################
-# create the dotfile
+# create the file
 echo "file1" > ${tmps}/dotfiles/abc
+mkdir -p ${tmps}/dotfiles/def
+echo 'file2' > ${tmps}/dotfiles/def/afile
+echo '{{@@ header() @@}}' > ${tmps}/dotfiles/ghi
+mkdir -p ${tmps}/dotfiles/jkl
+echo '{{@@ header() @@}}' > ${tmps}/dotfiles/jkl/anotherfile
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -69,20 +76,36 @@ config:
   create: true
   dotpath: dotfiles
   link_dotfile_default: nolink
+  workdir: ${tmpw}
 dotfiles:
-  d_abc:
+  f_abc:
     dst: ${tmpd}/abc
     src: abc
     link: relative
-  d_abc2:
+  f_abc2:
     dst: ${tmpd}/abc2
     src: abc
     link: absolute
+  d_def:
+    dst: ${tmpd}/def
+    src: def
+    link: relative
+  f_ghi:
+    dst: ${tmpd}/ghi
+    src: ghi
+    link: relative
+  d_jkl:
+    dst: ${tmpd}/jkl
+    src: jkl
+    link: relative
 profiles:
   p1:
     dotfiles:
-    - d_abc
-    - d_abc2
+    - f_abc
+    - f_abc2
+    - d_def
+    - f_ghi
+    - d_jkl
 _EOF
 #cat ${cfg}
 
@@ -92,15 +115,28 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 # ensure exists and is link
 [ ! -h ${tmpd}/abc ] && echo "not a symlink" && exit 1
 [ ! -h ${tmpd}/abc2 ] && echo "not a symlink" && exit 1
+[ ! -h ${tmpd}/def ] && echo "not a symlink" && exit 1
+[ ! -d ${tmpd}/def ] && echo "not a symlink" && exit 1
+[ ! -h ${tmpd}/ghi ] && echo "not a symlink" && exit 1
+[ ! -h ${tmpd}/jkl ] && echo "not a symlink" && exit 1
+[ ! -d ${tmpd}/jkl ] && echo "not a symlink" && exit 1
 
-ls -l ${tmpd}/abc | grep '..' || exit 1
+ls -l ${tmpd}/abc | grep '\.\.' || exit 1
 ls -l ${tmpd}/abc2
+ls -l ${tmpd}/def | grep '\.\.' || exit 1
+ls -l ${tmpd}/ghi | grep '\.\.' || exit 1
+ls -l ${tmpd}/jkl | grep '\.\.' || exit 1
 
 grep 'file1' ${tmpd}/abc
 grep 'file1' ${tmpd}/abc2
+grep 'file2' ${tmpd}/def/afile
+grep 'This dotfile is managed using dotdrop' ${tmpd}/ghi
+grep 'This dotfile is managed using dotdrop' ${tmpd}/jkl/anotherfile
+[[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/ghi)") =~ ^/ ]] && echo "ghi not subpath of workdir" && exit 1
+[[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/jkl)") =~ ^/ ]] && echo "jkl not subpath of workdir" && exit 1
 
-## TODO with templates
-echo "TODO with templates"
+## TODO test with install path children of dotpath
+echo "TODO more tests"
 exit 1
 
 echo "OK"
