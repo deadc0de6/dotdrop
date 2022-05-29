@@ -85,6 +85,12 @@ if [[ $OSTYPE == 'darwin'* ]]; then
   chmod() {
     gchmod "$@"
   }
+  readlink() {
+    greadlink "$@"
+  }
+  realpath() {
+    grealpath "$@"
+  }
 
   export -f mktemp
   export -f stat
@@ -92,4 +98,6 @@ if [[ $OSTYPE == 'darwin'* ]]; then
   export -f wc
   export -f date
   export -f chmod
+  export -f readlink
+  export -f realpath
 fi
