@@ -137,9 +137,68 @@ grep 'This dotfile is managed using dotdrop' ${tmpd}/jkl/anotherfile
 [[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/ghi)") =~ "^/" ]] && echo "ghi not subpath of workdir" && exit 1
 [[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/jkl)") =~ ^/ ]] && echo "jkl not subpath of workdir" && exit 1
 
-## TODO test with install path children of dotpath
-echo "TODO more tests"
-exit 1
+
+#############################################################################################################################
+
+rm -rf ${tmps} ${tmpd} ${tmpw}
+
+# the dotfile source
+tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+mkdir -p ${tmps}/dotfiles
+tmpd="${tmps}"
+mkdir -p ${tmpd}
+
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
+
+# create the file
+echo "file1" > ${tmps}/dotfiles/abc
+mkdir -p ${tmps}/dotfiles/def
+echo 'file2' > ${tmps}/dotfiles/def/afile
+
+# create the config file
+cfg="${tmps}/config.yaml"
+cat > ${cfg} << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  link_dotfile_default: nolink
+  workdir: ${tmpw}
+dotfiles:
+  f_abc:
+    dst: ${tmpd}/abc
+    src: abc
+    link: relative
+  f_abc2:
+    dst: ${tmpd}/abc2
+    src: abc
+    link: absolute
+  d_def:
+    dst: ${tmpd}/def
+    src: def
+    link: relative
+profiles:
+  p1:
+    dotfiles:
+    - f_abc
+    - f_abc2
+    - d_def
+_EOF
+#cat ${cfg}
+
+# install
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+
+# ensure exists and is link
+[ ! -h ${tmpd}/abc ] && echo "not a symlink" && exit 1
+[ ! -h ${tmpd}/abc2 ] && echo "not a symlink" && exit 1
+[ ! -h ${tmpd}/def ] && echo "not a symlink" && exit 1
+[ ! -d ${tmpd}/def ] && echo "not a symlink" && exit 1
+
+grep 'file1' ${tmpd}/abc
+grep 'file1' ${tmpd}/abc2
+grep 'file2' ${tmpd}/def/afile
 
 echo "OK"
 exit 0
