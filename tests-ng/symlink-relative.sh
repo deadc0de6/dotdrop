@@ -52,6 +52,7 @@ mkdir -p ${tmps}/dotfiles
 tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 #echo "dotfile destination: ${tmpd}"
 tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+export DOTDROP_WORKDIR="${tmpw}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -132,7 +133,8 @@ grep 'file1' ${tmpd}/abc2
 grep 'file2' ${tmpd}/def/afile
 grep 'This dotfile is managed using dotdrop' ${tmpd}/ghi
 grep 'This dotfile is managed using dotdrop' ${tmpd}/jkl/anotherfile
-[[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/ghi)") =~ ^/ ]] && echo "ghi not subpath of workdir" && exit 1
+
+[[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/ghi)") =~ "^/" ]] && echo "ghi not subpath of workdir" && exit 1
 [[ $(realpath --relative-base="${tmpw}" -- "$(realpath ${tmpd}/jkl)") =~ ^/ ]] && echo "jkl not subpath of workdir" && exit 1
 
 ## TODO test with install path children of dotpath
