@@ -1215,6 +1215,8 @@ class CfgYaml:
         if not yamldict[self.key_settings]:
             # configs empty
             return
+
+        # check settings values
         settings = yamldict[self.key_settings]
         if self.key_settings_link_dotfile_default not in settings:
             return

@@ -42,6 +42,7 @@ class CfgAggregator:
         self.dry = dry
         self.log = Logger(debug=self.debug)
         self._load()
+        self._validate()
 
     ########################################################
     # public methods
@@ -217,6 +218,12 @@ class CfgAggregator:
     ########################################################
     # parsing
     ########################################################
+
+    def _validate(self):
+        """validate fields on top level view of config"""
+        val = self.settings.workdir
+        if not val:
+            raise UndefinedException('\"workdir\" is undefined')
 
     def _load(self, reloading=False):
         """load lower level config"""
