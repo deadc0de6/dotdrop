@@ -14,7 +14,7 @@ Obviously, if the dotfile uses template directives, it needs to be templated. Ho
 is not, disabling templating will speed up its installation (since it won't have to be
 processed by the engine).
 
-For dotfiles being symlinked (`link` or `link_children`), see
+For dotfiles being symlinked (`absolute`, `relative` or `link_children`), see
 [the dedicated doc](howto/symlink-dotfiles.md#templating-symlinked-dotfiles).
 
 ## Delimiters

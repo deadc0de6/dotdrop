@@ -119,7 +119,8 @@ Dotdrop is able to install dotfiles in three different ways,
 which are controlled by the `link` config attribute of each dotfile:
 
 * `link: nolink`: The dotfile (file or directory) is copied to its destination
-* `link: link`: The dotfile (file or directory) is symlinked to its destination
+* `link: absolute`: The dotfile (file or directory) is linked to its destination using an absolute symlink
+* `link: relative`: The dotfile (file or directory) is linked to its destination using a relative symlink
 * `link: link_children`: The files/directories found under the dotfile (directory) are symlinked to their destination
 
 For more, see [this how-to](howto/symlink-dotfiles.md).

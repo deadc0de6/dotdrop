@@ -30,7 +30,7 @@ There are two types of transformations available:
 A typical use-case for transformations is when dotfiles need to be
 stored encrypted or compressed. For more, see [the howto](howto/howto.md).
 
-Note that transformations cannot be used if the dotfile is to be linked (when `link: link` or `link: link_children`).
+Note that transformations cannot be used if the dotfile is to be linked (when `link: absolute|relative|link_children`).
 
 Transformations also support additional positional arguments that must start from 2 (since `{0}` and `{1}` are added automatically). The transformations themselves as well as their arguments can also be templated.
 

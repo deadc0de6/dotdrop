@@ -102,7 +102,7 @@ inside="${tmps}/dotfiles/${tmpd}/abc"
 [ ! -e ${inside} ] && exit 1
 
 cat ${cfg}
-cat ${cfg} | grep 'link: link' >/dev/null
+cat ${cfg} | grep 'link: absolute' >/dev/null
 
 echo "OK"
 exit 0

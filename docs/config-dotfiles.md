@@ -6,7 +6,7 @@ Entry    | Description
 -------- | -------------
 `dst` | Where this dotfile needs to be deployed (dotfiles with empty `dst` are ignored and considered installed, can use `variables`, make sure to quote)
 `src` | Dotfile path within the `dotpath` (dotfiles with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
-`link` | Defines how this dotfile is installed. Possible values: *nolink*, *link*, *link_children* (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) (defaults to value of `link_dotfile_default`)
+`link` | Defines how this dotfile is installed. Possible values: *nolink*, *absolute*, *relative*, *link_children* (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) (defaults to value of `link_dotfile_default`)
 `actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-actions.md))
 `chmod` | Defines the file permissions in octal notation to apply during installation (See [permissions](config-file.md#permissions))
 `cmpignore` | List of patterns to ignore when comparing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
@@ -25,7 +25,7 @@ Entry    | Description
   dst: <where-this-file-is-deployed>
   src: <filename-within-the-dotpath>
   ## Optional
-  link: (nolink|link|link_children)
+  link: (nolink|absolute|relative|link_children)
   ignoreempty: (true|false)
   cmpignore:
     - "<ignore-pattern>"
@@ -209,7 +209,7 @@ profiles:
     dotfiles:
     - f_test
     variables:
-      link_value: "link"
+      link_value: "absolute"
   windows:
     dotfiles:
     - f_test

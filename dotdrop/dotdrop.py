@@ -224,7 +224,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         LinkTypes.LINK, LinkTypes.LINK_CHILDREN,
         LinkTypes.RELATIVE, LinkTypes.ABSOLUTE
     ):
-        # link|relative|absolute|link_children
+        # nolink|relative|absolute|link_children
         ret, err = inst.install(templ, dotfile.src, dotfile.dst,
                                 dotfile.link,
                                 actionexec=pre_actions_exec,
@@ -645,7 +645,7 @@ def cmd_remove(opts):
             k = dotfile.key
             # ignore if uses any type of link
             if dotfile.link != LinkTypes.NOLINK:
-                msg = '{} uses link/link_children, remove manually'
+                msg = '{} uses symlink, remove manually'
                 LOG.warn(msg.format(k))
                 continue
 
