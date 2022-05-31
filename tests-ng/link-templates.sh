@@ -55,6 +55,7 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 echo "dotfiles destination: ${tmpd}"
 # the workdir
 tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+export DOTDROP_WORKDIR="${tmpw}"
 echo "workdir: ${tmpw}"
 
 clear_on_exit "${tmps}"

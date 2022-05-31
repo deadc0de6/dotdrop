@@ -53,6 +53,7 @@ tmp=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 
 tmpf="${tmp}/dotfiles"
 tmpw="${tmp}/workdir"
+export DOTDROP_WORKDIR="${tmpw}"
 
 mkdir -p ${tmpf}
 echo "dotfiles source (dotpath): ${tmpf}"
