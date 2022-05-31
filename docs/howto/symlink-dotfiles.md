@@ -3,7 +3,7 @@
 Dotdrop offers two ways to symlink a dotfile through its
 config entry `link`:
 
-* Setting `link: link` for a dotfile will symlink `dst` to `src`
+* Setting `link: absolute` or `link: relative` for a dotfile will symlink `dst` to `src`
 * Setting `link: link_children` will, for every direct child of `src`, symlink `dst/<childrenX>` to `src/<childrenX>` (See [Link children](#link-children))
 
 where `src` is the file stored in your *dotpath* and
@@ -28,13 +28,13 @@ $ dotdrop import ~/.bashrc
 	-> "/home/user/.bashrc" imported
 ```
 
-Edit the `config.yaml` and set the `link` value to `link`:
+Edit the `config.yaml` and set the `link` value to `absolute`:
 ```yaml
 dotfiles:
   f_bashrc:
     src: bashrc
     dst: ~/.bashrc
-    link: link
+    link: absolute
 ```
 
 Install the dotfile, which will remove your `~/.bashrc` and replace it with a link to the file stored in dotdrop:
@@ -64,7 +64,7 @@ Setting this option on a file that is not a directory will make any operation on
 
 A good example of its use is when managing `~/.vim` with dotdrop.
 
-Here's what it looks like when using `link: link`:
+Here's what it looks like when using `link: absolute`:
 ```yaml
 config:
   dotpath: dotfiles
@@ -72,7 +72,7 @@ dotfiles:
   vim:
     dst: ~/.vim
     src: vim
-    link: link
+    link: absolute
 ```
 
 The top directory `~/.vim` is symlinked to the `<dotpath>/vim` location:
@@ -126,7 +126,7 @@ to dotdrop's `dotpath` directory (see [the config file doc](../config-file.md)).
 When using templating directives, however, the dotfiles are first installed into
 `workdir` (defaults to *~/.config/dotdrop*; see [the doc](../config-config.md))
 and then symlinked there.
-This applies to both dotfiles with `link: link` and `link: link_children`.
+This applies to both dotfiles with `link: absolute|relative` and `link: link_children`.
 
 For example:
 ```bash

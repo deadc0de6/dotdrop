@@ -43,7 +43,8 @@ ETCCFG = '/etc/{}'.format(NAME)
 
 OPT_LINK = {
     LinkTypes.NOLINK.name.lower(): LinkTypes.NOLINK,
-    LinkTypes.LINK.name.lower(): LinkTypes.LINK,
+    LinkTypes.ABSOLUTE.name.lower(): LinkTypes.ABSOLUTE,
+    LinkTypes.RELATIVE.name.lower(): LinkTypes.RELATIVE,
     LinkTypes.LINK_CHILDREN.name.lower(): LinkTypes.LINK_CHILDREN}
 
 BANNER = r"""     _       _      _
@@ -82,7 +83,7 @@ Options:
   -G --grepable           Grepable output.
   -i --ignore=<pattern>   Pattern to ignore.
   -k --key                Treat <path> as a dotfile key.
-  -l --link=<link>        Link option (nolink|link|link_children).
+  -l --link=<link>        Link option (nolink|absolute|relative|link_children).
   -L --file-only          Do not show diff but only the files that differ.
   -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
   -n --nodiff             Do not diff when installing.

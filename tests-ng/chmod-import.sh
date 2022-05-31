@@ -142,7 +142,7 @@ mkdir -p ${tmps}/dotfiles
 
 # import without --preserve-mode and link
 for i in ${toimport}; do
-  cd ${ddpath} | ${bin} import -c ${cfg} -l link -f -p p1 -V ${i}
+  cd ${ddpath} | ${bin} import -c ${cfg} -l absolute -f -p p1 -V ${i}
 done
 
 cat ${cfg}
@@ -155,7 +155,7 @@ cnt=`cat ${cfg} | grep "chmod: '777'" | wc -l`
 [ "${cnt}" != "${tot}" ] && echo "not all chmod inserted (2)" && exit 1
 
 tot=`echo ${toimport} | wc -w`
-cnt=`cat ${cfg} | grep 'link: link' | wc -l`
+cnt=`cat ${cfg} | grep 'link: absolute' | wc -l`
 [ "${cnt}" != "${tot}" ] && echo "not all link inserted" && exit 1
 
 ## --preserve-mode

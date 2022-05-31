@@ -80,7 +80,7 @@ cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
 
 # ensure minversion is present
 cat ${cfg}
-grep 'link: link' ${cfg}
+grep 'link: absolute' ${cfg}
 grep 'minversion' ${cfg}
 
 # fake a higher version

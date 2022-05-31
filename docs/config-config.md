@@ -28,14 +28,14 @@ Entry    | Description | Default
 `keepdot` | Preserve leading dot when importing hidden file in the `dotpath` | false
 `key_prefix` | Prefix dotfile key on `import` with `f<key_separator>` for file and `d<key_separator>` for directory | true
 `key_separator` | Separator to use on dotfile key generation on `import` | `_`
-`link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *link* (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) | `nolink`
-`link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *link* [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) | `nolink`
+`link_dotfile_default` | Set a dotfile's `link` attribute to this value when undefined. Possible values: *nolink*, *absolute*, *relative* (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) | `nolink`
+`link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *absolute*, *relative* [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) | `nolink`
 `longkey` | Use long keys for dotfiles when importing (See [Import dotfiles](usage.md#import-dotfiles)) | false
 `minversion` | (*for internal use, do not modify*) Provides the minimal dotdrop version to use | -
 `showdiff` | On install, show a diff before asking to overwrite (See `--showdiff`) | false
 `template_dotfile_default` | Disable templating on all dotfiles when set to false | true
 `upignore` | List of patterns to ignore when updating, appled to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns)) | -
-`workdir` | Path to the directory where templates are installed before being symlinked when using `link:link` or `link:link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
+`workdir` | Path to the directory where templates are installed before being symlinked when using `link:absolute|relative|link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
 <s>link_by_default</s> | When importing a dotfile, set `link` to this value by default | false
 
 

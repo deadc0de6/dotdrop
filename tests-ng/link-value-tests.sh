@@ -181,11 +181,11 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=link
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=absolute
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:link,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
 
 # try to install
 rm -rf ${tmpd}/qwert
@@ -219,7 +219,7 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:link,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
 
 # try to install
 rm -rf ${tmpd}/qwert
@@ -349,11 +349,11 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link -p p1 ${df} -V
+cd ${ddpath} | ${bin} import -f -c ${cfg} --link=absolute -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:link,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
 
 # try to install
 rm -rf ${tmpd}/qwert

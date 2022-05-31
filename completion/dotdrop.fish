@@ -72,7 +72,7 @@ set -l  f -s f -l force          -d "Do not ask user confirmation for anything."
 set -l  G -s G -l grepable       -d "Grepable output."
 set -l  i -s i -l ignore         -d "Pattern to ignore."
 set -l  k -s k -l key            -d "Treat <path> as a dotfile key."
-set -l  l -s l -l link           -d "Link option (nolink|link|link_children)."
+set -l  l -s l -l link           -d "Link option (nolink|absolute|relative|link_children)."
 set -l  L -s L -l file-only      -d "Do not show diff but only the files that differ."
 set -l  m -s m -l preserve-mode  -d "Insert a chmod entry in the dotfile with its mode."
 set -l  n -s n -l nodiff         -d "Do not diff when installing."
@@ -91,7 +91,7 @@ set -l  h -s h -l help           -d "Show this screen."
 set -al c -rF
 set -al C -rF
 set -al i -x
-set -al l -x -a "nolink link link_children"
+set -al l -x -a "nolink absolute relative link_children"
 set -al p -x -a "(__fish_dotdrop_list_profiles)"
 set -al s -rF
 set -al w -x

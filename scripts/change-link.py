@@ -19,7 +19,7 @@ USAGE = """
 change-link.py
 
 Usage:
-  change-link.py (--true | --false) [--ignore=<dotfile-name>...] <config.yaml>
+  change-link.py --value=<value> [--ignore=<dotfile-name>...] <config.yaml>
   change-link.py --help
 
 Options:
@@ -35,11 +35,7 @@ def main():
     """entry point"""
     args = docopt(USAGE)
     path = os.path.expanduser(args['<config.yaml>'])
-    if args['--true']:
-        value = True
-    if args['--false']:
-        value = False
-
+    value = args['--value']
     ignores = args['--ignore']
 
     with open(path, 'r') as file:
