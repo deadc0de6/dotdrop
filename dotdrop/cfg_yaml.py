@@ -1143,9 +1143,23 @@ class CfgYaml:
                 dotfile[self.key_dotfile_link] = new
                 self._dirty = True
                 self._dirty_deprecated = True
-                self._log.warn('deprecated \"link\" value')
+                warn = 'deprecated \"link: <boolean>\"'
+                warn += ', updated to \"link: {}\"'.format(new)
+                self._log.warn(warn)
 
-            elif old_key in dotfile and \
+            if self.key_dotfile_link in dotfile and \
+                    dotfile[self.key_dotfile_link] == self.lnk_link:
+                # patch "link: link"
+                # to "link: absolute"
+                new = self.lnk_absolute
+                dotfile[self.key_dotfile_link] = new
+                self._dirty = True
+                self._dirty_deprecated = True
+                warn = 'deprecated \"link: link\"'
+                warn += ', updated to \"link: {}\"'.format(new)
+                self._log.warn(warn)
+
+            if old_key in dotfile and \
                     isinstance(dotfile[old_key], bool):
                 # patch link_children: <bool>
                 cur = dotfile[old_key]
@@ -1156,7 +1170,9 @@ class CfgYaml:
                 dotfile[self.key_dotfile_link] = new
                 self._dirty = True
                 self._dirty_deprecated = True
-                self._log.warn('deprecated \"link_children\" value')
+                warn = 'deprecated \"link_children\" value'
+                warn += ', updated to \"{}\"'.format(new)
+                self._log.warn(warn)
 
     ########################################################
     # yaml utils
