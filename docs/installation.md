@@ -1,11 +1,12 @@
 # Installation
 
-* [PyPI](https://pypi.org/project/dotdrop/)
-* [Homebrew](https://formulae.brew.sh/formula/dotdrop)
-* [AUR (stable)](https://aur.archlinux.org/packages/dotdrop/)
-* [AUR (git version)](https://aur.archlinux.org/packages/dotdrop-git/)
-* [Snapcraft](https://snapcraft.io/dotdrop)
-* [Pacstall](https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript)
+* [as a submodule](#as-a-submodule)
+* [PyPI package](#pypi-package)
+* [Homebrew package](#homebrew-package)
+* [AUR packages](#aur-packages)
+* [Snap package](#snap-package)
+* [From source](#from-source)
+* [Pacstall package](https://github.com/pacstall/pacstall-programs/blob/master/packages/dotdrop/dotdrop.pacscript)
 
 ## As a submodule
 
@@ -114,6 +115,8 @@ automatically update dotdrop back to the latest commit.
 
 ## PyPI package
 
+[PyPI package](https://pypi.org/project/dotdrop/)
+
 Install dotdrop:
 ```bash
 $ pip3 install dotdrop --user
@@ -138,6 +141,8 @@ $ dotdrop --help
 Then follow the instructions under [PyPI package](#pypi-package).
 
 ## Homebrew package
+
+[Homebrew package](https://formulae.brew.sh/formula/dotdrop)
 
 Install dotdrop from Homebrew with:
 ```bash
