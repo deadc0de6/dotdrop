@@ -286,7 +286,7 @@ class CfgAggregator:
                                  islist=False)
         self._patch_keys_to_objs(self.dotfiles,
                                  "trans_w",
-                                 self._get_trans_w_args(self._get_trans_w),
+                                 self._get_trans_w_args(self.get_trans_w),
                                  islist=False)
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
@@ -460,7 +460,7 @@ class CfgAggregator:
         except StopIteration:
             return None
 
-    def _get_trans_w(self, key):
+    def get_trans_w(self, key):
         """return the trans_w with this key"""
         try:
             return next(x for x in self.trans_w if x.key == key)
