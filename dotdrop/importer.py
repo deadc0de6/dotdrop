@@ -11,7 +11,8 @@ import shutil
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home, get_default_file_perms, \
-    get_file_perm, get_umask, must_ignore
+    get_file_perm, get_umask, must_ignore, \
+    get_unique_tmp_name, removepath
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
 
@@ -47,7 +48,9 @@ class Importer:
         self.log = Logger(debug=self.debug)
 
     def import_path(self, path, import_as=None,
-                    import_link=LinkTypes.NOLINK, import_mode=False):
+                    import_link=LinkTypes.NOLINK,
+                    import_mode=False,
+                    import_transw=""):
         """
         import a dotfile pointed by path
         returns:
@@ -61,11 +64,20 @@ class Importer:
             self.log.err('\"{}\" does not exist, ignored!'.format(path))
             return -1
 
+        # check transw if any
+        trans_write = None
+        if import_transw:
+            trans_write = self.conf.get_trans_w(import_transw)
+
         return self._import(path, import_as=import_as,
-                            import_link=import_link, import_mode=import_mode)
+                            import_link=import_link,
+                            import_mode=import_mode,
+                            trans_write=trans_write)
 
     def _import(self, path, import_as=None,
-                import_link=LinkTypes.NOLINK, import_mode=False):
+                import_link=LinkTypes.NOLINK,
+                import_mode=False,
+                trans_write=None):
         """
         import path
         returns:
@@ -120,12 +132,16 @@ class Importer:
 
         self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
 
-        if not self._prepare_hierarchy(src, dst):
+        if not self._import_file(src, dst, trans_write=trans_write):
             return -1
 
-        return self._import_it(path, src, dst, perm, linktype, import_mode)
+        # TODO add trans_write
+        # TODO add trans_read too
+        return self._import_in_config(path, src, dst, perm, linktype,
+                                      import_mode)
 
-    def _import_it(self, path, src, dst, perm, linktype, import_mode):
+    def _import_in_config(self, path, src, dst, perm,
+                          linktype, import_mode):
         """
         import path
         returns:
@@ -151,34 +167,45 @@ class Importer:
         self.log.sub('\"{}\" imported'.format(path))
         return 1
 
-    def _prepare_hier_when_exists(self, srcf, dst):
-        """a dotfile in dotpath already exists at that spot"""
-        if not os.path.exists(srcf):
+    def _check_existing_dotfile(self, src, dst):
+        """
+        check if a dotfile in the dotpath
+        already exists for this src
+        """
+        if not os.path.exists(src):
             return True
         if not self.safe:
             return True
         cmp = Comparator(debug=self.debug,
                          diff_cmd=self.diff_cmd)
-        diff = cmp.compare(srcf, dst)
+        diff = cmp.compare(src, dst)
         if diff != '':
             # files are different, dunno what to do
-            self.log.log('diff \"{}\" VS \"{}\"'.format(dst, srcf))
+            self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
             self.log.emph(diff)
             # ask user
             msg = 'Dotfile \"{}\" already exists, overwrite?'
-            if not self.log.ask(msg.format(srcf)):
+            if not self.log.ask(msg.format(src)):
                 return False
             self.log.dbg('will overwrite existing file')
         return True
 
-    def _prepare_hierarchy(self, src, dst):
-        """prepare hierarchy for dotfile"""
+    def _import_file(self, src, dst, trans_write=None):
+        """
+        prepare hierarchy for dotfile in dotpath
+        and copy file
+        src is file in dotpath
+        dst is file on filesystem
+        """
         srcf = os.path.join(self.dotpath, src)
         srcfd = os.path.dirname(srcf)
+
+        # check if must be ignored
         if self._ignore(srcf) or self._ignore(srcfd):
             return False
 
-        if not self._prepare_hier_when_exists(srcf, dst):
+        # check we are not overwritting
+        if not self._check_existing_dotfile(srcf, dst):
             return False
 
         # create directory hierarchy
@@ -192,9 +219,15 @@ class Importer:
                 self.log.err('importing \"{}\" failed!'.format(dst))
                 return False
 
+        # import the file
         if self.dry:
             self.log.dry('would copy {} to {}'.format(dst, srcf))
         else:
+            # apply trans_w
+            dst = self._apply_trans_w(dst, trans_write)
+            if not dst:
+                # transformation failed
+                return False
             # copy the file to the dotpath
             try:
                 if os.path.isdir(dst):
@@ -246,3 +279,23 @@ class Importer:
             self.log.warn('{} ignored'.format(path))
             return True
         return False
+
+    def _apply_trans_w(self, path, trans):
+        """
+        apply transformation to path on filesystem)
+        returns
+        - the new path (tmp file) if trans
+        - original path if no trans
+        - None/empty string if error
+        """
+        if not trans:
+            return path
+        self.log.dbg('executing write transformation {}'.format(trans))
+        tmp = get_unique_tmp_name()
+        if not trans.transform(path, tmp, debug=self.debug):
+            msg = 'transformation \"{}\" failed for {}'
+            self.log.err(msg.format(trans.key, path))
+            if os.path.exists(tmp):
+                removepath(tmp, logger=self.log)
+            return None
+        return tmp
