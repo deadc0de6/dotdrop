@@ -36,6 +36,10 @@
 
 [Merge files on install](merge-files-when-installing.md)
 
+## Prompt user for variables
+
+[Prompt user for variables](prompt-user-for-variables.md)
+
 ## Share content across dotfiles
 
 [Share content across dotfiles](sharing-content.md)
@@ -43,7 +47,3 @@
 ## Symlink dotfiles
 
 [Symlink dotfiles](symlink-dotfiles.md)
-
-## Prompt user for variables
-
-[Prompt user for variables](prompt-user-for-variables.md)

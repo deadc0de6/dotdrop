@@ -1,13 +1,12 @@
 # Symlink dotfiles
 
-Dotdrop offers two ways to symlink a dotfile through its
-config entry `link`:
+Dotdrop is able to install dotfiles in three different ways,
+which are controlled by the `link` config attribute of each dotfile:
 
-* Setting `link: absolute` or `link: relative` for a dotfile will symlink `dst` to `src`
-* Setting `link: link_children` will, for every direct child of `src`, symlink `dst/<childrenX>` to `src/<childrenX>` (See [Link children](#link-children))
-
-where `src` is the file stored in your *dotpath* and
-`dst` is the file located in your `$HOME`.
+* `link: nolink`: The dotfile (file or directory) is copied to its destination
+* `link: absolute`: The dotfile (file or directory) is linked to its destination using an absolute symlink
+* `link: relative`: The dotfile (file or directory) is linked to its destination using a relative symlink
+* `link: link_children`: The files/directories found under the dotfile (directory) are symlinked to their destination. For every direct child of `src`, symlink `dst/<childrenX>` to `src/<childrenX>` (See [Link children](#link-children))
 
 Note that if the dotfile uses template directives, it will be symlinked into
 `~/.config/dotdrop` instead of directly into your *dotpath*
