@@ -25,8 +25,21 @@ nav:
     - 'Uservariables block': 'config-uservars.md'
   - 'Templating':
     - 'Templating': 'templating.md'
-  - 'More':
-    - 'HowTo': 'howto/howto.md'
+  - 'HowTo':
+    - 'Append text to a dotfile on install': 'howto/append.md'
+    - 'Create files on install': 'howto/create-special-files.md'
+    - 'Handle compressed directories': 'howto/store-compressed-directories.md'
+    - 'Handle secrets': 'howto/sensitive-dotfiles.md'
+    - 'Handle special chars': 'howto/special-chars.md'
+    - 'Improve Git integration': 'howto/improve-git-integration.md'
+    - 'Include files or templates in templates': 'howto/include-in-template.md'
+    - 'Manage system dotfiles': 'howto/system-config-files.md'
+    - 'Merge files on install': 'howto/merge-files-when-installing.md'
+    - 'Prompt user for variables': 'howto/prompt-user-for-variables.md'
+    - 'Share content across dotfiles': 'howto/sharing-content.md'
+    - 'Symlink dotfiles': 'howto/symlink-dotfiles.md'
+
+
 markdown_extensions:
   - meta
   - tables
