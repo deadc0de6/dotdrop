@@ -6,7 +6,7 @@ theme:
     highlightjs: true
     hljs_languages:
       - yaml
-    collapse_navigation: false
+    #collapse_navigation: false
 use_directory_urls: true
 nav:
   - 'Dotdrop': 'README.md'
@@ -36,16 +36,14 @@ nav:
     - 'Manage system dotfiles': 'howto/system-config-files.md'
     - 'Merge files on install': 'howto/merge-files-when-installing.md'
     - 'Prompt user for variables': 'howto/prompt-user-for-variables.md'
-    - 'Share content across dotfiles': 'howto/sharing-content.md'
-    - 'Symlink dotfiles': 'howto/symlink-dotfiles.md'
-
-
+    - 'Share content across dotfiles': 'sharing-content.md'
+    - 'Symlink dotfiles': 'symlink-dotfiles.md'
 markdown_extensions:
   - meta
   - tables
   - fenced_code
   - toc:
       permalink: True
-extra_css:
-    - css/extra.css
+#extra_css:
+#    - css/extra.css
 
