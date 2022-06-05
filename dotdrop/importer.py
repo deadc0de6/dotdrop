@@ -15,19 +15,21 @@ from dotdrop.utils import strip_home, get_default_file_perms, \
     get_unique_tmp_name, removepath
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
+from dotdrop.templategen import Templategen
 
 
 class Importer:
     """dotfile importer"""
 
     def __init__(self, profile, conf, dotpath, diff_cmd,
-                 dry=False, safe=True, debug=False,
+                 variables, dry=False, safe=True, debug=False,
                  keepdot=True, ignore=None):
         """constructor
         @profile: the selected profile
         @conf: configuration manager
         @dotpath: dotfiles dotpath
         @diff_cmd: diff command to use
+        @variables: dictionary of variables for the templates
         @dry: simulate
         @safe: ask for overwrite if True
         @debug: enable debug
@@ -38,11 +40,16 @@ class Importer:
         self.conf = conf
         self.dotpath = dotpath
         self.diff_cmd = diff_cmd
+        self.variables = variables
         self.dry = dry
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
         self.ignore = ignore or []
+
+        self.templater = Templategen(variables=self.variables,
+                                     base=self.dotpath,
+                                     debug=self.debug)
 
         self.umask = get_umask()
         self.log = Logger(debug=self.debug)
@@ -50,7 +57,8 @@ class Importer:
     def import_path(self, path, import_as=None,
                     import_link=LinkTypes.NOLINK,
                     import_mode=False,
-                    import_transw=""):
+                    import_transw="",
+                    import_transr=""):
         """
         import a dotfile pointed by path
         returns:
@@ -66,18 +74,22 @@ class Importer:
 
         # check transw if any
         trans_write = None
+        trans_read = None
         if import_transw:
             trans_write = self.conf.get_trans_w(import_transw)
+        if import_transr:
+            trans_read = self.conf.get_trans_r(import_transr)
 
         return self._import(path, import_as=import_as,
                             import_link=import_link,
                             import_mode=import_mode,
-                            trans_write=trans_write)
+                            trans_write=trans_write,
+                            trans_read=trans_read)
 
     def _import(self, path, import_as=None,
                 import_link=LinkTypes.NOLINK,
                 import_mode=False,
-                trans_write=None):
+                trans_write=None, trans_read=None):
         """
         import path
         returns:
@@ -135,13 +147,14 @@ class Importer:
         if not self._import_file(src, dst, trans_write=trans_write):
             return -1
 
-        # TODO add trans_write
-        # TODO add trans_read too
         return self._import_in_config(path, src, dst, perm, linktype,
-                                      import_mode)
+                                      import_mode,
+                                      trans_w=trans_write,
+                                      trans_r=trans_read)
 
     def _import_in_config(self, path, src, dst, perm,
-                          linktype, import_mode):
+                          linktype, import_mode,
+                          trans_r=None, trans_w=None):
         """
         import path
         returns:
@@ -159,7 +172,9 @@ class Importer:
             chmod = perm
 
         # add file to config file
-        retconf = self.conf.new_dotfile(src, dst, linktype, chmod=chmod)
+        retconf = self.conf.new_dotfile(src, dst, linktype, chmod=chmod,
+                                        trans_read=trans_r,
+                                        trans_write=trans_w)
         if not retconf:
             self.log.warn('\"{}\" ignored during import'.format(path))
             return 0
@@ -292,7 +307,8 @@ class Importer:
             return path
         self.log.dbg('executing write transformation {}'.format(trans))
         tmp = get_unique_tmp_name()
-        if not trans.transform(path, tmp, debug=self.debug):
+        if not trans.transform(path, tmp, debug=self.debug,
+                               templater=self.templater):
             msg = 'transformation \"{}\" failed for {}'
             self.log.err(msg.format(trans.key, path))
             if os.path.exists(tmp):

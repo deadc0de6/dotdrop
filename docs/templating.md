@@ -75,27 +75,7 @@ It's possible to access environment variables inside the templates:
 This allows for storing host-specific properties and/or secrets in environment variables.
 It is recommended to use `variables` (see [config variables](config-file.md#variables))
 instead of environment variables unless these contain sensitive information that
-shouldn't be versioned in Git.
-
-For example, you can have an `.env` file in the directory where your `config.yaml` lies:
-```
-## Some secrets
-pass="verysecurepassword"
-```
-If this file contains secrets that should not be tracked by Git,
-put it in your `.gitignore`.
-
-You can then invoke dotdrop with the help of an alias
-```bash
-# when dotdrop is installed as a submodule
-alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
-
-# when dotdrop is installed from pypi or aur
-alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dotfiles/config.yaml'
-```
-
-The above aliases load all the variables from `~/dotfiles/.env`
-(while omitting lines starting with `#`) before calling dotdrop.
+shouldn't be versioned in Git (see [handle secrets doc](howto/sensitive-dotfiles.md)).
 
 ## Template methods
 
