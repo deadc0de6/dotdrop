@@ -394,7 +394,8 @@ class CfgYaml:
         self._dirty = True
         return True
 
-    def add_dotfile(self, key, src, dst, link, chmod=None):
+    def add_dotfile(self, key, src, dst, link, chmod=None,
+                    trans_r_key=None, trans_w_key=None):
         """add a new dotfile"""
         if key in self.dotfiles.keys():
             return False
@@ -404,10 +405,15 @@ class CfgYaml:
             self._dbg('new dotfile dst: {}'.format(dst))
             self._dbg('new dotfile link: {}'.format(link))
             self._dbg('new dotfile chmod: {}'.format(chmod))
+            self._dbg('new dotfile trans_r: {}'.format(trans_r_key))
+            self._dbg('new dotfile trans_w: {}'.format(trans_w_key))
+
+        # create the dotfile dict
         df_dict = {
             self.key_dotfile_src: src,
             self.key_dotfile_dst: dst,
         }
+
         # link
         dfl = self.settings[self.key_settings_link_dotfile_default]
         if str(link) != dfl:
@@ -416,6 +422,15 @@ class CfgYaml:
         # chmod
         if chmod:
             df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+
+        # trans_r/trans_w
+        if trans_r_key:
+            df_dict[self.key_trans_r] = str(trans_r_key)
+        if trans_w_key:
+            df_dict[self.key_trans_w] = str(trans_w_key)
+
+        if self._debug:
+            self._dbg('dotfile dict: {}'.format(df_dict))
 
         # add to global dict
         self._yaml_dict[self.key_dotfiles][key] = df_dict

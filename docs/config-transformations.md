@@ -16,14 +16,14 @@ There are two types of transformations available:
 
 * **Read transformations**: used to transform dotfiles before they are installed ([config](config-config.md) key `trans_read`)
     * Used for commands `install` and `compare`
-    * They have two arguments:
+    * They have two mandatory arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
     * This Happens **before** the dotfile is templated (see [templating](templating.md))
 
 * **Write transformations**: used to transform files before updating a dotfile ([config](config-config.md) key `trans_write`)
-    * Used for command `update`
-    * They have two arguments:
+    * Used for command `update` and `import`
+    * They have two mandatory arguments:
         * **{0}** will be replaced with the file path to update the dotfile with
         * **{1}** will be replaced with a temporary file to store the result of the transformation
 

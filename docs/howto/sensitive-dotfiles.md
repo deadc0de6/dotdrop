@@ -1,70 +1,109 @@
 # Handle secrets
 
-Two solutions exist, the first one using an unversioned file (see [Environment variables](../templating.md#environment-variables))
-and the second using transformations (see [Store encrypted dotfiles](#store-encrypted-dotfiles)).
+* [Using environment variables](#using-environment-variables)
+* [Store encrypted dotfiles using GPG](#store-encrypted-dotfiles-using-gpg)
+* [GPG examples](#gpg-examples)
 
-* [Store encrypted dotfiles](#store-encrypted-dotfiles)
-* [Load passphrase from file](#load-passphrase-from-file)
+## Using environment variables
 
-## Store encrypted dotfiles
+For example, you can have an `.env` file in the directory where your `config.yaml` lies:
+```bash
+## Some secrets
+pass="verysecurepassword"
+```
 
-Here's an example of part of a config file to use gpg encrypted dotfiles:
+If this file contains secrets that should not be tracked by Git,
+put it in your `.gitignore`.
+
+You can then invoke dotdrop with the help of an alias
+```bash
+# when dotdrop is installed as a submodule
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) ~/dotfiles/dotdrop.sh'
+
+# when dotdrop is installed from package
+alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dotfiles/config.yaml'
+```
+
+The above aliases load all the variables from `~/dotfiles/.env`
+(while omitting lines starting with `#`) before calling dotdrop.
+Defined variables can then be used [in the config](../config-file.md#template-config-entries)
+or [for templating dotfiles](../templating.md)
+
+For more see [the doc on environment variables](../templating.md#environment-variables).
+
+## Store encrypted dotfiles using GPG
+
+First you need to define the encryption/decryption methods, for example
 ```yaml
-dotfiles:
-  f_secret:
-    dst: ~/.secret
-    src: secret
-    trans_read: _gpg
+variables:
+  keyid: "11223344"
 trans_read:
-  _gpg: gpg2 -q --for-your-eyes-only --no-tty -d {0} > {1}
+  _decrypt: "gpg -q --for-your-eyes-only--no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "gpg -q -r {{@@ keyid @@}} --armor --no-tty -o {1} -e {0}"
 ```
 
-The above config allows to store the dotfile `~/.secret` encrypted in the *dotpath*
-directory and uses gpg to decrypt it when `install` is run.
-
-Here's how to deploy the above solution:
-
-* Import the clear dotfile (what creates the correct entries in the config file):
-
+You can then import your dotfile and specify the transformations to apply/associate.
 ```bash
-$ dotdrop import ~/.secret
+dotdrop import --transw=_encrypt --transr=_decrypt ~/.secret
 ```
 
-* Encrypt the original dotfile:
-
-```bash
-$ <some-gpg-command> ~/.secret
-```
-
-* Overwrite the dotfile with the encrypted version:
-
-```bash
-$ cp <encrypted-version-of-secret> dotfiles/secret
-```
-
-* Edit the config file and add the transformation to the dotfile
-  (as shown in the example above)
-
-* Commit and push the changes
+Now whenever you install/compare your dotfile, the `_decrypt` transformation will be executed
+to get the clear version of the file.
+When updating the `_encrypt` transformation will transform the file to store it encrypted.
 
 See [transformations](../config-transformations.md).
 
-## Load passphrase from file
+## gpg examples
+
+Using GPG keys:
+```yaml
+variables:
+  keyid: "11223344"
+trans_read:
+  _decrypt: "gpg -q --for-your-eyes-only--no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "gpg -q -r {{@@ keyid @@}} --armor --no-tty -o {1} -e {0}"
+```
+
+Passphrase is stored in a environement variable:
+```yaml
+trans_read:
+  _decrypt: "echo {{@@ env['THE_KEY'] @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "echo {{@@ env['THE_KEY'] @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
+```
+
+Passphrase is stored as a variable:
+```yaml
+variables:
+  gpg_password: "some password"
+trans_read:
+  _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
+```
 
 Passphrase is retrieved using a script:
 ```yaml
-variables:
+dynvariables:
   gpg_password: "./get-password.sh"
 trans_read:
-  _gpg: "gpg2 --batch --yes --passphrase-file <({{@@ gpg_password @@}}) -q --for-your-eyes-only --no-tty -d {0} > {1}"
+  _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
-Passphrase is stored in a file directly:
+Passphrase is stored in a file:
 ```yaml
 variables:
   gpg_password_file: "/tmp/the-password"
+dynvariables:
+  gpg_password: "cat {{@@ gpg_password_file @@}}"
 trans_read:
-  _gpg: "gpg2 --batch --yes --passphrase-file <(cat {{@@ gpg_password_file @@}}) -q --for-your-eyes-only --no-tty -d {0} > {1}"
+  _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
+trans_write:
+  _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
-See [transformations](../config-transformations.md).
+See also [transformations](../config-transformations.md).

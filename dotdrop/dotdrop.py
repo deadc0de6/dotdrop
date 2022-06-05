@@ -529,6 +529,7 @@ def cmd_importer(opts):
     paths = opts.import_path
     importer = Importer(opts.profile, opts.conf,
                         opts.dotpath, opts.diff_command,
+                        opts.variables,
                         dry=opts.dry, safe=opts.safe,
                         debug=opts.debug,
                         keepdot=opts.keepdot,
@@ -538,7 +539,8 @@ def cmd_importer(opts):
         tmpret = importer.import_path(path, import_as=opts.import_as,
                                       import_link=opts.import_link,
                                       import_mode=opts.import_mode,
-                                      import_transw=opts.import_transw)
+                                      import_transw=opts.import_transw,
+                                      import_transr=opts.import_transr)
         if tmpret < 0:
             ret = False
         elif tmpret > 0:

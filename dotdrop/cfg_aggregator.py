@@ -56,28 +56,36 @@ class CfgAggregator:
         """remove this dotfile from this profile"""
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
-    def new_dotfile(self, src, dst, link, chmod=None):
+    def new_dotfile(self, src, dst, link, chmod=None,
+                    trans_read=None, trans_write=None):
         """
         import a new dotfile
         @src: path in dotpath
         @dst: path in FS
         @link: LinkType
         @chmod: file permission
+        @trans_read: read transformation
+        @trans_write: write transformation
         """
         dst = self.path_to_dotfile_dst(dst)
         dotfile = self.get_dotfile_by_src_dst(src, dst)
         if not dotfile:
-            dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod)
+            # add the dotfile
+            dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod,
+                                               trans_read=trans_read,
+                                               trans_write=trans_write)
 
         if not dotfile:
             return False
 
+        # add to profile
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
         if ret:
             msg = 'new dotfile {} to profile {}'
             self.log.dbg(msg.format(key, self.profile_key))
 
+        # save the config and reload it
         if ret:
             self._save_and_reload()
         return ret
@@ -205,15 +213,26 @@ class CfgAggregator:
     # accessors for public methods
     ########################################################
 
-    def _create_new_dotfile(self, src, dst, link, chmod=None):
+    def _create_new_dotfile(self, src, dst, link, chmod=None,
+                            trans_read=None, trans_write=None):
         """create a new dotfile"""
         # get a new dotfile with a unique key
         key = self._get_new_dotfile_key(dst)
         self.log.dbg('new dotfile key: {}'.format(key))
         # add the dotfile
-        if not self.cfgyaml.add_dotfile(key, src, dst, link, chmod=chmod):
+        trans_r_key = trans_w_key = None
+        if trans_read:
+            trans_r_key = trans_read.key
+        if trans_write:
+            trans_w_key = trans_write.key
+        if not self.cfgyaml.add_dotfile(key, src, dst, link,
+                                        chmod=chmod,
+                                        trans_r_key=trans_r_key,
+                                        trans_w_key=trans_w_key):
             return None
-        return Dotfile(key, dst, src)
+        return Dotfile(key, dst, src,
+                       trans_r=trans_read,
+                       trans_w=trans_write)
 
     ########################################################
     # parsing
@@ -282,7 +301,7 @@ class CfgAggregator:
         # patch trans_w/trans_r in dotfiles
         self._patch_keys_to_objs(self.dotfiles,
                                  "trans_r",
-                                 self._get_trans_w_args(self._get_trans_r),
+                                 self._get_trans_w_args(self.get_trans_r),
                                  islist=False)
         self._patch_keys_to_objs(self.dotfiles,
                                  "trans_w",
@@ -453,7 +472,7 @@ class CfgAggregator:
             return trans
         return getit
 
-    def _get_trans_r(self, key):
+    def get_trans_r(self, key):
         """return the trans_r with this key"""
         try:
             return next(x for x in self.trans_r if x.key == key)
