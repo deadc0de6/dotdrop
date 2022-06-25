@@ -6,10 +6,12 @@ settings block
 """
 
 import os
+from dotdrop.exceptions import YamlException
 
 # local imports
 from dotdrop.linktypes import LinkTypes
 from dotdrop.dictparser import DictParser
+from dotdrop.utils import is_bin_in_path
 
 
 ENV_WORKDIR = 'DOTDROP_WORKDIR'
@@ -56,6 +58,9 @@ class Settings(DictParser):
     key_import_configs = 'import_configs'
     key_import_variables = 'import_variables'
 
+    # defaults
+    default_diff_command = 'diff -r -u {0} {1}'
+
     def __init__(self, backup=True, banner=True,
                  create=True, default_actions=None, dotpath='dotfiles',
                  ignoreempty=False, import_actions=None, import_configs=None,
@@ -66,7 +71,7 @@ class Settings(DictParser):
                  impignore=None, workdir='~/.config/dotdrop',
                  showdiff=False, minversion=None,
                  func_file=None, filter_file=None,
-                 diff_command='diff -r -u {0} {1}',
+                 diff_command=default_diff_command,
                  template_dotfile_default=True,
                  ignore_missing_in_dotdrop=False,
                  force_chmod=False, chmod_on_import=False,
@@ -107,6 +112,11 @@ class Settings(DictParser):
         self.compare_workdir = compare_workdir
         self.key_prefix = key_prefix
         self.key_separator = key_separator
+
+        # check diff command
+        if not is_bin_in_path(self.diff_command):
+            err = 'bad diff_command: {}'.format(self.diff_command)
+            raise YamlException(err)
 
     def _serialize_seq(self, name, dic):
         """serialize attribute 'name' into 'dic'"""

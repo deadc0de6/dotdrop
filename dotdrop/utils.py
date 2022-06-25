@@ -14,7 +14,7 @@ import inspect
 import importlib
 import filecmp
 import itertools
-from shutil import rmtree, which
+import shutil
 import json
 import requests
 from packaging import version
@@ -176,7 +176,7 @@ def removepath(path, logger=None):
         if os.path.islink(path) or os.path.isfile(path):
             os.unlink(path)
         elif os.path.isdir(path):
-            rmtree(path)
+            shutil.rmtree(path)
         else:
             err = 'Unsupported file type for deletion: {}'.format(path)
             raise OSError(err)
@@ -343,10 +343,11 @@ def get_module_from_path(path):
 def dependencies_met():
     """make sure all dependencies are met"""
     # check unix tools deps
-    deps = ['file', 'diff']
+    # diff command is checked in settings.py
+    deps = ['file']
     err = 'The tool \"{}\" was not found in the PATH!'
     for dep in deps:
-        if not which(dep):
+        if not shutil.which(dep):
             raise UnmetDependency(err.format(dep))
     # check python deps
     err = 'missing python module \"{}\"'
@@ -381,6 +382,13 @@ def dependencies_met():
         assert YAML
     except ImportError as exc:
         raise Exception(err.format('ruamel.yaml')) from exc
+
+    # toml
+    try:
+        import toml
+        assert toml
+    except ImportError as exc:
+        raise Exception(err.format('toml')) from exc
 # pylint: enable=C0415
 
 
@@ -494,3 +502,25 @@ def pivot_path(path, newdir, striphome=False, logger=None):
     if logger:
         logger.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
     return new
+
+
+def is_bin_in_path(command):
+    """
+    check binary from command is in path
+    """
+    bpath = ""
+    if not command:
+        return False
+    try:
+        binary = command.split(" ")[0]
+    except ValueError:
+        return False
+    if not binary:
+        return False
+    try:
+        bpath = shutil.which(binary)
+    except shutil.Error:
+        return False
+    if not bpath:
+        return False
+    return os.path.exists(bpath)
