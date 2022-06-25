@@ -36,7 +36,8 @@ if ENV_PROFILE in os.environ:
     PROFILE = os.environ[ENV_PROFILE]
 
 NAME = 'dotdrop'
-CONFIG = 'config.yaml'
+CONFIGFILEYAML = 'config.yaml'
+CONFIGFILETOML = 'config.toml'
 HOMECFG = '~/.config/{}'.format(NAME)
 ETCXDGCFG = '/etc/xdg/{}'.format(NAME)
 ETCCFG = '/etc/{}'.format(NAME)
@@ -157,6 +158,9 @@ class Options(AttrMonitor):
         self.confpath = self._get_config_path()
         if not self.confpath:
             raise YamlException('no config file found')
+        if not os.path.exists(self.confpath):
+            err = 'bad config file path: {}'.format(self.confpath)
+            raise YamlException(err)
         self.log.dbg('#################################################')
         self.log.dbg('#################### DOTDROP ####################')
         self.log.dbg('#################################################')
@@ -176,21 +180,31 @@ class Options(AttrMonitor):
         self._set_attr_err = True
 
     @classmethod
-    def _get_config_from_fs(cls):
+    def _get_config_from_env(cls, name):
+        # look in XDG_CONFIG_HOME
+        if ENV_XDG in os.environ:
+            cfg = os.path.expanduser(os.environ[ENV_XDG])
+            path = os.path.join(cfg, NAME, name)
+            if os.path.exists(path):
+                return path
+        return ''
+
+    @classmethod
+    def _get_config_from_fs(cls, name):
         """get config from filesystem"""
         # look in ~/.config/dotdrop
         cfg = os.path.expanduser(HOMECFG)
-        path = os.path.join(cfg, CONFIG)
+        path = os.path.join(cfg, name)
         if os.path.exists(path):
             return path
 
         # look in /etc/xdg/dotdrop
-        path = os.path.join(ETCXDGCFG, CONFIG)
+        path = os.path.join(ETCXDGCFG, name)
         if os.path.exists(path):
             return path
 
         # look in /etc/dotdrop
-        path = os.path.join(ETCCFG, CONFIG)
+        path = os.path.join(ETCCFG, name)
         if os.path.exists(path):
             return path
 
@@ -207,17 +221,30 @@ class Options(AttrMonitor):
             return os.path.expanduser(os.environ[ENV_CONFIG])
 
         # look in current directory
-        if os.path.exists(CONFIG):
-            return CONFIG
+        if os.path.exists(CONFIGFILEYAML):
+            return CONFIGFILEYAML
 
-        # look in XDG_CONFIG_HOME
-        if ENV_XDG in os.environ:
-            cfg = os.path.expanduser(os.environ[ENV_XDG])
-            path = os.path.join(cfg, NAME, CONFIG)
-            if os.path.exists(path):
-                return path
+        # look in current directory
+        if os.path.exists(CONFIGFILETOML):
+            return CONFIGFILETOML
 
-        return self._get_config_from_fs()
+        path = self._get_config_from_env(CONFIGFILEYAML)
+        if path:
+            return path
+
+        path = self._get_config_from_env(CONFIGFILETOML)
+        if path:
+            return path
+
+        path = self._get_config_from_fs(CONFIGFILEYAML)
+        if path:
+            return path
+
+        path = self._get_config_from_fs(CONFIGFILETOML)
+        if path:
+            return path
+
+        return None
 
     def _header(self):
         """display the header"""
