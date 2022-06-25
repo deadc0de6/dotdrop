@@ -44,6 +44,6 @@ markdown_extensions:
   - fenced_code
   - toc:
       permalink: True
-#extra_css:
-#    - css/extra.css
+extra_css:
+    - css/extra.css
 
