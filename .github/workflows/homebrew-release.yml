@@ -4,7 +4,7 @@ on:
     types: [created]
 jobs:
   homebrew-core:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: dawidd6/action-homebrew-bump-formula@v3
       with:
