@@ -39,6 +39,7 @@ nav:
     - 'Share content across dotfiles': 'howto/sharing-content.md'
     - 'Symlink dotfiles': 'howto/symlink-dotfiles.md'
     - '': ''
+    - '': ''
 markdown_extensions:
   - meta
   - tables
