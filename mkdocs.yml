@@ -36,8 +36,9 @@ nav:
     - 'Manage system dotfiles': 'howto/system-config-files.md'
     - 'Merge files on install': 'howto/merge-files-when-installing.md'
     - 'Prompt user for variables': 'howto/prompt-user-for-variables.md'
-    - 'Share content across dotfiles': 'sharing-content.md'
-    - 'Symlink dotfiles': 'symlink-dotfiles.md'
+    - 'Share content across dotfiles': 'howto/sharing-content.md'
+    - 'Symlink dotfiles': 'howto/symlink-dotfiles.md'
+    - '': ''
 markdown_extensions:
   - meta
   - tables

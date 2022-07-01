@@ -1,6 +1,6 @@
 # Installation
 
-* [as a submodule](#as-a-submodule)
+* [As a submodule](#as-a-submodule)
 * [PyPI package](#pypi-package)
 * [Homebrew package](#homebrew-package)
 * [AUR packages](#aur-packages)
@@ -15,7 +15,7 @@ you are cloning your dotfiles Git tree from you will have dotdrop shipped with i
 Note that when using dotdrop as a submodule you will be tracking the master branch (and not a specific version)
 
 The following will create a Git repository for your dotfiles and
-keep dotdrop as a submodule. 
+keep dotdrop as a submodule.
 ```bash
 ## create the repository
 $ mkdir dotfiles; cd dotfiles
