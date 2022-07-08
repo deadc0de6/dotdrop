@@ -20,6 +20,9 @@ setup(
     long_description_content_type="text/markdown; variant=GFM",
     url='https://github.com/deadc0de6/dotdrop',
     download_url = 'https://github.com/deadc0de6/dotdrop/archive/v'+VERSION+'.tar.gz',
+    options={"bdist_wheel": {"python_tag": "py3"}},
+    # include anything from MANIFEST.in
+    include_package_data=True,
 
     author='deadc0de6',
     author_email='deadc0de6@foo.bar',
