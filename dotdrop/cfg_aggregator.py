@@ -17,7 +17,7 @@ from dotdrop.profile import Profile
 from dotdrop.action import Action, Transform
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home, debug_list, debug_dict
-from dotdrop.exceptions import UndefinedException
+from dotdrop.exceptions import UndefinedException, YamlException
 
 
 TILD = '~'
@@ -41,7 +41,10 @@ class CfgAggregator:
         self.debug = debug
         self.dry = dry
         self.log = Logger(debug=self.debug)
-        self._load()
+        try:
+            self._load()
+        except Exception as exc:
+            raise YamlException(exc) from exc
         self._validate()
 
     ########################################################

@@ -12,6 +12,7 @@ import os
 from dotdrop.cfg_yaml import CfgYaml as Cfg
 from dotdrop.options import Options
 from dotdrop.linktypes import LinkTypes
+from dotdrop.exceptions import YamlException
 from tests.helpers import (SubsetTestCase, _fake_args, clean,
                            create_fake_config, create_yaml_keyval, get_tempdir,
                            populate_fake_config, yaml_load, yaml_dump)
@@ -129,7 +130,7 @@ profiles:
         args['--cfg'] = 'mocked'
         args['--verbose'] = True
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(YamlException):
             o = Options(args=args)
             print(o.import_link)
 
