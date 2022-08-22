@@ -48,7 +48,7 @@ The following variables are available in templates:
 
 ## Variables enrichment
 
-The below variables are added to the available variables withins. If the variable
+The below variables are added to the available variables within templates. If the variable
 is already set by the user (through the config file for example), it will not be overwritten.
 
 * `os`: will contain the OS name as provided by <https://docs.python.org/3/library/platform.html#platform.system>
