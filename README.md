@@ -6,7 +6,7 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![GitHub Repo stars](https://img.shields.io/github/stars/deadc0de6/dotdrop?style=social)](https://github.com/deadc0de6/dotdrop/)
 
-[![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg)](https://github.com/deadc0de6/dotdrop/actions)
+[![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg?branch=master)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
 [![Coveralls](https://img.shields.io/coveralls/github/deadc0de6/dotdrop)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
 [![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/deadc0de6/dotdrop?label=code%20quality)](https://lgtm.com/projects/g/deadc0de6/dotdrop/context:python)
