@@ -8,6 +8,7 @@ handle higher level of the config file
 import os
 import shlex
 import platform
+import distro
 
 
 # local imports
@@ -338,16 +339,7 @@ class CfgAggregator:
             self.variables[self.variable_release] = var_release
             msg = 'enrich variables with {}={}'
             self.log.dbg(msg.format(self.variable_release, var_release))
-
-        has_distro = True
-        try:
-            import distro
-            assert distro
-        except ImportError as exc:
-            self.log.dbg('distro packages not found!')
-            has_distro = False
-
-        if has_distro and self.variable_distro_id not in self.variables:
+        if self.variable_distro_id not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.id
@@ -355,7 +347,7 @@ class CfgAggregator:
             self.variables[self.variable_distro_id] = var_distro_id
             msg = 'enrich variables with {}={}'
             self.log.dbg(msg.format(self.variable_distro_id, var_distro_id))
-        if has_distro and self.variable_distro_version not in self.variables:
+        if self.variable_distro_version not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.version
@@ -363,7 +355,7 @@ class CfgAggregator:
             self.variables[self.variable_distro_version] = var_version
             msg = 'enrich variables with {}={}'
             self.log.dbg(msg.format(self.variable_distro_version, var_version))
-        if has_distro and self.variable_distro_like not in self.variables:
+        if self.variable_distro_like not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.like
