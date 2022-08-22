@@ -389,6 +389,13 @@ def dependencies_met():
         assert toml
     except ImportError as exc:
         raise Exception(err.format('toml')) from exc
+
+    # distro
+    try:
+        import distro
+        assert distro
+    except ImportError as exc:
+        raise Exception(err.format('distro')) from exc
 # pylint: enable=C0415
 
 
