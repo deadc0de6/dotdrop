@@ -7,6 +7,7 @@ handle higher level of the config file
 
 import os
 import shlex
+import platform
 
 
 # local imports
@@ -28,6 +29,12 @@ class CfgAggregator:
 
     file_prefix = 'f'
     dir_prefix = 'd'
+
+    variable_os = 'os'
+    variable_release = 'release'
+    variable_distro_id = 'distro_id'
+    variable_distro_like = 'distro_like'
+    variable_distro_version = 'distro_version'
 
     def __init__(self, path, profile_key, debug=False, dry=False):
         """
@@ -283,6 +290,8 @@ class CfgAggregator:
         self.variables = self.cfgyaml.variables
         debug_dict('variables', self.variables, self.debug)
 
+        self._enrich_variables()
+
         # patch dotfiles in profiles
         self._patch_keys_to_objs(self.profiles,
                                  "dotfiles", self.get_dotfile)
@@ -310,6 +319,58 @@ class CfgAggregator:
                                  "trans_w",
                                  self._get_trans_w_args(self.get_trans_w),
                                  islist=False)
+
+    def _enrich_variables(self):
+        """
+        enrich available variables
+        """
+        if self.variable_os not in self.variables:
+            # enrich with os variable
+            # https://docs.python.org/3/library/platform.html#platform.system
+            var_os = platform.system().lower()
+            self.variables[self.variable_os] = var_os
+            msg = 'enrich variables with {}={}'
+            self.log.dbg(msg.format(self.variable_os, var_os))
+        if self.variable_release not in self.variables:
+            # enrich with release variable
+            # https://docs.python.org/3/library/platform.html#platform.release
+            var_release = platform.release().lower()
+            self.variables[self.variable_release] = var_release
+            msg = 'enrich variables with {}={}'
+            self.log.dbg(msg.format(self.variable_release, var_release))
+
+        has_distro = True
+        try:
+            import distro
+            assert distro
+        except ImportError as exc:
+            self.log.dbg('distro packages not found!')
+            has_distro = False
+
+        if has_distro and self.variable_distro_id not in self.variables:
+            # enrich with distro variable
+            # https://pypi.org/project/distro/
+            # https://distro.readthedocs.io/en/latest/#distro.id
+            var_distro_id = distro.id().lower()
+            self.variables[self.variable_distro_id] = var_distro_id
+            msg = 'enrich variables with {}={}'
+            self.log.dbg(msg.format(self.variable_distro_id, var_distro_id))
+        if has_distro and self.variable_distro_version not in self.variables:
+            # enrich with distro variable
+            # https://pypi.org/project/distro/
+            # https://distro.readthedocs.io/en/latest/#distro.version
+            var_version = distro.version().lower()
+            self.variables[self.variable_distro_version] = var_version
+            msg = 'enrich variables with {}={}'
+            self.log.dbg(msg.format(self.variable_distro_version, var_version))
+        if has_distro and self.variable_distro_like not in self.variables:
+            # enrich with distro variable
+            # https://pypi.org/project/distro/
+            # https://distro.readthedocs.io/en/latest/#distro.like
+            var_like = distro.like().lower()
+            self.variables[self.variable_distro_like] = var_like
+            msg = 'enrich variables with {}={}'
+            self.log.dbg(msg.format(self.variable_distro_like, var_like))
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
         """
