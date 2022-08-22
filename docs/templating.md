@@ -49,13 +49,13 @@ The following variables are available in templates:
 ## Variables enrichment
 
 The below variables are added to the available variables within templates. If the variable
-is already set by the user (through the config file for example), it will not be overwritten.
+is already set by the user (through the config file for example) it will not be overwritten.
 
-* `os`: will contain the OS name as provided by <https://docs.python.org/3/library/platform.html#platform.system>
-* `release`: will contain the OS release version as provided by <https://docs.python.org/3/library/platform.html#platform.release>
-* `distro_id`: will contain the distribution ID as provided by <https://distro.readthedocs.io/en/latest/#distro.id>
-* `distro_version`: will contain the distribution version as provided by <https://distro.readthedocs.io/en/latest/#distro.version>
-* `distro_like`: will contain a space-separated list of distro IDs that are closely related to the current OS distro as provided by <https://distro.readthedocs.io/en/latest/#distro.like>
+* `os` will contain the OS name as provided by <https://docs.python.org/3/library/platform.html#platform.system>
+* `release` will contain the OS release version as provided by <https://docs.python.org/3/library/platform.html#platform.release>
+* `distro_id` will contain the distribution ID as provided by <https://distro.readthedocs.io/en/latest/#distro.id>
+* `distro_version` will contain the distribution version as provided by <https://distro.readthedocs.io/en/latest/#distro.version>
+* `distro_like` will contain a space-separated list of distro IDs that are closely related to the current OS distro as provided by <https://distro.readthedocs.io/en/latest/#distro.like>
 
 ## Dotfile variables
 
