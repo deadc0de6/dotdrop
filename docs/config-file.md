@@ -164,14 +164,17 @@ profiles:
 It is possible to ignore specific patterns when using dotdrop.
 
 * For [install](usage.md#install-dotfiles):
-    * Using `instignore` in the config file
+    * Using config block [instignore](config-config.md)
+    * Using dotfiles block [instignore](config-dotfiles.md)
 * For [import](usage.md#import-dotfiles):
-    * Using `impignore` in the config file
+    * Using config block [impignore](config-config.md)
 * For [compare](usage.md#compare-dotfiles):
-    * Using `cmpignore` in the config file
+    * Using config block [cmpignore](config-config.md)
+    * Using dotfiles block [cmpignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
 * For [update](usage.md#update-dotfiles):
-    * Using `upignore` in the config file
+    * Using config block [upignore](config-config.md)
+    * Using dotfiles block [upignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
 
 The ignore pattern must follow Unix shell-style wildcards, like, for example `*/path/to/file`.
@@ -185,6 +188,8 @@ config:
   - '*/README.md'
   instignore:
   - '*/README.md'
+  impignore:
+  - '*/README.md'
 ...
 dotfiles:
   d_vim
@@ -193,6 +198,10 @@ dotfiles:
     upignore:
     - '*/undo-dir'
     - '*/plugged'
+    instignore:
+    - '*/internal'
+    cmpignore:
+    - '*/ignore-me'
 ...
 ```
 
