@@ -16,6 +16,7 @@ from dotdrop.utils import strip_home, get_default_file_perms, \
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
+from dotdrop.exceptions import UndefinedException
 
 
 class Importer:
@@ -35,8 +36,11 @@ class Importer:
         @debug: enable debug
         @keepdot: keep dot prefix
         @ignore: patterns to ignore when importing
+        This may raise UndefinedException
         """
         self.profile = profile
+        if not self.profile:
+            raise UndefinedException("profile is undefined")
         self.conf = conf
         self.dotpath = dotpath
         self.diff_cmd = diff_cmd

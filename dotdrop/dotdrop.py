@@ -854,6 +854,9 @@ def _exec_command(opts):
             LOG.dbg(f'running cmd: {command}')
             cmd_remove(opts)
 
+    except UndefinedException as exc:
+        LOG.err(exc)
+        ret = False
     except KeyboardInterrupt:
         LOG.err('interrupted')
         ret = False
