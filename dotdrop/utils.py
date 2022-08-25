@@ -42,11 +42,13 @@ NOREMOVE = [os.path.normpath(p) for p in DONOTDELETE]
 def run(cmd, debug=False):
     """run a command (expects a list)"""
     if debug:
-        LOG.dbg('exec: {}'.format(' '.join(cmd)), force=True)
-    proc = subprocess.Popen(cmd, shell=False,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out, _ = proc.communicate()
-    ret = proc.returncode
+        fcmd = ' '.join(cmd)
+        LOG.dbg(f'exec: {fcmd}', force=True)
+    with subprocess.Popen(cmd, shell=False,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.STDOUT) as proc:
+        out, _ = proc.communicate()
+        ret = proc.returncode
     out = out.splitlines(keepends=True)
     lines = ''.join([x.decode('utf-8', 'replace') for x in out])
     return ret == 0, lines
@@ -66,10 +68,10 @@ def shellrun(cmd, debug=False):
     returns True|False, output
     """
     if debug:
-        LOG.dbg('shell exec: \"{}\"'.format(cmd), force=True)
+        LOG.dbg(f'shell exec: \"{cmd}\"', force=True)
     ret, out = subprocess.getstatusoutput(cmd)
     if debug:
-        LOG.dbg('shell result ({}): {}'.format(ret, out), force=True)
+        LOG.dbg(f'shell result ({ret}): {out}', force=True)
     return ret == 0, out
 
 
@@ -79,11 +81,11 @@ def userinput(prompt, debug=False):
     return user input
     """
     if debug:
-        LOG.dbg('get user input for \"{}\"'.format(prompt), force=True)
-    pre = 'Please provide the value for \"{}\": '.format(prompt)
+        LOG.dbg(f'get user input for \"{prompt}\"', force=True)
+    pre = f'Please provide the value for \"{prompt}\": '
     res = input(pre)
     if debug:
-        LOG.dbg('user input result: {}'.format(res), force=True)
+        LOG.dbg(f'user input result: {res}', force=True)
     return res
 
 
@@ -160,13 +162,13 @@ def removepath(path, logger=None):
     if not path:
         return
     if not os.path.lexists(path):
-        err = 'File not found: {}'.format(path)
+        err = f'File not found: {path}'
         if logger:
             logger.warn(err)
             return
         raise OSError(err)
     if os.path.normpath(os.path.expanduser(path)) in NOREMOVE:
-        err = 'Dotdrop refuses to remove {}'.format(path)
+        err = f'Dotdrop refuses to remove {path}'
         if logger:
             logger.warn(err)
             return
@@ -178,7 +180,7 @@ def removepath(path, logger=None):
         elif os.path.isdir(path):
             shutil.rmtree(path)
         else:
-            err = 'Unsupported file type for deletion: {}'.format(path)
+            err = f'Unsupported file type for deletion: {path}'
             raise OSError(err)
     except Exception as exc:
         err = str(exc)
@@ -226,7 +228,7 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg('must ignore? \"{}\" against {}'.format(paths, ignores),
+        LOG.dbg(f'must ignore? \"{paths}\" against {ignores}',
                 force=True)
     ignored_negative, ignored = categorize(
         lambda ign: ign.startswith('!'), ignores)
@@ -236,7 +238,7 @@ def must_ignore(paths, ignores, debug=False):
         for i in ignored:
             if fnmatch.fnmatch(path, i):
                 if debug:
-                    LOG.dbg('ignore \"{}\" match: {}'.format(i, path),
+                    LOG.dbg(f'ignore \"{i}\" match: {path}',
                             force=True)
                 ignore_matches.append(path)
 
@@ -249,24 +251,24 @@ def must_ignore(paths, ignores, debug=False):
                 LOG.dbg(msg.format(path, nign), force=True)
             if fnmatch.fnmatch(path, nign):
                 if debug:
-                    msg = 'negative ignore \"{}\" match: {}'.format(nign, path)
+                    msg = f'negative ignore \"{nign}\" match: {path}'
                     LOG.dbg(msg, force=True)
                 try:
                     ignore_matches.remove(path)
                 except ValueError:
-                    LOG.warn('no files that are currently being '
-                             'ignored match \"{}\". In order '
-                             'for a negative ignore pattern '
-                             'to work, it must match a file '
-                             'that is being ignored by a '
-                             'previous ignore pattern.'.format(nign)
-                             )
+                    warn = 'no files that are currently being '
+                    warn += f'ignored match \"{nign}\". In order '
+                    warn += 'for a negative ignore pattern '
+                    warn += 'to work, it must match a file '
+                    warn += 'that is being ignored by a '
+                    warn += 'previous ignore pattern.'
+                    LOG.warn(warn)
         if ignore_matches:
             if debug:
-                LOG.dbg('ignoring {}'.format(paths), force=True)
+                LOG.dbg(f'ignoring {paths}', force=True)
             return True
     if debug:
-        LOG.dbg('NOT ignoring {}'.format(paths), force=True)
+        LOG.dbg(f'NOT ignoring {paths}', force=True)
     return False
 
 
@@ -284,7 +286,7 @@ def uniq_list(a_list):
 def patch_ignores(ignores, prefix, debug=False):
     """allow relative ignore pattern"""
     new = []
-    LOG.dbg('ignores before patching: {}'.format(ignores), force=debug)
+    LOG.dbg(f'ignores before patching: {ignores}', force=debug)
     for ignore in ignores:
         negative = ignore.startswith('!')
         if negative:
@@ -311,7 +313,7 @@ def patch_ignores(ignores, prefix, debug=False):
             new.append('!' + path)
         else:
             new.append(path)
-    LOG.dbg('ignores after patching: {}'.format(new), force=debug)
+    LOG.dbg(f'ignores after patching: {new}', force=debug)
     return new
 
 
@@ -424,7 +426,7 @@ def get_file_perm(path):
 def chmod(path, mode, debug=False):
     """change mode of file"""
     if debug:
-        LOG.dbg('chmod {} {}'.format(oct(mode), path), force=True)
+        LOG.dbg(f'chmod {mode:o} {path}', force=True)
     os.chmod(path, mode)
     return get_file_perm(path) == mode
 
@@ -452,23 +454,23 @@ def debug_list(title, elems, debug):
     """pretty print list"""
     if not debug:
         return
-    LOG.dbg('{}:'.format(title), force=debug)
+    LOG.dbg(f'{title}:', force=debug)
     for elem in elems:
-        LOG.dbg('\t- {}'.format(elem), force=debug)
+        LOG.dbg(f'\t- {elem}', force=debug)
 
 
 def debug_dict(title, elems, debug):
     """pretty print dict"""
     if not debug:
         return
-    LOG.dbg('{}:'.format(title), force=debug)
+    LOG.dbg(f'{title}:', force=debug)
     for k, val in elems.items():
         if isinstance(val, list):
-            LOG.dbg('\t- \"{}\":'.format(k), force=debug)
+            LOG.dbg(f'\t- \"{k}\":', force=debug)
             for i in val:
-                LOG.dbg('\t\t- {}'.format(i), force=debug)
+                LOG.dbg(f'\t\t- {i}', force=debug)
         else:
-            LOG.dbg('\t- \"{}\": {}'.format(k, val), force=debug)
+            LOG.dbg(f'\t- \"{k}\": {val}', force=debug)
 
 
 def check_version():
@@ -493,14 +495,14 @@ def check_version():
 def pivot_path(path, newdir, striphome=False, logger=None):
     """change path to be under newdir"""
     if logger:
-        logger.dbg('pivot new dir: \"{}\"'.format(newdir))
-        logger.dbg('strip home: {}'.format(striphome))
+        logger.dbg(f'pivot new dir: \"{newdir}\"')
+        logger.dbg(f'strip home: {striphome}')
     if striphome:
         path = strip_home(path)
     sub = path.lstrip(os.sep)
     new = os.path.join(newdir, sub)
     if logger:
-        logger.dbg('pivot \"{}\" to \"{}\"'.format(path, new))
+        logger.dbg(f'pivot \"{path}\" to \"{new}\"')
     return new
 
 

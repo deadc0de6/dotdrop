@@ -18,7 +18,9 @@ pyflakes --version
 which pycodestyle >/dev/null 2>&1
 [ "$?" != "0" ] && echo "Install pycodestyle" && exit 1
 echo "testing with pycodestyle"
-pycodestyle --ignore=W503,W504,W605 dotdrop/
+# W503: Line break occurred before a binary operator
+# W504: Line break occurred after a binary operator
+pycodestyle --ignore=W503,W504 dotdrop/
 pycodestyle tests/
 pycodestyle scripts/
 
@@ -29,6 +31,15 @@ pyflakes tests/
 
 # pylint
 echo "testing with pylint"
+# https://pylint.pycqa.org/en/latest/user_guide/checkers/features.html
+# R0902: too-many-instance-attributes
+# R0913: too-many-arguments
+# R0903: too-few-public-methods
+# R0914: too-many-locals
+# R0915: too-many-statements
+# R0912: too-many-branches
+# R0911: too-many-return-statements
+# C0209: consider-using-f-string
 pylint \
   --disable=R0902 \
   --disable=R0913 \
@@ -37,7 +48,6 @@ pylint \
   --disable=R0915 \
   --disable=R0912 \
   --disable=R0911 \
-  --disable=R1732 \
   --disable=C0209 \
   dotdrop/
 

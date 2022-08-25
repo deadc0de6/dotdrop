@@ -73,11 +73,11 @@ class Templategen:
         self._load_funcs_to_dic(jhelpers, self.env.globals)
         if func_file:
             for ffile in func_file:
-                self.log.dbg('load custom functions from {}'.format(ffile))
+                self.log.dbg(f'load custom functions from {ffile}')
                 self._load_path_to_dic(ffile, self.env.globals)
         if filter_file:
             for ffile in filter_file:
-                self.log.dbg('load custom filters from {}'.format(ffile))
+                self.log.dbg(f'load custom filters from {ffile}')
                 self._load_path_to_dic(ffile, self.env.filters)
         if self.debug:
             self._debug_dict('template additional variables', variables)
@@ -93,7 +93,7 @@ class Templategen:
         try:
             return self._handle_file(src)
         except UndefinedError as exc:
-            err = 'undefined variable: {}'.format(exc.message)
+            err = f'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
     def generate_string(self, string):
@@ -107,7 +107,7 @@ class Templategen:
         try:
             return self.env.from_string(string).render(self.variables)
         except UndefinedError as exc:
-            err = 'undefined variable: {}'.format(exc.message)
+            err = 'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
     def add_tmp_vars(self, newvars=None):
@@ -129,7 +129,7 @@ class Templategen:
     def _load_path_to_dic(self, path, dic):
         mod = utils.get_module_from_path(path)
         if not mod:
-            self.log.warn('cannot load module \"{}\"'.format(path))
+            self.log.warn(f'cannot load module \"{path}\"')
             return
         self._load_funcs_to_dic(mod, dic)
 
@@ -139,13 +139,13 @@ class Templategen:
             return
         funcs = utils.get_module_functions(mod)
         for name, func in funcs:
-            self.log.dbg('load function \"{}\"'.format(name))
+            self.log.dbg(f'load function \"{name}\"')
             dic[name] = func
 
     @classmethod
     def _header(cls, prepend=''):
         """add a comment usually in the header of a dotfile"""
-        return '{}{}'.format(prepend, utils.header())
+        return f'{prepend}{utils.header()}'
 
     def _handle_file(self, src):
         """generate the file content from template"""
@@ -161,8 +161,8 @@ class Templategen:
             self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
         istext = self._is_text(filetype)
-        self.log.dbg('filetype \"{}\": {}'.format(src, filetype))
-        self.log.dbg('is text \"{}\": {}'.format(src, istext))
+        self.log.dbg(f'filetype \"{src}\": {filetype}')
+        self.log.dbg(f'is text \"{src}\": {istext}')
         if not istext:
             return self._handle_bin_file(src)
         return self._handle_text_file(src)
@@ -220,7 +220,7 @@ class Templategen:
     def is_template(path, ignore=None, debug=False):
         """recursively check if any file is a template within path"""
         if debug:
-            LOG.dbg('is template: {}'.format(path), force=True)
+            LOG.dbg(f'is template: {path}', force=True)
         path = os.path.expanduser(path)
 
         if not os.path.exists(path):
@@ -280,8 +280,8 @@ class Templategen:
         """pretty print dict"""
         if not self.debug:
             return
-        self.log.dbg('{}:'.format(title))
+        self.log.dbg(f'{title}:')
         if not elems:
             return
         for k, val in elems.items():
-            self.log.dbg('  - \"{}\": {}'.format(k, val))
+            self.log.dbg(f'  - \"{k}\": {val}')

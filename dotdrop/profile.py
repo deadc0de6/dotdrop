@@ -55,8 +55,7 @@ class Profile(DictParser):
                 hash(tuple(self.dotfiles)))
 
     def __str__(self):
-        msg = 'key:"{}"'
-        return msg.format(self.key)
+        return f'key:"{self.key}"'
 
     def __repr__(self):
-        return 'profile({!s})'.format(self)
+        return f'profile({self})'

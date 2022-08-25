@@ -67,9 +67,9 @@ class Importer:
             -1: error
         """
         path = os.path.abspath(path)
-        self.log.dbg('import {}'.format(path))
+        self.log.dbg(f'import {path}'.format(path))
         if not os.path.exists(path):
-            self.log.err('\"{}\" does not exist, ignored!'.format(path))
+            self.log.err(f'\"{path}\" does not exist, ignored!')
             return -1
 
         # check transw if any
@@ -110,8 +110,8 @@ class Importer:
         if self.safe:
             realdst = os.path.realpath(dst)
             if dst != realdst:
-                msg = '\"{}\" is a symlink, dereference it and continue?'
-                if not self.log.ask(msg.format(dst)):
+                msg = f'\"{dst}\" is a symlink, dereference it and continue?'
+                if not self.log.ask(msg):
                     return 0
 
         # create src path
@@ -122,7 +122,7 @@ class Importer:
             src = src.rstrip(os.sep)
             src = os.path.abspath(src)
             src = strip_home(src)
-            self.log.dbg('import src for {} as {}'.format(dst, src))
+            self.log.dbg(f'import src for {dst} as {src}')
         # with or without dot prefix
         strip = '.' + os.sep
         if self.keepdot:
@@ -136,13 +136,13 @@ class Importer:
         linktype = import_link
         if linktype == LinkTypes.LINK_CHILDREN and \
                 not os.path.isdir(path):
-            self.log.err('importing \"{}\" failed!'.format(path))
+            self.log.err(f'importing \"{path}\" failed!')
             return -1
 
         if self._already_exists(src, dst):
             return -1
 
-        self.log.dbg('import dotfile: src:{} dst:{}'.format(src, dst))
+        self.log.dbg(f'import dotfile: src:{src} dst:{dst}')
 
         if not self._import_file(src, dst, trans_write=trans_write):
             return -1
@@ -165,7 +165,7 @@ class Importer:
         # handle file mode
         chmod = None
         dflperm = get_default_file_perms(dst, self.umask)
-        self.log.dbg('import chmod: {}'.format(import_mode))
+        self.log.dbg(f'import chmod: {import_mode}')
         if import_mode or perm != dflperm:
             msg = 'adopt mode {:o} (umask {:o})'
             self.log.dbg(msg.format(perm, dflperm))
@@ -176,10 +176,10 @@ class Importer:
                                         trans_read=trans_r,
                                         trans_write=trans_w)
         if not retconf:
-            self.log.warn('\"{}\" ignored during import'.format(path))
+            self.log.warn(f'\"{path}\" ignored during import')
             return 0
 
-        self.log.sub('\"{}\" imported'.format(path))
+        self.log.sub(f'\"{path}\" imported')
         return 1
 
     def _check_existing_dotfile(self, src, dst):
@@ -196,7 +196,7 @@ class Importer:
         diff = cmp.compare(src, dst)
         if diff != '':
             # files are different, dunno what to do
-            self.log.log('diff \"{}\" VS \"{}\"'.format(dst, src))
+            self.log.log(f'diff \"{dst}\" VS \"{src}\"')
             self.log.emph(diff)
             # ask user
             msg = 'Dotfile \"{}\" already exists, overwrite?'
@@ -225,18 +225,18 @@ class Importer:
 
         # create directory hierarchy
         if self.dry:
-            cmd = 'mkdir -p {}'.format(srcfd)
-            self.log.dry('would run: {}'.format(cmd))
+            cmd = f'mkdir -p {srcfd}'
+            self.log.dry(f'would run: {cmd}')
         else:
             try:
                 os.makedirs(srcfd, exist_ok=True)
             except OSError:
-                self.log.err('importing \"{}\" failed!'.format(dst))
+                self.log.err(f'importing \"{dst}\" failed!')
                 return False
 
         # import the file
         if self.dry:
-            self.log.dry('would copy {} to {}'.format(dst, srcf))
+            self.log.dry(f'would copy {dst} to {srcf}')
         else:
             # apply trans_w
             dst = self._apply_trans_w(dst, trans_write)
@@ -257,7 +257,7 @@ class Importer:
             except shutil.Error as exc:
                 src = exc.args[0][0][0]
                 why = exc.args[0][0][2]
-                self.log.err('importing \"{}\" failed: {}'.format(src, why))
+                self.log.err(f'importing \"{src}\" failed: {why}')
 
         return True
 
@@ -290,8 +290,8 @@ class Importer:
 
     def _ignore(self, path):
         if must_ignore([path], self.ignore, debug=self.debug):
-            self.log.dbg('ignoring import of {}'.format(path))
-            self.log.warn('{} ignored'.format(path))
+            self.log.dbg(f'ignoring import of {path}')
+            self.log.warn(f'{path} ignored')
             return True
         return False
 
@@ -305,12 +305,12 @@ class Importer:
         """
         if not trans:
             return path
-        self.log.dbg('executing write transformation {}'.format(trans))
+        self.log.dbg(f'executing write transformation {trans}')
         tmp = get_unique_tmp_name()
         if not trans.transform(path, tmp, debug=self.debug,
                                templater=self.templater):
-            msg = 'transformation \"{}\" failed for {}'
-            self.log.err(msg.format(trans.key, path))
+            msg = f'transformation \"{trans.key}\" failed for {path}'
+            self.log.err(msg)
             if os.path.exists(tmp):
                 removepath(tmp, logger=self.log)
             return None

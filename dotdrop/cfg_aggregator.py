@@ -221,7 +221,7 @@ class CfgAggregator:
         """create a new dotfile"""
         # get a new dotfile with a unique key
         key = self._get_new_dotfile_key(dst)
-        self.log.dbg('new dotfile key: {}'.format(key))
+        self.log.dbg(f'new dotfile key: {key}')
         # add the dotfile
         trans_r_key = trans_w_key = None
         if trans_read:
@@ -298,7 +298,7 @@ class CfgAggregator:
         self._patch_keys_to_objs([self.settings],
                                  "default_actions", self._get_action_w_args)
 
-        msg = 'default actions: {}'.format(self.settings.default_actions)
+        msg = f'default actions: {self.settings.default_actions}'
         self.log.dbg(msg)
 
         # patch trans_w/trans_r in dotfiles
@@ -318,7 +318,7 @@ class CfgAggregator:
         """
         if not containers:
             return
-        self.log.dbg('patching {} ...'.format(keys))
+        self.log.dbg(f'patching {keys} ...')
         for container in containers:
             objects = []
             okeys = getattr(container, keys)
@@ -329,8 +329,8 @@ class CfgAggregator:
             for key in okeys:
                 obj = get_by_key(key)
                 if not obj:
-                    err = '{} does not contain'.format(container)
-                    err += ' a {} entry named {}'.format(keys, key)
+                    err = f'{container} does not contain'
+                    err += f' a {keys} entry named {key}'
                     self.log.err(err)
                     raise Exception(err)
                 objects.append(obj)

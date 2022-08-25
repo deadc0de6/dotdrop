@@ -27,7 +27,7 @@ class LinkTypes(IntEnum):
         except KeyError as exc:
             if default:
                 return default
-            err = 'bad {} value: "{}"'.format(cls.__name__, key)
+            err = f'bad {cls.__name__} value: "{key}"'
             raise ValueError(err) from exc
 
     def __str__(self):

@@ -31,24 +31,23 @@ class Logger:
         cend = self._color(self.RESET)
         if bold:
             bold = self._color(self.BOLD)
-            fmt = '{}{}{}{}{}'.format(pre, cstart, bold,
-                                      string, cend)
-            fmt += '{}{}'.format(end, cend)
+            fmt = f'{pre}{cstart}{bold}{string}{cend}'
+            fmt += f'{end}{cend}'
         else:
-            fmt = '{}{}{}{}{}'.format(pre, cstart, string, end, cend)
+            fmt = f'{pre}{cstart}{string}{end}{cend}'
         sys.stdout.write(fmt)
 
     def sub(self, string, end='\n'):
         """sub log"""
         cstart = self._color(self.BLUE)
         cend = self._color(self.RESET)
-        sys.stdout.write('\t{}->{} {}{}'.format(cstart, cend, string, end))
+        sys.stdout.write(f'\t{cstart}->{cend} {string}{end}')
 
     def emph(self, string, stdout=True):
         """emphasis log"""
         cstart = self._color(self.EMPH)
         cend = self._color(self.RESET)
-        content = '{}{}{}'.format(cstart, string, cend)
+        content = f'{cstart}{string}{cend}'
         if not stdout:
             sys.stderr.write(content)
         else:
@@ -58,14 +57,14 @@ class Logger:
         """error log"""
         cstart = self._color(self.RED)
         cend = self._color(self.RESET)
-        msg = '{} {}'.format(string, end)
-        sys.stderr.write('{}[ERR] {}{}'.format(cstart, msg, cend))
+        msg = f'{string} {end}'.format(string, end)
+        sys.stderr.write(f'{cstart}[ERR] {msg}{cend}')
 
     def warn(self, string, end='\n'):
         """warning log"""
         cstart = self._color(self.YELLOW)
         cend = self._color(self.RESET)
-        sys.stderr.write('{}[WARN] {} {}{}'.format(cstart, string, end, cend))
+        sys.stderr.write(f'{cstart}[WARN] {string} {end}{cend}')
 
     def dbg(self, string, force=False):
         """debug log"""
@@ -78,29 +77,28 @@ class Logger:
         cend = self._color(self.RESET)
         clight = self._color(self.LMAGENTA)
         bold = self._color(self.BOLD)
-        line = '{}{}[DEBUG][{}.{}]{}{} {}{}\n'
-        sys.stderr.write(line.format(bold, clight,
-                                     mod, func,
-                                     cend, cstart,
-                                     string, cend))
+        line = f'{bold}{clight}[DEBUG][{mod}.{func}]'
+        line += f'{cend}{cstart} {string}{cend}\n'
+        sys.stderr.write(line)
 
     def dry(self, string, end='\n'):
         """dry run log"""
         cstart = self._color(self.GREEN)
         cend = self._color(self.RESET)
-        sys.stdout.write('{}[DRY] {} {}{}'.format(cstart, string, end, cend))
+        sys.stdout.write(f'{cstart}[DRY] {string} {end}{cend}')
 
     @classmethod
     def raw(cls, string, end='\n'):
         """raw log"""
-        sys.stdout.write('{}{}'.format(string, end))
+        sys.stdout.write(f'{string}{end}')
 
     def ask(self, query):
         """ask user for confirmation"""
         cstart = self._color(self.BLUE)
         cend = self._color(self.RESET)
-        query = '{}{}{}'.format(cstart, query + ' [y/N] ? ', cend)
-        resp = input(query)
+        question = query + ' [y/N] ? '
+        qmsg = f'{cstart}{question}{cend}'
+        resp = input(qmsg)
         return resp == 'y'
 
     @classmethod

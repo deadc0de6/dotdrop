@@ -38,9 +38,9 @@ if ENV_PROFILE in os.environ:
 NAME = 'dotdrop'
 CONFIGFILEYAML = 'config.yaml'
 CONFIGFILETOML = 'config.toml'
-HOMECFG = '~/.config/{}'.format(NAME)
-ETCXDGCFG = '/etc/xdg/{}'.format(NAME)
-ETCCFG = '/etc/{}'.format(NAME)
+HOMECFG = f'~/.config/{NAME}'
+ETCXDGCFG = f'/etc/xdg/{NAME}'
+ETCCFG = f'/etc/{NAME}'
 
 OPT_LINK = {
     LinkTypes.NOLINK.name.lower(): LinkTypes.NOLINK,
@@ -51,11 +51,11 @@ OPT_LINK = {
 BANNER = r"""     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/  v{}
-                               |_|""".format(VERSION)
+ \__,_|\___/ \__\__,_|_|  \___/| .__/  v{VERSION}
+                               |_|"""
 
-USAGE = """
-{}
+USAGE = f"""
+{BANNER}
 
 Usage:
   dotdrop install   [-VbtfndDaW] [-c <path>] [-p <profile>]
@@ -89,7 +89,7 @@ Options:
   -L --file-only          Do not show diff but only the files that differ.
   -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
   -n --nodiff             Do not diff when installing.
-  -p --profile=<profile>  Specify the profile to use [default: {}].
+  -p --profile=<profile>  Specify the profile to use [default: {PROFILE}].
   -P --show-patch         Provide a one-liner to manually patch template.
   -s --as=<path>          Import as a different path from actual path.
   --transr=<key>          Associate trans_read key on import.
@@ -102,7 +102,7 @@ Options:
   -z --ignore-missing     Ignore files in installed folders that are missing.
   -v --version            Show version.
   -h --help               Show this screen.
-""".format(BANNER, PROFILE)
+"""
 
 
 class AttrMonitor:
@@ -159,14 +159,15 @@ class Options(AttrMonitor):
         if not self.confpath:
             raise YamlException('no config file found')
         if not os.path.exists(self.confpath):
-            err = 'bad config file path: {}'.format(self.confpath)
+            err = f'bad config file path: {self.confpath}'
             raise YamlException(err)
         self.log.dbg('#################################################')
         self.log.dbg('#################### DOTDROP ####################')
         self.log.dbg('#################################################')
-        self.log.dbg('version: {}'.format(VERSION))
-        self.log.dbg('command: {}'.format(' '.join(sys.argv)))
-        self.log.dbg('config file: {}'.format(self.confpath))
+        self.log.dbg(f'version: {VERSION}')
+        args = ' '.join(sys.argv)
+        self.log.dbg(f'command: {args}')
+        self.log.dbg(f'config file: {self.confpath}')
 
         self._read_config()
         self._apply_args()
@@ -290,7 +291,7 @@ class Options(AttrMonitor):
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
         self.compare_ignore.extend(self.cmpignore)
-        self.compare_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.compare_ignore.append(f'*{self.install_backup_suffix}')
         self.compare_ignore = uniq_list(self.compare_ignore)
         self.compare_fileonly = self.args['--file-only']
         self.ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
@@ -303,7 +304,7 @@ class Options(AttrMonitor):
         self.import_mode = self.args['--preserve-mode'] or self.chmod_on_import
         self.import_ignore = self.args['--ignore']
         self.import_ignore.extend(self.impignore)
-        self.import_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.import_ignore.append(f'*{self.install_backup_suffix}')
         self.import_ignore = uniq_list(self.import_ignore)
         self.import_transw = self.args['--transw']
         self.import_transr = self.args['--transr']
@@ -314,7 +315,7 @@ class Options(AttrMonitor):
         self.update_iskey = self.args['--key']
         self.update_ignore = self.args['--ignore']
         self.update_ignore.extend(self.upignore)
-        self.update_ignore.append('*{}'.format(self.install_backup_suffix))
+        self.update_ignore.append(f'*{self.install_backup_suffix}')
         self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
 
@@ -362,7 +363,7 @@ class Options(AttrMonitor):
             # overwrite default import link with cli switch
             link = self.args['--link']
             if link not in OPT_LINK:
-                self.log.err('bad option for --link: {}'.format(link))
+                self.log.err(f'bad option for --link: {link}')
                 sys.exit(USAGE)
             self.import_link = OPT_LINK[link]
 
@@ -411,12 +412,12 @@ class Options(AttrMonitor):
             if callable(val):
                 continue
             if isinstance(val, list):
-                debug_list('-> {}'.format(att), val, self.debug)
+                debug_list(f'-> {att}', val, self.debug)
             elif isinstance(val, dict):
-                debug_dict('-> {}'.format(att), val, self.debug)
+                debug_dict(f'-> {att}', val, self.debug)
             else:
-                self.log.dbg('-> {}: {}'.format(att, val))
+                self.log.dbg(f'-> {att}: {val}')
 
     def _attr_set(self, attr):
         """error when some inexistent attr is set"""
-        raise Exception('bad option: {}'.format(attr))
+        raise Exception(f'bad option: {attr}')

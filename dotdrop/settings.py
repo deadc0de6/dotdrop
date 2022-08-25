@@ -115,7 +115,7 @@ class Settings(DictParser):
 
         # check diff command
         if not is_bin_in_path(self.diff_command):
-            err = 'bad diff_command: {}'.format(self.diff_command)
+            err = f'bad diff_command: {diff_command}'
             raise YamlException(err)
 
     def _serialize_seq(self, name, dic):

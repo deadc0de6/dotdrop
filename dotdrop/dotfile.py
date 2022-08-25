@@ -57,11 +57,10 @@ class Dotfile(DictParser):
 
         if self.link != LinkTypes.NOLINK and \
                 (
-                    (trans_r and len(trans_r) > 0)
-                    or
+                    (trans_r and len(trans_r) > 0) or
                     (trans_w and len(trans_w) > 0)
                 ):
-            msg = '[{}] transformations disabled'.format(key)
+            msg = f'[{key}] transformations disabled'
             msg += ' because dotfile is linked'
             self.log.warn(msg)
             self.trans_r = []
@@ -112,48 +111,48 @@ class Dotfile(DictParser):
         return hash(self.dst) ^ hash(self.src) ^ hash(self.key)
 
     def __str__(self):
-        msg = 'key:\"{}\"'.format(self.key)
-        msg += ', src:\"{}\"'.format(self.src)
-        msg += ', dst:\"{}\"'.format(self.dst)
-        msg += ', link:\"{}\"'.format(str(self.link))
-        msg += ', template:{}'.format(self.template)
+        msg = f'key:\"{self.key}\"'
+        msg += f', src:\"{self.src}\"'
+        msg += f', dst:\"{self.dst}\"'
+        msg += f', link:\"{self.link}\"'
+        msg += f', template:{self.template}'
         if self.chmod:
-            msg += ', chmod:{:o}'.format(self.chmod)
+            msg += f', chmod:{self.chmod:o}'
         return msg
 
     def prt(self):
         """extended dotfile to str"""
         indent = '  '
-        out = 'dotfile: \"{}\"'.format(self.key)
-        out += '\n{}src: \"{}\"'.format(indent, self.src)
-        out += '\n{}dst: \"{}\"'.format(indent, self.dst)
-        out += '\n{}link: \"{}\"'.format(indent, str(self.link))
-        out += '\n{}template: \"{}\"'.format(indent, str(self.template))
+        out = f'dotfile: \"{self.key}\"'
+        out += f'\n{indent}src: \"{self.src}\"'
+        out += f'\n{indent}dst: \"{self.dst}\"'
+        out += f'\n{indent}link: \"{self.link}\"'
+        out += f'\n{indent}template: \"{self.template}\"'
         if self.chmod:
-            out += '\n{}chmod: \"{:o}\"'.format(indent, self.chmod)
+            out += f'\n{indent}chmod: \"{self.chmod:o}\"'
 
-        out += '\n{}pre-action:'.format(indent)
+        out += f'\n{indent}pre-action:'
         some = self.get_pre_actions()
         if some:
             for act in some:
-                out += '\n{}- {}'.format(2 * indent, act)
+                out += f'\n{2*indent}- {act}'
 
-        out += '\n{}post-action:'.format(indent)
+        out += f'\n{indent}post-action:'
         some = self.get_post_actions()
         if some:
             for act in some:
-                out += '\n{}- {}'.format(2 * indent, act)
+                out += f'\n{2*indent}- {act}'
 
-        out += '\n{}trans_r:'.format(indent)
+        out += f'\n{indent}trans_r:'
         some = self.get_trans_r()
         if some:
-            out += '\n{}- {}'.format(2 * indent, some)
+            out += f'\n{2*indent}- {some}'
 
-        out += '\n{}trans_w:'.format(indent)
+        out += f'\n{indent}trans_w:'
         some = self.get_trans_w()
         if some:
-            out += '\n{}- {}'.format(2 * indent, some)
+            out += f'\n{2*indent}- {some}'
         return out
 
     def __repr__(self):
-        return 'dotfile({!s})'.format(self)
+        return f'dotfile({self})'
