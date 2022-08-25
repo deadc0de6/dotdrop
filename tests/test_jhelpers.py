@@ -7,7 +7,7 @@ basic unittest for jhelpers
 import os
 import unittest
 
-from dotdrop.cfg_aggregator import CfgAggregator as Cfg
+from dotdrop.cfg_aggregator import CfgAggregator
 from tests.helpers import (clean,
                            create_random_file, get_string, get_tempdir,
                            load_options)
@@ -97,7 +97,7 @@ dirname: /tmp/a/b
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
         self.fake_config(confpath, d1, profile, tmp)
-        conf = Cfg(confpath, profile, debug=True)
+        conf = CfgAggregator(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 
         # install them

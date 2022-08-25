@@ -17,7 +17,7 @@ from docopt import docopt
 from dotdrop.version import __version__ as VERSION
 from dotdrop.linktypes import LinkTypes
 from dotdrop.logger import Logger
-from dotdrop.cfg_aggregator import CfgAggregator as Cfg
+from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list, debug_list, debug_dict
 from dotdrop.exceptions import YamlException
@@ -253,8 +253,10 @@ class Options(AttrMonitor):
 
     def _read_config(self):
         """read the config file"""
-        self.conf = Cfg(self.confpath, self.profile, debug=self.debug,
-                        dry=self.dry)
+        self.conf = CfgAggregator(self.confpath,
+                                  self.profile,
+                                  debug=self.debug,
+                                  dry=self.dry)
         # transform the config settings to self attribute
         settings = self.conf.get_settings()
         debug_dict('effective settings', settings, self.debug)
