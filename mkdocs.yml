@@ -28,6 +28,7 @@ nav:
   - 'HowTo':
     - 'Append text to a dotfile on install': 'howto/append.md'
     - 'Create files on install': 'howto/create-special-files.md'
+    - 'Group hosts and meta profiles': 'howto/group-hosts.md'
     - 'Handle compressed directories': 'howto/store-compressed-directories.md'
     - 'Handle secrets': 'howto/sensitive-dotfiles.md'
     - 'Handle special chars': 'howto/special-chars.md'
