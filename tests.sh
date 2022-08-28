@@ -48,8 +48,23 @@ pylint \
   --disable=R0915 \
   --disable=R0912 \
   --disable=R0911 \
-  --disable=C0209 \
   dotdrop/
+
+set +e
+
+exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
+# f-string errors and missing f literal
+find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v "f'" {} \; | grep -v "{'" | grep -v "${exceptions}" | grep "'.*}" \
+  && echo "bad string format (1): ${errs}" && exit 1
+
+find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v 'f"' {} \; | grep -v "f'" | grep -v '{"' | grep -v "${exceptions}" | grep '".*}' \
+  && echo "bad string format (2): ${errs}" && exit 1
+
+# use of .format()
+#grep -r -n --with-filename '\.format(' dotdrop/ \
+#  && echo "bad string format (3): ${errs}" && exit 1
+
+set -e
 
 # coverage file location
 rl="readlink -f"
