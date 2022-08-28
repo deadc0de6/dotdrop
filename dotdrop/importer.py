@@ -67,7 +67,7 @@ class Importer:
             -1: error
         """
         path = os.path.abspath(path)
-        self.log.dbg(f'import {path}'.format(path))
+        self.log.dbg(f'import {path}')
         if not os.path.exists(path):
             self.log.err(f'\"{path}\" does not exist, ignored!')
             return -1
@@ -167,8 +167,8 @@ class Importer:
         dflperm = get_default_file_perms(dst, self.umask)
         self.log.dbg(f'import chmod: {import_mode}')
         if import_mode or perm != dflperm:
-            msg = 'adopt mode {:o} (umask {:o})'
-            self.log.dbg(msg.format(perm, dflperm))
+            msg = f'adopt mode {perm:o} (umask {dflperm:o})'
+            self.log.dbg(msg)
             chmod = perm
 
         # add file to config file
@@ -199,8 +199,8 @@ class Importer:
             self.log.log(f'diff \"{dst}\" VS \"{src}\"')
             self.log.emph(diff)
             # ask user
-            msg = 'Dotfile \"{}\" already exists, overwrite?'
-            if not self.log.ask(msg.format(src)):
+            msg = f'Dotfile \"{src}\" already exists, overwrite?'
+            if not self.log.ask(msg):
                 return False
             self.log.dbg('will overwrite existing file')
         return True
@@ -283,8 +283,8 @@ class Importer:
                     not self.conf.get_dotfile_by_src_dst(src, dst):
                 # same profile
                 # different src
-                msg = 'duplicate dotfile: {}'
-                self.log.err(msg.format(dotfile.key))
+                msg = f'duplicate dotfile: {dotfile.key}'
+                self.log.err(msg)
                 return True
         return False
 

@@ -59,7 +59,7 @@ class Settings(DictParser):
     key_import_variables = 'import_variables'
 
     # defaults
-    default_diff_command = 'diff -r -u {0} {1}'
+    default_diff_cmd = 'diff -r -u {0} {1}'
 
     def __init__(self, backup=True, banner=True,
                  create=True, default_actions=None, dotpath='dotfiles',
@@ -71,7 +71,7 @@ class Settings(DictParser):
                  impignore=None, workdir='~/.config/dotdrop',
                  showdiff=False, minversion=None,
                  func_file=None, filter_file=None,
-                 diff_command=default_diff_command,
+                 diff_command=default_diff_cmd,
                  template_dotfile_default=True,
                  ignore_missing_in_dotdrop=False,
                  force_chmod=False, chmod_on_import=False,

@@ -85,8 +85,8 @@ class CfgAggregator:
         key = dotfile.key
         ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
         if ret:
-            msg = 'new dotfile {} to profile {}'
-            self.log.dbg(msg.format(key, self.profile_key))
+            msg = f'new dotfile {key} to profile {self.profile_key}'
+            self.log.dbg(msg)
 
         # save the config and reload it
         if ret:
@@ -136,8 +136,8 @@ class CfgAggregator:
         try:
             src = self.cfgyaml.resolve_dotfile_src(src)
         except UndefinedException as exc:
-            err = 'unable to resolve {}: {}'
-            self.log.err(err.format(src, exc))
+            err = f'unable to resolve {src}: {exc}'
+            self.log.err(err)
             return None
         dotfiles = self.get_dotfile_by_dst(dst)
         for dotfile in dotfiles:
@@ -453,8 +453,8 @@ class CfgAggregator:
         if len(fields) > 1:
             # we have args
             key, *args = fields
-            msg = 'action with parm: {} and {}'
-            self.log.dbg(msg.format(key, args))
+            msg = f'action with parm: {key} and {args}'
+            self.log.dbg(msg)
             action = self._get_action(key).copy(args)
         else:
             action = self._get_action(key)
@@ -467,8 +467,8 @@ class CfgAggregator:
             if len(fields) > 1:
                 # we have args
                 key, *args = fields
-                msg = 'trans with parm: {} and {}'
-                self.log.dbg(msg.format(key, args))
+                msg = f'trans with parm: {key} and {args}'
+                self.log.dbg(msg)
                 trans = getter(key).copy(args)
             else:
                 trans = getter(key)

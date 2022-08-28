@@ -57,7 +57,7 @@ class Logger:
         """error log"""
         cstart = self._color(self.RED)
         cend = self._color(self.RESET)
-        msg = f'{string} {end}'.format(string, end)
+        msg = f'{string} {end}'
         sys.stderr.write(f'{cstart}[ERR] {msg}{cend}')
 
     def warn(self, string, end='\n'):

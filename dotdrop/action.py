@@ -54,8 +54,8 @@ class Cmd(DictParser):
             try:
                 args = [templater.generate_string(a) for a in args]
             except UndefinedException as exc:
-                err = 'undefined arguments for {}: {}'
-                self.log.warn(err.format(self.descr, exc))
+                err = f'undefined arguments for {self.descr}: {exc}'
+                self.log.warn(err)
                 return False
         return args
 
@@ -73,14 +73,14 @@ class Cmd(DictParser):
         try:
             cmd = action.format(*args)
         except IndexError as exc:
-            err = 'findex error for {self.descr}: \"{action}\"'
+            err = f'index error for {self.descr}: \"{action}\"'
             err += f' with \"{args}\"'
             err += f': {exc}'
             self.log.warn(err)
             return False
         except KeyError as exc:
             err = f'key error for {self.descr}: \"{action}\": {exc}'
-            err += ' with \"{args}\"'
+            err += f' with \"{args}\"'
             self.log.warn(err)
             return False
         if self.silent:
@@ -94,7 +94,7 @@ class Cmd(DictParser):
         try:
             ret = subprocess.call(cmd, shell=True)
         except KeyboardInterrupt:
-            self.log.warn('f{self.descr} interrupted')
+            self.log.warn(f'{self.descr} interrupted')
         if ret != 0:
             self.log.warn(f'{self.descr} returned code {ret}')
         return ret == 0
@@ -104,7 +104,7 @@ class Cmd(DictParser):
         return {'action': value}
 
     def __str__(self):
-        return 'key:{self.key} -> \"{self.action}\"'
+        return f'key:{self.key} -> \"{self.action}\"'
 
 
 class Action(Cmd):
@@ -138,8 +138,8 @@ class Action(Cmd):
         return cls(key=key, **val)
 
     def __str__(self):
-        out = '{}: [{}] \"{}\"'
-        return out.format(self.key, self.kind, self.action)
+        out = f'{self.key}: [{self.kind}] \"{self.action}\"'
+        return out
 
     def __repr__(self):
         return f'action({self.__str__()})'
@@ -171,8 +171,8 @@ class Transform(Cmd):
         and {1} is the result file
         """
         if os.path.exists(arg1):
-            msg = 'transformation \"{}\": destination exists: {}'
-            self.log.warn(msg.format(self.key, arg1))
+            msg = f'transformation \"{self.key}\": destination exists: {arg1}'
+            self.log.warn(msg)
             return False
 
         if not self.args:

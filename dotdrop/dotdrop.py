@@ -52,15 +52,15 @@ def action_executor(opts, actions, defactions, templater, post=False):
             LOG.dbg(f'executing def-{actiontype}-action: {action}')
             ret = action.execute(templater=templater, debug=opts.debug)
             if not ret:
-                err = 'def-{}-action \"{}\" failed'
-                LOG.err(err.format(actiontype, action.key))
+                err = f'def-{actiontype}-action \"{action.key}\" failed'
+                LOG.err(err)
                 return False, err
 
         # execute actions
         for action in actions:
             if opts.dry:
-                err = 'would execute {}-action: {}'
-                LOG.dry(err.format(actiontype, action))
+                err = f'would execute {actiontype}-action: {action}'
+                LOG.dry(err)
                 continue
             LOG.dbg(f'executing {actiontype}-action: {action}')
             ret = action.execute(templater=templater, debug=opts.debug)
@@ -112,8 +112,9 @@ def _dotfile_compare(opts, dotfile, tmp):
 
     src = dotfile.src
     if not os.path.lexists(os.path.expanduser(dotfile.dst)):
-        line = '=> compare {}: \"{}\" does not exist on destination'
-        LOG.log(line.format(dotfile.key, dotfile.dst))
+        line = f'=> compare {dotfile.key}: \"{dotfile.dst}\" '
+        line += 'does not exist on destination'
+        LOG.log(line)
         return False
 
     # apply transformation
@@ -130,8 +131,8 @@ def _dotfile_compare(opts, dotfile, tmp):
     asrc = os.path.join(opts.dotpath, os.path.expanduser(src))
     adst = os.path.expanduser(dotfile.dst)
     if os.path.samefile(asrc, adst):
-        line = '=> compare {}: diffing with \"{}\"'
-        LOG.dbg(line.format(dotfile.key, dotfile.dst))
+        line = f'=> compare {dotfile.key}: diffing with \"{dotfile.dst}\"'
+        LOG.dbg(line)
         LOG.dbg('points to itself')
         return True
 
@@ -149,8 +150,8 @@ def _dotfile_compare(opts, dotfile, tmp):
                                                  set_create=True)
         if not ret:
             # failed to install to tmp
-            line = '=> compare {} error: {}'
-            LOG.log(line.format(dotfile.key, err))
+            line = f'=> compare {dotfile.key} error: {err}'
+            LOG.log(line)
             LOG.err(err)
             return False
         src = insttmp
@@ -172,17 +173,17 @@ def _dotfile_compare(opts, dotfile, tmp):
     if diff != '':
         # print diff results
         if opts.compare_fileonly:
-            line = f'=> differ: \"{dotfile.src}\" \"{dotfile.dst}\"'
-            LOG.log(line.format(dotfile.key, dotfile.dst))
+            line = f'=> differ: \"{dotfile.key}\" \"{dotfile.dst}\"'
+            LOG.log(line)
         else:
-            line = '=> compare {}: diffing with \"{}\"'
-            LOG.log(line.format(dotfile.key, dotfile.dst))
+            line = f'=> compare {dotfile.key}: diffing with \"{dotfile.dst}\"'
+            LOG.log(line)
             LOG.emph(diff)
         return False
 
     # no difference
-    line = '=> compare {}: diffing with \"{}\"'
-    LOG.dbg(line.format(dotfile.key, dotfile.dst))
+    line = f'=> compare {dotfile.key}: diffing with \"{dotfile.dst}\"'
+    LOG.dbg(line)
     LOG.dbg('same file')
     return True
 
@@ -300,8 +301,8 @@ def cmd_install(opts):
         dotfiles = [d for d in dotfiles if d.key in uniq]
 
     if not dotfiles:
-        msg = 'no dotfile to install for this profile (\"{}\")'
-        LOG.warn(msg.format(opts.profile))
+        msg = f'no dotfile to install for this profile (\"{opts.profile}\")'
+        LOG.warn(msg)
         return False
 
     lfs = [k.key for k in dotfiles]
@@ -359,8 +360,8 @@ def cmd_install(opts):
 
     # execute profile post-action
     if len(installed) > 0 or opts.install_force_action:
-        msg = 'run {} profile post actions'
-        LOG.dbg(msg.format(len(pro_post_actions)))
+        msg = f'run {len(pro_post_actions)} profile post actions'
+        LOG.dbg(msg)
         ret, _ = action_executor(opts, pro_post_actions,
                                  [], templ, post=False)()
         if not ret:
@@ -417,7 +418,7 @@ def cmd_compare(opts, tmp):
     """compare dotfiles and return True if all identical"""
     dotfiles = opts.dotfiles
     if not dotfiles:
-        msg = 'no dotfile defined for this profile (\"{opts.profile}\")'
+        msg = f'no dotfile defined for this profile (\"{opts.profile}\")'
         LOG.warn(msg)
         return True
 
@@ -582,11 +583,12 @@ def cmd_files(opts):
             if not Templategen.is_template(src):
                 continue
         if opts.files_grepable:
-            fmt = '{},dst:{},src:{},link:{}'
-            fmt = fmt.format(dotfile.key, dotfile.dst,
-                             dotfile.src, dotfile.link.name.lower())
+            fmt = f'{dotfile.key},'
+            fmt += f'dst:{dotfile.dst},'
+            fmt += f'src:{dotfile.src},'
+            fmt += f'link:{dotfile.link.name.lower()}'
             if dotfile.chmod:
-                fmt += ',chmod:{:o}'
+                fmt += f',chmod:{dotfile.chmod:o}'
             else:
                 fmt += ',chmod:None'
             LOG.raw(fmt)

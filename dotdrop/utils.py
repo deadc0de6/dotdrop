@@ -247,8 +247,9 @@ def must_ignore(paths, ignores, debug=False):
             # Each of these will start with an '!' so we need to remove that
             nign = nign[1:]
             if debug:
-                msg = 'trying to match :\"{}\" with non-ignore-pattern:\"{}\"'
-                LOG.dbg(msg.format(path, nign), force=True)
+                msg = f'trying to match :\"{path}\" '
+                msg += f'with non-ignore-pattern:\"{nign}\"'
+                LOG.dbg(msg, force=True)
             if fnmatch.fnmatch(path, nign):
                 if debug:
                     msg = f'negative ignore \"{nign}\" match: {path}'
@@ -347,50 +348,60 @@ def dependencies_met():
     # check unix tools deps
     # diff command is checked in settings.py
     deps = ['file']
-    err = 'The tool \"{}\" was not found in the PATH!'
+
     for dep in deps:
         if not shutil.which(dep):
-            raise UnmetDependency(err.format(dep))
-    # check python deps
-    err = 'missing python module \"{}\"'
+            err = f'The tool \"{dep}\" was not found in the PATH!'
+            raise UnmetDependency(err)
 
+    # check python deps
 # pylint: disable=C0415
     # python-magic
+    name = 'python-magic'
+    err = f'missing python module \"{name}\"'
     try:
         import magic
         assert magic
         if not hasattr(magic, 'from_file'):
-            LOG.warn(err.format('python-magic'))
+            LOG.warn(err)
     except ImportError:
-        LOG.warn(err.format('python-magic'))
+        LOG.warn(err)
 
     # docopt
+    name = 'docopt'
+    err = f'missing python module \"{name}\"'
     try:
         from docopt import docopt
         assert docopt
     except ImportError as exc:
-        raise Exception(err.format('docopt')) from exc
+        raise Exception(err) from exc
 
     # jinja2
+    name = 'jinja2'
+    err = f'missing python module \"{name}\"'
     try:
         import jinja2
         assert jinja2
     except ImportError as exc:
-        raise Exception(err.format('jinja2')) from exc
+        raise Exception(err) from exc
 
     # ruamel.yaml
+    name = 'ruamel.yaml'
+    err = f'missing python module \"{name}\"'
     try:
         from ruamel.yaml import YAML
         assert YAML
     except ImportError as exc:
-        raise Exception(err.format('ruamel.yaml')) from exc
+        raise Exception(err) from exc
 
     # toml
+    name = 'toml'
+    err = f'missing python module \"{name}\"'
     try:
         import toml
         assert toml
     except ImportError as exc:
-        raise Exception(err.format('toml')) from exc
+        raise Exception(err) from exc
 # pylint: enable=C0415
 
 
@@ -488,8 +499,8 @@ def check_version():
     if latest.startswith('v'):
         latest = latest[1:]
     if version.parse(VERSION) < version.parse(latest):
-        msg = 'A new version of dotdrop is available ({})'
-        LOG.warn(msg.format(latest))
+        msg = f'A new version of dotdrop is available ({latest})'
+        LOG.warn(msg)
 
 
 def pivot_path(path, newdir, striphome=False, logger=None):

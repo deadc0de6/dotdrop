@@ -363,7 +363,6 @@ class CfgYaml:
             pro[self.key_profile_dotfiles].append(dotfile_key)
             if self._debug:
                 msg = f'add \"{dotfile_key}\" to profile \"{profile_key}\"'
-                msg.format(dotfile_key, profile_key)
                 self._dbg(msg)
             self._dirty = True
         return self._dirty
@@ -861,8 +860,8 @@ class CfgYaml:
             new = self.__get_profile_included_item(inherited_profile,
                                                    keyitem, seen)
             if self._debug:
-                msg = 'included {} from {}: {}'
-                self._dbg(msg.format(keyitem, inherited_profile, new))
+                msg = f'included {keyitem} from {inherited_profile}: {new}'
+                self._dbg(msg)
             items.update(new)
 
         cur = pentry.get(keyitem, {})
@@ -938,7 +937,7 @@ class CfgYaml:
             # merge actions keys
             if self._debug:
                 msg = f'Merging actions {profile} '
-                msg += '<- {i}: {actions} <- {o_actions}'
+                msg += f'<- {i}: {actions} <- {o_actions}'
                 self._dbg(msg)
                 actions.extend(o_actions)
             this_profile[self.key_profile_actions] = uniq_list(actions)
@@ -1231,7 +1230,7 @@ class CfgYaml:
         # check top entries
         for entry in self.top_entries:
             if entry not in yamldict:
-                err = f'no {entry} entry found'.format(entry)
+                err = f'no {entry} entry found'
                 self._log.err(err)
                 raise YamlException(f'config format error: {err}')
 
@@ -1654,8 +1653,8 @@ class CfgYaml:
             dirn = os.path.dirname(self._path)
             ret = os.path.join(dirn, path)
             if self._debug:
-                msg = 'normalizing relative to cfg: {} -> {}'
-                self._dbg(msg.format(path, ret))
+                msg = f'normalizing relative to cfg: {path} -> {ret}'
+                self._dbg(msg)
             path = ret
         ret = os.path.normpath(path)
         if self._debug and path != ret:

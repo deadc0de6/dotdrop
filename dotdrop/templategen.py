@@ -107,7 +107,7 @@ class Templategen:
         try:
             return self.env.from_string(string).render(self.variables)
         except UndefinedError as exc:
-            err = 'undefined variable: {exc.message}'
+            err = f'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
     def add_tmp_vars(self, newvars=None):
