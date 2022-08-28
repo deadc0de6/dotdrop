@@ -48,11 +48,11 @@ OPT_LINK = {
     LinkTypes.RELATIVE.name.lower(): LinkTypes.RELATIVE,
     LinkTypes.LINK_CHILDREN.name.lower(): LinkTypes.LINK_CHILDREN}
 
-BANNER = r"""     _       _      _
+BANNER = fr"""     _       _      _
   __| | ___ | |_ __| |_ __ ___  _ __
  / _` |/ _ \| __/ _` | '__/ _ \| '_ |
- \__,_|\___/ \__\__,_|_|  \___/| .__/  v{}
-                               |_|""".format(VERSION)
+ \__,_|\___/ \__\__,_|_|  \___/| .__/  v{VERSION}
+                               |_|"""
 
 USAGE = f"""
 {BANNER}
