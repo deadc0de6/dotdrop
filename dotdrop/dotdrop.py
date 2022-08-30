@@ -535,7 +535,8 @@ def cmd_importer(opts):
                         ignore=opts.import_ignore)
 
     for path in paths:
-        tmpret = importer.import_path(path, import_as=opts.import_as,
+        tmpret = importer.import_path(path,
+                                      import_as=opts.import_as,
                                       import_link=opts.import_link,
                                       import_mode=opts.import_mode,
                                       import_transw=opts.import_transw,
