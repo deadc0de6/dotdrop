@@ -6,11 +6,11 @@ which are controlled by the `link` config attribute of each dotfile:
 * `link: nolink`: The dotfile (file or directory) is copied to its destination
 * `link: absolute`: The dotfile (file or directory) is linked to its destination using an absolute symlink
 * `link: relative`: The dotfile (file or directory) is linked to its destination using a relative symlink
-* `link: link_children`: The files/directories found under the dotfile (directory) are symlinked to their destination. For every direct child of `src`, symlink `dst/<childrenX>` to `src/<childrenX>` (See [Link children](#link-children))
+* `link: link_children`: The direct children of the dotfile (directory only) are symlinked to their destination. For every direct child of `src`, symlink `dst/<childrenX>` to `src/<childrenX>` (See [Link children](#link-children))
 
-Note that if the dotfile uses template directives, it will be symlinked into
-`~/.config/dotdrop` instead of directly into your *dotpath*
-(see [Templating symlinked dotfiles](#templating-symlinked-dotfiles))
+Note that if the dotfile uses template directives, it will first be installed to your
+`workdir` (defaults to `~/.config/dotdrop`) and then symlinked
+(see [Templating symlinked dotfiles](#templating-symlinked-dotfiles)).
 
 Although the config entries `link_on_import` and `link_dotfile_default` can be set to the value `link_children`,
 it is not recommended, since operations on a dotfile that is not a directory with the option `link_children`
@@ -55,15 +55,12 @@ $ readlink ~/.bashrc
 
 The `link_children` option can be very useful for dotfiles when you don't want the entire
 directory to be symlinked but still want to keep a clean config file (with a
-limited number of entries).
-
-Setting this option on a file that is not a directory will make any operation on the dotfile fail.
+limited number of entries). Note that `link_children` can only be applied to directories.
 
 *Make sure to do a backup of your dotfiles with something like `cp -r <my-important-dotfile>{,.bak}`.*
 
 A good example of its use is when managing `~/.vim` with dotdrop.
-
-Here's what it looks like when using `link: absolute`:
+First let's see what it looks like when using `link: absolute`:
 ```yaml
 config:
   dotpath: dotfiles
@@ -85,8 +82,8 @@ after  autoload  plugged  plugin  snippets  spell  swap  vimrc
 As a result, all files under `~/.vim` will be managed by
 dotdrop (including unwanted directories like `spell`, `swap`, etc.).
 
-A cleaner solution is to use `link_children` which allows to only symlink
-files under the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
+Now with `link_children` dotdrop allows to only symlink
+direct children of the dotfile directory. Let's say only `after`, `plugin`, `snippets`, and `vimrc`
 need to be managed in dotdrop. `~/.vim` is imported in dotdrop and cleaned of all unwanted
 files/directories, and then the `link` entry is set to `link_children` in the config file:
 ```yaml
