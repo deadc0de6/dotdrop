@@ -1,6 +1,6 @@
 # Symlink dotfiles
 
-Dotdrop is able to install dotfiles in three different ways,
+Dotdrop is able to install dotfiles in four different ways,
 which are controlled by the `link` config attribute of each dotfile:
 
 * `link: nolink`: The dotfile (file or directory) is copied to its destination
