@@ -223,8 +223,6 @@ def strip_home(path):
 
 def must_ignore(paths, ignores, debug=False):
     """return true if any paths in list matches any ignore patterns"""
-    if debug:
-        LOG.dbg('must_ignore called', force=True)
     if not ignores:
         return False
     if debug:

@@ -39,7 +39,7 @@ echo "testing with pylint"
 # R0915: too-many-statements
 # R0912: too-many-branches
 # R0911: too-many-return-statements
-# C0209: consider-using-f-string
+# R0904: too-many-public-methods
 pylint \
   --disable=R0902 \
   --disable=R0913 \
@@ -48,6 +48,7 @@ pylint \
   --disable=R0915 \
   --disable=R0912 \
   --disable=R0911 \
+  --disable=R0904 \
   dotdrop/
 
 set +e

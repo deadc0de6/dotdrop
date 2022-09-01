@@ -60,8 +60,9 @@ Importing `~/.mutt/colors` and then `~/.vim/colors` will result in:
 * `d_mutt_colors` and `d_vim_colors` in the long format
 
 A dotfile can be imported as a different file with the use
-of the command line switch `--as` (effectively selecting the `src` part
-of the dotfile in the config). It is however recommended
+of the command line switch `--as` (effectively modifying the `src` part
+of the dotfile in the config, that is the location of the dotfile in the
+`dotpath`). It is however recommended
 to use [templating](templating.md) to avoid duplicates and optimize
 dotfile management.
 ```bash

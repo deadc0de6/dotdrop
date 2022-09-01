@@ -308,7 +308,10 @@ class CfgYaml:
         return newlink
 
     def resolve_dotfile_src(self, src, templater=None):
-        """resolve dotfile src path"""
+        """
+        get abs src file from a relative path
+        in dotpath
+        """
         newsrc = ''
         if src:
             new = src
@@ -340,9 +343,11 @@ class CfgYaml:
     def add_dotfile_to_profile(self, dotfile_key, profile_key):
         """
         add an existing dotfile key to a profile_key
+        if profile_key doesn't exist, the profile is created
         we test using profiles variable since it merges
         imported ones (include, etc) but insert in main
         yaml only
+        return True if was added
         """
         # create the profile if it doesn't exist
         self._new_profile(profile_key)
