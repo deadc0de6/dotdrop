@@ -154,6 +154,7 @@ class Options(AttrMonitor):
         if ENV_NODEBUG in os.environ:
             # force disabling debugs
             self.debug = False
+        # selected profile
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
         if not self.confpath:
@@ -393,11 +394,11 @@ class Options(AttrMonitor):
 
     def _fill_attr(self):
         """create attributes from conf"""
-        # variables
+        # defined variables
         self.variables = self.conf.get_variables()
-        # the dotfiles
-        self.dotfiles = self.conf.get_dotfiles()
-        # the profiles
+        # dotfiles for this profile
+        self.dotfiles = self.conf.get_dotfiles(profile_key=self.profile)
+        # all defined profiles
         self.profiles = self.conf.get_profiles()
 
     def _debug_attr(self):
