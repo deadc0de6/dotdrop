@@ -27,9 +27,9 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
 Defined variables can then be used [in the config](../config/config-file.md#template-config-entries)
-or [for templating dotfiles](../templating.md)
+or [for templating dotfiles](../template/templating.md)
 
-For more see [the doc on environment variables](../templating.md#environment-variables).
+For more see [the doc on environment variables](../template/template-variables.md#environment-variables).
 
 ## Store encrypted dotfiles using GPG
 

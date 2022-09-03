@@ -63,7 +63,7 @@ A dotfile can be imported as a different file with the use
 of the command line switch `--as` (effectively modifying the `src` part
 of the dotfile in the config, that is the location of the dotfile in the
 `dotpath`). It is however recommended
-to use [templating](templating.md) to avoid duplicates and optimize
+to use [templating](template/templating.md) to avoid duplicates and optimize
 dotfile management.
 ```bash
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test
@@ -133,7 +133,7 @@ f_xinitrc
 ```
 
 By using the `-T`/`--template` switch, only the dotfiles that
-are using [templating](templating.md) are listed.
+are using [templating](template/templating.md) are listed.
 
 It is also possible to list all the files related to each dotfile entry
 by invoking the `detail` command, for example:
@@ -178,7 +178,7 @@ There are two cases when updating a dotfile:
 * [The dotfile does not use templating](#the-dotfile-does-not-use-templating)
 * [The dotfile uses templating](#the-dotfile-uses-templating)
 
-### The dotfile does not use [templating](templating.md)
+### The dotfile does not use [templating](template/templating.md)
 
 The new version of the dotfile is copied to the *dotpath* directory and overwrites
 the old version. If Git is used to version the dotfiles stored by dotdrop, the Git command
@@ -189,7 +189,7 @@ $ dotdrop update ~/.vimrc
 $ git diff
 ```
 
-### The dotfile uses [templating](templating.md)
+### The dotfile uses [templating](template/templating.md)
 
 The dotfile must be manually updated; three solutions can be used to identify the
 changes to apply to the template:

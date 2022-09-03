@@ -19,7 +19,7 @@ There are two types of transformations available:
     * They have two mandatory arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
-    * This Happens **before** the dotfile is templated (see [templating](../templating.md))
+    * This Happens **before** the dotfile is templated (see [templating](../template/templating.md))
 
 * **Write transformations**: used to transform files before updating a dotfile ([config](config-config.md) key `trans_write`)
     * Used for command `update` and `import`
@@ -73,7 +73,7 @@ trans_write:
 
 As for [dynamic actions](config-actions.md#dynamic-actions), transformations support
 the use of variables ([variables and dynvariables](config-file.md#variables)
-and [template variables](../templating.md#template-variables)).
+and [template variables](../template/template-variables.md#template-variables)).
 
 A very dumb example:
 ```yaml

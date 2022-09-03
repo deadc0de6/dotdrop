@@ -24,7 +24,11 @@ nav:
     - 'Dynvariables block': 'config/config-dynvars.md'
     - 'Uservariables block': 'config/config-uservars.md'
   - 'Templating':
-    - 'Templating': 'templating.md'
+    - 'Templating': 'template/templating.md'
+    - 'Template variables': 'template/template-variables.md'
+    - 'Template methods': 'template/template-methods.md'
+    - 'Template filters': 'template/template-filters.md'
+    - 'Debugging templates': 'template/template-debug.md'
   - 'HowTo':
     - 'Append text to a dotfile on install': 'howto/append.md'
     - 'Create files on install': 'howto/create-special-files.md'

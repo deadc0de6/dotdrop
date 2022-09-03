@@ -61,7 +61,7 @@ dynvariables:
 ```
 
 Note that `_dotdrop_dotpath` is part of the built-in variables
-(For more, see [template variables](../templating.md#template-variables)).
+(For more, see [template variables](../template/template-variables.md#template-variables)).
 
 Then use the generated list in the dotfile template:
 ```

@@ -35,7 +35,7 @@ parametrize the following elements of the config:
 Note that variables used in `actions` and `transformations`
 are resolved when the action/transformation is executed
 (See [Dynamic actions](config-actions.md#dynamic-actions),
-[Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](../templating.md)).
+[Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](../template/templating.md)).
 
 The following variables are available in the config files:
 
@@ -44,13 +44,13 @@ The following variables are available in the config files:
 * [User variables defined in the config](config-variables.md)
 * [Profile variables defined in the config](config-profiles.md#profile-variables-entry)
 * Environment variables: `{{@@ env['MY_VAR'] @@}}`
-* The [enriched variables](../templating.md#enriched-variables)
-* Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](../templating.md#dotdrop-header))
+* The [enriched variables](../template/template-variables.md#enriched-variables)
+* Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](../template/templating.md#dotdrop-header))
 
-as well as all [template methods](../templating.md#template-methods) and [template filters](../templating.md#template-filters).
+as well as all [template methods](../template/template-methods.md) and [template filters](../template/template-filters.md).
 
 Note that all variables available in the config file will
-then be available during [templating](../templating.md).
+then be available during [templating](../template/templating.md).
 
 Here are some rules on the use of variables in configs:
 
@@ -120,7 +120,7 @@ see the [symlink dotfiles documentation](../howto/symlink-dotfiles.md).
 
 ## Template config entries
 
-Some entries in the config can be templated (See [templating](../templating.md)):
+Some entries in the config can be templated (See [templating](../template/templating.md)):
 
 Entry    | Related doc
 -------- | -------------

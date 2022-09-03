@@ -15,9 +15,9 @@ Entry    | Description | Default
 `default_actions` | List of action keys to execute for all installed dotfiles (See [actions](config-actions.md)) | -
 `diff_command` | The diff command to use for diffing files | `diff -r -u {0} {1}`
 `dotpath` | Path to the directory containing the dotfiles to be managed by dotdrop (absolute path or relative to the config file location) | `dotfiles`
-`filter_file` | List of paths to load templating filters from (See [Templating available filters](../templating.md#template-filters)) | -
+`filter_file` | List of paths to load templating filters from (See [Templating available filters](../template/template-filters.md)) | -
 `force_chmod` | If true, do not ask confirmation to apply permissions on install | false
-`func_file` | List of paths to load templating functions from (See [Templating available methods](../templating.md#template-methods)) | -
+`func_file` | List of paths to load templating functions from (See [Templating available methods](../template/template-methods.md)) | -
 `ignore_missing_in_dotdrop` | Ignore missing files in dotdrop when comparing and importing (See [Ignore missing](config-file.md#ignore-missing)) | false
 `ignoreempty` | Do not deploy template if empty | false
 `impignore` | List of patterns to ignore when importing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns)) | -
