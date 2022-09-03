@@ -44,6 +44,7 @@ The following variables are available in the config files:
 * [User variables defined in the config](config-variables.md)
 * [Profile variables defined in the config](config-profiles.md#profile-variables-entry)
 * Environment variables: `{{@@ env['MY_VAR'] @@}}`
+* The [enriched variables](templating.md#enriched-variables)
 * Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
 
 as well as all [template methods](templating.md#template-methods) and [template filters](templating.md#template-filters).

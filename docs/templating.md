@@ -39,14 +39,14 @@ The following variables are available in templates:
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` contains the dotdrop header (see [Dotdrop header](#dotdrop-header)).
 * `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-config.md) absolute path.
-* `{{@@ _dotdrop_cfgpath @@}}` contains the absolute path to the [config file](config-file.md).
+* `{{@@ _dotdrop_cfgpath @@}}` contains the [config file](config-file.md) absolute path.
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-config.md) absolute path.
-* The [enriched variables](#variables-enrichment)
+* The [enriched variables](#enriched-variables)
 * Dotfile specific variables (see [Dotfile variables](#dotfile-variables))
 * All defined config variables (see [Variables](config-file.md#variables))
 * All defined config interpreted variables (see [Interpreted variables](config-dynvars.md#dynvariables-entry))
 
-## Variables enrichment
+## Enriched variables
 
 The below variables are added to the available variables within templates. If the variable
 is already set by the user (through the config file for example) it will not be overwritten.
