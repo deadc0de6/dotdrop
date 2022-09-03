@@ -69,6 +69,9 @@ dotfile management.
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test
 ```
 
+By importing a path using the profile special keyword `ALL`, a dotfile will be created
+in the config but won't be linked to any profile.
+
 To ignore specific patterns during import, see [the ignore patterns](config-file.md#ignore-patterns).
 
 For more options, see the usage with `dotdrop --help`.
