@@ -80,13 +80,15 @@ class CfgAggregator:
 
         if not dotfile:
             return False
+        ret = dotfile is not None
 
-        # add to profile
-        key = dotfile.key
-        ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
-        if ret:
-            msg = f'new dotfile {key} to profile {self.profile_key}'
-            self.log.dbg(msg)
+        if self.profile_key != self.cfgyaml.key_all:
+            # add to profile
+            key = dotfile.key
+            ret = self.cfgyaml.add_dotfile_to_profile(key, self.profile_key)
+            if ret:
+                msg = f'new dotfile {key} to profile {self.profile_key}'
+                self.log.dbg(msg)
 
         # save the config and reload it
         if ret:
@@ -133,15 +135,18 @@ class CfgAggregator:
         @src: dotfile src (in dotpath)
         @dst: dotfile dst (on filesystem)
         """
-        try:
-            src = self.cfgyaml.resolve_dotfile_src(src)
-        except UndefinedException as exc:
-            err = f'unable to resolve {src}: {exc}'
-            self.log.err(err)
-            return None
+        if not os.path.isabs(src):
+            # ensures we have an absolute path
+            try:
+                src = self.cfgyaml.resolve_dotfile_src(src)
+            except UndefinedException as exc:
+                err = f'unable to resolve {src}: {exc}'
+                self.log.err(err)
+                return None
         dotfiles = self.get_dotfile_by_dst(dst)
         for dotfile in dotfiles:
-            if dotfile.src == src:
+            dsrc = self.cfgyaml.resolve_dotfile_src(dotfile.src)
+            if dsrc == src:
                 return dotfile
         return None
 
@@ -188,7 +193,13 @@ class CfgAggregator:
         return res
 
     def get_dotfiles(self, profile_key=None):
-        """get all dotfiles for this profile or specified profile key"""
+        """
+        get all dotfiles for the current profile if None
+        or the specified profile_key if defined
+        or all dotfiles if profile_key is ALL
+        """
+        if profile_key == self.cfgyaml.key_all:
+            return self.dotfiles
         dotfiles = []
         profile = self.get_profile(key=profile_key)
         if not profile:

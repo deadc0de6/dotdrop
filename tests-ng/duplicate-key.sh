@@ -99,7 +99,7 @@ cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} -p p2 \
 
 # count dotfiles for p2
 cnt=`cd ${ddpath} | ${bin} files --verbose -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
-[ "${cnt}" != "4" ] && exit 1
+[ "${cnt}" != "4" ] && echo "bad count for p2: ${cnt} != 4" && exit 1
 
 echo "OK"
 exit 0

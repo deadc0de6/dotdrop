@@ -351,6 +351,8 @@ class CfgYaml:
         """
         # create the profile if it doesn't exist
         self._new_profile(profile_key)
+        if profile_key not in self.profiles:
+            return False
         profile = self.profiles[profile_key]
 
         # ensure profile dotfiles list is not None
@@ -724,6 +726,14 @@ class CfgYaml:
             return profiles
         new = {}
         for k, val in profiles.items():
+            if k == self.key_all:
+                msg = f'\"{self.key_all}\" is a special profile name, '
+                msg += 'consider renaming to avoid any issue.'
+                self._log.warn(msg)
+            if not k:
+                msg = 'empty profile name'
+                self._log.warn(msg)
+                continue
             if not val:
                 # no dotfiles
                 continue
@@ -1097,6 +1107,14 @@ class CfgYaml:
 
     def _new_profile(self, key):
         """add a new profile if it doesn't exist"""
+        if key == self.key_all:
+            err = f'profile key \"{key}\" is reserved'
+            self._log.warn(err)
+            raise YamlException(err)
+        if not key:
+            err = 'empty profile key'
+            self._log.warn(err)
+            raise YamlException(err)
         if key not in self.profiles.keys():
             # update yaml_dict
             self._yaml_dict[self.key_profiles][key] = {
