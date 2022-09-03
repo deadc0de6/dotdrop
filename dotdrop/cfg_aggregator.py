@@ -330,39 +330,43 @@ class CfgAggregator:
             # https://docs.python.org/3/library/platform.html#platform.system
             var_os = platform.system().lower()
             self.variables[self.variable_os] = var_os
-            msg = 'enrich variables with {}={}'
-            self.log.dbg(msg.format(self.variable_os, var_os))
+            msg = f'enrich variables with {self.variable_os}={var_os}'
+            self.log.dbg(msg)
         if self.variable_release not in self.variables:
             # enrich with release variable
             # https://docs.python.org/3/library/platform.html#platform.release
             var_release = platform.release().lower()
             self.variables[self.variable_release] = var_release
-            msg = 'enrich variables with {}={}'
-            self.log.dbg(msg.format(self.variable_release, var_release))
+            msg = f'enrich variables with {self.variable_release}'
+            msg += f'={var_release}'
+            self.log.dbg(msg)
         if self.variable_distro_id not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.id
             var_distro_id = distro.id().lower()
             self.variables[self.variable_distro_id] = var_distro_id
-            msg = 'enrich variables with {}={}'
-            self.log.dbg(msg.format(self.variable_distro_id, var_distro_id))
+            msg = f'enrich variables with {self.variable_distro_id}'
+            msg += f'={var_distro_id}'
+            self.log.dbg(msg)
         if self.variable_distro_version not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.version
             var_version = distro.version().lower()
             self.variables[self.variable_distro_version] = var_version
-            msg = 'enrich variables with {}={}'
-            self.log.dbg(msg.format(self.variable_distro_version, var_version))
+            msg = f'enrich variables with {self.variable_distro_version}'
+            msg += f'={var_version}'
+            self.log.dbg(msg)
         if self.variable_distro_like not in self.variables:
             # enrich with distro variable
             # https://pypi.org/project/distro/
             # https://distro.readthedocs.io/en/latest/#distro.like
             var_like = distro.like().lower()
             self.variables[self.variable_distro_like] = var_like
-            msg = 'enrich variables with {}={}'
-            self.log.dbg(msg.format(self.variable_distro_like, var_like))
+            msg = f'enrich variables with {self.variable_distro_like}'
+            msg += f'={var_like}'
+            self.log.dbg(msg)
 
     def _patch_keys_to_objs(self, containers, keys, get_by_key, islist=True):
         """
