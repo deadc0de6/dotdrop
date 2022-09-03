@@ -35,7 +35,7 @@ parametrize the following elements of the config:
 Note that variables used in `actions` and `transformations`
 are resolved when the action/transformation is executed
 (See [Dynamic actions](config-actions.md#dynamic-actions),
-[Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](templating.md)).
+[Dynamic transformations](config-transformations.md#dynamic-transformations) and [Templating](../templating.md)).
 
 The following variables are available in the config files:
 
@@ -44,13 +44,13 @@ The following variables are available in the config files:
 * [User variables defined in the config](config-variables.md)
 * [Profile variables defined in the config](config-profiles.md#profile-variables-entry)
 * Environment variables: `{{@@ env['MY_VAR'] @@}}`
-* The [enriched variables](templating.md#enriched-variables)
-* Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](templating.md#dotdrop-header))
+* The [enriched variables](../templating.md#enriched-variables)
+* Dotdrop header: `{{@@ header() @@}}` (see [Dotdrop header](../templating.md#dotdrop-header))
 
-as well as all [template methods](templating.md#template-methods) and [template filters](templating.md#template-filters).
+as well as all [template methods](../templating.md#template-methods) and [template filters](../templating.md#template-filters).
 
 Note that all variables available in the config file will
-then be available during [templating](templating.md).
+then be available during [templating](../templating.md).
 
 Here are some rules on the use of variables in configs:
 
@@ -116,11 +116,11 @@ On `update`, the following rule is applied:
 
 ## Symlinking dotfiles
 
-see the [symlink dotfiles documentation](howto/symlink-dotfiles.md).
+see the [symlink dotfiles documentation](../howto/symlink-dotfiles.md).
 
 ## Template config entries
 
-Some entries in the config can be templated (See [templating](templating.md)):
+Some entries in the config can be templated (See [templating](../templating.md)):
 
 Entry    | Related doc
 -------- | -------------
@@ -164,16 +164,16 @@ profiles:
 
 It is possible to ignore specific patterns when using dotdrop.
 
-* For [install](usage.md#install-dotfiles):
+* For [install](../usage.md#install-dotfiles):
     * Using config block [instignore](config-config.md)
     * Using dotfiles block [instignore](config-dotfiles.md)
-* For [import](usage.md#import-dotfiles):
+* For [import](../usage.md#import-dotfiles):
     * Using config block [impignore](config-config.md)
-* For [compare](usage.md#compare-dotfiles):
+* For [compare](../usage.md#compare-dotfiles):
     * Using config block [cmpignore](config-config.md)
     * Using dotfiles block [cmpignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
-* For [update](usage.md#update-dotfiles):
+* For [update](../usage.md#update-dotfiles):
     * Using config block [upignore](config-config.md)
     * Using dotfiles block [upignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
@@ -289,8 +289,8 @@ profiles:
 
 ## Ignore missing
 
-Sometimes, it is nice to have [update](usage.md#update-dotfiles) not copy all the files in the installed directory
-or [compare](usage.md#compare-dotfiles) diff them.
+Sometimes, it is nice to have [update](../usage.md#update-dotfiles) not copy all the files in the installed directory
+or [compare](../usage.md#compare-dotfiles) diff them.
 
 For example,
 maybe you only want to include a single configuration file in your repository

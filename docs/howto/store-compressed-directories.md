@@ -26,4 +26,4 @@ And the *write* transformation `compress` is run when updating the dotfile direc
 tar -cf {1} -C {0} .
 ```
 
-See [transformations](../config-transformations.md).
+See [transformations](../config/config-transformations.md).

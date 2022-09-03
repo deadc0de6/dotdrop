@@ -1,12 +1,12 @@
 # Prompt user for variables
 
-With the use of [uservariables](../config-uservars.md),
+With the use of [uservariables](../config/config-uservars.md),
 one can define specific variables that need to be initially filled in manually
 by the user on first run.
 
 The provided values are then automatically saved by dotdrop to `uservariables.yaml`,
 which can be included in the main config as a file from which variables are imported
-using [import_variables](../config-config.md).
+using [import_variables](../config/config-config.md).
 
 Let's say, for example, that you want to manually provide the email value
 on new hosts you deploy your dotfiles to.

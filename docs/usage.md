@@ -41,7 +41,7 @@ $ dotdrop import ~/.xinitrc
 ```
 
 You can control how the dotfile key is generated in the config file
-with the following [config entries](config-config.md):
+with the following [config entries](config/config-config.md):
 
 * `longkey`
     * `false` (default): take the shortest unique path
@@ -72,7 +72,7 @@ $ dotdrop import ~/.zshrc --as=~/.zshrc.test
 By importing a path using the profile special keyword `ALL`, a dotfile will be created
 in the config but won't be associated to any profile.
 
-To ignore specific patterns during import, see [the ignore patterns](config-file.md#ignore-patterns).
+To ignore specific patterns during import, see [the ignore patterns](config/config-file.md#ignore-patterns).
 
 For more options, see the usage with `dotdrop --help`.
 
@@ -89,11 +89,11 @@ Some available options:
 
 * `-t`/`--temp`: Install the dotfile(s) to a temporary directory for review (helping to debug templating issues, for example).
   Note that actions are not executed in this mode.
-* `-a`/`--force-actions`: Force the execution of actions even if the dotfiles are not installed (see [Fake dotfile and actions](config-actions.md#fake-dotfile-and-actions) as an alternative)
+* `-a`/`--force-actions`: Force the execution of actions even if the dotfiles are not installed (see [Fake dotfile and actions](config/config-actions.md#fake-dotfile-and-actions) as an alternative)
 * `-f`/`--force`: Do not ask for any confirmation
-* `-W`/`--workdir-clear`: Clear the `workdir` before installing dotfiles (see [the config entry](config-config.md) `clear_workdir`)
+* `-W`/`--workdir-clear`: Clear the `workdir` before installing dotfiles (see [the config entry](config/config-config.md) `clear_workdir`)
 
-To ignore specific patterns during installation, see [the ignore patterns](config-file.md#ignore-patterns).
+To ignore specific patterns during installation, see [the ignore patterns](config/config-file.md#ignore-patterns).
 
 For more options, see the usage with `dotdrop --help`.
 
@@ -105,19 +105,19 @@ $ dotdrop compare
 ```
 
 The diffing is done with the UNIX tool `diff` as the backend; one can provide a specific
-diff command using [the config entry](config-config.md) `diff_command`.
+diff command using [the config entry](config/config-config.md) `diff_command`.
 
 You can specify against which destination file to compare:
 ```bash
 $ dotdrop compare -C ~/.vimrc
 ```
 
-To ignore specific patterns, see [the ignore patterns](config-file.md#ignore-patterns).
+To ignore specific patterns, see [the ignore patterns](config/config-file.md#ignore-patterns).
 
-To completely ignore all files not present in `dotpath` see [Ignore missing](config-file.md#ignore-missing).
+To completely ignore all files not present in `dotpath` see [Ignore missing](config/config-file.md#ignore-missing).
 
 If you want to get notified on files present in the `workdir` but not tracked
-by dotdrop see the [compare_workdir](config-config.md).
+by dotdrop see the [compare_workdir](config/config-config.md).
 
 For more options, see the usage with `dotdrop --help`.
 
@@ -169,9 +169,9 @@ $ dotdrop update --key f_vimrc
 
 If not argument is provided, all dotfiles for the selected profile are updated.
 
-To ignore specific patterns, see [the dedicated page](config-file.md#ignore-patterns).
+To ignore specific patterns, see [the dedicated page](config/config-file.md#ignore-patterns).
 
-To completely ignore all files not present in `dotpath`, see [Ignore missing](config-file.md#ignore-missing).
+To completely ignore all files not present in `dotpath`, see [Ignore missing](config/config-file.md#ignore-missing).
 
 There are two cases when updating a dotfile:
 

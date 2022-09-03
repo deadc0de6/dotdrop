@@ -117,10 +117,10 @@ $ tree -L 1 ~/.vim
 ## Templating symlinked dotfiles
 
 Dotfiles not using any templating directives are directly linked
-to dotdrop's `dotpath` directory (see [the config file doc](../config-file.md)).
+to dotdrop's `dotpath` directory (see [the config file doc](../config/config-file.md)).
 
 When using templating directives, however, the dotfiles are first installed into
-`workdir` (defaults to *~/.config/dotdrop*; see [the doc](../config-config.md))
+`workdir` (defaults to *~/.config/dotdrop*; see [the doc](../config/config-config.md))
 and then symlinked there.
 This applies to both dotfiles with `link: absolute|relative` and `link: link_children`.
 

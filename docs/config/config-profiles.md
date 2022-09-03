@@ -6,7 +6,7 @@ Entry    | Description
 -------- | -------------
 `dotfiles` | The dotfiles associated with this profile
 `import` | List of paths containing dotfile keys for this profile (absolute path or relative to the config file location; see [Import profile dotfiles from file](config-profiles.md#profile-import-entry)).
-`include` | Include all elements (dotfiles, actions, (dyn)variables, etc) from another profile (See [Include dotfiles from another profile](config-profiles.md#profile-include-entry) and [meta profiles](howto/group-hosts.md))
+`include` | Include all elements (dotfiles, actions, (dyn)variables, etc) from another profile (See [Include dotfiles from another profile](config-profiles.md#profile-include-entry) and [meta profiles](../howto/group-hosts.md))
 `variables` | Profile-specific variables (See [Variables](config-file.md#variables))
 `dynvariables` | Profile-specific interpreted variables (See [Interpreted variables](config-dynvars.md))
 `actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-actions.md))
@@ -40,7 +40,7 @@ the `include` entry to avoid redundancy.
 
 Note that everything from the included profile is made available
 (actions, variables/dynvariables, etc). See also an example in
-[meta profiles](howto/group-hosts.md).
+[meta profiles](../howto/group-hosts.md).
 
 For example:
 ```yaml

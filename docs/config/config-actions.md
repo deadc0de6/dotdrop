@@ -64,7 +64,7 @@ dotfiles:
 ## Dynamic actions
 
 Variables ([config variables and dynvariables](config-file.md#variables)
-and [template variables](templating.md#template-variables)) can be used
+and [template variables](../templating.md#template-variables)) can be used
 in actions for more advanced use-cases.
 
 ```yaml

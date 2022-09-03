@@ -26,7 +26,7 @@ alias dotdrop='eval $(grep -v "^#" ~/dotfiles/.env) /usr/bin/dotdrop --cfg=~/dot
 
 The above aliases load all the variables from `~/dotfiles/.env`
 (while omitting lines starting with `#`) before calling dotdrop.
-Defined variables can then be used [in the config](../config-file.md#template-config-entries)
+Defined variables can then be used [in the config](../config/config-file.md#template-config-entries)
 or [for templating dotfiles](../templating.md)
 
 For more see [the doc on environment variables](../templating.md#environment-variables).
@@ -52,7 +52,7 @@ Now whenever you install/compare your dotfile, the `_decrypt` transformation wil
 to get the clear version of the file.
 When updating the `_encrypt` transformation will transform the file to store it encrypted.
 
-See [transformations](../config-transformations.md).
+See [transformations](../config/config-transformations.md).
 
 ## gpg examples
 
@@ -106,4 +106,4 @@ trans_write:
   _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
-See also [transformations](../config-transformations.md).
+See also [transformations](../config/config-transformations.md).

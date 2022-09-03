@@ -127,7 +127,7 @@ Potential *included* entries:
 * Profile's *include*
 
 Variables are then used to resolve different elements in the config file:
-see [this](docs/config-file.md#variables).
+see [this](docs/config/config-file.md#variables).
 
 ## Rules
 

@@ -6,8 +6,8 @@ or the below sections for more information on how to template your dotfiles.
 
 ## Templating or not templating
 
-The dotfile config entry [template](config-dotfiles.md#dotfiles-block)
-and the global config entry [template_dotfile_default](config-config.md)
+The dotfile config entry [template](config/config-dotfiles.md#dotfiles-block)
+and the global config entry [template_dotfile_default](config/config-config.md)
 allow to control whether a dotfile is processed by the templating engine.
 
 Obviously, if the dotfile uses template directives, it needs to be templated. However, if it
@@ -38,13 +38,13 @@ The following variables are available in templates:
 * `{{@@ profile @@}}` contains the profile provided to dotdrop.
 * `{{@@ env['MY_VAR'] @@}}` contains environment variables (see [Environment variables](#environment-variables)).
 * `{{@@ header() @@}}` contains the dotdrop header (see [Dotdrop header](#dotdrop-header)).
-* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config-config.md) absolute path.
-* `{{@@ _dotdrop_cfgpath @@}}` contains the [config file](config-file.md) absolute path.
-* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config-config.md) absolute path.
+* `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](config/config-config.md) absolute path.
+* `{{@@ _dotdrop_cfgpath @@}}` contains the [config file](config/config-file.md) absolute path.
+* `{{@@ _dotdrop_workdir @@}}` contains the [workdir](config/config-config.md) absolute path.
 * The [enriched variables](#enriched-variables)
 * Dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* All defined config variables (see [Variables](config-file.md#variables))
-* All defined config interpreted variables (see [Interpreted variables](config-dynvars.md#dynvariables-entry))
+* All defined config variables (see [Variables](config/config-file.md#variables))
+* All defined config interpreted variables (see [Interpreted variables](config/config-dynvars.md#dynvariables-entry))
 
 ## Enriched variables
 
@@ -85,7 +85,7 @@ It's possible to access environment variables inside the templates:
 ```
 
 This allows for storing host-specific properties and/or secrets in environment variables.
-It is recommended to use `variables` (see [config variables](config-file.md#variables))
+It is recommended to use `variables` (see [config variables](config/config-file.md#variables))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in Git (see [handle secrets doc](howto/sensitive-dotfiles.md)).
 

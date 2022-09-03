@@ -23,7 +23,7 @@ $ wget https://raw.githubusercontent.com/deadc0de6/dotdrop/master/config.yaml
 ```
 It is recommended to store your config file directly within your repository
 (*my-dotfiles* in the example above), but you could save it in different places if you wish;
-see [config location](config-file.md#location) for more.
+see [config location](config/config-file.md#location) for more.
 
 ```bash
 $ tree my-dotfiles
@@ -38,7 +38,7 @@ in your preferred shell to call dotdrop with the config file path argument.
 alias dotdrop='dotdrop --cfg=<path-to-your-config.yaml>'
 ```
 
-For more info on the config file format, see [the config file doc](config-file.md).
+For more info on the config file format, see [the config file doc](config/config-file.md).
 
 ## Basic usage
 

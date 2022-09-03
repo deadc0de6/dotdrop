@@ -2,8 +2,8 @@
 
 For examples of transformation uses, see:
 
-* [Handle compressed directories](howto/store-compressed-directories.md)
-* [Handle secrets](howto/sensitive-dotfiles.md)
+* [Handle compressed directories](../howto/store-compressed-directories.md)
+* [Handle secrets](../howto/sensitive-dotfiles.md)
 
 **Notes**:
 
@@ -19,7 +19,7 @@ There are two types of transformations available:
     * They have two mandatory arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
-    * This Happens **before** the dotfile is templated (see [templating](templating.md))
+    * This Happens **before** the dotfile is templated (see [templating](../templating.md))
 
 * **Write transformations**: used to transform files before updating a dotfile ([config](config-config.md) key `trans_write`)
     * Used for command `update` and `import`
@@ -28,7 +28,7 @@ There are two types of transformations available:
         * **{1}** will be replaced with a temporary file to store the result of the transformation
 
 A typical use-case for transformations is when dotfiles need to be
-stored encrypted or compressed. For more, see [the howto](howto/howto.md).
+stored encrypted or compressed. For more, see [the howto](../howto/howto.md).
 
 Note that transformations cannot be used if the dotfile is to be linked (when `link: absolute|relative|link_children`).
 
@@ -73,7 +73,7 @@ trans_write:
 
 As for [dynamic actions](config-actions.md#dynamic-actions), transformations support
 the use of variables ([variables and dynvariables](config-file.md#variables)
-and [template variables](templating.md#template-variables)).
+and [template variables](../templating.md#template-variables)).
 
 A very dumb example:
 ```yaml
