@@ -106,6 +106,7 @@ cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 [ -e ${tmpd}/dir1/empty/this.ignore ] && exit 1
 [ -e ${tmpd}/dir1/sub/empty/that.ignore ] && exit 1
 
+cat ${tmpd}/dir1/not-empty/file
 grep "p1" ${tmpd}/dir1/not-empty/file
 
 echo "OK"
