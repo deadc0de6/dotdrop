@@ -9,6 +9,14 @@ variables:
 
 Variables defined in the `variables` entry are made available within the config file.
 
+For example
+```yaml
+variables:
+  myvar: "some value"
+  home: "{{@@ env['HOME'] @@}}"
+  email: "user@domain.com"
+```
+
 Config variables are recursively evaluated, which means that
 a config like the below:
 ```yaml
