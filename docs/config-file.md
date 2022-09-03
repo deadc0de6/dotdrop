@@ -264,6 +264,29 @@ dotfiles:
       - '[a-zA-Z0-9]*'
 ```
 
+To ignore specific files on different profiles (same `src` but some files
+are not installed for specific profile)
+```yaml
+dotfiles:
+  d_testdir_p1:
+    src: testdir
+    dst: ~/.testdir
+    instignore:
+    - '*/ignore-me-1'
+  d_testdir_p2:
+    src: testdir
+    dst: ~/.testdir
+    instignore:
+    - '*/ignore-me-2'
+profiles:
+  p1:
+    dotfiles:
+    - d_testdir_p1
+  p2:
+    dotfiles:
+    - d_testdir_p2
+```
+
 ## Ignore missing
 
 Sometimes, it is nice to have [update](usage.md#update-dotfiles) not copy all the files in the installed directory
