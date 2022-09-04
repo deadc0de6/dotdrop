@@ -5,7 +5,9 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/deadc0de6/dotdrop)](https://github.com/deadc0de6/dotdrop/releases/latest)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![GitHub Repo stars](https://badgen.net/github/stars/deadc0de6/dotdrop)](https://github.com/deadc0de6/dotdrop/)
+
 [![Last commit](https://badgen.net/github/last-commit/deadc0de6/dotdrop)](https://github.com/deadc0de6/dotdrop/commits/master)
+[![Commits since last release](https://img.shields.io/github/commits-since/deadc0de6/dotdrop/latest)](https://github.com/deadc0de6/dotdrop/)
 
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg?branch=master)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
