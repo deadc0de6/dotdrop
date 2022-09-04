@@ -16,6 +16,7 @@
 [![PyPI](https://img.shields.io/pypi/v/dotdrop)](https://badge.fury.io/py/dotdrop)
 [![Homebrew version](https://img.shields.io/homebrew/v/dotdrop)](https://formulae.brew.sh/formula/dotdrop)
 [![AUR](https://img.shields.io/aur/version/dotdrop.svg)](https://aur.archlinux.org/packages/dotdrop)
+[![Snap](https://badgen.net/snapcraft/v/dotdrop)](https://snapcraft.io/dotdrop)
 
 [![Donate](https://img.shields.io/badge/donate-KoFi-blue.svg)](https://ko-fi.com/deadc0de6)
 
