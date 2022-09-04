@@ -10,10 +10,8 @@ The following variables are available in templates:
 * `{{@@ _dotdrop_dotpath @@}}` contains the [dotpath](../config/config-config.md) absolute path.
 * `{{@@ _dotdrop_cfgpath @@}}` contains the [config file](../config/config-file.md) absolute path.
 * `{{@@ _dotdrop_workdir @@}}` contains the [workdir](../config/config-config.md) absolute path.
-* The [enriched variables](#enriched-variables)
+* All variables defined [in the config](../config/config-file.md#variables)
 * Dotfile specific variables (see [Dotfile variables](#dotfile-variables))
-* All defined config variables (see [Variables](../config/config-file.md#variables))
-* All defined config interpreted variables (see [Interpreted variables](../config/config-dynvars.md#dynvariables-entry))
 
 ## Enriched variables
 

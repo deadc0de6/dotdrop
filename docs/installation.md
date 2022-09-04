@@ -31,7 +31,7 @@ $ ./dotdrop.sh --help
 ```
 
 For macOS users, make sure to install `realpath` through Homebrew
-(part of *coreutils*).
+(part of *coreutils*) and `libmagic`.
 
 Using dotdrop as a submodule will require you to work with dotdrop by
 using the generated script `dotdrop.sh` at the root
