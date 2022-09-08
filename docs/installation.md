@@ -39,6 +39,13 @@ of your dotfiles repository. Note that this script updates the submodule
 automatically unless called with the environment variable `DOTDROP_AUTOUPDATE`
 set to `no`.
 
+If you happened to encounter `ModuleNotFoundError` error after an
+update, it means the dependencies have changed and you should re-install
+dependencies with
+```bash
+pip3 install --user -r dotdrop/requirements.txt
+```
+
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell with the config file path; for example:
 ```
@@ -84,6 +91,9 @@ If used as a submodule, update it with:
 ```bash
 $ git submodule update --init --recursive
 $ git submodule update --remote dotdrop
+
+## install dependencies
+$ pip3 install --user -r dotdrop/requirements.txt
 ```
 
 You will then need to commit the changes with:
