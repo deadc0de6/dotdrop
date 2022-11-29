@@ -59,15 +59,20 @@ Importing `~/.mutt/colors` and then `~/.vim/colors` will result in:
 * `d_colors` and `d_vim_colors` in the short format
 * `d_mutt_colors` and `d_vim_colors` in the long format
 
-A dotfile can be imported as a different file with the use
-of the command line switch `--as` (effectively modifying the `src` part
-of the dotfile in the config, that is the location of the dotfile in the
-`dotpath`). It is however recommended
+It is possible to import a dotfile while pretending it was at a different
+path with the use of `--as` what will effectively modify the `src` path
+of the generated dotfile entry in the config as well as the location of the file
+in the *dotpath*.
+The argument to `--as` is expected to be an absolute path and will be made
+absolute in case it isn't (specifying `--as test` will result in something like
+`--as <current-working-directory>/test`). It is however recommended
 to use [templating](template/templating.md) to avoid duplicates and optimize
-dotfile management.
+dotfile management instead of using `--as`.
 ```bash
+# imported to <dotpath>/zshrc.test
 $ dotdrop import ~/.zshrc --as=~/.zshrc.test
 ```
+see [issue #220](https://github.com/deadc0de6/dotdrop/issues/220) and [issue #368](https://github.com/deadc0de6/dotdrop/issues/368).
 
 By importing a path using the profile special keyword `ALL`, a dotfile will be created
 in the config but won't be associated to any profile.
