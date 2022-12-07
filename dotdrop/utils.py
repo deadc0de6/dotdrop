@@ -439,7 +439,9 @@ def get_default_file_perms(path, umask):
 
 def get_file_perm(path):
     """return file permission"""
-    return os.stat(path).st_mode & 0o777
+    if not os.path.exists(path):
+        return 0o777
+    return os.stat(path, follow_symlinks=True).st_mode & 0o777
 
 
 def chmod(path, mode, debug=False):
