@@ -90,6 +90,7 @@ cfg="${tmps}/config.yaml"
 echo 'f777' > ${tmps}/dotfiles/f777
 chmod 700 ${tmps}/dotfiles/f777
 echo 'link' > ${tmps}/dotfiles/link
+chmod 777 ${tmps}/dotfiles/link
 mkdir -p ${tmps}/dotfiles/dir
 echo "f1" > ${tmps}/dotfiles/dir/f1
 
@@ -99,6 +100,7 @@ echo "exists" > ${tmpd}/exists
 chmod 644 ${tmpd}/exists
 
 echo "existslink" > ${tmps}/dotfiles/existslink
+chmod 777 ${tmps}/dotfiles/existslink
 chmod 644 ${tmpd}/exists
 
 mkdir -p ${tmps}/dotfiles/direxists
@@ -187,7 +189,6 @@ profiles:
   p2:
     dotfiles:
     - f_exists
-    - f_existslink
     - d_linkchildren
     - f_symlinktemplate
     - f_nomode
@@ -196,8 +197,8 @@ _EOF
 
 # install
 echo "first install round"
-#cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 -V
+cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V
+echo "first install round"
 
 has_rights "${tmpd}/f777" "777"
 has_rights "${tmpd}/link" "777"
@@ -223,17 +224,15 @@ chmod 600 ${tmps}/dotfiles/exists
 echo "exists" > ${tmpd}/exists
 chmod 600 ${tmpd}/exists
 
-chmod 600 ${tmpd}/existslink
-
 chmod 700 ${tmpd}/linkchildren
 
 chmod 600 ${tmpd}/symlinktemplate
 
 echo "second install round"
 cd ${ddpath} | ${bin} install -c ${cfg} -p p2 -f -V
+echo "second install round"
 
 has_rights "${tmpd}/exists" "777"
-has_rights "${tmpd}/existslink" "777"
 has_rights "${tmpd}/linkchildren/f1" "644"
 has_rights "${tmpd}/linkchildren/d1" "755"
 has_rights "${tmpd}/linkchildren/d1/f2" "644"
