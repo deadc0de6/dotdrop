@@ -9,9 +9,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build and Publish Snapcraft
       env:
-        SNAP_TOKEN: ${{ secrets.SNAPCRAFT_TOKEN }}
         SNAPCRAFT_BUILD_ENVIRONMENT: host
         RELEASE_TAG: ${{ github.ref }}
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
       working-directory: ./packages/snap/
       run: |
         export MAGIC=$SNAP/usr/share/file/magic.mgc
@@ -19,7 +19,7 @@ jobs:
         sudo apt -y install git python3-pip python3-setuptools
         sudo apt -y install snapd
         sudo snap install snapcraft --classic
-        echo "$SNAP_TOKEN" | snapcraft login --with -
+        snapcraft login
         snapcraft
         version=$(echo ${RELEASE_TAG} | sed 's#^.*v##g')
         snapcraft upload --release=stable dotdrop_${version}_amd64.snap
