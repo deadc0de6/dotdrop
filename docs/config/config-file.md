@@ -90,7 +90,19 @@ dotfiles:
     src: dir
     dst: ~/dir
     chmod: 744
+  f_preserve:
+    src: preserve
+    dst: ~/preserve
+    chmod: preserve
 ```
+
+The `chmod` value defines the file permissions in octal notation to apply on dotfiles. If undefined
+new files will get the system default permissions (see `umask`, `777-<umask>` for directories and
+`666-<umask>` for files).
+
+The special keyword `preserve` allows to ensure that if the dotfiles already exists
+on the filesystem, it is not altered during `install` and the `chmod` value won't
+be changed during `update`.
 
 On `import`, the following rules are applied:
 
@@ -107,12 +119,13 @@ On `install`, the following rules are applied:
 * Otherwise, the permissions of the dotfile in the `dotpath` are applied.
 * If the global setting `force_chmod` is set to true, dotdrop will not ask
   for confirmation to apply permissions.
+* If `chmod` is `preserve` and the destination exists with a different permission set
+  than system default, then it is not altered
 
 On `update`, the following rule is applied:
 
 * If the permissions of the file in the filesystem differ from the dotfile in the `dotpath`,
-  then the dotfile entry `chmod` is added/updated accordingly.
-
+  then the dotfile entry `chmod` is added/updated accordingly (unless `chmod` value is `preserve`)
 
 ## Symlinking dotfiles
 

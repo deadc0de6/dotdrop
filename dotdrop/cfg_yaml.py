@@ -67,6 +67,9 @@ class CfgYaml:
     key_dotfile_template = 'template'
     key_dotfile_chmod = 'chmod'
 
+    # chmod value
+    chmod_ignore = 'preserve'
+
     # profile
     key_profile_dotfiles = 'dotfiles'
     key_profile_include = 'include'
@@ -378,14 +381,17 @@ class CfgYaml:
         """return all existing dotfile keys"""
         return self.dotfiles.keys()
 
-    def update_dotfile(self, key, chmod):
-        """update an existing dotfile"""
-        if key not in self.dotfiles.keys():
-            return False
-        dotfile = self._yaml_dict[self.key_dotfiles][key]
+    def _update_dotfile_chmod(self, key, dotfile, chmod):
         old = None
         if self.key_dotfile_chmod in dotfile:
             old = dotfile[self.key_dotfile_chmod]
+            if old == self.chmod_ignore:
+                msg = (
+                    'ignore chmod change since '
+                    f'{self.chmod_ignore}'
+                )
+                self._dbg(msg)
+                return False
         if old == chmod:
             return False
         if self._debug:
@@ -397,6 +403,18 @@ class CfgYaml:
             del dotfile[self.key_dotfile_chmod]
         else:
             dotfile[self.key_dotfile_chmod] = str(format(chmod, 'o'))
+        return True
+
+    def update_dotfile(self, key, chmod):
+        """
+        update an existing dotfile
+        return true if updated
+        """
+        if key not in self.dotfiles.keys():
+            return False
+        dotfile = self._yaml_dict[self.key_dotfiles][key]
+        if not self._update_dotfile_chmod(key, dotfile, chmod):
+            return False
         self._dirty = True
         return True
 
@@ -743,62 +761,77 @@ class CfgYaml:
             new[k] = val
         return new
 
+    def _norm_dotfile_chmod(self, entry):
+        value = str(entry[self.key_dotfile_chmod])
+        if value == self.chmod_ignore:
+            # is preserve
+            return
+        if len(value) < 3:
+            # bad format
+            err = f'bad format for chmod: {value}'
+            self._log.err(err)
+            raise YamlException(f'config content error: {err}')
+
+        # check is valid value
+        try:
+            int(value)
+        except Exception as exc:
+            err = f'bad format for chmod: {value}'
+            self._log.err(err)
+            err = f'config content error: {err}'
+            raise YamlException(err) from exc
+
+        # normalize chmod value
+        for chmodv in list(value):
+            chmodint = int(chmodv)
+            if chmodint < 0 or chmodint > 7:
+                err = f'bad format for chmod: {value}'
+                self._log.err(err)
+                raise YamlException(
+                    f'config content error: {err}'
+                )
+        # octal
+        entry[self.key_dotfile_chmod] = int(value, 8)
+
     def _norm_dotfiles(self, dotfiles):
         """normalize and check dotfiles entries"""
         if not dotfiles:
             return dotfiles
         new = {}
         for k, val in dotfiles.items():
-            # add 'src' as key' if not present
             if self.key_dotfile_src not in val:
+                # add 'src' as key' if not present
                 val[self.key_dotfile_src] = k
                 new[k] = val
             else:
                 new[k] = val
-            # fix deprecated trans key
+
             if self.old_key_trans_r in val:
-                msg = '\"trans\" is deprecated, please use \"trans_read\"'
+                # fix deprecated trans key
+                msg = f'{k} \"trans\" is deprecated, please use \"trans_read\"'
                 self._log.warn(msg)
                 val[self.key_trans_r] = val[self.old_key_trans_r]
                 del val[self.old_key_trans_r]
                 new[k] = val
+
             if self.key_dotfile_link not in val:
                 # apply link value if undefined
                 value = self.settings[self.key_settings_link_dotfile_default]
                 val[self.key_dotfile_link] = value
-            # apply noempty if undefined
+
             if self.key_dotfile_noempty not in val:
+                # apply noempty if undefined
                 value = self.settings.get(self.key_settings_noempty, False)
                 val[self.key_dotfile_noempty] = value
-            # apply template if undefined
+
             if self.key_dotfile_template not in val:
+                # apply template if undefined
                 value = self.settings.get(self.key_settings_template, True)
                 val[self.key_dotfile_template] = value
-            # validate value of chmod if defined
-            if self.key_dotfile_chmod in val:
-                value = str(val[self.key_dotfile_chmod])
-                if len(value) < 3:
-                    err = f'bad format for chmod: {value}'
-                    self._log.err(err)
-                    raise YamlException(f'config content error: {err}')
-                try:
-                    int(value)
-                except Exception as exc:
-                    err = f'bad format for chmod: {value}'
-                    self._log.err(err)
-                    err = f'config content error: {err}'
-                    raise YamlException(err) from exc
-                # normalize chmod value
-                for chmodv in list(value):
-                    chmodint = int(chmodv)
-                    if chmodint < 0 or chmodint > 7:
-                        err = f'bad format for chmod: {value}'
-                        self._log.err(err)
-                        raise YamlException(
-                            f'config content error: {err}'
-                        )
-                val[self.key_dotfile_chmod] = int(value, 8)
 
+            if self.key_dotfile_chmod in val:
+                # validate value of chmod if defined
+                self._norm_dotfile_chmod(val)
         return new
 
     def _add_variables(self, new, shell=False, template=True, prio=False):

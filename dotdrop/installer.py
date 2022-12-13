@@ -14,6 +14,7 @@ from dotdrop.logger import Logger
 from dotdrop.linktypes import LinkTypes
 from dotdrop import utils
 from dotdrop.exceptions import UndefinedException
+from dotdrop.cfg_yaml import CfgYaml
 
 
 class Installer:
@@ -138,13 +139,15 @@ class Installer:
             ret, err = self._link_absolute(templater, src, dst,
                                            actionexec=actionexec,
                                            is_template=is_template,
-                                           ignore=ignore)
+                                           ignore=ignore,
+                                           chmod=chmod)
         elif linktype == LinkTypes.RELATIVE:
             # symlink
             ret, err = self._link_relative(templater, src, dst,
                                            actionexec=actionexec,
                                            is_template=is_template,
-                                           ignore=ignore)
+                                           ignore=ignore,
+                                           chmod=chmod)
         elif linktype == LinkTypes.LINK_CHILDREN:
             # symlink direct children
             if not isdir:
@@ -158,7 +161,16 @@ class Installer:
                                                is_template=is_template,
                                                ignore=ignore)
 
-        self.log.dbg(f'before chmod: {ret} err:{err}')
+        if self.log.debug and chmod:
+            cur = utils.get_file_perm(dst)
+            if chmod == CfgYaml.chmod_ignore:
+                chmodstr = CfgYaml.chmod_ignore
+            else:
+                chmodstr = f'{chmod:o}'
+            self.log.dbg(
+                f'before chmod (cur:{cur:o}, new:{chmodstr}): '
+                f'installed:{ret} err:{err}'
+            )
 
         if self.dry:
             return self._log_install(ret, err)
@@ -169,9 +181,15 @@ class Installer:
         # but not when
         # - error (not r, err)
         # - aborted (not r, err)
-        if os.path.exists(dst) and (ret or (not ret and not err)):
+        # - special keyword "preserve"
+        apply_chmod = linktype in [LinkTypes.NOLINK, LinkTypes.LINK_CHILDREN]
+        apply_chmod = apply_chmod and os.path.exists(dst)
+        apply_chmod = apply_chmod and (ret or (not ret and not err))
+        apply_chmod = apply_chmod and chmod != CfgYaml.chmod_ignore
+        if apply_chmod:
             if not chmod:
                 chmod = utils.get_file_perm(src)
+            self.log.dbg(f'applying chmod {chmod:o} to {dst}')
             dstperms = utils.get_file_perm(dst)
             if dstperms != chmod:
                 # apply mode
@@ -187,6 +205,8 @@ class Installer:
                     else:
                         ret = False
                         err = 'chmod failed'
+        else:
+            self.log.dbg('no chmod applied')
 
         return self._log_install(ret, err)
 
@@ -255,7 +275,8 @@ class Installer:
     def _link_absolute(self, templater, src, dst,
                        actionexec=None,
                        is_template=True,
-                       ignore=None):
+                       ignore=None,
+                       chmod=None):
         """
         install link:absolute|link
 
@@ -269,12 +290,14 @@ class Installer:
                                   actionexec=actionexec,
                                   is_template=is_template,
                                   ignore=ignore,
-                                  absolute=True)
+                                  absolute=True,
+                                  chmod=chmod)
 
     def _link_relative(self, templater, src, dst,
                        actionexec=None,
                        is_template=True,
-                       ignore=None):
+                       ignore=None,
+                       chmod=None):
         """
         install link:relative
 
@@ -288,12 +311,17 @@ class Installer:
                                   actionexec=actionexec,
                                   is_template=is_template,
                                   ignore=ignore,
-                                  absolute=False)
+                                  absolute=False,
+                                  chmod=chmod)
 
     def _link_dotfile(self, templater, src, dst, actionexec=None,
-                      is_template=True, ignore=None, absolute=True):
+                      is_template=True, ignore=None, absolute=True,
+                      chmod=None):
         """
         symlink
+
+        chmod is only used if the dotfile is a template
+        and needs to be installed to the workdir first
 
         return
         - True, None        : success
@@ -302,15 +330,15 @@ class Installer:
         - False, 'aborted'    : user aborted
         """
         if is_template:
-            self.log.dbg('is a template')
-            self.log.dbg(f'install to {self.workdir}')
+            self.log.dbg(f'is a template, installing to {self.workdir}')
             tmp = utils.pivot_path(dst, self.workdir,
                                    striphome=True, logger=self.log)
             ret, err = self.install(templater, src, tmp,
                                     LinkTypes.NOLINK,
                                     actionexec=actionexec,
                                     is_template=is_template,
-                                    ignore=ignore)
+                                    ignore=ignore,
+                                    chmod=chmod)
             if not ret and not os.path.exists(tmp):
                 return ret, err
             src = tmp
@@ -467,6 +495,10 @@ class Installer:
                 dstrel = os.path.dirname(dstrel)
             lnk_src = os.path.relpath(src, dstrel)
         os.symlink(lnk_src, dst)
+        self.log.dbg(
+            f'symlink {dst} to {lnk_src} '
+            f'(mode:{utils.get_file_perm(dst):o})'
+        )
         if not self.comparing:
             self.log.sub(f'linked {dst} to {lnk_src}')
         return True, None
@@ -527,7 +559,10 @@ class Installer:
         ret, err = self._write(src, dst,
                                content=content,
                                actionexec=actionexec)
+
         if ret and not err:
+            rights = f'{utils.get_file_perm(src):o}'
+            self.log.dbg(f'installed file {src} to {dst} ({rights})')
             if not self.dry and not self.comparing:
                 self.log.sub(f'install {src} to {dst}')
         return ret, err
@@ -587,13 +622,12 @@ class Installer:
     @classmethod
     def _write_content_to_file(cls, content, src, dst):
         """write content to file"""
-
         if content:
             # write content the file
             try:
                 with open(dst, 'wb') as file:
                     file.write(content)
-                shutil.copymode(src, dst)
+                # shutil.copymode(src, dst)
             except NotADirectoryError as exc:
                 err = f'opening dest file: {exc}'
                 return False, err
@@ -605,7 +639,7 @@ class Installer:
             # copy file
             try:
                 shutil.copyfile(src, dst)
-                shutil.copymode(src, dst)
+                # shutil.copymode(src, dst)
             except OSError as exc:
                 return False, str(exc)
         return True, None
@@ -665,7 +699,7 @@ class Installer:
         if not ret:
             return False, err
 
-        self.log.dbg(f'install file to \"{dst}\"')
+        self.log.dbg(f'installing file to \"{dst}\"')
         # re-check in case action created the file
         if self.safe and not overwrite and \
                 os.path.lexists(dst) and \
@@ -674,7 +708,10 @@ class Installer:
             return False, 'aborted'
 
         # writing to file
-        return self._write_content_to_file(content, src, dst)
+        self.log.dbg(f'before writing to {dst} ({utils.get_file_perm(src):o})')
+        ret = self._write_content_to_file(content, src, dst)
+        self.log.dbg(f'written to {dst} ({utils.get_file_perm(src):o})')
+        return ret
 
     ########################################################
     # helpers
@@ -749,7 +786,13 @@ class Installer:
             return
         dst = path.rstrip(os.sep) + self.backup_suffix
         self.log.log(f'backup {path} to {dst}')
-        os.rename(path, dst)
+        # os.rename(path, dst)
+        # copy to preserve mode on chmod=preserve
+        # since we expect dotfiles this shouldn't have
+        # such a big impact but who knows.
+        shutil.copy2(path, dst)
+        stat = os.stat(path)
+        os.chown(dst, stat.st_uid, stat.st_gid)
 
     def _exec_pre_actions(self, actionexec):
         """execute action executor"""

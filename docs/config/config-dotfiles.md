@@ -8,7 +8,7 @@ Entry    | Description
 `src` | Dotfile path within the `dotpath` (dotfiles with empty `src` are ignored and considered installed, can use `variables`, make sure to quote)
 `link` | Defines how this dotfile is installed. Possible values: *nolink*, *absolute*, *relative*, *link_children* (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) (defaults to value of `link_dotfile_default`)
 `actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-actions.md))
-`chmod` | Defines the file permissions in octal notation to apply during installation (See [permissions](config-file.md#permissions))
+`chmod` | Defines the file permissions in octal notation to apply during installation or the special keyword `preserve` (See [permissions](config-file.md#permissions))
 `cmpignore` | List of patterns to ignore when comparing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
 `ignore_missing_in_dotdrop` | Ignore missing files in dotdrop when comparing and importing (see [Ignore missing](config-file.md#ignore-missing))
 `ignoreempty` | If true, an empty template will not be deployed (defaults to the value of `ignoreempty`)

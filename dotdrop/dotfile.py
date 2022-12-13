@@ -117,7 +117,10 @@ class Dotfile(DictParser):
         msg += f', link:\"{self.link}\"'
         msg += f', template:{self.template}'
         if self.chmod:
-            msg += f', chmod:{self.chmod:o}'
+            if isinstance(self.chmod, int) or len(self.chmod) == 3:
+                msg += f', chmod:{self.chmod:o}'
+            else:
+                msg += f', chmod:\"{self.chmod}\"'
         return msg
 
     def prt(self):
@@ -129,7 +132,10 @@ class Dotfile(DictParser):
         out += f'\n{indent}link: \"{self.link}\"'
         out += f'\n{indent}template: \"{self.template}\"'
         if self.chmod:
-            out += f'\n{indent}chmod: \"{self.chmod:o}\"'
+            if isinstance(self.chmod, int) or len(self.chmod) == 3:
+                out += f'\n{indent}chmod: \"{self.chmod:o}\"'
+            else:
+                out += f'\n{indent}chmod: \"{self.chmod}\"'
 
         out += f'\n{indent}pre-action:'
         some = self.get_pre_actions()

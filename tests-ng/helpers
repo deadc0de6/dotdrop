@@ -101,3 +101,12 @@ if [[ $OSTYPE == 'darwin'* ]]; then
   export -f readlink
   export -f realpath
 fi
+
+# workdir tricks
+# when tests are called without using the
+# top level tests.sh script which sets the workdir
+if [ -z "${DOTDROP_WORKDIR}" ]; then
+  _workdir="/tmp/dotdrop-test-workdir"
+  export DOTDROP_WORKDIR="${_workdir}"
+  clear_on_exit "${_workdir}"
+fi
