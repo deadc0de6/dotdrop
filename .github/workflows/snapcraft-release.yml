@@ -12,7 +12,7 @@ jobs:
       env:
         SNAPCRAFT_BUILD_ENVIRONMENT: host
         RELEASE_TAG: ${{ github.ref }}
-        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_LOGIN }}
       working-directory: ./packages/snap/
       run: |
         export MAGIC=$SNAP/usr/share/file/magic.mgc
