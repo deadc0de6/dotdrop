@@ -2,6 +2,7 @@ name: Release to aur
 on:
   release:
     types: [created]
+  workflow_dispatch:
 jobs:
   aur_publish:
     runs-on: ubuntu-latest

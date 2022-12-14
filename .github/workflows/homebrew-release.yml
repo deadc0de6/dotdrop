@@ -2,6 +2,7 @@ name: Release to Homebrew
 on:
   release:
     types: [created]
+  workflow_dispatch:
 jobs:
   homebrew-core:
     runs-on: ubuntu-latest
