@@ -4,23 +4,30 @@ on:
     types: [created]
   workflow_dispatch:
 jobs:
-  snapcraft_publish:
+  build:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Build and Publish Snapcraft
+    - uses: snapcore/action-build@v1
+      id: build-snap
+      with:
+        path: ./packages/snap
+    - uses: actions/upload-artifact@v3
+      with:
+        name: dotdrop
+        path: ${{ steps.build-snap.outputs.snap }}
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: dotdrop
+        path: .
+    - uses: snapcore/action-publish@v1
       env:
-        SNAPCRAFT_BUILD_ENVIRONMENT: host
-        RELEASE_TAG: ${{ github.ref }}
         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_LOGIN }}
-      working-directory: ./packages/snap/
-      run: |
-        export MAGIC=$SNAP/usr/share/file/magic.mgc
-        sudo apt update
-        sudo apt -y install git python3-pip python3-setuptools
-        sudo apt -y install snapd
-        sudo snap install snapcraft --classic
-        snapcraft login
-        snapcraft
-        version=$(echo ${RELEASE_TAG} | sed 's#^.*v##g')
-        snapcraft upload --release=stable dotdrop_${version}_amd64.snap
+      with:
+        snap: ${{needs.build.outputs.snap-file}}
+        release: 'stable'
