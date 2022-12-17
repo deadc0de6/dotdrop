@@ -13,7 +13,6 @@
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
 [![Coveralls](https://img.shields.io/coveralls/github/deadc0de6/dotdrop)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
 ![CodeQL](https://github.com/deadc0de6/dotdrop/workflows/CodeQL/badge.svg)
-[![LGTM Grade](https://img.shields.io/lgtm/grade/python/github/deadc0de6/dotdrop?label=code%20quality)](https://lgtm.com/projects/g/deadc0de6/dotdrop/context:python)
 
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)
 
