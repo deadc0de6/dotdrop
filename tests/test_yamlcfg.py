@@ -90,6 +90,7 @@ profiles:
         '''.format(cfgstring)
 
         mock_open.side_effect = [
+                unittest.mock.mock_open(read_data=data).return_value,
                 unittest.mock.mock_open(read_data=data).return_value
                 ]
         mock_exists.return_value = True
