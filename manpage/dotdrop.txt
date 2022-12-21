@@ -1,0 +1,70 @@
+NAME
+  dotdrop - save your dotfiles once, deploy them everywhere
+
+SYNOPSIS
+ dotdrop [OPTIONS] [ARGS] ...
+
+DESCRIPTION
+ Dotdrop makes the management of dotfiles between different hosts easy.
+ It allows you to store your dotfiles in Git and automagically deploy
+ different versions of the same file on different setups.
+
+ It also allows manage different sets of dotfiles. For example, you can have
+ a set of dotfiles for your home laptop and a different set for your office
+ desktop. Those sets may overlap, and different versions of the same dotfiles
+ can be deployed using different predefined profiles. Or you may have a main
+ set of dotfiles for your everyday host and a subset you only need to deploy
+ to temporary hosts (cloud VM etc.) that may be using a slightly different
+ version of some of the dotfiles.
+
+OPTIONS
+  -a --force-actions      Execute all actions even if no dotfile is installed.
+  -b --no-banner          Do not display the banner.
+  -c --cfg=<path>         Path to the config.
+  -C --file=<path>        Path of dotfile to compare.
+  -d --dry                Dry run.
+  -D --showdiff           Show a diff before overwriting.
+  -f --force              Do not ask user confirmation for anything.
+  -G --grepable           Grepable output.
+  -i --ignore=<pattern>   Pattern to ignore.
+  -k --key                Treat <path> as a dotfile key.
+  -l --link=<link>        Link option (nolink|absolute|relative|link_children).
+  -L --file-only          Do not show diff but only the files that differ.
+  -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
+  -n --nodiff             Do not diff when installing.
+  -p --profile=<profile>  Specify the profile to use [default: f22b45ac65b3].
+  -P --show-patch         Provide a one-liner to manually patch template.
+  -s --as=<path>          Import as a different path from actual path.
+  --transr=<key>          Associate trans_read key on import.
+  --transw=<key>          Apply trans_write key on import.
+  -t --temp               Install to a temporary directory for review.
+  -T --template           Only template dotfiles.
+  -V --verbose            Be verbose.
+  -w --workers=<nb>       Number of concurrent workers [default: 1].
+  -W --workdir-clear      Clear the workdir.
+  -z --ignore-missing     Ignore files in installed folders that are missing.
+  -v --version            Show version.
+  -h --help               Show this screen.
+
+EXAMPLES
+  dotdrop install   [-VbtfndDaW] [-c <path>] [-p <profile>]
+                                 [-w <nb>] [<key>...]
+  dotdrop import    [-Vbdfm]     [-c <path>] [-p <profile>] [-i <pattern>...]
+                                 [--transr=<key>] [--transw=<key>]
+                                 [-l <link>] [-s <path>] <path>...
+  dotdrop compare   [-LVbz]      [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
+  dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
+  dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
+  dotdrop profiles  [-VbG]       [-c <path>]
+  dotdrop --help
+  dotdrop --version
+
+AUTHOR
+  Written by deadc0de6 <info@deadc0de.ch>
+
+  This manual page was written by Guilherme de Paula Xavier Segundo
+  <guilherme.lnx@gmail.com> for the Debian project (but may be used by others).
