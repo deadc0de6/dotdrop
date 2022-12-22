@@ -1,0 +1,114 @@
+NAME
+  dotdrop - save your dotfiles once, deploy them everywhere
+
+SYNOPSIS
+  dotdrop COMMAND [OPTIONS] [ARGS] ...
+  dotdrop --help
+  dotdrop --version
+
+DESCRIPTION
+ Dotdrop makes the management of dotfiles between different hosts easy.
+ It allows you to store your dotfiles in Git and automagically deploy
+ different versions of the same file on different setups.
+
+ It also allows manage different sets of dotfiles. For example, you can have
+ a set of dotfiles for your home laptop and a different set for your office
+ desktop. Those sets may overlap, and different versions of the same dotfiles
+ can be deployed using different predefined profiles. Or you may have a main
+ set of dotfiles for your everyday host and a subset you only need to deploy
+ to temporary hosts (cloud VM etc.) that may be using a slightly different
+ version of some of the dotfiles.
+
+COMMANDS
+  install  Install dotfiles
+        -a --force-actions      Execute all actions even if no dotfile is installed.
+        -d --dry                Dry run.
+        -D --showdiff           Show a diff before overwriting.
+        -f --force              Do not ask user confirmation for anything.
+        -n --nodiff             Do not diff when installing.
+        -p --profile=<profile>  Specify the profile to use.
+        -t --temp               Install to a temporary directory for review.
+        -w --workers=<nb>       Number of concurrent workers [default: 1].
+        -W --workdir-clear      Clear the workdir.
+
+  import  Import dotfiles
+        -d --dry                Dry run.
+        -f --force              Do not ask user confirmation for anything.
+        -i --ignore=<pattern>   Pattern to ignore.
+        -l --link=<link>        Link option (nolink|absolute|relative|link_children).
+        -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
+        -p --profile=<profile>  Specify the profile to use.
+        -s --as=<path>          Import as a different path from actual path.
+        --transr=<key>          Associate trans_read key on import.
+        --transw=<key>          Apply trans_write key on import.
+
+  compare  Compare dotfiles
+        -C --file=<path>        Path of dotfile to compare.
+        -i --ignore=<pattern>   Pattern to ignore.
+        -p --profile=<profile>  Specify the profile to use.
+        -w --workers=<nb>       Number of concurrent workers [default: 1].
+        -z --ignore-missing     Ignore files in installed folders that are missing.
+
+  update  Update a managed dotfile
+        -d --dry                Dry run.
+        -f --force              Do not ask user confirmation for anything.
+        -i --ignore=<pattern>   Pattern to ignore.
+        -k --key                Treat <path> as a dotfile key.
+        -p --profile=<profile>  Specify the profile to use.
+        -P --show-patch         Provide a one-liner to manually patch template.
+        -w --workers=<nb>       Number of concurrent workers [default: 1].
+        -z --ignore-missing     Ignore files in installed folders that are missing.
+
+  remove  Unmanage a dotfile
+        -d --dry                Dry run.
+        -f --force              Do not ask user confirmation for anything.
+        -k --key                Treat <path> as a dotfile key.
+        -p --profile=<profile>  Specify the profile to use.
+
+  files  List the managed dotfiles
+        -G --grepable           Grepable output.
+        -p --profile=<profile>  Specify the profile to use.
+        -T --template           Only template dotfiles.
+
+  detail  Detail managed dotfiles
+        -p --profile=<profile>  Specify the profile to use.
+
+  profiles  List all profiles
+        -G --grepable           Grepable output.
+
+GLOBAL OPTIONS
+  -b --no-banner          Do not display the banner.
+  -c --cfg=<path>         Path to the config.
+  -V --verbose            Be verbose.
+
+EXAMPLES
+  dotdrop install   [-VbtfndDaW] [-c <path>] [-p <profile>]
+                                 [-w <nb>] [<key>...]
+  dotdrop import    [-Vbdfm]     [-c <path>] [-p <profile>] [-i <pattern>...]
+                                 [--transr=<key>] [--transw=<key>]
+                                 [-l <link>] [-s <path>] <path>...
+  dotdrop compare   [-LVbz]      [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
+  dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
+                                 [-w <nb>] [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
+  dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
+  dotdrop profiles  [-VbG]       [-c <path>]
+
+  dotdrop --help
+
+  dotdrop --version
+
+ABOUT
+  More information can be found on the repository under <https://github.com/deadc0de6/dotdrop>
+  and in the main documentation under <https://dotdrop.readthedocs.io>
+
+AUTHOR
+  Written by deadc0de6 <https://github.com/deadc0de6>
+
+COPYRIGHT
+  dotdrop is copyright (c) 2017, deadc0de6. Released under the GPLv3 license.
+
+REPORTING BUGS
+  <https://github.com/deadc0de6/dotdrop/issues>
