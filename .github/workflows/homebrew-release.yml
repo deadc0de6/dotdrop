@@ -1,7 +1,9 @@
 name: Release to Homebrew
 on:
-  release:
-    types: [created]
+  workflow_run:
+    workflows: ["Release to PyPI"]
+    types:
+      - completed
   workflow_dispatch:
 jobs:
   homebrew-core:
