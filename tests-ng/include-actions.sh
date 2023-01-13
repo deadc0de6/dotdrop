@@ -181,5 +181,32 @@ nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
 nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
 [ "${nb}" != "1" ] && echo "naked executed multiple times" &&  exit 1
 
+# install without verbose
+rm -f ${tmpa}/pre ${tmpa}/pre2 ${tmpa}/post ${tmpa}/post2 ${tmpa}/naked
+rm -f ${tmpd}/abc
+echo "PROFILE p0 without verbose"
+cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0
+
+# checks
+[ ! -e ${tmpa}/pre ] && echo "pre not found" && exit 1
+nb=`wc -l ${tmpa}/pre | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "pre executed multiple times" && exit 1
+
+[ ! -e ${tmpa}/pre2 ] && echo "pre2 not found" && exit 1
+nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "pre2 executed multiple times" && exit 1
+
+[ ! -e ${tmpa}/post ] && echo "post not found" && exit 1
+nb=`wc -l ${tmpa}/post | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "post executed multiple times" && exit 1
+
+[ ! -e ${tmpa}/post2 ] && echo "post2 not found" && exit 1
+nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "post2 executed multiple times" && exit 1
+
+[ ! -e ${tmpa}/naked ] && echo "naked not found" && exit 1
+nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
+[ "${nb}" != "1" ] && echo "naked executed multiple times" &&  exit 1
+
 echo "OK"
 exit 0

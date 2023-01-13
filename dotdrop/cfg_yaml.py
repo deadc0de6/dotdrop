@@ -265,7 +265,7 @@ class CfgYaml:
         # process imported configs (import_configs)
         self._import_configs()
 
-        # process profile include
+        # process profile include items (actions, dotfiles, ...)
         self._resolve_profile_includes()
 
         # add the current profile variables
@@ -928,7 +928,7 @@ class CfgYaml:
                 val[self.key_profile_dotfiles] = self.dotfiles.keys()
 
     def _resolve_profile_includes(self):
-        """resolve profile(s) including other profiles"""
+        """resolve elements included through other profiles"""
         for k, _ in self.profiles.items():
             self._rec_resolve_profile_include(k)
 
@@ -987,7 +987,7 @@ class CfgYaml:
                 msg = f'Merging actions {profile} '
                 msg += f'<- {i}: {actions} <- {o_actions}'
                 self._dbg(msg)
-                actions.extend(o_actions)
+            actions.extend(o_actions)
             this_profile[self.key_profile_actions] = uniq_list(actions)
 
         dotfiles = this_profile.get(self.key_profile_dotfiles, [])
@@ -1498,7 +1498,10 @@ class CfgYaml:
             self._redefine_templater()
 
     def _get_profile_included_vars(self):
-        """resolve profile included variables/dynvariables"""
+        """
+        resolve profile included variables/dynvariables
+        returns inc_profiles, inc_var, inc_dvar
+        """
         for _, val in self.profiles.items():
             if self.key_profile_include in val and \
                     val[self.key_profile_include]:
