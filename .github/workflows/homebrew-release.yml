@@ -5,6 +5,10 @@ on:
     types:
       - completed
   workflow_dispatch:
+    inputs:
+      tag-name:
+        description: 'Tag to bump the formula to'
+        required: true
 jobs:
   homebrew-core:
     runs-on: ubuntu-latest
