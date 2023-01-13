@@ -1,4 +1,4 @@
-name: Release to Homebrew
+name: Manual release to Homebrew
 on:
   workflow_run:
     workflows: ["Release to PyPI"]
