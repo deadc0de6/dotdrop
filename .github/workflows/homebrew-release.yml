@@ -9,7 +9,8 @@ jobs:
   homebrew-core:
     runs-on: ubuntu-latest
     steps:
-    - uses: dawidd6/action-homebrew-bump-formula@v3
+    - uses: mislav/bump-homebrew-formula-action@v2
       with:
-        token: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
-        formula: dotdrop
+        formula-name: dotdrop
+      env:
+        COMMITTER_TOKEN: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
