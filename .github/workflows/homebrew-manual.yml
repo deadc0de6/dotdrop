@@ -4,6 +4,11 @@ on:
     workflows: ["Release to PyPI"]
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: 'Tag to bump the formula to'
+        required: true
 jobs:
   homebrew-core:
     runs-on: ubuntu-latest
@@ -11,5 +16,7 @@ jobs:
     - uses: mislav/bump-homebrew-formula-action@v2
       with:
         formula-name: dotdrop
+        tag-name: ${{ github.event.inputs.tag-name }}
+        download-url: https://github.com/deadc0de6/dotdrop/archive/${{ github.event.inputs.tag-name }}.tar.gz
       env:
         COMMITTER_TOKEN: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
