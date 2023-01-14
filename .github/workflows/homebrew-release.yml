@@ -4,12 +4,12 @@ on:
     workflows: ["Release to PyPI"]
     types:
       - completed
+  workflow_dispatch:
 jobs:
   homebrew-core:
     runs-on: ubuntu-latest
     steps:
-    - uses: mislav/bump-homebrew-formula-action@v2
+    - uses: dawidd6/action-homebrew-bump-formula@v3
       with:
-        formula-name: dotdrop
-      env:
-        COMMITTER_TOKEN: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
+        token: ${{secrets.HOMEBREW_FORMULA_GH_TOKEN}}
+        formula: dotdrop
