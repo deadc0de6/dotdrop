@@ -18,8 +18,8 @@ will fail.
 
 ## Symlink a dotfile
 
-Below is an ad-hoc way to symlink a dotfile when [link_dotfile_default](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry)
-and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config-format/#config-entry) use their default values.
+Below is an ad-hoc way to symlink a dotfile when [link_dotfile_default](https://dotdrop.readthedocs.io/en/latest/config/config-config/)
+and [link_on_import](https://dotdrop.readthedocs.io/en/latest/config/config-config/) use their default values.
 
 Import the file:
 ```bash

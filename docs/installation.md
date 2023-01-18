@@ -166,8 +166,6 @@ Dotdrop is available on aur:
 * Stable: <https://aur.archlinux.org/packages/dotdrop/>
 * Git version: <https://aur.archlinux.org/packages/dotdrop-git/>
 
-Make sure to install the [python-magic-ahupp](https://aur.archlinux.org/packages/python-magic-ahupp/) from aur.
-
 ## Snap package
 
 Dotdrop is available as a snap package: <https://snapcraft.io/dotdrop>.

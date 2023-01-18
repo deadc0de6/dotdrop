@@ -165,7 +165,7 @@ Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.
 
 * Test for PEP8 compliance with `pycodestyle` and `pyflakes`
 * Run the unittest available in [tests directory](/tests)
-* Run the bash script tests in [tests-ng directory](tests-ng)
+* Run the bash script tests in [tests-ng directory](/tests-ng)
 
 ## Testing with unittest
 
@@ -177,7 +177,7 @@ for the tests.
 
 ## Testing with bash scripts
 
-The bash scripts are available in [tests-ng directory](tests-ng).
+The bash scripts are available in [tests-ng directory](/tests-ng).
 These test entire workflows by simulating the use of dotdrop from end to end
 for different use-cases (usually described in their filename or in the file header).
 
