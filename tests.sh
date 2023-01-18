@@ -17,9 +17,11 @@ fi
 cur=`dirname $(${rl} "${0}")`
 
 # test syntax
+echo "checking syntax..."
 ${cur}/test-syntax.sh
 
 # test doc
+echo "checking documentation..."
 ${cur}/test-doc.sh
 
 workers=${DOTDROP_WORKERS}
@@ -29,6 +31,7 @@ if [ ! -z ${workers} ]; then
 fi
 
 # execute tests with coverage
+echo "unit tests..."
 if [ -z ${GITHUB_WORKFLOW} ]; then
   ## local
   export COVERAGE_FILE=
@@ -52,6 +55,7 @@ if [ ! -z ${workers} ]; then
 fi
 
 # run bash tests
+echo "nextgen tests..."
 export DOTDROP_DEBUG="yes"
 unset DOTDROP_FORCE_NODEBUG
 workdir_tmp_exists="no"
