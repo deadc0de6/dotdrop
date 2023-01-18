@@ -106,7 +106,7 @@ Dotdrop is available on:
 
 [Create a new repository](https://dotdrop.readthedocs.io/en/latest/getting-started/#repository-setup)
 to store your dotfiles with dotdrop. *Init* or *clone* that new repository and
-[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation).
+[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/).
 
 Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host
@@ -154,7 +154,7 @@ profiles:
     - d_polybar
 ```
 For a description of the different fields and their use,
-see the [config doc](https://dotdrop.readthedocs.io/en/latest/config-config/).
+see the [config doc](https://dotdrop.readthedocs.io/en/latest/config/config-config/).
 
 Commit and push your changes with git.
 
@@ -183,7 +183,7 @@ profiles:
     - d_polybar
 ```
 
-Then adapt any dotfile using the [templating](https://dotdrop.readthedocs.io/en/latest/templating/)
+Then adapt any dotfile using the [templating](https://dotdrop.readthedocs.io/en/latest/template/templating/)
 feature (if needed). For example, you might want different fonts sizes in Polybar for each host.
 
 Edit `<dotpath>/config/polybar/config`:
@@ -202,7 +202,7 @@ font2 = "unifont:size=6;0"
 You also want to have the correct interface set on the wireless network in
 the Polybar config.
 
-Add a [variable](https://dotdrop.readthedocs.io/en/latest/config-variables/)
+Add a [variable](https://dotdrop.readthedocs.io/en/latest/config/config-variables/)
 to the config file (In the below example, *home* gets the default `wlan0` value for
 the variable `wifi` while *office* gets `wlp2s0`):
 ```yaml
@@ -290,10 +290,10 @@ That's it, a single repository with all your dotfiles for your different hosts.
 
 For more, see the [docs](https://dotdrop.readthedocs.io):
 
-* [Create actions](https://dotdrop.readthedocs.io/en/latest/config-actions)
-* [Use transformations](https://dotdrop.readthedocs.io/en/latest/config-transformations)
-* [Use variables](https://dotdrop.readthedocs.io/en/latest/config-variables)
-* [Symlink dotfiles](https://dotdrop.readthedocs.io/en/latest/howto/symlink-dotfiles)
+* [Create actions](https://dotdrop.readthedocs.io/en/latest/config/config-actions/)
+* [Use transformations](https://dotdrop.readthedocs.io/en/latest/config/config-transformations/)
+* [Use variables](https://dotdrop.readthedocs.io/en/latest/config/config-variables/)
+* [Symlink dotfiles](https://dotdrop.readthedocs.io/en/latest/howto/symlink-dotfiles/)
 * [and more](https://dotdrop.readthedocs.io/en/latest/howto/howto/)
 
 # Documentation
