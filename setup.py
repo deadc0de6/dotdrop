@@ -1,25 +1,31 @@
-from setuptools import setup, find_packages
+"""setup.py"""
 from os import path
+from setuptools import setup, find_packages
 from dotdrop.version import __version__ as VERSION
 
-readme = 'README.md'
+
+README = 'README.md'
 here = path.abspath(path.dirname(__file__))
 
-def read_readme(f):
-    with open(f, encoding="utf-8") as fp:
-        return fp.read()
+
+def read_readme(readme_path):
+    """read readme content"""
+    with open(readme_path, encoding="utf-8") as file:
+        return file.read()
+
 
 REQUIRES_PYTHON = '>=3'
+URL = f'https://github.com/deadc0de6/dotdrop/archive/v{VERSION}.tar.gz'
 
 setup(
     name='dotdrop',
     version=VERSION,
 
     description='Save your dotfiles once, deploy them everywhere',
-    long_description=read_readme(readme),
+    long_description=read_readme(README),
     long_description_content_type="text/markdown; variant=GFM",
     url='https://github.com/deadc0de6/dotdrop',
-    download_url = 'https://github.com/deadc0de6/dotdrop/archive/v'+VERSION+'.tar.gz',
+    download_url=URL,
     options={"bdist_wheel": {"python_tag": "py3"}},
     # include anything from MANIFEST.in
     include_package_data=True,
@@ -41,7 +47,10 @@ setup(
 
     keywords='dotfiles jinja2',
     packages=find_packages(exclude=['tests*']),
-    install_requires=['docopt', 'Jinja2', 'ruamel.yaml', 'python-magic', 'packaging', 'requests', 'toml', 'distro'],
+    install_requires=[
+        'docopt', 'Jinja2', 'ruamel.yaml',
+        'python-magic', 'packaging', 'requests',
+        'toml', 'distro'],
 
     extras_require={
         'dev': ['check-manifest'],
