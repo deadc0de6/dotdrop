@@ -24,56 +24,13 @@ ${cur}/test-syntax.sh
 echo "checking documentation..."
 ${cur}/test-doc.sh
 
-workers=${DOTDROP_WORKERS}
-if [ ! -z ${workers} ]; then
-  unset DOTDROP_WORKERS
-  echo "DISABLE workers"
-fi
+# unittest
+echo "unittest..."
+${cur}/test-unittest.sh
 
-# execute tests with coverage
-echo "unit tests..."
-if [ -z ${GITHUB_WORKFLOW} ]; then
-  ## local
-  export COVERAGE_FILE=
-  # do not print debugs when running tests (faster)
-  # tests
-  PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop --plugin=nose2.plugins.mp -N0
-else
-  ## CI/CD
-  export COVERAGE_FILE="${cur}/.coverage"
-  # tests
-  PYTHONPATH="dotdrop" nose2 --with-coverage --coverage dotdrop
-fi
-#PYTHONPATH="dotdrop" python3 -m pytest tests
-
-tmpworkdir="/tmp/dotdrop-tests-workdir"
-export DOTDROP_WORKDIR="${tmpworkdir}"
-
-if [ ! -z ${workers} ]; then
-  DOTDROP_WORKERS=${workers}
-  echo "ENABLE workers: ${workers}"
-fi
-
-# run bash tests
-echo "CICD tests..."
-export DOTDROP_DEBUG="yes"
-unset DOTDROP_FORCE_NODEBUG
-workdir_tmp_exists="no"
-[ -d "~/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
-if [ -z ${GITHUB_WORKFLOW} ]; then
-  ## local
-  export COVERAGE_FILE=
-  tests-ng/tests-launcher.py
-else
-  ## CI/CD
-  export COVERAGE_FILE="${cur}/.coverage"
-  tests-ng/tests-launcher.py 1
-fi
-
-# clear workdir
-[ "${workdir_tmp_exists}" = "no" ] && rm -rf ~/.config/dotdrop/tmp
-# clear temp workdir
-rm -rf "${tmpworkdir}"
+# tests-ng
+echo "tests-ng..."
+${cur}/test-ng.sh
 
 ## done
-echo "All test finished successfully"
+echo "All tests finished successfully"
