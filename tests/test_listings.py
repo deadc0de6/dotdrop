@@ -19,6 +19,7 @@ from tests.helpers import create_dir, get_string, get_tempdir, \
 
 
 class TestListings(unittest.TestCase):
+    """listing test"""
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True

@@ -28,6 +28,7 @@ pycodestyle scripts/
 echo "testing with pyflakes"
 pyflakes dotdrop/
 pyflakes tests/
+pyflakes scripts/
 
 # pylint
 echo "testing with pylint"
@@ -50,6 +51,19 @@ pylint \
   --disable=R0911 \
   --disable=R0904 \
   dotdrop/
+
+# C0103: invalid-name
+pylint \
+  --disable=R0902 \
+  --disable=R0913 \
+  --disable=R0903 \
+  --disable=R0914 \
+  --disable=R0915 \
+  --disable=R0912 \
+  --disable=R0911 \
+  --disable=R0904 \
+  --disable=C0103 \
+  scripts/
 
 set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"

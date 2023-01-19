@@ -31,14 +31,9 @@ KEY = 'dotfiles'
 ENTRY = 'link'
 
 
-def main():
-    """entry point"""
-    args = docopt(USAGE)
-    path = os.path.expanduser(args['<config.yaml>'])
-    value = args['--value']
-    ignores = args['--ignore']
-
-    with open(path, 'r') as file:
+def change_link(path, value, ignores):
+    """change link value"""
+    with open(path, 'r', encoding='utf-8') as file:
         content = yaml(typ='safe').load(file)
     for k, val in content[KEY].items():
         if k in ignores:
@@ -52,6 +47,15 @@ def main():
     data.typ = 'rt'
     data.dump(content, output)
     print(output)
+
+
+def main():
+    """entry point"""
+    args = docopt(USAGE)
+    path = os.path.expanduser(args['<config.yaml>'])
+    value = args['--value']
+    ignores = args['--ignore']
+    change_link(path, value, ignores)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2022, deadc0de6
@@ -17,13 +16,13 @@ import toml
 def yaml_load(path):
     """load from yaml"""
     with open(path, 'r', encoding='utf8') as file:
-        data = yaml()
-        data.typ = 'rt'
-        content = data.load(file)
+        cont = yaml()
+        cont.typ = 'rt'
+        content = cont.load(file)
     return content
 
 
-def replace_None(content):
+def replace_none(content):
     """replace any occurence of None with empty string"""
     n = {}
     for k in content:
@@ -35,7 +34,7 @@ def replace_None(content):
             n[k] = ""
             continue
         if isinstance(content[k], dict):
-            n[k] = replace_None(content[k])
+            n[k] = replace_none(content[k])
             continue
         n[k] = content[k]
     return n
@@ -48,11 +47,10 @@ def toml_dump(content):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("usage: {} <yaml-config-path>".format(sys.argv[0]))
+        print(f"usage: {sys.argv[0]} <yaml-config-path>")
         sys.exit(1)
 
-    path = sys.argv[1]
-    content = yaml_load(path)
-    content = replace_None(content)
-    out = toml_dump(content)
+    data = yaml_load(sys.argv[1])
+    data = replace_none(data)
+    out = toml_dump(data)
     print(out)
