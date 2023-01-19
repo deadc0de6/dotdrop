@@ -55,7 +55,7 @@ if [ ! -z ${workers} ]; then
 fi
 
 # run bash tests
-echo "nextgen tests..."
+echo "CICD tests..."
 export DOTDROP_DEBUG="yes"
 unset DOTDROP_FORCE_NODEBUG
 workdir_tmp_exists="no"
