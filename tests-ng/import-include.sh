@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2017, deadc0de6
+# Copyright (c) 2023, deadc0de6
 #
-# test the use of the keyword "include"
-# returns 1 in case of error
+# test import in profile which includes another
 #
 
 # exit on first error
@@ -55,6 +54,12 @@ tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
+# create the dotfile to import
+echo "file" > ${tmpd}/file
+
+# create the dotfiles already imported
+echo "already in" > ${tmps}/dotfiles/abc
+
 # create the config file
 cfg="${tmps}/config.yaml"
 
@@ -63,62 +68,35 @@ config:
   backup: true
   create: true
   dotpath: dotfiles
-actions:
-    pre:
-      preaction: touch ${tmpd}/action.pre
-    postaction: touch ${tmpd}/action.post
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
 profiles:
   p0:
-    dotfiles:
-    include:
-    - p3
-  p1:
-    actions:
-    - preaction
-    - postaction
-    dotfiles:
-    - f_abc
-  p2:
     include:
     - p1
-  p3:
-    include:
-    - p2
+  p1:
+    dotfiles:
+    - f_abc
 _EOF
 cat ${cfg}
 
-# create the source
-mkdir -p ${tmps}/dotfiles/
-echo "test" > ${tmps}/dotfiles/abc
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep '^f_' | wc -l`
+[ "${cnt}" != "1" ] && echo "this is bad" && exit 1
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 --verbose
+cd ${ddpath} | ${bin} import -f -c ${cfg} -p p0 --verbose ${tmpd}/file
 
-[ ! -e ${tmpd}/action.pre ] && exit 1
-[ ! -e ${tmpd}/action.post ] && exit 1
+[ ! -e ${tmps}/dotfiles/${tmpd}/file ] && echo "file not imported" && exit 1
 
-# compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p2
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p3
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
-
-# list
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p2 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p3 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc
-
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc | wc -l`
-[ "${cnt}" != "1" ] && echo "dotfiles displayed more than once" && exit 1
+# make sure file is in
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep '^f_file' | wc -l`
+[ "${cnt}" != "1" ] && echo "dotfiles not in config" && exit 1
 
 # count
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -b | grep '^f_' | wc -l`
-[ "${cnt}" != "1" ] && exit 1
+cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 -b | grep '^f_' | wc -l`
+[ "${cnt}" != "2" ] && echo "not enough dotfile" exit 1
 
 echo "OK"
 exit 0

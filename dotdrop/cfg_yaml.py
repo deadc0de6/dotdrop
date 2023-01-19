@@ -358,11 +358,15 @@ class CfgYaml:
             return False
         profile = self.profiles[profile_key]
 
-        # ensure profile dotfiles list is not None
+        # ensure profile dotfiles list is not None in local object
         if self.key_profile_dotfiles not in profile or \
                 profile[self.key_profile_dotfiles] is None:
             profile[self.key_profile_dotfiles] = []
-            self._yaml_dict[self.key_profiles][profile_key] = []
+        # ensure profile dotfiles list is not None in yaml dict
+        dict_pro = self._yaml_dict[self.key_profiles][profile_key]
+        if self.key_profile_dotfiles not in dict_pro or \
+                dict_pro[self.key_profile_dotfiles] is None:
+            dict_pro[self.key_profile_dotfiles] = []
 
         # add to the profile
         pdfs = profile[self.key_profile_dotfiles]
@@ -743,22 +747,26 @@ class CfgYaml:
         if not profiles:
             return profiles
         new = {}
-        for k, val in profiles.items():
-            if k == self.key_all:
+        # loop through each profile
+        for pro, entries in profiles.items():
+            if pro == self.key_all:
                 msg = f'\"{self.key_all}\" is a special profile name, '
                 msg += 'consider renaming to avoid any issue.'
                 self._log.warn(msg)
-            if not k:
+            if not pro:
                 msg = 'empty profile name'
                 self._log.warn(msg)
                 continue
-            if not val:
-                # no dotfiles
+            if not entries:
+                # no entries in profile dict
                 continue
-            # add dotfiles entry if not present
-            if self.key_profile_dotfiles not in val:
-                val[self.key_profile_dotfiles] = []
-            new[k] = val
+            # add "dotfiles:"" entry if not present
+            if self.key_profile_dotfiles not in entries:
+                msg = f'\"{self.key_profile_dotfiles}\" entry is mandatory'
+                msg += f' and was not present in profile \"{pro}\".'
+                self._log.warn(msg)
+                entries[self.key_profile_dotfiles] = []
+            new[pro] = entries
         return new
 
     def _norm_dotfile_chmod(self, entry):
