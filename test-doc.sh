@@ -10,6 +10,7 @@ done
 ## test the doc internal links
 ## https://github.com/remarkjs/remark-validate-links
 ## https://github.com/tcort/markdown-link-check
+## npm install -g remark-cli remark-validate-links
 set +e
 which remark >/dev/null 2>&1
 r="$?"
