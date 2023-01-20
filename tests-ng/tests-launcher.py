@@ -29,19 +29,21 @@ def run_test(logfd, path):
     path = os.path.join(cur, name)
 
     if logfd:
-        logfd.write(f'starting test {path}\n')
+        logfd.write(f'starting test \"{path}\"\n')
+        logfd.flush()
     proc = subprocess.Popen(path, shell=False,
                             stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT)
+                            stderr=subprocess.STDOUT,
+                            text=True)
     out, _ = proc.communicate()
-    out = out.decode()
     ret = proc.returncode == 0
-    if logfd:
-        logfd.write(f'done test {path}\n')
     reason = 'returncode'
     if 'Traceback' in out:
         ret = False
         reason = 'traceback'
+    if logfd:
+        logfd.write(f'done test \"{path}\": ok:{ret}\n')
+        logfd.flush()
     return ret, reason, path, out
 
 
@@ -60,7 +62,7 @@ def get_tests():
 
 def main():
     """entry point"""
-    max_jobs = 10
+    max_jobs = None  # number of processor
     if len(sys.argv) > 1:
         max_jobs = int(sys.argv[1])
 
@@ -69,7 +71,9 @@ def main():
     logfd = sys.stdout
     if not is_cicd():
         logfd = open(LOG_FILE, 'w', encoding='utf-8')
-    logfd.write(f'start with {max_jobs} jobs\n')
+    if max_jobs:
+        logfd.write(f'start with {max_jobs} parallel worker(s)\n')
+    logfd.write(f'running {len(tests)} test(s)\n')
     logfd.flush()
 
     print()
@@ -94,14 +98,14 @@ def main():
                     remainer.cancel()
                 print()
                 print(log)
-                print(f'test {name} failed ({reason})')
+                print(f'test \"{name}\" failed: {reason}')
                 logfd.close()
                 return False
         sys.stdout.write('\n')
     if spinner:
         spinner.stop()
     print()
-    logfd.write(f'done with {max_jobs} jobs\n')
+    logfd.write(f'done - ran {len(tests)} test(s)\n')
     logfd.close()
     return True
 

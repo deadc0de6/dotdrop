@@ -36,7 +36,7 @@ if [ -z ${GITHUB_WORKFLOW} ]; then
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
-  tests-ng/tests-launcher.py 1
+  tests-ng/tests-launcher.py
 fi
 
 # clear workdir
