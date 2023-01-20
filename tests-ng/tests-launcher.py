@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-# author: deadc0de6 (https://github.com/deadc0de6)
-# Copyright (c) 2020, deadc0de6
-#
-# tests launcher
-#
+"""
+author: deadc0de6 (https://github.com/deadc0de6)
+Copyright (c) 2020, deadc0de6
+
+tests launcher
+"""
 
 
 import os
@@ -13,33 +14,39 @@ from concurrent import futures
 from halo import Halo
 
 
-MAX_JOBS = 10
 LOG_FILE = '/tmp/dotdrop-tests-launcher.log'
 
 
+def is_cicd():
+    """are we in a CICD env (github actions)"""
+    return 'GITHUB_WORKFLOW' in os.environ
+
+
 def run_test(logfd, path):
+    """run test pointed by path"""
     cur = os.path.dirname(sys.argv[0])
     name = os.path.basename(path)
     path = os.path.join(cur, name)
 
     if logfd:
-        logfd.write('starting test {}\n'.format(path))
-    p = subprocess.Popen(path, shell=False,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    out, _ = p.communicate()
+        logfd.write(f'starting test {path}\n')
+    proc = subprocess.Popen(path, shell=False,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT)
+    out, _ = proc.communicate()
     out = out.decode()
-    r = p.returncode == 0
+    ret = proc.returncode == 0
     if logfd:
-        logfd.write('done test {}\n'.format(path))
+        logfd.write(f'done test {path}\n')
     reason = 'returncode'
     if 'Traceback' in out:
-        r = False
+        ret = False
         reason = 'traceback'
-    return r, reason, path, out
+    return ret, reason, path, out
 
 
 def get_tests():
+    """get all tests available in current directory"""
     tests = []
     cur = os.path.dirname(sys.argv[0])
     for (_, _, filenames) in os.walk(cur):
@@ -52,46 +59,50 @@ def get_tests():
 
 
 def main():
-    global MAX_JOBS
+    """entry point"""
+    max_jobs = 10
     if len(sys.argv) > 1:
-        MAX_JOBS = int(sys.argv[1])
+        max_jobs = int(sys.argv[1])
 
     tests = get_tests()
 
-    fd = open(LOG_FILE, 'w')
-    fd.write('start with {} jobs\n'.format(MAX_JOBS))
-    fd.flush()
+    logfd = sys.stdout
+    if not is_cicd():
+        logfd = open(LOG_FILE, 'w', encoding='utf-8')
+    logfd.write(f'start with {max_jobs} jobs\n')
+    logfd.flush()
 
     print()
-    spinner = Halo(text='Testing', spinner='bouncingBall')
-    spinner.start()
-    with futures.ThreadPoolExecutor(max_workers=MAX_JOBS) as ex:
+    spinner = None
+    if not is_cicd():
+        # no spinner on github actions
+        spinner = Halo(text='Testing', spinner='bouncingBall')
+        spinner.start()
+    with futures.ThreadPoolExecutor(max_workers=max_jobs) as ex:
         wait_for = []
         for test in tests:
-            j = ex.submit(run_test, fd, test)
+            j = ex.submit(run_test, logfd, test)
             wait_for.append(j)
-        fd.flush()
+        logfd.flush()
 
-        for f in futures.as_completed(wait_for):
-            r, reason, p, log = f.result()
-            fd.flush()
-            if not r:
+        for test in futures.as_completed(wait_for):
+            ret, reason, name, log = test.result()
+            logfd.flush()
+            if not ret:
                 ex.shutdown(wait=False)
-                for x in wait_for:
-                    x.cancel()
+                for remainer in wait_for:
+                    remainer.cancel()
                 print()
                 print(log)
-                print('test {} failed ({})'.format(p, reason))
-                fd.close()
+                print(f'test {name} failed ({reason})')
+                logfd.close()
                 return False
-            #else:
-            #    sys.stdout.write('.')
-            #    sys.stdout.flush()
         sys.stdout.write('\n')
-    spinner.stop()
+    if spinner:
+        spinner.stop()
     print()
-    fd.write('done with {} jobs\n'.format(MAX_JOBS))
-    fd.close()
+    logfd.write(f'done with {max_jobs} jobs\n')
+    logfd.close()
     return True
 
 
