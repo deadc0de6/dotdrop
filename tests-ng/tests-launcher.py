@@ -15,11 +15,12 @@ from halo import Halo
 
 
 LOG_FILE = '/tmp/dotdrop-tests-launcher.log'
+GITHUB_ENV = 'GITHUB_WORKFLOW'
 
 
 def is_cicd():
     """are we in a CICD env (github actions)"""
-    return 'GITHUB_WORKFLOW' in os.environ
+    return GITHUB_ENV in os.environ
 
 
 def run_test(logfd, path):
@@ -74,7 +75,7 @@ def main():
     if not is_cicd():
         logfd = open(LOG_FILE, 'w', encoding='utf-8')
     if max_jobs:
-        logfd.write(f'start with {max_jobs} parallel worker(s)\n')
+        logfd.write(f'run tests with {max_jobs} parallel job(s)\n')
     logfd.write(f'running {len(tests)} test(s)\n')
     logfd.flush()
 

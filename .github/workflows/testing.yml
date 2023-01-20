@@ -22,14 +22,14 @@ jobs:
         pip install -r tests-requirements.txt
         pip install -r requirements.txt
         npm install -g remark-cli remark-validate-links
-    - name: Run sequential tests
+    - name: Run with 1 worker
       run: |
         ./tests.sh
       env:
         DOTDROP_FORCE_NODEBUG: yes
         DOTDROP_NOBANNER: yes
         DOTDROP_WORKERS: 1
-    - name: Run parallel tests
+    - name: Run with 4 workers
       run: |
         ./tests.sh
       env:

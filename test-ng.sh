@@ -36,7 +36,9 @@ if [ -z ${GITHUB_WORKFLOW} ]; then
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
-  tests-ng/tests-launcher.py
+  # running multiple jobs in parallel sometimes
+  # messes with the results on remote servers
+  tests-ng/tests-launcher.py 1
 fi
 
 # clear workdir

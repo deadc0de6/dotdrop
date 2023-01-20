@@ -236,8 +236,8 @@ For more options, see the usage with `dotdrop --help`.
 
 ## Concurrency
 
-The command line switch `-w`/`--workers`, if set to a value greater than one, allowing to use
-multiple concurrent workers to execute an operation. It can be applied to the following
+The command line switch `-w`/`--workers`, if set to a value greater than one, enables the use
+of multiple concurrent workers to execute an operation. It can be applied to the following
 commands:
 
 * `install`
