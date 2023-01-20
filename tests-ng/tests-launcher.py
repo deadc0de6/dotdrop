@@ -83,19 +83,24 @@ def main():
         spinner = Halo(text='Testing', spinner='bouncingBall')
         spinner.start()
     with futures.ThreadPoolExecutor(max_workers=max_jobs) as ex:
-        wait_for = []
+        wait_for = {}
         for test in tests:
             j = ex.submit(run_test, logfd, test)
-            wait_for.append(j)
+            wait_for[j] = test
         logfd.flush()
 
-        for test in futures.as_completed(wait_for):
-            ret, reason, name, log = test.result()
-            logfd.flush()
+        for test in futures.as_completed(wait_for.keys()):
+            try:
+                ret, reason, name, log = test.result()
+            except Exception as exc:
+                print()
+                print(f'test \"{wait_for[test]}\" failed: {exc}')
+                logfd.close()
+                return False
             if not ret:
                 ex.shutdown(wait=False)
-                for remainer in wait_for:
-                    remainer.cancel()
+                for job in wait_for:
+                    job.cancel()
                 print()
                 print(log)
                 print(f'test \"{name}\" failed: {reason}')
