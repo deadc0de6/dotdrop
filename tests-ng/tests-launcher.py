@@ -34,7 +34,9 @@ def run_test(logfd, path):
     proc = subprocess.Popen(path, shell=False,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
-                            universal_newlines=True)
+                            universal_newlines=True,
+                            encoding='utf-8',
+                            errors='ignore')
     out, _ = proc.communicate()
     ret = proc.returncode == 0
     reason = 'returncode'
