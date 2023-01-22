@@ -760,12 +760,18 @@ class CfgYaml:
             if not entries:
                 # no entries in profile dict
                 continue
-            # add "dotfiles:"" entry if not present
-            if self.key_profile_dotfiles not in entries:
-                msg = f'\"{self.key_profile_dotfiles}\" entry is mandatory'
-                msg += f' and was not present in profile \"{pro}\".'
-                self._log.warn(msg)
+
+            # add "dotfiles:" entry if not present in local object
+            if self.key_profile_dotfiles not in entries or \
+                    entries[self.key_profile_dotfiles] is None:
                 entries[self.key_profile_dotfiles] = []
+
+            # add "dotfiles:" entry if not present in yaml dict
+            dict_pro = self._yaml_dict[self.key_profiles][pro]
+            if self.key_profile_dotfiles not in dict_pro or \
+                    dict_pro[self.key_profile_dotfiles] is None:
+                dict_pro[self.key_profile_dotfiles] = []
+
             new[pro] = entries
         return new
 
