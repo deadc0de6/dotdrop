@@ -3,6 +3,8 @@
 * [As a submodule](#as-a-submodule)
 * [PyPI package](#pypi-package)
 * [Homebrew package](#homebrew-package)
+* [Debian unstable (sid)](#debian)
+* [Ubuntu lunar (23.04)](#ubuntu)
 * [AUR packages](#aur-packages)
 * [Snap package](#snap-package)
 * [From source](#from-source)
@@ -157,6 +159,24 @@ Then follow the instructions under [PyPI package](#pypi-package).
 Install dotdrop from Homebrew with:
 ```bash
 $ brew install dotdrop
+```
+
+## Debian
+
+[Debian package](https://packages.debian.org/sid/dotdrop)
+
+Install dotdrop
+```bash
+sudo apt install dotdrop
+```
+
+## Ubuntu
+
+[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop)
+
+Install dotdrop
+```bash
+$ sudo apt install dotdrop
 ```
 
 ## Aur packages
