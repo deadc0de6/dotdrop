@@ -163,7 +163,7 @@ $ brew install dotdrop
 
 ## Debian
 
-[Debian package](https://packages.debian.org/sid/dotdrop)
+[Debian package](https://packages.debian.org/sid/dotdrop) in sid (unstable)
 
 Install dotdrop
 ```bash
@@ -172,7 +172,7 @@ sudo apt install dotdrop
 
 ## Ubuntu
 
-[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop)
+[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop) in lunar (23.04)
 
 Install dotdrop
 ```bash
