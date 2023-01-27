@@ -27,42 +27,45 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
-clear_on_exit "~/.dotdrop-test"
+clear_on_exit "${HOME}/.dotdrop-test"
 
 # create the dotfile
-echo "original" > ${tmpd}/testfile
+echo "original" > "${tmpd}"/testfile
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -74,39 +77,39 @@ _EOF
 
 # import
 echo "[+] import file"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V "${tmpd}"/testfile
+cat "${cfg}"
 
 # ensure exists and is not link
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
-cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
-grep 'original' ${tmps}/dotfiles/${tmpd}/testfile
-nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/testfile ] && echo "does not exist" && exit 1
+cat "${cfg}" | grep "${tmpd}"/testfile >/dev/null 2>&1
+grep 'original' "${tmps}"/dotfiles/"${tmpd}"/testfile
+nb=$(cat "${cfg}" | grep "${tmpd}"/testfile | wc -l)
 [ "${nb}" != "1" ] && echo 'not 1 entry' && exit 1
 
 # re-import without changing
 echo "[+] re-import without changes"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V "${tmpd}"/testfile
+cat "${cfg}"
 
 # test is only once
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
-cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
-grep 'original' ${tmps}/dotfiles/${tmpd}/testfile
-nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/testfile ] && echo "does not exist" && exit 1
+cat "${cfg}" | grep "${tmpd}"/testfile >/dev/null 2>&1
+grep 'original' "${tmps}"/dotfiles/"${tmpd}"/testfile
+nb=$(cat "${cfg}" | grep "${tmpd}"/testfile | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 # re-import with changes
 echo "[+] re-import with changes"
-echo 'modified' > ${tmpd}/testfile
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/testfile
-cat ${cfg}
+echo 'modified' > "${tmpd}"/testfile
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V "${tmpd}"/testfile
+cat "${cfg}"
 
 # test is only once
-[ ! -e ${tmps}/dotfiles/${tmpd}/testfile ] && echo "does not exist" && exit 1
-cat ${cfg} | grep ${tmpd}/testfile >/dev/null 2>&1
-grep 'modified' ${tmps}/dotfiles/${tmpd}/testfile
-nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/testfile ] && echo "does not exist" && exit 1
+cat "${cfg}" | grep "${tmpd}"/testfile >/dev/null 2>&1
+grep 'modified' "${tmps}"/dotfiles/"${tmpd}"/testfile
+nb=$(cat "${cfg}" | grep "${tmpd}"/testfile | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 # ###################################################
@@ -114,39 +117,39 @@ nb=`cat ${cfg} | grep ${tmpd}/testfile | wc -l`
 echo 'original' > "${HOME}/.dotdrop.test"
 # import in home
 echo "[+] import file in home"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V ~/.dotdrop.test
+cat "${cfg}"
 
 # ensure exists and is not link
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
-grep 'original' ${tmps}/dotfiles/dotdrop.test
-nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
+cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+grep 'original' "${tmps}"/dotfiles/dotdrop.test
+nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
 [ "${nb}" != "1" ] && echo 'not 1 entry' && exit 1
 
 # re-import without changing
 echo "[+] re-import without changes in home"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V ~/.dotdrop.test
+cat "${cfg}"
 
 # test is only once
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
-grep 'original' ${tmps}/dotfiles/dotdrop.test
-nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
+cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+grep 'original' "${tmps}"/dotfiles/dotdrop.test
+nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 # re-import with changes
 echo "[+] re-import with changes in home"
 echo 'modified' > ~/.dotdrop.test
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ~/.dotdrop.test
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V ~/.dotdrop.test
+cat "${cfg}"
 
 # test is only once
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat ${cfg} | grep "~/.dotdrop.test" >/dev/null 2>&1
-grep 'modified' ${tmps}/dotfiles/dotdrop.test
-nb=`cat ${cfg} | grep "~/.dotdrop.test" | wc -l`
+cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+grep 'modified' "${tmps}"/dotfiles/dotdrop.test
+nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 echo "OK"

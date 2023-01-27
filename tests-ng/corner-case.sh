@@ -33,26 +33,29 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
@@ -62,7 +65,7 @@ export DOTDROP_WORKERS=1
 
 # create the config file
 cfg="${basedir}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -83,24 +86,24 @@ profiles:
 _EOF
 
 echo "[+] test install dry"
-cd ${ddpath} | ${bin} install -c ${cfg} --dry -p p1 --verbose f_x
+cd "${ddpath}" | ${bin} install -c "${cfg}" --dry -p p1 --verbose f_x
 [ "$?" != "0" ] && exit 1
 
 echo "[+] test install show-diff"
-cd ${ddpath} | ${bin} install -c ${cfg} -p p1 --verbose f_x
+cd "${ddpath}" | ${bin} install -c "${cfg}" -p p1 --verbose f_x
 [ "$?" != "0" ] && exit 1
-cd ${ddpath} | ${bin} install -D -c ${cfg} -p p1 --verbose f_x
+cd "${ddpath}" | ${bin} install -D -c "${cfg}" -p p1 --verbose f_x
 [ "$?" != "0" ] && exit 1
 
 echo "[+] test install not existing src"
-cd ${ddpath} | ${bin} install -c ${cfg} -f --dry -p p1 --verbose f_y
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f --dry -p p1 --verbose f_y
 
 echo "[+] test install to temp"
-cd ${ddpath} | ${bin} install -t -c ${cfg} -p p1 --verbose f_x > ${basedir}/log 2>&1
+cd "${ddpath}" | ${bin} install -t -c "${cfg}" -p p1 --verbose f_x > "${basedir}"/log 2>&1
 [ "$?" != "0" ] && echo "install to tmp failed" && exit 1
 
 # cleaning
-tmpfile=`cat ${basedir}/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/'`
+tmpfile=$(cat "${basedir}"/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/')
 echo "tmpfile: ${tmpfile}"
 rm -rf "${tmpfile}"
 

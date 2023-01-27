@@ -28,49 +28,52 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 dotfiles="${basedir}/dotfiles"
 echo "dotdrop dir: ${basedir}"
 # the dotfile
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-create_dir ${tmpd}
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+create_dir "${tmpd}"
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
 
 # create the config file
 cfg="${basedir}/config.yaml"
-create_conf ${cfg} # sets token
+create_conf "${cfg}" # sets token
 
 # import the dir
-cd ${ddpath} | ${bin} import -f -c ${cfg} ${tmpd}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" "${tmpd}"
 
 # change token
-echo "changed" > ${token}
+echo "changed" > "${token}"
 
 # update
-cd ${ddpath} | ${bin} update -f -c ${cfg} ${tmpd} --verbose
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" "${tmpd}" --verbose
 
-grep 'changed' ${token} >/dev/null 2>&1
+grep 'changed' "${token}" >/dev/null 2>&1
 
 echo "OK"
 exit 0

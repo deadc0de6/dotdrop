@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -59,10 +62,10 @@ clear_on_exit "${tmpd}"
 cfg="${tmps}/config.yaml"
 
 # create the source
-echo "abc" > ${tmpd}/abc
+echo "abc" > "${tmpd}"/abc
 
 # import with nolink by default
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -73,18 +76,18 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/abc
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V "${tmpd}"/abc
 
 # checks
 inside="${tmps}/dotfiles/${tmpd}/abc"
-[ ! -e ${inside} ] && exit 1
+[ ! -e "${inside}" ] && exit 1
 
 set +e
-cat ${cfg} | grep 'link:' && exit 1
+cat "${cfg}" | grep 'link:' && exit 1
 set -e
 
 # import with parent by default
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -95,14 +98,14 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V ${tmpd}/abc
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V "${tmpd}"/abc
 
 # checks
 inside="${tmps}/dotfiles/${tmpd}/abc"
-[ ! -e ${inside} ] && exit 1
+[ ! -e "${inside}" ] && exit 1
 
-cat ${cfg}
-cat ${cfg} | grep 'link: absolute' >/dev/null
+cat "${cfg}"
+cat "${cfg}" | grep 'link: absolute' >/dev/null
 
 echo "OK"
 exit 0

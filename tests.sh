@@ -14,7 +14,7 @@ if ! ${rl} "${0}" >/dev/null 2>&1; then
     echo "\"${rl}\" not found!" && exit 1
   fi
 fi
-cur=`dirname $(${rl} "${0}")`
+cur=$(dirname "$(${rl} "${0}")")
 
 # make sure both version.py and manpage dotdrop.1 are in sync
 dotdrop_version=$(grep version dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
@@ -27,19 +27,19 @@ echo "current version ${dotdrop_version}"
 
 # test syntax
 echo "checking syntax..."
-${cur}/test-syntax.sh
+"${cur}"/test-syntax.sh
 
 # test doc
 echo "checking documentation..."
-${cur}/test-doc.sh
+"${cur}"/test-doc.sh
 
 # unittest
 echo "unittest..."
-${cur}/test-unittest.sh
+"${cur}"/test-unittest.sh
 
 # tests-ng
 echo "tests-ng..."
-${cur}/test-ng.sh
+"${cur}"/test-ng.sh
 
 ## done
 echo "All tests finished successfully"

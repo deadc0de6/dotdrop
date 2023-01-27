@@ -13,16 +13,15 @@ if ! ${rl} "${0}" >/dev/null 2>&1; then
     echo "\"${rl}\" not found!" && exit 1
   fi
 fi
-cur=`dirname $(${rl} "${0}")`
+cur=$(dirname "$(${rl} "${0}")")
 
-workers=${DOTDROP_WORKERS}
-if [ ! -z ${workers} ]; then
+if [ -n "${DOTDROP_WORKERS}" ]; then
   unset DOTDROP_WORKERS
   echo "DISABLE workers"
 fi
 
 # execute tests with coverage
-if [ -z ${GITHUB_WORKFLOW} ]; then
+if [ -z "${GITHUB_WORKFLOW}" ]; then
   ## local
   export COVERAGE_FILE=
   # do not print debugs when running tests (faster)

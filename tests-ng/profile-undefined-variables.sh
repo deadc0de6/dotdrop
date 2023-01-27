@@ -29,29 +29,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -60,7 +63,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -96,29 +99,29 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "main" > ${tmps}/dotfiles/abc
-echo "alt" > ${tmps}/dotfiles/def
+echo "main" > "${tmps}"/dotfiles/abc
+echo "alt" > "${tmps}"/dotfiles/def
 
 # install pmain
 echo "install pmain"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p pmain -V
-[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
-grep main ${tmpd}/abc
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p pmain -V
+[ ! -e "${tmpd}"/abc ] && echo "dotfile not installed" && exit 1
+grep main "${tmpd}"/abc
 
 # install pall
 echo "install pall"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p pall -V
-[ ! -e ${tmpd}/abcall ] && echo "dotfile not installed" && exit 1
-grep main ${tmpd}/abcall
-[ ! -e ${tmpd}/defall ] && echo "dotfile not installed" && exit 1
-grep alt ${tmpd}/defall
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p pall -V
+[ ! -e "${tmpd}"/abcall ] && echo "dotfile not installed" && exit 1
+grep main "${tmpd}"/abcall
+[ ! -e "${tmpd}"/defall ] && echo "dotfile not installed" && exit 1
+grep alt "${tmpd}"/defall
 
 # install pinclude
 echo "install pinclude"
-rm -f ${tmpd}/abc
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p pinclude -V
-[ ! -e ${tmpd}/abc ] && echo "dotfile not installed" && exit 1
-grep main ${tmpd}/abc
+rm -f "${tmpd}"/abc
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p pinclude -V
+[ ! -e "${tmpd}"/abc ] && echo "dotfile not installed" && exit 1
+grep main "${tmpd}"/abc
 
 echo "OK"
 exit 0

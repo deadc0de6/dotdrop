@@ -28,19 +28,22 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -49,15 +52,15 @@ unset DOTDROP_WORKDIR
 string="blabla"
 
 # the dotfile source
-tmp=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmp=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 tmpf="${tmp}/dotfiles"
 tmpw="${tmp}/workdir"
 export DOTDROP_WORKDIR="${tmpw}"
 
-mkdir -p ${tmpf}
+mkdir -p "${tmpf}"
 echo "dotfiles source (dotpath): ${tmpf}"
-mkdir -p ${tmpw}
+mkdir -p "${tmpw}"
 echo "workdir: ${tmpw}"
 
 # create the config file
@@ -65,13 +68,13 @@ cfg="${tmp}/config.yaml"
 echo "config file: ${cfg}"
 
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "dotfiles destination: ${tmpd}"
 
 clear_on_exit "${tmp}"
 clear_on_exit "${tmpd}"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -101,67 +104,67 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "{{@@ profile @@}}" > ${tmpf}/a
-echo "{{@@ profile @@}}" > ${tmpf}/b
-mkdir -p ${tmpf}/c
-echo "{{@@ profile @@}}" > ${tmpf}/c/a
-echo "{{@@ profile @@}}" > ${tmpf}/c/b
-mkdir ${tmpf}/c/x
-echo "{{@@ profile @@}}" > ${tmpf}/c/x/a
-echo "{{@@ profile @@}}" > ${tmpf}/c/x/b
+echo "{{@@ profile @@}}" > "${tmpf}"/a
+echo "{{@@ profile @@}}" > "${tmpf}"/b
+mkdir -p "${tmpf}"/c
+echo "{{@@ profile @@}}" > "${tmpf}"/c/a
+echo "{{@@ profile @@}}" > "${tmpf}"/c/b
+mkdir "${tmpf}"/c/x
+echo "{{@@ profile @@}}" > "${tmpf}"/c/x/a
+echo "{{@@ profile @@}}" > "${tmpf}"/c/x/b
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b
 
 # compare (no diff)
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -b -V
 
 # add file
-touch ${tmpw}/untrack
+touch "${tmpw}"/untrack
 
 # compare (one diff)
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -b -V
 [ "$?" != "1" ] && echo "not found untracked file in workdir (1)" && exit 1
 set -e
 
 # clean
-rm ${tmpw}/untrack
+rm "${tmpw}"/untrack
 # add sub file
-touch ${tmpw}/${tmpd}/c/x/untrack
+touch "${tmpw}"/"${tmpd}"/c/x/untrack
 
 # compare (two diff)
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -b -V
 [ "$?" != "1" ] && echo "not found untracked file in workdir (2)" && exit 1
 set -e
 
 # clean
-rm ${tmpw}/${tmpd}/c/x/untrack
+rm "${tmpw}"/"${tmpd}"/c/x/untrack
 # add dir
-mkdir ${tmpw}/d_untrack
-touch ${tmpw}/d_untrack/untrack
+mkdir "${tmpw}"/d_untrack
+touch "${tmpw}"/d_untrack/untrack
 
 # compare (three diffs)
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -b -V
 [ "$?" != "1" ] && echo "not found untracked file in workdir (3)" && exit 1
 set -e
 
 # clean
-rm -r ${tmpw}/d_untrack
+rm -r "${tmpw}"/d_untrack
 # add sub dir
-mkdir ${tmpw}/${tmpd}/c/x/d_untrack
-touch ${tmpw}/${tmpd}/c/x/d_untrack/untrack
+mkdir "${tmpw}"/"${tmpd}"/c/x/d_untrack
+touch "${tmpw}"/"${tmpd}"/c/x/d_untrack/untrack
 
 # compare
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -b -V
 [ "$?" != "1" ] && echo "not found untracked file in workdir (4)" && exit 1
 set -e
 
 ## CLEANING
-rm -rf ${tmp} ${tmpd}
+rm -rf "${tmp}" "${tmpd}"
 
 echo "OK"
 exit 0

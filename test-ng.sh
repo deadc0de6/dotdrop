@@ -13,13 +13,13 @@ if ! ${rl} "${0}" >/dev/null 2>&1; then
     echo "\"${rl}\" not found!" && exit 1
   fi
 fi
-cur=`dirname $(${rl} "${0}")`
+cur=$(dirname "$(${rl} "${0}")")
 
 tmpworkdir="/tmp/dotdrop-tests-workdir"
 export DOTDROP_WORKDIR="${tmpworkdir}"
 
 workers=${DOTDROP_WORKERS}
-if [ ! -z ${workers} ]; then
+if [ -n "${workers}" ]; then
   DOTDROP_WORKERS=${workers}
   echo "ENABLE workers: ${workers}"
 fi
@@ -28,8 +28,8 @@ fi
 export DOTDROP_DEBUG="yes"
 unset DOTDROP_FORCE_NODEBUG
 workdir_tmp_exists="no"
-[ -d "~/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
-if [ -z ${GITHUB_WORKFLOW} ]; then
+[ -d "${HOME}/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
+if [ -z "${GITHUB_WORKFLOW}" ]; then
   ## local
   export COVERAGE_FILE=
   tests-ng/tests-launcher.py

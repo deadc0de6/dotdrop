@@ -28,33 +28,36 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "dotfiles destination: ${tmpd}"
 # the workdir
-tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpw=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 export DOTDROP_WORKDIR="${tmpw}"
 echo "workdir: ${tmpw}"
 
@@ -65,7 +68,7 @@ clear_on_exit "${tmpw}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -84,21 +87,21 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-mkdir -p ${tmps}/dotfiles/abc
-echo "{{@@ profile @@}}" > ${tmps}/dotfiles/abc/template
-echo "blabla" >> ${tmps}/dotfiles/abc/template
-echo "blabla" > ${tmps}/dotfiles/abc/nottemplate
+mkdir -p "${tmps}"/dotfiles/abc
+echo "{{@@ profile @@}}" > "${tmps}"/dotfiles/abc/template
+echo "blabla" >> "${tmps}"/dotfiles/abc/template
+echo "blabla" > "${tmps}"/dotfiles/abc/nottemplate
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
 # checks
-[ ! -d ${tmpd}/abc ] && echo "[ERROR] dotfile not installed" && exit 1
-[ ! -h ${tmpd}/abc ] && echo "[ERROR] dotfile is not a symlink" && exit 1
+[ ! -d "${tmpd}"/abc ] && echo "[ERROR] dotfile not installed" && exit 1
+[ ! -h "${tmpd}"/abc ] && echo "[ERROR] dotfile is not a symlink" && exit 1
 #cat ${tmpd}/abc/template
 #tree -a ${tmpd}/abc/
 set +e
-grep '{{@@' ${tmpd}/abc/template >/dev/null 2>&1 && echo "[ERROR] template in dir not replace" && exit 1
+grep '{{@@' "${tmpd}"/abc/template >/dev/null 2>&1 && echo "[ERROR] template in dir not replace" && exit 1
 set -e
 
 echo "OK"

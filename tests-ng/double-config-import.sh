@@ -27,19 +27,22 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -57,7 +60,7 @@ error_log="${dst}/error.log"
 
 # bottom-level
 bottom_level_cfg="${src}/bottom-level.yaml"
-cat > ${bottom_level_cfg} << _EOF
+cat > "${bottom_level_cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -70,7 +73,7 @@ touch "${src}/dotfiles/bottom"
 
 # mid-level
 mid_level_cfg="${src}/mid-level.yaml"
-cat > ${mid_level_cfg} << _EOF
+cat > "${mid_level_cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -85,7 +88,7 @@ _EOF
 
 # top-level
 top_level_cfg="${src}/top-level.yaml"
-cat > ${top_level_cfg} << _EOF
+cat > "${top_level_cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -101,7 +104,7 @@ _EOF
 
 # install
 set +e
-cd ${ddpath} | ${bin} install -f -c ${top_level_cfg} -p top-level 2> "${error_log}"
+cd "${ddpath}" | ${bin} install -f -c "${top_level_cfg}" -p top-level 2> "${error_log}"
 set -e
 
 # checks

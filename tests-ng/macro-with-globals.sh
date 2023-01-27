@@ -27,29 +27,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -57,7 +60,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -76,27 +79,27 @@ variables:
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
+mkdir -p "${tmps}"/dotfiles/
 
-cat > ${tmps}/dotfiles/macro_file << _EOF
+cat > "${tmps}"/dotfiles/macro_file << _EOF
 {%@@ macro macro(var) @@%}
 {{@@ global @@}}
 {{@@ var @@}}
 {%@@ endmacro @@%}
 _EOF
 
-cat > ${tmps}/dotfiles/abc << _EOF
+cat > "${tmps}"/dotfiles/abc << _EOF
 {%@@ from 'macro_file' import macro with context @@%}
 {{@@ macro(local) @@}}
 _EOF
 
 # install
-cd ${ddpath} | ${bin} install -c ${cfg} -p p0 -V -f
+cd "${ddpath}" | ${bin} install -c "${cfg}" -p p0 -V -f
 
 # test file content
-cat ${tmpd}/abc
-grep 'global_var' ${tmpd}/abc >/dev/null 2>&1
-grep 'local_var' ${tmpd}/abc >/dev/null 2>&1
+cat "${tmpd}"/abc
+grep 'global_var' "${tmpd}"/abc >/dev/null 2>&1
+grep 'local_var' "${tmpd}"/abc >/dev/null 2>&1
 
 echo "OK"
 exit 0

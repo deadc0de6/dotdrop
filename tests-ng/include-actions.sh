@@ -29,31 +29,34 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpa=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -62,7 +65,7 @@ clear_on_exit "${tmpa}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 actions:
   pre:
     preaction: echo 'pre' >> ${tmpa}/pre
@@ -103,109 +106,109 @@ profiles:
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
-echo "test" > ${tmps}/dotfiles/abc
+mkdir -p "${tmps}"/dotfiles/
+echo "test" > "${tmps}"/dotfiles/abc
 
 # install
 echo "PROFILE p2"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p2 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p2 -V
 
 # checks
-[ ! -e ${tmpa}/pre ] && echo "pre not found" && exit 1
-nb=`wc -l ${tmpa}/pre | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre ] && echo "pre not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/pre2 ] && echo "pre2 not found" && exit 1
-nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre2 ] && echo "pre2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post ] && echo "post not found" && exit 1
-nb=`wc -l ${tmpa}/post | awk '{print $1}'`
+[ ! -e "${tmpa}"/post ] && echo "post not found" && exit 1
+nb=$(wc -l "${tmpa}"/post | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post2 ] && echo "post2 not found" && exit 1
-nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/post2 ] && echo "post2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/post2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post2 executed multiple times" && exit 1
 
 # install
-rm -f ${tmpa}/pre ${tmpa}/pre2 ${tmpa}/post ${tmpa}/post2 ${tmpa}/naked
-rm -f ${tmpd}/abc
+rm -f "${tmpa}"/pre "${tmpa}"/pre2 "${tmpa}"/post "${tmpa}"/post2 "${tmpa}"/naked
+rm -f "${tmpd}"/abc
 echo "PROFILE p3"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p3 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p3 -V
 
 # checks
-[ ! -e ${tmpa}/pre ] && echo "pre not found" && exit 1
-nb=`wc -l ${tmpa}/pre | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre ] && echo "pre not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/pre2 ] && echo "pre2 not found" && exit 1
-nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre2 ] && echo "pre2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post ] && echo "post not found" && exit 1
-nb=`wc -l ${tmpa}/post | awk '{print $1}'`
+[ ! -e "${tmpa}"/post ] && echo "post not found" && exit 1
+nb=$(wc -l "${tmpa}"/post | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post2 ] && echo "post2 not found" && exit 1
-nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/post2 ] && echo "post2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/post2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/naked ] && echo "naked not found" && exit 1
-nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
+[ ! -e "${tmpa}"/naked ] && echo "naked not found" && exit 1
+nb=$(wc -l "${tmpa}"/naked | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "naked executed multiple times" &&  exit 1
 
 # install
-rm -f ${tmpa}/pre ${tmpa}/pre2 ${tmpa}/post ${tmpa}/post2 ${tmpa}/naked
-rm -f ${tmpd}/abc
+rm -f "${tmpa}"/pre "${tmpa}"/pre2 "${tmpa}"/post "${tmpa}"/post2 "${tmpa}"/naked
+rm -f "${tmpd}"/abc
 echo "PROFILE p0"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p0 -V
 
 # checks
-[ ! -e ${tmpa}/pre ] && echo "pre not found" && exit 1
-nb=`wc -l ${tmpa}/pre | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre ] && echo "pre not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/pre2 ] && echo "pre2 not found" && exit 1
-nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre2 ] && echo "pre2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post ] && echo "post not found" && exit 1
-nb=`wc -l ${tmpa}/post | awk '{print $1}'`
+[ ! -e "${tmpa}"/post ] && echo "post not found" && exit 1
+nb=$(wc -l "${tmpa}"/post | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post2 ] && echo "post2 not found" && exit 1
-nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/post2 ] && echo "post2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/post2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/naked ] && echo "naked not found" && exit 1
-nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
+[ ! -e "${tmpa}"/naked ] && echo "naked not found" && exit 1
+nb=$(wc -l "${tmpa}"/naked | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "naked executed multiple times" &&  exit 1
 
 # install without verbose
-rm -f ${tmpa}/pre ${tmpa}/pre2 ${tmpa}/post ${tmpa}/post2 ${tmpa}/naked
-rm -f ${tmpd}/abc
+rm -f "${tmpa}"/pre "${tmpa}"/pre2 "${tmpa}"/post "${tmpa}"/post2 "${tmpa}"/naked
+rm -f "${tmpd}"/abc
 echo "PROFILE p0 without verbose"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p0
 
 # checks
-[ ! -e ${tmpa}/pre ] && echo "pre not found" && exit 1
-nb=`wc -l ${tmpa}/pre | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre ] && echo "pre not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/pre2 ] && echo "pre2 not found" && exit 1
-nb=`wc -l ${tmpa}/pre2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/pre2 ] && echo "pre2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/pre2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "pre2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post ] && echo "post not found" && exit 1
-nb=`wc -l ${tmpa}/post | awk '{print $1}'`
+[ ! -e "${tmpa}"/post ] && echo "post not found" && exit 1
+nb=$(wc -l "${tmpa}"/post | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/post2 ] && echo "post2 not found" && exit 1
-nb=`wc -l ${tmpa}/post2 | awk '{print $1}'`
+[ ! -e "${tmpa}"/post2 ] && echo "post2 not found" && exit 1
+nb=$(wc -l "${tmpa}"/post2 | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "post2 executed multiple times" && exit 1
 
-[ ! -e ${tmpa}/naked ] && echo "naked not found" && exit 1
-nb=`wc -l ${tmpa}/naked | awk '{print $1}'`
+[ ! -e "${tmpa}"/naked ] && echo "naked not found" && exit 1
+nb=$(wc -l "${tmpa}"/naked | awk '{print $1}')
 [ "${nb}" != "1" ] && echo "naked executed multiple times" &&  exit 1
 
 echo "OK"

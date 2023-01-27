@@ -27,29 +27,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -59,15 +62,15 @@ clear_on_exit "${tmpd}"
 # test symlink directory
 ##################################################
 # create the dotfile
-mkdir -p ${tmps}/dotfiles/abc
-echo "file1" > ${tmps}/dotfiles/abc/file1
-echo "file2" > ${tmps}/dotfiles/abc/file2
+mkdir -p "${tmps}"/dotfiles/abc
+echo "file1" > "${tmps}"/dotfiles/abc/file1
+echo "file2" > "${tmps}"/dotfiles/abc/file2
 
 # create a shell script
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -86,29 +89,29 @@ _EOF
 #cat ${cfg}
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 #cat ${cfg}
 
 # ensure exists and is link
-[ ! -h ${tmpd}/abc ] && echo "not a symlink" && exit 1
-[ ! -e ${tmpd}/abc/file1 ] && echo "does not exist" && exit 1
-[ ! -e ${tmpd}/abc/file2 ] && echo "does not exist" && exit 1
+[ ! -h "${tmpd}"/abc ] && echo "not a symlink" && exit 1
+[ ! -e "${tmpd}"/abc/file1 ] && echo "does not exist" && exit 1
+[ ! -e "${tmpd}"/abc/file2 ] && echo "does not exist" && exit 1
 
 ##################################################
 # test symlink files
 ##################################################
 # clean
-rm -rf ${tmps}/dotfiles ${tmpd}/abc
+rm -rf "${tmps}"/dotfiles "${tmpd}"/abc
 
 # create the dotfiles
-mkdir -p ${tmps}/dotfiles/
-echo "abc" > ${tmps}/dotfiles/abc
+mkdir -p "${tmps}"/dotfiles/
+echo "abc" > "${tmps}"/dotfiles/abc
 
 # create a shell script
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -127,28 +130,28 @@ _EOF
 #cat ${cfg}
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 #cat ${cfg}
 
 # ensure exists and is link
-[ ! -h ${tmpd}/abc ] && echo "not a symlink" && exit 1
+[ ! -h "${tmpd}"/abc ] && echo "not a symlink" && exit 1
 
 ##################################################
 # test link_children
 ##################################################
 # clean
-rm -rf ${tmps}/dotfiles ${tmpd}/abc
+rm -rf "${tmps}"/dotfiles "${tmpd}"/abc
 
 # create the dotfile
-mkdir -p ${tmps}/dotfiles/abc
-echo "file1" > ${tmps}/dotfiles/abc/file1
-echo "file2" > ${tmps}/dotfiles/abc/file2
+mkdir -p "${tmps}"/dotfiles/abc
+echo "file1" > "${tmps}"/dotfiles/abc/file1
+echo "file2" > "${tmps}"/dotfiles/abc/file2
 
 # create a shell script
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -167,30 +170,30 @@ _EOF
 #cat ${cfg}
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 #cat ${cfg}
 
 # ensure exists and is link
-[ ! -d ${tmpd}/abc ] && echo "not a symlink" && exit 1
-[ ! -h ${tmpd}/abc/file1 ] && echo "does not exist" && exit 1
-[ ! -h ${tmpd}/abc/file2 ] && echo "does not exist" && exit 1
+[ ! -d "${tmpd}"/abc ] && echo "not a symlink" && exit 1
+[ ! -h "${tmpd}"/abc/file1 ] && echo "does not exist" && exit 1
+[ ! -h "${tmpd}"/abc/file2 ] && echo "does not exist" && exit 1
 
 ##################################################
 # test link_children with templates
 ##################################################
 # clean
-rm -rf ${tmps}/dotfiles ${tmpd}/abc
+rm -rf "${tmps}"/dotfiles "${tmpd}"/abc
 
 # create the dotfile
-mkdir -p ${tmps}/dotfiles/abc
-echo "{{@@ profile @@}}" > ${tmps}/dotfiles/abc/file1
-echo "file2" > ${tmps}/dotfiles/abc/file2
+mkdir -p "${tmps}"/dotfiles/abc
+echo "{{@@ profile @@}}" > "${tmps}"/dotfiles/abc/file1
+echo "file2" > "${tmps}"/dotfiles/abc/file2
 
 # create a shell script
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -209,14 +212,14 @@ _EOF
 #cat ${cfg}
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 #cat ${cfg}
 
 # ensure exists and is link
-[ ! -d ${tmpd}/abc ] && echo "not a symlink" && exit 1
-[ ! -h ${tmpd}/abc/file1 ] && echo "does not exist" && exit 1
-[ ! -h ${tmpd}/abc/file2 ] && echo "does not exist" && exit 1
-grep '^p1$' ${tmpd}/abc/file1
+[ ! -d "${tmpd}"/abc ] && echo "not a symlink" && exit 1
+[ ! -h "${tmpd}"/abc/file1 ] && echo "does not exist" && exit 1
+[ ! -h "${tmpd}"/abc/file2 ] && echo "does not exist" && exit 1
+grep '^p1$' "${tmpd}"/abc/file1
 
 echo "OK"
 exit 0

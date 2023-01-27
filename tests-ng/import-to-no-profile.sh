@@ -27,42 +27,45 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # create the dotfile
-echo "file1" > ${tmpd}/file1
-echo "file2" > ${tmpd}/file2
+echo "file1" > "${tmpd}"/file1
+echo "file2" > "${tmpd}"/file2
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -76,57 +79,57 @@ noprofile="ALL"
 
 ##################################
 # import with profile from arg
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p "${noprofile}" -V ${tmpd}/file1
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p "${noprofile}" -V "${tmpd}"/file1
+cat "${cfg}"
 
 # ensure exists and is not link
-[ ! -e ${tmps}/dotfiles/${tmpd}/file1 ] && echo "file not imported" && exit 1
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/file1 ] && echo "file not imported" && exit 1
 # ensure present in config
-cat ${cfg} | grep ${tmpd}/file1 >/dev/null 2>&1
+cat "${cfg}" | grep "${tmpd}"/file1 >/dev/null 2>&1
 
-nb=`cat ${cfg} | grep f_file1 | wc -l`
+nb=$(cat "${cfg}" | grep f_file1 | wc -l)
 [ "${nb}" != "1" ] && echo 'bad config' && exit 1
 
-cntpre=`find ${tmps}/dotfiles -type f | wc -l`
+cntpre=$(find "${tmps}"/dotfiles -type f | wc -l)
 
 # reimport
 set +e
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p "${noprofile}" -V ${tmpd}/file1
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p "${noprofile}" -V "${tmpd}"/file1
 set -e
-cat ${cfg}
+cat "${cfg}"
 
-cntpost=`find ${tmps}/dotfiles -type f | wc -l`
+cntpost=$(find "${tmps}"/dotfiles -type f | wc -l)
 [ "${cntpost}" != "${cntpre}" ] && echo "imported twice" && exit 1
 
-nb=`cat ${cfg} | grep "dst: ${tmpd}/file1" | wc -l`
+nb=$(cat "${cfg}" | grep "dst: ${tmpd}/file1" | wc -l)
 [ "${nb}" != "1" ] && echo 'imported twice in config' && exit 1
 
 ##################################
 # import with profile from env
 export DOTDROP_PROFILE="${noprofile}"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -V ${tmpd}/file2
-cat ${cfg}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -V "${tmpd}"/file2
+cat "${cfg}"
 
 # ensure exists and is not link
-[ ! -e ${tmps}/dotfiles/${tmpd}/file2 ] && echo "file not imported" && exit 1
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/file2 ] && echo "file not imported" && exit 1
 # ensure present in config
-cat ${cfg} | grep ${tmpd}/file2 >/dev/null 2>&1
+cat "${cfg}" | grep "${tmpd}"/file2 >/dev/null 2>&1
 
-nb=`cat ${cfg} | grep f_file2 | wc -l`
+nb=$(cat "${cfg}" | grep f_file2 | wc -l)
 [ "${nb}" != "1" ] && echo 'bad config' && exit 1
 
-cntpre=`find ${tmps}/dotfiles -type f | wc -l`
+cntpre=$(find "${tmps}"/dotfiles -type f | wc -l)
 
 # reimport
 set +e
-cd ${ddpath} | ${bin} import -f -c ${cfg} -V ${tmpd}/file2
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -V "${tmpd}"/file2
 set -e
-cat ${cfg}
+cat "${cfg}"
 
-cntpost=`find ${tmps}/dotfiles -type f | wc -l`
+cntpost=$(find "${tmps}"/dotfiles -type f | wc -l)
 [ "${cntpost}" != "${cntpre}" ] && echo "imported twice" && exit 1
 
-nb=`cat ${cfg} | grep "dst: ${tmpd}/file2" | wc -l`
+nb=$(cat "${cfg}" | grep "dst: ${tmpd}/file2" | wc -l)
 [ "${nb}" != "1" ] && echo 'imported twice in config' && exit 1
 
 echo "OK"

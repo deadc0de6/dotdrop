@@ -28,36 +28,39 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile to be imported
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -85,44 +88,44 @@ profiles:
     - f_last
 _EOF
 cfgbak="${tmps}/config.yaml.bak"
-cp ${cfg} ${cfgbak}
+cp "${cfg}" "${cfgbak}"
 
 # create the dotfile
-echo "abc" > ${tmps}/dotfiles/abc
-echo "abc" > ${tmpd}/abc
+echo "abc" > "${tmps}"/dotfiles/abc
+echo "abc" > "${tmpd}"/abc
 
-echo "def" > ${tmps}/dotfiles/def
-echo "def" > ${tmpd}/def
+echo "def" > "${tmps}"/dotfiles/def
+echo "def" > "${tmpd}"/def
 
 # remove with bad profile
-cd ${ddpath} | ${bin} remove -f -k -p empty -c ${cfg} f_abc -V
-[ ! -e ${tmps}/dotfiles/abc ] && echo "dotfile in dotpath deleted" && exit 1
-[ ! -e ${tmpd}/abc ] && echo "source dotfile deleted" && exit 1
-[ ! -e ${tmps}/dotfiles/def ] && echo "dotfile in dotpath deleted" && exit 1
-[ ! -e ${tmpd}/def ] && echo "source dotfile deleted" && exit 1
+cd "${ddpath}" | ${bin} remove -f -k -p empty -c "${cfg}" f_abc -V
+[ ! -e "${tmps}"/dotfiles/abc ] && echo "dotfile in dotpath deleted" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "source dotfile deleted" && exit 1
+[ ! -e "${tmps}"/dotfiles/def ] && echo "dotfile in dotpath deleted" && exit 1
+[ ! -e "${tmpd}"/def ] && echo "source dotfile deleted" && exit 1
 # ensure config not altered
-diff ${cfg} ${cfgbak}
+diff "${cfg}" "${cfgbak}"
 
 # remove by key
 echo "[+] remove f_abc by key"
-cd ${ddpath} | ${bin} remove -p p1 -f -k -c ${cfg} f_abc -V
-cat ${cfg}
+cd "${ddpath}" | ${bin} remove -p p1 -f -k -c "${cfg}" f_abc -V
+cat "${cfg}"
 echo "[+] remove f_def by key"
-cd ${ddpath} | ${bin} remove -p p2 -f -k -c ${cfg} f_def -V
-cat ${cfg}
+cd "${ddpath}" | ${bin} remove -p p2 -f -k -c "${cfg}" f_def -V
+cat "${cfg}"
 
 # checks
-[ -e ${tmps}/dotfiles/abc ] && echo "dotfile in dotpath not deleted" && exit 1
-[ ! -e ${tmpd}/abc ] && echo "source dotfile deleted" && exit 1
+[ -e "${tmps}"/dotfiles/abc ] && echo "dotfile in dotpath not deleted" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "source dotfile deleted" && exit 1
 
-[ -e ${tmps}/dotfiles/def ] && echo "dotfile in dotpath not deleted" && exit 1
-[ ! -e ${tmpd}/def ] && echo "source dotfile deleted" && exit 1
+[ -e "${tmps}"/dotfiles/def ] && echo "dotfile in dotpath not deleted" && exit 1
+[ ! -e "${tmpd}"/def ] && echo "source dotfile deleted" && exit 1
 
 echo "[+] ========="
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -149,32 +152,32 @@ profiles:
     dotfiles:
     - f_last
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
 # create the dotfile
-echo "abc" > ${tmps}/dotfiles/abc
-echo "abc" > ${tmpd}/abc
+echo "abc" > "${tmps}"/dotfiles/abc
+echo "abc" > "${tmpd}"/abc
 
-echo "def" > ${tmps}/dotfiles/def
-echo "def" > ${tmpd}/def
+echo "def" > "${tmps}"/dotfiles/def
+echo "def" > "${tmpd}"/def
 
 # remove by key
 echo "[+] remove f_abc by path"
-cd ${ddpath} | ${bin} remove -p p1 -f -c ${cfg} ${tmpd}/abc -V
-cat ${cfg}
+cd "${ddpath}" | ${bin} remove -p p1 -f -c "${cfg}" "${tmpd}"/abc -V
+cat "${cfg}"
 echo "[+] remove f_def by path"
-cd ${ddpath} | ${bin} remove -p p2 -f -c ${cfg} ${tmpd}/def -V
-cat ${cfg}
+cd "${ddpath}" | ${bin} remove -p p2 -f -c "${cfg}" "${tmpd}"/def -V
+cat "${cfg}"
 
 # checks
-[ -e ${tmps}/dotfiles/abc ] && echo "(2) dotfile in dotpath not deleted" && exit 1
-[ ! -e ${tmpd}/abc ] && echo "(2) source dotfile deleted" && exit 1
+[ -e "${tmps}"/dotfiles/abc ] && echo "(2) dotfile in dotpath not deleted" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "(2) source dotfile deleted" && exit 1
 
-[ -e ${tmps}/dotfiles/def ] && echo "(2) dotfile in dotpath not deleted" && exit 1
-[ ! -e ${tmpd}/def ] && echo "(2) source dotfile deleted" && exit 1
+[ -e "${tmps}"/dotfiles/def ] && echo "(2) dotfile in dotpath not deleted" && exit 1
+[ ! -e "${tmpd}"/def ] && echo "(2) source dotfile deleted" && exit 1
 
 
-cat ${cfg}
+cat "${cfg}"
 
 echo "OK"
 exit 0

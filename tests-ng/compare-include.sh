@@ -27,41 +27,44 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # create the dotfiles already imported
-echo "already in" > ${tmps}/dotfiles/abc
-cp ${tmps}/dotfiles/abc ${tmpd}/abc
+echo "already in" > "${tmps}"/dotfiles/abc
+cp "${tmps}"/dotfiles/abc "${tmpd}"/abc
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -84,36 +87,36 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
-cd ${ddpath} | ${bin} files -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0
 
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 | grep '^f_' | wc -l)
 [ "${cnt}" != "1" ] && echo "this is bad" && exit 1
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p0
 
 echo "modifying"
-echo 'modified' > ${tmpd}/abc
+echo 'modified' > "${tmpd}"/abc
 
 # compare
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p0
 ret=$?
 [ "${ret}" = "0" ] && echo "compare should fail (returned ${ret})" && exit 1
 set -e
 
 # count
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 -b | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 -b | grep '^f_' | wc -l)
 [ "${cnt}" != "2" ] && echo "not enough dotfile" exit 1
 
 ## without dotfiles: entry
 # reset dotfile content
-echo "already in" > ${tmps}/dotfiles/abc
-cp ${tmps}/dotfiles/abc ${tmpd}/abc
+echo "already in" > "${tmps}"/dotfiles/abc
+cp "${tmps}"/dotfiles/abc "${tmpd}"/abc
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -134,28 +137,28 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
-cd ${ddpath} | ${bin} files -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0
 
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 | grep '^f_' | wc -l)
 [ "${cnt}" != "1" ] && echo "this is bad" && exit 1
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p0
 
 echo "modifying"
-echo 'modified' > ${tmpd}/abc
+echo 'modified' > "${tmpd}"/abc
 
 # compare
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p0
 ret=$?
 [ "${ret}" = "0" ] && echo "compare should fail (returned ${ret})" && exit 1
 set -e
 
 # count
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 -b | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 -b | grep '^f_' | wc -l)
 [ "${cnt}" != "2" ] && echo "not enough dotfile" exit 1
 
 echo "OK"

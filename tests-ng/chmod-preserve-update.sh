@@ -27,29 +27,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -60,46 +63,46 @@ clear_on_exit "${tmpd}"
 ##
 
 # file
-echo "exists-original" > ${tmps}/dotfiles/exists
-chmod 644 ${tmps}/dotfiles/exists
-echo "exists" > ${tmpd}/exists
-chmod 700 ${tmpd}/exists
+echo "exists-original" > "${tmps}"/dotfiles/exists
+chmod 644 "${tmps}"/dotfiles/exists
+echo "exists" > "${tmpd}"/exists
+chmod 700 "${tmpd}"/exists
 
 # link
-echo "existslink" > ${tmps}/dotfiles/existslink
-chmod 700 ${tmps}/dotfiles/existslink
-ln -s ${tmps}/dotfiles/existslink ${tmpd}/existslink
+echo "existslink" > "${tmps}"/dotfiles/existslink
+chmod 700 "${tmps}"/dotfiles/existslink
+ln -s "${tmps}"/dotfiles/existslink "${tmpd}"/existslink
 
 # directory
-mkdir -p ${tmps}/dotfiles/direxists
-echo "f1-original" > ${tmps}/dotfiles/direxists/f1
-mkdir -p ${tmpd}/direxists
-echo "f1" > ${tmpd}/direxists/f1
-chmod 700 ${tmpd}/direxists/f1
-chmod 700 ${tmpd}/direxists
+mkdir -p "${tmps}"/dotfiles/direxists
+echo "f1-original" > "${tmps}"/dotfiles/direxists/f1
+mkdir -p "${tmpd}"/direxists
+echo "f1" > "${tmpd}"/direxists/f1
+chmod 700 "${tmpd}"/direxists/f1
+chmod 700 "${tmpd}"/direxists
 
 # link children
-mkdir -p ${tmps}/dotfiles/linkchildren
-echo "f1-original" > ${tmps}/dotfiles/linkchildren/f1
-chmod 700 ${tmps}/dotfiles/linkchildren/f1
-mkdir -p ${tmps}/dotfiles/linkchildren/d1
-chmod 700 ${tmps}/dotfiles/linkchildren/d1
-echo "f2-original" > ${tmps}/dotfiles/linkchildren/d1/f2
-chmod 700 ${tmps}/dotfiles/linkchildren/d1/f2
+mkdir -p "${tmps}"/dotfiles/linkchildren
+echo "f1-original" > "${tmps}"/dotfiles/linkchildren/f1
+chmod 700 "${tmps}"/dotfiles/linkchildren/f1
+mkdir -p "${tmps}"/dotfiles/linkchildren/d1
+chmod 700 "${tmps}"/dotfiles/linkchildren/d1
+echo "f2-original" > "${tmps}"/dotfiles/linkchildren/d1/f2
+chmod 700 "${tmps}"/dotfiles/linkchildren/d1/f2
 
-mkdir -p ${tmpd}/linkchildren
-chmod 700 ${tmpd}/linkchildren
-echo "f1" > ${tmpd}/linkchildren/f1
-mkdir -p ${tmpd}/linkchildren/d1
-echo "f2" > ${tmpd}/linkchildren/d1/f2
+mkdir -p "${tmpd}"/linkchildren
+chmod 700 "${tmpd}"/linkchildren
+echo "f1" > "${tmpd}"/linkchildren/f1
+mkdir -p "${tmpd}"/linkchildren/d1
+echo "f2" > "${tmpd}"/linkchildren/d1/f2
 
 # no mode
-echo 'nomode-original' > ${tmps}/dotfiles/nomode
-echo 'nomode' > ${tmpd}/nomode
+echo 'nomode-original' > "${tmps}"/dotfiles/nomode
+echo 'nomode' > "${tmpd}"/nomode
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -140,13 +143,13 @@ _EOF
 #cat ${cfg}
 
 echo "update"
-cd ${ddpath} | ${bin} update -f -c ${cfg} -p p1 -V ${tmpd}/exists
-cd ${ddpath} | ${bin} update -f -c ${cfg} -p p1 -V ${tmpd}/existslink
-cd ${ddpath} | ${bin} update -f -c ${cfg} -p p1 -V ${tmpd}/direxists
-cd ${ddpath} | ${bin} update -f -c ${cfg} -p p1 -V ${tmpd}/linkchildren
-cd ${ddpath} | ${bin} update -f -c ${cfg} -p p1 -V ${tmpd}/nomode
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/exists
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/existslink
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/direxists
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/linkchildren
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/nomode
 
-count=$(cat ${cfg} | grep chmod | grep -v 'chmod: preserve\|force_chmod' | wc -l)
+count=$(cat "${cfg}" | grep chmod | grep -v 'chmod: preserve\|force_chmod' | wc -l)
 echo "${count}"
 [ "${count}" != "0" ] && echo "chmod altered" && exit 1
 

@@ -28,29 +28,33 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
+
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -59,7 +63,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -86,22 +90,22 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "var3: {{@@ var3 @@}}" > ${tmps}/dotfiles/abc
-echo "dvar3: {{@@ dvar3 @@}}" >> ${tmps}/dotfiles/abc
-echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
-echo "dvar4: {{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
+echo "var3: {{@@ var3 @@}}" > "${tmps}"/dotfiles/abc
+echo "dvar3: {{@@ dvar3 @@}}" >> "${tmps}"/dotfiles/abc
+echo "var4: {{@@ var4 @@}}" >> "${tmps}"/dotfiles/abc
+echo "dvar4: {{@@ dvar4 @@}}" >> "${tmps}"/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 #cat ${tmpd}/abc
 
-grep '^var3: var1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar3: dvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
-grep '^var4: echo var1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar4: var1 var2 var3' ${tmpd}/abc >/dev/null
+grep '^var3: var1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar3: dvar1 dvar2 dvar3' "${tmpd}"/abc >/dev/null
+grep '^var4: echo var1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar4: var1 var2 var3' "${tmpd}"/abc >/dev/null
 
 #cat ${tmpd}/abc
 

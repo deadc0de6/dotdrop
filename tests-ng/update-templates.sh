@@ -28,33 +28,36 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "dotfiles destination: ${tmpd}"
 # the workdir
-tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpw=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 export DOTDROP_WORKDIR="${tmpw}"
 echo "workdir: ${tmpw}"
 
@@ -65,7 +68,7 @@ clear_on_exit "${tmpw}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -83,27 +86,27 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "head" > ${tmps}/dotfiles/abc
-echo '{%@@ if profile == "p1" @@%}' >> ${tmps}/dotfiles/abc
-echo "is p1" >> ${tmps}/dotfiles/abc
-echo '{%@@ else @@%}' >> ${tmps}/dotfiles/abc
-echo "is not p1" >> ${tmps}/dotfiles/abc
-echo '{%@@ endif @@%}' >> ${tmps}/dotfiles/abc
-echo "tail" >> ${tmps}/dotfiles/abc
+echo "head" > "${tmps}"/dotfiles/abc
+echo '{%@@ if profile == "p1" @@%}' >> "${tmps}"/dotfiles/abc
+echo "is p1" >> "${tmps}"/dotfiles/abc
+echo '{%@@ else @@%}' >> "${tmps}"/dotfiles/abc
+echo "is not p1" >> "${tmps}"/dotfiles/abc
+echo '{%@@ endif @@%}' >> "${tmps}"/dotfiles/abc
+echo "tail" >> "${tmps}"/dotfiles/abc
 
 # create the installed dotfile
-echo "head" > ${tmpd}/abc
-echo "is p1" >> ${tmpd}/abc
-echo "tail" >> ${tmpd}/abc
+echo "head" > "${tmpd}"/abc
+echo "is p1" >> "${tmpd}"/abc
+echo "tail" >> "${tmpd}"/abc
 
 # update
 #cat ${tmps}/dotfiles/abc
 set +e
-patch=`cd ${ddpath} | ${bin} update -P -p p1 -k f_abc --cfg ${cfg} 2>&1 | grep 'try patching with' | sed 's/"//g'`
+patch=$(cd "${ddpath}" | ${bin} update -P -p p1 -k f_abc --cfg "${cfg}" 2>&1 | grep 'try patching with' | sed 's/"//g')
 set -e
-patch=`echo ${patch} | sed 's/^.*: //g'`
+patch=$(echo "${patch}" | sed 's/^.*: //g')
 echo "patching with: ${patch}"
-eval ${patch}
+eval "${patch}"
 #cat ${tmps}/dotfiles/abc
 
 echo "OK"

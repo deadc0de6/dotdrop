@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 variables:
   var1: "_1"
 dynvariables:
@@ -92,25 +95,25 @@ _EOF
 
 # create the dotfile
 c1="content:abc"
-echo "${c1}" > ${tmps}/dotfiles/abc
+echo "${c1}" > "${tmps}"/dotfiles/abc
 c2="content:def"
-echo "${c2}" > ${tmps}/dotfiles/def
+echo "${c2}" > "${tmps}"/dotfiles/def
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p profile_3 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p profile_3 --verbose
 
 # check dotfile exists
-[ ! -e ${tmpd}/abc ] && exit 1
+[ ! -e "${tmpd}"/abc ] && exit 1
 #cat ${tmpd}/abc
-grep ${c1} ${tmpd}/abc >/dev/null || exit 1
+grep ${c1} "${tmpd}"/abc >/dev/null || exit 1
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p profile_4 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p profile_4 --verbose
 
 # check dotfile exists
-[ ! -e ${tmpd}/def ] && exit 1
+[ ! -e "${tmpd}"/def ] && exit 1
 #cat ${tmpd}/def
-grep ${c2} ${tmpd}/def >/dev/null || exit 1
+grep ${c2} "${tmpd}"/def >/dev/null || exit 1
 
 echo "OK"
 exit 0

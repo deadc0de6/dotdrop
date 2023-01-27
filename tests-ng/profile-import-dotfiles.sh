@@ -29,29 +29,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -64,7 +67,7 @@ src="dotdrop-test"
 dst=".dotdrop-test"
 clear_on_exit "${HOME}/${dst}"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   dotpath: dotfiles
 dotfiles:
@@ -81,32 +84,32 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
-cat > ${cfg2} << _EOF
+cat > "${cfg2}" << _EOF
 dotfiles:
   - f_def
 _EOF
 #cat ${cfg2}
 
 # create the dotfile
-echo "abc" > ${tmps}/dotfiles/abc
-echo "abc" > ${tmpd}/abc
-echo "def" > ${tmps}/dotfiles/${src}
-echo "def" > ${HOME}/${dst}
+echo "abc" > "${tmps}"/dotfiles/abc
+echo "abc" > "${tmpd}"/abc
+echo "def" > "${tmps}"/dotfiles/${src}
+echo "def" > "${HOME}"/${dst}
 
 # import
 ## this is a special case since the dotfile must
 ## be in home (because it is strip)
-echo ${ddpath}
-echo ${bin}
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 --verbose ~/${dst}
+echo "${ddpath}"
+echo "${bin}"
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 --verbose ~/${dst}
 
-cat ${cfg}
+cat "${cfg}"
 echo '----------'
-cat ${cfg2}
+cat "${cfg2}"
 
-cnt=$(cd ${ddpath} | ${bin} files -G -c ${cfg} -p p1 | grep '^f_def' | wc -l)
+cnt=$(cd "${ddpath}" | ${bin} files -G -c "${cfg}" -p p1 | grep '^f_def' | wc -l)
 [ "${cnt}" != "1" ] && echo "imported twice! (${cnt})" && exit 1
 
 echo "OK"
