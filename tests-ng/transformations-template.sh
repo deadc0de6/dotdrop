@@ -28,30 +28,33 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "dotfiles destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -60,7 +63,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 trans_read:
   r_echo_abs_src: echo "\$(cat {0}); {{@@ _dotfile_abs_src @@}}" > {1}
   r_echo_var: echo "\$(cat {0}); {{@@ r_var @@}}" > {1}
@@ -104,48 +107,48 @@ _EOF
 #cat ${cfg}
 
 # create the dotfiles
-echo 'abc' > ${tmps}/dotfiles/abc
-echo 'marker' > ${tmps}/dotfiles/def
-echo 'ghi' > ${tmps}/dotfiles/ghi
-echo '{{@@ profile @@}}' | rev > ${tmps}/dotfiles/rev
+echo 'abc' > "${tmps}"/dotfiles/abc
+echo 'marker' > "${tmps}"/dotfiles/def
+echo 'ghi' > "${tmps}"/dotfiles/ghi
+echo '{{@@ profile @@}}' | rev > "${tmps}"/dotfiles/rev
 
 ###########################
 # test install and compare
 ###########################
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
 # check dotfile
-[ ! -e ${tmpd}/def ] && exit 1
-[ ! -e ${tmpd}/abc ] && exit 1
-[ ! -e ${tmpd}/ghi ] && exit 1
-[ ! -e ${tmpd}/rev ] && exit 1
-grep marker ${tmpd}/def
-cat ${tmpd}/abc
-grep "^abc; ${tmps}/dotfiles/abc$" ${tmpd}/abc
-cat ${tmpd}/ghi
-grep "^ghi; readvar$" ${tmpd}/ghi
-cat ${tmpd}/rev
-grep "^p1$" ${tmpd}/rev
+[ ! -e "${tmpd}"/def ] && exit 1
+[ ! -e "${tmpd}"/abc ] && exit 1
+[ ! -e "${tmpd}"/ghi ] && exit 1
+[ ! -e "${tmpd}"/rev ] && exit 1
+grep marker "${tmpd}"/def
+cat "${tmpd}"/abc
+grep "^abc; ${tmps}/dotfiles/abc$" "${tmpd}"/abc
+cat "${tmpd}"/ghi
+grep "^ghi; readvar$" "${tmpd}"/ghi
+cat "${tmpd}"/rev
+grep "^p1$" "${tmpd}"/rev
 
 ###########################
 # test update
 ###########################
 
 # update single file
-cd ${ddpath} | ${bin} update -f -k -c ${cfg} -p p1 -b -V
+cd "${ddpath}" | ${bin} update -f -k -c "${cfg}" -p p1 -b -V
 
 # checks
-[ ! -e ${tmps}/dotfiles/def ] && exit 1
-[ ! -e ${tmps}/dotfiles/abc ] && exit 1
-[ ! -e ${tmps}/dotfiles/ghi ] && exit 1
-[ ! -e ${tmps}/dotfiles/rev ] && exit 1
-grep marker ${tmps}/dotfiles/def
-cat ${tmps}/dotfiles/abc
-grep "^abc; ${tmps}/dotfiles/abc; f_abc$" ${tmps}/dotfiles/abc
-cat ${tmps}/dotfiles/ghi
-grep "^ghi; readvar; writevar$" ${tmps}/dotfiles/ghi
+[ ! -e "${tmps}"/dotfiles/def ] && exit 1
+[ ! -e "${tmps}"/dotfiles/abc ] && exit 1
+[ ! -e "${tmps}"/dotfiles/ghi ] && exit 1
+[ ! -e "${tmps}"/dotfiles/rev ] && exit 1
+grep marker "${tmps}"/dotfiles/def
+cat "${tmps}"/dotfiles/abc
+grep "^abc; ${tmps}/dotfiles/abc; f_abc$" "${tmps}"/dotfiles/abc
+cat "${tmps}"/dotfiles/ghi
+grep "^ghi; readvar; writevar$" "${tmps}"/dotfiles/ghi
 
 echo "OK"
 exit 0

@@ -6,7 +6,27 @@
 #set -ev
 set -e
 
-# versions
+# test shell scripts
+if ! which shellcheck >/dev/null 2>&1; then
+  echo "Install shellcheck"
+  exit 1
+fi
+echo "shellcheck version:"
+shellcheck --version
+# SC2002: Useless cat
+# SC2126: Consider using grep -c instead of grep|wc -l
+# SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
+# SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?
+find . -iname '*.sh' | while read -r script; do
+  shellcheck -x \
+    -e SC2002 \
+    -e SC2126 \
+    -e SC2129 \
+    -e SC2181 \
+    "${script}"
+done
+
+# python tools versions
 echo "pylint version:"
 pylint --version
 echo "pycodestyle version:"
@@ -16,7 +36,10 @@ pyflakes --version
 
 # PEP8 tests
 which pycodestyle >/dev/null 2>&1
-[ "$?" != "0" ] && echo "Install pycodestyle" && exit 1
+if ! which pycodestyle >/dev/null 2>&1; then
+  echo "Install pycodestyle"
+  exit 1
+fi
 echo "testing with pycodestyle"
 # W503: Line break occurred before a binary operator
 # W504: Line break occurred after a binary operator
@@ -68,8 +91,8 @@ pylint \
 set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
 # f-string errors and missing f literal
-find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v "f'" {} \; | grep -v "{'" | grep -v "${exceptions}" | grep "'.*}" && echo "bad string format (1): ${errs}" && exit 1
-find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v 'f"' {} \; | grep -v "f'" | grep -v '{"' | grep -v "${exceptions}" | grep '".*}' && echo "bad string format (2): ${errs}" && exit 1
+find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v "f'" {} \; | grep -v "{'" | grep -v "${exceptions}" | grep "'.*}" && echo "bad string format (1)" && exit 1
+find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v 'f"' {} \; | grep -v "f'" | grep -v '{"' | grep -v "${exceptions}" | grep '".*}' && echo "bad string format (2)" && exit 1
 set -e
 
 echo "syntax OK"

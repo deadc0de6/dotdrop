@@ -28,31 +28,34 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpa=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmpa}"
 clear_on_exit "${tmps}"
@@ -61,7 +64,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 actions:
   pre:
     preaction: echo '{0} {1}' > ${tmpa}/pre
@@ -92,29 +95,29 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "test" > ${tmps}/dotfiles/abc
+echo "test" > "${tmps}"/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
-[ ! -e ${tmpa}/pre ] && echo "pre arg action not found" && exit 1
-grep test1 ${tmpa}/pre >/dev/null
-grep test2 ${tmpa}/pre >/dev/null
+[ ! -e "${tmpa}"/pre ] && echo "pre arg action not found" && exit 1
+grep test1 "${tmpa}"/pre >/dev/null
+grep test2 "${tmpa}"/pre >/dev/null
 
-[ ! -e ${tmpa}/post ] && echo "post arg action not found" && exit 1
-grep test3 ${tmpa}/post >/dev/null
-grep test4 ${tmpa}/post >/dev/null
-grep test5 ${tmpa}/post >/dev/null
+[ ! -e "${tmpa}"/post ] && echo "post arg action not found" && exit 1
+grep test3 "${tmpa}"/post >/dev/null
+grep test4 "${tmpa}"/post >/dev/null
+grep test5 "${tmpa}"/post >/dev/null
 
-[ ! -e ${tmpa}/naked ] && echo "naked arg action not found" && exit 1
-grep "test6 something" ${tmpa}/naked >/dev/null
+[ ! -e "${tmpa}"/naked ] && echo "naked arg action not found" && exit 1
+grep "test6 something" "${tmpa}"/naked >/dev/null
 
-[ ! -e ${tmpa}/empty ] && echo "empty arg action not found" && exit 1
-grep empty ${tmpa}/empty >/dev/null
+[ ! -e "${tmpa}"/empty ] && echo "empty arg action not found" && exit 1
+grep empty "${tmpa}"/empty >/dev/null
 
-[ ! -e ${tmpa}/tgt ] && echo "tgt arg action not found" && exit 1
-grep tgt ${tmpa}/tgt >/dev/null
+[ ! -e "${tmpa}"/tgt ] && echo "tgt arg action not found" && exit 1
+grep tgt "${tmpa}"/tgt >/dev/null
 
 echo "OK"
 exit 0

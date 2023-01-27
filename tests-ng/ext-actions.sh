@@ -28,38 +28,41 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpa=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 clear_on_exit "${tmpa}"
 
 act="${tmps}/actions.yaml"
-cat > ${act} << _EOF
+cat > "${act}" << _EOF
 actions:
   pre:
     preaction: echo 'pre' > ${tmpa}/pre
@@ -72,7 +75,7 @@ _EOF
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -98,26 +101,26 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "test" > ${tmps}/dotfiles/abc
+echo "test" > "${tmps}"/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 # checks
-[ ! -e ${tmpa}/pre ] && exit 1
-grep pre ${tmpa}/pre >/dev/null
+[ ! -e "${tmpa}"/pre ] && exit 1
+grep pre "${tmpa}"/pre >/dev/null
 echo "pre is ok"
 
-[ ! -e ${tmpa}/post ] && exit 1
-grep post ${tmpa}/post >/dev/null
+[ ! -e "${tmpa}"/post ] && exit 1
+grep post "${tmpa}"/post >/dev/null
 echo "post is ok"
 
-[ ! -e ${tmpa}/naked ] && exit 1
-grep naked ${tmpa}/naked >/dev/null
+[ ! -e "${tmpa}"/naked ] && exit 1
+grep naked "${tmpa}"/naked >/dev/null
 echo "naked is ok"
 
-[ ! -e ${tmpa}/write ] && exit 1
-grep over ${tmpa}/write >/dev/null
+[ ! -e "${tmpa}"/write ] && exit 1
+grep over "${tmpa}"/write >/dev/null
 echo "write is ok"
 
 echo "OK"

@@ -28,30 +28,33 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -60,7 +63,7 @@ clear_on_exit "${tmpd}"
 cfg="${tmps}/config.yaml"
 export dotdrop_test_dst="${tmpd}/def"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -77,14 +80,14 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "os={{@@ os @@}}" > ${tmps}/dotfiles/abc
-echo "release={{@@ release @@}}" >> ${tmps}/dotfiles/abc
-echo "distro_id={{@@ distro_id @@}}" >> ${tmps}/dotfiles/abc
-echo "distro_like={{@@ distro_like @@}}" >> ${tmps}/dotfiles/abc
-echo "distro_version={{@@ distro_version @@}}" >> ${tmps}/dotfiles/abc
+echo "os={{@@ os @@}}" > "${tmps}"/dotfiles/abc
+echo "release={{@@ release @@}}" >> "${tmps}"/dotfiles/abc
+echo "distro_id={{@@ distro_id @@}}" >> "${tmps}"/dotfiles/abc
+echo "distro_like={{@@ distro_like @@}}" >> "${tmps}"/dotfiles/abc
+echo "distro_version={{@@ distro_version @@}}" >> "${tmps}"/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 pybin="python3"
 real_os=$(${pybin} -c 'import platform; print(platform.system().lower())')
@@ -94,17 +97,17 @@ real_distro_like=$(${pybin} -c 'import distro; print(distro.like().lower())')
 real_distro_version=$(${pybin} -c 'import distro; print(distro.version().lower())')
 
 # tests
-[ ! -e ${tmpd}/abc ] && echo "abc not installed" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
 cat "${tmpd}/abc"
   ## only test this on CI/CD
-grep "^os=${real_os}" ${tmpd}/abc >/dev/null
-grep "^release=${real_release}" ${tmpd}/abc >/dev/null
-grep "^distro_id=${real_distro_id}" ${tmpd}/abc >/dev/null
-grep "^distro_like=${real_distro_like}" ${tmpd}/abc >/dev/null
-grep "^distro_version=${real_distro_version}" ${tmpd}/abc >/dev/null
+grep "^os=${real_os}" "${tmpd}"/abc >/dev/null
+grep "^release=${real_release}" "${tmpd}"/abc >/dev/null
+grep "^distro_id=${real_distro_id}" "${tmpd}"/abc >/dev/null
+grep "^distro_like=${real_distro_like}" "${tmpd}"/abc >/dev/null
+grep "^distro_version=${real_distro_version}" "${tmpd}"/abc >/dev/null
 
 # already defined variables
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -127,16 +130,16 @@ _EOF
 rm -f "${tmpd}/abc"
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # tests
-[ ! -e ${tmpd}/abc ] && echo "abc not installed" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
 cat "${tmpd}/abc"
-grep '^os=abc$' ${tmpd}/abc >/dev/null
-grep '^release=def$' ${tmpd}/abc >/dev/null
-grep '^distro_id=ghi$' ${tmpd}/abc >/dev/null
-grep '^distro_like=jkl$' ${tmpd}/abc >/dev/null
-grep '^distro_version=mno$' ${tmpd}/abc >/dev/null
+grep '^os=abc$' "${tmpd}"/abc >/dev/null
+grep '^release=def$' "${tmpd}"/abc >/dev/null
+grep '^distro_id=ghi$' "${tmpd}"/abc >/dev/null
+grep '^distro_like=jkl$' "${tmpd}"/abc >/dev/null
+grep '^distro_version=mno$' "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0

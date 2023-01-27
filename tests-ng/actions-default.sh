@@ -28,31 +28,34 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the action temp
-tmpa=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpa=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -61,7 +64,7 @@ clear_on_exit "${tmpa}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 actions:
   pre:
     failpre: "false"
@@ -99,37 +102,37 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo 'test' > ${tmps}/dotfiles/abc
+echo 'test' > "${tmps}"/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 # checks pre action
-[ ! -e ${tmpa}/pre ] && echo 'pre action not executed' && exit 1
-[ ! -e ${tmpa}/preinside ] && echo 'pre action not executed' && exit 1
-grep pre ${tmpa}/pre >/dev/null
-grep preinside ${tmpa}/preinside >/dev/null
+[ ! -e "${tmpa}"/pre ] && echo 'pre action not executed' && exit 1
+[ ! -e "${tmpa}"/preinside ] && echo 'pre action not executed' && exit 1
+grep pre "${tmpa}"/pre >/dev/null
+grep preinside "${tmpa}"/preinside >/dev/null
 # checks post action
-[ ! -e ${tmpa}/post ] && echo 'post action not executed' && exit 1
-[ ! -e ${tmpa}/postinside ] && echo 'post action not executed' && exit 1
-grep post ${tmpa}/post >/dev/null
-grep postinside ${tmpa}/postinside >/dev/null
+[ ! -e "${tmpa}"/post ] && echo 'post action not executed' && exit 1
+[ ! -e "${tmpa}"/postinside ] && echo 'post action not executed' && exit 1
+grep post "${tmpa}"/post >/dev/null
+grep postinside "${tmpa}"/postinside >/dev/null
 # checks naked action
-[ ! -e ${tmpa}/naked ] && echo 'naked action not executed'  && exit 1
-[ ! -e ${tmpa}/nakedinside ] && echo 'naked action not executed'  && exit 1
-grep naked ${tmpa}/naked >/dev/null
-grep nakedinside ${tmpa}/nakedinside >/dev/null
+[ ! -e "${tmpa}"/naked ] && echo 'naked action not executed'  && exit 1
+[ ! -e "${tmpa}"/nakedinside ] && echo 'naked action not executed'  && exit 1
+grep naked "${tmpa}"/naked >/dev/null
+grep nakedinside "${tmpa}"/nakedinside >/dev/null
 
 # test default action run
-cd ${ddpath} | ${bin} install -fa -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -fa -c "${cfg}" -p p1 -V
 
-cnt=`cat ${tmpa}/append | wc -l`
+cnt=$(cat "${tmpa}"/append | wc -l)
 [ "${cnt}" != "2" ] && echo "default_actions not run on -a" && exit 1
 
 # clear
-rm -f ${tmpa}/naked* ${tmpa}/pre* ${tmpa}/post* ${tmpd}/abc
+rm -f "${tmpa}"/naked* "${tmpa}"/pre* "${tmpa}"/post* "${tmpd}"/abc
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 actions:
   pre:
     failpre: "false"
@@ -152,9 +155,9 @@ _EOF
 # ensure failing actions make the installation fail
 # install
 set +e
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 set -e
-[ -e ${tmpd}/abc ] && exit 1
+[ -e "${tmpd}"/abc ] && exit 1
 
 echo "OK"
 exit 0

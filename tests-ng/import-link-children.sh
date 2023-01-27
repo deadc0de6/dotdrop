@@ -32,7 +32,9 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -40,7 +42,7 @@ echo "pythonpath: ${PYTHONPATH}"
 # get the helpers
 source ${cur}/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -92,39 +94,39 @@ _EOF
 cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V --link=link_children ${dt}
 
 # check is set to link_children
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${dt}`" | grep ',link:link_children,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename "${dt}"`" | grep ',link:link_children,'
 
 # checks file exists in dotpath
-[ ! -e ${dotpath}/${dt} ] && echo "dotfile not imported" && exit 1
-[ ! -e ${dotpath}/${dtsub1} ] && echo "sub1 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${dtsub2} ] && echo "sub2 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${dtsub3} ] && echo "sub3 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${f1} ] && echo "f1 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${subf1} ] && echo "subf1 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${subf2} ] && echo "subf2 not found in dotpath" && exit 1
-[ ! -e ${dotpath}/${subf3} ] && echo "subf3 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${dt}" ] && echo "dotfile not imported" && exit 1
+[ ! -e "${dotpath}"/"${dtsub1}" ] && echo "sub1 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${dtsub2}" ] && echo "sub2 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${dtsub3}" ] && echo "sub3 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${f1}" ] && echo "f1 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${subf1}" ] && echo "subf1 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${subf2}" ] && echo "subf2 not found in dotpath" && exit 1
+[ ! -e "${dotpath}"/"${subf3}" ] && echo "subf3 not found in dotpath" && exit 1
 
 # checks file exists in fs
-[ ! -e ${dt} ] && echo "dotfile not imported" && exit 1
-[ ! -e ${dtsub1} ] && echo "sub1 not found in fs" && exit 1
-[ ! -e ${dtsub2} ] && echo "sub2 not found in fs" && exit 1
-[ ! -e ${dtsub3} ] && echo "sub3 not found in fs" && exit 1
-[ ! -e ${f1} ] && echo "f1 not found in fs" && exit 1
-[ ! -e ${subf1} ] && echo "subf1 not found in fs" && exit 1
-[ ! -e ${subf2} ] && echo "subf2 not found in fs" && exit 1
-[ ! -e ${subf3} ] && echo "subf3 not found in fs" && exit 1
+[ ! -e "${dt}" ] && echo "dotfile not imported" && exit 1
+[ ! -e "${dtsub1}" ] && echo "sub1 not found in fs" && exit 1
+[ ! -e "${dtsub2}" ] && echo "sub2 not found in fs" && exit 1
+[ ! -e "${dtsub3}" ] && echo "sub3 not found in fs" && exit 1
+[ ! -e "${f1}" ] && echo "f1 not found in fs" && exit 1
+[ ! -e "${subf1}" ] && echo "subf1 not found in fs" && exit 1
+[ ! -e "${subf2}" ] && echo "subf2 not found in fs" && exit 1
+[ ! -e "${subf3}" ] && echo "subf3 not found in fs" && exit 1
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 # checks file have correct type in fs
-[ ! -h ${f1} ] && echo "f1 is not a symlink" && exit 1
-[ -h ${subf1} ] && echo "subf1 is not a regular file" && exit 1
-[ -h ${subf2} ] && echo "subf2 is not a regular file" && exit 1
-[ -h ${subf3} ] && echo "subf3 is not a regular file" && exit 1
-[ ! -h ${dtsub1} ] && echo "dtsub1 is not a symlink" && exit 1
-[ ! -h ${dtsub2} ] && echo "dtsub2 is not a symlink" && exit 1
-[ -h ${dtsub3} ] && echo "dtsub3 is not a regular directory" && exit 1
+[ ! -h "${f1}" ] && echo "f1 is not a symlink" && exit 1
+[ -h "${subf1}" ] && echo "subf1 is not a regular file" && exit 1
+[ -h "${subf2}" ] && echo "subf2 is not a regular file" && exit 1
+[ -h "${subf3}" ] && echo "subf3 is not a regular file" && exit 1
+[ ! -h "${dtsub1}" ] && echo "dtsub1 is not a symlink" && exit 1
+[ ! -h "${dtsub2}" ] && echo "dtsub2 is not a symlink" && exit 1
+[ -h "${dtsub3}" ] && echo "dtsub3 is not a regular directory" && exit 1
 
 echo "OK"
 exit 0

@@ -28,31 +28,34 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "[+] dotdrop dir: ${basedir}"
 
 clear_on_exit "${basedir}"
 
 # create the config file
 cfg="${basedir}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -63,13 +66,13 @@ profiles:
 _EOF
 
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg}
+cd "${ddpath}" | ${bin} compare -c "${cfg}"
 [ "$?" = "0" ] && exit 1
 
-out=$(cd ${ddpath} | ${bin} compare -c ${cfg})
+out=$(cd "${ddpath}" | ${bin} compare -c "${cfg}")
 echo "${out}" | grep -i 'traceback' && exit 1
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -80,10 +83,10 @@ profiles:
 _EOF
 
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg}
+cd "${ddpath}" | ${bin} compare -c "${cfg}"
 [ "$?" = "0" ] && exit 1
 
-out=$(cd ${ddpath} | ${bin} compare -c ${cfg})
+out=$(cd "${ddpath}" | ${bin} compare -c "${cfg}")
 echo "${out}" | grep -i 'traceback' && exit 1
 
 echo "OK"

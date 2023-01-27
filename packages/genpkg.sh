@@ -8,7 +8,7 @@
 up()
 {
   # update pkgver
-  [ "${1}" != "" ] && sed -i "s/^pkgver=.*$/pkgver=${1}/g" ${pkgfile}
+  [ "${1}" != "" ] && sed -i "s/^pkgver=.*$/pkgver=${1}/g" "${pkgfile}"
   # create srcinfo
   rm -f .SRCINFO
   makepkg --printsrcinfo > .SRCINFO
@@ -24,10 +24,10 @@ if ! ${rl} "${0}" >/dev/null 2>&1; then
   fi
 fi
 # cur
-cur=`dirname $(${rl} "${0}")`
-opwd=`pwd`
+cur=$(dirname "$(${rl} "${0}")")
+opwd=$(pwd)
 pkgfile="PKGBUILD"
-cd ${cur}
+cd "${cur}" || exit 1
 
 ########################
 # update arch package
@@ -35,10 +35,10 @@ cd ${cur}
 ########################
 dir="arch-dotdrop"
 echo "doing ${dir} ..."
-cd ${dir}
-version="`git describe --abbrev=0 --tags | sed 's/^v//g'`"
-up ${version}
-cd ${OLDPWD}
+cd ${dir} || exit 1
+version="$(git describe --abbrev=0 --tags | sed 's/^v//g')"
+up "${version}"
+cd "${OLDPWD}" || exit 1
 
 #########################
 ## update arch package
@@ -53,4 +53,4 @@ cd ${OLDPWD}
 #cd ${OLDPWD}
 
 # pivot back
-cd ${opwd}
+cd "${opwd}" || exit

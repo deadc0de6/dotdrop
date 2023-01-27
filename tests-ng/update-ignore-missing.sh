@@ -23,19 +23,22 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -49,23 +52,23 @@ grep_or_fail()
 }
 
 # dotdrop directory
-tmps=`mktemp -d --suffix='-dotdrop-tests-source' || mktemp -d`
+tmps=$(mktemp -d --suffix='-dotdrop-tests-source' || mktemp -d)
 dt="${tmps}/dotfiles"
-mkdir -p ${dt}/folder
-touch ${dt}/folder/a
+mkdir -p "${dt}"/folder
+touch "${dt}"/folder/a
 
 # fs dotfiles
-tmpd=`mktemp -d --suffix='-dotdrop-tests-dest' || mktemp -d`
-cp -r ${dt}/folder ${tmpd}/
-touch ${tmpd}/folder/b
-mkdir ${tmpd}/folder/c
+tmpd=$(mktemp -d --suffix='-dotdrop-tests-dest' || mktemp -d)
+cp -r "${dt}"/folder "${tmpd}"/
+touch "${tmpd}"/folder/b
+mkdir "${tmpd}"/folder/c
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -89,14 +92,14 @@ _EOF
 
 # file b / folder c SHOULD be copied
 echo "[+] test with no ignore-missing setting"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key thedotfile
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key thedotfile
 
-[ ! -e ${dt}/folder/b ] && echo "should have been updated" && exit 1
-[ ! -e ${dt}/folder/c ] && echo "should have been updated" && exit 1
+[ ! -e "${dt}"/folder/b ] && echo "should have been updated" && exit 1
+[ ! -e "${dt}"/folder/c ] && echo "should have been updated" && exit 1
 
 # Reset
-rm ${dt}/folder/b
-rmdir ${dt}/folder/c
+rm "${dt}"/folder/b
+rmdir "${dt}"/folder/c
 
 #
 # Test with command-line flag
@@ -104,16 +107,16 @@ rmdir ${dt}/folder/c
 
 # file b / folder c should NOT be copied
 echo "[+] test with command-line flag"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key thedotfile --ignore-missing
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key thedotfile --ignore-missing
 
-[ -e ${dt}/folder/b ] && echo "should not have been updated" && exit 1
-[ -e ${dt}/folder/c ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/b ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/c ] && echo "should not have been updated" && exit 1
 
 #
 # Test with global option
 #
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -131,16 +134,16 @@ _EOF
 
 # file b / folder c should NOT be copied
 echo "[+] test global option"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key thedotfile
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key thedotfile
 
-[ -e ${dt}/folder/b ] && echo "should not have been updated" && exit 1
-[ -e ${dt}/folder/c ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/b ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/c ] && echo "should not have been updated" && exit 1
 
 #
 # Test with dotfile option
 #
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -157,10 +160,10 @@ profiles:
 _EOF
 # file b / folder c should NOT be copied
 echo "[+] test dotfile option"
-cd ${ddpath} | ${bin} update -f -c ${cfg} --verbose --profile=p1 --key thedotfile
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key thedotfile
 
-[ -e ${dt}/folder/b ] && echo "should not have been updated" && exit 1
-[ -e ${dt}/folder/c ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/b ] && echo "should not have been updated" && exit 1
+[ -e "${dt}"/folder/c ] && echo "should not have been updated" && exit 1
 
 echo "OK"
 exit 0

@@ -23,47 +23,50 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 dt="${basedir}/dotfiles"
-mkdir -p ${dt}/folder
-touch ${dt}/folder/a
+mkdir -p "${dt}"/folder
+touch "${dt}"/folder/a
 
 # the dotfile to be imported
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
 
 # some files
-cp -r ${dt}/folder ${tmpd}/
-mkdir -p ${tmpd}/folder
-touch ${tmpd}/folder/b
-mkdir ${tmpd}/folder/c
+cp -r "${dt}"/folder "${tmpd}"/
+mkdir -p "${tmpd}"/folder
+touch "${tmpd}"/folder/b
+mkdir "${tmpd}"/folder/c
 
 # create the config file
 cfg="${basedir}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -85,7 +88,7 @@ _EOF
 # Expect diff
 echo "[+] test with no ignore-missing setting"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --profile=p1
+cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --profile=p1
 [ "$?" = "0" ] && exit 1
 set -e
 
@@ -96,7 +99,7 @@ set -e
 # Expect no diff
 echo "[+] test with command-line flag"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --profile=p1 --ignore-missing
+cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --profile=p1 --ignore-missing
 [ "$?" != "0" ] && exit 1
 set -e
 
@@ -104,7 +107,7 @@ set -e
 # Test with global option
 #
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -123,7 +126,7 @@ _EOF
 # Expect no diff
 echo "[+] test global option"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --profile=p1
+cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --profile=p1
 [ "$?" != "0" ] && exit 1
 set -e
 
@@ -131,7 +134,7 @@ set -e
 # Test with dotfile option
 #
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -150,7 +153,7 @@ _EOF
 # Expect no diff
 echo "[+] test dotfile option"
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} --verbose --profile=p1
+cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --profile=p1
 [ "$?" != "0" ] && exit 1
 set -e
 

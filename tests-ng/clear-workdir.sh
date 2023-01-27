@@ -28,32 +28,35 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${basedir}/dotfiles
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${basedir}"/dotfiles
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 if [ -z "${DOTDROP_WORKDIR}" ]; then
-  tmpw=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+  tmpw=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
   export DOTDROP_WORKDIR="${tmpw}"
   clear_on_exit "${tmpw}"
 fi
@@ -61,11 +64,11 @@ fi
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
 
-echo "{{@@ profile @@}}" > ${basedir}/dotfiles/x
+echo "{{@@ profile @@}}" > "${basedir}"/dotfiles/x
 
 # create the config file
 cfg="${basedir}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -82,30 +85,30 @@ profiles:
 _EOF
 
 echo "[+] install (1)"
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
-[ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
-[ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
+[ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
+[ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
+[ ! -e "${DOTDROP_WORKDIR}"/"${tmpd}"/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
 
 # add file
-touch ${DOTDROP_WORKDIR}/new
+touch "${DOTDROP_WORKDIR}"/new
 
 echo "[+] re-install with clear-workdir in cli"
-cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
+cd "${ddpath}" | printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
 [ "$?" != "0" ] && exit 1
 
-[ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
-[ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
-[ -e ${DOTDROP_WORKDIR}/new ] && echo "workdir not cleared (1)" && exit 1
+[ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
+[ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
+[ ! -e "${DOTDROP_WORKDIR}"/"${tmpd}"/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
+[ -e "${DOTDROP_WORKDIR}"/new ] && echo "workdir not cleared (1)" && exit 1
 
 # add file
-touch ${DOTDROP_WORKDIR}/new
+touch "${DOTDROP_WORKDIR}"/new
 
 echo "[+] re-install with config clear-workdir in config"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -121,13 +124,13 @@ profiles:
     dotfiles:
     - f_x
 _EOF
-cd ${ddpath} | printf "y\n" | ${bin} install -W -c ${cfg} -p p1 --verbose
+cd "${ddpath}" | printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
 [ "$?" != "0" ] && exit 1
 
-[ ! -e ${tmpd}/x ] && echo "f_x not installed" && exit 1
-[ ! -h ${tmpd}/x ] && echo "f_x not symlink" && exit 1
-[ ! -e ${DOTDROP_WORKDIR}/${tmpd}/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
-[ -e ${DOTDROP_WORKDIR}/new ] && echo "workdir not cleared (2)" && exit 1
+[ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
+[ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
+[ ! -e "${DOTDROP_WORKDIR}"/"${tmpd}"/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
+[ -e "${DOTDROP_WORKDIR}"/new ] && echo "workdir not cleared (2)" && exit 1
 
 echo "OK"
 exit 0

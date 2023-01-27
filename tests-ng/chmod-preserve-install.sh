@@ -31,7 +31,9 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -39,7 +41,7 @@ echo "pythonpath: ${PYTHONPATH}"
 # get the helpers
 source ${cur}/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -68,31 +70,31 @@ is_same_as()
   local mode2=`stat -L -c '%a' "$2"`
   echo "$2: ${mode2}"
 
-  [ "${mode1}" != "${mode2}" ] && echo "`basename $1` (${mode1}) does not have same mode as `basename $2` (${mode2})" && exit 1
+  [ "${mode1}" != "${mode2}" ] && echo "`basename $1` (${mode1}) does not have same mode as `basename "$2"` (${mode2})" && exit 1
   true
 }
 
 get_default_file_mode()
 {
-  u=`umask`
-  u=`echo ${u} | sed 's/^0*//'`
+  u=$(umask)
+  u=$(echo "${u}" | sed 's/^0*//')
   v=$((666 - u))
   echo "${v}"
 }
 
 get_default_dir_mode()
 {
-  u=`umask`
-  u=`echo ${u} | sed 's/^0*//'`
+  u=$(umask)
+  u=$(echo "${u}" | sed 's/^0*//')
   v=$((777 - u))
   echo "${v}"
 }
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -106,70 +108,70 @@ cfg="${tmps}/config.yaml"
 ##
 
 # file
-echo 'f777' > ${tmps}/dotfiles/f777
-chmod 700 ${tmps}/dotfiles/f777
+echo 'f777' > "${tmps}"/dotfiles/f777
+chmod 700 "${tmps}"/dotfiles/f777
 
 # link
-echo 'link' > ${tmps}/dotfiles/link
-chmod 700 ${tmps}/dotfiles/link
+echo 'link' > "${tmps}"/dotfiles/link
+chmod 700 "${tmps}"/dotfiles/link
 
 # directory
-mkdir -p ${tmps}/dotfiles/dir
-echo "f1" > ${tmps}/dotfiles/dir/f1
-chmod 700 ${tmps}/dotfiles/dir
-chmod 700 ${tmps}/dotfiles/dir/f1
+mkdir -p "${tmps}"/dotfiles/dir
+echo "f1" > "${tmps}"/dotfiles/dir/f1
+chmod 700 "${tmps}"/dotfiles/dir
+chmod 700 "${tmps}"/dotfiles/dir/f1
 
 # template
-echo '{{@@ profile @@}}' > ${tmps}/dotfiles/template
-chmod 700 ${tmps}/dotfiles/template
+echo '{{@@ profile @@}}' > "${tmps}"/dotfiles/template
+chmod 700 "${tmps}"/dotfiles/template
 
 # link template
-echo '{{@@ profile @@}}' > ${tmps}/dotfiles/link-template
-chmod 700 ${tmps}/dotfiles/link-template
+echo '{{@@ profile @@}}' > "${tmps}"/dotfiles/link-template
+chmod 700 "${tmps}"/dotfiles/link-template
 
 ##
 # existing files
 ##
 
 # file
-echo "exists-original" > ${tmps}/dotfiles/exists
-chmod 644 ${tmps}/dotfiles/exists
-echo "exists" > ${tmpd}/exists
-chmod 700 ${tmpd}/exists
+echo "exists-original" > "${tmps}"/dotfiles/exists
+chmod 644 "${tmps}"/dotfiles/exists
+echo "exists" > "${tmpd}"/exists
+chmod 700 "${tmpd}"/exists
 
 # link
-echo "existslink" > ${tmps}/dotfiles/existslink
-chmod 700 ${tmps}/dotfiles/existslink
-ln -s ${tmps}/dotfiles/existslink ${tmpd}/existslink
+echo "existslink" > "${tmps}"/dotfiles/existslink
+chmod 700 "${tmps}"/dotfiles/existslink
+ln -s "${tmps}"/dotfiles/existslink "${tmpd}"/existslink
 
 # directory
-mkdir -p ${tmps}/dotfiles/direxists
-echo "f1-original" > ${tmps}/dotfiles/direxists/f1
-mkdir -p ${tmpd}/direxists
-echo "f1" > ${tmpd}/direxists/f1
-chmod 700 ${tmpd}/direxists/f1
-chmod 700 ${tmpd}/direxists
+mkdir -p "${tmps}"/dotfiles/direxists
+echo "f1-original" > "${tmps}"/dotfiles/direxists/f1
+mkdir -p "${tmpd}"/direxists
+echo "f1" > "${tmpd}"/direxists/f1
+chmod 700 "${tmpd}"/direxists/f1
+chmod 700 "${tmpd}"/direxists
 
 # link children
-mkdir -p ${tmps}/dotfiles/linkchildren
-echo "f1-original" > ${tmps}/dotfiles/linkchildren/f1
-chmod 700 ${tmps}/dotfiles/linkchildren/f1
-mkdir -p ${tmps}/dotfiles/linkchildren/d1
-chmod 700 ${tmps}/dotfiles/linkchildren/d1
-echo "f2-original" > ${tmps}/dotfiles/linkchildren/d1/f2
-chmod 700 ${tmps}/dotfiles/linkchildren/d1/f2
+mkdir -p "${tmps}"/dotfiles/linkchildren
+echo "f1-original" > "${tmps}"/dotfiles/linkchildren/f1
+chmod 700 "${tmps}"/dotfiles/linkchildren/f1
+mkdir -p "${tmps}"/dotfiles/linkchildren/d1
+chmod 700 "${tmps}"/dotfiles/linkchildren/d1
+echo "f2-original" > "${tmps}"/dotfiles/linkchildren/d1/f2
+chmod 700 "${tmps}"/dotfiles/linkchildren/d1/f2
 
-mkdir -p ${tmpd}/linkchildren
-chmod 700 ${tmpd}/linkchildren
-echo "f1" > ${tmpd}/linkchildren/f1
-mkdir -p ${tmpd}/linkchildren/d1
-echo "f2" > ${tmpd}/linkchildren/d1/f2
+mkdir -p "${tmpd}"/linkchildren
+chmod 700 "${tmpd}"/linkchildren
+echo "f1" > "${tmpd}"/linkchildren/f1
+mkdir -p "${tmpd}"/linkchildren/d1
+echo "f2" > "${tmpd}"/linkchildren/d1/f2
 
 # no mode
-echo 'nomode-original' > ${tmps}/dotfiles/nomode
-echo 'nomode' > ${tmpd}/nomode
+echo 'nomode-original' > "${tmps}"/dotfiles/nomode
+echo 'nomode' > "${tmpd}"/nomode
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -235,23 +237,23 @@ profiles:
 _EOF
 #cat ${cfg}
 
-exists_before=`stat -L -c '%a' "${tmpd}/exists"`
-direxists_before=`stat -L -c '%a' "${tmpd}/direxists"`
-direxists_f1_before=`stat -L -c '%a' "${tmpd}/direxists/f1"`
+exists_before=$(stat -L -c '%a' "${tmpd}/exists")
+direxists_before=$(stat -L -c '%a' "${tmpd}/direxists")
+direxists_f1_before=$(stat -L -c '%a' "${tmpd}/direxists/f1")
 
 # install
 echo "first round"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 echo "first round"
 
 # non-existing but will create with "default" rights on preserve
 # 644 for file
 # 755 for directory
 # link will get the rights of the file it points to
-has_rights "${tmpd}/f777" "`get_default_file_mode`"
+has_rights "${tmpd}/f777" "$(get_default_file_mode)"
 has_rights "${tmpd}/link" "700"
-has_rights "${tmpd}/dir" "`get_default_dir_mode`"
-has_rights "${tmpd}/template" "`get_default_file_mode`"
+has_rights "${tmpd}/dir" "$(get_default_dir_mode)"
+has_rights "${tmpd}/template" "$(get_default_file_mode)"
 # first install to workdir (def rights) and then symlink
 has_rights "${tmpd}/link-template" "644"
 [ -L "${tmpd}/link-template" ] && echo "link-template is not a symlink" && exit 1
@@ -275,20 +277,20 @@ has_rights "${tmpd}/linkchildren/d1" "700" # points back to dotpath
 has_rights "${tmpd}/linkchildren/d1/f2" "700"
 
 # modify
-echo 'f777-2' >> ${tmps}/dotfiles/f777
-chmod 701 ${tmps}/dotfiles/f777
-echo 'link-2' >> ${tmps}/dotfiles/link
-chmod 701 ${tmps}/dotfiles/link
-echo "f1-2" >> ${tmps}/dotfiles/dir/f1
-chmod 701 ${tmps}/dotfiles/dir
-chmod 701 ${tmps}/dotfiles/dir/f1
+echo 'f777-2' >> "${tmps}"/dotfiles/f777
+chmod 701 "${tmps}"/dotfiles/f777
+echo 'link-2' >> "${tmps}"/dotfiles/link
+chmod 701 "${tmps}"/dotfiles/link
+echo "f1-2" >> "${tmps}"/dotfiles/dir/f1
+chmod 701 "${tmps}"/dotfiles/dir
+chmod 701 "${tmps}"/dotfiles/dir/f1
 
-f777_before=`stat -L -c '%a' "${tmpd}/f777"`
-link_before=`stat -L -c '%a' "${tmpd}/link"`
-dir_before=`stat -L -c '%a' "${tmpd}/dir"`
+f777_before=$(stat -L -c '%a' "${tmpd}/f777")
+link_before=$(stat -L -c '%a' "${tmpd}/link")
+dir_before=$(stat -L -c '%a' "${tmpd}/dir")
 
 echo "second round"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 echo "second round"
 
 # existing

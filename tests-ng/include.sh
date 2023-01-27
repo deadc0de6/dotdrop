@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -89,35 +92,35 @@ profiles:
     include:
     - p2
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
-echo "test" > ${tmps}/dotfiles/abc
+mkdir -p "${tmps}"/dotfiles/
+echo "test" > "${tmps}"/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p0 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p0 --verbose
 
-[ ! -e ${tmpd}/action.pre ] && exit 1
-[ ! -e ${tmpd}/action.post ] && exit 1
+[ ! -e "${tmpd}"/action.pre ] && exit 1
+[ ! -e "${tmpd}"/action.post ] && exit 1
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p2
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p3
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p0
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p2
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p3
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p0
 
 # list
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p2 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p3 | grep f_abc
-cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 | grep f_abc
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p2 | grep f_abc
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p3 | grep f_abc
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 | grep f_abc
 
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p0 | grep f_abc | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p0 | grep f_abc | wc -l)
 [ "${cnt}" != "1" ] && echo "dotfiles displayed more than once" && exit 1
 
 # count
-cnt=`cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -b | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -b | grep '^f_' | wc -l)
 [ "${cnt}" != "1" ] && exit 1
 
 echo "OK"

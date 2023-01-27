@@ -33,7 +33,9 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -41,7 +43,7 @@ echo "pythonpath: ${PYTHONPATH}"
 # get the helpers
 source ${cur}/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -454,16 +456,16 @@ cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
 
 # checks
 cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${df}`" | head -1 | grep ',link:link_children,'
+cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename "${df}"`" | head -1 | grep ',link:link_children,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is a symlink" && exit 1
-[ ! -h ${df}/file ] && echo "file is not a symlink" && exit 1
-[ ! -h ${df}/directory ] && echo "directory is not a symlink" && exit 1
-[ -h ${df}/directory/file ] && echo "directory/file is a symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is a symlink" && exit 1
+[ ! -h "${df}"/file ] && echo "file is not a symlink" && exit 1
+[ ! -h "${df}"/directory ] && echo "directory is not a symlink" && exit 1
+[ -h "${df}"/directory/file ] && echo "directory/file is a symlink" && exit 1
 
 echo "OK"
 exit 0

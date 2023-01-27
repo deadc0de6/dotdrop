@@ -28,19 +28,22 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -49,22 +52,22 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
 dotpath="xyz"
 
 # dotdrop directory
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/${dotpath}
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/${dotpath}
 echo "[+] dotdrop dir: ${tmps}"
 echo "[+] dotpath dir: ${tmps}/${dotpath}"
 
 # dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
-echo "content" > ${tmps}/${dotpath}/abc
+echo "content" > "${tmps}"/${dotpath}/abc
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -81,16 +84,16 @@ _EOF
 
 echo "[+] install"
 export DOTDROP_DOTPATH=${dotpath}
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
-[ ! -e ${tmpd}/abc ] && echo "f_abc not installed" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "f_abc not installed" && exit 1
 
 # clean
-rm ${tmpd}/abc
+rm "${tmpd}"/abc
 
 # create the config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -108,10 +111,10 @@ profiles:
 _EOF
 
 echo "[+] install"
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
-[ ! -e ${tmpd}/abc ] && echo "f_abc not installed" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "f_abc not installed" && exit 1
 
 echo "OK"
 exit 0

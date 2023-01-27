@@ -18,8 +18,6 @@ fi
 args=("$@")
 cur=$(dirname "$(${rl} "${0}")")
 opwd=$(pwd)
-cfg="${cur}/config.yaml"
-sub="dotdrop"
 
 # pivot
 cd "${cur}" || { echo "Directory \"${cur}\" doesn't exist, aborting." && exit 1; }
@@ -33,7 +31,7 @@ fi
 # check python executable
 pybin="python3"
 hash ${pybin} 2>/dev/null || pybin="python"
-[[ "`${pybin} -V 2>&1`" =~ "Python 3" ]] || { echo "install Python 3" && exit 1; }
+[[ "$(${pybin} -V 2>&1)" =~ "Python 3" ]] || { echo "install Python 3" && exit 1; }
 
 # launch dotdrop
 PYTHONPATH=dotdrop:${PYTHONPATH} ${pybin} -m dotdrop.dotdrop "${args[@]}"

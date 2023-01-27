@@ -104,6 +104,7 @@ need_update_stable()
   last=$(get_latest)
   cur=$(get_current_tag)
   # get short tag if on a lightweight tag
+  # shellcheck disable=SC2001
   tag=$(echo "$cur" | sed 's/\(v.*\)-[0-9]*.-.*$/\1/g')
   if [ "${tag}" != "${last}" ]; then
     echo "new stable version available: ${last}" && exit 1

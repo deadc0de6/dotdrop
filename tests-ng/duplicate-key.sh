@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -75,30 +78,30 @@ _EOF
 #cat ${cfg}
 
 # create the imported one
-mkdir -p ${tmps}/dotfiles/${tmpd}
-echo "test" > ${tmps}/dotfiles/${tmpd}/abc
-echo "test" > ${tmpd}/abc
+mkdir -p "${tmps}"/dotfiles/"${tmpd}"
+echo "test" > "${tmps}"/dotfiles/"${tmpd}"/abc
+echo "test" > "${tmpd}"/abc
 
 # create the to-be-imported
-mkdir -p ${tmpd}/sub
-echo "test2" > ${tmpd}/sub/abc
+mkdir -p "${tmpd}"/sub
+echo "test2" > "${tmpd}"/sub/abc
 
-mkdir -p ${tmpd}/sub/sub2
-echo "test2" > ${tmpd}/sub/sub2/abc
+mkdir -p "${tmpd}"/sub/sub2
+echo "test2" > "${tmpd}"/sub/sub2/abc
 
-mkdir -p ${tmpd}/sub/sub
-echo "test2" > ${tmpd}/sub/sub/abc
+mkdir -p "${tmpd}"/sub/sub
+echo "test2" > "${tmpd}"/sub/sub/abc
 
 # import
-cd ${ddpath} | ${bin} import -f --verbose -c ${cfg} -p p2 \
-  ${tmpd}/abc \
-  ${tmpd}/sub/abc \
-  ${tmpd}/sub/abc \
-  ${tmpd}/sub/sub/abc \
-  ${tmpd}/sub/sub2/abc
+cd "${ddpath}" | ${bin} import -f --verbose -c "${cfg}" -p p2 \
+  "${tmpd}"/abc \
+  "${tmpd}"/sub/abc \
+  "${tmpd}"/sub/abc \
+  "${tmpd}"/sub/sub/abc \
+  "${tmpd}"/sub/sub2/abc
 
 # count dotfiles for p2
-cnt=`cd ${ddpath} | ${bin} files --verbose -c ${cfg} -p p2 -b | grep '^f_' | wc -l`
+cnt=$(cd "${ddpath}" | ${bin} files --verbose -c "${cfg}" -p p2 -b | grep '^f_' | wc -l)
 [ "${cnt}" != "4" ] && echo "bad count for p2: ${cnt} != 4" && exit 1
 
 echo "OK"

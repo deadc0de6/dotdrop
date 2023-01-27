@@ -26,35 +26,38 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -71,20 +74,20 @@ profiles:
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
-echo "abc" > ${tmps}/dotfiles/abc
-ln -s ${tmps}/dotfiles/abc ${tmpd}/abc
+mkdir -p "${tmps}"/dotfiles/
+echo "abc" > "${tmps}"/dotfiles/abc
+ln -s "${tmps}"/dotfiles/abc "${tmpd}"/abc
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -V
 
 # ensure minversion is present
-cat ${cfg}
-grep 'link: absolute' ${cfg}
-grep 'minversion' ${cfg}
+cat "${cfg}"
+grep 'link: absolute' "${cfg}"
+grep 'minversion' "${cfg}"
 
 # fake a higher version
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -103,12 +106,12 @@ _EOF
 
 # compare
 set +e
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -V
 [ "$?" != "1" ] && echo "minversion not working" && exit 1
 set -e
 
 # all clean
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -124,11 +127,11 @@ profiles:
 _EOF
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -V
 
 # test
-cat ${cfg}
-grep 'minversion' ${cfg} && echo "minversion added, not needed" && exit 1
+cat "${cfg}"
+grep 'minversion' "${cfg}" && echo "minversion added, not needed" && exit 1
 
 echo "OK"
 exit 0

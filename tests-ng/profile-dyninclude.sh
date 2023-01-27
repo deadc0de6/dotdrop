@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -59,7 +62,7 @@ clear_on_exit "${tmpd}"
 cfg="${tmps}/config.yaml"
 cfg2="${tmps}/sub.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   dotpath: dotfiles
   import_configs:
@@ -85,7 +88,7 @@ profiles:
 _EOF
 #cat ${cfg}
 
-cat > ${cfg2} << _EOF
+cat > "${cfg2}" << _EOF
 config:
 dotfiles:
   f_abc:
@@ -120,26 +123,26 @@ _EOF
 #cat ${cfg2}
 
 # create the dotfile
-echo "start" > ${tmps}/dotfiles/abc
-echo "{{@@ mainvar @@}}" >> ${tmps}/dotfiles/abc
-echo "{{@@ maindyn @@}}" >> ${tmps}/dotfiles/abc
-echo "{{@@ subdyn @@}}" >> ${tmps}/dotfiles/abc
-echo "{{@@ subvar @@}}" >> ${tmps}/dotfiles/abc
-echo "end" >> ${tmps}/dotfiles/abc
+echo "start" > "${tmps}"/dotfiles/abc
+echo "{{@@ mainvar @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ maindyn @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ subdyn @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ subvar @@}}" >> "${tmps}"/dotfiles/abc
+echo "end" >> "${tmps}"/dotfiles/abc
 #cat ${tmps}/dotfiles/abc
-echo "ghi content" > ${tmps}/dotfiles/ghi
+echo "ghi content" > "${tmps}"/dotfiles/ghi
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p profile_1 --verbose
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p profile_1 --verbose
 
 # check dotfile exists
-[ ! -e ${tmpd}/abc ] && exit 1
-grep 'maincontent' ${tmpd}/abc >/dev/null || (echo "variables 1 not resolved" && exit 1)
-grep 'maindyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 1 not resolved"  && exit 1)
-grep 'subcontent' ${tmpd}/abc >/dev/null || (echo "variables 2 not resolved" && exit 1)
-grep 'subdyncontent' ${tmpd}/abc >/dev/null || (echo "dynvariables 2 not resolved" && exit 1)
+[ ! -e "${tmpd}"/abc ] && exit 1
+grep 'maincontent' "${tmpd}"/abc >/dev/null || (echo "variables 1 not resolved" && exit 1)
+grep 'maindyncontent' "${tmpd}"/abc >/dev/null || (echo "dynvariables 1 not resolved"  && exit 1)
+grep 'subcontent' "${tmpd}"/abc >/dev/null || (echo "variables 2 not resolved" && exit 1)
+grep 'subdyncontent' "${tmpd}"/abc >/dev/null || (echo "dynvariables 2 not resolved" && exit 1)
 #cat ${tmpd}/abc
-[ ! -e ${tmpd}/ghi ] && exit 1
+[ ! -e "${tmpd}"/ghi ] && exit 1
 
 echo "OK"
 exit 0

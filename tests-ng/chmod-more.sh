@@ -33,7 +33,9 @@ ddpath="${cur}/../"
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
@@ -41,7 +43,7 @@ echo "pythonpath: ${PYTHONPATH}"
 # get the helpers
 source ${cur}/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -54,28 +56,28 @@ has_rights()
   echo "testing ${1} is ${2}"
   [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
   local mode=`stat -L -c '%a' "$1"`
-  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} instead of ${2})" && exit 1
+  [ "${mode}" != "$2" ] && echo "bad mode for `basename "$1"` (${mode} instead of ${2})" && exit 1
   true
 }
 
 # $1 file
 chmod_to_umask()
 {
-  u=`umask`
-  u=`echo ${u} | sed 's/^0*//'`
-  if [ -d ${1} ]; then
+  u=$(umask)
+  u=$(echo "${u}" | sed 's/^0*//')
+  if [ -d "${1}" ]; then
     v=$((777 - u))
   else
     v=$((666 - u))
   fi
-  chmod ${v} ${1}
+  chmod ${v} "${1}"
 }
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -83,21 +85,21 @@ clear_on_exit "${tmpd}"
 
 # create the dotfiles
 f1="${tmpd}/f1"
-touch ${f1}
-chmod 777 ${f1}
-stat -c '%a' ${f1}
+touch "${f1}"
+chmod 777 "${f1}"
+stat -c '%a' "${f1}"
 
 f2="${tmpd}/f2"
-touch ${f2}
-chmod 644 ${f2}
-stat -c '%a' ${f2}
+touch "${f2}"
+chmod 644 "${f2}"
+stat -c '%a' "${f2}"
 
 toimport="${f1} ${f2}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -109,11 +111,11 @@ _EOF
 
 # import without --preserve-mode
 for i in ${toimport}; do
-  stat -c '%a' ${i}
-  cd ${ddpath} | ${bin} import -c ${cfg} -f -p p1 -V ${i}
+  stat -c '%a' "${i}"
+  cd "${ddpath}" | ${bin} import -c "${cfg}" -f -p p1 -V "${i}"
 done
 
-cat ${cfg}
+cat "${cfg}"
 
 has_rights "${tmpd}/f1" "777"
 has_rights "${tmps}/dotfiles/${tmpd}/f1" "777"
@@ -121,7 +123,7 @@ has_rights "${tmpd}/f2" "644"
 has_rights "${tmps}/dotfiles/${tmpd}/f2" "644"
 
 # install
-cd ${ddpath} | ${bin} install -c ${cfg} -f -p p1 -V | grep '0 dotfile(s) installed' || (echo "should not install" && exit 1)
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V | grep '0 dotfile(s) installed' || (echo "should not install" && exit 1)
 
 echo "OK"
 exit 0

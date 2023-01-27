@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -59,13 +62,13 @@ clear_on_exit "${tmpd}"
 # create the config file
 extvars="${tmps}/variables.yaml"
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
   import_variables:
-  - $(basename ${extvars})
+  - $(basename "${extvars}")
 variables:
   var1: "var1"
   var2: "{{@@ var1 @@}} var2"
@@ -97,7 +100,7 @@ _EOF
 #cat ${cfg}
 
 # create the external variables file
-cat > ${extvars} << _EOF
+cat > "${extvars}" << _EOF
 variables:
   varx: "exttest"
 dynvariables:
@@ -106,47 +109,47 @@ dynvariables:
 _EOF
 
 # create the dotfile
-echo "var3: {{@@ var3 @@}}" > ${tmps}/dotfiles/abc
-echo "dvar3: {{@@ dvar3 @@}}" >> ${tmps}/dotfiles/abc
-echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
-echo "dvar4: {{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
-echo "varx: {{@@ varx @@}}" >> ${tmps}/dotfiles/abc
-echo "evar1: {{@@ evar1 @@}}" >> ${tmps}/dotfiles/abc
-echo "provar: {{@@ provar @@}}" >> ${tmps}/dotfiles/abc
-echo "theprofile: {{@@ theprofile @@}}" >> ${tmps}/dotfiles/abc
+echo "var3: {{@@ var3 @@}}" > "${tmps}"/dotfiles/abc
+echo "dvar3: {{@@ dvar3 @@}}" >> "${tmps}"/dotfiles/abc
+echo "var4: {{@@ var4 @@}}" >> "${tmps}"/dotfiles/abc
+echo "dvar4: {{@@ dvar4 @@}}" >> "${tmps}"/dotfiles/abc
+echo "varx: {{@@ varx @@}}" >> "${tmps}"/dotfiles/abc
+echo "evar1: {{@@ evar1 @@}}" >> "${tmps}"/dotfiles/abc
+echo "provar: {{@@ provar @@}}" >> "${tmps}"/dotfiles/abc
+echo "theprofile: {{@@ theprofile @@}}" >> "${tmps}"/dotfiles/abc
 
-echo "theprofile: {{@@ theprofile @@}}" > ${tmps}/dotfiles/def
+echo "theprofile: {{@@ theprofile @@}}" > "${tmps}"/dotfiles/def
 
 #cat ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 echo "check1"
-cat ${tmpd}/abc
-grep '^var3: var1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar3: dvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
-grep '^var4: echo var1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar4: var1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^varx: profvarx' ${tmpd}/abc >/dev/null
-grep '^evar1: extevar1' ${tmpd}/abc >/dev/null
-grep '^provar: provar' ${tmpd}/abc >/dev/null
-grep '^theprofile: p1' ${tmpd}/abc >/dev/null
+cat "${tmpd}"/abc
+grep '^var3: var1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar3: dvar1 dvar2 dvar3' "${tmpd}"/abc >/dev/null
+grep '^var4: echo var1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar4: var1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^varx: profvarx' "${tmpd}"/abc >/dev/null
+grep '^evar1: extevar1' "${tmpd}"/abc >/dev/null
+grep '^provar: provar' "${tmpd}"/abc >/dev/null
+grep '^theprofile: p1' "${tmpd}"/abc >/dev/null
 
 # check def
-[ ! -e ${tmpd}/p1 ] && echo "def not created" && exit 1
-grep '^theprofile: p1' ${tmpd}/p1 >/dev/null
+[ ! -e "${tmpd}"/p1 ] && echo "def not created" && exit 1
+grep '^theprofile: p1' "${tmpd}"/p1 >/dev/null
 
-rm -f ${tmpd}/abc
+rm -f "${tmpd}"/abc
 
 #cat ${tmpd}/abc
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
   import_variables:
-  - $(basename ${extvars})
+  - $(basename "${extvars}")
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -162,7 +165,7 @@ _EOF
 #cat ${cfg}
 
 # create the external variables file
-cat > ${extvars} << _EOF
+cat > "${extvars}" << _EOF
 variables:
   var1: "extvar1"
   varx: "exttest"
@@ -177,26 +180,26 @@ dynvariables:
 _EOF
 
 # create the dotfile
-echo "var3: {{@@ var3 @@}}" > ${tmps}/dotfiles/abc
-echo "dvar3: {{@@ dvar3 @@}}" >> ${tmps}/dotfiles/abc
-echo "var4: {{@@ var4 @@}}" >> ${tmps}/dotfiles/abc
-echo "dvar4: {{@@ dvar4 @@}}" >> ${tmps}/dotfiles/abc
-echo "varx: {{@@ varx @@}}" >> ${tmps}/dotfiles/abc
-echo "vary: {{@@ vary @@}}" >> ${tmps}/dotfiles/abc
+echo "var3: {{@@ var3 @@}}" > "${tmps}"/dotfiles/abc
+echo "dvar3: {{@@ dvar3 @@}}" >> "${tmps}"/dotfiles/abc
+echo "var4: {{@@ var4 @@}}" >> "${tmps}"/dotfiles/abc
+echo "dvar4: {{@@ dvar4 @@}}" >> "${tmps}"/dotfiles/abc
+echo "varx: {{@@ varx @@}}" >> "${tmps}"/dotfiles/abc
+echo "vary: {{@@ vary @@}}" >> "${tmps}"/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 echo "test2"
-cat ${tmpd}/abc
-grep '^var3: extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar3: extdvar1 dvar2 dvar3' ${tmpd}/abc >/dev/null
-grep '^var4: echo extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^dvar4: extvar1 var2 var3' ${tmpd}/abc >/dev/null
-grep '^varx: profvarx' ${tmpd}/abc >/dev/null
-grep '^vary: profvary' ${tmpd}/abc >/dev/null
+cat "${tmpd}"/abc
+grep '^var3: extvar1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar3: extdvar1 dvar2 dvar3' "${tmpd}"/abc >/dev/null
+grep '^var4: echo extvar1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^dvar4: extvar1 var2 var3' "${tmpd}"/abc >/dev/null
+grep '^varx: profvarx' "${tmpd}"/abc >/dev/null
+grep '^vary: profvary' "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0

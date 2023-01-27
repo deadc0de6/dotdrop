@@ -28,19 +28,22 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -54,27 +57,27 @@ grep_or_fail()
 }
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmpd}
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmpd}"
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # dotdrop directory
-mkdir -p ${tmpd}/a/{b,c}
-echo 'a' > ${tmpd}/a/b/abfile
-echo 'a' > ${tmpd}/a/c/acfile
-echo 'a' > ${tmpd}/a/b/newfile
-mkdir -p ${tmpd}/a/newdir
-echo 'a' > ${tmpd}/a/newdir/newfile
+mkdir -p "${tmpd}"/a/{b,c}
+echo 'a' > "${tmpd}"/a/b/abfile
+echo 'a' > "${tmpd}"/a/c/acfile
+echo 'a' > "${tmpd}"/a/b/newfile
+mkdir -p "${tmpd}"/a/newdir
+echo 'a' > "${tmpd}"/a/newdir/newfile
 
 # create the config file
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -90,11 +93,11 @@ _EOF
 
 # import
 echo "[+] import"
-cd ${ddpath} | ${bin} import -c ${cfg} -f --verbose --profile=p1 ${tmpd}/a
+cd "${ddpath}" | ${bin} import -c "${cfg}" -f --verbose --profile=p1 "${tmpd}"/a
 
-[ -d ${tmps}/dotfiles/newdir ] && echo "newdir not ignored" && exit 1
-[ -e ${tmps}/dotfiles/newdir/newfile ] && echo "newfile not ignored" && exit 1
-[ -e ${tmps}/dotfiles/a/b/newfile ] && echo "newfile not ignored" && exit 1
+[ -d "${tmps}"/dotfiles/newdir ] && echo "newdir not ignored" && exit 1
+[ -e "${tmps}"/dotfiles/newdir/newfile ] && echo "newfile not ignored" && exit 1
+[ -e "${tmps}"/dotfiles/a/b/newfile ] && echo "newfile not ignored" && exit 1
 
 echo "OK"
 exit 0

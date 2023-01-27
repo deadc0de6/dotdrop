@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 extdotfiles="${tmps}/df_p1.yaml"
 
 clear_on_exit "${tmps}"
@@ -62,7 +65,7 @@ dynextdotfiles="${tmps}/ext_${dynextdotfiles_name}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -87,42 +90,42 @@ profiles:
     dotfiles:
     - f_abc
     import:
-    - $(basename ${extdotfiles})
+    - $(basename "${extdotfiles}")
     - "ext_{{@@ d_uid @@}}"
 _EOF
 
 # create the external dotfile file
-cat > ${extdotfiles} << _EOF
+cat > "${extdotfiles}" << _EOF
 dotfiles:
   - f_def
   - f_xyz
 _EOF
 
-cat > ${dynextdotfiles} << _EOF
+cat > "${dynextdotfiles}" << _EOF
 dotfiles:
   - f_dyn
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
-echo "abc" > ${tmps}/dotfiles/abc
-echo "def" > ${tmps}/dotfiles/def
-echo "xyz" > ${tmps}/dotfiles/xyz
-echo "dyn" > ${tmps}/dotfiles/dyn
+mkdir -p "${tmps}"/dotfiles/
+echo "abc" > "${tmps}"/dotfiles/abc
+echo "def" > "${tmps}"/dotfiles/def
+echo "xyz" > "${tmps}"/dotfiles/xyz
+echo "dyn" > "${tmps}"/dotfiles/dyn
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 # checks
-[ ! -e ${tmpd}/abc ] && exit 1
-[ ! -e ${tmpd}/def ] && exit 1
-[ ! -e ${tmpd}/xyz ] && exit 1
-[ ! -e ${tmpd}/dyn ] && exit 1
+[ ! -e "${tmpd}"/abc ] && exit 1
+[ ! -e "${tmpd}"/def ] && exit 1
+[ ! -e "${tmpd}"/xyz ] && exit 1
+[ ! -e "${tmpd}"/dyn ] && exit 1
 echo 'file found'
-grep 'abc' ${tmpd}/abc >/dev/null 2>&1
-grep 'def' ${tmpd}/def >/dev/null 2>&1
-grep 'xyz' ${tmpd}/xyz >/dev/null 2>&1
-grep 'dyn' ${tmpd}/dyn >/dev/null 2>&1
+grep 'abc' "${tmpd}"/abc >/dev/null 2>&1
+grep 'def' "${tmpd}"/def >/dev/null 2>&1
+grep 'xyz' "${tmpd}"/xyz >/dev/null 2>&1
+grep 'dyn' "${tmpd}"/dyn >/dev/null 2>&1
 
 echo "OK"
 exit 0

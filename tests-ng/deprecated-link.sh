@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: false
   create: true
@@ -103,38 +106,38 @@ profiles:
     - f_children2
     - f_children3
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
 # create the dotfiles
-echo "test" > ${tmps}/dotfiles/abc
-echo "test" > ${tmpd}/abc
+echo "test" > "${tmps}"/dotfiles/abc
+echo "test" > "${tmpd}"/abc
 
 # compare
-cd ${ddpath} | ${bin} compare -c ${cfg} -p p1
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1
 # install
 #cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
 
-cat ${cfg}
+cat "${cfg}"
 
 # fail if find some of these entries
 echo "========> test for bad entries"
 set +e
-grep 'link_children: true' ${cfg} >/dev/null && exit 1
-grep 'link_children: false' ${cfg} >/dev/null && exit 1
-grep 'link: true' ${cfg} >/dev/null && exit 1
-grep 'link: false' ${cfg} >/dev/null && exit 1
-grep 'link_by_default: true' ${cfg} >/dev/null && exit 1
-grep 'link_by_default: false' ${cfg} >/dev/null && exit 1
+grep 'link_children: true' "${cfg}" >/dev/null && exit 1
+grep 'link_children: false' "${cfg}" >/dev/null && exit 1
+grep 'link: true' "${cfg}" >/dev/null && exit 1
+grep 'link: false' "${cfg}" >/dev/null && exit 1
+grep 'link_by_default: true' "${cfg}" >/dev/null && exit 1
+grep 'link_by_default: false' "${cfg}" >/dev/null && exit 1
 set -e
 
 # test values have been correctly updated
 echo "========> test for updated entries"
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_link' | head -1 | grep ',link:absolute,'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink'    | head -1 | grep ',link:nolink,'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_nolink1'   | head -1 | grep ',link:nolink,'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children'  | head -1 | grep ',link:link_children,'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children2' | head -1 | grep ',link:link_children,'
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -G | grep '^f_children3' | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_link' | head -1 | grep ',link:absolute,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_nolink'    | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_nolink1'   | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_children'  | head -1 | grep ',link:link_children,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_children2' | head -1 | grep ',link:link_children,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | grep '^f_children3' | head -1 | grep ',link:nolink,'
 
 echo "OK"
 exit 0

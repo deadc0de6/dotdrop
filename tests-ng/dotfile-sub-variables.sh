@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -75,32 +78,32 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-mkdir -p ${tmps}/dotfiles/abc
+mkdir -p "${tmps}"/dotfiles/abc
 # file1
-echo 'src:{{@@ _dotfile_sub_abs_src @@}}' > ${tmps}/dotfiles/abc/file1
-echo 'dst:{{@@ _dotfile_sub_abs_dst @@}}' >> ${tmps}/dotfiles/abc/file1
+echo 'src:{{@@ _dotfile_sub_abs_src @@}}' > "${tmps}"/dotfiles/abc/file1
+echo 'dst:{{@@ _dotfile_sub_abs_dst @@}}' >> "${tmps}"/dotfiles/abc/file1
 
 # file2
-mkdir -p ${tmps}/dotfiles/abc/subdir
-echo 'src:{{@@ _dotfile_sub_abs_src @@}}' > ${tmps}/dotfiles/abc/subdir/file2
-echo 'dst:{{@@ _dotfile_sub_abs_dst @@}}' >> ${tmps}/dotfiles/abc/subdir/file2
+mkdir -p "${tmps}"/dotfiles/abc/subdir
+echo 'src:{{@@ _dotfile_sub_abs_src @@}}' > "${tmps}"/dotfiles/abc/subdir/file2
+echo 'dst:{{@@ _dotfile_sub_abs_dst @@}}' >> "${tmps}"/dotfiles/abc/subdir/file2
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 # checks
-[ ! -d ${tmpd}/abc ] && echo 'dotfile not installed' && exit 1
-[ ! -e ${tmpd}/abc/file1 ] && echo 'dotfile sub src not installed' && exit 1
-[ ! -e ${tmpd}/abc/subdir/file2 ] && echo 'dotfile sub dst not installed' && exit 1
+[ ! -d "${tmpd}"/abc ] && echo 'dotfile not installed' && exit 1
+[ ! -e "${tmpd}"/abc/file1 ] && echo 'dotfile sub src not installed' && exit 1
+[ ! -e "${tmpd}"/abc/subdir/file2 ] && echo 'dotfile sub dst not installed' && exit 1
 
-cat ${tmpd}/abc/file1
-cat ${tmpd}/abc/subdir/file2
+cat "${tmpd}"/abc/file1
+cat "${tmpd}"/abc/subdir/file2
 
-grep "src:${tmps}/dotfiles/abc/file1" ${tmpd}/abc/file1 >/dev/null
-grep "dst:${tmpd}/abc/file1" ${tmpd}/abc/file1>/dev/null
+grep "src:${tmps}/dotfiles/abc/file1" "${tmpd}"/abc/file1 >/dev/null
+grep "dst:${tmpd}/abc/file1" "${tmpd}"/abc/file1>/dev/null
 
-grep "src:${tmps}/dotfiles/abc/subdir/file2" ${tmpd}/abc/subdir/file2 >/dev/null
-grep "dst:${tmpd}/abc/subdir/file2" ${tmpd}/abc/subdir/file2 >/dev/null
+grep "src:${tmps}/dotfiles/abc/subdir/file2" "${tmpd}"/abc/subdir/file2 >/dev/null
+grep "dst:${tmpd}/abc/subdir/file2" "${tmpd}"/abc/subdir/file2 >/dev/null
 
 echo "OK"
 exit 0

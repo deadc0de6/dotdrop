@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -59,13 +62,13 @@ clear_on_exit "${tmpd}"
 # create the config file
 extcfg="${tmps}/ext-config.yaml"
 cfg="${tmps}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
   import_configs:
-  - $(basename ${extcfg})
+  - $(basename "${extcfg}")
 variables:
   varx: "test"
   provar: "local"
@@ -87,10 +90,10 @@ profiles:
       dvarx: echo dprofvarx
       dprovar: echo dprovar
 _EOF
-cat ${cfg}
+cat "${cfg}"
 
 # create the external variables file
-cat > ${extcfg} << _EOF
+cat > "${extcfg}" << _EOF
 config:
 profiles:
   p2:
@@ -104,36 +107,36 @@ profiles:
       dprovar: echo extdprovar
 dotfiles:
 _EOF
-ls -l ${extcfg}
-cat ${extcfg}
+ls -l "${extcfg}"
+cat "${extcfg}"
 
 # create the dotfile
-echo "varx: {{@@ varx @@}}" > ${tmps}/dotfiles/abc
-echo "provar: {{@@ provar @@}}" >> ${tmps}/dotfiles/abc
-echo "dvarx: {{@@ dvarx @@}}" >> ${tmps}/dotfiles/abc
-echo "dprovar: {{@@ dprovar@@}}" >> ${tmps}/dotfiles/abc
+echo "varx: {{@@ varx @@}}" > "${tmps}"/dotfiles/abc
+echo "provar: {{@@ provar @@}}" >> "${tmps}"/dotfiles/abc
+echo "dvarx: {{@@ dvarx @@}}" >> "${tmps}"/dotfiles/abc
+echo "dprovar: {{@@ dprovar@@}}" >> "${tmps}"/dotfiles/abc
 
 #cat ${tmps}/dotfiles/abc
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p2 -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p2 -V
 
 echo "test1"
-cat ${tmpd}/abc
-grep '^varx: extprofvarx' ${tmpd}/abc >/dev/null
-grep '^provar: extprovar' ${tmpd}/abc >/dev/null
-grep '^dvarx: extdprofvarx' ${tmpd}/abc >/dev/null
-grep '^dprovar: extdprovar' ${tmpd}/abc >/dev/null
+cat "${tmpd}"/abc
+grep '^varx: extprofvarx' "${tmpd}"/abc >/dev/null
+grep '^provar: extprovar' "${tmpd}"/abc >/dev/null
+grep '^dvarx: extdprofvarx' "${tmpd}"/abc >/dev/null
+grep '^dprovar: extdprovar' "${tmpd}"/abc >/dev/null
 
-rm -f ${tmpd}/abc
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
+rm -f "${tmpd}"/abc
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
 echo "test2"
-cat ${tmpd}/abc
-grep '^varx: profvarx' ${tmpd}/abc >/dev/null
-grep '^provar: provar' ${tmpd}/abc >/dev/null
-grep '^dvarx: dprofvarx' ${tmpd}/abc >/dev/null
-grep '^dprovar: dprovar' ${tmpd}/abc >/dev/null
+cat "${tmpd}"/abc
+grep '^varx: profvarx' "${tmpd}"/abc >/dev/null
+grep '^provar: provar' "${tmpd}"/abc >/dev/null
+grep '^dvarx: dprofvarx' "${tmpd}"/abc >/dev/null
+grep '^dprovar: dprovar' "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0

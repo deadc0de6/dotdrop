@@ -28,29 +28,32 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -85,26 +88,26 @@ profiles:
 _EOF
 
 # create the source
-mkdir -p ${tmps}/dotfiles/
+mkdir -p "${tmps}"/dotfiles/
 content_abc="testrecinclude_abc"
-echo "${content_abc}" > ${tmps}/dotfiles/abc
+echo "${content_abc}" > "${tmps}"/dotfiles/abc
 content_def="testrecinclude_def"
-echo "${content_def}" > ${tmps}/dotfiles/def
+echo "${content_def}" > "${tmps}"/dotfiles/def
 
 # install
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p host -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p host -V
 
 # checks
-[ ! -e ${tmpd}/abc ] && echo "abc not installed" && exit 1
+[ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
 echo "abc installed"
-grep ${content_abc} ${tmpd}/abc
+grep ${content_abc} "${tmpd}"/abc
 
-[ ! -e ${tmpd}/def ] && echo "def not installed" && exit 1
+[ ! -e "${tmpd}"/def ] && echo "def not installed" && exit 1
 echo "def installed"
-grep ${content_def} ${tmpd}/def
+grep ${content_def} "${tmpd}"/def
 
 # test cyclic include
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -134,7 +137,7 @@ _EOF
 
 # install
 set +e
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p host -V
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p host -V
 [ "$?" = 0 ] && exit 1
 set -e
 

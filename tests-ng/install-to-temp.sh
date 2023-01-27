@@ -28,28 +28,31 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
-hash coverage 2>/dev/null && bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop" || true
+if hash coverage 2>/dev/null; then
+  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+fi
 
 echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename $BASH_SOURCE) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # dotdrop directory
-basedir=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${basedir}/dotfiles
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${basedir}"/dotfiles
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 
@@ -58,7 +61,7 @@ clear_on_exit "${tmpd}"
 
 # create the config file
 cfg="${basedir}/config.yaml"
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -82,19 +85,19 @@ profiles:
     - f_z
 _EOF
 
-echo 'test_x' > ${basedir}/dotfiles/x
-echo 'test_y' > ${basedir}/dotfiles/y
-echo "00000000  01 02 03 04 05" | xxd -r - ${basedir}/dotfiles/z
+echo 'test_x' > "${basedir}"/dotfiles/x
+echo 'test_y' > "${basedir}"/dotfiles/y
+echo "00000000  01 02 03 04 05" | xxd -r - "${basedir}"/dotfiles/z
 
 echo "[+] install"
 log="${basedir}/log"
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 --showdiff --verbose --temp > ${log}
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --showdiff --verbose --temp > "${log}"
 
-tmpfile=`cat ${basedir}/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/'`
+tmpfile=$(cat "${basedir}"/log | grep 'installed to tmp ' | sed 's/^.*to tmp "\(.*\)"./\1/')
 echo "tmpfile: ${tmpfile}"
 clear_on_exit "${tmpfile}"
 
-cat ${log} | grep '^3 dotfile(s) installed.$'
+cat "${log}" | grep '^3 dotfile(s) installed.$'
 [ "$?" != "0" ] && exit 1
 
 echo "OK"
