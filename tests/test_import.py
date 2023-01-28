@@ -156,14 +156,14 @@ class TestImport(unittest.TestCase):
                              get_path_strip_version(dotfile5))
         self.assertTrue(os.path.exists(indt5))
         fsb1 = os.path.join(dotfilespath,
-                          self.CONFIG_DOTPATH,
-                          get_path_strip_version(dotfile6),
-                          sub1)
+                            self.CONFIG_DOTPATH,
+                            get_path_strip_version(dotfile6),
+                            sub1)
         self.assertTrue(os.path.exists(fsb1))
         fsb2 = os.path.join(dotfilespath,
-                          self.CONFIG_DOTPATH,
-                          get_path_strip_version(dotfile6),
-                          sub2)
+                            self.CONFIG_DOTPATH,
+                            get_path_strip_version(dotfile6),
+                            sub2)
         self.assertTrue(os.path.exists(fsb2))
         indt6 = os.path.join(dotfilespath,
                              self.CONFIG_DOTPATH,
@@ -174,14 +174,14 @@ class TestImport(unittest.TestCase):
                              get_path_strip_version(dotfile7))
         self.assertTrue(os.path.exists(indt7))
         fsb3 = os.path.join(dotfilespath,
-                          self.CONFIG_DOTPATH,
-                          get_path_strip_version(dotfile7),
-                          sub3)
+                            self.CONFIG_DOTPATH,
+                            get_path_strip_version(dotfile7),
+                            sub3)
         self.assertTrue(os.path.exists(fsb3))
         fsb4 = os.path.join(dotfilespath,
-                          self.CONFIG_DOTPATH,
-                          get_path_strip_version(dotfile7),
-                          sub4)
+                            self.CONFIG_DOTPATH,
+                            get_path_strip_version(dotfile7),
+                            sub4)
         self.assertTrue(os.path.exists(fsb4))
 
         cmd_list_profiles(opt)
@@ -360,7 +360,7 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(t.endswith('ing') for t in transformations))
 
         # testing variables
-        variables = self._remove_priv_vars(ycont['variables'].keys())
+        variables = _remove_priv_vars(ycont['variables'].keys())
         self.assertTrue(all(v.endswith('ed') for v in variables))
         self.assertFalse(any(v.endswith('ing') for v in variables))
         dyn_variables = ycont['dynvariables'].keys()
@@ -402,18 +402,19 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(t.endswith('ed') for t in transformations))
 
         # testing variables
-        variables = self._remove_priv_vars(ycont['variables'].keys())
+        variables = _remove_priv_vars(ycont['variables'].keys())
         self.assertTrue(all(v.endswith('ing') for v in variables))
         self.assertFalse(any(v.endswith('ed') for v in variables))
         dyn_variables = ycont['dynvariables'].keys()
         self.assertTrue(all(dv.endswith('ing') for dv in dyn_variables))
         self.assertFalse(any(dv.endswith('ed') for dv in dyn_variables))
 
-    def _remove_priv_vars(self, variables_keys):
-        variables = [v for v in variables_keys if not v.startswith('_')]
-        if 'profile' in variables:
-            variables.remove('profile')
-        return variables
+
+def _remove_priv_vars(variables_keys):
+    variables = [v for v in variables_keys if not v.startswith('_')]
+    if 'profile' in variables:
+        variables.remove('profile')
+    return variables
 
 
 def main():
