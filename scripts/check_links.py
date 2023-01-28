@@ -27,6 +27,9 @@ VALID_RET = [
 IGNORES = [
   'badgen.net',
 ]
+IGNORE_GENERIC = [
+    'assets/dotdrop.svg'
+]
 USER_AGENT = (
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
     'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -56,18 +59,31 @@ def check_links(urls):
     ign = 0
     for url in urls:
         cnt += 1
+        ignored = False
+        print(f'    checking {MAGENTA}{url}{RESET}')
+        for ignore in IGNORE_GENERIC:
+            if ignore in url:
+                print(f'    {YELLOW}[IGN]{RESET} {url}')
+                ign += 1
+                ignored = True
+                break
+        if ignored:
+            continue
         hostname = urlparse(url).hostname
         if hostname in IGNORES:
             print(f'    {YELLOW}[IGN]{RESET} {url}')
             ign += 1
             continue
-        print(f'    checking {MAGENTA}{url}{RESET}')
 
         verb = 'head'
-        ret = requests.head(url,
-                            timeout=TIMEOUT,
-                            allow_redirects=True,
-                            headers=HEADERS).status_code
+        try:
+            ret = requests.head(url,
+                                timeout=TIMEOUT,
+                                allow_redirects=True,
+                                headers=HEADERS).status_code
+        # pylint: disable=W0703
+        except Exception:
+            ret = 404
         if ret not in VALID_RET:
             msg = (
                 f'    {YELLOW}[WARN]{RESET} HEAD {url} returned {ret}'
