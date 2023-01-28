@@ -6,55 +6,73 @@
 #set -ev
 set -e
 
-# test shell scripts
+# ensure binaries are here
 if ! which shellcheck >/dev/null 2>&1; then
   echo "Install shellcheck"
   exit 1
 fi
-echo "shellcheck version:"
+echo "=> shellcheck version:"
 shellcheck --version
-# SC2002: Useless cat
-# SC2126: Consider using grep -c instead of grep|wc -l
-# SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
-# SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?
-find . -iname '*.sh' | while read -r script; do
-  shellcheck -x \
-    -e SC2002 \
-    -e SC2126 \
-    -e SC2129 \
-    -e SC2181 \
-    "${script}"
-done
 
 # python tools versions
-echo "pylint version:"
+if ! which pylint >/dev/null 2>&1; then
+  echo "Install pylint"
+  exit 1
+fi
+echo "=> pylint version:"
 pylint --version
-echo "pycodestyle version:"
-pycodestyle --version
-echo "pyflakes version:"
-pyflakes --version
 
-# PEP8 tests
-which pycodestyle >/dev/null 2>&1
 if ! which pycodestyle >/dev/null 2>&1; then
   echo "Install pycodestyle"
   exit 1
 fi
-echo "testing with pycodestyle"
+echo "=> pycodestyle version:"
+pycodestyle --version
+
+if ! which pyflakes >/dev/null 2>&1; then
+  echo "Install pyflakes"
+  exit 1
+fi
+echo "=> pyflakes version:"
+pyflakes --version
+
+echo "---------------------"
+
+# check shell scripts
+# SC2002: Useless cat
+# SC2126: Consider using grep -c instead of grep|wc -l
+# SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
+# SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?
+echo "checking shell scripts with shellcheck"
+find . -iname '*.sh' | while read -r script; do
+  echo "checking ${script}"
+  shellcheck -x \
+    -e SC2002 \
+    -e SC2126 \
+    -e SC2129 \
+    -e SC2181 "${script}"
+done
+
+# check other python scripts
+echo "checking other python scripts with pylint"
+find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
+  echo "checking ${script}"
+  pylint --reports=no "${script}"
+done
+
+# PEP8 tests
 # W503: Line break occurred before a binary operator
 # W504: Line break occurred after a binary operator
+echo "checking dotdrop with pycodestyle"
 pycodestyle --ignore=W503,W504 dotdrop/
-pycodestyle tests/
 pycodestyle scripts/
 
 # pyflakes tests
-echo "testing with pyflakes"
+echo "checking dotdrop with pyflakes"
 pyflakes dotdrop/
-pyflakes tests/
-pyflakes scripts/
 
 # pylint
-echo "testing with pylint"
+echo "checking dotdrop with pylint"
 # https://pylint.pycqa.org/en/latest/user_guide/checkers/features.html
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
@@ -74,19 +92,6 @@ pylint \
   --disable=R0911 \
   --disable=R0904 \
   dotdrop/
-
-# C0103: invalid-name
-pylint \
-  --disable=R0902 \
-  --disable=R0913 \
-  --disable=R0903 \
-  --disable=R0914 \
-  --disable=R0915 \
-  --disable=R0912 \
-  --disable=R0911 \
-  --disable=R0904 \
-  --disable=C0103 \
-  scripts/
 
 set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
