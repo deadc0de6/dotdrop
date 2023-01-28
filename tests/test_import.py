@@ -22,6 +22,7 @@ from tests.helpers import (clean, create_dir, create_fake_config,
 
 
 class TestImport(unittest.TestCase):
+    """test case"""
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
@@ -33,11 +34,11 @@ class TestImport(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
         return yaml_load(path)
 
-    def assert_file(self, path, o, profile):
+    def assert_file(self, path, opt, _profile):
         """Make sure path has been inserted in conf for profile"""
         strip = get_path_strip_version(path)
-        self.assertTrue(any(x.src.endswith(strip) for x in o.dotfiles))
-        dsts = (os.path.expanduser(x.dst) for x in o.dotfiles)
+        self.assertTrue(any(x.src.endswith(strip) for x in opt.dotfiles))
+        dsts = (os.path.expanduser(x.dst) for x in opt.dotfiles)
         self.assertTrue(path in dsts)
 
     def assert_in_yaml(self, path, dic, link=False):
@@ -63,12 +64,12 @@ class TestImport(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        o = load_options(confpath, profile)
+        opt = load_options(confpath, profile)
 
         # create some random dotfiles
-        dotfile1, content1 = create_random_file(src)
+        dotfile1, _ = create_random_file(src)
         self.addCleanup(clean, dotfile1)
-        dotfile2, content2 = create_random_file(os.path.expanduser('~'))
+        dotfile2, _ = create_random_file(os.path.expanduser('~'))
         self.addCleanup(clean, dotfile2)
         homeconf = os.path.join(os.path.expanduser('~'), '.config')
         if not os.path.exists(homeconf):
@@ -77,8 +78,8 @@ class TestImport(unittest.TestCase):
         dotconfig = os.path.join(homeconf, get_string(5))
         create_dir(dotconfig)
         self.addCleanup(clean, dotconfig)
-        dotfile3, content3 = create_random_file(dotconfig)
-        dotfile4, content3 = create_random_file(homeconf)
+        dotfile3, _ = create_random_file(dotconfig)
+        dotfile4, _ = create_random_file(homeconf)
         self.addCleanup(clean, dotfile4)
 
         # fake a directory containing dotfiles
@@ -89,7 +90,7 @@ class TestImport(unittest.TestCase):
         sub2, _ = create_random_file(dotfile5)
 
         # fake a file for symlink
-        dotfile6, content6 = create_random_file(dotconfig)
+        dotfile6, _ = create_random_file(dotconfig)
         self.addCleanup(clean, dotfile6)
 
         # fake a directory for symlink
@@ -101,37 +102,37 @@ class TestImport(unittest.TestCase):
 
         # import the dotfiles
         dfiles = [dotfile1, dotfile2, dotfile3, dotfile4, dotfile5]
-        o.import_path = dfiles
-        cmd_importer(o)
+        opt.import_path = dfiles
+        cmd_importer(opt)
         # import symlink
-        o.import_link = LinkTypes.LINK
+        opt.import_link = LinkTypes.LINK
         sfiles = [dotfile6, dotfile7]
-        o.import_path = sfiles
-        cmd_importer(o)
-        o.import_link = LinkTypes.NOLINK
+        opt.import_path = sfiles
+        cmd_importer(opt)
+        opt.import_link = LinkTypes.NOLINK
 
         # reload the config
-        o = load_options(confpath, profile)
+        opt = load_options(confpath, profile)
 
         # test dotfiles in config class
-        self.assertTrue(profile in [p.key for p in o.profiles])
-        self.assert_file(dotfile1, o, profile)
-        self.assert_file(dotfile2, o, profile)
-        self.assert_file(dotfile3, o, profile)
-        self.assert_file(dotfile4, o, profile)
-        self.assert_file(dotfile5, o, profile)
-        self.assert_file(dotfile6, o, profile)
-        self.assert_file(dotfile7, o, profile)
+        self.assertTrue(profile in [p.key for p in opt.profiles])
+        self.assert_file(dotfile1, opt, profile)
+        self.assert_file(dotfile2, opt, profile)
+        self.assert_file(dotfile3, opt, profile)
+        self.assert_file(dotfile4, opt, profile)
+        self.assert_file(dotfile5, opt, profile)
+        self.assert_file(dotfile6, opt, profile)
+        self.assert_file(dotfile7, opt, profile)
 
         # test dotfiles in yaml file
-        y = self.load_yaml(confpath)
-        self.assert_in_yaml(dotfile1, y)
-        self.assert_in_yaml(dotfile2, y)
-        self.assert_in_yaml(dotfile3, y)
-        self.assert_in_yaml(dotfile4, y)
-        self.assert_in_yaml(dotfile5, y)
-        self.assert_in_yaml(dotfile6, y, link=True)
-        self.assert_in_yaml(dotfile7, y, link=True)
+        cont2 = self.load_yaml(confpath)
+        self.assert_in_yaml(dotfile1, cont2)
+        self.assert_in_yaml(dotfile2, cont2)
+        self.assert_in_yaml(dotfile3, cont2)
+        self.assert_in_yaml(dotfile4, cont2)
+        self.assert_in_yaml(dotfile5, cont2)
+        self.assert_in_yaml(dotfile6, cont2, link=True)
+        self.assert_in_yaml(dotfile7, cont2, link=True)
 
         # test have been imported in dotdrop dotpath directory
         indt1 = os.path.join(dotfilespath,
@@ -154,16 +155,16 @@ class TestImport(unittest.TestCase):
                              self.CONFIG_DOTPATH,
                              get_path_strip_version(dotfile5))
         self.assertTrue(os.path.exists(indt5))
-        s1 = os.path.join(dotfilespath,
+        fsb1 = os.path.join(dotfilespath,
                           self.CONFIG_DOTPATH,
                           get_path_strip_version(dotfile6),
                           sub1)
-        self.assertTrue(os.path.exists(s1))
-        s2 = os.path.join(dotfilespath,
+        self.assertTrue(os.path.exists(fsb1))
+        fsb2 = os.path.join(dotfilespath,
                           self.CONFIG_DOTPATH,
                           get_path_strip_version(dotfile6),
                           sub2)
-        self.assertTrue(os.path.exists(s2))
+        self.assertTrue(os.path.exists(fsb2))
         indt6 = os.path.join(dotfilespath,
                              self.CONFIG_DOTPATH,
                              get_path_strip_version(dotfile6))
@@ -172,29 +173,31 @@ class TestImport(unittest.TestCase):
                              self.CONFIG_DOTPATH,
                              get_path_strip_version(dotfile7))
         self.assertTrue(os.path.exists(indt7))
-        s3 = os.path.join(dotfilespath,
+        fsb3 = os.path.join(dotfilespath,
                           self.CONFIG_DOTPATH,
                           get_path_strip_version(dotfile7),
                           sub3)
-        self.assertTrue(os.path.exists(s3))
-        s4 = os.path.join(dotfilespath,
+        self.assertTrue(os.path.exists(fsb3))
+        fsb4 = os.path.join(dotfilespath,
                           self.CONFIG_DOTPATH,
                           get_path_strip_version(dotfile7),
                           sub4)
-        self.assertTrue(os.path.exists(s4))
+        self.assertTrue(os.path.exists(fsb4))
 
-        cmd_list_profiles(o)
-        cmd_files(o)
+        cmd_list_profiles(opt)
+        cmd_files(opt)
 
         # fake test update
         editcontent = 'edited'
         edit_content(dotfile1, editcontent)
-        o.safe = False
-        o.update_path = [dotfile1]
-        o.debug = True
-        cmd_update(o)
-        c2 = open(indt1, 'r').read()
-        self.assertTrue(editcontent == c2)
+        opt.safe = False
+        opt.update_path = [dotfile1]
+        opt.debug = True
+        cmd_update(opt)
+        cont = ''
+        with open(indt1, 'r', encoding='utf-8') as file:
+            cont = file.read()
+        self.assertTrue(editcontent == cont)
 
     def test_ext_config_yaml_not_mix(self):
         """Test whether the import_configs mixes yaml files upon importing."""
@@ -311,37 +314,37 @@ class TestImport(unittest.TestCase):
         })
 
         # import the dotfiles
-        o = load_options(imported_path, 'host1')
-        o.import_path = dotfiles_ed
-        cmd_importer(o)
+        opt = load_options(imported_path, 'host1')
+        opt.import_path = dotfiles_ed
+        cmd_importer(opt)
 
-        o = load_options(importing_path, 'host2')
-        o.import_path = dotfiles_ing
-        cmd_importer(o)
+        opt = load_options(importing_path, 'host2')
+        opt.import_path = dotfiles_ing
+        cmd_importer(opt)
 
         # reload the config
-        o = load_options(importing_path, 'host2')
+        opt = load_options(importing_path, 'host2')
 
         # test imported config
-        y = self.load_yaml(imported_path)
+        ycont = self.load_yaml(imported_path)
 
         # testing dotfiles
-        self.assertTrue(all(file_in_yaml(y, df)
+        self.assertTrue(all(file_in_yaml(ycont, df)
                             for df in dotfiles_ed))
-        self.assertFalse(any(file_in_yaml(y, df)
+        self.assertFalse(any(file_in_yaml(ycont, df)
                              for df in dotfiles_ing))
 
         # testing profiles
-        profiles = y['profiles'].keys()
+        profiles = ycont['profiles'].keys()
         self.assertTrue('host1' in profiles)
         self.assertFalse('host2' in profiles)
 
         # testing actions
-        actions = y['actions']['pre']
-        actions.update(y['actions']['post'])
+        actions = ycont['actions']['pre']
+        actions.update(ycont['actions']['post'])
         actions.update({
             k: v
-            for k, v in y['actions'].items()
+            for k, v in ycont['actions'].items()
             if k not in ('pre', 'post')
         })
         actions = actions.keys()
@@ -349,41 +352,41 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(a.endswith('ing') for a in actions))
 
         # testing transformations
-        transformations = y['trans_read'].keys()
+        transformations = ycont['trans_read'].keys()
         self.assertTrue(all(t.endswith('ed') for t in transformations))
         self.assertFalse(any(t.endswith('ing') for t in transformations))
-        transformations = y['trans_write'].keys()
+        transformations = ycont['trans_write'].keys()
         self.assertTrue(all(t.endswith('ed') for t in transformations))
         self.assertFalse(any(t.endswith('ing') for t in transformations))
 
         # testing variables
-        variables = self._remove_priv_vars(y['variables'].keys())
+        variables = self._remove_priv_vars(ycont['variables'].keys())
         self.assertTrue(all(v.endswith('ed') for v in variables))
         self.assertFalse(any(v.endswith('ing') for v in variables))
-        dyn_variables = y['dynvariables'].keys()
+        dyn_variables = ycont['dynvariables'].keys()
         self.assertTrue(all(dv.endswith('ed') for dv in dyn_variables))
         self.assertFalse(any(dv.endswith('ing') for dv in dyn_variables))
 
         # test importing config
-        y = self.load_yaml(importing_path)
+        ycont = self.load_yaml(importing_path)
 
         # testing dotfiles
-        self.assertTrue(all(file_in_yaml(y, df)
+        self.assertTrue(all(file_in_yaml(ycont, df)
                             for df in dotfiles_ing))
-        self.assertFalse(any(file_in_yaml(y, df)
+        self.assertFalse(any(file_in_yaml(ycont, df)
                              for df in dotfiles_ed))
 
         # testing profiles
-        profiles = y['profiles'].keys()
+        profiles = ycont['profiles'].keys()
         self.assertTrue('host2' in profiles)
         self.assertFalse('host1' in profiles)
 
         # testing actions
-        actions = y['actions']['pre']
-        actions.update(y['actions']['post'])
+        actions = ycont['actions']['pre']
+        actions.update(ycont['actions']['post'])
         actions.update({
             k: v
-            for k, v in y['actions'].items()
+            for k, v in ycont['actions'].items()
             if k not in ('pre', 'post')
         })
         actions = actions.keys()
@@ -391,18 +394,18 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(action.endswith('ed') for action in actions))
 
         # testing transformations
-        transformations = y['trans_read'].keys()
+        transformations = ycont['trans_read'].keys()
         self.assertTrue(all(t.endswith('ing') for t in transformations))
         self.assertFalse(any(t.endswith('ed') for t in transformations))
-        transformations = y['trans_write'].keys()
+        transformations = ycont['trans_write'].keys()
         self.assertTrue(all(t.endswith('ing') for t in transformations))
         self.assertFalse(any(t.endswith('ed') for t in transformations))
 
         # testing variables
-        variables = self._remove_priv_vars(y['variables'].keys())
+        variables = self._remove_priv_vars(ycont['variables'].keys())
         self.assertTrue(all(v.endswith('ing') for v in variables))
         self.assertFalse(any(v.endswith('ed') for v in variables))
-        dyn_variables = y['dynvariables'].keys()
+        dyn_variables = ycont['dynvariables'].keys()
         self.assertTrue(all(dv.endswith('ing') for dv in dyn_variables))
         self.assertFalse(any(dv.endswith('ed') for dv in dyn_variables))
 
@@ -414,6 +417,7 @@ class TestImport(unittest.TestCase):
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

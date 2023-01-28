@@ -47,13 +47,13 @@ class TestUpdate(unittest.TestCase):
         self.addCleanup(clean, dotfilespath)
 
         # create the dotfiles to test
-        d1, _ = create_random_file(fold_config)
-        self.assertTrue(os.path.exists(d1))
-        self.addCleanup(clean, d1)
+        dotfilefile1, _ = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(dotfilefile1))
+        self.addCleanup(clean, dotfilefile1)
 
-        d2, _ = create_random_file(fold_config)
-        self.assertTrue(os.path.exists(d2))
-        self.addCleanup(clean, d2)
+        dotfilefile2, _ = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(dotfilefile2))
+        self.addCleanup(clean, dotfilefile2)
 
         # template
         d3t, _ = create_random_file(fold_config)
@@ -96,7 +96,7 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(confpath))
         opt = load_options(confpath, profile)
         opt.update_showpatch = True
-        dfiles = [d1, dir1, d2, d3t, dsubstmp]
+        dfiles = [dotfilefile1, dir1, dotfilefile2, d3t, dsubstmp]
 
         # import the files
         opt.import_path = dfiles
@@ -138,7 +138,7 @@ class TestUpdate(unittest.TestCase):
         self.assertFalse(os.path.exists(gone))
 
         # edit the files
-        edit_content(d1, 'newcontent')
+        edit_content(dotfilefile1, 'newcontent')
         edit_content(dirf1, 'newcontent')
 
         # add more file
@@ -150,12 +150,12 @@ class TestUpdate(unittest.TestCase):
         create_random_file(dpath)
 
         # update it
-        opt.update_path = [d1, dir1]
+        opt.update_path = [dotfilefile1, dir1]
         cmd_update(opt)
 
         # test content
         newcontent = ''
-        with open(d1, 'r', encoding='utf-8') as file:
+        with open(dotfilefile1, 'r', encoding='utf-8') as file:
             newcontent = file.read()
         self.assertTrue(newcontent == 'newcontent')
         newcontent = ''
@@ -163,14 +163,14 @@ class TestUpdate(unittest.TestCase):
             newcontent = file.read()
         self.assertTrue(newcontent == 'newcontent')
 
-        edit_content(d2, 'newcontentbykey')
+        edit_content(dotfilefile2, 'newcontentbykey')
 
         # update it by key
         dfiles = opt.dotfiles
         d2key = ''
         for dotfile in dfiles:
             src = os.path.expanduser(dotfile.dst)
-            if src == d2:
+            if src == dotfilefile2:
                 d2key = dotfile.key
                 break
         self.assertTrue(d2key != '')
@@ -180,7 +180,7 @@ class TestUpdate(unittest.TestCase):
 
         # test content
         newcontent = ''
-        with open(d2, 'r', encoding='utf-8') as file:
+        with open(dotfilefile2, 'r', encoding='utf-8') as file:
             newcontent = file.read()
         self.assertTrue(newcontent == 'newcontentbykey')
 

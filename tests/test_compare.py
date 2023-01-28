@@ -20,24 +20,26 @@ from tests.helpers import create_dir, get_string, get_tempdir, clean, \
 
 
 class TestCompare(unittest.TestCase):
+    """test case"""
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
     CONFIG_DOTPATH = 'dotfiles'
     CONFIG_NAME = 'config.yaml'
 
-    def compare(self, o, tmp, nbdotfiles):
-        dotfiles = o.dotfiles
+    def compare(self, opt, tmp, nbdotfiles):
+        """compare"""
+        dotfiles = opt.dotfiles
         self.assertTrue(len(dotfiles) == nbdotfiles)
-        t = Templategen(base=o.dotpath, debug=True)
-        inst = Installer(create=o.create, backup=o.backup,
-                         dry=o.dry, base=o.dotpath, debug=o.debug)
+        templ = Templategen(base=opt.dotpath, debug=True)
+        inst = Installer(create=opt.create, backup=opt.backup,
+                         dry=opt.dry, base=opt.dotpath, debug=opt.debug)
         comp = Comparator()
         results = {}
         for dotfile in dotfiles:
             path = os.path.expanduser(dotfile.dst)
-            ret, err, insttmp = inst.install_to_temp(t, tmp, dotfile.src,
-                                                     dotfile.dst)
+            ret, _, insttmp = inst.install_to_temp(templ, tmp, dotfile.src,
+                                                   dotfile.dst)
             if not ret:
                 results[path] = False
                 continue
@@ -47,9 +49,10 @@ class TestCompare(unittest.TestCase):
         return results
 
     def test_none(self):
-        t = Templategen(base=self.CONFIG_DOTPATH,
-                        debug=True, variables=None)
-        self.assertTrue(t is not None)
+        """test none"""
+        templ = Templategen(base=self.CONFIG_DOTPATH,
+                            debug=True, variables=None)
+        self.assertTrue(templ is not None)
 
     def test_compare(self):
         """Test the compare function"""
@@ -74,33 +77,33 @@ class TestCompare(unittest.TestCase):
         self.addCleanup(clean, dotfilespath)
 
         # create the dotfiles to test
-        d1, c1 = create_random_file(fold_config)
-        self.assertTrue(os.path.exists(d1))
-        self.addCleanup(clean, d1)
+        df1, _ = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(df1))
+        self.addCleanup(clean, df1)
 
-        d2, c2 = create_random_file(fold_subcfg)
-        self.assertTrue(os.path.exists(d2))
-        self.addCleanup(clean, d2)
+        df2, _ = create_random_file(fold_subcfg)
+        self.assertTrue(os.path.exists(df2))
+        self.addCleanup(clean, df2)
 
-        d3, c3 = create_random_file(fold_tmp)
-        self.assertTrue(os.path.exists(d3))
-        self.addCleanup(clean, d3)
+        df3, _ = create_random_file(fold_tmp)
+        self.assertTrue(os.path.exists(df3))
+        self.addCleanup(clean, df3)
 
-        d4, c4 = create_random_file(fold_tmp, binary=True)
-        self.assertTrue(os.path.exists(d4))
-        self.addCleanup(clean, d4)
+        df4, _ = create_random_file(fold_tmp, binary=True)
+        self.assertTrue(os.path.exists(df4))
+        self.addCleanup(clean, df4)
 
-        d5 = get_tempdir()
-        self.assertTrue(os.path.exists(d5))
-        self.addCleanup(clean, d5)
+        df5 = get_tempdir()
+        self.assertTrue(os.path.exists(df5))
+        self.addCleanup(clean, df5)
 
-        d6, _ = create_random_file(d5)
-        self.assertTrue(os.path.exists(d6))
+        df6, _ = create_random_file(df5)
+        self.assertTrue(os.path.exists(df6))
 
-        d9 = get_tempdir()
-        self.assertTrue(os.path.exists(d9))
-        self.addCleanup(clean, d9)
-        d9sub = os.path.join(d9, get_string(5))
+        df9 = get_tempdir()
+        self.assertTrue(os.path.exists(df9))
+        self.addCleanup(clean, df9)
+        d9sub = os.path.join(df9, get_string(5))
         create_dir(d9sub)
         d9f1, _ = create_random_file(d9sub)
 
@@ -112,69 +115,70 @@ class TestCompare(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        o = load_options(confpath, profile)
-        o.longkey = True
-        o.debug = True
-        dfiles = [d1, d2, d3, d4, d5, d9]
+        opt = load_options(confpath, profile)
+        opt.longkey = True
+        opt.debug = True
+        dfiles = [df1, df2, df3, df4, df5, df9]
 
         # import the files
-        o.import_path = dfiles
-        cmd_importer(o)
-        o = load_options(confpath, profile)
+        opt.import_path = dfiles
+        cmd_importer(opt)
+        opt = load_options(confpath, profile)
 
         # compare the files
-        expected = {d1: True, d2: True, d3: True, d4: True,
-                    d5: True, d9: True}
-        results = self.compare(o, tmp, len(dfiles))
+        expected = {df1: True, df2: True, df3: True, df4: True,
+                    df5: True, df9: True}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify file
-        edit_content(d1, get_string(20))
-        expected = {d1: False, d2: True, d3: True, d4: True,
-                    d5: True, d9: True}
-        results = self.compare(o, tmp, len(dfiles))
+        edit_content(df1, get_string(20))
+        expected = {df1: False, df2: True, df3: True, df4: True,
+                    df5: True, df9: True}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify binary file
-        edit_content(d4, bytes(get_string(20), 'ascii'), binary=True)
-        expected = {d1: False, d2: True, d3: True, d4: False,
-                    d5: True, d9: True}
-        results = self.compare(o, tmp, len(dfiles))
+        edit_content(df4, bytes(get_string(20), 'ascii'), binary=True)
+        expected = {df1: False, df2: True, df3: True, df4: False,
+                    df5: True, df9: True}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # add file in directory
-        d7, _ = create_random_file(d5)
-        self.assertTrue(os.path.exists(d7))
-        expected = {d1: False, d2: True, d3: True, d4: False,
-                    d5: False, d9: True}
-        results = self.compare(o, tmp, len(dfiles))
+        df7, _ = create_random_file(df5)
+        self.assertTrue(os.path.exists(df7))
+        expected = {df1: False, df2: True, df3: True, df4: False,
+                    df5: False, df9: True}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # modify all files
-        edit_content(d2, get_string(20))
-        edit_content(d3, get_string(21))
-        expected = {d1: False, d2: False, d3: False, d4: False,
-                    d5: False, d9: True}
-        results = self.compare(o, tmp, len(dfiles))
+        edit_content(df2, get_string(20))
+        edit_content(df3, get_string(21))
+        expected = {df1: False, df2: False, df3: False, df4: False,
+                    df5: False, df9: True}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # edit sub file
         edit_content(d9f1, get_string(12))
-        expected = {d1: False, d2: False, d3: False, d4: False,
-                    d5: False, d9: False}
-        results = self.compare(o, tmp, len(dfiles))
+        expected = {df1: False, df2: False, df3: False, df4: False,
+                    df5: False, df9: False}
+        results = self.compare(opt, tmp, len(dfiles))
         self.assertTrue(results == expected)
 
         # test compare from dotdrop
-        self.assertFalse(cmd_compare(o, tmp))
+        self.assertFalse(cmd_compare(opt, tmp))
         # test focus
-        o.compare_focus = [d4]
-        self.assertFalse(cmd_compare(o, tmp))
-        o.compare_focus = ['/tmp/fake']
-        self.assertFalse(cmd_compare(o, tmp))
+        opt.compare_focus = [df4]
+        self.assertFalse(cmd_compare(opt, tmp))
+        opt.compare_focus = ['/tmp/fake']
+        self.assertFalse(cmd_compare(opt, tmp))
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

@@ -8,11 +8,10 @@ import os
 import unittest
 from unittest.mock import MagicMock
 import filecmp
-
-from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from tests.helpers import (clean, create_dir, create_fake_config,
                            create_random_file, get_string, get_tempdir,
                            load_options, populate_fake_config)
+from dotdrop.cfg_aggregator import CfgAggregator as Cfg
 from dotdrop.dotfile import Dotfile
 from dotdrop.installer import Installer
 from dotdrop.action import Action
@@ -23,6 +22,7 @@ from dotdrop.linktypes import LinkTypes
 
 
 class TestInstall(unittest.TestCase):
+    """test case"""
 
     CONFIG_NAME = 'config.yaml'
 
@@ -40,37 +40,38 @@ exec bspwm
 '''
 
     def fake_config(self, path, dotfiles, profile,
-                    dotpath, actions, trans):
+                    dotpath, actions, transs):
         """Create a fake config file"""
-        with open(path, 'w') as f:
-            f.write('actions:\n')
+        with open(path, 'w', encoding='utf-8') as file:
+            file.write('actions:\n')
             for action in actions:
-                f.write('  {}: {}\n'.format(action.key, action.action))
-            f.write('trans:\n')
-            for tr in trans:
-                f.write('  {}: {}\n'.format(tr.key, tr.action))
-            f.write('config:\n')
-            f.write('  backup: true\n')
-            f.write('  create: true\n')
-            f.write('  dotpath: {}\n'.format(dotpath))
-            f.write('dotfiles:\n')
-            for d in dotfiles:
-                f.write('  {}:\n'.format(d.key))
-                f.write('    dst: {}\n'.format(d.dst))
-                f.write('    src: {}\n'.format(d.src))
-                f.write('    link: {}\n'.format(d.link.name.lower()))
-                if len(d.actions) > 0:
-                    f.write('    actions:\n')
-                    for action in d.actions:
-                        f.write('      - {}\n'.format(action.key))
-                if d.trans_r:
-                    for tr in d.trans_r:
-                        f.write('    trans_read: {}\n'.format(tr.key))
-            f.write('profiles:\n')
-            f.write('  {}:\n'.format(profile))
-            f.write('    dotfiles:\n')
-            for d in dotfiles:
-                f.write('    - {}\n'.format(d.key))
+                file.write(f'  {action.key}: {action.action}\n')
+            file.write('trans:\n')
+            for trans in transs:
+                file.write(f'  {trans.key}: {trans.action}\n')
+            file.write('config:\n')
+            file.write('  backup: true\n')
+            file.write('  create: true\n')
+            file.write(f'  dotpath: {dotpath}\n')
+            file.write('dotfiles:\n')
+            for dotfile in dotfiles:
+                linkval = dotfile.link.name.lower()
+                file.write(f'  {dotfile.key}:\n')
+                file.write(f'    dst: {dotfile.dst}\n')
+                file.write(f'    src: {dotfile.src}\n')
+                file.write(f'    link: {linkval}\n')
+                if len(dotfile.actions) > 0:
+                    file.write('    actions:\n')
+                    for action in dotfile.actions:
+                        file.write(f'      - {action.key}\n')
+                if dotfile.trans_r:
+                    for trans in dotfile.trans_r:
+                        file.write(f'    trans_read: {trans.key}\n')
+            file.write('profiles:\n')
+            file.write(f'  {profile}:\n')
+            file.write('    dotfiles:\n')
+            for dotfile in dotfiles:
+                file.write(f'    - {dotfile.key}\n')
         return path
 
     def test_install(self):
@@ -87,40 +88,43 @@ exec bspwm
         self.addCleanup(clean, dst)
 
         # create the dotfile in dotdrop
-        f1, c1 = create_random_file(tmp)
+        fcontent1, _ = create_random_file(tmp)
         dst1 = os.path.join(dst, get_string(6))
-        d1 = Dotfile(get_string(5), dst1, os.path.basename(f1))
+        dotfile1 = Dotfile(get_string(5), dst1, os.path.basename(fcontent1))
         # fake a __str__
-        self.assertTrue(str(d1) != '')
-        f2, c2 = create_random_file(tmp)
+        self.assertTrue(str(dotfile1) != '')
+        fcontent2, _ = create_random_file(tmp)
         dst2 = os.path.join(dst, get_string(6))
-        d2 = Dotfile(get_string(5), dst2, os.path.basename(f2))
-        with open(f2, 'w') as f:
-            f.write(self.TEMPLATE)
-        f3, _ = create_random_file(tmp, binary=True)
+        dotfile2 = Dotfile(get_string(5), dst2, os.path.basename(fcontent2))
+        with open(fcontent2, 'w', encoding='utf-8') as file:
+            file.write(self.TEMPLATE)
+        fcontent3, _ = create_random_file(tmp, binary=True)
         dst3 = os.path.join(dst, get_string(6))
-        d3 = Dotfile(get_string(5), dst3, os.path.basename(f3))
+        dotfile3 = Dotfile(get_string(5), dst3, os.path.basename(fcontent3))
 
         # create a directory dotfile
         dir1 = os.path.join(tmp, 'somedir')
         create_dir(dir1)
-        fd, _ = create_random_file(dir1)
+        fildfd, _ = create_random_file(dir1)
         dstd = os.path.join(dst, get_string(6))
         ddot = Dotfile(get_string(5), dstd, os.path.basename(dir1))
 
         # to test backup
-        f4, c4 = create_random_file(tmp)
+        fcontent4, _ = create_random_file(tmp)
         dst4 = os.path.join(dst, get_string(6))
-        d4 = Dotfile(key=get_string(6), dst=dst4, src=os.path.basename(f4))
-        with open(dst4, 'w') as f:
-            f.write(get_string(16))
+        dotfile4 = Dotfile(key=get_string(6),
+                           dst=dst4,
+                           src=os.path.basename(fcontent4))
+        with open(dst4, 'w',
+                  encoding='utf-8') as file:
+            file.write(get_string(16))
 
         # to test link
-        f5, c5 = create_random_file(tmp)
+        fcontent5, _ = create_random_file(tmp)
         dst5 = os.path.join(dst, get_string(6))
         self.addCleanup(clean, dst5)
-        d5 = Dotfile(get_string(6), dst5,
-                     os.path.basename(f5), link=LinkTypes.LINK)
+        dotfile5 = Dotfile(get_string(6), dst5,
+                           os.path.basename(fcontent5), link=LinkTypes.LINK)
 
         # create the dotfile directories in dotdrop
         dir1 = create_dir(os.path.join(tmp, get_string(6)))
@@ -133,7 +137,7 @@ exec bspwm
         sub2, _ = create_random_file(dir1)
         self.assertTrue(os.path.exists(sub2))
         # make up the dotfile
-        d6 = Dotfile(get_string(6), dst6, os.path.basename(dir1))
+        dotfile6 = Dotfile(get_string(6), dst6, os.path.basename(dir1))
 
         # to test symlink directories
         dir2 = create_dir(os.path.join(tmp, get_string(6)))
@@ -146,47 +150,52 @@ exec bspwm
         sub4, _ = create_random_file(dir2)
         self.assertTrue(os.path.exists(sub4))
         # make up the dotfile
-        d7 = Dotfile(get_string(6), dst7,
-                     os.path.basename(dir2), link=LinkTypes.LINK)
+        dotfile7 = Dotfile(get_string(6), dst7,
+                           os.path.basename(dir2), link=LinkTypes.LINK)
 
         # to test actions
         value = get_string(12)
         fact = '/tmp/action'
         self.addCleanup(clean, fact)
-        act1 = Action('testaction', 'post', 'echo "{}" > {}'.format(value,
-                                                                    fact))
-        f8, c8 = create_random_file(tmp)
+        act1 = Action('testaction', 'post', f'echo "{value}" > {fact}')
+        fcontent8, _ = create_random_file(tmp)
         dst8 = os.path.join(dst, get_string(6))
-        d8 = Dotfile(get_string(6), dst8, os.path.basename(f8), actions=[act1])
+        dotfile8 = Dotfile(get_string(6), dst8, os.path.basename(fcontent8),
+                           actions=[act1])
 
         # to test transformations
         trans1 = 'trans1'
         trans2 = 'trans2'
+        # pylint: disable=C0209
         cmd = 'cat {0} | sed \'s/%s/%s/g\' > {1}' % (trans1, trans2)
-        tr = Action('testtrans', 'post', cmd)
-        f9, c9 = create_random_file(tmp, content=trans1)
+        self.addCleanup(clean, trans2)
+        the_trans = Action('testtrans', 'post', cmd)
+        fcontent9, _ = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
-        d9 = Dotfile(get_string(6), dst9, os.path.basename(f9), trans_r=[tr])
+        dotfile9 = Dotfile(get_string(6), dst9, os.path.basename(fcontent9),
+                           trans_r=[the_trans])
 
         # to test template
         f10, _ = create_random_file(tmp, content='{{@@ header() @@}}')
         dst10 = os.path.join(dst, get_string(6))
-        d10 = Dotfile(get_string(6), dst10, os.path.basename(f10))
+        dotfile10 = Dotfile(get_string(6), dst10, os.path.basename(f10))
 
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        dotfiles = [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, ddot]
+        dotfiles = [dotfile1, dotfile2, dotfile3, dotfile4,
+                    dotfile5, dotfile6, dotfile7, dotfile8,
+                    dotfile9, dotfile10, ddot]
         self.fake_config(confpath, dotfiles,
-                         profile, tmp, [act1], [tr])
+                         profile, tmp, [act1], [the_trans])
         conf = Cfg(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 
         # install them
-        o = load_options(confpath, profile)
-        o.safe = False
-        o.install_showdiff = True
-        cmd_install(o)
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        opt.install_showdiff = True
+        cmd_install(opt)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(dst1))
@@ -197,39 +206,47 @@ exec bspwm
         self.assertTrue(os.path.exists(dst7))
         self.assertTrue(os.path.exists(dst8))
         self.assertTrue(os.path.exists(dst10))
-        self.assertTrue(os.path.exists(fd))
+        self.assertTrue(os.path.exists(fildfd))
 
         # check if 'dst5' is a link whose target is 'f5'
         self.assertTrue(os.path.islink(dst5))
-        self.assertTrue(os.path.realpath(dst5) == os.path.realpath(f5))
+        self.assertTrue(os.path.realpath(dst5) == os.path.realpath(fcontent5))
 
         # check if 'dst7' is a link whose target is 'dir2'
         self.assertTrue(os.path.islink(dst7))
         self.assertTrue(os.path.realpath(dst7) == os.path.realpath(dir2))
 
         # make sure backup is there
-        b = dst4 + BACKUP_SUFFIX
-        self.assertTrue(os.path.exists(b))
+        backupf = dst4 + BACKUP_SUFFIX
+        self.assertTrue(os.path.exists(backupf))
 
-        self.assertTrue(filecmp.cmp(f1, dst1, shallow=True))
-        f2content = open(dst2, 'r').read()
+        self.assertTrue(filecmp.cmp(fcontent1, dst1, shallow=True))
+        f2content = ''
+        with open(dst2, 'r', encoding='utf-8') as file:
+            f2content = file.read()
         self.assertTrue(f2content == self.RESULT)
-        self.assertTrue(filecmp.cmp(f3, dst3, shallow=True))
+        self.assertTrue(filecmp.cmp(fcontent3, dst3, shallow=True))
 
         # test action has been executed
         self.assertTrue(os.path.exists(fact))
         self.assertTrue(str(act1) != '')
-        actcontent = open(fact, 'r').read().rstrip()
+        actcontent = ''
+        with open(fact, 'r', encoding='utf-8') as file:
+            actcontent = file.read().rstrip()
         self.assertTrue(actcontent == value)
 
         # test transformation has been done
         self.assertTrue(os.path.exists(dst9))
-        transcontent = open(dst9, 'r').read().rstrip()
+        transcontent = ''
+        with open(dst9, 'r', encoding='utf-8') as file:
+            transcontent = file.read().rstrip()
         self.assertTrue(transcontent == trans2)
 
         # test template has been remplaced
         self.assertTrue(os.path.exists(dst10))
-        tempcontent = open(dst10, 'r').read().rstrip()
+        tempcontent = ''
+        with open(dst10, 'r', encoding='utf-8') as file:
+            tempcontent = file.read().rstrip()
         self.assertTrue(tempcontent == header())
 
     def test_install_import_configs(self):
@@ -251,7 +268,7 @@ exec bspwm
         imported_dotfile, _ = create_random_file(os.path.join(tmp, 'imported'))
         imported_dotfile = {
             'dst': os.path.join(dst, imported_dotfile),
-            'key': 'f_{}'.format(imported_dotfile),
+            'key': f'f_{imported_dotfile}',
             'name': imported_dotfile,
             'src': os.path.join(tmp, 'imported', imported_dotfile),
         }
@@ -259,7 +276,7 @@ exec bspwm
             create_random_file(os.path.join(tmp, 'importing'))
         importing_dotfile = {
             'dst': os.path.join(dst, importing_dotfile),
-            'key': 'f_{}'.format(importing_dotfile),
+            'key': f'f_{importing_dotfile}',
             'name': importing_dotfile,
             'src': os.path.join(tmp, 'imported', importing_dotfile),
         }
@@ -323,11 +340,11 @@ exec bspwm
         })
 
         # install them
-        o = load_options(importing_path, 'host2')
-        o.safe = False
-        o.install_showdiff = True
-        o.variables = {}
-        cmd_install(o)
+        opt = load_options(importing_path, 'host2')
+        opt.safe = False
+        opt.install_showdiff = True
+        opt.variables = {}
+        cmd_install(opt)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(importing_dotfile['dst']))
@@ -355,8 +372,8 @@ exec bspwm
 
         # Ensure all destination files point to source
         for src in srcs:
-            dst = os.path.join(dst_dir, src)
-            self.assertEqual(os.path.realpath(dst), os.path.realpath(src))
+            xyz = os.path.join(dst_dir, src)
+            self.assertEqual(os.path.realpath(xyz), os.path.realpath(src))
 
     def test_fails_without_src(self):
         """test fails without src"""
@@ -372,8 +389,8 @@ exec bspwm
                                      actionexec=None)
 
         self.assertFalse(res)
-        e = 'source dotfile does not exist: {}'.format(src)
-        self.assertEqual(err, e)
+        exp = f'source dotfile does not exist: {src}'
+        self.assertEqual(err, exp)
 
     def test_fails_when_src_file(self):
         """test fails when src file"""
@@ -397,8 +414,8 @@ exec bspwm
 
         # ensure nothing performed
         self.assertFalse(res)
-        e = 'source dotfile is not a directory: {}'.format(src)
-        self.assertEqual(err, e)
+        exp = f'source dotfile is not a directory: {src}'
+        self.assertEqual(err, exp)
 
     def test_creates_dst(self):
         """test creates dst"""
@@ -435,7 +452,7 @@ exec bspwm
 
         # Create destination file to be replaced
         dst = os.path.join(dst_dir, get_string(6))
-        with open(dst, 'w'):
+        with open(dst, 'w', encoding='utf=8'):
             pass
         self.assertTrue(os.path.isfile(dst))
 
@@ -457,8 +474,7 @@ exec bspwm
 
         # ensure prompted
         ask.assert_called_with(
-            'Remove regular file {} and replace with empty directory?'
-            .format(dst))
+            f'Remove regular file {dst} and replace with empty directory?')
 
     def test_runs_templater(self):
         """test runs templater"""
@@ -484,15 +500,16 @@ exec bspwm
                           linktype=LinkTypes.LINK_CHILDREN, actionexec=None)
 
         for src in srcs:
-            dst = os.path.join(dst_dir, os.path.basename(src))
+            xyz = os.path.join(dst_dir, os.path.basename(src))
 
             # ensure dst is link
-            self.assertTrue(os.path.islink(dst))
+            self.assertTrue(os.path.islink(xyz))
             # ensure dst not directly linked to src
-            self.assertNotEqual(os.path.realpath(dst), src)
+            self.assertNotEqual(os.path.realpath(xyz), src)
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

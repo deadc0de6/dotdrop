@@ -21,27 +21,30 @@ TMPSUFFIX = '-dotdrop-tests'
 
 
 class SubsetTestCase(TestCase):
-    def assertIsSubset(self, sub, sup):
-        for subKey, subValue in sub.items():
-            self.assertIn(subKey, sup)
-            supValue = sup[subKey]
+    """test case"""
 
-            if isinstance(subValue, str):
-                self.assertEqual(subValue, supValue)
+    def assert_is_subset(self, sub, sup):
+        """ensure it's a subset"""
+        for sub_key, sub_val in sub.items():
+            self.assertIn(sub_key, sup)
+            subvalue = sup[sub_key]
+
+            if isinstance(sub_val, str):
+                self.assertEqual(sub_val, subvalue)
                 continue
 
-            if isinstance(subValue, dict):
-                self.assertIsSubset(subValue, supValue)
+            if isinstance(sub_val, dict):
+                self.assert_is_subset(sub_val, subvalue)
                 continue
 
             try:
-                iter(subValue)
+                iter(sub_val)
                 self.assertTrue(all(
-                    subItem in supValue
-                    for subItem in subValue
+                    subItem in subvalue
+                    for subItem in sub_val
                 ))
             except TypeError:
-                self.assertEqual(subValue, supValue)
+                self.assertEqual(sub_val, subvalue)
 
 
 def clean(path):
@@ -60,7 +63,7 @@ def get_string(length):
     """Get a random string of length 'length'"""
     alpha = string.ascii_uppercase + string.digits
     temp = ''.join(random.choice(alpha) for _ in range(length))
-    return 'tmp.{}{}'.format(temp, TMPSUFFIX)
+    return f'tmp.{temp}{TMPSUFFIX}'
 
 
 def get_tempdir():
@@ -82,15 +85,16 @@ def create_random_file(directory, content=None,
             pre = bytes()
             if template:
                 pre = bytes('{{@@ header() @@}}\n', 'ascii')
-            content = bytes('{}{}\n'.format(pre, get_string(100)), 'ascii')
+            content = bytes(f'{pre}{get_string(100)}\n', 'ascii')
         else:
             pre = ''
             if template:
                 pre = '{{@@ header() @@}}\n'
-            content = '{}{}\n'.format(pre, get_string(100))
+            content = f'{pre}{get_string(100)}\n'
     path = os.path.join(directory, fname)
-    with open(path, mode) as f:
-        f.write(content)
+    # pylint: disable=W1514
+    with open(path, mode) as file:
+        file.write(content)
     return path, content
 
 
@@ -99,8 +103,9 @@ def edit_content(path, newcontent, binary=False):
     mode = 'w'
     if binary:
         mode = 'wb'
-    with open(path, mode) as f:
-        f.write(newcontent)
+    # pylint: disable=W1514
+    with open(path, mode) as file:
+        file.write(newcontent)
 
 
 def create_dir(path):
@@ -159,15 +164,16 @@ def load_options(confpath, profile):
     args['--profile'] = profile
     args['--verbose'] = True
     # and get the options
-    o = Options(args=args)
-    o.profile = profile
-    o.dry = False
-    o.safe = False
-    o.install_diff = True
-    o.import_link = LinkTypes.NOLINK
-    o.install_showdiff = True
-    o.debug = True
-    return o
+    opt = Options(args=args)
+    opt.profile = profile
+    opt.dry = False
+    opt.safe = False
+    opt.install_diff = True
+    opt.import_link = LinkTypes.NOLINK
+    opt.install_showdiff = True
+    opt.debug = True
+    opt.dotpath = os.path.join(os.path.dirname(confpath), 'dotfiles')
+    return opt
 
 
 def get_path_strip_version(path):
@@ -192,7 +198,9 @@ def get_dotfile_from_yaml(dic, path):
 
 
 def yaml_dashed_list(items, indent=0):
-    return ('\n'.join('{}- {}'.format(' ' * indent, item) for item in items)
+    """yaml dashed list"""
+    ind = ' ' * indent
+    return ('\n'.join(f'{ind}- {item}' for item in items)
             + '\n')
 
 
@@ -203,28 +211,29 @@ def create_fake_config(directory, configname='config.yaml',
     """Create a fake config file"""
     path = os.path.join(directory, configname)
     workdir = os.path.join(directory, 'workdir')
-    with open(path, 'w') as f:
-        f.write('config:\n')
-        f.write('  backup: {}\n'.format(str(backup)))
-        f.write('  create: {}\n'.format(str(create)))
-        f.write('  dotpath: {}\n'.format(dotpath))
-        f.write('  workdir: {}\n'.format(workdir))
+    with open(path, 'w', encoding='utf-8') as file:
+        file.write('config:\n')
+        file.write(f'  backup: {backup}\n')
+        file.write(f'  create: {create}\n')
+        file.write(f'  dotpath: {dotpath}\n')
+        file.write(f'  workdir: {workdir}\n')
         if import_actions:
-            f.write('  import_actions:\n')
-            f.write(yaml_dashed_list(import_actions, 4))
+            file.write('  import_actions:\n')
+            file.write(yaml_dashed_list(import_actions, 4))
         if import_configs:
-            f.write('  import_configs:\n')
-            f.write(yaml_dashed_list(import_configs, 4))
+            file.write('  import_configs:\n')
+            file.write(yaml_dashed_list(import_configs, 4))
         if import_variables:
-            f.write('  import_variables:\n')
-            f.write(yaml_dashed_list(import_variables, 4))
-        f.write('dotfiles:\n')
-        f.write('profiles:\n')
-        f.write('actions:\n')
+            file.write('  import_variables:\n')
+            file.write(yaml_dashed_list(import_variables, 4))
+        file.write('dotfiles:\n')
+        file.write('profiles:\n')
+        file.write('actions:\n')
     return path
 
 
 def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
+    """create key val for yaml"""
     if top_key:
         pairs = {top_key: pairs}
     if not parent_dir:
@@ -235,6 +244,7 @@ def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
     return file_name
 
 
+# pylint: disable=W0102
 def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
                          trans={}, trans_write={}, variables={},
                          dynvariables={}):
@@ -267,14 +277,14 @@ def file_in_yaml(yaml_file, path, link=False):
 
     dotfiles = yaml_conf['dotfiles'].values()
 
-    in_src = any([x['src'].endswith(strip) for x in dotfiles])
+    in_src = any(x['src'].endswith(strip) for x in dotfiles)
     in_dst = path in (os.path.expanduser(x['dst']) for x in dotfiles)
 
     if link:
-        df = get_dotfile_from_yaml(yaml_conf, path)
+        dotfile = get_dotfile_from_yaml(yaml_conf, path)
         has_link = False
-        if df:
-            has_link = 'link' in df
+        if dotfile:
+            has_link = 'link' in dotfile
         else:
             return False
         return in_src and in_dst and has_link
@@ -282,15 +292,17 @@ def file_in_yaml(yaml_file, path, link=False):
 
 
 def yaml_load(path):
-    with open(path, 'r') as f:
-        content = yaml(typ='safe').load(f)
+    """load yaml"""
+    with open(path, 'r', encoding='utf-8') as file:
+        content = yaml(typ='safe').load(file)
     return content
 
 
 def yaml_dump(content, path):
-    with open(path, 'w') as f:
-        y = yaml()
-        y.default_flow_style = False
-        y.indent = 2
-        y.typ = 'safe'
-        y.dump(content, f)
+    """dump yaml"""
+    with open(path, 'w', encoding='utf-8') as file:
+        cont = yaml()
+        cont.default_flow_style = False
+        cont.indent = 2
+        cont.typ = 'safe'
+        cont.dump(content, file)

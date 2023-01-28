@@ -6,16 +6,16 @@ basic unittest for jhelpers
 
 import os
 import unittest
-
-from dotdrop.cfg_aggregator import CfgAggregator
 from tests.helpers import (clean,
                            create_random_file, get_string, get_tempdir,
                            load_options)
+from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.dotfile import Dotfile
 from dotdrop.dotdrop import cmd_install
 
 
 class TestJhelpers(unittest.TestCase):
+    """test case"""
 
     CONFIG_NAME = 'config.yaml'
 
@@ -58,19 +58,19 @@ dirname: /tmp/a/b
 
     def fake_config(self, path, dotfile, profile, dotpath):
         """Create a fake config file"""
-        with open(path, 'w') as f:
-            f.write('config:\n')
-            f.write('  backup: true\n')
-            f.write('  create: true\n')
-            f.write('  dotpath: {}\n'.format(dotpath))
-            f.write('dotfiles:\n')
-            f.write('  {}:\n'.format(dotfile.key))
-            f.write('    dst: {}\n'.format(dotfile.dst))
-            f.write('    src: {}\n'.format(dotfile.src))
-            f.write('profiles:\n')
-            f.write('  {}:\n'.format(profile))
-            f.write('    dotfiles:\n')
-            f.write('    - {}\n'.format(dotfile.key))
+        with open(path, 'w', encoding='utf-8') as file:
+            file.write('config:\n')
+            file.write('  backup: true\n')
+            file.write('  create: true\n')
+            file.write(f'  dotpath: {dotpath}\n')
+            file.write('dotfiles:\n')
+            file.write(f'  {dotfile.key}:\n')
+            file.write(f'    dst: {dotfile.dst}\n')
+            file.write(f'    src: {dotfile.src}\n')
+            file.write('profiles:\n')
+            file.write(f'  {profile}:\n')
+            file.write('    dotfiles:\n')
+            file.write(f'    - {dotfile.key}\n')
         return path
 
     def test_jhelpers(self):
@@ -87,34 +87,37 @@ dirname: /tmp/a/b
         self.addCleanup(clean, dst)
 
         # create the dotfile in dotdrop
-        f1, c1 = create_random_file(tmp)
-        with open(f1, 'w') as f:
-            f.write(self.TEMPLATE)
+        file1, _ = create_random_file(tmp)
+        with open(file1, 'w', encoding='utf-8') as file:
+            file.write(self.TEMPLATE)
         dst1 = os.path.join(dst, get_string(6))
-        d1 = Dotfile(get_string(5), dst1, os.path.basename(f1))
+        dotfile1 = Dotfile(get_string(5), dst1, os.path.basename(file1))
 
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, d1, profile, tmp)
+        self.fake_config(confpath, dotfile1, profile, tmp)
         conf = CfgAggregator(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 
         # install them
-        o = load_options(confpath, profile)
-        o.safe = False
-        o.install_showdiff = True
-        o.variables = {}
-        o.debug = True
-        cmd_install(o)
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        opt.install_showdiff = True
+        opt.variables = {}
+        opt.debug = True
+        cmd_install(opt)
 
         # now compare the generated files
         self.assertTrue(os.path.exists(dst1))
-        f1content = open(dst1, 'r').read()
+        f1content = ''
+        with open(dst1, 'r', encoding='utf-8') as file:
+            f1content = file.read()
         self.assertTrue(f1content == self.RESULT)
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

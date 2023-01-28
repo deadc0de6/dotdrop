@@ -19,6 +19,7 @@ from tests.helpers import (SubsetTestCase, _fake_args, clean,
 
 
 class TestConfig(SubsetTestCase):
+    """test case"""
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
@@ -52,6 +53,8 @@ class TestConfig(SubsetTestCase):
         self.assertTrue(conf.dump() != '')
 
     def test_def_link(self):
+        """unittest"""
+        # pylint: disable=E1120
         self._test_link_import('nolink', LinkTypes.ABSOLUTE, 'absolute')
         self._test_link_import('nolink', LinkTypes.RELATIVE, 'relative')
         self._test_link_import('nolink', LinkTypes.NOLINK, 'nolink')
@@ -75,7 +78,7 @@ class TestConfig(SubsetTestCase):
     @patch('dotdrop.cfg_yaml.os.path.exists', create=True)
     def _test_link_import(self, cfgstring, expected,
                           cliargs, mock_exists, mock_open):
-        data = '''
+        data = f'''
 config:
   backup: true
   create: true
@@ -83,11 +86,11 @@ config:
   banner: true
   longkey: false
   keepdot: false
-  link_on_import: {}
+  link_on_import: {cfgstring}
   link_dotfile_default: nolink
 dotfiles:
 profiles:
-        '''.format(cfgstring)
+        '''
 
         mock_open.side_effect = [
                 unittest.mock.mock_open(read_data=data).return_value,
@@ -100,14 +103,14 @@ profiles:
         args['--cfg'] = 'mocked'
         args['--link'] = cliargs
         args['--verbose'] = True
-        o = Options(args=args)
+        opt = Options(args=args)
 
-        self.assertTrue(o.import_link == expected)
+        self.assertTrue(opt.import_link == expected)
 
     @patch('dotdrop.cfg_yaml.open', create=True)
     @patch('dotdrop.cfg_yaml.os.path.exists', create=True)
     def _test_link_import_fail(self, value, mock_exists, mock_open):
-        data = '''
+        data = f'''
 config:
   backup: true
   create: true
@@ -115,11 +118,11 @@ config:
   banner: true
   longkey: false
   keepdot: false
-  link_on_import: {}
+  link_on_import: {value}
   link_dotfile_default: nolink
 dotfiles:
 profiles:
-        '''.format(value)
+        '''
 
         mock_open.side_effect = [
                 unittest.mock.mock_open(read_data=data).return_value
@@ -132,10 +135,11 @@ profiles:
         args['--verbose'] = True
 
         with self.assertRaises(YamlException):
-            o = Options(args=args)
-            print(o.import_link)
+            opt = Options(args=args)
+            print(opt.import_link)
 
     def test_include(self):
+        """unittest"""
         tmp = get_tempdir()
         self.assertTrue(os.path.exists(tmp))
         self.addCleanup(clean, tmp)
@@ -358,32 +362,32 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.profiles,
-                            importing_cfg.profiles)
+        self.assert_is_subset(imported_cfg.profiles,
+                              importing_cfg.profiles)
 
         # test dotfiles
-        self.assertIsSubset(imported_cfg.dotfiles, importing_cfg.dotfiles)
+        self.assert_is_subset(imported_cfg.dotfiles, importing_cfg.dotfiles)
 
         # test actions
         pre_ed = post_ed = pre_ing = post_ing = {}
-        for k, v in imported_cfg.actions.items():
-            kind, _ = v
+        for k, val in imported_cfg.actions.items():
+            kind, _ = val
             if kind == 'pre':
-                pre_ed[k] = v
+                pre_ed[k] = val
             elif kind == 'post':
-                post_ed[k] = v
-        for k, v in importing_cfg.actions.items():
-            kind, _ = v
+                post_ed[k] = val
+        for k, val in importing_cfg.actions.items():
+            kind, _ = val
             if kind == 'pre':
-                pre_ing[k] = v
+                pre_ing[k] = val
             elif kind == 'post':
-                post_ing[k] = v
-        self.assertIsSubset(pre_ed, pre_ing)
-        self.assertIsSubset(post_ed, post_ing)
+                post_ing[k] = val
+        self.assert_is_subset(pre_ed, pre_ing)
+        self.assert_is_subset(post_ed, post_ing)
 
         # test transactions
-        self.assertIsSubset(imported_cfg.trans_r, importing_cfg.trans_r)
-        self.assertIsSubset(imported_cfg.trans_w, importing_cfg.trans_w)
+        self.assert_is_subset(imported_cfg.trans_r, importing_cfg.trans_r)
+        self.assert_is_subset(imported_cfg.trans_w, importing_cfg.trans_w)
 
         # test variables
         imported_vars = {
@@ -396,10 +400,10 @@ profiles:
             for k, v in importing_cfg.variables.items()
             if not k.startswith('_')
         }
-        self.assertIsSubset(imported_vars, importing_vars)
+        self.assert_is_subset(imported_vars, importing_vars)
 
         # test prodots
-        self.assertIsSubset(imported_cfg.profiles, importing_cfg.profiles)
+        self.assert_is_subset(imported_cfg.profiles, importing_cfg.profiles)
 
     def test_import_configs_override(self):
         """Test import_configs when some config keys overlap."""
@@ -563,8 +567,8 @@ profiles:
         self.assertIsNotNone(imported_cfg)
 
         # test profiles
-        self.assertIsSubset(imported_cfg.profiles,
-                            importing_cfg.profiles)
+        self.assert_is_subset(imported_cfg.profiles,
+                              importing_cfg.profiles)
 
         # test dotfiles
         self.assertEqual(importing_cfg.dotfiles['f_vimrc'],
@@ -609,6 +613,7 @@ profiles:
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

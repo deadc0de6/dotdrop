@@ -10,11 +10,13 @@ import dotdrop
 
 
 class TestDummy(unittest.TestCase):
+    """test case"""
 
     dotdrop.main()
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 
