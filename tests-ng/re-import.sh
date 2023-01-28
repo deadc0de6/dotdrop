@@ -122,9 +122,11 @@ cat "${cfg}"
 
 # ensure exists and is not link
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+# shellcheck disable=SC2088
+cat "${cfg}" | grep '~/.dotdrop.test'
 grep 'original' "${tmps}"/dotfiles/dotdrop.test
-nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
+# shellcheck disable=SC2088
+nb=$(cat "${cfg}" | grep '~/.dotdrop.test' | wc -l)
 [ "${nb}" != "1" ] && echo 'not 1 entry' && exit 1
 
 # re-import without changing
@@ -134,9 +136,11 @@ cat "${cfg}"
 
 # test is only once
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+# shellcheck disable=SC2088
+cat "${cfg}" | grep '~/.dotdrop.test' >/dev/null 2>&1
 grep 'original' "${tmps}"/dotfiles/dotdrop.test
-nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
+# shellcheck disable=SC2088
+nb=$(cat "${cfg}" | grep '~/.dotdrop.test' | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 # re-import with changes
@@ -147,9 +151,11 @@ cat "${cfg}"
 
 # test is only once
 [ ! -e "${tmps}/dotfiles/dotdrop.test" ] && echo "does not exist" && exit 1
-cat "${cfg}" | grep "${HOME}/.dotdrop.test" >/dev/null 2>&1
+# shellcheck disable=SC2088
+cat "${cfg}" | grep '~/.dotdrop.test' >/dev/null 2>&1
 grep 'modified' "${tmps}"/dotfiles/dotdrop.test
-nb=$(cat "${cfg}" | grep "${HOME}/.dotdrop.test" | wc -l)
+# shellcheck disable=SC2088
+nb=$(cat "${cfg}" | grep '~/.dotdrop.test' | wc -l)
 [ "${nb}" != "1" ] && echo 'two entries!' && exit 1
 
 echo "OK"

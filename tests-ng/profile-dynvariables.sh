@@ -126,7 +126,7 @@ grep '^local1' "${tmpd}"/abc >/dev/null
 grep '^global2' "${tmpd}"/abc >/dev/null
 grep '^local2' "${tmpd}"/abc >/dev/null
 # test dynvariables
-grep "^# author: deadc0de6" "${tmpd}"/abc >/dev/null
+grep "^# shellcheck" "${tmpd}"/abc >/dev/null
 grep '^tset,emos,si,siht' "${tmpd}"/abc >/dev/null
 grep "^${TESTENV2}" "${tmpd}"/abc > /dev/null
 grep "^cba" "${tmpd}"/abc >/dev/null

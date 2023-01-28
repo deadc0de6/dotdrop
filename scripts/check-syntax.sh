@@ -54,6 +54,13 @@ find . -iname '*.sh' | while read -r script; do
     -e SC1004 \
     "${script}"
 done
+shellcheck -x \
+    -e SC2002 \
+    -e SC2126 \
+    -e SC2129 \
+    -e SC2181 \
+    -e SC1004 \
+    "tests-ng/helpers"
 
 # check other python scripts
 echo "-----------------------------------------"
