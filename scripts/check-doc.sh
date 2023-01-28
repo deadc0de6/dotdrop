@@ -2,6 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2022, deadc0de6
 
+# stop on first error
 set -e
 
 ## test doc external links

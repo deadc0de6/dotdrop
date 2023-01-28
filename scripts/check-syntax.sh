@@ -3,7 +3,6 @@
 # Copyright (c) 2022, deadc0de6
 
 # stop on first error
-#set -ev
 set -e
 
 # ensure binaries are here
@@ -41,6 +40,7 @@ pyflakes --version
 # SC2126: Consider using grep -c instead of grep|wc -l
 # SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
 # SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?
+# SC1004: This backslash+linefeed is literal. Break outside single quotes if you just want to break the line
 echo "--------------------------------------"
 echo "checking shell scripts with shellcheck"
 echo "--------------------------------------"
@@ -51,6 +51,7 @@ find . -iname '*.sh' | while read -r script; do
     -e SC2126 \
     -e SC2129 \
     -e SC2181 \
+    -e SC1004 \
     "${script}"
 done
 
