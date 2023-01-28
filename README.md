@@ -1,4 +1,4 @@
-# <img src="https://raw.githubusercontent.com/deadc0de6/dotdrop/master/dotdrop.svg" width="100" height="100" align="left"> dotdrop
+# <img src="https://raw.githubusercontent.com/deadc0de6/dotdrop/master/assets/dotdrop.svg" width="100" height="100" align="left"> dotdrop
 <br/>
 <br/>
 
