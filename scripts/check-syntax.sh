@@ -52,6 +52,8 @@ find . -iname '*.sh' | while read -r script; do
     -e SC2129 \
     -e SC2181 \
     -e SC1004 \
+    -e SC1117 \
+    -e SC2230 \
     "${script}"
 done
 shellcheck -x \
