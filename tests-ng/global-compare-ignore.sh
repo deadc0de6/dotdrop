@@ -104,7 +104,6 @@ sed '/dotpath: dotfiles/a \ \ cmpignore:\n\ \ \ \ - "*b"' "${cfg}" > "${cfg2}"
 cat "${cfg2}"
 
 # expects no diff
-patt="*b"
 echo "[+] comparing with ignore in dotfile - 0 diff"
 set +e
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" --verbose

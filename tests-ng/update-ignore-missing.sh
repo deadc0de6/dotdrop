@@ -44,13 +44,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # this is the test
 ################################################################
 
-# $1 pattern
-# $2 path
-grep_or_fail()
-{
-  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern not found in ${2}" && exit 1)
-}
-
 # dotdrop directory
 tmps=$(mktemp -d --suffix='-dotdrop-tests-source' || mktemp -d)
 dt="${tmps}/dotfiles"

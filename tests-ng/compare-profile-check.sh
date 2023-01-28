@@ -51,7 +51,7 @@ dt="${tmps}/dotfiles"
 mkdir -p "${dt}"
 
 xori="profile x"
-xori="profile y"
+yori="profile y"
 echo "${xori}" > "${dt}"/file_x
 echo "${yori}" > "${dt}"/file_y
 

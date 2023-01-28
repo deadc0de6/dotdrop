@@ -49,7 +49,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # this is the test
 ################################################################
 unset DOTDROP_WORKDIR
-string="blabla"
 
 # the dotfile source
 tmp=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)

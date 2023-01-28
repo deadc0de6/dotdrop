@@ -27,7 +27,7 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -39,9 +39,10 @@ echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -52,9 +53,10 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0
 has_rights()
 {
   echo "testing ${1} is ${2}"
-  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
-  local mode=`stat -L -c '%a' "$1"`
-  [ "${mode}" != "$2" ] && echo "bad mode for `basename $1` (${mode} VS expected ${2})" && exit 1
+  [ ! -e "$1" ] && echo "$(basename "$1") does not exist" && exit 1
+  local mode
+  mode=$(stat -L -c '%a' "$1")
+  [ "${mode}" != "$2" ] && echo "bad mode for $(basename "$1") (${mode} VS expected ${2})" && exit 1
   true
 }
 
@@ -62,21 +64,24 @@ has_rights()
 is_same_as()
 {
   echo "testing ${1} has same rights than ${2}"
-  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
-  [ ! -e "$2" ] && echo "`basename $2` does not exist" && exit 1
+  [ ! -e "$1" ] && echo "$(basename "$1") does not exist" && exit 1
+  [ ! -e "$2" ] && echo "$(basename "$2") does not exist" && exit 1
 
-  local mode1=`stat -L -c '%a' "$1"`
+  local mode1
+  mode1=$(stat -L -c '%a' "$1")
   echo "$1: ${mode1}"
-  local mode2=`stat -L -c '%a' "$2"`
+  local mode2
+  mode2=$(stat -L -c '%a' "$2")
   echo "$2: ${mode2}"
 
-  [ "${mode1}" != "${mode2}" ] && echo "`basename $1` (${mode1}) does not have same mode as `basename "$2"` (${mode2})" && exit 1
+  [ "${mode1}" != "${mode2}" ] && echo "$(basename "$1") (${mode1}) does not have same mode as $(basename "$2") (${mode2})" && exit 1
   true
 }
 
 get_default_file_mode()
 {
   u=$(umask)
+  # shellcheck disable=SC2001
   u=$(echo "${u}" | sed 's/^0*//')
   v=$((666 - u))
   echo "${v}"
@@ -85,6 +90,7 @@ get_default_file_mode()
 get_default_dir_mode()
 {
   u=$(umask)
+  # shellcheck disable=SC2001
   u=$(echo "${u}" | sed 's/^0*//')
   v=$((777 - u))
   echo "${v}"

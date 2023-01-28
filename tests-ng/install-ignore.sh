@@ -125,8 +125,11 @@ echo "(3) found ${nb} README.md file(s)"
 
 ## reinstall to trigger showdiff
 echo "showdiff" > "${tmpd}"/program/a
-cd "${ddpath}" | echo "y" | ${bin} install --showdiff -c "${cfg}" --verbose -f
-[ "$?" != "0" ] && exit 1
+(
+  cd "${ddpath}"
+  printf "y\n" | ${bin} install --showdiff -c "${cfg}" --verbose -f
+  exit $?
+)
 
 # test templated subdir
 cat > "${cfg}" << _EOF

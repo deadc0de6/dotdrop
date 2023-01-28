@@ -28,7 +28,7 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -40,9 +40,10 @@ echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -50,8 +51,9 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0
 
 get_file_mode()
 {
-  u=`umask`
-  u=`echo ${u} | sed 's/^0*//'`
+  u=$(umask)
+  # shellcheck disable=SC2001
+  u=$(echo "${u}" | sed 's/^0*//')
   v=$((666 - u))
   echo "${v}"
 }
@@ -61,9 +63,10 @@ get_file_mode()
 has_rights()
 {
   echo "testing ${1} is ${2}"
-  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
-  local mode=`stat -L -c '%a' "$1"`
-  [ "${mode}" != "$2" ] && echo "bad mode for `basename "$1"` (${mode} VS expected ${2})" && exit 1
+  [ ! -e "$1" ] && echo "$(basename "$1") does not exist" && exit 1
+  local mode
+  mode=$(stat -L -c '%a' "$1")
+  [ "${mode}" != "$2" ] && echo "bad mode for $(basename "$1") (${mode} VS expected ${2})" && exit 1
   true
 }
 
@@ -113,15 +116,21 @@ chmod 644 "${tmpd}"/x
 
 mode=$(get_file_mode "${tmpd}"/x)
 echo "[+] re-install with no"
-cd "${ddpath}" | printf "N\n" | ${bin} install -c "${cfg}" -p p1 --verbose
-[ "$?" != "0" ] && exit 1
+(
+  cd "${ddpath}"
+  printf "N\n" | ${bin} install -c "${cfg}" -p p1 --verbose
+  exit ${?}
+)
 
 # if user answers N, chmod should not be done
 has_rights "${tmpd}/x" "${mode}"
 
 echo "[+] re-install with yes"
-cd "${ddpath}" | printf "y\n" | ${bin} install -c "${cfg}" -p p1 --verbose
-[ "$?" != "0" ] && exit 1
+(
+  cd "${ddpath}"
+  printf "y\n" | ${bin} install -c "${cfg}" -p p1 --verbose
+  exit ${?}
+)
 
 has_rights "${tmpd}/x" "666"
 
