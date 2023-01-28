@@ -15,6 +15,7 @@ from tests.helpers import (clean, create_dir,
 
 
 class TestRemove(unittest.TestCase):
+    """test case"""
 
     def load_yaml(self, path):
         """Load yaml to dict"""
@@ -68,13 +69,13 @@ class TestRemove(unittest.TestCase):
         }
 
         yaml_dump(configdic, confpath)
-        o = load_options(confpath, 'host1')
-        o.remove_path = ['f_test1']
-        o.remove_iskey = True
-        o.debug = True
-        o.safe = False
+        opt = load_options(confpath, 'host1')
+        opt.remove_path = ['f_test1']
+        opt.remove_iskey = True
+        opt.debug = True
+        opt.safe = False
         # by key
-        cmd_remove(o)
+        cmd_remove(opt)
 
         # ensure file is deleted
         self.assertFalse(os.path.exists(df1))
@@ -82,48 +83,49 @@ class TestRemove(unittest.TestCase):
         self.assertTrue(os.path.exists(df3))
 
         # load dict
-        y = yaml_load(confpath)
+        cont = yaml_load(confpath)
 
         # ensure not present
-        self.assertTrue('f_test1' not in y['dotfiles'])
-        self.assertTrue('f_test1' not in y['profiles']['host1']['dotfiles'])
-        self.assertTrue('host2' not in y['profiles'])
+        self.assertTrue('f_test1' not in cont['dotfiles'])
+        self.assertTrue('f_test1' not in cont['profiles']['host1']['dotfiles'])
+        self.assertTrue('host2' not in cont['profiles'])
 
         # assert rest is intact
-        self.assertTrue('f_test2' in y['dotfiles'].keys())
-        self.assertTrue('f_test3' in y['dotfiles'].keys())
-        self.assertTrue('f_test2' in y['profiles']['host1']['dotfiles'])
-        self.assertTrue('f_test3' in y['profiles']['host1']['dotfiles'])
-        self.assertTrue(y['profiles']['host3']['dotfiles'] == ['f_test2'])
+        self.assertTrue('f_test2' in cont['dotfiles'].keys())
+        self.assertTrue('f_test3' in cont['dotfiles'].keys())
+        self.assertTrue('f_test2' in cont['profiles']['host1']['dotfiles'])
+        self.assertTrue('f_test3' in cont['profiles']['host1']['dotfiles'])
+        self.assertTrue(cont['profiles']['host3']['dotfiles'] == ['f_test2'])
 
-        o = load_options(confpath, 'host1')
-        o.remove_path = ['/tmp/some-fake-path']
-        o.remove_iskey = False
-        o.debug = True
-        o.safe = False
+        opt = load_options(confpath, 'host1')
+        opt.remove_path = ['/tmp/some-fake-path']
+        opt.remove_iskey = False
+        opt.debug = True
+        opt.safe = False
         # by path
-        cmd_remove(o)
+        cmd_remove(opt)
 
         # ensure file is deleted
         self.assertTrue(os.path.exists(df2))
         self.assertFalse(os.path.exists(df3))
 
         # load dict
-        y = yaml_load(confpath)
+        cont = yaml_load(confpath)
 
         # ensure not present
-        self.assertTrue('f_test3' not in y['dotfiles'])
-        self.assertTrue('f_test3' not in y['profiles']['host1']['dotfiles'])
+        self.assertTrue('f_test3' not in cont['dotfiles'])
+        self.assertTrue('f_test3' not in cont['profiles']['host1']['dotfiles'])
 
         # assert rest is intact
-        self.assertTrue('host1' in y['profiles'].keys())
-        self.assertFalse('host2' in y['profiles'].keys())
-        self.assertTrue('host3' in y['profiles'].keys())
-        self.assertTrue(y['profiles']['host1']['dotfiles'] == ['f_test2'])
-        self.assertTrue(y['profiles']['host3']['dotfiles'] == ['f_test2'])
+        self.assertTrue('host1' in cont['profiles'].keys())
+        self.assertFalse('host2' in cont['profiles'].keys())
+        self.assertTrue('host3' in cont['profiles'].keys())
+        self.assertTrue(cont['profiles']['host1']['dotfiles'] == ['f_test2'])
+        self.assertTrue(cont['profiles']['host3']['dotfiles'] == ['f_test2'])
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 

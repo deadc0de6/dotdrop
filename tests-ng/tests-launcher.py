@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable-msg=C0103
 """
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2020, deadc0de6
@@ -32,6 +33,7 @@ def run_test(logfd, path):
     if logfd:
         logfd.write(f'starting test \"{path}\"\n')
         logfd.flush()
+    # pylint: disable=R1732
     proc = subprocess.Popen(path, shell=False,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT,
@@ -73,6 +75,7 @@ def main():
 
     logfd = sys.stdout
     if not is_cicd():
+        # pylint: disable=R1732
         logfd = open(LOG_FILE, 'w', encoding='utf-8')
     if max_jobs:
         logfd.write(f'run tests with {max_jobs} parallel job(s)\n')
@@ -95,6 +98,7 @@ def main():
         for test in futures.as_completed(wait_for.keys()):
             try:
                 ret, reason, name, log = test.result()
+            # pylint: disable=W0703
             except Exception as exc:
                 print()
                 print(f'test \"{wait_for[test]}\" failed: {exc}')

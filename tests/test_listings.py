@@ -49,23 +49,23 @@ class TestListings(unittest.TestCase):
         self.addCleanup(clean, dotfilespath)
 
         # create the dotfiles to test
-        d1, c1 = create_random_file(fold_config)
-        self.assertTrue(os.path.exists(d1))
-        self.addCleanup(clean, d1)
-        d2, c2 = create_random_file(fold_subcfg)
-        self.assertTrue(os.path.exists(d2))
-        self.addCleanup(clean, d2)
-        d3, c3 = create_random_file(fold_tmp)
-        self.assertTrue(os.path.exists(d3))
-        self.addCleanup(clean, d3)
-        d4, c4 = create_random_file(fold_tmp, binary=True)
-        self.assertTrue(os.path.exists(d4))
-        self.addCleanup(clean, d4)
-        d5 = get_tempdir()
-        self.assertTrue(os.path.exists(d5))
-        self.addCleanup(clean, d5)
-        d6, _ = create_random_file(d5)
-        self.assertTrue(os.path.exists(d6))
+        file1, _ = create_random_file(fold_config)
+        self.assertTrue(os.path.exists(file1))
+        self.addCleanup(clean, file1)
+        file2, _ = create_random_file(fold_subcfg)
+        self.assertTrue(os.path.exists(file2))
+        self.addCleanup(clean, file2)
+        file3, _ = create_random_file(fold_tmp)
+        self.assertTrue(os.path.exists(file3))
+        self.addCleanup(clean, file3)
+        file4, _ = create_random_file(fold_tmp, binary=True)
+        self.assertTrue(os.path.exists(file4))
+        self.addCleanup(clean, file4)
+        file5 = get_tempdir()
+        self.assertTrue(os.path.exists(file5))
+        self.addCleanup(clean, file5)
+        file6, _ = create_random_file(file5)
+        self.assertTrue(os.path.exists(file6))
 
         # create the config file
         profile = get_string(5)
@@ -75,29 +75,30 @@ class TestListings(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        o = load_options(confpath, profile)
-        dfiles = [d1, d2, d3, d4, d5]
+        opt = load_options(confpath, profile)
+        dfiles = [file1, file2, file3, file4, file5]
 
         # import the files
-        o.import_path = dfiles
-        cmd_importer(o)
-        o = load_options(confpath, profile)
+        opt.import_path = dfiles
+        cmd_importer(opt)
+        opt = load_options(confpath, profile)
 
         # files
-        cmd_list_profiles(o)
+        cmd_list_profiles(opt)
 
         # list files
-        o.files_templateonly = False
-        cmd_files(o)
-        o.files_templateonly = True
-        cmd_files(o)
+        opt.files_templateonly = False
+        cmd_files(opt)
+        opt.files_templateonly = True
+        cmd_files(opt)
 
         # details
-        o.detail_keys = None
-        cmd_detail(o)
+        opt.detail_keys = None
+        cmd_detail(opt)
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 
