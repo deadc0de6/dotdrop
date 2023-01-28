@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable-msg=C0103
 """
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2018, deadc0de6
