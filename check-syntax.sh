@@ -36,14 +36,14 @@ fi
 echo "=> pyflakes version:"
 pyflakes --version
 
-echo "---------------------"
-
 # check shell scripts
 # SC2002: Useless cat
 # SC2126: Consider using grep -c instead of grep|wc -l
 # SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
 # SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?
+echo "--------------------------------------"
 echo "checking shell scripts with shellcheck"
+echo "--------------------------------------"
 find . -iname '*.sh' | while read -r script; do
   echo "checking ${script}"
   shellcheck -x \
@@ -55,7 +55,9 @@ find . -iname '*.sh' | while read -r script; do
 done
 
 # check other python scripts
+echo "-----------------------------------------"
 echo "checking other python scripts with pylint"
+echo "-----------------------------------------"
 find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
   echo "checking ${script}"
   pylint -sn \
@@ -68,16 +70,22 @@ done
 # PEP8 tests
 # W503: Line break occurred before a binary operator
 # W504: Line break occurred after a binary operator
+echo "---------------------------------"
 echo "checking dotdrop with pycodestyle"
+echo "---------------------------------"
 pycodestyle --ignore=W503,W504 dotdrop/
 pycodestyle scripts/
 
 # pyflakes tests
+echo "------------------------------"
 echo "checking dotdrop with pyflakes"
+echo "------------------------------"
 pyflakes dotdrop/
 
 # pylint
+echo "----------------------------"
 echo "checking dotdrop with pylint"
+echo "----------------------------"
 # https://pylint.pycqa.org/en/latest/user_guide/checkers/features.html
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
@@ -98,6 +106,9 @@ pylint \
   --disable=R0904 \
   dotdrop/
 
+echo "------------------------"
+echo "checking for more issues"
+echo "------------------------"
 set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
 # f-string errors and missing f literal

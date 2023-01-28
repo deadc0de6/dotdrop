@@ -17,6 +17,7 @@ from tests.helpers import create_dir, get_string, get_tempdir, clean, \
 
 
 class TestUpdate(unittest.TestCase):
+    """unit test"""
 
     CONFIG_BACKUP = False
     CONFIG_CREATE = True
@@ -46,16 +47,16 @@ class TestUpdate(unittest.TestCase):
         self.addCleanup(clean, dotfilespath)
 
         # create the dotfiles to test
-        d1, c1 = create_random_file(fold_config)
+        d1, _ = create_random_file(fold_config)
         self.assertTrue(os.path.exists(d1))
         self.addCleanup(clean, d1)
 
-        d2, c2 = create_random_file(fold_config)
+        d2, _ = create_random_file(fold_config)
         self.assertTrue(os.path.exists(d2))
         self.addCleanup(clean, d2)
 
         # template
-        d3t, c3t = create_random_file(fold_config)
+        d3t, _ = create_random_file(fold_config)
         self.assertTrue(os.path.exists(d3t))
         self.addCleanup(clean, d3t)
 
@@ -74,9 +75,9 @@ class TestUpdate(unittest.TestCase):
         dir1sub2str = 'sub2'
         sub2 = os.path.join(dir1, dir1sub2str)
         create_dir(sub2)
-        f1s1, f1s1c1 = create_random_file(sub1)
+        f1s1, _ = create_random_file(sub1)
         self.assertTrue(os.path.exists(f1s1))
-        f1s2, f1s2c1 = create_random_file(sub2)
+        f1s2, _ = create_random_file(sub2)
         self.assertTrue(os.path.exists(f1s2))
 
         # create the directory to test
@@ -93,38 +94,38 @@ class TestUpdate(unittest.TestCase):
                                       backup=self.CONFIG_BACKUP,
                                       create=self.CONFIG_CREATE)
         self.assertTrue(os.path.exists(confpath))
-        o = load_options(confpath, profile)
-        o.update_showpatch = True
+        opt = load_options(confpath, profile)
+        opt.update_showpatch = True
         dfiles = [d1, dir1, d2, d3t, dsubstmp]
 
         # import the files
-        o.import_path = dfiles
-        cmd_importer(o)
+        opt.import_path = dfiles
+        cmd_importer(opt)
 
         # get new config
-        o = load_options(confpath, profile)
-        o.safe = False
-        o.update_showpatch = True
-        o.debug = True
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        opt.update_showpatch = True
+        opt.debug = True
         trans = Transform('trans', 'cp -r {0} {1}')
         d3tb = os.path.basename(d3t)
-        for dotfile in o.dotfiles:
+        for dotfile in opt.dotfiles:
             if os.path.basename(dotfile.dst) == d3tb:
                 # patch the template
-                src = os.path.join(o.dotpath, dotfile.src)
+                src = os.path.join(opt.dotpath, dotfile.src)
                 src = os.path.expanduser(src)
                 edit_content(src, '{{@@ profile @@}}')
             left = os.path.realpath(os.path.basename(dotfile.dst))
             right = os.path.realpath(dirsubs)
             if left == right:
                 # retrieve the path of the sub in the dotpath
-                d1indotpath = os.path.join(o.dotpath, dotfile.src)
+                d1indotpath = os.path.join(opt.dotpath, dotfile.src)
                 d1indotpath = os.path.expanduser(d1indotpath)
             dotfile.trans_w = trans
 
         # update template
-        o.update_path = [d3t]
-        self.assertFalse(cmd_update(o))
+        opt.update_path = [d3t]
+        self.assertFalse(cmd_update(opt))
 
         # update sub dirs
         gone = os.path.join(d1indotpath, dir1string)
@@ -132,8 +133,8 @@ class TestUpdate(unittest.TestCase):
         self.assertTrue(os.path.exists(gone))
         clean(sub1)  # dir1sub1str
         self.assertTrue(os.path.exists(gone))
-        o.update_path = [dsubstmp]
-        cmd_update(o)
+        opt.update_path = [dsubstmp]
+        cmd_update(opt)
         self.assertFalse(os.path.exists(gone))
 
         # edit the files
@@ -141,7 +142,7 @@ class TestUpdate(unittest.TestCase):
         edit_content(dirf1, 'newcontent')
 
         # add more file
-        dirf2, _ = create_random_file(dpath)
+        _, _ = create_random_file(dpath)
 
         # add more dirs
         dpath = os.path.join(dpath, get_string(5))
@@ -149,36 +150,43 @@ class TestUpdate(unittest.TestCase):
         create_random_file(dpath)
 
         # update it
-        o.update_path = [d1, dir1]
-        cmd_update(o)
+        opt.update_path = [d1, dir1]
+        cmd_update(opt)
 
         # test content
-        newcontent = open(d1, 'r').read()
+        newcontent = ''
+        with open(d1, 'r', encoding='utf-8') as file:
+            newcontent = file.read()
         self.assertTrue(newcontent == 'newcontent')
-        newcontent = open(dirf1, 'r').read()
+        newcontent = ''
+        with open(dirf1, 'r', encoding='utf-8') as file:
+            newcontent = file.read()
         self.assertTrue(newcontent == 'newcontent')
 
         edit_content(d2, 'newcontentbykey')
 
         # update it by key
-        dfiles = o.dotfiles
+        dfiles = opt.dotfiles
         d2key = ''
-        for ds in dfiles:
-            t = os.path.expanduser(ds.dst)
-            if t == d2:
-                d2key = ds.key
+        for dotfile in dfiles:
+            src = os.path.expanduser(dotfile.dst)
+            if src == d2:
+                d2key = dotfile.key
                 break
         self.assertTrue(d2key != '')
-        o.update_path = [d2key]
-        o.update_iskey = True
-        cmd_update(o)
+        opt.update_path = [d2key]
+        opt.update_iskey = True
+        cmd_update(opt)
 
         # test content
-        newcontent = open(d2, 'r').read()
+        newcontent = ''
+        with open(d2, 'r', encoding='utf-8') as file:
+            newcontent = file.read()
         self.assertTrue(newcontent == 'newcontentbykey')
 
 
 def main():
+    """entry point"""
     unittest.main()
 
 
