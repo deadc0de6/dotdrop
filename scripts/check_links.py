@@ -30,6 +30,7 @@ IGNORES = [
 IGNORE_GENERIC = [
     'assets/dotdrop.svg',
     'github.com/deadc0de6/dotdrop',
+    'packages.debian.org',
 ]
 USER_AGENT = (
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
