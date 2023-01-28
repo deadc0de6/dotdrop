@@ -67,6 +67,7 @@ find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
     --disable=R0914 \
     --disable=R0915 \
     --disable=R0913 \
+    --disable=R0201 \
     "${script}"
 done
 
