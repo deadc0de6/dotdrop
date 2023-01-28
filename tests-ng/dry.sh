@@ -135,17 +135,17 @@ _EOF
 echo "dry install"
 cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V --dry
 
-cnt=$(find "${tmpd}" -type f | wc -l)
+cnt=$(find "${tmpd}" -depth 1 -type f | wc -l)
 ls -1 "${tmpd}"
-[ "${cnt}" != "0" ] && echo "dry install failed (1)" && exit 1
+[ "${cnt}" != "0" ] && echo "dry install failed (1 -> ${cnt})" && exit 1
 
-cnt=$(find "${tmpw}" -type f | wc -l)
+cnt=$(find "${tmpw}" -depth 1 -type f | wc -l)
 ls -1 "${tmpw}"
-[ "${cnt}" != "0" ] && echo "dry install failed (2)" && exit 1
+[ "${cnt}" != "0" ] && echo "dry install failed (2 -> ${cnt})" && exit 1
 
-cnt=$(find "${tmpa}" -type f | wc -l)
+cnt=$(find "${tmpa}" -depth 1 -type f | wc -l)
 ls -1 "${tmpa}"
-[ "${cnt}" != "0" ] && echo "dry install failed (3)" && exit 1
+[ "${cnt}" != "0" ] && echo "dry install failed (3 -> ${cnt})" && exit 1
 
 # -----------------------------
 # test import
@@ -181,9 +181,9 @@ echo "content" > "${tmpd}"/dirchildren/f2
 echo "dry import"
 cd "${ddpath}" | ${bin} import -c "${cfg}" -f -p p1 -V --dry "${tmpd}"/file "${tmpd}"/link "${tmpd}"/dir "${tmpd}"/dirchildren
 
-cnt=$(find "${tmps}"/dotfiles | wc -l)
+cnt=$(find "${tmps}"/dotfiles -depth 1 | wc -l)
 ls -1 "${tmps}"/dotfiles
-[ "${cnt}" != "0" ] && echo "dry import failed (1)" && exit 1
+[ "${cnt}" != "0" ] && echo "dry import failed (1 -> ${cnt})" && exit 1
 
 diff "${cfg}" "${tmpa}"/config.yaml || (echo "dry import failed (2)" && exit 1)
 
