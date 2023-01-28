@@ -61,6 +61,11 @@ def check_links(urls):
                             allow_redirects=True,
                             headers=HEADERS).status_code
         if ret not in VALID_RET:
+            msg = (
+                f'    [WARN] HEAD {url} returned {ret}'
+                f' ... checking with GET'
+            )
+            print(msg)
             verb = 'get'
             ret = requests.get(url,
                                timeout=TIMEOUT,
