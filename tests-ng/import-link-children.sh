@@ -28,7 +28,7 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -40,48 +40,49 @@ echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
 
 # dotpath
 dotpath="${tmps}/dotfiles"
-mkdir -p ${dotpath}
+mkdir -p "${dotpath}"
 
 # create the dotfile to import
 dt="${tmpd}/directory"
-mkdir -p ${dt}
+mkdir -p "${dt}"
 # subdir
 dtsub1="${dt}/sub1"
-mkdir -p ${dtsub1}
+mkdir -p "${dtsub1}"
 dtsub2="${dt}/sub2"
-mkdir -p ${dtsub2}
+mkdir -p "${dtsub2}"
 dtsub3="${dtsub1}/subsub1"
-mkdir -p ${dtsub3}
+mkdir -p "${dtsub3}"
 # files
 f1="${dt}/file"
 subf1="${dtsub1}/file"
 subf2="${dtsub2}/file"
 subf3="${dtsub3}/file"
-touch ${f1} ${subf1} ${subf2} ${subf3}
+touch "${f1}" "${subf1}" "${subf2}" "${subf3}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -91,10 +92,10 @@ profiles:
 _EOF
 
 # import
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 -V --link=link_children ${dt}
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V --link=link_children "${dt}"
 
 # check is set to link_children
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename "${dt}"`" | grep ',link:link_children,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "d_$(basename "${dt}")" | grep ',link:link_children,'
 
 # checks file exists in dotpath
 [ ! -e "${dotpath}"/"${dt}" ] && echo "dotfile not imported" && exit 1

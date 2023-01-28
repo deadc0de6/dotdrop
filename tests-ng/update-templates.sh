@@ -104,6 +104,7 @@ echo "tail" >> "${tmpd}"/abc
 set +e
 patch=$(cd "${ddpath}" | ${bin} update -P -p p1 -k f_abc --cfg "${cfg}" 2>&1 | grep 'try patching with' | sed 's/"//g')
 set -e
+# shellcheck disable=SC2001
 patch=$(echo "${patch}" | sed 's/^.*: //g')
 echo "patching with: ${patch}"
 eval "${patch}"

@@ -51,7 +51,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 
 # dotdrop directory
 basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
-dotfiles="${basedir}/dotfiles"
 echo "dotdrop dir: ${basedir}"
 # the dotfile
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
