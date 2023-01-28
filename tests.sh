@@ -27,19 +27,19 @@ echo "current version ${dotdrop_version}"
 
 # test syntax
 echo "checking syntax..."
-"${cur}"/test-syntax.sh
+"${cur}"/check-syntax.sh
 
 # test doc
 echo "checking documentation..."
-"${cur}"/test-doc.sh
+"${cur}"/check-doc.sh
 
 # unittest
 echo "unittest..."
-"${cur}"/test-unittest.sh
+"${cur}"/check-unittests.sh
 
 # tests-ng
 echo "tests-ng..."
-"${cur}"/test-ng.sh
+"${cur}"/check-tests-ng.sh
 
 ## done
 echo "All tests finished successfully"
