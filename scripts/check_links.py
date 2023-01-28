@@ -12,6 +12,13 @@ from urllib.parse import urlparse
 import requests
 
 
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+MAGENTA = '\033[95m'
+RESET = '\033[0m'
+
 TIMEOUT = 3
 VALID_RET = [
     200,
@@ -51,9 +58,10 @@ def check_links(urls):
         cnt += 1
         hostname = urlparse(url).hostname
         if hostname in IGNORES:
-            print(f'    [IGN] {url}')
+            print(f'    {YELLOW}[IGN]{RESET} {url}')
             ign += 1
             continue
+        print(f'    checking {MAGENTA}{url}{RESET}')
 
         verb = 'head'
         ret = requests.head(url,
@@ -62,7 +70,7 @@ def check_links(urls):
                             headers=HEADERS).status_code
         if ret not in VALID_RET:
             msg = (
-                f'    [WARN] HEAD {url} returned {ret}'
+                f'    {YELLOW}[WARN]{RESET} HEAD {url} returned {ret}'
                 f' ... checking with GET'
             )
             print(msg)
@@ -72,10 +80,10 @@ def check_links(urls):
                                allow_redirects=True,
                                headers=HEADERS).status_code
             if ret not in VALID_RET:
-                print(f'    [ERROR] {url} returned {ret}')
+                print(f'    {RED}[ERROR]{RESET} {url} returned {ret}')
                 return False
-        print(f'    [OK-{verb}-{ret}] {url}')
-    print(f'OK - total {cnt} links checked ({ign} ignored)')
+        print(f'    [{GREEN}OK{RESET}-{verb}-{ret}] {MAGENTA}{url}{RESET}')
+    print(f'    {GREEN}OK{RESET} - total {cnt} links checked ({ign} ignored)')
     return True
 
 
@@ -84,19 +92,14 @@ if __name__ == '__main__':
         print(f'usage: {sys.argv[0]} <path>')
         sys.exit(1)
 
-    print(f'checking {sys.argv[1]} for links...')
+    print(f'checking {BLUE}{sys.argv[1]}{RESET} for links...')
     links = get_links(sys.argv[1])
     print(f'    found {len(links)} links')
     try:
         if not check_links(links):
             sys.exit(1)
-    except ValueError as exc:
+    # pylint: disable=W0703
+    except Exception as exc:
         print(f'error {exc}')
-        sys.exit(1)
-    except urlparse.URLError as exc:
-        print(f'urlparse error {exc}')
-        sys.exit(1)
-    except requests.exceptions.RequestException as exc:
-        print(f'requests error {exc}')
         sys.exit(1)
     sys.exit(0)
