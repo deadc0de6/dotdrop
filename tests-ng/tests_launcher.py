@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# pylint: disable-msg=C0103
 """
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2020, deadc0de6
@@ -15,7 +14,7 @@ from concurrent import futures
 from halo import Halo
 
 
-LOG_FILE = '/tmp/dotdrop-tests-launcher.log'
+LOG_FILE = '/tmp/dotdrop-tests_launcher.log'
 GITHUB_ENV = 'GITHUB_WORKFLOW'
 
 
