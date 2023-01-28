@@ -21,6 +21,42 @@ from dotdrop.utils import header
 from dotdrop.linktypes import LinkTypes
 
 
+def fake_config(path, dotfiles, profile,
+                dotpath, actions, transs):
+    """Create a fake config file"""
+    with open(path, 'w', encoding='utf-8') as file:
+        file.write('actions:\n')
+        for action in actions:
+            file.write(f'  {action.key}: {action.action}\n')
+        file.write('trans:\n')
+        for trans in transs:
+            file.write(f'  {trans.key}: {trans.action}\n')
+        file.write('config:\n')
+        file.write('  backup: true\n')
+        file.write('  create: true\n')
+        file.write(f'  dotpath: {dotpath}\n')
+        file.write('dotfiles:\n')
+        for dotfile in dotfiles:
+            linkval = dotfile.link.name.lower()
+            file.write(f'  {dotfile.key}:\n')
+            file.write(f'    dst: {dotfile.dst}\n')
+            file.write(f'    src: {dotfile.src}\n')
+            file.write(f'    link: {linkval}\n')
+            if len(dotfile.actions) > 0:
+                file.write('    actions:\n')
+                for action in dotfile.actions:
+                    file.write(f'      - {action.key}\n')
+            if dotfile.trans_r:
+                for trans in dotfile.trans_r:
+                    file.write(f'    trans_read: {trans.key}\n')
+        file.write('profiles:\n')
+        file.write(f'  {profile}:\n')
+        file.write('    dotfiles:\n')
+        for dotfile in dotfiles:
+            file.write(f'    - {dotfile.key}\n')
+    return path
+
+
 class TestInstall(unittest.TestCase):
     """test case"""
 
@@ -38,41 +74,6 @@ exec bspwm
 # launch the wm
 exec bspwm
 '''
-
-    def fake_config(self, path, dotfiles, profile,
-                    dotpath, actions, transs):
-        """Create a fake config file"""
-        with open(path, 'w', encoding='utf-8') as file:
-            file.write('actions:\n')
-            for action in actions:
-                file.write(f'  {action.key}: {action.action}\n')
-            file.write('trans:\n')
-            for trans in transs:
-                file.write(f'  {trans.key}: {trans.action}\n')
-            file.write('config:\n')
-            file.write('  backup: true\n')
-            file.write('  create: true\n')
-            file.write(f'  dotpath: {dotpath}\n')
-            file.write('dotfiles:\n')
-            for dotfile in dotfiles:
-                linkval = dotfile.link.name.lower()
-                file.write(f'  {dotfile.key}:\n')
-                file.write(f'    dst: {dotfile.dst}\n')
-                file.write(f'    src: {dotfile.src}\n')
-                file.write(f'    link: {linkval}\n')
-                if len(dotfile.actions) > 0:
-                    file.write('    actions:\n')
-                    for action in dotfile.actions:
-                        file.write(f'      - {action.key}\n')
-                if dotfile.trans_r:
-                    for trans in dotfile.trans_r:
-                        file.write(f'    trans_read: {trans.key}\n')
-            file.write('profiles:\n')
-            file.write(f'  {profile}:\n')
-            file.write('    dotfiles:\n')
-            for dotfile in dotfiles:
-                file.write(f'    - {dotfile.key}\n')
-        return path
 
     def test_install(self):
         """Test the install function"""
@@ -186,8 +187,8 @@ exec bspwm
         dotfiles = [dotfile1, dotfile2, dotfile3, dotfile4,
                     dotfile5, dotfile6, dotfile7, dotfile8,
                     dotfile9, dotfile10, ddot]
-        self.fake_config(confpath, dotfiles,
-                         profile, tmp, [act1], [the_trans])
+        fake_config(confpath, dotfiles,
+                    profile, tmp, [act1], [the_trans])
         conf = Cfg(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 

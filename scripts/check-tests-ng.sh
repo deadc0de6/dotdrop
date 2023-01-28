@@ -32,13 +32,13 @@ workdir_tmp_exists="no"
 if [ -z "${GITHUB_WORKFLOW}" ]; then
   ## local
   export COVERAGE_FILE=
-  tests-ng/tests-launcher.py
+  tests-ng/tests_launcher.py
 else
   ## CI/CD
   export COVERAGE_FILE="${cur}/.coverage"
   # running multiple jobs in parallel sometimes
   # messes with the results on remote servers
-  tests-ng/tests-launcher.py 1
+  tests-ng/tests_launcher.py 1
 fi
 
 # clear workdir

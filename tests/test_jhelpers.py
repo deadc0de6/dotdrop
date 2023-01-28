@@ -14,6 +14,24 @@ from dotdrop.dotfile import Dotfile
 from dotdrop.dotdrop import cmd_install
 
 
+def fake_config(path, dotfile, profile, dotpath):
+    """Create a fake config file"""
+    with open(path, 'w', encoding='utf-8') as file:
+        file.write('config:\n')
+        file.write('  backup: true\n')
+        file.write('  create: true\n')
+        file.write(f'  dotpath: {dotpath}\n')
+        file.write('dotfiles:\n')
+        file.write(f'  {dotfile.key}:\n')
+        file.write(f'    dst: {dotfile.dst}\n')
+        file.write(f'    src: {dotfile.src}\n')
+        file.write('profiles:\n')
+        file.write(f'  {profile}:\n')
+        file.write('    dotfiles:\n')
+        file.write(f'    - {dotfile.key}\n')
+    return path
+
+
 class TestJhelpers(unittest.TestCase):
     """test case"""
 
@@ -56,23 +74,6 @@ basename: c
 dirname: /tmp/a/b
 '''
 
-    def fake_config(self, path, dotfile, profile, dotpath):
-        """Create a fake config file"""
-        with open(path, 'w', encoding='utf-8') as file:
-            file.write('config:\n')
-            file.write('  backup: true\n')
-            file.write('  create: true\n')
-            file.write(f'  dotpath: {dotpath}\n')
-            file.write('dotfiles:\n')
-            file.write(f'  {dotfile.key}:\n')
-            file.write(f'    dst: {dotfile.dst}\n')
-            file.write(f'    src: {dotfile.src}\n')
-            file.write('profiles:\n')
-            file.write(f'  {profile}:\n')
-            file.write('    dotfiles:\n')
-            file.write(f'    - {dotfile.key}\n')
-        return path
-
     def test_jhelpers(self):
         """Test the install function"""
 
@@ -96,7 +97,7 @@ dirname: /tmp/a/b
         # generate the config and stuff
         profile = get_string(5)
         confpath = os.path.join(tmp, self.CONFIG_NAME)
-        self.fake_config(confpath, dotfile1, profile, tmp)
+        fake_config(confpath, dotfile1, profile, tmp)
         conf = CfgAggregator(confpath, profile, debug=True)
         self.assertTrue(conf is not None)
 
