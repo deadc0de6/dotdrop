@@ -73,20 +73,17 @@ done
 # W504: Line break occurred after a binary operator
 echo "---------------------------------"
 echo "checking dotdrop with pycodestyle"
-echo "---------------------------------"
 pycodestyle --ignore=W503,W504 dotdrop/
 pycodestyle scripts/
 
 # pyflakes tests
 echo "------------------------------"
 echo "checking dotdrop with pyflakes"
-echo "------------------------------"
 pyflakes dotdrop/
 
 # pylint
 echo "----------------------------"
 echo "checking dotdrop with pylint"
-echo "----------------------------"
 # https://pylint.pycqa.org/en/latest/user_guide/checkers/features.html
 # R0902: too-many-instance-attributes
 # R0913: too-many-arguments
@@ -109,7 +106,6 @@ pylint \
 
 echo "------------------------"
 echo "checking for more issues"
-echo "------------------------"
 set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
 # f-string errors and missing f literal
