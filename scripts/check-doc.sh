@@ -2,6 +2,8 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2022, deadc0de6
 
+set -e
+
 ## test doc external links
 find . -type f -iname '*.md' | while read -r line; do
   ./scripts/check_links.py "${line}"
