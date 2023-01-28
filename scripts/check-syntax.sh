@@ -67,7 +67,6 @@ find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
     --disable=R0914 \
     --disable=R0915 \
     --disable=R0913 \
-    --load-plugins pylint.extensions.no_self_use \
     "${script}"
 done
 
