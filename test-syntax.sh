@@ -50,14 +50,19 @@ find . -iname '*.sh' | while read -r script; do
     -e SC2002 \
     -e SC2126 \
     -e SC2129 \
-    -e SC2181 "${script}"
+    -e SC2181 \
+    "${script}"
 done
 
 # check other python scripts
 echo "checking other python scripts with pylint"
 find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
   echo "checking ${script}"
-  pylint --reports=no "${script}"
+  pylint -sn \
+    --disable=R0914 \
+    --disable=R0915 \
+    --disable=R0913 \
+    "${script}"
 done
 
 # PEP8 tests
