@@ -97,7 +97,11 @@ echo "var4: {{@@ var4 @@}}" >> "${tmps}"/dotfiles/abc
 
 # install
 echo "step 1"
-cd "${ddpath}" | echo -e 'var1contentxxx\nvar2contentyyy\nvar3\nvar4\n' | ${bin} install -f -c "${cfg}" -p p1 -V
+(
+  cd "${ddpath}"
+  printf 'var1contentxxx\nvar2contentyyy\nvar3\nvar4\n' | ${bin} install -f -c "${cfg}" -p p1 -V
+  exit ${?}
+)
 
 cat "${tmpd}"/abc
 

@@ -96,8 +96,11 @@ cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 --verbose | grep '^1 dotfil
 touch "${DOTDROP_WORKDIR}"/new
 
 echo "[+] re-install with clear-workdir in cli"
-cd "${ddpath}" | printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
-[ "$?" != "0" ] && exit 1
+(
+  cd "${ddpath}"
+  printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
+  exit $?
+)
 
 [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
 [ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
@@ -124,8 +127,11 @@ profiles:
     dotfiles:
     - f_x
 _EOF
-cd "${ddpath}" | printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
-[ "$?" != "0" ] && exit 1
+(
+  cd "${ddpath}"
+  printf "y\n" | ${bin} install -W -c "${cfg}" -p p1 --verbose
+  exit $?
+)
 
 [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
 [ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1

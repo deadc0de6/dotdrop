@@ -54,6 +54,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 chmod_to_umask()
 {
   u=$(umask)
+  # shellcheck disable=SC2001
   u=$(echo "${u}" | sed 's/^0*//')
   if [ -d "${1}" ]; then
     v=$((777 - u))

@@ -29,7 +29,7 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -41,9 +41,10 @@ echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
@@ -54,23 +55,11 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0
 has_rights()
 {
   echo "testing ${1} is ${2}"
-  [ ! -e "$1" ] && echo "`basename $1` does not exist" && exit 1
-  local mode=`stat -L -c '%a' "$1"`
-  [ "${mode}" != "$2" ] && echo "bad mode for `basename "$1"` (${mode} instead of ${2})" && exit 1
+  [ ! -e "$1" ] && echo "$(basename "$1") does not exist" && exit 1
+  local mode
+  mode=$(stat -L -c '%a' "$1")
+  [ "${mode}" != "$2" ] && echo "bad mode for $(basename "$1") (${mode} instead of ${2})" && exit 1
   true
-}
-
-# $1 file
-chmod_to_umask()
-{
-  u=$(umask)
-  u=$(echo "${u}" | sed 's/^0*//')
-  if [ -d "${1}" ]; then
-    v=$((777 - u))
-  else
-    v=$((666 - u))
-  fi
-  chmod ${v} "${1}"
 }
 
 # the dotfile source

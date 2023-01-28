@@ -111,7 +111,8 @@ chmod 777 "${dnormal}"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f -p p1 -V "${dnormal}"
 
 # check rights updated
-[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/$(basename "${dnormal}"))" != "777" ] && echo "rights not updated (1)" && exit 1
+bname=$(basename "${dnormal}")
+[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/"${bname}")" != "777" ] && echo "rights not updated (1)" && exit 1
 
 cnt=$(cat "${cfg}" | grep "chmod: '777'" | wc -l)
 [ "${cnt}" != "1" ] && echo "chmod not updated (1)" && exit 1
@@ -122,7 +123,8 @@ chmod 777 "${dlink}"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f -p p1 -V "${dlink}"
 
 # check rights updated
-[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/$(basename "${dlink}"))" != "777" ] && echo "rights not updated (2)" && exit 1
+bname=$(basename "${dlink}")
+[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/"${bname}")" != "777" ] && echo "rights not updated (2)" && exit 1
 cnt=$(cat "${cfg}" | grep "chmod: '777'" | wc -l)
 [ "${cnt}" != "2" ] && echo "chmod not updated (2)" && exit 1
 
@@ -132,7 +134,8 @@ chmod 777 "${dlinkchildren}"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f -p p1 -V "${dlinkchildren}"
 
 # check rights updated
-[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/$(basename "${dlinkchildren}"))" != "777" ] && echo "rights not updated (3)" && exit 1
+bname=$(basename "${dlinkchildren}")
+[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/"${bname}")" != "777" ] && echo "rights not updated (3)" && exit 1
 cnt=$(cat "${cfg}" | grep "chmod: '777'" | wc -l)
 [ "${cnt}" != "3" ] && echo "chmod not updated (3)" && exit 1
 
@@ -142,7 +145,8 @@ chmod 777 "${fnormal}"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f -p p1 -V "${fnormal}"
 
 # check rights updated
-[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/$(basename "${fnormal}"))" != "777" ] && echo "rights not updated (4)" && exit 1
+bname=$(basename "${fnormal}")
+[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/"${bname}")" != "777" ] && echo "rights not updated (4)" && exit 1
 cnt=$(cat "${cfg}" | grep "chmod: '777'" | wc -l)
 [ "${cnt}" != "4" ] && echo "chmod not updated (4)" && exit 1
 
@@ -152,7 +156,8 @@ chmod 777 "${flink}"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f -p p1 -V "${flink}"
 
 # check rights updated
-[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/$(basename "${flink}"))" != "777" ] && echo "rights not updated (5)" && exit 1
+bname=$(basename "${flink}")
+[ "$(stat -c '%a' "${tmps}"/dotfiles/"${tmpd}"/"${bname}")" != "777" ] && echo "rights not updated (5)" && exit 1
 cnt=$(cat "${cfg}" | grep "chmod: '777'" | wc -l)
 [ "${cnt}" != "5" ] && echo "chmod not updated (5)" && exit 1
 

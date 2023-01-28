@@ -238,7 +238,7 @@ _EOF
 #cat ${cfg}
 
 # clean destination
-rm -rf "${tmpd}"/*
+rm -rf "${tmpd:?}"/*
 
 # install
 cd "${ddpath}" | ${bin} install -f --showdiff -c "${cfg}" -p p1 -V

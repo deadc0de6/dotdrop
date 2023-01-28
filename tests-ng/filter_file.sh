@@ -124,10 +124,10 @@ _EOF
 echo "this is the test dotfile" > "${tmps}"/dotfiles/abc
 
 # test imported function
-echo "{{@@ "abc" | filter1 @@}}" >> "${tmps}"/dotfiles/abc
-echo "{{@@ "arg1" | filter2('arg2') @@}}" >> "${tmps}"/dotfiles/abc
-echo "{{@@ "13" | filter3() @@}}" >> "${tmps}"/dotfiles/abc
-echo "{{@@ "something" | filter_ext() @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ \"abc\" | filter1 @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ \"arg1\" | filter2('arg2') @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ \"13\" | filter3() @@}}" >> "${tmps}"/dotfiles/abc
+echo "{{@@ \"something\" | filter_ext() @@}}" >> "${tmps}"/dotfiles/abc
 echo "{{@@ filt @@}}variable" >> "${tmps}"/dotfiles/abc
 
 # install

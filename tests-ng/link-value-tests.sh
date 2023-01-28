@@ -29,7 +29,7 @@ cur=$(dirname "$(${rl} "${0}")")
 # dotdrop path can be pass as argument
 ddpath="${cur}/../"
 [ "${1}" != "" ] && ddpath="${1}"
-[ ! -d ${ddpath} ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
+[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
@@ -41,19 +41,20 @@ echo "dotdrop path: ${ddpath}"
 echo "pythonpath: ${PYTHONPATH}"
 
 # get the helpers
-source ${cur}/helpers
+# shellcheck source=tests-ng/helpers
+source "${cur}"/helpers
 
-echo -e "$(tput setaf 6)==> RUNNING $(basename ${BASH_SOURCE[0]}) <==$(tput sgr0)"
+echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
 
 ################################################################
 # this is the test
 ################################################################
 
 # the dotfile source
-tmps=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
-mkdir -p ${tmps}/dotfiles
+tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=`mktemp -d --suffix='-dotdrop-tests' || mktemp -d`
+tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -64,13 +65,13 @@ cfg="${tmps}/config.yaml"
 # ----------------------------------------------------------
 echo -e "\n======> import with all default"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -81,28 +82,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=nolink and link_dotfile_default=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -115,28 +116,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=nolink and link_dotfile_default=nolink and --link=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -149,28 +150,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V --link=nolink
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=nolink and link_dotfile_default=nolink and --link=link"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -183,28 +184,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=absolute
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V --link=absolute
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:absolute,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ ! -h ${df} ] && echo "not symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ ! -h "${df}" ] && echo "not symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=link and link_dotfile_default=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -217,28 +218,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:absolute,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ ! -h ${df} ] && echo "not symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ ! -h "${df}" ] && echo "not symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=link and link_dotfile_default=nolink and --link=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -251,28 +252,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V --link=nolink
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=nolink and link_dotfile_default=link"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -285,28 +286,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V --link=nolink
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with link_on_import=link and link_dotfile_default=nolink and --link=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -319,28 +320,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V --link=nolink
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V --link=nolink
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:nolink,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:nolink,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with all default and --link=link"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -351,28 +352,28 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} --link=absolute -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --link=absolute -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "f_`basename ${df}`" | head -1 | grep ',link:absolute,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "f_$(basename "${df}")" | head -1 | grep ',link:absolute,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ ! -h ${df} ] && echo "not a symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ ! -h "${df}" ] && echo "not a symlink" && exit 1
 
 # ----------------------------------------------------------
 echo -e "\n======> import with all default and --link=link_children"
 # create the source
-rm -rf ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert
+rm -rf "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -384,24 +385,24 @@ _EOF
 # import
 df="${tmpd}/qwert"
 set +e
-cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link_children -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --link=link_children -p p1 "${df}" -V
 [ "$?" = "0" ] && echo "link_children with file should fail" && exit 1
 set -e
 
 # ----------------------------------------------------------
 echo -e "\n======> import with all default and --link=link_children"
 # create the source
-rm -rf ${tmpd}/qwert
-mkdir -p ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert/file
-mkdir -p ${tmpd}/qwert/directory
-echo "test" > ${tmpd}/qwert/directory/file
+rm -rf "${tmpd}"/qwert
+mkdir -p "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert/file
+mkdir -p "${tmpd}"/qwert/directory
+echo "test" > "${tmpd}"/qwert/directory/file
 
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -412,34 +413,34 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} --link=link_children -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --link=link_children -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename ${df}`" | head -1 | grep ',link:link_children,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "d_$(basename "${df}")" | head -1 | grep ',link:link_children,'
 
 # try to install
-rm -rf ${tmpd}/qwert
-cd ${ddpath} | ${bin} install -f -c ${cfg} -p p1 -V
-[ ! -e ${df} ] && echo "does not exist" && exit 1
-[ -h ${df} ] && echo "is a symlink" && exit 1
-[ ! -h ${df}/file ] && echo "file is not a symlink" && exit 1
-[ ! -h ${df}/directory ] && echo "directory is not a symlink" && exit 1
-[ -h ${df}/directory/file ] && echo "directory/file is a symlink" && exit 1
+rm -rf "${tmpd}"/qwert
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
+[ ! -e "${df}" ] && echo "does not exist" && exit 1
+[ -h "${df}" ] && echo "is a symlink" && exit 1
+[ ! -h "${df}"/file ] && echo "file is not a symlink" && exit 1
+[ ! -h "${df}"/directory ] && echo "directory is not a symlink" && exit 1
+[ -h "${df}"/directory/file ] && echo "directory/file is a symlink" && exit 1
 
 echo -e "\n======> import with link_on_import=link_children and link_dotfile_default=nolink"
 # create the source
-rm -rf ${tmpd}/qwert
-mkdir -p ${tmpd}/qwert
-echo "test" > ${tmpd}/qwert/file
-mkdir -p ${tmpd}/qwert/directory
-echo "test" > ${tmpd}/qwert/directory/file
+rm -rf "${tmpd}"/qwert
+mkdir -p "${tmpd}"/qwert
+echo "test" > "${tmpd}"/qwert/file
+mkdir -p "${tmpd}"/qwert/directory
+echo "test" > "${tmpd}"/qwert/directory/file
 
 # clean
-rm -rf ${tmps}/dotfiles
-mkdir -p ${tmps}/dotfiles
+rm -rf "${tmps}"/dotfiles
+mkdir -p "${tmps}"/dotfiles
 # config file
-cat > ${cfg} << _EOF
+cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
@@ -452,11 +453,11 @@ _EOF
 
 # import
 df="${tmpd}/qwert"
-cd ${ddpath} | ${bin} import -f -c ${cfg} -p p1 ${df} -V
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 "${df}" -V
 
 # checks
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V
-cd ${ddpath} | ${bin} files -c ${cfg} -p p1 -V -G | grep "d_`basename "${df}"`" | head -1 | grep ',link:link_children,'
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V
+cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -V -G | grep "d_$(basename "${df}")" | head -1 | grep ',link:link_children,'
 
 # try to install
 rm -rf "${tmpd}"/qwert

@@ -158,7 +158,7 @@ cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p2 -V
 # test with non-existing dotpath this time
 
 rm -rf "${tmps}"/dotfiles
-rm -rf "${tmpd}"/*
+rm -rf "${tmpd:?}"/*
 
 cat > "${cfg1}" << _EOF
 config:
@@ -190,7 +190,7 @@ cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p2 -V
 
 # test with same profile defined in both
 rm -rf "${tmps}"/dotfiles
-rm -rf "${tmpd}"/*
+rm -rf "${tmpd:?}"/*
 
 cat > "${cfg1}" << _EOF
 config:
