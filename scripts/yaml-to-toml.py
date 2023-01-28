@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pylint: disable-msg=C0103
 """
 author: deadc0de6 (https://github.com/deadc0de6)
 Copyright (c) 2022, deadc0de6
@@ -24,20 +25,20 @@ def yaml_load(path):
 
 def replace_none(content):
     """replace any occurence of None with empty string"""
-    n = {}
+    new = {}
     for k in content:
         if content[k] is None:
             if k == 'dotfiles':
                 continue
             if k == 'profiles':
                 continue
-            n[k] = ""
+            new[k] = ""
             continue
         if isinstance(content[k], dict):
-            n[k] = replace_none(content[k])
+            new[k] = replace_none(content[k])
             continue
-        n[k] = content[k]
-    return n
+        new[k] = content[k]
+    return new
 
 
 def toml_dump(content):
