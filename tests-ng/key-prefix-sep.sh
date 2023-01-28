@@ -91,7 +91,7 @@ cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | cut -f1 -d',' | grep '_top_
 cd "${ddpath}" | ${bin} files -c "${cfg}" -p p1 -G | cut -f1 -d',' | grep '_mutt_sub' | grep -q 'd_'
 
 # pimping
-rm -rf "${tmps}"/*
+rm -rf "${tmps:?}"/*
 
 cat > "${cfg}" << _EOF
 config:

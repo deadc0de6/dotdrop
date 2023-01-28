@@ -114,7 +114,7 @@ echo "second" > "${tmps}"/dotfiles/second
 echo "third" > "${tmps}"/dotfiles/third
 
 attempts="3"
-for ((i=0;i<${attempts};i++)); do
+for ((i=0;i<attempts;i++)); do
   # install
   cd "${ddpath}" | ${bin} install -w 1 -f -c "${cfg}" -p p0 -V
 
