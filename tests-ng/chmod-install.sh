@@ -267,7 +267,7 @@ chmod 600 "${tmps}"/dotfiles/nomode
 echo "nomode" > "${tmpd}"/nomode
 chmod 700 "${tmpd}"/nomode
 (
-  d "${ddpath}"
+  cd "${ddpath}"
   printf 'y\ny\n' | ${bin} install -f -c "${cfg}" -p p2 -V f_nomode
   exit $?
 )

@@ -91,7 +91,7 @@ profiles:
     dotfiles:
     - f_abc
 _EOF
-#cat ${cfg}
+#cat "${cfg}"
 
 # create the dotfile
 echo "{{@@ var1 @@}}" > "${tmps}"/dotfiles/abc
@@ -104,12 +104,13 @@ echo "test" >> "${tmps}"/dotfiles/abc
 # install
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 
+#cat "${cfg}"
 echo "-----"
 cat "${tmpd}"/abc
 echo "-----"
 
 grep '^this is some test' "${tmpd}"/abc >/dev/null
-grep '^# author: deadc0de6' "${tmpd}"/abc >/dev/null
+grep '^# shellcheck' "${tmpd}"/abc >/dev/null
 grep '^tset,emos,si,siht' "${tmpd}"/abc >/dev/null
 grep "^${TESTENV}" "${tmpd}"/abc > /dev/null
 grep '^4ravd_eht' "${tmpd}"/abc >/dev/null
