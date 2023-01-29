@@ -163,14 +163,16 @@ dynvariables:
 
 Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.
 
-* Test for PEP8 compliance with `pycodestyle` and `pyflakes`
-* Run the unittest available in [tests directory](/tests)
-* Run the bash script tests in [tests-ng directory](/tests-ng)
+* Test for PEP8 compliance with `pylint`, `pycodestyle` and `pyflakes` (see [check-syntax.sh](/scripts/test-syntax.sh))
+* Test the documentation and links (see [check-doc.sh](/scripts/check-doc.sh))
+* Run the unittests in [tests directory](/tests) with pytest (see [check-unittest.sh](/scripts/check-unittests.sh))
+* Run the blackbox bash script tests in [tests-ng directory](/tests-ng) (see [check-tests-ng.sh](/scripts/check-tests-ng.sh))
 
 ## Testing with unittest
 
 All unittests are available in [the tests directory](/tests)
 and use [Python's unittest](https://docs.python.org/3/library/unittest.html).
+Those are run with the help of [pytest](https://docs.pytest.org/).
 
 The file [helpers.py](/tests/helpers.py) provides different helper methods
 for the tests.
@@ -178,7 +180,7 @@ for the tests.
 ## Testing with bash scripts
 
 The bash scripts are available in [tests-ng directory](/tests-ng).
-These test entire workflows by simulating the use of dotdrop from end to end
+These scripts test entire workflows by simulating the use of dotdrop with a blackbox approach
 for different use-cases (usually described in their filename or in the file header).
 
 Each script starts with the same boilerplate code that you can paste at the
