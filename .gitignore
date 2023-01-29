@@ -1,15 +1,16 @@
+# python stuff
 *.pyc
 __pycache__
-
-.coverage
-.coverage*
-
 dist/
 build/
 *.egg-info/
 tags
 env
 venv
+
+# coverage stuff
+.coverage
+.coverage*
 htmlcov
 
 # IDE
