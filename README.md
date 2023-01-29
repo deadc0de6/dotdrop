@@ -52,8 +52,7 @@ Features:
 * Associate transformations for storing encrypted/compressed dotfiles
 * Provide solutions for handling dotfiles containing sensitive information
 
-Also check out the [blog post](https://deadc0de.re/articles/dotfiles.html),
-the [example](#getting-started), the [documentation](https://dotdrop.readthedocs.io/) or
+Check the [example](#getting-started), the [documentation](https://dotdrop.readthedocs.io/) or
 how [people are using dotdrop](https://dotdrop.readthedocs.io/en/latest/misc/people-using-dotdrop/)
 for more.
 
