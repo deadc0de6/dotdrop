@@ -495,17 +495,31 @@ def debug_dict(title, elems, debug):
 
 
 def check_version():
-    """check dotdrop version on github and compare with current"""
+    """
+    get dotdrop latest version on github
+    compare with "version"
+    and emit warning in case new version is available
+    """
     url = 'https://api.github.com/repos/deadc0de6/dotdrop/releases/latest'
-    req = requests.get(url, timeout=1)
-    if not req:
+    try:
+        req = requests.get(url, timeout=1)
+    except requests.exceptions.RequestException:
+        # request failed
         return
+    if not req:
+        # request failed
+        return
+    if req.status_code != 200:
+        # request failed
+        return
+    # get json
     try:
         latest = req.json()['name']
     except json.decoder.JSONDecodeError:
         return
     except ValueError:
         return
+    # compare
     if latest.startswith('v'):
         latest = latest[1:]
     if version.parse(VERSION) < version.parse(latest):
