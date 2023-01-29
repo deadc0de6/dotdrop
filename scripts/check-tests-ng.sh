@@ -18,24 +18,16 @@ cur=$(dirname "$(${rl} "${0}")")
 tmpworkdir="/tmp/dotdrop-tests-workdir"
 export DOTDROP_WORKDIR="${tmpworkdir}"
 
-workers=${DOTDROP_WORKERS}
-if [ -n "${workers}" ]; then
-  DOTDROP_WORKERS=${workers}
-  echo "ENABLE workers: ${workers}"
-fi
-
-# run bash tests
-export DOTDROP_DEBUG="yes"
-unset DOTDROP_FORCE_NODEBUG
+# check if tmp dir is present
 workdir_tmp_exists="no"
 [ -d "${HOME}/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
+
+# run bash tests
 if [ -z "${GITHUB_WORKFLOW}" ]; then
   ## local
-  export COVERAGE_FILE=
   tests-ng/tests_launcher.py
 else
   ## CI/CD
-  export COVERAGE_FILE="${cur}/.coverage"
   # running multiple jobs in parallel sometimes
   # messes with the results on remote servers
   tests-ng/tests_launcher.py 1
