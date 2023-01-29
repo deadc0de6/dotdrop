@@ -1,5 +1,5 @@
 pycodestyle; python_version > '3.5'
-nose2; python_version > '3.5'
+pytest; python_version > '3.5'
 coverage; python_version > '3.5'
 coveralls; python_version > '3.5'
 pyflakes; python_version > '3.5'

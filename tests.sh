@@ -41,5 +41,8 @@ echo "unittest..."
 echo "tests-ng..."
 "${cur}"/scripts/check-tests-ng.sh
 
+# merge coverage
+coverage combine
+
 ## done
 echo "All tests finished successfully"

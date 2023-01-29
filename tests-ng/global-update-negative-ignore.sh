@@ -27,7 +27,7 @@ ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 bin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
-  bin="coverage run -a --source=dotdrop -m dotdrop.dotdrop"
+  bin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
 fi
 
 echo "dotdrop path: ${ddpath}"
