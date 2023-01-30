@@ -128,5 +128,17 @@ cntpost=$(find "${tmps}"/dotfiles -type f | wc -l)
 
 [ "${cntpost}" != "${cntpre}" ] && echo "import failed" && exit 1
 
+# for coverage
+export DOTDROP_CONFIG="${cfg}"
+export DOTDROP_PROFILE="p1"
+export DOTDROP_VERBOSE="yes"
+unset DOTDROP_FORCE_NODEBUG
+unset DOTDROP_NOBANNER=
+export DOTDROP_TMPDIR="${tmpx}"
+export DOTDROP_WORKDIR="${tmpy}"
+export DOTDROP_WORKERS="1"
+
+cd "${ddpath}" | ${bin} files
+
 echo "OK"
 exit 0
