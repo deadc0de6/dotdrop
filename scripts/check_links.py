@@ -9,7 +9,9 @@ URL checking script
 import sys
 import re
 from urllib.parse import urlparse
+from urllib3 import Retry
 import requests
+from requests.adapters import HTTPAdapter
 
 
 RED = '\033[91m'
@@ -19,7 +21,7 @@ BLUE = '\033[94m'
 MAGENTA = '\033[95m'
 RESET = '\033[0m'
 
-TIMEOUT = 3
+TIMEOUT = 10
 VALID_RET = [
     200,
     302,
@@ -53,6 +55,20 @@ def get_links(path):
     entries = re.findall(PATTERN, content)
     urls = list(set(entries))
     return urls
+
+
+def get_session():
+    """get a session with retry"""
+    session = requests.Session()
+    retry_on = [404, 429, 500, 502, 503, 504]
+    retry = Retry(total=3,
+                  backoff_factor=1,
+                  allowed_methods=False,
+                  status_forcelist=retry_on)
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 
 def check_links(urls):
@@ -93,10 +109,11 @@ def check_links(urls):
             )
             print(msg)
             verb = 'get'
-            ret = requests.get(url,
-                               timeout=TIMEOUT,
-                               allow_redirects=True,
-                               headers=HEADERS).status_code
+            sess = get_session()
+            ret = sess.get(url,
+                           timeout=TIMEOUT,
+                           allow_redirects=True,
+                           headers=HEADERS).status_code
             if ret not in VALID_RET:
                 print(f'    {RED}[ERROR]{RESET} {url} returned {ret}')
                 return False
