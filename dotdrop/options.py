@@ -216,36 +216,45 @@ class Options(AttrMonitor):
         """get the config path"""
         # cli provided
         if self.args['--cfg']:
+            self.log.dbg(f'config from --cfg {self.args["--cfg"]}')
             return os.path.expanduser(self.args['--cfg'])
 
         # environment variable provided
         if ENV_CONFIG in os.environ:
+            self.log.dbg(f'config from env {ENV_CONFIG}')
             return os.path.expanduser(os.environ[ENV_CONFIG])
 
         # look in current directory
         if os.path.exists(CONFIGFILEYAML):
+            self.log.dbg(f'config from yaml in current dir {CONFIGFILEYAML}')
             return CONFIGFILEYAML
 
         # look in current directory
         if os.path.exists(CONFIGFILETOML):
+            self.log.dbg(f'config from toml in current dir {CONFIGFILETOML}')
             return CONFIGFILETOML
 
         path = self._get_config_from_env(CONFIGFILEYAML)
         if path:
+            self.log.dbg(f'config from env with {CONFIGFILEYAML}')
             return path
 
         path = self._get_config_from_env(CONFIGFILETOML)
         if path:
+            self.log.dbg(f'config from env with {CONFIGFILETOML}')
             return path
 
         path = self._get_config_from_fs(CONFIGFILEYAML)
         if path:
+            self.log.dbg(f'config from fs with {CONFIGFILEYAML}')
             return path
 
         path = self._get_config_from_fs(CONFIGFILETOML)
         if path:
+            self.log.dbg(f'config from fs with {CONFIGFILETOML}')
             return path
 
+        self.log.dbg('no config file found')
         return None
 
     def _header(self):
