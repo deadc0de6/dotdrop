@@ -52,6 +52,25 @@ class TestConfig(SubsetTestCase):
         self.assertTrue(dpath == self.CONFIG_DOTPATH)
         self.assertTrue(conf.dump() != '')
 
+    def test_raises(self):
+        """test raises on not existing path"""
+        with self.assertRaises(YamlException):
+            Cfg('path', debug=True)
+
+    def test_resolve_link(self):
+        """test bad link value"""
+        tmp = get_tempdir()
+        self.assertTrue(os.path.exists(tmp))
+        self.addCleanup(clean, tmp)
+        confpath = create_fake_config(tmp,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        cfg = Cfg(confpath, debug=True)
+        with self.assertRaises(YamlException):
+            cfg._resolve_dotfile_link('fake')
+
     def test_def_link(self):
         """unittest"""
         # pylint: disable=E1120
