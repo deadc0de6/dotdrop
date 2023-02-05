@@ -19,7 +19,8 @@ from dotdrop.profile import Profile
 from dotdrop.action import Action, Transform
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home, debug_list, debug_dict
-from dotdrop.exceptions import UndefinedException, YamlException
+from dotdrop.exceptions import UndefinedException, YamlException, \
+    ConfigException
 
 
 TILD = '~'
@@ -400,7 +401,7 @@ class CfgAggregator:
                     err = f'{container} does not contain'
                     err += f' a {keys} entry named {key}'
                     self.log.err(err)
-                    raise Exception(err)
+                    raise ConfigException(err)
                 objects.append(obj)
             if not islist:
                 objects = objects[0]
