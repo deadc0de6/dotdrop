@@ -12,6 +12,7 @@ import os
 import unittest
 from unittest.mock import patch
 from dotdrop.options import Options, Logger
+from dotdrop.exceptions import YamlException
 
 
 class FakeOptions(Options):
@@ -101,8 +102,6 @@ class TestOptions(unittest.TestCase):
         home = os.path.expanduser('~/.config')
         expected = f'{home}/dotdrop/config.yaml'
         mock_exists.side_effect = side_effect(valid=expected)
-        log = Logger(debug=True)
-        log.dbg(f'expected: {expected}')
         args = get_args({'--cfg': ''})
         os.environ['XDG_CONFIG_HOME'] = home
         fake = FakeOptions(args)
@@ -115,51 +114,120 @@ class TestOptions(unittest.TestCase):
         home = os.path.expanduser('~/.config')
         expected = f'{home}/dotdrop/config.toml'
         mock_exists.side_effect = side_effect(valid=expected)
-        log = Logger(debug=True)
-        log.dbg(f'expected: {expected}')
         args = get_args({'--cfg': ''})
         os.environ['XDG_CONFIG_HOME'] = home
         fake = FakeOptions(args)
         self.assertEqual(fake._get_config_path(), expected)
 
     @patch('os.path.exists')
-    def test_get_path_fs_yaml(self, mock_exists):
+    def test_get_path_fs_xdg_yaml(self, mock_exists):
         """from fs yaml"""
         clean_setup()
         home = os.path.expanduser('~/.config')
-        expected = f'{home}/dotdrop/config.toml'
+        expected = f'{home}/dotdrop/config.yaml'
         mock_exists.side_effect = side_effect(valid=expected)
-        log = Logger(debug=True)
-        log.dbg(f'expected: {expected}')
         args = get_args({'--cfg': ''})
         fake = FakeOptions(args)
         self.assertEqual(fake._get_config_path(), expected)
 
     @patch('os.path.exists')
-    def test_get_path_fs_xdg(self, mock_exists):
+    def test_get_path_fs_xdg_etc_yaml(self, mock_exists):
+        """from fs xdg"""
+        clean_setup()
+        home = os.path.expanduser('/etc/xdg')
+        expected = f'{home}/dotdrop/config.yaml'
+        mock_exists.side_effect = side_effect(valid=expected)
+        args = get_args({'--cfg': ''})
+        fake = FakeOptions(args)
+        self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_fs_etc_dotdrop_yaml(self, mock_exists):
+        """from fs etc"""
+        clean_setup()
+        home = os.path.expanduser('/etc')
+        expected = f'{home}/dotdrop/config.yaml'
+        mock_exists.side_effect = side_effect(valid=expected)
+        args = get_args({'--cfg': ''})
+        fake = FakeOptions(args)
+        self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_fs_etc_xdg_yaml(self, mock_exists):
+        """from fs etc/xdg"""
+        clean_setup()
+        home = os.path.expanduser('/etc/xdg')
+        expected = f'{home}/dotdrop/config.yaml'
+        mock_exists.side_effect = side_effect(valid=expected)
+        args = get_args({'--cfg': ''})
+        fake = FakeOptions(args)
+        self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_fs_xdg_toml(self, mock_exists):
+        """from fs toml"""
+        clean_setup()
+        home = os.path.expanduser('~/.config')
+        expected = f'{home}/dotdrop/config.toml'
+        mock_exists.side_effect = side_effect(valid=expected)
+        args = get_args({'--cfg': ''})
+        fake = FakeOptions(args)
+        self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_fs_xdg_etc_toml(self, mock_exists):
         """from fs xdg"""
         clean_setup()
         home = os.path.expanduser('/etc/xdg')
         expected = f'{home}/dotdrop/config.toml'
         mock_exists.side_effect = side_effect(valid=expected)
-        log = Logger(debug=True)
-        log.dbg(f'expected: {expected}')
         args = get_args({'--cfg': ''})
         fake = FakeOptions(args)
         self.assertEqual(fake._get_config_path(), expected)
 
     @patch('os.path.exists')
-    def test_get_path_fs_etc(self, mock_exists):
+    def test_get_path_fs_etc_dotdrop_toml(self, mock_exists):
         """from fs etc"""
         clean_setup()
         home = os.path.expanduser('/etc')
         expected = f'{home}/dotdrop/config.toml'
         mock_exists.side_effect = side_effect(valid=expected)
-        log = Logger(debug=True)
-        log.dbg(f'expected: {expected}')
         args = get_args({'--cfg': ''})
         fake = FakeOptions(args)
         self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_fs_etc_xdg_toml(self, mock_exists):
+        """from fs etc/xdg"""
+        clean_setup()
+        home = os.path.expanduser('/etc/xdg')
+        expected = f'{home}/dotdrop/config.toml'
+        mock_exists.side_effect = side_effect(valid=expected)
+        args = get_args({'--cfg': ''})
+        fake = FakeOptions(args)
+        self.assertEqual(fake._get_config_path(), expected)
+
+    @patch('os.path.exists')
+    def test_get_path_none(self, mock_exists):
+        """path is none"""
+        clean_setup()
+        mock_exists.return_value = False
+        args = get_args({})
+        fake = FakeOptions(args)
+        self.assertEqual(None, fake._get_config_path())
+
+    @patch('os.path.exists')
+    def test_options_debug(self, mock_exists):
+        """test debug"""
+        mock_exists.return_value = False
+        args = {
+            '--verbose': True,
+            '--dry': False,
+            '--cfg': 'path',
+            '--profile': 'profile',
+        }
+        with self.assertRaises(YamlException):
+            Options(args)
 
 
 def main():

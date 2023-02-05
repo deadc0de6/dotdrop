@@ -117,7 +117,7 @@ def create_dir(path):
 
 def _fake_args():
     args = {}
-    args['--verbose'] = False
+    args['--verbose'] = True
     args['--no-banner'] = False
     args['--dry'] = False
     args['--force'] = False
