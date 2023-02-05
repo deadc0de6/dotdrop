@@ -20,7 +20,7 @@ from dotdrop.logger import Logger
 from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list, debug_list, debug_dict
-from dotdrop.exceptions import YamlException
+from dotdrop.exceptions import YamlException, OptionsException
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -430,4 +430,4 @@ class Options(AttrMonitor):
 
     def _attr_set(self, attr):
         """error when some inexistent attr is set"""
-        raise Exception(f'bad option: {attr}')
+        raise OptionsException(f'bad option: {attr}')

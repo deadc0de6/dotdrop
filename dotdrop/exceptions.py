@@ -10,6 +10,14 @@ class YamlException(Exception):
     """exception in CfgYaml"""
 
 
+class ConfigException(Exception):
+    """exception in config parsing/aggregation"""
+
+
+class OptionsException(Exception):
+    """dotdrop options exception"""
+
+
 class UndefinedException(Exception):
     """exception in templating"""
 

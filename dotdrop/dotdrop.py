@@ -24,7 +24,8 @@ from dotdrop.utils import get_tmpdir, removepath, \
     adapt_workers, check_version, pivot_path
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, \
-    UndefinedException, UnmetDependency
+    UndefinedException, UnmetDependency, \
+    ConfigException, OptionsException
 
 LOG = Logger()
 TRANS_SUFFIX = 'trans'
@@ -877,10 +878,16 @@ def main():
     try:
         opts = Options()
     except YamlException as exc:
-        LOG.err(f'config error: {exc}')
+        LOG.err(f'error (yaml): {exc}')
+        return False
+    except ConfigException as exc:
+        LOG.err(f'error (config): {exc}')
         return False
     except UndefinedException as exc:
-        LOG.err(f'config error: {exc}')
+        LOG.err(f'error (deps): {exc}')
+        return False
+    except OptionsException as exc:
+        LOG.err(f'error (options): {exc}')
         return False
 
     if opts.debug:

@@ -354,6 +354,7 @@ def dependencies_met():
 
     # check python deps
 # pylint: disable=C0415
+
     # python-magic
     name = 'python-magic'
     err = f'missing python module \"{name}\"'
@@ -372,7 +373,7 @@ def dependencies_met():
         from docopt import docopt
         assert docopt
     except ImportError as exc:
-        raise Exception(err) from exc
+        raise UnmetDependency(err) from exc
 
     # jinja2
     name = 'jinja2'
@@ -381,7 +382,7 @@ def dependencies_met():
         import jinja2
         assert jinja2
     except ImportError as exc:
-        raise Exception(err) from exc
+        raise UnmetDependency(err) from exc
 
     # ruamel.yaml
     name = 'ruamel.yaml'
@@ -390,7 +391,7 @@ def dependencies_met():
         from ruamel.yaml import YAML
         assert YAML
     except ImportError as exc:
-        raise Exception(err) from exc
+        raise UnmetDependency(err) from exc
 
     # toml
     name = 'toml'
@@ -399,7 +400,7 @@ def dependencies_met():
         import toml
         assert toml
     except ImportError as exc:
-        raise Exception(err) from exc
+        raise UnmetDependency(err) from exc
 
     # distro
     name = 'distro'
@@ -408,7 +409,7 @@ def dependencies_met():
         import distro
         assert distro
     except ImportError as exc:
-        raise Exception(err) from exc
+        raise UnmetDependency(err) from exc
 
 # pylint: enable=C0415
 
