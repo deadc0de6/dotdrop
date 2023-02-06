@@ -25,7 +25,7 @@ class LinkTypes(IntEnum):
         try:
             return key if isinstance(key, cls) else cls[key.upper()]
         except KeyError as exc:
-            if default:
+            if default and isinstance(default, cls):
                 return default
             err = f'bad {cls.__name__} value: "{key}"'
             raise ValueError(err) from exc
