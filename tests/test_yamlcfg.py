@@ -69,6 +69,7 @@ class TestConfig(SubsetTestCase):
                                       create=self.CONFIG_CREATE)
         cfg = Cfg(confpath, debug=True)
         with self.assertRaises(YamlException):
+            # pylint: disable=W0212
             cfg._resolve_dotfile_link('fake')
 
     def test_def_link(self):
