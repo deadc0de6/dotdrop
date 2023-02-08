@@ -29,11 +29,7 @@ VALID_RET = [
 IGNORES = [
   'badgen.net',
 ]
-IGNORE_GENERIC = [
-    'assets/dotdrop.svg',
-    'github.com/deadc0de6/dotdrop',
-    'packages.debian.org',
-]
+IGNORE_GENERIC = []
 USER_AGENT = (
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
     'AppleWebKit/537.36 (KHTML, like Gecko) '
