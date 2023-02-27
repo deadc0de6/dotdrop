@@ -10,5 +10,5 @@ $ git clone https://github.com/deadc0de6/dotdrop.git
 $ cd dotdrop
 ## switch to a specific branch if needed
 $ git checkout <branch-name>
-$ ./dotdrop.sh --config <path-to-your-config-file.yaml>
+$ ./dotdrop.sh --cfg <path-to-your-config-file.yaml>
 ```
