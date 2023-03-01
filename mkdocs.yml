@@ -43,6 +43,7 @@ nav:
     - 'Prompt user for variables': 'howto/prompt-user-for-variables.md'
     - 'Share content across dotfiles': 'howto/sharing-content.md'
     - 'Symlink dotfiles': 'howto/symlink-dotfiles.md'
+    - 'Test latest dotdrop': 'howto/test-latest-dotdrop.md'
     - '': ''
     - '': ''
 markdown_extensions:

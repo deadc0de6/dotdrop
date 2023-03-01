@@ -256,7 +256,7 @@ class CfgYaml:
         # process imported variables (import_variables)
         newvars = self._import_variables()
         self._clear_profile_vars(newvars)
-        self._add_variables(newvars)
+        self._add_variables(newvars, prio=True)
 
         # process imported actions (import_actions)
         self._import_actions()
@@ -1042,7 +1042,7 @@ class CfgYaml:
             if dvar.keys():
                 self._shell_exec_dvars(merged, keys=dvar.keys())
             self._clear_profile_vars(merged)
-            newvars = self._merge_dict(newvars, merged)
+            newvars = self._merge_dict(merged, newvars)
         if self._debug:
             self._debug_dict('imported variables', newvars)
         return newvars

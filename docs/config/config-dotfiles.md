@@ -51,8 +51,7 @@ executed when the dotfile is installed (that is, when
 the version present in dotdrop differs from the one
 in the filesystem).
 
-For example, let's consider
-[Vundle](https://github.com/VundleVim/Vundle.vim), used
+For example, let's consider Vundle, used
 to manage Vim's plugins.  The following action could
 be set to update and install the plugins when `vimrc` is
 deployed:

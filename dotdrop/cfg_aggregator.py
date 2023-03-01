@@ -274,37 +274,48 @@ class CfgAggregator:
                                reloading=reloading,
                                debug=self.debug)
 
+        self.log.dbg('parsing cfgyaml into cfg_aggregator')
+
         # settings
+        self.log.dbg('parsing settings')
         self.settings = Settings.parse(None, self.cfgyaml.settings)
         self.key_prefix = self.settings.key_prefix
         self.key_separator = self.settings.key_separator
 
         # dotfiles
+        self.log.dbg('parsing dotfiles')
         self.dotfiles = Dotfile.parse_dict(self.cfgyaml.dotfiles)
         debug_list('dotfiles', self.dotfiles, self.debug)
 
         # profiles
+        self.log.dbg('parsing profiles')
         self.profiles = Profile.parse_dict(self.cfgyaml.profiles)
         debug_list('profiles', self.profiles, self.debug)
 
         # actions
+        self.log.dbg('parsing actions')
         self.actions = Action.parse_dict(self.cfgyaml.actions)
         debug_list('actions', self.actions, self.debug)
 
         # trans_r
+        self.log.dbg('parsing trans_r')
         self.trans_r = Transform.parse_dict(self.cfgyaml.trans_r)
         debug_list('trans_r', self.trans_r, self.debug)
 
         # trans_w
+        self.log.dbg('parsing trans_w')
         self.trans_w = Transform.parse_dict(self.cfgyaml.trans_w)
         debug_list('trans_w', self.trans_w, self.debug)
 
         # variables
+        self.log.dbg('parsing variables')
         self.variables = self.cfgyaml.variables
         debug_dict('variables', self.variables, self.debug)
 
+        self.log.dbg('enrich variables')
         self._enrich_variables()
 
+        self.log.dbg('patch keys...')
         # patch dotfiles in profiles
         self._patch_keys_to_objs(self.profiles,
                                  "dotfiles", self.get_dotfile)
@@ -332,6 +343,8 @@ class CfgAggregator:
                                  "trans_w",
                                  self._get_trans_w_args(self.get_trans_w),
                                  islist=False)
+
+        self.log.dbg('done parsing cfgyaml into cfg_aggregator')
 
     def _enrich_variables(self):
         """

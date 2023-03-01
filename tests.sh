@@ -23,7 +23,10 @@ if [ "${dotdrop_version}" != "${man_version}" ]; then
   echo "ERROR version.py (${dotdrop_version}) and manpage (${man_version}) differ!"
   exit 1
 fi
-echo "current version ${dotdrop_version}"
+echo "current dotdrop version ${dotdrop_version}"
+
+echo "=> python version:"
+python3 --version
 
 # test syntax
 echo "checking syntax..."
