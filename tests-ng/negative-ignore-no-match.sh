@@ -6,38 +6,20 @@
 # returns 1 in case of error
 #
 
-# exit on first error
+## start-cookie
 set -e
-
-# all this crap to get current path
-rl="readlink -f"
-if ! ${rl} "${0}" >/dev/null 2>&1; then
-  rl="realpath"
-
-  if ! hash ${rl}; then
-    echo "\"${rl}\" not found !" && exit 1
-  fi
-fi
-cur=$(dirname "$(${rl} "${0}")")
-# dotdrop path can be pass as argument
+cur=$(cd "$(dirname "${BASH_SOURCE:-$0}")" && pwd)
 ddpath="${cur}/../"
-[ -n "${1}" ] && ddpath="${1}"
-[ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
-
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
-bin="python3 -m dotdrop.dotdrop"
+altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
-  bin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
+  altbin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
 fi
-
-echo "dotdrop path: ${ddpath}"
-echo "pythonpath: ${PYTHONPATH}"
-
-# get the helpers
+bin="${DT_BIN:-${altbin}}"
 # shellcheck source=tests-ng/helpers
 source "${cur}"/helpers
-
 echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sgr0)"
+## end-cookie
 
 ################################################################
 # this is the test
