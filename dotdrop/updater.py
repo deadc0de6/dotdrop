@@ -166,8 +166,9 @@ class Updater:
         return tmp
 
     def _is_template(self, path):
-        if not Templategen.is_template(path, ignore=self.ignores,
-                                       debug=self.debug):
+        if not Templategen.path_is_template(path,
+                                            ignore=self.ignores,
+                                            debug=self.debug):
             self.log.dbg(f'{path} is NO template')
             return False
         self.log.warn(f'{path} uses template, update manually')
