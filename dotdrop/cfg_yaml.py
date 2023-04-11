@@ -188,7 +188,7 @@ class CfgYaml:
         self._add_variables(dvariables, template=False)
 
         # now template variables and dynvariables from the same pool
-        self._rec_resolve_variables(self.variables)
+        self.variables = self._rec_resolve_variables(self.variables)
         # and execute dvariables
         # since this is done after recursively resolving variables
         # and dynvariables this means that variables referencing
@@ -873,7 +873,7 @@ class CfgYaml:
         self._redefine_templater()
         if template:
             # rec resolve variables with new ones
-            self._rec_resolve_variables(self.variables)
+            self.variables = self._rec_resolve_variables(self.variables)
         if shell and new:
             # shell exec
             self._shell_exec_dvars(self.variables, keys=new.keys())
@@ -1038,7 +1038,7 @@ class CfgYaml:
                                     mandatory=False)
 
             merged = self._merge_dict(dvar, var)
-            self._rec_resolve_variables(merged)
+            merged = self._rec_resolve_variables(merged)
             if dvar.keys():
                 self._shell_exec_dvars(merged, keys=dvar.keys())
             self._clear_profile_vars(merged)
@@ -1516,7 +1516,7 @@ class CfgYaml:
                 templ.update_variables(newvars)
         if newvars is self.variables:
             self._redefine_templater()
-        variables = newvars
+        return newvars
 
     def _get_profile_included_vars(self):
         """
@@ -1755,6 +1755,7 @@ class CfgYaml:
             if self._debug:
                 self._dbg(f'{k}: `{val}` -> {out}')
             dic[k] = out
+            self._debug_dict('dynvars after', dic)
 
     @classmethod
     def _check_minversion(cls, minversion):
