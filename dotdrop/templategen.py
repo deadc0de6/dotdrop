@@ -110,6 +110,38 @@ class Templategen:
             err = f'undefined variable: {exc.message}'
             raise UndefinedException(err) from exc
 
+    def generate_dict(self, dic):
+        """
+        template each entry of the dict where only
+        the value of each entry is templated (recursively)
+        may raise a UndefinedException
+        in case a variable is undefined
+        """
+        if not dic:
+            return dic
+        for key in dic:
+            value = dic[key]
+            if isinstance(value, str):
+                dic[key] = self.generate_string(value)
+                continue
+            if isinstance(value, dict):
+                dic[key] = self.generate_dict(value)
+                continue
+            continue
+        return dic
+
+    def generate_string_or_dict(self, content):
+        """
+        render template from string or dict
+        may raise a UndefinedException
+        in case a variable is undefined
+        """
+        if isinstance(content, str):
+            return self.generate_string(content)
+        if isinstance(content, dict):
+            return self.generate_dict(content)
+        raise UndefinedError(f'could not template {content}')
+
     def add_tmp_vars(self, newvars=None):
         """add vars to the globals, make sure to call restore_vars"""
         saved_variables = self.variables.copy()
@@ -217,7 +249,7 @@ class Templategen:
         return data.decode('utf-8', 'replace')
 
     @staticmethod
-    def is_template(path, ignore=None, debug=False):
+    def path_is_template(path, ignore=None, debug=False):
         """recursively check if any file is a template within path"""
         if debug:
             LOG.dbg(f'is template: {path}', force=True)
@@ -240,18 +272,44 @@ class Templategen:
             fpath = os.path.join(path, entry)
             if not os.path.isfile(fpath):
                 # recursively explore directory
-                if Templategen.is_template(fpath, ignore=ignore, debug=debug):
+                if Templategen.path_is_template(fpath,
+                                                ignore=ignore,
+                                                debug=debug):
                     return True
             else:
                 # check if file is a template
-                if Templategen._is_template(fpath, ignore=ignore, debug=debug):
+                if Templategen._is_template(fpath,
+                                            ignore=ignore,
+                                            debug=debug):
                     return True
         return False
 
     @staticmethod
-    def var_is_template(string):
+    def string_is_template(string):
         """check if variable contains template(s)"""
         return VAR_START in str(string)
+
+    @staticmethod
+    def dict_is_template(dic):
+        """check if dict contains template(s)"""
+        for key in dic:
+            value = dic[key]
+            if isinstance(value, str):
+                isit = Templategen.string_is_template(value)
+                if isit:
+                    return True
+            elif isinstance(value, dict):
+                return Templategen.dict_is_template(value)
+        return False
+
+    @staticmethod
+    def var_is_template(something):
+        """check if string or dict is template"""
+        if isinstance(something, str):
+            return Templategen.string_is_template(something)
+        if isinstance(something, dict):
+            return Templategen.dict_is_template(something)
+        return False
 
     @staticmethod
     def _is_template(path, ignore, debug=False):

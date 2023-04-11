@@ -1398,11 +1398,11 @@ class CfgYaml:
         template an item using the templategen
         will raise an exception if template failed and exc_if_fail
         """
-        if not Templategen.var_is_template(item):
+        if not Templategen.string_is_template(item):
             return item
         try:
             val = item
-            while Templategen.var_is_template(val):
+            while Templategen.string_is_template(val):
                 val = self._tmpl.generate_string(val)
         except UndefinedException as exc:
             if exc_if_fail:
@@ -1502,14 +1502,21 @@ class CfgYaml:
         templ = Templategen(variables=var,
                             func_file=func_files,
                             filter_file=filter_files)
+        newvars = variables.copy()
         for k in variables.keys():
             val = variables[k]
             while Templategen.var_is_template(val):
-                val = templ.generate_string(val)
-                variables[k] = val
-                templ.update_variables(variables)
-        if variables is self.variables:
+                val = templ.generate_string_or_dict(val)
+                if isinstance(val, dict):
+                    for sub in val:
+                        subkey = f'{k}.{sub}'
+                        newvars[subkey] = val[sub]
+                else:
+                    newvars[k] = val
+                templ.update_variables(newvars)
+        if newvars is self.variables:
             self._redefine_templater()
+        variables = newvars
 
     def _get_profile_included_vars(self):
         """

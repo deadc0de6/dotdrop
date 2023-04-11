@@ -141,9 +141,10 @@ def _dotfile_compare(opts, dotfile, tmp):
     ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
 
     insttmp = None
-    if dotfile.template and Templategen.is_template(src,
-                                                    ignore=ignores,
-                                                    debug=opts.debug):
+    if dotfile.template and \
+        Templategen.path_is_template(src,
+                                     ignore=ignores,
+                                     debug=opts.debug):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(templ, tmp, src, dotfile.dst,
                                                  is_template=True,
@@ -217,7 +218,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
     ignores = list(set(opts.install_ignore + dotfile.instignore))
     ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
 
-    is_template = dotfile.template and Templategen.is_template(
+    is_template = dotfile.template and Templategen.path_is_template(
         dotfile.src,
         ignore=ignores,
     )
@@ -243,7 +244,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
                 return False, dotfile.key, None
             src = tmp
         # make sure to re-evaluate if is template
-        is_template = dotfile.template and Templategen.is_template(
+        is_template = dotfile.template and Templategen.path_is_template(
             src,
             ignore=ignores,
         )
@@ -389,7 +390,7 @@ def _workdir_enum(opts):
         if dotfile.link == LinkTypes.NOLINK:
             # ignore not link files
             continue
-        if not Templategen.is_template(src):
+        if not Templategen.path_is_template(src):
             # ignore not template
             continue
         newpath = pivot_path(dotfile.dst, opts.workdir,
@@ -582,7 +583,7 @@ def cmd_files(opts):
     for dotfile in opts.dotfiles:
         if opts.files_templateonly:
             src = os.path.join(opts.dotpath, dotfile.src)
-            if not Templategen.is_template(src):
+            if not Templategen.path_is_template(src):
                 continue
         if opts.files_grepable:
             fmt = f'{dotfile.key},'
@@ -746,7 +747,7 @@ def _detail(dotpath, dotfile):
     path = os.path.join(dotpath, os.path.expanduser(dotfile.src))
     if not os.path.isdir(path):
         template = 'no'
-        if dotfile.template and Templategen.is_template(path):
+        if dotfile.template and Templategen.path_is_template(path):
             template = 'yes'
         LOG.sub(f'{path} (template:{template})')
     else:
@@ -754,7 +755,7 @@ def _detail(dotpath, dotfile):
             for file in files:
                 fpath = os.path.join(root, file)
                 template = 'no'
-                if dotfile.template and Templategen.is_template(fpath):
+                if dotfile.template and Templategen.path_is_template(fpath):
                     template = 'yes'
                 LOG.sub(f'{fpath} (template:{template})')
 

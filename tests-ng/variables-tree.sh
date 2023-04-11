@@ -8,7 +8,7 @@
 
 ## start-cookie
 set -e
-cur=$(cd "$(dirname "${BASH_SOURCE:-$0}")" && pwd)
+cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 altbin="python3 -m dotdrop.dotdrop"
@@ -61,23 +61,17 @@ _EOF
 #cat ${cfg}
 
 # create the dotfile
-echo "wow1: {{@@ wow1 @@}}" > "${tmps}"/dotfiles/abc
-echo "wow2: {{@@ wow2 @@}}" >> "${tmps}"/dotfiles/abc
+echo "wow1={{@@ wow1 @@}}" > "${tmps}"/dotfiles/abc
+echo "wow2={{@@ z2.wow2 @@}}" >> "${tmps}"/dotfiles/abc
 
 # install
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 cat "${tmpd}"/abc
 
-#[ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
-#grep '^this is some test' "${tmpd}"/abc >/dev/null
-#grep '^12' "${tmpd}"/abc >/dev/null
-#grep '^another test' "${tmpd}"/abc >/dev/null
-#
-#[ ! -e "${tmpd}"/def ] && echo "def not installed" && exit 1
-#grep '^test_def' "${tmpd}"/def >/dev/null
-
-#cat ${tmpd}/abc
+[ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
+grep '^wow1=hello1' "${tmpd}"/abc >/dev/null
+grep '^wow2=hello2' "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0
