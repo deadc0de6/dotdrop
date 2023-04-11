@@ -6,7 +6,7 @@
 
 ## start-cookie
 set -e
-cur=$(cd "$(dirname "${BASH_SOURCE:-$0}")" && pwd)
+cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 altbin="python3 -m dotdrop.dotdrop"

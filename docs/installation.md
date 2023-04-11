@@ -223,11 +223,9 @@ dotdrop depends on the following tools:
 
 * `diff` (unless a different tool is used, see [diff_command](config/config-config.md#config-block))
 * `git` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
-* `readlink` or `realpath` (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh))
 
 For macOS users, make sure to install the below packages through [Homebrew](https://brew.sh/):
 
-* [coreutils](https://formulae.brew.sh/formula/coreutils) (only if using the entry point script [dotdrop.sh](https://github.com/deadc0de6/dotdrop/blob/master/dotdrop.sh) which uses realpath)
 * [libmagic](https://formulae.brew.sh/formula/libmagic) (for python-magic)
 
 For WSL (Windows Subsystem for Linux), make sure to install `python-magic-bin`:
