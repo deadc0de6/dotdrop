@@ -3,14 +3,7 @@
 # Copyright (c) 2023, deadc0de6
 
 # get current working directory
-rl="readlink -f"
-if ! ${rl} "${0}" >/dev/null 2>&1; then
-  rl="realpath"
-  if ! hash ${rl}; then
-    echo "\"${rl}\" not found!" && exit 1
-  fi
-fi
-cur=$(dirname "$(${rl} "${0}")")
+cur=$(cd "$(dirname "${0}")" && pwd)
 
 # extract version from git latest tag
 #version=$(git describe --tags --abbrev=0)

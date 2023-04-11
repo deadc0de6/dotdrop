@@ -6,15 +6,7 @@
 #set -ev
 set -e
 
-rl="readlink -f"
-if ! ${rl} "${0}" >/dev/null 2>&1; then
-  rl="realpath"
-
-  if ! hash ${rl}; then
-    echo "\"${rl}\" not found!" && exit 1
-  fi
-fi
-cur=$(dirname "$(${rl} "${0}")")
+cur=$(cd "$(dirname "${0}")" && pwd)
 
 # make sure both version.py and manpage dotdrop.1 are in sync
 dotdrop_version=$(grep version dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
