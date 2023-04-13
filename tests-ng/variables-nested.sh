@@ -2,7 +2,7 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2023, deadc0de6
 #
-# test variables tree (see #383)
+# test nested variables (see #383)
 # returns 1 in case of error
 #
 
@@ -49,6 +49,12 @@ variables:
   hello2: "hello2"
   z2:
     wow2: "{{@@ hello2 @@}}"
+  a:
+    suba:
+      subsuba: "submarine"
+  b:
+    subb:
+      subsubb:
 dotfiles:
   f_abc:
     dst: ${tmpd}/abc
@@ -63,6 +69,8 @@ _EOF
 # create the dotfile
 echo "wow1={{@@ wow1 @@}}" > "${tmps}"/dotfiles/abc
 echo "wow2={{@@ z2.wow2 @@}}" >> "${tmps}"/dotfiles/abc
+echo "subsuba={{@@ a.suba.subsuba @@}}" >> "${tmps}"/dotfiles/abc
+echo "subsubb={{@@ b.subb.subsubb @@}}" >> "${tmps}"/dotfiles/abc
 
 # install
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
@@ -72,6 +80,8 @@ cat "${tmpd}"/abc
 [ ! -e "${tmpd}"/abc ] && echo "abc not installed" && exit 1
 grep '^wow1=hello1' "${tmpd}"/abc >/dev/null
 grep '^wow2=hello2' "${tmpd}"/abc >/dev/null
+grep '^subsuba=submarine' "${tmpd}"/abc >/dev/null
+grep '^subsubb=None' "${tmpd}"/abc >/dev/null
 
 echo "OK"
 exit 0
