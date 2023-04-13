@@ -21,6 +21,9 @@ BLUE = '\033[94m'
 MAGENTA = '\033[95m'
 RESET = '\033[0m'
 
+RETRY_TOTAL = 10
+RETRY_CONNECT = 5
+
 TIMEOUT = 10
 VALID_RET = [
     200,
@@ -57,7 +60,9 @@ def get_session():
     """get a session with retry"""
     session = requests.Session()
     retry_on = [404, 429, 500, 502, 503, 504]
-    retry = Retry(total=3,
+    retry = Retry(total=RETRY_TOTAL,
+                  connect=RETRY_CONNECT,
+                  status=RETRY_CONNECT,
                   backoff_factor=1,
                   allowed_methods=False,
                   status_forcelist=retry_on)
