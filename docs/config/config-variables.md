@@ -42,3 +42,15 @@ will result in the following available variables:
 * dvar2: `dvar1 dvar2`
 * dvar3: `dvar1 dvar2 dvar3`
 * dvar4: `var1 var2 var3`
+
+Config variables can be nested as shown below:
+```yaml
+variables:
+  rofi:
+    background_color: "rgba ( 33, 33, 33, 100 % );"
+  polybar:
+    background_color: "#cc222222"
+```
+
+Where the above would be referenced using `{{@@ rofi.background_color @@}}`
+and `{{@@ polybar.background_color @@}}`.
