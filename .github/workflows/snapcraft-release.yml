@@ -11,8 +11,8 @@ jobs:
     - name: snapcraft setup
       run: |
         pwd
-        cp -r "${GITHUB_WORKSPACE}/packages/snap" "${GITHUB_WORKSPACE}"
-        sed -i 's#source: ../../#source: \.#g' "${GITHUB_WORKSPACE}/snap/snapcraft.yaml"
+        cp "${GITHUB_WORKSPACE}/packages/snap/snapcraft.yaml" "${GITHUB_WORKSPACE}/snapcraft.yaml"
+        sed -i 's#source: ../../#source: \.#g' "${GITHUB_WORKSPACE}/snapcraft.yaml"
         cat "${GITHUB_WORKSPACE}/snap/snapcraft.yaml"
     - uses: snapcore/action-build@v1
       id: build
