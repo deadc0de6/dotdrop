@@ -40,4 +40,7 @@ parts:
     plugin: nil
     override-build: |
       VERSION=$(git describe --abbrev=0 --tags | sed 's/^v//g')
+      if [ -z ${VERSION} ]; then
+        VERSION=$(cat dotdrop/version.py | grep version | sed 's/^.*= .\(.*\).$/\1/g')
+      fi
       snapcraftctl set-version "${VERSION}"
