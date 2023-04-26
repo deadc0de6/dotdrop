@@ -66,7 +66,7 @@ trans_write:
   _encrypt: "gpg -q -r {{@@ keyid @@}} --armor --no-tty -o {1} -e {0}"
 ```
 
-Passphrase is stored in a environement variable:
+Passphrase is stored in an environment variable:
 ```yaml
 trans_read:
   _decrypt: "echo {{@@ env['THE_KEY'] @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
