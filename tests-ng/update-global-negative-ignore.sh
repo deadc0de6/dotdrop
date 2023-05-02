@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # author: jtt9340 (https://github.com/jtt9340)
+# author: deadc0de6
 #
 # test global negative ignore update
 # returns 1 in case of error
