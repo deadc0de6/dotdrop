@@ -282,7 +282,7 @@ def uniq_list(a_list):
     return new
 
 
-def patch_ignores(ignores, prefix, debug=False):
+def ignores_to_absolute(ignores, prefix, debug=False):
     """allow relative ignore pattern"""
     new = []
     LOG.dbg(f'ignores before patching: {ignores}', force=debug)
