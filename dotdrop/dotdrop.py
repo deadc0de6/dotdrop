@@ -20,7 +20,7 @@ from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
 from dotdrop.utils import get_tmpdir, removepath, \
-    uniq_list, patch_ignores, dependencies_met, \
+    uniq_list, ignores_to_absolute, dependencies_met, \
     adapt_workers, check_version, pivot_path
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, \
@@ -138,7 +138,7 @@ def _dotfile_compare(opts, dotfile, tmp):
         return True
 
     ignores = list(set(opts.compare_ignore + dotfile.cmpignore))
-    ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
+    ignores = ignores_to_absolute(ignores, dotfile.dst, debug=opts.debug)
 
     insttmp = None
     if dotfile.template and \
@@ -216,7 +216,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
     LOG.dbg(dotfile.prt())
 
     ignores = list(set(opts.install_ignore + dotfile.instignore))
-    ignores = patch_ignores(ignores, dotfile.dst, debug=opts.debug)
+    ignores = ignores_to_absolute(ignores, dotfile.dst, debug=opts.debug)
 
     is_template = dotfile.template and Templategen.path_is_template(
         dotfile.src,
