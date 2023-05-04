@@ -95,9 +95,9 @@ file "${tmps}"/dotfiles/"${tmpd}"/def | grep -i 'tar'
 tar -cf "${tmps}"/test-def -C "${tmpd}"/def .
 diff "${tmps}"/dotfiles/"${tmpd}"/def "${tmps}"/test-def
 
-#file "${tmps}"/dotfiles/"${tmpd}"/ghi | grep -i 'gpg symmetrically encrypted data'
-#echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmps}"/test-ghi
-#diff "${tmps}"/test-ghi "${tmpd}"/ghi
+file "${tmps}"/dotfiles/"${tmpd}"/ghi | grep -i 'gpg symmetrically encrypted data\|PGP symmetric key encrypted data'
+echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmps}"/test-ghi
+diff "${tmps}"/test-ghi "${tmpd}"/ghi
 
 # check is imported in config
 echo "checking imported in config"
