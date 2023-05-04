@@ -117,10 +117,10 @@ class Updater:
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             dotfile.ignore_missing_in_dotdrop
 
-        if (ignore_missing_in_dotdrop and not os.path.exists(local_path)) or \
-                self._must_ignore([deployed_path, local_path], ignores):
+        if ignore_missing_in_dotdrop and not os.path.exists(local_path):
             self.log.sub(f'\"{dotfile.key}\" ignored')
             return True
+
         # apply write transformation if any
         new_path = self._apply_trans_w(deployed_path, dotfile)
         if not new_path:
@@ -261,9 +261,6 @@ class Updater:
         deployed_path = os.path.expanduser(deployed_path)
         local_path = os.path.expanduser(local_path)
 
-        if self._must_ignore([deployed_path, local_path], ignores):
-            self.log.sub(f'\"{local_path}\" ignored')
-            return True
         # find the differences
         diff = filecmp.dircmp(deployed_path, local_path, ignore=None)
         # handle directories diff
@@ -283,8 +280,7 @@ class Updater:
                 continue
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
-            if (ignore_missing_in_dotdrop and not os.path.exists(new)) or \
-                    self._must_ignore([exist, new], ignores):
+            if ignore_missing_in_dotdrop and not os.path.exists(new):
                 self.log.sub(f'\"{exist}\" ignored')
                 continue
             if self.dry:
@@ -403,8 +399,6 @@ class Updater:
         """Synchronize directories recursively."""
         left, right = diff.left, diff.right
         self.log.dbg(f'sync dir {left} to {right}')
-        if self._must_ignore([left, right], ignores):
-            return True
 
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             dotfile.ignore_missing_in_dotdrop
