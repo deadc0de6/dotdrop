@@ -7,6 +7,7 @@ Contents
   * [Precedence](#precedence)
   * [Variable resolution](#variable-resolution)
   * [Rules](#rules)
+  * [Ignore pattern](#ignore-pattern)
 * [Testing](#testing)
   * [Testing with unittest](#testing-with-unittest)
   * [Testing with bash scripts](#testing-with-bash-scripts)
@@ -158,6 +159,34 @@ dynvariables:
   dvar0: "echo {{@@ var0 @@}}"
 ```
 
+## Ignore pattern
+
+**compare**
+
+* for files, match with ignore directly
+* uses `filecmp.dircmp` to compare directories
+* will then match each file that is different
+  within the directory against the ignore patterns
+  before printing
+
+**import**
+
+* for files, match with ignore directly
+* uses `shutil.copytree` with a callback
+  that will match each path against the ignore pattern
+
+**install**
+
+* recursively process each files and
+  match against the ignore pattern
+
+**update**
+
+* for files, match with ignore directly
+* uses `filecmp.dircmp` to compare directories
+* will then match each file that is different
+  within the directory against the ignore patterns
+  before printing
 
 # Testing
 
