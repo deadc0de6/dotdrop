@@ -71,7 +71,7 @@ dotfiles:
     src: a
     upignore:
     - "*"
-    - "!*/c"
+    - "!*/c/**"
     - "!*/d/**"
 profiles:
   p1:
@@ -87,7 +87,6 @@ cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key d_abc
 grep_or_fail a "${basedir}"/dotfiles/a/b/abfile1
 grep_or_fail a "${basedir}"/dotfiles/a/b/abfile2
 grep_or_fail a "${basedir}"/dotfiles/a/b/abfile3
-cat "${basedir}"/dotfiles/a/c/acfile
 grep_or_fail b "${basedir}"/dotfiles/a/c/acfile
 [ ! -s "${basedir}"/dotfiles/a/d/adfile ] && echo "adfile not updated" && exit 1
 grep_or_fail b "${basedir}"/dotfiles/a/d/adfile
