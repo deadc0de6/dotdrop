@@ -6,6 +6,8 @@
 set -e
 
 ## test doc external links
+echo "------------------------"
+echo "checking external links"
 find . -type f -iname '*.md' | while read -r line; do
   ./scripts/check_links.py "${line}"
 done
@@ -23,6 +25,8 @@ if [ "$r" != "0" ]; then
   exit 1
 fi
 
+echo "------------------------"
+echo "checking internal links"
 find . -type f -iname '*.md' | while read -r line; do
   remark -f -u validate-links "${line}"
 done
