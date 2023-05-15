@@ -273,6 +273,7 @@ class Updater:
                                      ignore_missing_in_dotdrop,
                                      ignores):
         """create dirs that don't exist in dotdrop"""
+        self.log.dbg(f'_merge_dirs_create_left_only: {diff.left_only}')
         for toadd in diff.left_only:
             exist = os.path.join(left, toadd)
             if not os.path.isdir(exist):
@@ -315,6 +316,7 @@ class Updater:
                                       ignore_missing_in_dotdrop,
                                       ignores):
         """remove dirs that don't exist in deployed version"""
+        self.log.dbg(f'_merge_dirs_remove_right_only: {diff.right_only}')
         for toremove in diff.right_only:
             old = os.path.join(right, toremove)
             if not os.path.isdir(old):
@@ -333,6 +335,7 @@ class Updater:
 
         # handle files diff
         # sync files that exist in both but are different
+        self.log.dbg(f'_merge_dirs_remove_right_only: {diff.diff_files}')
         fdiff = diff.diff_files
         fdiff.extend(diff.funny_files)
         fdiff.extend(diff.common_funny)
@@ -354,6 +357,7 @@ class Updater:
                                    ignore_missing_in_dotdrop,
                                    ignores):
         """copy files that don't exist in dotdrop"""
+        self.log.dbg(f'_merge_dirs_copy_left_only: {diff.left_only}')
         for toadd in diff.left_only:
             exist = os.path.join(left, toadd)
             if os.path.isdir(exist):
@@ -379,6 +383,7 @@ class Updater:
 
     def _merge_dirs_remove_right_only_2(self, diff, right, ignores):
         """remove files that don't exist in deployed version"""
+        self.log.dbg(f'_merge_dirs_remove_right_only_2: {diff.right_only}')
         for toremove in diff.right_only:
             new = os.path.join(right, toremove)
             if not os.path.exists(new):
