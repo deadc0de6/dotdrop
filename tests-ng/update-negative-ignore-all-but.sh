@@ -42,20 +42,20 @@ echo "[+] dst dir: ${tmpd}"
 
 # dotfiles in dotdrop
 mkdir -p "${basedir}"/dotfiles/a/{b,c,x}
-echo 'a' > "${basedir}"/dotfiles/a/b/abfile1
-echo 'a' > "${basedir}"/dotfiles/a/b/abfile2
-echo 'a' > "${basedir}"/dotfiles/a/b/abfile3
-echo 'a' > "${basedir}"/dotfiles/a/c/acfile
-echo 'a' > "${basedir}"/dotfiles/a/x/axfile
+echo 'original' > "${basedir}"/dotfiles/a/b/abfile1
+echo 'original' > "${basedir}"/dotfiles/a/b/abfile2
+echo 'original' > "${basedir}"/dotfiles/a/b/abfile3
+echo 'original' > "${basedir}"/dotfiles/a/c/acfile
+echo 'original' > "${basedir}"/dotfiles/a/x/axfile
 
 # filesystem
 mkdir -p "${tmpd}"/a/{b,c,d,x}
-echo "b" > "${tmpd}/a/b/abfile1"
-echo "b" > "${tmpd}/a/b/abfile2"
-echo "b" > "${tmpd}/a/b/abfile3"
-echo "b" > "${tmpd}/a/c/acfile"
-echo "b" > "${tmpd}/a/d/adfile"
-echo "b" > "${tmpd}/a/x/axfile"
+echo "updated" > "${tmpd}/a/b/abfile1"
+echo "updated" > "${tmpd}/a/b/abfile2"
+echo "updated" > "${tmpd}/a/b/abfile3"
+echo "updated" > "${tmpd}/a/c/acfile"
+echo "updated" > "${tmpd}/a/d/adfile"
+echo "updated" > "${tmpd}/a/x/axfile"
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
@@ -87,13 +87,13 @@ echo "[+] update"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key d_abc
 
 # check files haven't been updated
-grep_or_fail a "${basedir}"/dotfiles/a/b/abfile1
-grep_or_fail a "${basedir}"/dotfiles/a/b/abfile2
-grep_or_fail a "${basedir}"/dotfiles/a/b/abfile3
-grep_or_fail b "${basedir}"/dotfiles/a/c/acfile
+grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile1
+grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile2
+grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile3
+grep_or_fail "updated" "${basedir}"/dotfiles/a/c/acfile
 [ ! -s "${basedir}"/dotfiles/a/d/adfile ] && echo "adfile not updated" && exit 1
-grep_or_fail b "${basedir}"/dotfiles/a/d/adfile
-grep_or_fail a "${basedir}"/dotfiles/a/x/axfile
+grep_or_fail "updated" "${basedir}"/dotfiles/a/d/adfile
+grep_or_fail "original" "${basedir}"/dotfiles/a/x/axfile
 
 echo "OK"
 exit 0
