@@ -143,7 +143,6 @@ def _dotfile_compare(opts, dotfile, tmp):
     insttmp = None
     if dotfile.template and \
         Templategen.path_is_template(src,
-                                     ignore=ignores,
                                      debug=opts.debug):
         # install dotfile to temporary dir for compare
         ret, err, insttmp = inst.install_to_temp(templ, tmp, src, dotfile.dst,
@@ -220,7 +219,6 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
 
     is_template = dotfile.template and Templategen.path_is_template(
         dotfile.src,
-        ignore=ignores,
     )
     if hasattr(dotfile, 'link') and dotfile.link in (
         LinkTypes.LINK, LinkTypes.LINK_CHILDREN,
@@ -244,10 +242,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
                 return False, dotfile.key, None
             src = tmp
         # make sure to re-evaluate if is template
-        is_template = dotfile.template and Templategen.path_is_template(
-            src,
-            ignore=ignores,
-        )
+        is_template = dotfile.template and Templategen.path_is_template(src)
         ret, err = inst.install(templ, src, dotfile.dst,
                                 LinkTypes.NOLINK,
                                 actionexec=pre_actions_exec,
