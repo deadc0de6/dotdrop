@@ -169,7 +169,7 @@ class Updater:
             return None
         return tmp
 
-    def _is_template(self, path, ignores):
+    def _is_template(self, path):
         if not Templategen.path_is_template(path,
                                             debug=self.debug):
             self.log.dbg(f'{path} is NO template')
@@ -221,7 +221,7 @@ class Updater:
             self.log.sub(f'\"{local_path}\" ignored')
             return True
         self.log.dbg(f'update for file {deployed_path} and {local_path}')
-        if self._is_template(local_path, ignores):
+        if self._is_template(local_path):
             # dotfile is a template
             self.log.dbg(f'{local_path} is a template')
             if self.showpatch:
