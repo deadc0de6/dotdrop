@@ -260,7 +260,7 @@ class Templategen:
         return data.decode('utf-8', 'replace')
 
     @staticmethod
-    def path_is_template(path, ignore=None, debug=False):
+    def path_is_template(path, debug=False):
         """recursively check if any file is a template within path"""
         if debug:
             LOG.dbg(f'is template: {path}', force=True)
@@ -270,13 +270,9 @@ class Templategen:
             # does not exist
             return False
 
-        if utils.must_ignore([path], ignore, debug=debug):
-            # must be ignored
-            return False
-
         if os.path.isfile(path):
             # is file
-            return Templategen._is_template(path, ignore=ignore, debug=debug)
+            return Templategen._is_template(path, debug=debug)
 
         # is a directory
         for entry in os.listdir(path):
@@ -284,13 +280,11 @@ class Templategen:
             if not os.path.isfile(fpath):
                 # recursively explore directory
                 if Templategen.path_is_template(fpath,
-                                                ignore=ignore,
                                                 debug=debug):
                     return True
             else:
                 # check if file is a template
                 if Templategen._is_template(fpath,
-                                            ignore=ignore,
                                             debug=debug):
                     return True
         return False
@@ -323,10 +317,10 @@ class Templategen:
         return False
 
     @staticmethod
-    def _is_template(path, ignore, debug=False):
+    def _is_template(path, debug=False):
         """test if file pointed by path is a template"""
-        if utils.must_ignore([path], ignore, debug=debug):
-            return False
+        if debug:
+            Logger().dbg(f'is template: {path}')
         if not os.path.isfile(path):
             return False
         if os.stat(path).st_size == 0:
