@@ -27,3 +27,8 @@ $ sudo dotdrop import --cfg=config-root.yaml <some-dotfile>
 $ sudo dotdrop install --cfg=config-root.yaml
 ...
 ```
+
+When commiting the local and system wide changes git will complain about permission. To fix that run:
+```
+$ sudo chown -R <user>:<user> <system-wide-dotfiles>
+```
