@@ -179,8 +179,7 @@ class Templategen:
         """add a comment usually in the header of a dotfile"""
         return f'{prepend}{utils.header()}'
 
-    def _handle_file(self, src):
-        """generate the file content from template"""
+    def _get_filetype(self, src):
         try:
             # pylint: disable=C0415
             import magic
@@ -188,10 +187,22 @@ class Templategen:
             self.log.dbg('using \"magic\" for filetype identification')
         except ImportError:
             # fallback
-            _, filetype = utils.run(['file', '-b', '--mime-type', src],
+            _, filetype = utils.run(['file', '-L', '-b', '--mime-type', src],
                                     debug=self.debug)
             self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
+        if filetype == 'inode/symlink':
+            dst = os.readlink(src)
+            if dst[0] != '/':
+                # Canonicalize relative path
+                dst = os.path.join(os.path.dirname(src), dst)
+            return self._get_filetype(dst)
+        else:
+            return filetype
+
+    def _handle_file(self, src):
+        """generate the file content from template"""
+        filetype = self._get_filetype(src)
         istext = self._is_text(filetype)
         self.log.dbg(f'filetype \"{src}\": {filetype}')
         self.log.dbg(f'is text \"{src}\": {istext}')
