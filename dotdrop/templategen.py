@@ -197,8 +197,7 @@ class Templategen:
                 # Canonicalize relative path
                 dst = os.path.join(os.path.dirname(src), dst)
             return self._get_filetype(dst)
-        else:
-            return filetype
+        return filetype
 
     def _handle_file(self, src):
         """generate the file content from template"""
