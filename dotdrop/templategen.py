@@ -180,6 +180,7 @@ class Templategen:
         return f'{prepend}{utils.header()}'
 
     def _get_filetype(self, src):
+        """use magic or the file command to get the mime type of a file"""
         try:
             # pylint: disable=C0415
             import magic
