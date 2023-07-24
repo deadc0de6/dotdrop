@@ -81,18 +81,24 @@ cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
 # checks
 [ ! -e "${tmpd}"/abc ] && echo "[ERROR] dotfile not installed" && exit 1
-diff "${tmpd}"/abc "${expected}" || echo "[ERROR] dotfile not processed by template engine" && exit 1
+diff "${tmpd}"/abc "${expected}" || {
+  echo "[ERROR] dotfile not processed by template engine"
+  exit 1
+}
 
 # test multiple levels of indirection
 ln -s "${tmps}"/dotfiles/ghi "${tmps}"/dotfiles/def
-ln -s "${tmps}"/dotfiles/def "${tmps}"/dotfiles/abc
+ln -s -f "${tmps}"/dotfiles/def "${tmps}"/dotfiles/abc
 
 # install again
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
 # checks again
 [ ! -e "${tmpd}"/abc ] && echo "[ERROR] dotfile not installed" && exit 1
-diff "${tmpd}"/abc "${expected}" || echo "[ERROR] dotfile not processed by template engine" && exit 1
+diff "${tmpd}"/abc "${expected}" || {
+  echo "[ERROR] dotfile not processed by template engine"
+  exit 1
+}
 
 echo "OK"
 exit 0
