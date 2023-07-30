@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # author: deadc0de6
 #
-# test negative ignore on update
+# test negative ignore on install
 # returns 1 in case of error
 #
 
@@ -28,6 +28,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # $2 path
 grep_or_fail()
 {
+  [ ! -e "${2}" ] && (echo "file ${2} does not exist" && exit 1)
   grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern \"${1}\" not found in ${2}" && exit 1)
 }
 
@@ -48,15 +49,6 @@ echo 'original' > "${basedir}"/dotfiles/a/b/abfile3
 echo 'original' > "${basedir}"/dotfiles/a/c/acfile
 echo 'original' > "${basedir}"/dotfiles/a/x/axfile
 
-# filesystem
-mkdir -p "${tmpd}"/a/{b,c,d,x}
-echo "updated" > "${tmpd}/a/b/abfile1"
-echo "updated" > "${tmpd}/a/b/abfile2"
-echo "updated" > "${tmpd}/a/b/abfile3"
-echo "updated" > "${tmpd}/a/c/acfile"
-echo "updated" > "${tmpd}/a/d/adfile"
-echo "updated" > "${tmpd}/a/x/axfile"
-
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
 
@@ -71,29 +63,25 @@ dotfiles:
   d_abc:
     dst: ${tmpd}/a
     src: a
-    upignore:
+    instignore:
     - "*"
     - "!*/c/**"
     - "!*/d/**"
-    - "!x/"
+    - "!x/**"
 profiles:
   p1:
     dotfiles:
     - d_abc
 _EOF
 
-# update
-echo "[+] update"
-cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key d_abc
+# install
+echo "[+] install"
+cd "${ddpath}" | ${bin} install -f -c "${cfg}" --verbose --profile=p1
 
-# check files haven't been updated
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile1
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile2
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile3
-grep_or_fail "updated" "${basedir}"/dotfiles/a/c/acfile
-[ ! -s "${basedir}"/dotfiles/a/d/adfile ] && echo "adfile not updated" && exit 1
-grep_or_fail "updated" "${basedir}"/dotfiles/a/d/adfile
-grep_or_fail "original" "${basedir}"/dotfiles/a/x/axfile
+[ -d "${tmpd}/a/b" ] && (echo "/a/b created" && exit 1)
+grep_or_fail "original" "${tmpd}/a/c/acfile"
+#grep_or_fail "original" "${tmpd}/a/d/adfile"
+grep_or_fail "original" "${tmpd}/a/x/axfile"
 
 echo "OK"
 exit 0
