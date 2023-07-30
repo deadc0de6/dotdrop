@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # author: deadc0de6
 #
-# test negative ignore on update
+# test negative ignore on compare
 # returns 1 in case of error
 #
 
@@ -23,13 +23,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 ################################################################
 # this is the test
 ################################################################
-
-# $1 pattern
-# $2 path
-grep_or_fail()
-{
-  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern \"${1}\" not found in ${2}" && exit 1)
-}
 
 # dotdrop directory
 basedir=$(mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d)
@@ -71,29 +64,25 @@ dotfiles:
   d_abc:
     dst: ${tmpd}/a
     src: a
-    upignore:
+    cmpignore:
     - "*"
     - "!*/c/**"
     - "!*/d/**"
-    - "!x/"
+    - "!x/**"
 profiles:
   p1:
     dotfiles:
     - d_abc
 _EOF
 
-# update
-echo "[+] update"
-cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key d_abc
-
-# check files haven't been updated
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile1
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile2
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile3
-grep_or_fail "updated" "${basedir}"/dotfiles/a/c/acfile
-[ ! -s "${basedir}"/dotfiles/a/d/adfile ] && echo "adfile not updated" && exit 1
-grep_or_fail "updated" "${basedir}"/dotfiles/a/d/adfile
-grep_or_fail "original" "${basedir}"/dotfiles/a/x/axfile
+# compare
+echo "[+] compare"
+set +e
+cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --profile=p1
+ret="$?"
+echo "return code: ${ret}"
+[ "${ret}" != "1" ] && exit 1
+set -e
 
 echo "OK"
 exit 0
