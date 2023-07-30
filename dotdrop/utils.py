@@ -232,6 +232,7 @@ def must_ignore(paths, ignores, debug=False):
         lambda ign: ign.startswith('!'), ignores)
     for path in paths:
         ignore_matches = []
+        isdir = os.path.isdir(path)
         # First ignore dotfiles
         for i in ignored:
             if fnmatch.fnmatch(path, i):
@@ -262,12 +263,25 @@ def must_ignore(paths, ignores, debug=False):
                     warn += 'that is being ignored by a '
                     warn += 'previous ignore pattern.'
                     LOG.warn(warn)
+            else:
+                if debug:
+                    msg = f'negative ignore \"{nign}\" NO match: {path}'
+                    LOG.dbg(msg, force=True)
         if ignore_matches:
             if debug:
-                LOG.dbg(f'ignoring {paths}', force=True)
+                LOG.dbg(f'effectively ignoring \"{paths}\"', force=True)
+            if isdir and len(ignored_negative) > 0:
+                # this ensures whoever calls this function will
+                # descend into the directory to explore the possiblity
+                # of a file matching the non-ignore pattern
+                if debug:
+                    msg = 'ignore would have match but neg ignores'
+                    msg += f' present and is a dir: \"{path}\" -> not ignored!'
+                    LOG.dbg(msg, force=True)
+                return False
             return True
     if debug:
-        LOG.dbg(f'NOT ignoring {paths}', force=True)
+        LOG.dbg(f'NOT ignoring \"{paths}\"', force=True)
     return False
 
 
@@ -282,7 +296,7 @@ def uniq_list(a_list):
     return new
 
 
-def ignores_to_absolute(ignores, prefix, debug=False):
+def ignores_to_absolute(ignores, prefixes, debug=False):
     """allow relative ignore pattern"""
     new = []
     LOG.dbg(f'ignores before patching: {ignores}', force=debug)
@@ -307,11 +321,12 @@ def ignores_to_absolute(ignores, prefix, debug=False):
                     new.append(ignore)
                 continue
         # patch ignore
-        path = os.path.join(prefix, ignore)
-        if negative:
-            new.append('!' + path)
-        else:
-            new.append(path)
+        for prefix in prefixes:
+            path = os.path.join(prefix, ignore)
+            if negative:
+                new.append('!' + path)
+            else:
+                new.append(path)
     LOG.dbg(f'ignores after patching: {new}', force=debug)
     return new
 
