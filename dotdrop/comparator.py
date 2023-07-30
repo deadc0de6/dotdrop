@@ -38,7 +38,7 @@ class Comparator:
             ignore = []
         local_path = os.path.expanduser(local_path)
         deployed_path = os.path.expanduser(deployed_path)
-        self.log.dbg(f'comparing {local_path} and {deployed_path}')
+        self.log.dbg(f'comparing \"{local_path}\" and \"{deployed_path}\"')
         self.log.dbg(f'ignore pattern(s): {ignore}')
 
         # test type of file
@@ -59,7 +59,7 @@ class Comparator:
                 ret = self._comp_mode(local_path, deployed_path, mode=mode)
             return ret
 
-        self.log.dbg(f'{local_path} is a directory')
+        self.log.dbg(f'\"{local_path}\" is a directory')
 
         ret = self._comp_dir(local_path, deployed_path, ignore)
         if not ret:
@@ -100,10 +100,13 @@ class Comparator:
         self.log.dbg(f'compare directory {local_path} with {deployed_path}')
         if not os.path.exists(deployed_path):
             return ''
-        if (self.ignore_missing_in_dotdrop and not
-                os.path.exists(local_path)) \
-                or must_ignore([local_path, deployed_path], ignore,
-                               debug=self.debug):
+        ign_missing = self.ignore_missing_in_dotdrop and not \
+            os.path.exists(local_path)
+        paths = [local_path, deployed_path]
+        must_ign = must_ignore(paths,
+                               ignore,
+                               debug=self.debug)
+        if ign_missing or must_ign:
             self.log.dbg(f'ignoring diff {local_path} and {deployed_path}')
             return ''
         if not os.path.isdir(deployed_path):
