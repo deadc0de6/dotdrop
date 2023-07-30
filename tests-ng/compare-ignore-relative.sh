@@ -63,7 +63,7 @@ echo "[+] comparing normal - diffs expected"
 set +e
 cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose
 ret="$?"
-echo ${ret}
+echo "return code: ${ret}"
 [ "${ret}" = "0" ] && exit 1
 set -e
 
@@ -144,7 +144,7 @@ echo "[+] comparing .zsh with new files"
 set +e
 cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose -C "${tmpd}"/.zsh
 ret="$?"
-echo ${ret}
+echo "return code: ${ret}"
 [ "${ret}" = "0" ] && exit 1
 set -e
 
