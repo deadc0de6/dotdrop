@@ -96,7 +96,8 @@ class Updater:
         ret = False
         new_path = None
         ignores = list(set(self.ignore + dotfile.upignore))
-        ignores = ignores_to_absolute(ignores, dotfile.dst,
+        prefixes = [dotfile.dst, dotfile.src]
+        ignores = ignores_to_absolute(ignores, prefixes,
                                       debug=self.debug)
         self.log.dbg(f'ignore pattern(s) for {path}: {ignores}')
 
