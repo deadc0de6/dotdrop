@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # author: deadc0de6
 #
-# test negative ignore on update
+# test negative ignore on import
 # returns 1 in case of error
 #
 
@@ -28,6 +28,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # $2 path
 grep_or_fail()
 {
+  [ ! -e "${2}" ] && (echo "file ${2} does not exist" && exit 1)
   grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern \"${1}\" not found in ${2}" && exit 1)
 }
 
@@ -39,14 +40,6 @@ tmpd=$(mktemp -d --suffix='-dotdrop-tests' 2>/dev/null || mktemp -d)
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 echo "[+] dst dir: ${tmpd}"
-
-# dotfiles in dotdrop
-mkdir -p "${basedir}"/dotfiles/a/{b,c,x}
-echo 'original' > "${basedir}"/dotfiles/a/b/abfile1
-echo 'original' > "${basedir}"/dotfiles/a/b/abfile2
-echo 'original' > "${basedir}"/dotfiles/a/b/abfile3
-echo 'original' > "${basedir}"/dotfiles/a/c/acfile
-echo 'original' > "${basedir}"/dotfiles/a/x/axfile
 
 # filesystem
 mkdir -p "${tmpd}"/a/{b,c,d,x}
@@ -67,33 +60,29 @@ config:
   backup: false
   create: true
   dotpath: dotfiles
-dotfiles:
-  d_abc:
-    dst: ${tmpd}/a
-    src: a
-    upignore:
+  impignore:
     - "*"
-    - "!*/c/**"
-    - "!*/d/**"
-    - "!x/"
+    - "!*/c"
+    - "!*/d"
+    - "!*/x"
+dotfiles:
 profiles:
   p1:
-    dotfiles:
-    - d_abc
 _EOF
 
-# update
-echo "[+] update"
-cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key d_abc
+# import
+echo "[+] import"
+set +e
+cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/b"
+cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/c"
+cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/d"
+cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/x"
+set -e
 
-# check files haven't been updated
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile1
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile2
-grep_or_fail "original" "${basedir}"/dotfiles/a/b/abfile3
-grep_or_fail "updated" "${basedir}"/dotfiles/a/c/acfile
-[ ! -s "${basedir}"/dotfiles/a/d/adfile ] && echo "adfile not updated" && exit 1
-grep_or_fail "updated" "${basedir}"/dotfiles/a/d/adfile
-grep_or_fail "original" "${basedir}"/dotfiles/a/x/axfile
+[ -d "${basedir}/dotfiles/a/b" ] && (echo "/a/b created" && exit 1)
+grep_or_fail "updated" "${basedir}/dotfiles/a/c/acfile"
+grep_or_fail "updated" "${basedir}/dotfiles/a/d/adfile"
+grep_or_fail "updated" "${basedir}/dotfiles/a/x/axfile"
 
 echo "OK"
 exit 0
