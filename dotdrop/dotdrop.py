@@ -216,7 +216,8 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
     LOG.dbg(dotfile.prt())
 
     ignores = list(set(opts.install_ignore + dotfile.instignore))
-    ignores = ignores_to_absolute(ignores, [dotfile.dst, dotfile.src], debug=opts.debug)
+    ignores = ignores_to_absolute(ignores, [dotfile.dst, dotfile.src],
+                                  debug=opts.debug)
 
     is_template = dotfile.template and Templategen.path_is_template(
         dotfile.src,
