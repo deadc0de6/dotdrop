@@ -45,6 +45,7 @@ def toml_dump(content):
     return toml.dumps(content)
 
 
+# pylint: disable=C0103
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(f"usage: {sys.argv[0]} <yaml-config-path>")
@@ -54,3 +55,4 @@ if __name__ == '__main__':
     data = replace_none(data)
     out = toml_dump(data)
     print(out)
+# pylint: enable=C0103
