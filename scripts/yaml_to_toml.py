@@ -9,8 +9,8 @@ convert yaml config file to toml
 import sys
 # pip3 install ruamel.yaml
 from ruamel.yaml import YAML as yaml
-# pip3 install toml
-import toml
+# pip3 install tomli_w
+import tomli_w
 
 
 def yaml_load(path):
@@ -42,7 +42,7 @@ def replace_none(content):
 
 def toml_dump(content):
     """dump toml to stdout"""
-    return toml.dumps(content)
+    return tomli_w.dumps(content)
 
 
 # pylint: disable=C0103
