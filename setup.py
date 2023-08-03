@@ -50,7 +50,8 @@ setup(
     install_requires=[
         'docopt', 'Jinja2', 'ruamel.yaml',
         'python-magic', 'packaging', 'requests',
-        'toml', 'distro'],
+        'tomli; python_version < "3.11"',
+        'tomli_w', 'distro'],
 
     extras_require={
         'dev': ['check-manifest'],

@@ -16,6 +16,7 @@ import filecmp
 import itertools
 import shutil
 import json
+import sys
 import requests
 from packaging import version
 
@@ -393,12 +394,22 @@ def dependencies_met():
     except ImportError as exc:
         raise UnmetDependency(err) from exc
 
-    # toml
-    name = 'toml'
+    # tomli
+    if sys.version_info < (3, 11):
+        name = 'tomli'
+        err = f'missing python module \"{name}\"'
+        try:
+            import tomli
+            assert tomli
+        except ImportError as exc:
+            raise UnmetDependency(err) from exc
+
+    # tomli_w
+    name = 'tomli_w'
     err = f'missing python module \"{name}\"'
     try:
-        import toml
-        assert toml
+        import tomli_w
+        assert tomli_w
     except ImportError as exc:
         raise UnmetDependency(err) from exc
 
