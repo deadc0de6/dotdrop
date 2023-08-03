@@ -73,10 +73,10 @@ _EOF
 # import
 echo "[+] import"
 set +e
-cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/b"
-cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/c"
-cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/d"
-cd "${ddpath}" | ${bin} import -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/x"
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/b"
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/c"
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/d"
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/x"
 set -e
 
 [ -d "${basedir}/dotfiles/a/b" ] && (echo "/a/b created" && exit 1)
