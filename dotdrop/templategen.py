@@ -220,6 +220,10 @@ class Templategen:
             return True
         if 'json' in out:
             return True
+        if 'javascript' in out:
+            return True
+        if 'ecmascript' in out:
+            return True
         return False
 
     def _template_loader(self, relpath):
