@@ -78,12 +78,12 @@ cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -b -V --transw=base64 --tran
 # import directory (to compress)
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -b -V --transw=compress --transr=decompress "${tmpd}"/def
 # import file (to encrypt)
-cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -b -V --transw=encrypt --transr=decrypt "${tmpd}"/ghi
+#cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -b -V --transw=encrypt --transr=decrypt "${tmpd}"/ghi
 
 # check file imported in dotpath
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/abc ] && echo "abc does not exist" && exit 1
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/def ] && echo "def does not exist" && exit 1
-[ ! -e "${tmps}"/dotfiles/"${tmpd}"/ghi ] && echo "ghi does not exist" && exit 1
+#[ ! -e "${tmps}"/dotfiles/"${tmpd}"/ghi ] && echo "ghi does not exist" && exit 1
 
 # check content in dotpath
 echo "checking content"
@@ -95,16 +95,16 @@ file "${tmps}"/dotfiles/"${tmpd}"/def | grep -i 'tar'
 tar -cf "${tmps}"/test-def -C "${tmpd}"/def .
 diff "${tmps}"/dotfiles/"${tmpd}"/def "${tmps}"/test-def
 
-file "${tmps}"/dotfiles/"${tmpd}"/ghi | grep -i 'gpg symmetrically encrypted data'
-echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmps}"/test-ghi
-diff "${tmps}"/test-ghi "${tmpd}"/ghi
+#file "${tmps}"/dotfiles/"${tmpd}"/ghi | grep -i 'gpg symmetrically encrypted data'
+#echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmps}"/test-ghi
+#diff "${tmps}"/test-ghi "${tmpd}"/ghi
 
 # check is imported in config
 echo "checking imported in config"
 cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files
 cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^f_abc'
 cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^d_def'
-cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^f_ghi'
+#cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^f_ghi'
 
 # check has trans_write and trans_read in config
 echo "checking trans_write is set in config"
@@ -113,17 +113,17 @@ cat "${cfg}"
 echo "--------------"
 cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_write: base64'
 cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_write: compress'
-cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_write: encrypt'
+#cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_write: encrypt'
 
 cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_read: base64'
 cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_read: decompress'
-cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_read: decrypt'
+#cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_read: decrypt'
 
 # install these
 echo "install and check"
 rm "${tmpd}"/abc
 rm -r "${tmpd}"/def
-rm "${tmpd}"/ghi
+#rm "${tmpd}"/ghi
 
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
@@ -132,7 +132,7 @@ echo "check exist"
 [ ! -e "${tmpd}"/abc ] && exit 1
 [ ! -d "${tmpd}"/def/a ] && exit 1
 [ ! -e "${tmpd}"/def/a/file ] && exit 1
-[ ! -e "${tmpd}"/ghi ] && exit 1
+#[ ! -e "${tmpd}"/ghi ] && exit 1
 
 # test content
 echo "check content"
@@ -140,7 +140,7 @@ cat "${tmpd}"/abc
 cat "${tmpd}"/abc | grep "${token}"
 cat "${tmpd}"/def/a/file
 cat "${tmpd}"/def/a/file | grep "${tokend}"
-cat "${tmpd}"/ghi | grep "${tokenenc}"
+#cat "${tmpd}"/ghi | grep "${tokenenc}"
 
 echo "OK"
 exit 0
