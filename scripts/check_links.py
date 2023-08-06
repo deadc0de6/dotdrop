@@ -123,6 +123,7 @@ def check_links(urls):
     return True
 
 
+# pylint: disable=C0103
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(f'usage: {sys.argv[0]} <path>')
@@ -139,3 +140,4 @@ if __name__ == '__main__':
         print(f'error {exc}')
         sys.exit(1)
     sys.exit(0)
+# pylint: enable=C0103

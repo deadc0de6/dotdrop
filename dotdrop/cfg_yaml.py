@@ -26,7 +26,11 @@ import io
 from copy import deepcopy
 from itertools import chain
 from ruamel.yaml import YAML as yaml
-import toml
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
+import tomli_w
 
 # local imports
 from dotdrop.version import __version__ as VERSION
@@ -1345,7 +1349,7 @@ class CfgYaml:
         """load from toml"""
         with open(path, 'r', encoding='utf8') as file:
             data = file.read()
-        content = toml.loads(data)
+        content = tomllib.loads(data)
         # handle inexistent dotfiles/profiles
         # since toml doesn't have a nul/nil/null/none
         if cls.key_dotfiles not in content:
@@ -1375,7 +1379,7 @@ class CfgYaml:
     @classmethod
     def __toml_dump(cls, content, file):
         """dump to toml"""
-        toml.dump(content, file)
+        file.write(tomli_w.dumps(content))
 
     ########################################################
     # templating
