@@ -3,7 +3,7 @@
 _pkgname=dotdrop
 pkgname="${_pkgname}-git"
 pkgver=1.3.7.r13.g18b156e
-pkgrel=5
+pkgrel=8
 pkgdesc="Save your dotfiles once, deploy them everywhere "
 arch=('any')
 url="https://github.com/deadc0de6/dotdrop"
@@ -27,5 +27,7 @@ package() {
   install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop-completion.bash "${pkgdir}/usr/share/bash-completion/completions/${_pkgname}"
   install -Dm644 ${srcdir}/${_pkgname}/completion/_dotdrop-completion.zsh "${pkgdir}/usr/share/zsh/site-functions/_${_pkgname}"
   install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop.fish "${pkgdir}/usr/share/fish/completions/${_pkgname}.fish"
+  install -Dm644 ${srcdir}/${_pkgname}/LICENSE "${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE"
+  install -Dm644 ${srcdir}/${_pkgname}/README.md "${pkgdir}/usr/share/doc/${_pkgname}/README.md"
 }
 
