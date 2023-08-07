@@ -71,6 +71,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
     print(f'max parallel jobs: {max_jobs}')
     print(f'stop on first error: {stop_on_first_err}')
     print(f'use spinner: {spinner}')
+    print(f'log file {LOG_FILE}')
     tests = get_tests()
 
     logfd = sys.stdout
@@ -103,26 +104,25 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
             # pylint: disable=W0703
             except Exception as exc:
                 failed += 1
+                print()
+                print(f'test \"{wait_for[test]}\" failed (exception): {exc}')
                 if stop_on_first_err:
                     ex.shutdown(wait=False)
                     for job in wait_for:
                         job.cancel()
-                print()
-                print(f'test \"{wait_for[test]}\" failed: {exc}')
                 if stop_on_first_err:
                     logfd.close()
                     return False
             if not ret:
                 failed += 1
+                print()
+                if stop_on_first_err:
+                    print(log)
+                print(f'test \"{name}\" failed ({ret}): {reason}')
                 if stop_on_first_err:
                     ex.shutdown(wait=False)
                     for job in wait_for:
                         job.cancel()
-                print()
-                if stop_on_first_err:
-                    print(log)
-                print(f'test \"{name}\" failed: {reason}')
-                if stop_on_first_err:
                     logfd.close()
                     return False
             else:
@@ -138,6 +138,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
         print(f'{failed}/{failed+success} failed tests')
         logfd.write(f'{failed}/{failed+success} failed tests\n')
     logfd.close()
+    print(f'log file {LOG_FILE}')
     return failed < 1
 
 
