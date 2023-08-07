@@ -12,7 +12,8 @@ import shutil
 from dotdrop.logger import Logger
 from dotdrop.utils import strip_home, get_default_file_perms, \
     get_file_perm, get_umask, must_ignore, \
-    get_unique_tmp_name, removepath
+    get_unique_tmp_name, removepath, copytree_with_ign, \
+    copyfile
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
@@ -148,7 +149,7 @@ class Importer:
 
         self.log.dbg(f'import dotfile: src:{src} dst:{dst}')
 
-        if not self._import_file(src, dst, trans_write=trans_write):
+        if not self._import_to_dotpath(src, dst, trans_write=trans_write):
             return -1
 
         return self._import_in_config(path, src, dst, perm, linktype,
@@ -165,7 +166,6 @@ class Importer:
             1: 1 dotfile imported
             0: ignored
         """
-
         # handle file mode
         chmod = None
         dflperm = get_default_file_perms(dst, self.umask)
@@ -209,68 +209,46 @@ class Importer:
             self.log.dbg('will overwrite existing file')
         return True
 
-    def _import_file(self, src, dst, trans_write=None):
+    def _import_to_dotpath(self, in_dotpath, in_fs, trans_write=None):
         """
-        prepare hierarchy for dotfile in dotpath
-        and copy file
-        src is file in dotpath
-        dst is file on filesystem
+        prepare hierarchy for dotfile in dotpath and copy file
         """
-        srcf = os.path.join(self.dotpath, src)
-        srcfd = os.path.dirname(srcf)
-
-        # check if must be ignored
-        if self._ignore(srcf) or self._ignore(srcfd):
-            return False
+        srcf = os.path.join(self.dotpath, in_dotpath)
 
         # check we are not overwritting
-        if not self._check_existing_dotfile(srcf, dst):
+        if not self._check_existing_dotfile(srcf, in_fs):
             return False
-
-        # create directory hierarchy
-        if self.dry:
-            cmd = f'mkdir -p {srcfd}'
-            self.log.dry(f'would run: {cmd}')
-        else:
-            try:
-                os.makedirs(srcfd, exist_ok=True)
-            except OSError:
-                self.log.err(f'importing \"{dst}\" failed!')
-                return False
 
         # import the file
         if self.dry:
-            self.log.dry(f'would copy {dst} to {srcf}')
-        else:
-            # apply trans_w
-            dst = self._apply_trans_w(dst, trans_write)
-            if not dst:
-                # transformation failed
-                return False
-            # copy the file to the dotpath
-            try:
-                if os.path.isdir(dst):
-                    if os.path.exists(srcf):
-                        shutil.rmtree(srcf)
-                    ign = shutil.ignore_patterns(*self.ignore)
-                    shutil.copytree(dst, srcf,
-                                    copy_function=self._cp,
-                                    ignore=ign)
-                else:
-                    shutil.copy2(dst, srcf)
-            except shutil.Error as exc:
-                src = exc.args[0][0][0]
-                why = exc.args[0][0][2]
-                self.log.err(f'importing \"{src}\" failed: {why}')
+            self.log.dry(f'would copy {in_fs} to {srcf}')
+            return True
 
-        return True
+        # apply trans_w
+        in_fs = self._apply_trans_w(in_fs, trans_write)
+        if not in_fs:
+            # transformation failed
+            return False
+        # copy the file to the dotpath
+        try:
+            if not os.path.isdir(in_fs):
+                # is a file
+                self.log.dbg(f'{in_fs} is file')
+                copyfile(in_fs, srcf, debug=self.debug)
+            else:
+                # is a dir
+                if os.path.exists(srcf):
+                    shutil.rmtree(srcf)
+                self.log.dbg(f'{in_fs} is dir')
+                copytree_with_ign(in_fs, srcf,
+                                  ignore_func=self._ignore,
+                                  debug=self.debug)
+        except shutil.Error as exc:
+            in_dotpath = exc.args[0][0][0]
+            why = exc.args[0][0][2]
+            self.log.err(f'importing \"{in_fs}\" failed: {why}')
 
-    def _cp(self, src, dst):
-        """the copy function for copytree"""
-        # test if must be ignored
-        if self._ignore(src):
-            return
-        shutil.copy2(src, dst)
+        return os.path.exists(srcf)
 
     def _already_exists(self, src, dst):
         """
