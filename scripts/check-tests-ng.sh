@@ -15,12 +15,12 @@ workdir_tmp_exists="no"
 # run bash tests
 if [ -z "${GITHUB_WORKFLOW}" ]; then
   ## local
-  tests-ng/tests_launcher.py
+  tests-ng/tests_launcher.py -s
 else
   ## CI/CD
   # running multiple jobs in parallel sometimes
   # messes with the results on remote servers
-  tests-ng/tests_launcher.py 1
+  tests-ng/tests_launcher.py -p 1 -n -s
 fi
 
 # clear workdir
