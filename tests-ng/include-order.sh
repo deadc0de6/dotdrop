@@ -86,7 +86,9 @@ _EOF
 # create the source
 mkdir -p "${tmps}"/dotfiles/
 echo "first" > "${tmps}"/dotfiles/first
+sleep 1
 echo "second" > "${tmps}"/dotfiles/second
+sleep 1
 echo "third" > "${tmps}"/dotfiles/third
 
 attempts="3"
