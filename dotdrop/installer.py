@@ -12,7 +12,12 @@ import shutil
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.linktypes import LinkTypes
-from dotdrop import utils
+from dotdrop.utils import copyfile, get_file_perm, \
+    pivot_path, must_ignore, removepath, \
+    samefile, write_to_tmpfile, fastdiff, \
+    content_empty
+from dotdrop.utils import chmod as chmodit
+from dotdrop.utils import diff as diffit
 from dotdrop.exceptions import UndefinedException
 from dotdrop.cfg_yaml import CfgYaml
 
@@ -162,7 +167,7 @@ class Installer:
                                                ignore=ignore)
 
         if self.log.debug and chmod:
-            cur = utils.get_file_perm(dst)
+            cur = get_file_perm(dst)
             if chmod == CfgYaml.chmod_ignore:
                 chmodstr = CfgYaml.chmod_ignore
             else:
@@ -188,9 +193,9 @@ class Installer:
         apply_chmod = apply_chmod and chmod != CfgYaml.chmod_ignore
         if apply_chmod:
             if not chmod:
-                chmod = utils.get_file_perm(src)
+                chmod = get_file_perm(src)
             self.log.dbg(f'applying chmod {chmod:o} to {dst}')
-            dstperms = utils.get_file_perm(dst)
+            dstperms = get_file_perm(dst)
             if dstperms != chmod:
                 # apply mode
                 msg = f'chmod {dst} to {chmod:o}'
@@ -200,7 +205,7 @@ class Installer:
                 else:
                     if not self.comparing:
                         self.log.sub(f'chmod {dst} to {chmod:o}')
-                    if utils.chmod(dst, chmod, debug=self.debug):
+                    if chmodit(dst, chmod, debug=self.debug):
                         ret = True
                     else:
                         ret = False
@@ -250,7 +255,7 @@ class Installer:
         self.totemp = None
 
         # install the dotfile to a temp directory
-        tmpdst = utils.pivot_path(dst, tmpdir, logger=self.log)
+        tmpdst = pivot_path(dst, tmpdir, logger=self.log)
         ret, err = self.install(templater, src, tmpdst,
                                 LinkTypes.NOLINK,
                                 is_template=is_template,
@@ -331,8 +336,8 @@ class Installer:
         """
         if is_template:
             self.log.dbg(f'is a template, installing to {self.workdir}')
-            tmp = utils.pivot_path(dst, self.workdir,
-                                   striphome=True, logger=self.log)
+            tmp = pivot_path(dst, self.workdir,
+                             striphome=True, logger=self.log)
             ret, err = self.install(templater, src, tmp,
                                     LinkTypes.NOLINK,
                                     actionexec=actionexec,
@@ -388,7 +393,7 @@ class Installer:
             subsrc = srcs[i]
             subdst = dsts[i]
 
-            if utils.must_ignore([subsrc, subdst], ignore, debug=self.debug):
+            if must_ignore([subsrc, subdst], ignore, debug=self.debug):
                 self.log.dbg(
                     f'ignoring install of {src} to {dst}',
                 )
@@ -399,8 +404,8 @@ class Installer:
             if is_template:
                 self.log.dbg('child is a template')
                 self.log.dbg(f'install to {self.workdir} and symlink')
-                tmp = utils.pivot_path(subdst, self.workdir,
-                                       striphome=True, logger=self.log)
+                tmp = pivot_path(subdst, self.workdir,
+                                 striphome=True, logger=self.log)
                 ret2, err2 = self.install(templater, subsrc, tmp,
                                           LinkTypes.NOLINK,
                                           actionexec=actionexec,
@@ -456,7 +461,7 @@ class Installer:
             # remove symlink
             overwrite = True
             try:
-                utils.removepath(dst)
+                removepath(dst)
             except OSError as exc:
                 err = f'something went wrong with {src}: {exc}'
                 return False, err
@@ -481,7 +486,7 @@ class Installer:
             if self.safe and not overwrite and not self.log.ask(msg):
                 return False, 'aborted'
             try:
-                utils.removepath(dst)
+                removepath(dst)
             except OSError as exc:
                 err = f'something went wrong with {src}: {exc}'
                 return False, err
@@ -497,7 +502,7 @@ class Installer:
         os.symlink(lnk_src, dst)
         self.log.dbg(
             f'symlink {dst} to {lnk_src} '
-            f'(mode:{utils.get_file_perm(dst):o})'
+            f'(mode:{get_file_perm(dst):o})'
         )
         if not self.comparing:
             self.log.sub(f'linked {dst} to {lnk_src}')
@@ -522,12 +527,12 @@ class Installer:
         self.log.dbg(f'no empty: {noempty}')
 
         # ignore file
-        if utils.must_ignore([src, dst], ignore, debug=self.debug):
+        if must_ignore([src, dst], ignore, debug=self.debug):
             self.log.dbg(f'ignoring install of {src} to {dst}')
             return False, None
 
         # check no loop
-        if utils.samefile(src, dst):
+        if samefile(src, dst):
             err = f'dotfile points to itself: {dst}'
             return False, err
 
@@ -548,7 +553,7 @@ class Installer:
             finally:
                 templater.restore_vars(saved)
             # test is empty
-            if noempty and utils.content_empty(content):
+            if noempty and content_empty(content):
                 self.log.dbg(f'ignoring empty template: {src}')
                 return False, None
             if content is None:
@@ -561,7 +566,7 @@ class Installer:
                                actionexec=actionexec)
 
         if ret and not err:
-            rights = f'{utils.get_file_perm(src):o}'
+            rights = f'{get_file_perm(src):o}'
             self.log.dbg(f'installed file {src} to {dst} ({rights})')
             if not self.dry and not self.comparing:
                 self.log.sub(f'install {src} to {dst}')
@@ -627,7 +632,6 @@ class Installer:
             try:
                 with open(dst, 'wb') as file:
                     file.write(content)
-                # shutil.copymode(src, dst)
             except NotADirectoryError as exc:
                 err = f'opening dest file: {exc}'
                 return False, err
@@ -638,8 +642,8 @@ class Installer:
         else:
             # copy file
             try:
+                # do NOT copy meta here
                 shutil.copyfile(src, dst)
-                # shutil.copymode(src, dst)
             except OSError as exc:
                 return False, str(exc)
         return True, None
@@ -708,9 +712,9 @@ class Installer:
             return False, 'aborted'
 
         # writing to file
-        self.log.dbg(f'before writing to {dst} ({utils.get_file_perm(src):o})')
+        self.log.dbg(f'before writing to {dst} ({get_file_perm(src):o})')
         ret = self._write_content_to_file(content, src, dst)
-        self.log.dbg(f'written to {dst} ({utils.get_file_perm(src):o})')
+        self.log.dbg(f'written to {dst} ({get_file_perm(src):o})')
         return ret
 
     ########################################################
@@ -732,13 +736,13 @@ class Installer:
         # check file content
         tmp = None
         if content:
-            tmp = utils.write_to_tmpfile(content)
+            tmp = write_to_tmpfile(content)
             src = tmp
-        ret = utils.fastdiff(src, dst)
+        ret = fastdiff(src, dst)
         if ret:
             self.log.dbg('content differ')
         if content:
-            utils.removepath(tmp)
+            removepath(tmp)
         return ret
 
     def _show_diff_before_write(self, src, dst, content=None):
@@ -749,12 +753,12 @@ class Installer:
         """
         tmp = None
         if content:
-            tmp = utils.write_to_tmpfile(content)
+            tmp = write_to_tmpfile(content)
             src = tmp
-        diff = utils.diff(modified=src, original=dst,
-                          diff_cmd=self.diff_cmd)
+        diff = diffit(modified=src, original=dst,
+                      diff_cmd=self.diff_cmd)
         if tmp:
-            utils.removepath(tmp, logger=self.log)
+            removepath(tmp, logger=self.log)
 
         if diff:
             self._print_diff(src, dst, diff)
@@ -790,7 +794,7 @@ class Installer:
         # copy to preserve mode on chmod=preserve
         # since we expect dotfiles this shouldn't have
         # such a big impact but who knows.
-        shutil.copy2(path, dst)
+        copyfile(path, dst, debug=self.debug)
         stat = os.stat(path)
         os.chown(dst, stat.st_uid, stat.st_gid)
 

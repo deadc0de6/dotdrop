@@ -8,14 +8,13 @@ handle the update of dotfiles
 import os
 import shutil
 import filecmp
-import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.utils import ignores_to_absolute, removepath, \
     get_unique_tmp_name, write_to_tmpfile, must_ignore, \
-    mirror_file_rights, get_file_perm
+    mirror_file_rights, get_file_perm, copytree_with_ign
 from dotdrop.exceptions import UndefinedException
 
 
@@ -288,29 +287,21 @@ class Updater:
                 self.log.dry(f'would cp -r {exist} {new}')
                 continue
             self.log.dbg(f'cp -r {exist} {new}')
-
-            # Newly created directory should be copied as is (for efficiency).
-            def ign(src, names):
-                whitelist, blacklist = set(), set()
-                for ignore in ignores:
-                    for name in names:
-                        path = os.path.join(src, name)
-                        if ignore.startswith('!') and \
-                                fnmatch.fnmatch(path, ignore[1:]):
-                            # add to whitelist
-                            whitelist.add(name)
-                        elif fnmatch.fnmatch(path, ignore):
-                            # add to blacklist
-                            blacklist.add(name)
-                return blacklist - whitelist
-
             try:
-                shutil.copytree(exist, new, ignore=ign)
+                ign_func = self._ignore(ignores, debug=self.debug)
+                copytree_with_ign(exist, new,
+                                  ignore_func=ign_func,
+                                  debug=self.debug)
             except OSError as exc:
                 msg = f'error copying dir {exist}'
                 self.log.err(f'{msg}: {exc}')
                 continue
             self.log.sub(f'\"{new}\" dir added')
+
+    def _ignore(self, ignores, debug=False):
+        def ignore_func(path):
+            return must_ignore([path], ignores, debug=debug)
+        return ignore_func
 
     def _merge_dirs_remove_right_only(self, diff, left, right,
                                       ignore_missing_in_dotdrop,
