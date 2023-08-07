@@ -104,7 +104,9 @@ rm "${basedir}"/dotfiles/"${tmpd}"/dir1/file_in_dir1
 mkdir -p "${basedir}"/dotfiles/"${tmpd}"/dir1/file_in_dir1
 
 # ensure changes applied correctly
-diff "${tmpd}"/dir1 "${basedir}"/dotfiles/"${tmpd}"/dir1
+echo "diff dir1"
+diff -r --suppress-common-lines "${tmpd}"/dir1 "${basedir}"/dotfiles/"${tmpd}"/dir1
+echo "diff uniquefile"
 diff "${tmpd}"/uniquefile "${basedir}"/dotfiles/"${tmpd}"/uniquefile
 [ ! -e "${basedir}"/dotfiles/"${tmpd}"/dir1/sub1/sub2/sub3/file ] && echo "sub does not exist" && exit 1
 

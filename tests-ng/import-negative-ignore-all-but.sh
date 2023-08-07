@@ -62,9 +62,9 @@ config:
   dotpath: dotfiles
   impignore:
     - "*"
-    - "!*/c"
-    - "!*/d"
-    - "!*/x"
+    - "!*/c/**"
+    - "!*/d/**"
+    - "!*/x/**"
 dotfiles:
 profiles:
   p1:
@@ -79,10 +79,10 @@ cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" --verbose --profile=p1 "${tmpd}/a/x"
 set -e
 
-[ -d "${basedir}/dotfiles/a/b" ] && (echo "/a/b created" && exit 1)
-grep_or_fail "updated" "${basedir}/dotfiles/a/c/acfile"
-grep_or_fail "updated" "${basedir}/dotfiles/a/d/adfile"
-grep_or_fail "updated" "${basedir}/dotfiles/a/x/axfile"
+[ -d "${basedir}/dotfiles/${tmpd}/a/b" ] && (echo "/a/b created" && exit 1)
+grep_or_fail "updated" "${basedir}/dotfiles/${tmpd}/a/c/acfile"
+grep_or_fail "updated" "${basedir}/dotfiles/${tmpd}/a/d/adfile"
+grep_or_fail "updated" "${basedir}/dotfiles/${tmpd}/a/x/axfile"
 
 echo "OK"
 exit 0
