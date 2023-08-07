@@ -36,6 +36,7 @@ tmpd=$(mktemp -d --suffix='-dotdrop-tests-dest' || mktemp -d)
 cp -r "${dt}"/folder "${tmpd}"/
 touch "${tmpd}"/folder/b
 mkdir "${tmpd}"/folder/c
+touch "${tmpd}"/folder/c/cfile
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
@@ -68,12 +69,12 @@ _EOF
 echo "[+] test with no ignore-missing setting"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key thedotfile
 
-[ ! -e "${dt}"/folder/b ] && echo "should have been updated" && exit 1
-[ ! -e "${dt}"/folder/c ] && echo "should have been updated" && exit 1
+[ ! -e "${dt}"/folder/b ] && echo "${dt}/folder/b should have been updated" && exit 1
+[ ! -e "${dt}"/folder/c/cfile ] && echo "${dt}/folder/c/cfile should have been updated" && exit 1
 
 # Reset
 rm "${dt}"/folder/b
-rmdir "${dt}"/folder/c
+rm -rf "${dt}"/folder/c
 
 #
 # Test with command-line flag
