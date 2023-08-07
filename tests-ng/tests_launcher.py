@@ -83,6 +83,8 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
     logfd.flush()
 
     print()
+    failed = 0
+    success = 0
     spinner = None
     if not is_cicd() and spinner:
         # no spinner on github actions
@@ -100,6 +102,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
                 ret, reason, name, log = test.result()
             # pylint: disable=W0703
             except Exception as exc:
+                failed += 1
                 if stop_on_first_err:
                     ex.shutdown(wait=False)
                     for job in wait_for:
@@ -110,6 +113,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
                     logfd.close()
                     return False
             if not ret:
+                failed += 1
                 if stop_on_first_err:
                     ex.shutdown(wait=False)
                     for job in wait_for:
@@ -122,6 +126,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
                     logfd.close()
                     return False
             else:
+                success += 1
                 if not spinner:
                     print(f'OK - test \"{name}\" succeeded!')
         sys.stdout.write('\n')
@@ -129,8 +134,11 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
         spinner.stop()
     print()
     logfd.write(f'done - ran {len(tests)} test(s)\n')
+    if not stop_on_first_err:
+        print(f'{failed}/{failed+success} failed tests')
+        logfd.write(f'{failed}/{failed+success} failed tests\n')
     logfd.close()
-    return True
+    return failed < 1
 
 
 def main():
