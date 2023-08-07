@@ -222,68 +222,123 @@ def strip_home(path):
     return path
 
 
+def _match_ignore_pattern(path, pattern, debug=False):
+    """
+    returns true if path matches the pattern
+    """
+    ret = fnmatch.fnmatch(path, pattern)
+    if debug:
+        LOG.dbg(f'ignore \"{pattern}\" match: {path}',
+                force=True)
+    return ret
+
+
+def _must_ignore(path, ignores, neg_ignores, debug=False):
+    """
+    return true if path matches any ignore patterns
+    """
+    match_ignore_pattern = []
+    # test for ignore pattern
+    for pattern in ignores:
+        if _match_ignore_pattern(path, pattern):
+            match_ignore_pattern.append(path)
+
+    # remove negative match
+    for pattern in neg_ignores:
+        # remove '!'
+        pattern = pattern[1:]
+        if not _match_ignore_pattern(path, pattern):
+            if debug:
+                msg = f'negative ignore \"{pattern}\" NO match: {path}'
+                LOG.dbg(msg, force=True)
+            continue
+        # remove from the list
+        try:
+            match_ignore_pattern.remove(path)
+        except ValueError:
+            warn = 'no files that are currently being '
+            warn += f'ignored match \"{pattern}\". In order '
+            warn += 'for a negative ignore pattern '
+            warn += 'to work, it must match a file '
+            warn += 'that is being ignored by a '
+            warn += 'previous ignore pattern.'
+            LOG.warn(warn)
+    if len(match_ignore_pattern) < 1:
+        return False
+    if os.path.isdir(path):
+        # this ensures whoever calls this function will
+        # descend into the directory to explore the possiblity
+        # of a file matching the non-ignore pattern
+        if debug:
+            msg = 'ignore would have match but neg ignores'
+            msg += f' present and is a dir: \"{path}\" -> not ignored!'
+            LOG.dbg(msg, force=True)
+        return False
+    if debug:
+        LOG.dbg(f'effectively ignoring \"{path}\"', force=True)
+    return True
+
+
 def must_ignore(paths, ignores, debug=False):
-    """return true if any paths in list matches any ignore patterns"""
+    """
+    return true if any paths in list matches any ignore patterns
+    """
     if not ignores:
         return False
     if debug:
         LOG.dbg(f'must ignore? \"{paths}\" against {ignores}',
                 force=True)
-    ignored_negative, ignored = categorize(
+    nign, ign = categorize(
         lambda ign: ign.startswith('!'), ignores)
     for path in paths:
-        ignore_matches = []
-        isdir = os.path.isdir(path)
-        # First ignore dotfiles
-        for i in ignored:
-            if fnmatch.fnmatch(path, i):
-                if debug:
-                    LOG.dbg(f'ignore \"{i}\" match: {path}',
-                            force=True)
-                ignore_matches.append(path)
-
-        # Then remove any matches that actually shouldn't be ignored
-        for nign in ignored_negative:
-            # Each of these will start with an '!' so we need to remove that
-            nign = nign[1:]
-            if debug:
-                msg = f'trying to match :\"{path}\" '
-                msg += f'with non-ignore-pattern:\"{nign}\"'
-                LOG.dbg(msg, force=True)
-            if fnmatch.fnmatch(path, nign):
-                if debug:
-                    msg = f'negative ignore \"{nign}\" match: {path}'
-                    LOG.dbg(msg, force=True)
-                try:
-                    ignore_matches.remove(path)
-                except ValueError:
-                    warn = 'no files that are currently being '
-                    warn += f'ignored match \"{nign}\". In order '
-                    warn += 'for a negative ignore pattern '
-                    warn += 'to work, it must match a file '
-                    warn += 'that is being ignored by a '
-                    warn += 'previous ignore pattern.'
-                    LOG.warn(warn)
-            else:
-                if debug:
-                    msg = f'negative ignore \"{nign}\" NO match: {path}'
-                    LOG.dbg(msg, force=True)
-        if ignore_matches:
-            if debug:
-                LOG.dbg(f'effectively ignoring \"{paths}\"', force=True)
-            if isdir and len(ignored_negative) > 0:
-                # this ensures whoever calls this function will
-                # descend into the directory to explore the possiblity
-                # of a file matching the non-ignore pattern
-                if debug:
-                    msg = 'ignore would have match but neg ignores'
-                    msg += f' present and is a dir: \"{path}\" -> not ignored!'
-                    LOG.dbg(msg, force=True)
-                return False
+        if _must_ignore(path, ign, nign, debug=debug):
             return True
     if debug:
         LOG.dbg(f'NOT ignoring \"{paths}\"', force=True)
     return False
+
+
+def _cp(src, dst, ignore_func=None, debug=False):
+    """the copy function for copytree"""
+    if ignore_func and ignore_func(src):
+        return
+    dstdir = os.path.dirname(dst)
+    if debug:
+        LOG.dbg(f'mkdir \"{dstdir}\"',
+                force=True)
+    os.makedirs(dstdir, exist_ok=True)
+    if debug:
+        LOG.dbg(f'cp {src} {dst}',
+                force=True)
+    shutil.copy2(src, dst)
+
+
+def copyfile(src, dst, debug=False):
+    """
+    copy file from src to dst
+    no dir expected!
+    """
+    _cp(src, dst, debug=debug)
+
+
+def copytree_with_ign(src, dst, ignore_func=None, debug=False):
+    """copytree with support for ignore"""
+    if debug:
+        LOG.dbg(f'copytree \"{src}\" to \"{dst}\"', force=True)
+    for entry in os.listdir(src):
+        srcf = os.path.join(src, entry)
+        dstf = os.path.join(dst, entry)
+        if os.path.isdir(srcf):
+            if debug:
+                LOG.dbg(f'mkdir \"{dstf}\"',
+                        force=True)
+            os.makedirs(dstf, exist_ok=True)
+            copytree_with_ign(srcf, dstf, ignore_func=ignore_func)
+        else:
+            if debug:
+                LOG.dbg(f'copytree, copy file \"{src}\" to \"{dst}\"',
+                        force=True)
+            _cp(srcf, dstf, ignore_func=ignore_func, debug=debug)
 
 
 def uniq_list(a_list):
