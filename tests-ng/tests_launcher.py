@@ -10,6 +10,7 @@ tests launcher
 import os
 import sys
 import subprocess
+import argparse
 from concurrent import futures
 from halo import Halo
 
@@ -61,15 +62,15 @@ def get_tests():
                 continue
             tests.append(path)
         break
+    tests.sort()
     return tests
 
 
-def main():
-    """entry point"""
-    max_jobs = None  # number of processor
-    if len(sys.argv) > 1:
-        max_jobs = int(sys.argv[1])
-
+def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
+    """run the tests"""
+    print(f'max parallel jobs: {max_jobs}')
+    print(f'stop on first error: {stop_on_first_err}')
+    print(f'use spinner: {spinner}')
     tests = get_tests()
 
     logfd = sys.stdout
@@ -83,7 +84,7 @@ def main():
 
     print()
     spinner = None
-    if not is_cicd():
+    if not is_cicd() and spinner:
         # no spinner on github actions
         spinner = Halo(text='Testing', spinner='bouncingBall')
         spinner.start()
@@ -99,19 +100,30 @@ def main():
                 ret, reason, name, log = test.result()
             # pylint: disable=W0703
             except Exception as exc:
+                if stop_on_first_err:
+                    ex.shutdown(wait=False)
+                    for job in wait_for:
+                        job.cancel()
                 print()
                 print(f'test \"{wait_for[test]}\" failed: {exc}')
-                logfd.close()
-                return False
+                if stop_on_first_err:
+                    logfd.close()
+                    return False
             if not ret:
-                ex.shutdown(wait=False)
-                for job in wait_for:
-                    job.cancel()
+                if stop_on_first_err:
+                    ex.shutdown(wait=False)
+                    for job in wait_for:
+                        job.cancel()
                 print()
-                print(log)
+                if stop_on_first_err:
+                    print(log)
                 print(f'test \"{name}\" failed: {reason}')
-                logfd.close()
-                return False
+                if stop_on_first_err:
+                    logfd.close()
+                    return False
+            else:
+                if not spinner:
+                    print(f'OK - test \"{name}\" succeeded!')
         sys.stdout.write('\n')
     if spinner:
         spinner.stop()
@@ -119,6 +131,21 @@ def main():
     logfd.write(f'done - ran {len(tests)} test(s)\n')
     logfd.close()
     return True
+
+
+def main():
+    """entry point"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--proc',
+                        type=int)
+    parser.add_argument('-s', '--stoponerr',
+                        action='store_true')
+    parser.add_argument('-n', '--nospinner',
+                        action='store_true')
+    args = parser.parse_args()
+    return run_tests(max_jobs=args.proc,
+                     stop_on_first_err=args.stoponerr,
+                     spinner=not args.nospinner)
 
 
 if __name__ == '__main__':
