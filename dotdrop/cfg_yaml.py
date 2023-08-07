@@ -436,7 +436,8 @@ class CfgYaml:
             self._dbg(f'new dotfile src: {src}')
             self._dbg(f'new dotfile dst: {dst}')
             self._dbg(f'new dotfile link: {link}')
-            self._dbg(f'new dotfile chmod: {chmod}')
+            if chmod:
+                self._dbg(f'new dotfile chmod: {chmod:o}')
             self._dbg(f'new dotfile trans_r: {trans_r_key}')
             self._dbg(f'new dotfile trans_w: {trans_w_key}')
 
