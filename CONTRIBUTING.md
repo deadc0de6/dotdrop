@@ -168,17 +168,23 @@ dynvariables:
 * will then match each file that is different
   within the directory against the ignore patterns
   before printing
+* patterns are matched against both files
+  (in dotpath and in filesystem)
 
 **import**
 
 * for files, match with ignore directly
 * uses `shutil.copytree` with a callback
   that will match each path against the ignore pattern
+* the pattern (and negative pattern) will be matched
+  against the path(s) that are being imported
 
 **install**
 
 * recursively process each files and
   match against the ignore pattern
+* patterns are matched against both files
+  (in dotpath and in filesystem)
 
 **update**
 
@@ -187,6 +193,8 @@ dynvariables:
 * will then match each file that is different
   within the directory against the ignore patterns
   before printing
+* patterns are matched against both files
+  (in dotpath and in filesystem)
 
 # Testing
 
