@@ -288,7 +288,7 @@ class Updater:
                 continue
             self.log.dbg(f'cp -r {exist} {new}')
             try:
-                ign_func = self._ignore(ignores, debug=self.debug)
+                ign_func = self._ignore(ignores)
                 copytree_with_ign(exist, new,
                                   ignore_func=ign_func,
                                   debug=self.debug)
@@ -298,9 +298,10 @@ class Updater:
                 continue
             self.log.sub(f'\"{new}\" dir added')
 
-    def _ignore(self, ignores, debug=False):
+    def _ignore(self, ignores):
         def ignore_func(path):
-            return must_ignore([path], ignores, debug=debug)
+            return must_ignore([path], ignores,
+                               debug=self.debug)
         return ignore_func
 
     def _merge_dirs_remove_right_only(self, diff, left, right,
