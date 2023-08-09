@@ -39,7 +39,7 @@ def run_test(logfd, path):
                             universal_newlines=True,
                             encoding='utf-8',
                             errors='ignore')
-    out, _ = proc.communicate()
+    out, err = proc.communicate()
     ret = proc.returncode == 0
     reason = 'returncode'
     if 'Traceback' in out:
@@ -48,7 +48,7 @@ def run_test(logfd, path):
     if logfd:
         logfd.write(f'done test \"{path}\": ok:{ret}\n')
         logfd.flush()
-    return ret, reason, path, out
+    return ret, reason, path, (out, err)
 
 
 def get_tests():
@@ -92,7 +92,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
 
         for test in futures.as_completed(wait_for.keys()):
             try:
-                ret, reason, name, log = test.result()
+                ret, reason, name, (log_out, log_err) = test.result()
             # pylint: disable=W0703
             except Exception as exc:
                 failed += 1
@@ -108,7 +108,8 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
                 failed += 1
                 print()
                 if stop_on_first_err:
-                    print(log)
+                    print(log_out)
+                    print(log_err)
                 print(f'test \"{name}\" failed ({ret}): {reason}')
                 if stop_on_first_err:
                     ex.shutdown(wait=False)
@@ -117,8 +118,6 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
                     return False
             else:
                 success += 1
-                if not spinner:
-                    print(f'OK - test \"{name}\" succeeded!')
         sys.stdout.write('\n')
     if spinner:
         spinner.stop()
