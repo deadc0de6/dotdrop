@@ -304,6 +304,9 @@ def _cp(src, dst, ignore_func=None, debug=False):
         return
     if not os.path.isfile(src):
         # ignore special files
+        if debug:
+            LOG.dbg(f'ignore special file \"{src}\"',
+                    force=True)
         return
     dstdir = os.path.dirname(dst)
     if debug:
