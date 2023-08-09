@@ -36,7 +36,12 @@ echo "=> pyflakes version:"
 pyflakes --version
 
 # checking for TODO/FIXME
-grep -r 'TODO\|FIXME'
+echo "--------------------------------------"
+echo "checking for TODO/FIXME"
+grep -rv 'TODO\|FIXME' dotdrop/ >/dev/null 2>&1
+grep -rv 'TODO\|FIXME' tests/ >/dev/null 2>&1
+grep -rv 'TODO\|FIXME' tests-ng/ >/dev/null 2>&1
+grep -rv 'TODO\|FIXME' scripts/ >/dev/null 2>&1
 
 # PEP8 tests
 # W503: Line break occurred before a binary operator
