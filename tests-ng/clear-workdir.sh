@@ -13,7 +13,8 @@ ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
-  altbin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
+  mkdir -p coverages/
+  altbin="coverage run -p --data-file coverages/coverage --source=dotdrop -m dotdrop.dotdrop"
 fi
 bin="${DT_BIN:-${altbin}}"
 # shellcheck source=tests-ng/helpers
@@ -66,8 +67,8 @@ ret="$?"
 [ "${ret}" != "0" ] && echo "install returned ${ret}" && exit 1
 
 # checks
-[ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
-[ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
+[ ! -e "${tmpd}"/x ] && echo "f_x not installed (${tmpd}/x)" && exit 1
+[ ! -h "${tmpd}"/x ] && echo "f_x not symlink (${tmpd}/x)" && exit 1
 [ ! -e "${DOTDROP_WORKDIR}"/"${tmpd}"/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
 
 # add file

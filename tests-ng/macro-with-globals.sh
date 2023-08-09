@@ -12,7 +12,8 @@ ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
-  altbin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
+  mkdir -p coverages/
+  altbin="coverage run -p --data-file coverages/coverage --source=dotdrop -m dotdrop.dotdrop"
 fi
 bin="${DT_BIN:-${altbin}}"
 # shellcheck source=tests-ng/helpers

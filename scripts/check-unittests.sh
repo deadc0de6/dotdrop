@@ -10,4 +10,5 @@ if [ -n "${DOTDROP_WORKERS}" ]; then
   echo "DISABLE workers for unittests"
 fi
 
-coverage run -p -m pytest tests
+mkdir -p coverages/
+coverage run -p --data-file coverages/coverage -m pytest tests
