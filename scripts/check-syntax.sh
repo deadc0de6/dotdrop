@@ -35,6 +35,9 @@ fi
 echo "=> pyflakes version:"
 pyflakes --version
 
+# checking for TODO/FIXME
+grep -r 'TODO\|FIXME'
+
 # PEP8 tests
 # W503: Line break occurred before a binary operator
 # W504: Line break occurred after a binary operator
