@@ -78,14 +78,16 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
     failed = 0
     success = 0
     spinner = None
+    logfd = sys.stdout
     if not is_cicd() and with_spinner:
         # no spinner on github actions
         spinner = Halo(text='Testing', spinner='bouncingBall')
         spinner.start()
+        logfd = None
     with futures.ThreadPoolExecutor(max_workers=max_jobs) as ex:
         wait_for = {}
         for test in tests:
-            j = ex.submit(run_test, sys.stdout, test)
+            j = ex.submit(run_test, logfd, test)
             wait_for[j] = test
 
         for test in futures.as_completed(wait_for.keys()):
