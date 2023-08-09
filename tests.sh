@@ -37,7 +37,7 @@ echo "tests-ng..."
 "${cur}"/scripts/check-tests-ng.sh
 
 # merge coverage
-coverage combine coverages/
+coverage combine coverages/*
 
 ## done
 echo "All tests finished successfully"
