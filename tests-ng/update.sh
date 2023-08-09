@@ -58,7 +58,6 @@ echo 'first' > "${tmpd}"/dir1/sub/sub2/different
 # for dir2 (modified original for update)
 mkdir "${tmpd}"/dir2
 touch "${tmpd}"/dir2/file_only_in_dir2
-mkdir -p "${tmpd}"/dir2/dir_only_in_dir2
 mkdir -p "${tmpd}"/dir2/common_dir
 echo 'this file is the same' > "${tmpd}"/dir2/common_file
 echo 'in dir2' > "${tmpd}"/dir2/not_the_same
