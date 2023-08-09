@@ -62,8 +62,10 @@ _EOF
 
 echo "[+] install (1)"
 cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 --verbose | grep '^1 dotfile(s) installed.$'
-[ "$?" != "0" ] && exit 1
+ret="$?"
+[ "${ret}" != "0" ] && echo "install returned ${ret}" && exit 1
 
+# checks
 [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
 [ ! -h "${tmpd}"/x ] && echo "f_x not symlink" && exit 1
 [ ! -e "${DOTDROP_WORKDIR}"/"${tmpd}"/x ] && echo "f_x not in workdir (${DOTDROP_WORKDIR}/${tmpd})" && exit 1
