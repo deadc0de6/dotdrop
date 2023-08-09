@@ -13,7 +13,8 @@ ddpath="${cur}/../"
 export PYTHONPATH="${ddpath}:${PYTHONPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
-  altbin="coverage run -p --source=dotdrop -m dotdrop.dotdrop"
+  mkdir -p coverages/
+  altbin="coverage run -p --data-file coverages/coverage --source=dotdrop -m dotdrop.dotdrop"
 fi
 bin="${DT_BIN:-${altbin}}"
 # shellcheck source=tests-ng/helpers
@@ -73,17 +74,16 @@ cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -V
 #cat ${cfg}
 
 # check normal
-[ ! -d "${tmpd}"/dir1 ] && exit 1
-[ -d "${tmpd}"/dir1/empty ] && exit 1
-[ -d "${tmpd}"/dir1/sub ] && exit 1
-[ -d "${tmpd}"/dir1/sub/empty ] && exit 1
-[ ! -d "${tmpd}"/dir1/not-empty ] && exit 1
-
-[ ! -e "${tmpd}"/dir1/not-empty/file ] && exit 1
+[ ! -d "${tmpd}"/dir1 ] && echo "not dir \"${tmpd}/dir1\"" && exit 1
+[ -d "${tmpd}"/dir1/empty ] && echo "exists: \"${tmpd}/dir1/empty\"" && exit 1
+[ -d "${tmpd}"/dir1/sub ] && echo "exists: \"${tmpd}/dir1/sub\"" && exit 1
+[ -d "${tmpd}"/dir1/sub/empty ] && echo "exists: \"${tmpd}/dir1/sub/empty\"" &&  exit 1
+[ ! -d "${tmpd}"/dir1/not-empty ] && echo "not dir: \"${tmpd}/dir1/not-empty\"" && exit 1
+[ ! -e "${tmpd}"/dir1/not-empty/file ] && echo "not exists: \"${tmpd}/dir1/not-empty/file\"" && exit 1
 
 # ignored files
-[ -e "${tmpd}"/dir1/empty/this.ignore ] && exit 1
-[ -e "${tmpd}"/dir1/sub/empty/that.ignore ] && exit 1
+[ -e "${tmpd}"/dir1/empty/this.ignore ] && echo "exists: \"${tmpd}/dir1/empty/this.ignore\"" && exit 1
+[ -e "${tmpd}"/dir1/sub/empty/that.ignore ] && echo "exists: \"${tmpd}/dir1/sub/empty/that.ignore\"" && exit 1
 
 cat "${tmpd}"/dir1/not-empty/file
 grep "p1" "${tmpd}"/dir1/not-empty/file

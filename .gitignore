@@ -12,6 +12,7 @@ venv
 .coverage
 .coverage*
 htmlcov
+coverages/
 
 # IDE
 .idea/
