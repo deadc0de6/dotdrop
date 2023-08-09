@@ -302,6 +302,9 @@ def _cp(src, dst, ignore_func=None, debug=False):
     """the copy function for copytree"""
     if ignore_func and ignore_func(src):
         return
+    if not os.path.isfile(src):
+        # ignore special files
+        return
     dstdir = os.path.dirname(dst)
     if debug:
         LOG.dbg(f'mkdir \"{dstdir}\"',
