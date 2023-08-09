@@ -15,7 +15,6 @@ from concurrent import futures
 from halo import Halo
 
 
-LOG_FILE = '/tmp/dotdrop-tests_launcher.log'
 GITHUB_ENV = 'GITHUB_WORKFLOW'
 
 
@@ -66,37 +65,28 @@ def get_tests():
     return tests
 
 
-def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
+def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
     """run the tests"""
+    # pylint: disable=R0914,R0912
     print(f'max parallel jobs: {max_jobs}')
     print(f'stop on first error: {stop_on_first_err}')
-    print(f'use spinner: {spinner}')
-    print(f'log file {LOG_FILE}')
+    print(f'use spinner: {with_spinner}')
     tests = get_tests()
-
-    logfd = sys.stdout
-    if not is_cicd():
-        # pylint: disable=R1732
-        logfd = open(LOG_FILE, 'w', encoding='utf-8')
-    if max_jobs:
-        logfd.write(f'run tests with {max_jobs} parallel job(s)\n')
-    logfd.write(f'running {len(tests)} test(s)\n')
-    logfd.flush()
-
+    print(f'running {len(tests)} test(s)\n')
     print()
+
     failed = 0
     success = 0
     spinner = None
-    if not is_cicd() and spinner:
+    if not is_cicd() and with_spinner:
         # no spinner on github actions
         spinner = Halo(text='Testing', spinner='bouncingBall')
         spinner.start()
     with futures.ThreadPoolExecutor(max_workers=max_jobs) as ex:
         wait_for = {}
         for test in tests:
-            j = ex.submit(run_test, logfd, test)
+            j = ex.submit(run_test, sys.stdout, test)
             wait_for[j] = test
-        logfd.flush()
 
         for test in futures.as_completed(wait_for.keys()):
             try:
@@ -111,7 +101,6 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
                     for job in wait_for:
                         job.cancel()
                 if stop_on_first_err:
-                    logfd.close()
                     return False
             if not ret:
                 failed += 1
@@ -123,7 +112,6 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
                     ex.shutdown(wait=False)
                     for job in wait_for:
                         job.cancel()
-                    logfd.close()
                     return False
             else:
                 success += 1
@@ -133,12 +121,9 @@ def run_tests(max_jobs=None, stop_on_first_err=True, spinner=True):
     if spinner:
         spinner.stop()
     print()
-    logfd.write(f'done - ran {len(tests)} test(s)\n')
+    print(f'done - ran {len(tests)} test(s)\n')
     if not stop_on_first_err:
         print(f'{failed}/{failed+success} failed tests')
-        logfd.write(f'{failed}/{failed+success} failed tests\n')
-    logfd.close()
-    print(f'log file {LOG_FILE}')
     return failed < 1
 
 
@@ -154,7 +139,7 @@ def main():
     args = parser.parse_args()
     return run_tests(max_jobs=args.proc,
                      stop_on_first_err=args.stoponerr,
-                     spinner=not args.nospinner)
+                     with_spinner=not args.nospinner)
 
 
 if __name__ == '__main__':
