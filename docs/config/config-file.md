@@ -227,6 +227,17 @@ provided they *would have* been ignored by an earlier ignore pattern (dotdrop wi
 case). This feature allows to, for example, ignore all files within a certain directory, except for a
 particular one (See examples below).
 
+For example to ignore everything but the `colors` directory under `~/.vim`
+```yaml
+dotfiles:
+  d_vim
+    dst: ~/.vim
+    src: vim
+    cmpignore:
+      - '*'
+      - '!*/colors/**'
+```
+
 To completely ignore comparison of a specific dotfile:
 ```yaml
 dotfiles:
