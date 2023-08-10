@@ -2,6 +2,8 @@
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 
+ENV_DIR=${DOTDROP_VIRTUALENV:-}
+
 # setup variables
 args=("$@")
 cur=$(cd "$(dirname "${0}")" && pwd)
@@ -18,8 +20,14 @@ fi
 
 # check python executable
 pybin="python3"
-hash ${pybin} 2>/dev/null || pybin="python"
-[[ "$(${pybin} -V 2>&1)" =~ "Python 3" ]] || { echo "install Python 3" && exit 1; }
+if [ -z "${ENV_DIR}" ]; then
+  hash ${pybin} 2>/dev/null || pybin="python"
+  [[ "$(${pybin} -V 2>&1)" =~ "Python 3" ]] || { echo "install Python 3" && exit 1; }
+else
+  # virtualenv
+  pybin="${ENV_DIR}/bin/python"
+fi
+hash "${pybin}" 2>/dev/null || (echo "python executable not found" && exit 1)
 
 # launch dotdrop
 PYTHONPATH=dotdrop:${PYTHONPATH} ${pybin} -m dotdrop.dotdrop "${args[@]}"

@@ -1,6 +1,8 @@
 # Installation
 
 * [As a submodule](#as-a-submodule)
+* [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv)
+* [Submodule upgrade/downgrade](#submodule-upgradedowngrade)
 * [PyPI package](#pypi-package)
 * [Homebrew package](#homebrew-package)
 * [Debian unstable (sid)](#debian)
@@ -54,7 +56,7 @@ shell with the config file path; for example:
 alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
-### As a submodule in a virtualenv
+## As a submodule in a virtualenv
 
 To install it in a [virtualenv](https://virtualenv.pypa.io):
 ```bash
@@ -65,22 +67,28 @@ $ git init
 ## install dotdrop as a submodule
 $ git submodule add https://github.com/deadc0de6/dotdrop.git
 $ virtualenv -p python3 env
-$ echo 'env' > .gitignore
-$ source env/bin/activate
-$ pip install -r dotdrop/requirements.txt
+$ echo 'env' >> .gitignore
+$ env/bin/pip install -r dotdrop/requirements.txt
 $ ./dotdrop/bootstrap.sh
+
+# add the following in your .bashrc/.zshrc/etc
+# or hardcode it in the dotdrop.sh script
+$ export DOTDROP_VIRTUALENV=env
 
 ## use dotdrop
 $ ./dotdrop.sh --help
 ```
 
-When using a virtualenv, make sure to source the environment before using dotdrop:
+When using a virtualenv, make sure to export the `DOTDROP_VIRTUALENV`
+variable with the directory name of your virtualenv:
 ```bash
-$ source env/bin/activate
+$ export DOTDROP_VIRTUALENV=env
 $ ./dotdrop.sh --help
 ```
 
 Then follow the instructions under [As a submodule](#as-a-submodule).
+
+## Submodule upgrade/downgrade
 
 ### Upgrade dotdrop submodule
 
