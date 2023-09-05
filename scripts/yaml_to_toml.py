@@ -45,8 +45,8 @@ def toml_dump(content):
     return tomli_w.dumps(content)
 
 
-# pylint: disable=C0103
-if __name__ == '__main__':
+def main():
+    """entry point"""
     if len(sys.argv) < 2:
         print(f"usage: {sys.argv[0]} <yaml-config-path>")
         sys.exit(1)
@@ -55,4 +55,7 @@ if __name__ == '__main__':
     data = replace_none(data)
     out = toml_dump(data)
     print(out)
-# pylint: enable=C0103
+
+
+if __name__ == '__main__':
+    main()
