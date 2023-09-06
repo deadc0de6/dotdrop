@@ -123,26 +123,21 @@ def check_links(urls):
     return True
 
 
-def main():
-    """entry point"""
+# pylint: disable=C0103
+if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(f'usage: {sys.argv[0]} <path>')
-        return False
+        sys.exit(1)
 
     print(f'checking {BLUE}{sys.argv[1]}{RESET} for links...')
     links = get_links(sys.argv[1])
     print(f'    found {len(links)} links')
     try:
         if not check_links(links):
-            return False
+            sys.exit(1)
     # pylint: disable=W0703
     except Exception as exc:
         print(f'error {exc}')
-        return False
-    return True
-
-
-if __name__ == '__main__':
-    if main():
-        sys.exit(0)
-    sys.exit(1)
+        sys.exit(1)
+    sys.exit(0)
+# pylint: enable=C0103

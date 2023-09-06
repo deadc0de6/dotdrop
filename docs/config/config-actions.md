@@ -67,10 +67,6 @@ Variables ([config variables and dynvariables](config-file.md#variables)
 and [template variables](../template/template-variables.md)) can be used
 in actions for more advanced use-cases.
 
-Actions accept arguments in the form `{<arg-num>}` which specifies which
-argument to replace in the action.
-
-For example
 ```yaml
 dotfiles:
   f_test:
@@ -92,7 +88,7 @@ actions:
   log: "echo {0} >> {1}"
 config:
   default_actions:
-  - log '{{@@ _dotfile_key @@}} installed' "/tmp/log"
+  - preaction '{{@@ _dotfile_key @@}} installed' "/tmp/log"
 ...
 ```
 
