@@ -620,6 +620,17 @@ def cmd_detail(opts):
     LOG.log('')
 
 
+def cmd_uninstall(opts):
+    paths = opts.uninstall_path
+    iskey = opts.uninstall_iskey
+    prof = opts.conf.get_profile()
+
+    if not paths:
+        # is entire profile
+        # TODO
+    # TODO
+
+
 def cmd_remove(opts):
     """remove dotfile from dotpath and from config"""
     paths = opts.remove_path
@@ -855,6 +866,12 @@ def _exec_command(opts):
             command = 'remove'
             LOG.dbg(f'running cmd: {command}')
             cmd_remove(opts)
+
+        elif opts.cmd_uninstall:
+            # uninstall dotfile
+            command = 'uninstall'
+            LOG.dbg(f'running cmd: {command}')
+            cmd_uninstall(opts)
 
     except UndefinedException as exc:
         LOG.err(exc)
