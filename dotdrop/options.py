@@ -68,6 +68,7 @@ Usage:
   dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
                                  [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
+  dotdrop uninstall [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
   dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
   dotdrop profiles  [-VbG]       [-c <path>]
@@ -340,6 +341,11 @@ class Options(AttrMonitor):
         self.remove_path = self.args['<path>']
         self.remove_iskey = self.args['--key']
 
+    def _apply_args_uninstall(self):
+        """uninstall specifics"""
+        self.uninstall_path = self.args['<path>']
+        self.uninstall_iskey = self.args['--key']
+
     def _apply_args_detail(self):
         """detail specifics"""
         self.detail_keys = self.args['<key>']
@@ -402,6 +408,9 @@ class Options(AttrMonitor):
 
         # "remove" specifics
         self._apply_args_remove()
+
+        # "uninstall" specifics
+        self._apply_args_uninstall()
 
     def _fill_attr(self):
         """create attributes from conf"""
