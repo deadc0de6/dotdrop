@@ -29,6 +29,9 @@ COMMENT_START = '{#@@'
 COMMENT_END = '@@#}'
 LOG = Logger()
 
+DICT_ENV_NAME = 'env'
+DICT_VARS_NAME = '_vars'
+
 
 class Templategen:
     """dotfile templater"""
@@ -62,9 +65,10 @@ class Templategen:
                                undefined=StrictUndefined)
 
         # adding variables
-        self.variables['env'] = os.environ
+        self.variables[DICT_ENV_NAME] = os.environ
         if variables:
             self.variables.update(variables)
+            self.variables[DICT_VARS_NAME] = variables
 
         # adding header method
         self.env.globals['header'] = self._header
