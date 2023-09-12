@@ -55,3 +55,12 @@ This allows for storing host-specific properties and/or secrets in environment v
 It is recommended to use `variables` (see [config variables](../config/config-file.md#variables))
 instead of environment variables unless these contain sensitive information that
 shouldn't be versioned in Git (see [handle secrets doc](../howto/sensitive-dotfiles.md)).
+
+## Variables dictionary
+
+All variables are also available through the dictionary `_vars`
+```
+{%@@ for key in _vars @@%}
+key:{{@@ key @@}} - value:{{@@ _vars[key] @@}}
+{%@@ endfor @@%}
+```
