@@ -288,7 +288,7 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg(f'must ignore? \"{paths}\" against {ignores}',
+        LOG.dbg(f'must ignore? \"{paths}\" against pattern(s): {ignores}',
                 force=True)
     nign, ign = categorize(
         lambda ign: ign.startswith('!'), ignores)
@@ -336,6 +336,9 @@ def copytree_with_ign(src, dst, ignore_func=None, debug=False):
     for entry in os.listdir(src):
         srcf = os.path.join(src, entry)
         dstf = os.path.join(dst, entry)
+        if ignore_func:
+            if ignore_func(srcf):
+                continue
         if os.path.isdir(srcf):
             if debug:
                 LOG.dbg(f'mkdir \"{dstf}\"',

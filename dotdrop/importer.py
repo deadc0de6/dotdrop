@@ -50,14 +50,23 @@ class Importer:
         self.safe = safe
         self.debug = debug
         self.keepdot = keepdot
-        self.ignore = ignore or []
+        self.ignore = []
+        self.log = Logger(debug=self.debug)
+
+        # patch ignore patterns
+        for ign in ignore:
+            if ign.startswith('*/'):
+                self.ignore.append(ign)
+                continue
+            newign = f'*/{ign}'
+            self.log.dbg(f'patching ignore {ign} to {newign}')
+            self.ignore.append(newign)
 
         self.templater = Templategen(variables=self.variables,
                                      base=self.dotpath,
                                      debug=self.debug)
 
         self.umask = get_umask()
-        self.log = Logger(debug=self.debug)
 
     def import_path(self, path, import_as=None,
                     import_link=LinkTypes.NOLINK,
