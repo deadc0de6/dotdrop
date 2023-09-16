@@ -244,9 +244,11 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
             match_ignore_pattern.append(path)
 
     # remove negative match
+    neg_ignore_cnt = 0
     for pattern in neg_ignores:
         # remove '!'
         pattern = pattern[1:]
+        neg_ignore_cnt += 1
         if not _match_ignore_pattern(path, pattern):
             if debug:
                 msg = f'negative ignore \"{pattern}\" NO match: {path}'
@@ -265,7 +267,7 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
             LOG.warn(warn)
     if len(match_ignore_pattern) < 1:
         return False
-    if os.path.isdir(path):
+    if os.path.isdir(path) and neg_ignore_cnt > 0:
         # this ensures whoever calls this function will
         # descend into the directory to explore the possiblity
         # of a file matching the non-ignore pattern
