@@ -22,6 +22,8 @@ class Uninstaller:
         @debug: enable debug
         @backup_suffix: suffix for dotfile backup file
         """
+        # TODO dry
+        # TODO force
         base = os.path.expanduser(base)
         base = os.path.normpath(base)
         self.base = base
@@ -60,27 +62,32 @@ class Uninstaller:
 
         msg = f'uninstalling \"{path}\" (link: {linktype})'
         self.log.dbg(msg)
-        self._remove(path)
+        ret, msg = self._remove(path)
+        if ret:
+            if not self.dry:
+                self.log.sub(f'uninstall {dst}')
+        return ret, msg
 
     def _remove(self, path):
         """remove path"""
         # TODO handle symlink
         backup = f'{path}{self.backup_suffix}'
         if os.path.exists(backup):
+            self.log.dbg(f'backup exists for  {path}: {backup}')
             return self._replace(path, backup)
         try:
             removepath(path, self.log)
         except OSError as exc:
             err = f'removing \"{path}\" failed: {exc}'
             return False, err
+        return True, ''
 
     def _replace(self, path, backup):
         """replace path by backup"""
-        if os.path.isdir(path):
-            # TODO
-            return False, 'TODO'
         try:
+            self.log.dbg(f'mv {backup} {path}')
             os.replace(path, backup)
         except OSError as exc:
             err = f'replacing \"{path}\" by \"{backup}\" failed: {exc}'
             return False, err
+        return True, ''

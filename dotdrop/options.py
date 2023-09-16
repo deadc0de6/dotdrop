@@ -68,7 +68,7 @@ Usage:
   dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
                                  [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
-  dotdrop uninstall [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
+  dotdrop uninstall [-Vbfd]      [-c <path>] [-p <profile>] [<key>...]
   dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
   dotdrop profiles  [-VbG]       [-c <path>]
@@ -343,8 +343,7 @@ class Options(AttrMonitor):
 
     def _apply_args_uninstall(self):
         """uninstall specifics"""
-        self.uninstall_path = self.args['<path>']
-        self.uninstall_iskey = self.args['--key']
+        self.uninstall_key = self.args['<key>']
 
     def _apply_args_detail(self):
         """detail specifics"""
@@ -361,6 +360,7 @@ class Options(AttrMonitor):
         self.cmd_update = self.args['update']
         self.cmd_detail = self.args['detail']
         self.cmd_remove = self.args['remove']
+        self.cmd_uninstall = self.args['uninstall']
 
         # adapt attributes based on arguments
         self.safe = not self.args['--force']
