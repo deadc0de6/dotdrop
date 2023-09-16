@@ -16,6 +16,7 @@ from dotdrop.options import Options
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
+from dotdrop.uninstaller import Uninstaller
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
@@ -621,14 +622,41 @@ def cmd_detail(opts):
 
 
 def cmd_uninstall(opts):
-    paths = opts.uninstall_path
-    iskey = opts.uninstall_iskey
-    prof = opts.conf.get_profile()
+    dotfiles = opts.dotfiles
+    keys = opts.uninstall_key
 
-    if not paths:
-        # is entire profile
-        # TODO
-    # TODO
+    if keys:
+        # update only specific keys for this profile
+        dotfiles = []
+        for key in uniq_list(keys):
+            dotfile = opts.conf.get_dotfile(key)
+            if dotfile:
+                dotfiles.append(dotfile)
+
+    if not dotfiles:
+        msg = f'no dotfile to uninstall for this profile (\"{opts.profile}\")'
+        LOG.warn(msg)
+        return False
+
+    if opts.debug:
+        lfs = [k.key for k in dotfiles]
+        LOG.dbg(f'dotfiles registered for uninstall: {lfs}')
+
+    uninst = Uninstaller(base=opts.dotpath,
+                         workdir=opts.workdir,
+                         dry=opts.dry,
+                         debug=opts.debug,
+                         backup_suffix=opts.install_backup_suffix)
+    uninstalled = 0
+    for df in dotfiles:
+        res, msg = uninst.uninstall(df.src,
+                                    df.dst,
+                                    df.link)
+        if not res:
+            LOG.err(msg)
+            continue
+        uninstalled += 1
+    LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
 
 
 def cmd_remove(opts):
