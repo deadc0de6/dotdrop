@@ -55,6 +55,9 @@ class Importer:
 
         # patch ignore patterns
         for ign in ignore:
+            if ign.startswith('!'):
+                self.ignore.append(ign)
+                continue
             if ign.startswith('*/'):
                 self.ignore.append(ign)
                 continue
