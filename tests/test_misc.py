@@ -10,13 +10,46 @@ basic unittest for misc stuff
 
 import unittest
 from unittest.mock import patch
+from jinja2 import TemplateNotFound
 from dotdrop.profile import Profile
 from dotdrop.linktypes import LinkTypes
+from dotdrop.action import Cmd, Transform
 from dotdrop.templategen import Templategen
 from dotdrop.exceptions import UndefinedException
-from jinja2 import TemplateNotFound
 from tests.helpers import create_random_file, \
     get_tempdir, clean
+
+
+class TestActions(unittest.TestCase):
+    """test case"""
+
+    def test_cmd(self):
+        """test action"""
+        badstring = '{{@@ non-existing-var @@}}'
+        cmd = Cmd('key', badstring)
+        tmpl = Templategen()
+        self.assertFalse(cmd._get_action(tmpl, False))
+
+        cmd.args = [badstring]
+        self.assertFalse(cmd._get_args(tmpl))
+
+    def test_args(self):
+        """test arg parameters"""
+        cmd = Cmd('key', '{0} {1}')
+        cmd.args = ['arg1']
+        self.assertFalse(cmd.execute())
+
+        cmd = Cmd('key', '{0}')
+        cmd.args = ['arg1', 'arg2']
+        self.assertFalse(cmd.execute())
+
+    def test_trans(self):
+        """test trans"""
+        trans = Transform('key', 'value')
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        path, _ = create_random_file(tmpdir)
+        self.assertFalse(trans.transform('', path))
 
 
 class TestTemplateGen(unittest.TestCase):
