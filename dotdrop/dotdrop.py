@@ -645,6 +645,7 @@ def cmd_uninstall(opts):
     uninst = Uninstaller(base=opts.dotpath,
                          workdir=opts.workdir,
                          dry=opts.dry,
+                         safe=opts.safe,
                          debug=opts.debug,
                          backup_suffix=opts.install_backup_suffix)
     uninstalled = 0
