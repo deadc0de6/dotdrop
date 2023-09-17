@@ -144,7 +144,7 @@ class Templategen:
             return self.generate_string(content)
         if isinstance(content, dict):
             return self.generate_dict(content)
-        raise UndefinedError(f'could not template {content}')
+        raise UndefinedException(f'could not template {content}')
 
     def add_tmp_vars(self, newvars=None):
         """add vars to the globals, make sure to call restore_vars"""
