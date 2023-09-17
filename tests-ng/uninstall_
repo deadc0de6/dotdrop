@@ -1,0 +1,135 @@
+################################################################
+# this is the test
+################################################################
+
+# $1 pattern
+# $2 path
+grep_or_fail()
+{
+  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern \"${1}\" not found in ${2}" && exit 1)
+}
+
+# $1: basedir
+# $2: content
+create_hierarchy()
+{
+  echo "${2}" > "${1}"/x
+  mkdir -p "${1}"/y
+  echo "${2}" > "${1}"/y/file
+  mkdir -p "${1}"/y/subdir
+  echo "${2}" > "${1}"/y/subdir/subfile
+}
+
+# $1: basedir
+clean_hierarchy()
+{
+  rm -f "${1}"/x
+  rm -rf "${1}"/y
+}
+
+uninstall_with_link()
+{
+  ddpath="${DOTDROP_TEST_NG_UNINSTALL_DDPATH}"
+  bin="${DOTDROP_TEST_NG_UNINSTALL_BIN}"
+
+  # dotdrop directory
+  basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+  mkdir -p "${basedir}"/dotfiles
+  echo "[+] dotdrop dir: ${basedir}"
+  echo "[+] dotpath dir: ${basedir}/dotfiles"
+  tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+
+  clear_on_exit "${basedir}/dotfiles"
+  clear_on_exit "${tmpd}"
+
+  create_hierarchy "${basedir}/dotfiles" "modified"
+
+  # create the config file
+  cfg="${basedir}/config.yaml"
+  LINK_TYPE="${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE:-nolink}"
+  cat > "${cfg}" << _EOF
+config:
+  backup: true
+  create: true
+  dotpath: dotfiles
+  link_dotfile_default: ${LINK_TYPE}
+dotfiles:
+  f_x:
+    src: x
+    dst: ${tmpd}/x
+  d_y:
+    src: y
+    dst: ${tmpd}/y
+profiles:
+  p1:
+    dotfiles:
+    - f_x
+    - d_y
+_EOF
+
+  #########################
+  ## no original
+  #########################
+
+  # install
+  echo "[+] install (1)"
+  cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 | grep '^2 dotfile(s) installed.$'
+
+  # tests
+  [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
+  [ ! -e "${tmpd}"/y/file ] && echo "d_y not installed" && exit 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y not installed" && exit 1
+  grep_or_fail 'modified' "${tmpd}"/x
+  grep_or_fail 'modified' "${tmpd}"/y/file
+
+  # uninstall
+  echo "[+] uninstall (1)"
+  cd "${ddpath}" | ${bin} uninstall -c "${cfg}" -f -p p1 --verbose
+  [ "$?" != "0" ] && exit 1
+
+  # tests
+  [ ! -d "${basedir}"/dotfiles ] && echo "dotpath removed" && exit 1
+  [ -e "${tmpd}"/x ] && echo "f_x not uninstalled" && exit 1
+  [ -d "${tmpd}"/y ] && echo "d_y dir not uninstalled" && exit 1
+  [ -e "${tmpd}"/y/file ] && echo "d_y file not uninstalled" && exit 1
+  [ -e "${tmpd}"/y/subdir/subfile ] && echo "d_y subfile not uninstalled" && exit 1
+
+  #########################
+  ## with original
+  #########################
+  # clean
+  clean_hierarchy "${tmpd}"
+
+  # recreate
+  create_hierarchy "${tmpd}" "original"
+
+  # install
+  echo "[+] install (2)"
+  cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 | grep '^2 dotfile(s) installed.$'
+
+  # tests
+  [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
+  [ ! -d "${tmpd}"/y ] && echo "d_y not installed" && exit 1
+  [ ! -e "${tmpd}"/y/file ] && echo "d_y file not installed" && exit 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y subfile not installed" && exit 1
+  grep_or_fail 'modified' "${tmpd}"/x
+  grep_or_fail 'modified' "${tmpd}"/y/file
+
+  # uninstall
+  echo "[+] uninstall (2)"
+  cd "${ddpath}" | ${bin} uninstall -c "${cfg}" -f -p p1 --verbose
+  [ "$?" != "0" ] && exit 1
+
+  tree "${tmpd}"
+  # tests
+  [ ! -d "${basedir}"/dotfiles ] && echo "dotpath removed" && exit 1
+  [ ! -e "${tmpd}"/x ] && echo "f_x backup not restored" && exit 1
+  [ -e "${tmpd}"/x.dotdropbak ] && echo "f_x backup not removed" && exit 1
+  [ ! -d "${tmpd}"/y ] && echo "d_y backup not restored" && exit 1
+  [ ! -e "${tmpd}"/y/file ] && echo "d_y backup not restored" && exit 1
+  [ -e "${tmpd}"/y/file.dotdropbak ] && echo "d_y backup not removed" && exit 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y sub backup not restored" && exit 1
+  [ -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "d_y sub backup not removed" && exit 1
+  grep_or_fail 'original' "${tmpd}"/x
+  grep_or_fail 'original' "${tmpd}"/y/file
+}
