@@ -107,7 +107,9 @@ def check_links(urls):
         except Exception:
             ret = 404
         if ret == 403 and hostname in OK_WHEN_FORBIDDEN:
-            print(f'    [{GREEN}OK-although-{ret}{RESET}] {MAGENTA}{url}{RESET}')
+            msg = f'    [{GREEN}OK-although-{ret}{RESET}]'
+            msg += f' {MAGENTA}{url}{RESET}'
+            print(msg)
             continue
         if ret not in VALID_RET:
             msg = (
