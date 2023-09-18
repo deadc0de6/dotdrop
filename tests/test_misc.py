@@ -8,16 +8,116 @@ basic unittest for misc stuff
 # pylint: disable=W0231
 # pylint: disable=W0212
 
+import os
+import sys
 import unittest
+from io import StringIO
 from unittest.mock import patch
 from jinja2 import TemplateNotFound
 from dotdrop.profile import Profile
+from dotdrop.importer import Importer
 from dotdrop.linktypes import LinkTypes
 from dotdrop.action import Cmd, Transform
 from dotdrop.templategen import Templategen
-from dotdrop.exceptions import UndefinedException
+from dotdrop.exceptions import UndefinedException, \
+    UnmetDependency
+from dotdrop.utils import removepath, samefile, \
+    content_empty, _match_ignore_pattern, \
+    get_module_from_path, dependencies_met
 from tests.helpers import create_random_file, \
     get_tempdir, clean
+
+
+class TestUtils(unittest.TestCase):
+    """test case"""
+
+    def test_removepath(self):
+        """test removepath"""
+        removepath('')
+        with self.assertRaises(OSError):
+            removepath('/abc')
+        with self.assertRaises(OSError):
+            removepath(os.path.expanduser('~'))
+
+    def test_misc(self):
+        """misc test"""
+        self.assertFalse(samefile('', ''))
+        self.assertTrue(content_empty(b'\n'))
+        self.assertTrue(_match_ignore_pattern('', '', debug=True))
+        self.assertEqual(get_module_from_path(None), None)
+
+    def test_dependencies_met(self):
+        """dependencies met"""
+        oimport = __import__
+
+        def prepare_import_mock(keywords):
+            def import_mock(name, *args):
+                if name in keywords:
+                    raise ImportError
+                return oimport(name, *args)
+            return import_mock
+
+        # with self.assertRaises(UnmetDependency):
+        #     with patch('builtins.__import__',
+        #                side_effect=prepare_import_mock(
+        #                    ['magic', 'python-magic'])
+        #                ):
+        #         dependencies_met()
+
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['docopt'])):
+                dependencies_met()
+
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['jinja2'])):
+                dependencies_met()
+
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['ruamel.yaml'])):
+                dependencies_met()
+
+        orig = sys.version_info
+        sys.version_info = (3, 10)
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['tomli'])):
+                dependencies_met()
+        sys.version_info = orig
+
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['tomli_w'])):
+                dependencies_met()
+
+        with self.assertRaises(UnmetDependency):
+            with patch('builtins.__import__',
+                       side_effect=prepare_import_mock(['distro'])):
+                dependencies_met()
+
+
+class TestImporter(unittest.TestCase):
+    """test case"""
+
+    @patch('sys.stdin', StringIO('y\n'))
+    def test_generic(self):
+        """test importer"""
+        with self.assertRaises(UndefinedException):
+            Importer('', None, '', '', {})
+
+        imp = Importer('profile', None, '', '', {})
+        self.assertEqual(imp.import_path('/abc'), -1)
+
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        path1, _ = create_random_file(tmpdir, content='left')
+        path2, _ = create_random_file(tmpdir, content='right')
+        imp.safe = True
+        self.assertTrue(imp._check_existing_dotfile(path1, path2))
+        path2, _ = create_random_file(tmpdir, content='left')
+        self.assertTrue(imp._check_existing_dotfile(path1, path2))
 
 
 class TestActions(unittest.TestCase):
