@@ -54,16 +54,17 @@ class Importer:
         self.log = Logger(debug=self.debug)
 
         # patch ignore patterns
-        for ign in ignore:
-            if ign.startswith('!'):
-                self.ignore.append(ign)
-                continue
-            if ign.startswith('*/'):
-                self.ignore.append(ign)
-                continue
-            newign = f'*/{ign}'
-            self.log.dbg(f'patching ignore {ign} to {newign}')
-            self.ignore.append(newign)
+        if ignore:
+            for ign in ignore:
+                if ign.startswith('!'):
+                    self.ignore.append(ign)
+                    continue
+                if ign.startswith('*/'):
+                    self.ignore.append(ign)
+                    continue
+                newign = f'*/{ign}'
+                self.log.dbg(f'patching ignore {ign} to {newign}')
+                self.ignore.append(newign)
 
         self.templater = Templategen(variables=self.variables,
                                      base=self.dotpath,
