@@ -119,6 +119,16 @@ class TestImporter(unittest.TestCase):
         path2, _ = create_random_file(tmpdir, content='left')
         self.assertTrue(imp._check_existing_dotfile(path1, path2))
 
+    def test_apply_trans(self):
+        """test apply_trans"""
+        trans = Transform('key', 'value')
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        path, _ = create_random_file(tmpdir)
+
+        imp = Importer('profile', None, '', '', {})
+        self.assertEqual(imp._apply_trans_w(path, trans), None)
+
 
 class TestActions(unittest.TestCase):
     """test case"""
