@@ -1,12 +1,27 @@
+#!/usr/bin/env bash
+# author: deadc0de6 (https://github.com/deadc0de6)
+# Copyright (c) 2023, deadc0de6
+#
+# returns 1 in case of error
+#
+
 ################################################################
 # this is the test
 ################################################################
+
+set -e
+
+ddpath="${DOTDROP_TEST_NG_UNINSTALL_DDPATH}"
+bin="${DOTDROP_TEST_NG_UNINSTALL_BIN}"
+LINK_TYPE="${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE:-nolink}"
+PRE="[link:${LINK_TYPE}]"
+PRO_TEMPL="{{@@ profile @@}}"
 
 # $1 pattern
 # $2 path
 grep_or_fail()
 {
-  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "pattern \"${1}\" not found in ${2}" && exit 1)
+  grep "${1}" "${2}" >/dev/null 2>&1 || (echo "${PRE} pattern \"${1}\" not found in ${2}" && return 1)
 }
 
 # $1: basedir
@@ -18,6 +33,11 @@ create_hierarchy()
   echo "${2}" > "${1}"/y/file
   mkdir -p "${1}"/y/subdir
   echo "${2}" > "${1}"/y/subdir/subfile
+  echo "profile: ${PRO_TEMPL}" > "${1}"/t
+  mkdir -p "${1}"/z
+  echo "profile t1: ${PRO_TEMPL}" > "${1}"/z/t1
+  echo "profile t2: ${PRO_TEMPL}" > "${1}"/z/t2
+  echo "${2}" > "${1}"/z/file
 }
 
 # $1: basedir
@@ -25,34 +45,35 @@ clean_hierarchy()
 {
   rm -f "${1}"/x
   rm -rf "${1}"/y
+  rm -f "${1}/"t
+  rm -rf "${1}"/z
 }
 
 uninstall_with_link()
 {
-  ddpath="${DOTDROP_TEST_NG_UNINSTALL_DDPATH}"
-  bin="${DOTDROP_TEST_NG_UNINSTALL_BIN}"
-
   # dotdrop directory
   basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
   mkdir -p "${basedir}"/dotfiles
   echo "[+] dotdrop dir: ${basedir}"
   echo "[+] dotpath dir: ${basedir}/dotfiles"
   tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+  tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
 
-  clear_on_exit "${basedir}/dotfiles"
-  clear_on_exit "${tmpd}"
+  clear_on_return "${basedir}/dotfiles"
+  clear_on_return "${tmpd}"
+  clear_on_return "${tmpw}"
 
   create_hierarchy "${basedir}/dotfiles" "modified"
 
   # create the config file
   cfg="${basedir}/config.yaml"
-  LINK_TYPE="${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE:-nolink}"
   cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
   link_dotfile_default: ${LINK_TYPE}
+  workdir: ${tmpw}
 dotfiles:
   f_x:
     src: x
@@ -60,11 +81,19 @@ dotfiles:
   d_y:
     src: y
     dst: ${tmpd}/y
+  f_t:
+    src: t
+    dst: ${tmpd}/t
+  d_z:
+    src: z
+    dst: ${tmpd}/z
 profiles:
   p1:
     dotfiles:
     - f_x
     - d_y
+    - f_t
+    - d_z
 _EOF
 
   #########################
@@ -73,26 +102,45 @@ _EOF
 
   # install
   echo "[+] install (1)"
-  cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 | grep '^2 dotfile(s) installed.$'
+  ( \
+    cd "${ddpath}" && ${bin} install -c "${cfg}" -f -p p1 | grep '^4 dotfile(s) installed.$' \
+  )
 
   # tests
-  [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
-  [ ! -e "${tmpd}"/y/file ] && echo "d_y not installed" && exit 1
-  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y not installed" && exit 1
+  [ ! -e "${tmpd}"/x ] && echo "${PRE} f_x not installed" && return 1
+  [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y not installed" && return 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y not installed" && return 1
+  [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not installed" && return 1
+  [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not installed" && return 1
+  [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not installed" && return 1
+  [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not installed" && return 1
   grep_or_fail 'modified' "${tmpd}"/x
   grep_or_fail 'modified' "${tmpd}"/y/file
+  grep_or_fail 'profile: p1' "${tmpd}"/t
+  grep_or_fail 'profile t1: p1' "${tmpd}"/z/t1
+  grep_or_fail 'profile t2: p1' "${tmpd}"/z/t2
+  grep_or_fail 'modified' "${tmpd}"/z/file
 
   # uninstall
   echo "[+] uninstall (1)"
-  cd "${ddpath}" | ${bin} uninstall -c "${cfg}" -f -p p1 --verbose
-  [ "$?" != "0" ] && exit 1
+  ( \
+    cd "${ddpath}" && ${bin} uninstall -c "${cfg}" -f -p p1 --verbose \
+  )
+  [ "$?" != "0" ] && return 1
 
   # tests
-  [ ! -d "${basedir}"/dotfiles ] && echo "dotpath removed" && exit 1
-  [ -e "${tmpd}"/x ] && echo "f_x not uninstalled" && exit 1
-  [ -d "${tmpd}"/y ] && echo "d_y dir not uninstalled" && exit 1
-  [ -e "${tmpd}"/y/file ] && echo "d_y file not uninstalled" && exit 1
-  [ -e "${tmpd}"/y/subdir/subfile ] && echo "d_y subfile not uninstalled" && exit 1
+  [ ! -d "${basedir}"/dotfiles ] && echo "${PRE} dotpath removed" && return 1
+  [ -e "${tmpd}"/x ] && echo "${PRE} f_x not uninstalled" && return 1
+  [ -d "${tmpd}"/y ] && echo "${PRE} d_y dir not uninstalled" && return 1
+  [ -e "${tmpd}"/y/file ] && echo "${PRE} d_y file not uninstalled" && return 1
+  [ -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y subfile not uninstalled" && return 1
+  [ -e "${tmpd}"/t ] && echo "${PRE} f_t not uninstalled" && return 1
+  [ -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z subfile t1 not uninstalled" && return 1
+  [ -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z subfile t2 not uninstalled" && return 1
+  [ -e "${tmpd}"/z/file ] && echo "${PRE} d_z subfile file not uninstalled" && return 1
+
+  # test workdir is empty
+  [ -z "$(ls -A "${tmpw}")" ] && (echo "${PRE} workdir (1) is not empty"; ls -r "${tmpw}"; return 1)
 
   #########################
   ## with original
@@ -105,31 +153,67 @@ _EOF
 
   # install
   echo "[+] install (2)"
-  cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 | grep '^2 dotfile(s) installed.$'
+  cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 | grep '^4 dotfile(s) installed.$'
 
   # tests
-  [ ! -e "${tmpd}"/x ] && echo "f_x not installed" && exit 1
-  [ ! -d "${tmpd}"/y ] && echo "d_y not installed" && exit 1
-  [ ! -e "${tmpd}"/y/file ] && echo "d_y file not installed" && exit 1
-  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y subfile not installed" && exit 1
+  [ ! -e "${tmpd}"/x ] && echo "${PRE} f_x not installed" && return 1
+  [ ! -d "${tmpd}"/y ] && echo "${PRE} d_y not installed" && return 1
+  [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y file not installed" && return 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y subfile not installed" && return 1
+  [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not installed" && return 1
+  [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not installed" && return 1
+  [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not installed" && return 1
+  [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not installed" && return 1
   grep_or_fail 'modified' "${tmpd}"/x
   grep_or_fail 'modified' "${tmpd}"/y/file
+  grep_or_fail 'profile: p1' "${tmpd}"/t
+  grep_or_fail 'profile t1: p1' "${tmpd}"/z/t1
+  grep_or_fail 'profile t2: p1' "${tmpd}"/z/t2
+  grep_or_fail 'modified' "${tmpd}"/z/file
 
   # uninstall
   echo "[+] uninstall (2)"
-  cd "${ddpath}" | ${bin} uninstall -c "${cfg}" -f -p p1 --verbose
-  [ "$?" != "0" ] && exit 1
+  ( \
+    cd "${ddpath}" && ${bin} uninstall -c "${cfg}" -f -p p1 --verbose \
+  )
+  [ "$?" != "0" ] && return 1
 
-  tree "${tmpd}"
   # tests
-  [ ! -d "${basedir}"/dotfiles ] && echo "dotpath removed" && exit 1
-  [ ! -e "${tmpd}"/x ] && echo "f_x backup not restored" && exit 1
-  [ -e "${tmpd}"/x.dotdropbak ] && echo "f_x backup not removed" && exit 1
-  [ ! -d "${tmpd}"/y ] && echo "d_y backup not restored" && exit 1
-  [ ! -e "${tmpd}"/y/file ] && echo "d_y backup not restored" && exit 1
-  [ -e "${tmpd}"/y/file.dotdropbak ] && echo "d_y backup not removed" && exit 1
-  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "d_y sub backup not restored" && exit 1
-  [ -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "d_y sub backup not removed" && exit 1
+  [ ! -d "${basedir}"/dotfiles ] && echo "${PRE} dotpath removed" && return 1
+  [ ! -e "${tmpd}"/x ] && echo "${PRE} f_x backup not restored" && return 1
+  [ -e "${tmpd}"/x.dotdropbak ] && echo "${PRE} f_x backup not removed" && return 1
+  [ ! -d "${tmpd}"/y ] && echo "${PRE} d_y backup not restored" && return 1
+  [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y backup not restored" && return 1
+  [ -e "${tmpd}"/y/file.dotdropbak ] && echo "${PRE} d_y backup not removed" && return 1
+  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y sub backup not restored" && return 1
+  [ -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "${PRE} d_y sub backup not removed" && return 1
+
+  [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not restored" && return 1
+  [ -e "${tmpd}"/t.dotdropback ] && echo "${PRE} f_t backup not removed" && return 1
+  [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not restore" && return 1
+  [ -e "${tmpd}"/z/t1.dotdropback ] && echo "${PRE} d_z t1 backup not removed" && return 1
+  [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not restored" && return 1
+  [ -e "${tmpd}"/z/t2.dotdropback ] && echo "${PRE} d_z t2 backup not removed" && return 1
+  [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not restored" && return 1
+  [ -e "${tmpd}"/z/file.dotdropbak ] && echo "${PRE} d_z file backup not removed" && return 1
+
   grep_or_fail 'original' "${tmpd}"/x
   grep_or_fail 'original' "${tmpd}"/y/file
+  grep_or_fail "profile: ${PRO_TEMPL}" "${tmpd}/t"
+  grep_or_fail "profile t1: ${PRO_TEMPL}" "${tmpd}/z/t1"
+  grep_or_fail "profile t2: ${PRO_TEMPL}" "${tmpd}/z/t2"
+  grep_or_fail 'original' "${tmpd}"/z/file
+
+  echo "testing workdir..."
+
+  # test workdir is empty
+  [ -n "$(ls -A "${tmpw}")" ] && ( \
+    echo "${PRE} workdir (2) - ${tmpw} - is not empty"; \
+    ls -r "${tmpw}"; \
+    return 1; \
+  )
+
+  echo "${PRE} done OK"
+
+  return 0
 }
