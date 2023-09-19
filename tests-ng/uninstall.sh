@@ -31,29 +31,26 @@ source "${cur}"/uninstall_
 
 export DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE="nolink"
 echo "[+] testing uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE}..."
-uninstall_with_link
-echo "[+] uninstall link ${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
+uninstall_with_link || exit 1
+echo "[+] uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
 
 export DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE="absolute"
 echo "[+] testing uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE}..."
-uninstall_with_link
-echo "[+] uninstall link ${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
+uninstall_with_link || exit 1
+echo "[+] uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
 
 export DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE="relative"
 echo "[+] testing uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE}..."
-uninstall_with_link
-echo "[+] uninstall link ${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
+uninstall_with_link || exit 1
+echo "[+] uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
 
 export DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE="link_children"
 echo "[+] testing uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE}..."
-uninstall_with_link
-echo "[+] uninstall link ${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
+uninstall_with_link || exit 1
+echo "[+] uninstall link:${DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE} OK"
 
 # TODO test
-# - symlink file (absolute, relative)
-# - symlink directory (absolute, relative, link_children)
 # - transformation
-# - template
 
 echo "OK"
 exit 0

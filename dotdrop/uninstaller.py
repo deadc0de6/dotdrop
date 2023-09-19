@@ -74,21 +74,26 @@ class Uninstaller:
 
     def _descend(self, dirpath):
         ret = True
-        for root, dirs, files in os.walk(dirpath):
-            for file in files:
-                fpath = os.path.join(root, file)
-                subret, _ = self._remove(fpath)
+        self.log.dbg(f'recursively uninstall {dirpath}')
+        for sub in os.listdir(dirpath):
+            subpath = os.path.join(dirpath, sub)
+            if os.path.isdir(subpath):
+                self.log.dbg(f'under {dirpath} uninstall dir {subpath}')
+                self._descend(subpath)
+            else:
+                self.log.dbg(f'under {dirpath} uninstall file {subpath}')
+                subret, _ = self._remove(subpath)
                 if not subret:
                     ret = False
-            for directory in dirs:
-                dpath = os.path.join(root, directory)
-                self._descend(dpath)
+
         if not os.listdir(dirpath):
             # empty
+            self.log.dbg(f'remove empty dir {dirpath}')
             if self.dry:
                 self.log.dry(f'would \"rm -r {dirpath}\"')
                 return True, ''
             return self._remove_path(dirpath)
+        self.log.dbg(f'not removing non-empty dir {dirpath}')
         return ret, ''
 
     def _remove_path(self, path):
@@ -108,10 +113,11 @@ class Uninstaller:
             self.log.dbg(f'skip {path} ignored')
             return True, ''
         backup = f'{path}{self.backup_suffix}'
-        self.log.dbg(f'potential backup file {backup}')
         if os.path.exists(backup):
-            self.log.dbg(f'backup exists for  {path}: {backup}')
+            self.log.dbg(f'backup exists for {path}: {backup}')
             return self._replace(path, backup)
+        else:
+            self.log.dbg(f'no backup file for {path}')
 
         if os.path.isdir(path):
             self.log.dbg(f'{path} is a directory')
@@ -124,6 +130,7 @@ class Uninstaller:
         msg = f'Remove {path}?'
         if self.safe and not self.log.ask(msg):
             return False, 'user refused'
+        self.log.dbg(f'removing {path}')
         return self._remove_path(path)
 
     def _replace(self, path, backup):
