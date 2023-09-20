@@ -107,7 +107,6 @@ class Uninstaller:
 
     def _remove(self, path):
         """remove path"""
-        # TODO handle symlink
         self.log.dbg(f'handling uninstall of {path}')
         if path.endswith(self.backup_suffix):
             self.log.dbg(f'skip {path} ignored')
@@ -116,8 +115,7 @@ class Uninstaller:
         if os.path.exists(backup):
             self.log.dbg(f'backup exists for {path}: {backup}')
             return self._replace(path, backup)
-        else:
-            self.log.dbg(f'no backup file for {path}')
+        self.log.dbg(f'no backup file for {path}')
 
         if os.path.isdir(path):
             self.log.dbg(f'{path} is a directory')

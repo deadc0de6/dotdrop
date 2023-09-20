@@ -27,6 +27,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 ################################################################
 export DOTDROP_TEST_NG_UNINSTALL_DDPATH="${ddpath}"
 export DOTDROP_TEST_NG_UNINSTALL_BIN="${bin}"
+# shellcheck source=uninstall_
 source "${cur}"/uninstall_
 
 export DOTDROP_TEST_NG_UNINSTALL_LINK_TYPE="nolink"

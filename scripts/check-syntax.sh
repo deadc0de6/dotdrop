@@ -38,10 +38,12 @@ pyflakes --version
 # checking for TODO/FIXME
 echo "--------------------------------------"
 echo "checking for TODO/FIXME"
-grep -rv 'TODO\|FIXME' dotdrop/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' tests/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' tests-ng/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' scripts/ >/dev/null 2>&1
+set +e
+grep -r 'TODO\|FIXME' dotdrop/ && exit 1
+grep -r 'TODO\|FIXME' tests/ && exit 1
+grep -r 'TODO\|FIXME' tests-ng/ && exit 1
+#grep -r 'TODO\|FIXME' scripts/ && exit 1
+set -e
 
 # checking for tests options
 echo "---------------------------------"
