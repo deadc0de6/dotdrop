@@ -620,6 +620,7 @@ def cmd_detail(opts):
 
 
 def cmd_uninstall(opts):
+    """uninstall"""
     dotfiles = opts.dotfiles
     keys = opts.uninstall_key
 
@@ -647,15 +648,16 @@ def cmd_uninstall(opts):
                          debug=opts.debug,
                          backup_suffix=opts.install_backup_suffix)
     uninstalled = 0
-    for df in dotfiles:
-        res, msg = uninst.uninstall(df.src,
-                                    df.dst,
-                                    df.link)
+    for dotf in dotfiles:
+        res, msg = uninst.uninstall(dotf.src,
+                                    dotf.dst,
+                                    dotf.link)
         if not res:
             LOG.err(msg)
             continue
         uninstalled += 1
     LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
+    return True
 
 
 def cmd_remove(opts):
