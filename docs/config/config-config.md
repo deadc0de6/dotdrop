@@ -4,7 +4,7 @@ The **config** entry (mandatory) contains global settings.
 
 Entry    | Description | Default
 -------- | ------------- | ------------
-`backup` | Create a backup of the dotfile in case it differs from the one that will be installed by dotdrop  | true
+`backup` | Create a backup of the existing destination; see [backup entry](config-config.md#backup-entry)) | true
 `banner` | Display the banner  | true
 `check_version` | Check if a new version of dotdrop is available on github | false
 `chmod_on_import` | Always add a chmod entry on newly imported dotfiles (see `--preserve-mode`) | false
@@ -213,3 +213,15 @@ profiles:
     dotfiles:
     - f_vimrc
 ```
+
+## backup entry
+
+When set to `true`, existing files that would be replaced
+by a dotdrop `install`, are backed up with the
+extension `.dotdropbak` if their content differ.
+
+Note:
+* directories will **not** be backed up, only files
+* when using a different `link` value than `nolink` with directories,
+  the files under the directory will **not** be backed up
+  (See [Symlinking dotfiles](config-file.md#symlinking-dotfiles)),
