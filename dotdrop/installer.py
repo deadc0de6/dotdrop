@@ -563,6 +563,7 @@ class Installer:
         content = None
         if is_template:
             # template the file
+            self.log.dbg(f'it is a template: {src}')
             saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
             try:
                 content = templater.generate(src)
@@ -689,6 +690,7 @@ class Installer:
 
         if os.path.lexists(dst):
             # file/symlink exists
+            self.log.dbg(f'file already exists on filesystem: {dst}')
             try:
                 os.stat(dst)
             except OSError as exc:
@@ -714,6 +716,8 @@ class Installer:
 
             if self.backup:
                 self._backup(dst)
+        else:
+            self.log.dbg(f'file does not exist on filesystem: {dst}')
 
         # create hierarchy
         base = os.path.dirname(dst)
