@@ -477,6 +477,8 @@ class Installer:
                 return False, 'aborted'
 
             # remove symlink
+            if self.backup and not os.path.isdir(dst):
+                self._backup(dst)
             overwrite = True
             try:
                 removepath(dst)

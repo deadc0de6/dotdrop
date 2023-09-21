@@ -151,7 +151,6 @@ grep_or_fail original "${tmpd}"/tree/file.dotdropbak
 grep_or_fail original "${tmpd}"/tree/template.dotdropbak
 grep_or_fail original "${tmpd}"/tree/sub/file.dotdropbak
 grep_or_fail original "${tmpd}"/tree/sub/template.dotdropbak
-grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail p1 "${tmpd}"/template
 grep_or_fail modified "${tmpd}"/dir/sub
 grep_or_fail p1 "${tmpd}"/dir/template
@@ -167,28 +166,13 @@ clear_dotpath
 clear_fs
 create_dotpath
 create_fs
-tree "${tmps}"/dotfiles
-tree "${tmpd}"
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
 [ ! -e "${tmpd}"/file.dotdropbak ] && echo "${pre} file backup not found" && exit 1
 [ ! -e "${tmpd}"/template.dotdropbak ] && echo "${pre} template backup not found" && exit 1
-[ ! -e "${tmpd}"/dir/sub.dotdropbak ] && echo "${pre} dir sub backup not found" && exit 1
-[ ! -e "${tmpd}"/dir/template.dotdropbak ] && echo "${pre} dir template backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/file.dotdropbak ] && echo "${pre} tree file backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/template.dotdropbak ] && echo "${pre} tree template backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/file.dotdropbak ] && echo "${pre} tree sub file backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/template.dotdropbak ] && echo "${pre} tree sub template backup not found" && exit 1
 grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail original "${tmpd}"/template.dotdropbak
-grep_or_fail original "${tmpd}"/dir/sub.dotdropbak
-grep_or_fail original "${tmpd}"/dir/template.dotdropbak
-grep_or_fail original "${tmpd}"/tree/file.dotdropbak
-grep_or_fail original "${tmpd}"/tree/template.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/file.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/template.dotdropbak
-grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail p1 "${tmpd}"/template
 grep_or_fail modified "${tmpd}"/dir/sub
 grep_or_fail p1 "${tmpd}"/dir/template
@@ -209,21 +193,8 @@ cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 # checks
 [ ! -e "${tmpd}"/file.dotdropbak ] && echo "${pre} file backup not found" && exit 1
 [ ! -e "${tmpd}"/template.dotdropbak ] && echo "${pre} template backup not found" && exit 1
-[ ! -e "${tmpd}"/dir/sub.dotdropbak ] && echo "${pre} dir sub backup not found" && exit 1
-[ ! -e "${tmpd}"/dir/template.dotdropbak ] && echo "${pre} dir template backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/file.dotdropbak ] && echo "${pre} tree file backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/template.dotdropbak ] && echo "${pre} tree template backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/file.dotdropbak ] && echo "${pre} tree sub file backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/template.dotdropbak ] && echo "${pre} tree sub template backup not found" && exit 1
 grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail original "${tmpd}"/template.dotdropbak
-grep_or_fail original "${tmpd}"/dir/sub.dotdropbak
-grep_or_fail original "${tmpd}"/dir/template.dotdropbak
-grep_or_fail original "${tmpd}"/tree/file.dotdropbak
-grep_or_fail original "${tmpd}"/tree/template.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/file.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/template.dotdropbak
-grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail p1 "${tmpd}"/template
 grep_or_fail modified "${tmpd}"/dir/sub
 grep_or_fail p1 "${tmpd}"/dir/template
@@ -258,7 +229,6 @@ grep_or_fail original "${tmpd}"/tree/file.dotdropbak
 grep_or_fail original "${tmpd}"/tree/template.dotdropbak
 grep_or_fail original "${tmpd}"/tree/sub/file.dotdropbak
 grep_or_fail original "${tmpd}"/tree/sub/template.dotdropbak
-grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail p1 "${tmpd}"/template
 grep_or_fail modified "${tmpd}"/dir/sub
 grep_or_fail p1 "${tmpd}"/dir/template
