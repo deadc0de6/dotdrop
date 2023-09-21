@@ -30,7 +30,7 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 grep_or_fail()
 {
   if ! grep "${1}" "${2}" >/dev/null 2>&1; then
-    echo "pattern not found in ${2}"
+    echo "pattern \"${1}\" not found in ${2}"
     exit 1
   fi
 }
