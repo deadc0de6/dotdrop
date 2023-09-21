@@ -80,7 +80,7 @@ create_fs()
 {
   # create the existing dotfiles in filesystem
   echo "original" > "${tmpd}"/file
-  echo "original" > "${tmps}"/dotfiles/template
+  echo "original" > "${tmpd}"/template
   mkdir -p "${tmpd}"/dir
   echo "original" > "${tmpd}"/dir/sub
   echo "original" > "${tmpd}"/dir/template
