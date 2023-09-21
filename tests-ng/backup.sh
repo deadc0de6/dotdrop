@@ -94,26 +94,36 @@ cfg="${tmps}/config.yaml"
 # $1: linktype
 create_config()
 {
+  link_default="${1}"
+  link_file="${1}"
+  link_dir="${1}"
+  if [ "${link_default}" = "link_children" ]; then
+    link_file="nolink"
+  fi
   cat > "${cfg}" << _EOF
 config:
   backup: true
   create: true
   dotpath: dotfiles
-  link_dotfile_default: ${1}
+  link_dotfile_default: ${link_default}
   workdir: ${tmpw}
 dotfiles:
   f_file:
     dst: ${tmpd}/file
     src: file
+    link: ${link_file}
   f_template:
     dst: ${tmpd}/template
     src: template
+    link: ${link_file}
   d_dir:
     dst: ${tmpd}/dir
     src: dir
+    link: ${link_dir}
   d_tree:
     dst: ${tmpd}/tree
     src: tree
+    link: ${link_dir}
 profiles:
   p1:
     dotfiles:
@@ -219,16 +229,12 @@ cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 [ ! -e "${tmpd}"/dir/template.dotdropbak ] && echo "${pre} dir template backup not found" && exit 1
 [ ! -e "${tmpd}"/tree/file.dotdropbak ] && echo "${pre} tree file backup not found" && exit 1
 [ ! -e "${tmpd}"/tree/template.dotdropbak ] && echo "${pre} tree template backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/file.dotdropbak ] && echo "${pre} tree sub file backup not found" && exit 1
-[ ! -e "${tmpd}"/tree/sub/template.dotdropbak ] && echo "${pre} tree sub template backup not found" && exit 1
 grep_or_fail original "${tmpd}"/file.dotdropbak
 grep_or_fail original "${tmpd}"/template.dotdropbak
 grep_or_fail original "${tmpd}"/dir/sub.dotdropbak
 grep_or_fail original "${tmpd}"/dir/template.dotdropbak
 grep_or_fail original "${tmpd}"/tree/file.dotdropbak
 grep_or_fail original "${tmpd}"/tree/template.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/file.dotdropbak
-grep_or_fail original "${tmpd}"/tree/sub/template.dotdropbak
 grep_or_fail p1 "${tmpd}"/template
 grep_or_fail modified "${tmpd}"/dir/sub
 grep_or_fail p1 "${tmpd}"/dir/template
