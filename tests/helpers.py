@@ -148,6 +148,7 @@ def _fake_args():
     args['profiles'] = False
     args['files'] = False
     args['install'] = False
+    args['uninstall'] = False
     args['compare'] = False
     args['import'] = False
     args['update'] = False
