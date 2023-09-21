@@ -36,20 +36,19 @@ grep_or_fail()
 }
 
 # the dotfile source
-tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+tmps=$(mktemp -d --suffix='-dotdrop-tests-dotpath' || mktemp -d)
 mkdir -p "${tmps}"/dotfiles
 # the dotfile destination
-tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+tmpd=$(mktemp -d --suffix='-dotdrop-tests-dst' || mktemp -d)
+tmpw=$(mktemp -d --suffix='-dotdrop-workdir' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmpw}"
 
 clear_dotpath()
 {
-  rm -f "${tmps}"/dotfiles/file
-  rm -f "${tmps}"/dotfiles/template
-  rm -rf "${tmps}"/dotfiles/dir
-  rm -rf "${tmps}"/dotfiles/tree
+  rm -rf "${tmps:?}"/dotfiles/*
 }
 
 create_dotpath()
@@ -70,10 +69,7 @@ create_dotpath()
 
 clear_fs()
 {
-  rm -f "${tmpd}"/file
-  rm -f "${tmpd}"/template
-  rm -rf "${tmpd}"/dir
-  rm -rf "${tmpd}"/tree
+  rm -rf "${tmpd:?}"/*
 }
 
 create_fs()
@@ -104,6 +100,7 @@ config:
   create: true
   dotpath: dotfiles
   link_dotfile_default: ${1}
+  workdir: ${tmpw}
 dotfiles:
   f_file:
     dst: ${tmpd}/file
@@ -129,7 +126,7 @@ _EOF
 }
 
 # install nolink
-pre="nolink"
+pre="link:nolink"
 create_config "nolink"
 clear_dotpath
 clear_fs
@@ -164,12 +161,14 @@ grep_or_fail modified "${tmpd}"/tree/sub/file
 grep_or_fail p1 "${tmpd}"/tree/sub/template
 
 # install relative
-pre="relative"
+pre="link:relative"
 create_config "relative"
 clear_dotpath
 clear_fs
 create_dotpath
 create_fs
+tree "${tmps}"/dotfiles
+tree "${tmpd}"
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
@@ -199,7 +198,7 @@ grep_or_fail modified "${tmpd}"/tree/sub/file
 grep_or_fail p1 "${tmpd}"/tree/sub/template
 
 # install absolute
-pre="absolute"
+pre="link:absolute"
 create_config "absolute"
 clear_dotpath
 clear_fs
@@ -234,7 +233,7 @@ grep_or_fail modified "${tmpd}"/tree/sub/file
 grep_or_fail p1 "${tmpd}"/tree/sub/template
 
 # install link_children
-pre="link_children"
+pre="link:link_children"
 create_config "link_children"
 clear_dotpath
 clear_fs
