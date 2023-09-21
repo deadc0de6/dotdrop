@@ -30,7 +30,10 @@ VALID_RET = [
     302,
 ]
 IGNORES = [
-  'badgen.net',
+    'badgen.net',
+]
+OK_WHEN_FORBIDDEN = [
+    'linux.die.net'
 ]
 IGNORE_GENERIC = []
 USER_AGENT = (
@@ -103,6 +106,11 @@ def check_links(urls):
         # pylint: disable=W0703
         except Exception:
             ret = 404
+        if ret == 403 and hostname in OK_WHEN_FORBIDDEN:
+            msg = f'    [{GREEN}OK-although-{ret}{RESET}]'
+            msg += f' {MAGENTA}{url}{RESET}'
+            print(msg)
+            continue
         if ret not in VALID_RET:
             msg = (
                 f'    {YELLOW}[WARN]{RESET} HEAD {url} returned {ret}'
