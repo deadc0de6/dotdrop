@@ -175,6 +175,8 @@ def removepath(path, logger=None):
             return
         LOG.err(err)
         raise OSError(err)
+    if logger:
+        logger.dbg(f'removing {path}')
     try:
         if os.path.islink(path) or os.path.isfile(path):
             os.unlink(path)
