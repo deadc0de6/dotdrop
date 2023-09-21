@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2023, deadc0de6
 
 # stop on first error
-set -e
+set -euo errtrace pipefail
 
 tmpworkdir="/tmp/dotdrop-tests-workdir"
 export DOTDROP_WORKDIR="${tmpworkdir}"
@@ -13,7 +13,8 @@ workdir_tmp_exists="no"
 [ -d "${HOME}/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
 
 # run bash tests
-if [ -z "${GITHUB_WORKFLOW}" ]; then
+GH_WORKFLOW=${GITHUB_WORKFLOW:-}
+if [ -z "${GH_WORKFLOW}" ]; then
   ## local
   tests-ng/tests_launcher.py -s
 else
@@ -27,3 +28,5 @@ fi
 [ "${workdir_tmp_exists}" = "no" ] && rm -rf ~/.config/dotdrop/tmp
 # clear temp workdir
 rm -rf "${tmpworkdir}"
+
+echo "tests-ng done"

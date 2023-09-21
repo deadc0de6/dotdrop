@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2022, deadc0de6
 
 # stop on first error
-set -e
+set -euo errtrace pipefail
 
 # ensure binaries are here
 if ! which shellcheck >/dev/null 2>&1; then
@@ -42,6 +42,14 @@ grep -rv 'TODO\|FIXME' dotdrop/ >/dev/null 2>&1
 grep -rv 'TODO\|FIXME' tests/ >/dev/null 2>&1
 grep -rv 'TODO\|FIXME' tests-ng/ >/dev/null 2>&1
 grep -rv 'TODO\|FIXME' scripts/ >/dev/null 2>&1
+
+# checking for tests options
+echo "---------------------------------"
+echo "checking for bash strict mode"
+find tests-ng -iname '*.sh' | while read -r script; do
+  #grep 'set +e' "${script}" 2>&1 >/dev/null && echo "set +e found in ${script}" && exit 1
+  grep 'set \-euxo errtrace pipefailuxo errtrace pipefail' "${script}" || (echo "set -euo errtrace pipefail not set in ${script}" && exit 1 )
+done
 
 # PEP8 tests
 # W503: Line break occurred before a binary operator
@@ -114,11 +122,9 @@ done
 
 echo "------------------------"
 echo "checking for more issues"
-set +e
 exceptions="save_uservariables_name\|@@\|diff_cmd\|original,\|modified,"
 # f-string errors and missing f literal
 find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v "f'" {} \; | grep -v "{'" | grep -v "${exceptions}" | grep "'.*}" && echo "bad string format (1)" && exit 1
 find dotdrop/ -iname '*.py' -exec grep --with-filename -n -v 'f"' {} \; | grep -v "f'" | grep -v '{"' | grep -v "${exceptions}" | grep '".*}' && echo "bad string format (2)" && exit 1
-set -e
 
 echo "syntax OK"

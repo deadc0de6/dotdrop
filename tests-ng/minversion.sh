@@ -5,10 +5,11 @@
 # test minversion
 
 ## start-cookie
-set -e
+set -euo errtrace pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
-export PYTHONPATH="${ddpath}:${PYTHONPATH}"
+PPATH="{PYTHONPATH:-}"
+export PYTHONPATH="${ddpath}:${PPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
   mkdir -p coverages/

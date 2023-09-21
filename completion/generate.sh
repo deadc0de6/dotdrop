@@ -5,7 +5,7 @@
 # pip3 install --user infi.docopt_completion
 #
 
-set -e
+set -euo errtrace pipefail
 
 bin="docopt-completion"
 if ! hash ${bin}; then

@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-#set -e
+#set -euo errtrace pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
 
@@ -16,7 +16,8 @@ ddpath="${cur}/../"
 [ -n "${1}" ] && ddpath="${1}"
 [ ! -d "${ddpath}" ] && echo "ddpath \"${ddpath}\" is not a directory" && exit 1
 
-export PYTHONPATH="${ddpath}:${PYTHONPATH}"
+PPATH="{PYTHONPATH:-}"
+export PYTHONPATH="${ddpath}:${PPATH}"
 bin="python3 -m dotdrop.dotdrop"
 
 echo "dotdrop path: ${ddpath}"

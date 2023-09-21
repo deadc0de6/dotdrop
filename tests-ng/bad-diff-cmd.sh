@@ -7,10 +7,11 @@
 #
 
 ## start-cookie
-set -e
+set -euo errtrace pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
-export PYTHONPATH="${ddpath}:${PYTHONPATH}"
+PPATH="{PYTHONPATH:-}"
+export PYTHONPATH="${ddpath}:${PPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
   mkdir -p coverages/
@@ -42,12 +43,13 @@ dotfiles:
 profiles:
 _EOF
 
+# check diff command is reported as error
 set +e
 cd "${ddpath}" | ${bin} compare -c "${cfg}"
 [ "$?" = "0" ] && exit 1
-
 out=$(cd "${ddpath}" | ${bin} compare -c "${cfg}")
 echo "${out}" | grep -i 'traceback' && exit 1
+set -e
 
 cat > "${cfg}" << _EOF
 config:
@@ -59,12 +61,13 @@ dotfiles:
 profiles:
 _EOF
 
+# should fail
 set +e
 cd "${ddpath}" | ${bin} compare -c "${cfg}"
 [ "$?" = "0" ] && exit 1
-
 out=$(cd "${ddpath}" | ${bin} compare -c "${cfg}")
 echo "${out}" | grep -i 'traceback' && exit 1
+set -e
 
 echo "OK"
 exit 0
