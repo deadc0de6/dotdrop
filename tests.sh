@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2017, deadc0de6
 
 # stop on first error
-#set -ev
-set -e
+#set -euo errtrace pipefailv
+set -euo errtrace pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
 
@@ -24,10 +24,6 @@ python3 --version
 echo "checking syntax..."
 "${cur}"/scripts/check-syntax.sh
 
-# test doc
-echo "checking documentation..."
-"${cur}"/scripts/check-doc.sh
-
 # unittest
 echo "unittest..."
 "${cur}"/scripts/check-unittests.sh
@@ -38,6 +34,10 @@ echo "tests-ng..."
 
 # merge coverage
 coverage combine coverages/*
+
+# test doc
+echo "checking documentation..."
+"${cur}"/scripts/check-doc.sh
 
 ## done
 echo "All tests finished successfully"

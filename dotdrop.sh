@@ -27,7 +27,7 @@ else
   # virtualenv
   pybin="${ENV_DIR}/bin/python"
 fi
-hash "${pybin}" 2>/dev/null || (echo "python executable not found" && exit 1)
+hash "${pybin}" 2>/dev/null || { echo "python executable not found" && exit 1; }
 
 # launch dotdrop
 PYTHONPATH=dotdrop:${PYTHONPATH} ${pybin} -m dotdrop.dotdrop "${args[@]}"

@@ -72,7 +72,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
     print(f'stop on first error: {stop_on_first_err}')
     print(f'use spinner: {with_spinner}')
     tests = get_tests()
-    print(f'running {len(tests)} test(s)\n')
+    print(f'running {len(tests)} test script(s)\n')
     print()
 
     failed = 0

@@ -1,9 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # author: deadc0de6 (https://github.com/deadc0de6)
 # Copyright (c) 2022, deadc0de6
 
 # stop on first error
-set -e
+set -euo errtrace pipefail
 
 ## test doc external links
 echo "------------------------"
@@ -16,11 +16,7 @@ done
 ## https://github.com/remarkjs/remark-validate-links
 ## https://github.com/tcort/markdown-link-check
 ## npm install -g remark-cli remark-validate-links
-set +e
-which remark >/dev/null 2>&1
-r="$?"
-set -e
-if [ "$r" != "0" ]; then
+if ! which remark >/dev/null 2>&1; then
   echo "[WARNING] install \"remark\" to test the doc"
   exit 1
 fi

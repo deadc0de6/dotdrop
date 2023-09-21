@@ -7,10 +7,11 @@
 #
 
 ## start-cookie
-set -e
+set -euo errtrace pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
-export PYTHONPATH="${ddpath}:${PYTHONPATH}"
+PPATH="{PYTHONPATH:-}"
+export PYTHONPATH="${ddpath}:${PPATH}"
 altbin="python3 -m dotdrop.dotdrop"
 if hash coverage 2>/dev/null; then
   mkdir -p coverages/
@@ -40,12 +41,12 @@ clear_on_exit "${tmpd}"
 export TESTENV="this is my global testenv"
 scr=$(mktemp --suffix='-dotdrop-tests' || mktemp -d)
 chmod +x "${scr}"
-echo -e "#!/bin/bash\necho $TESTENV\n" >> "${scr}"
+echo -e "#!/usr/bin/env bash\necho $TESTENV\n" >> "${scr}"
 
 export TESTENV2="this is my profile testenv"
 scr2=$(mktemp --suffix='-dotdrop-tests' || mktemp -d)
 chmod +x "${scr2}"
-echo -e "#!/bin/bash\necho $TESTENV2\n" >> "${scr2}"
+echo -e "#!/usr/bin/env bash\necho $TESTENV2\n" >> "${scr2}"
 
 clear_on_exit "${scr}"
 clear_on_exit "${scr2}"
