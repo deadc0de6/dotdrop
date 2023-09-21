@@ -55,11 +55,7 @@ create_hierarchy()
 # $1: basedir
 clean_hierarchy()
 {
-  rm -f "${1}"/x
-  rm -rf "${1}"/y
-  rm -f "${1}/"t
-  rm -rf "${1}"/z
-  rm -f "${1}"/trans
+  rm -rf "${1:?}"/*
 }
 
 uninstall_with_link()
@@ -83,7 +79,11 @@ uninstall_with_link()
   clear_on_exit "${tmpd}"
   clear_on_exit "${tmpw}"
 
-  create_hierarchy "${basedir}/dotfiles" "modified"
+  file_link="${LINK_TYPE}"
+  dir_link="${LINK_TYPE}"
+  if [ "${LINK_TYPE}" = "link_children" ]; then
+    file_link="absolute"
+  fi
 
   # create the config file
   cfg="${basedir}/config.yaml"
@@ -98,18 +98,23 @@ dotfiles:
   f_x:
     src: x
     dst: ${tmpd}/x
+    link: ${file_link}
   d_y:
     src: y
     dst: ${tmpd}/y
+    link: ${dir_link}
   f_t:
     src: t
     dst: ${tmpd}/t
+    link: ${file_link}
   d_z:
     src: z
     dst: ${tmpd}/z
+    link: ${dir_link}
   f_trans:
     src: trans
     dst: ${tmpd}/trans
+    link: ${file_link}
 profiles:
   p1:
     dotfiles:
@@ -123,6 +128,8 @@ _EOF
   #########################
   ## no original
   #########################
+
+  create_hierarchy "${basedir}/dotfiles" "modified"
 
   # install
   echo "[+] install (1)"
@@ -180,8 +187,10 @@ _EOF
   #########################
   # clean
   clean_hierarchy "${tmpd}"
+  clean_hierarchy "${basedir}"/dotfiles
 
   # recreate
+  create_hierarchy "${basedir}"/dotfiles "modified"
   create_hierarchy "${tmpd}" "original"
 
   # install
@@ -193,17 +202,17 @@ _EOF
   [ ! -e "${tmpd}"/x.dotdropbak ] && echo "${PRE} f_x backup not created" && exit 1
   [ ! -d "${tmpd}"/y ] && echo "${PRE} d_y not installed" && exit 1
   [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y file not installed" && exit 1
-  [ ! -e "${tmpd}"/y/file.dotdropbak ] && echo "${PRE} d_y backup file not created" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/y/file.dotdropbak ] && echo "${PRE} d_y backup file not created" && exit 1
   [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y subfile not installed" && exit 1
-  [ ! -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "${PRE} d_y subfile backup not created" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "${PRE} d_y subfile backup not created" && exit 1
   [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not installed" && exit 1
   [ ! -e "${tmpd}"/t.dotdropbak ] && echo "${PRE} f_t backup not created" && exit 1
   [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not installed" && exit 1
-  [ ! -e "${tmpd}"/z/t1.dotdropbak ] && echo "${PRE} d_z t1 backup not created" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t1.dotdropbak ] && echo "${PRE} d_z t1 backup not created" && exit 1
   [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not installed" && exit 1
-  [ ! -e "${tmpd}"/z/t2.dotdropbak ] && echo "${PRE} d_z t2 backup not created" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t2.dotdropbak ] && echo "${PRE} d_z t2 backup not created" && exit 1
   [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not installed" && exit 1
-  [ ! -e "${tmpd}"/z/file.dotdropbak ] && echo "${PRE} d_z backup file not created" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/file.dotdropbak ] && echo "${PRE} d_z backup file not created" && exit 1
   [ ! -e "${tmpd}"/trans ] && echo "${PRE} f_trans file not installed" && exit 1
   [ ! -e "${tmpd}"/trans.dotdropbak ] && echo "${PRE} f_trans backup file not created" && exit 1
   grep_or_fail 'modified' "${tmpd}"/x
@@ -225,28 +234,28 @@ _EOF
   [ ! -d "${basedir}"/dotfiles ] && echo "${PRE} dotpath removed" && exit 1
   [ ! -e "${tmpd}"/x ] && echo "${PRE} f_x backup not restored" && exit 1
   [ -e "${tmpd}"/x.dotdropbak ] && echo "${PRE} f_x backup not removed" && exit 1
-  [ ! -d "${tmpd}"/y ] && echo "${PRE} d_y backup not restored" && exit 1
-  [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y backup not restored" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -d "${tmpd}"/y ] && echo "${PRE} d_y backup not restored" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/y/file ] && echo "${PRE} d_y file backup not restored" && exit 1
   [ -e "${tmpd}"/y/file.dotdropbak ] && echo "${PRE} d_y backup not removed" && exit 1
-  [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y sub backup not restored" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y sub backup not restored" && exit 1
   [ -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "${PRE} d_y sub backup not removed" && exit 1
   [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not restored" && exit 1
   [ -e "${tmpd}"/t.dotdropback ] && echo "${PRE} f_t backup not removed" && exit 1
-  [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not restore" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not restore" && exit 1
   [ -e "${tmpd}"/z/t1.dotdropback ] && echo "${PRE} d_z t1 backup not removed" && exit 1
-  [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not restored" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not restored" && exit 1
   [ -e "${tmpd}"/z/t2.dotdropback ] && echo "${PRE} d_z t2 backup not removed" && exit 1
-  [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not restored" && exit 1
+  [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not restored" && exit 1
   [ -e "${tmpd}"/z/file.dotdropbak ] && echo "${PRE} d_z file backup not removed" && exit 1
   [ ! -e "${tmpd}"/trans ] && echo "${PRE} f_trans backup not restored" && exit 1
   [ -e "${tmpd}"/trans.dotdropbak ] && echo "${PRE} f_trans backup not removed" && exit 1
 
   grep_or_fail 'original' "${tmpd}"/x
-  grep_or_fail 'original' "${tmpd}"/y/file
+  [ "${LINK_TYPE}" = "nolink" ] && grep_or_fail 'original' "${tmpd}"/y/file
   grep_or_fail "profile: ${PRO_TEMPL}" "${tmpd}/t"
-  grep_or_fail "profile t1: ${PRO_TEMPL}" "${tmpd}/z/t1"
-  grep_or_fail "profile t2: ${PRO_TEMPL}" "${tmpd}/z/t2"
-  grep_or_fail 'original' "${tmpd}"/z/file
+  [ "${LINK_TYPE}" = "nolink" ] && grep_or_fail "profile t1: ${PRO_TEMPL}" "${tmpd}/z/t1"
+  [ "${LINK_TYPE}" = "nolink" ] && grep_or_fail "profile t2: ${PRO_TEMPL}" "${tmpd}/z/t2"
+  [ "${LINK_TYPE}" = "nolink" ] && grep_or_fail 'original' "${tmpd}"/z/file
   grep_or_fail "trans:${PRO_TEMPL}" "${tmpd}"/trans
 
   echo "testing workdir..."
