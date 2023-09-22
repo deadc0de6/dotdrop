@@ -91,17 +91,17 @@ dotfiles:
     dst: ~/dir
     chmod: 744
   f_preserve:
-    src: preserve
-    dst: ~/preserve
+    src: pfile
+    dst: ~/pfile
     chmod: preserve
 ```
 
-The `chmod` value defines the file permissions in octal notation to apply on dotfiles. If undefined
+The `chmod` value defines the file permissions in octal notation to apply to the dotfile. If undefined
 new files will get the system default permissions (see `umask`, `777-<umask>` for directories and
 `666-<umask>` for files).
 
 The special keyword `preserve` allows to ensure that if the dotfiles already exists
-on the filesystem, it is not altered during `install` and the `chmod` value won't
+on the filesystem, its permission is not altered during `install` and the `chmod` config value won't
 be changed during `update`.
 
 On `import`, the following rules are applied:

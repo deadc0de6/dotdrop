@@ -180,40 +180,52 @@ class Installer:
         if self.dry:
             return self._log_install(ret, err)
 
-        # handle chmod
-        # - on success (r, not err)
-        # - no change (not r, not err)
-        # but not when
-        # - error (not r, err)
-        # - aborted (not r, err)
-        # - special keyword "preserve"
+        self._apply_chmod_after_install(src, dst, ret, err,
+                                        chmod=chmod,
+                                        force_chmod=force_chmod,
+                                        linktype=linktype)
+
+        return self._log_install(ret, err)
+
+    def _apply_chmod_after_install(self, src, dst, ret, err,
+                                   chmod=None,
+                                   force_chmod=False,
+                                   linktype=LinkTypes.NOLINK):
+        """
+        handle chmod after install
+        - on success (r, not err)
+        - no change (not r, not err)
+        but not when
+        - error (not r, err)
+        - aborted (not r, err)
+        - special keyword "preserve"
+        """
         apply_chmod = linktype in [LinkTypes.NOLINK, LinkTypes.LINK_CHILDREN]
         apply_chmod = apply_chmod and os.path.exists(dst)
         apply_chmod = apply_chmod and (ret or (not ret and not err))
         apply_chmod = apply_chmod and chmod != CfgYaml.chmod_ignore
-        if apply_chmod:
-            if not chmod:
-                chmod = get_file_perm(src)
-            self.log.dbg(f'applying chmod {chmod:o} to {dst}')
-            dstperms = get_file_perm(dst)
-            if dstperms != chmod:
-                # apply mode
-                msg = f'chmod {dst} to {chmod:o}'
-                if not force_chmod and self.safe and not self.log.ask(msg):
-                    ret = False
-                    err = 'aborted'
-                else:
-                    if not self.comparing:
-                        self.log.sub(f'chmod {dst} to {chmod:o}')
-                    if chmodit(dst, chmod, debug=self.debug):
-                        ret = True
-                    else:
-                        ret = False
-                        err = 'chmod failed'
-        else:
+        if not apply_chmod:
             self.log.dbg('no chmod applied')
-
-        return self._log_install(ret, err)
+            return
+        if not chmod:
+            chmod = get_file_perm(src)
+            self.log.dbg(f'dotfile in dotpath perm: {chmod:o}')
+        self.log.dbg(f'applying chmod {chmod:o} to {dst}')
+        dstperms = get_file_perm(dst)
+        if dstperms != chmod:
+            # apply mode
+            msg = f'chmod {dst} to {chmod:o}'
+            if not force_chmod and self.safe and not self.log.ask(msg):
+                ret = False
+                err = 'aborted'
+            else:
+                if not self.comparing:
+                    self.log.sub(f'chmod {dst} to {chmod:o}')
+                if chmodit(dst, chmod, debug=self.debug):
+                    ret = True
+                else:
+                    ret = False
+                    err = 'chmod failed'
 
     def install_to_temp(self, templater, tmpdir, src, dst,
                         is_template=True, chmod=None, ignore=None,
@@ -594,8 +606,9 @@ class Installer:
             self.log.dbg(f'deploy sub from {dst}: {entry}')
             if not os.path.isdir(fpath):
                 # is file
+                fdst = os.path.join(dst, entry)
                 res, err = self._copy_file(templater, fpath,
-                                           os.path.join(dst, entry),
+                                           fdst,
                                            actionexec=actionexec,
                                            noempty=noempty,
                                            ignore=ignore,
@@ -603,6 +616,8 @@ class Installer:
                 if not res and err:
                     # error occured
                     return res, err
+
+                self._apply_chmod_after_install(fpath, fdst, ret, err)
 
                 if res:
                     # something got installed
