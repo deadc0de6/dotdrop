@@ -6,7 +6,10 @@
 #
 # for i in *.sh; do ./$i >/dev/null 2>&1; find /tmp/ -maxdepth 1 -type f -iname 'tmp*' >> /tmp/$i.log; find /tmp/ -maxdepth 1 -type d -iname 'tmp.*-dotdrop-tests' >> /tmp/$i.log; find /tmp/ -maxdepth 1 -type d  -iname 'dotdrop-*' >> /tmp/$i.log; wc -l /tmp/$i.log; [ "`wc -l /tmp/$i.log | awk '{print $1}'`" -gt "0" ] && break; done
 
-declare -a to_be_cleared
+set -euo errtrace pipefail
+
+#declare -a to_be_cleared
+to_be_cleared=()
 
 # add a file/directory to be cleared
 # on exit
@@ -109,7 +112,8 @@ fi
 # workdir tricks
 # when tests are called without using the
 # top level tests.sh script which sets the workdir
-if [ -z "${DOTDROP_WORKDIR}" ]; then
+DD_WORKDIR=${DOTDROP_WORKDIR:-}
+if [ -z "${DD_WORKDIR}" ]; then
   _workdir="/tmp/dotdrop-test-workdir"
   export DOTDROP_WORKDIR="${_workdir}"
   clear_on_exit "${_workdir}"
