@@ -133,7 +133,8 @@ class Installer:
                 ret, err = self._copy_dir(templater, src, dst,
                                           actionexec=actionexec,
                                           noempty=noempty, ignore=ignore,
-                                          is_template=is_template)
+                                          is_template=is_template,
+                                          chmod=chmod)
             else:
                 ret, err = self._copy_file(templater, src, dst,
                                            actionexec=actionexec,
@@ -586,7 +587,8 @@ class Installer:
 
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
-                  ignore=None, is_template=True):
+                  ignore=None, is_template=True,
+                  chmod=None):
         """
         install src to dst when is a directory
 
@@ -617,7 +619,8 @@ class Installer:
                     # error occured
                     return res, err
 
-                self._apply_chmod_after_install(fpath, fdst, ret, err)
+                self._apply_chmod_after_install(fpath, fdst, ret, err,
+                                                chmod=chmod)
 
                 if res:
                     # something got installed
