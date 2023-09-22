@@ -239,10 +239,10 @@ class TestImport(unittest.TestCase):
                 },
                 'a_log_ed': 'echo 2',
             },
-            'trans': {
+            'trans_install': {
                 't_log_ed': 'echo 3',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log_ed': 'echo 4',
             },
             'variables': {
@@ -273,10 +273,10 @@ class TestImport(unittest.TestCase):
                 },
                 'a_log_ing': 'echo a',
             },
-            'trans': {
+            'trans_install': {
                 't_log_ing': 'echo b',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log_ing': 'echo c',
             },
             'variables': {
@@ -352,10 +352,10 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(a.endswith('ing') for a in actions))
 
         # testing transformations
-        transformations = ycont['trans_read'].keys()
+        transformations = ycont['trans_install'].keys()
         self.assertTrue(all(t.endswith('ed') for t in transformations))
         self.assertFalse(any(t.endswith('ing') for t in transformations))
-        transformations = ycont['trans_write'].keys()
+        transformations = ycont['trans_update'].keys()
         self.assertTrue(all(t.endswith('ed') for t in transformations))
         self.assertFalse(any(t.endswith('ing') for t in transformations))
 
@@ -394,10 +394,10 @@ class TestImport(unittest.TestCase):
         self.assertFalse(any(action.endswith('ed') for action in actions))
 
         # testing transformations
-        transformations = ycont['trans_read'].keys()
+        transformations = ycont['trans_install'].keys()
         self.assertTrue(all(t.endswith('ing') for t in transformations))
         self.assertFalse(any(t.endswith('ed') for t in transformations))
-        transformations = ycont['trans_write'].keys()
+        transformations = ycont['trans_update'].keys()
         self.assertTrue(all(t.endswith('ing') for t in transformations))
         self.assertFalse(any(t.endswith('ed') for t in transformations))
 

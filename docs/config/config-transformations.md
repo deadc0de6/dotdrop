@@ -14,14 +14,14 @@ For examples of transformation uses, see:
 
 There are two types of transformations available:
 
-* **Read transformations**: used to transform dotfiles before they are installed ([config](config-config.md) key `trans_read`)
+* **Install transformations**: used to transform dotfiles before they are installed ([config](config-config.md) key `trans_install`)
     * Used for commands `install` and `compare`
     * They have two mandatory arguments:
         * **{0}** will be replaced with the dotfile to process
         * **{1}** will be replaced with a temporary file to store the result of the transformation
     * This Happens **before** the dotfile is templated (see [templating](../template/templating.md))
 
-* **Write transformations**: used to transform files before updating a dotfile ([config](config-config.md) key `trans_write`)
+* **Update/Import transformations**: used to transform files before updating/importing a dotfile ([config](config-config.md) key `trans_update`)
     * Used for command `update` and `import`
     * They have two mandatory arguments:
         * **{0}** will be replaced with the file path to update the dotfile with
@@ -36,13 +36,13 @@ Transformations also support additional positional arguments that must start fro
 
 For example:
 ```yaml
-trans_read:
+trans_install:
   targ: echo "$(basename {0}); {{@@ _dotfile_key @@}}; {2}; {3}" > {1}
 dotfiles:
   f_abc:
     dst: /tmp/abc
     src: abc
-    trans_read: targ "{{@@ profile @@}}" lastarg
+    trans_install: targ "{{@@ profile @@}}" lastarg
 profiles:
   p1:
     dotfiles:
@@ -51,21 +51,21 @@ profiles:
 
 will result in `abc; f_abc; p1; lastarg`.
 
-## trans_read entry
+## trans_install entry
 
-The **trans_read** entry (optional) contains a transformations mapping (See [transformations](config-transformations.md)).
+The **trans_install** entry (optional) contains a transformations mapping (See [transformations](config-transformations.md)).
 
 ```yaml
-trans_read:
+trans_install:
    <trans-key>: <command-to-execute>
 ```
 
-## trans_write entry
+## trans_update entry
 
-The **trans_write** entry (optional) contains a write transformations mapping (See [transformations](config-transformations.md)).
+The **trans_update** entry (optional) contains a write transformations mapping (See [transformations](config-transformations.md)).
 
 ```yaml
-trans_write:
+trans_update:
    <trans-key>: <command-to-execute>
 ```
 
@@ -77,10 +77,10 @@ and [template variables](../template/template-variables.md#template-variables)).
 
 A very dumb example:
 ```yaml
-trans_read:
+trans_install:
   r_echo_abs_src: echo "{0}: {{@@ _dotfile_abs_src @@}}" > {1}
   r_echo_var: echo "{0}: {{@@ r_var @@}}" > {1}
-trans_write:
+trans_update:
   w_echo_key: echo "{0}: {{@@ _dotfile_key @@}}" > {1}
   w_echo_var: echo "{0}: {{@@ w_var @@}}" > {1}
 variables:
@@ -90,11 +90,11 @@ dotfiles:
   f_abc:
     dst: ${tmpd}/abc
     src: abc
-    trans_read: r_echo_abs_src
-    trans_write: w_echo_key
+    trans_install: r_echo_abs_src
+    trans_update: w_echo_key
   f_def:
     dst: ${tmpd}/def
     src: def
-    trans_read: r_echo_var
-    trans_write: w_echo_var
+    trans_install: r_echo_var
+    trans_update: w_echo_var
 ```

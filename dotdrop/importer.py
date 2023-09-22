@@ -75,8 +75,8 @@ class Importer:
     def import_path(self, path, import_as=None,
                     import_link=LinkTypes.NOLINK,
                     import_mode=False,
-                    import_transw="",
-                    import_transr=""):
+                    import_trans_install="",
+                    import_trans_update=""):
         """
         import a dotfile pointed by path
         returns:
@@ -90,24 +90,25 @@ class Importer:
             self.log.err(f'\"{path}\" does not exist, ignored!')
             return -1
 
-        # check transw if any
-        trans_write = None
-        trans_read = None
-        if import_transw:
-            trans_write = self.conf.get_trans_w(import_transw)
-        if import_transr:
-            trans_read = self.conf.get_trans_r(import_transr)
+        # check trans_update if any
+        trans_install = None
+        trans_update = None
+        if import_trans_install:
+            trans_install = self.conf.get_trans_install(import_trans_install)
+        if import_trans_update:
+            trans_update = self.conf.get_trans_update(import_trans_update)
 
         return self._import(path, import_as=import_as,
                             import_link=import_link,
                             import_mode=import_mode,
-                            trans_write=trans_write,
-                            trans_read=trans_read)
+                            trans_update=trans_update,
+                            trans_install=trans_install)
 
     def _import(self, path, import_as=None,
                 import_link=LinkTypes.NOLINK,
                 import_mode=False,
-                trans_write=None, trans_read=None):
+                trans_install=None,
+                trans_update=None):
         """
         import path
         returns:
@@ -162,17 +163,18 @@ class Importer:
 
         self.log.dbg(f'import dotfile: src:{src} dst:{dst}')
 
-        if not self._import_to_dotpath(src, dst, trans_write=trans_write):
+        if not self._import_to_dotpath(src, dst, trans_update=trans_update):
             return -1
 
         return self._import_in_config(path, src, dst, perm, linktype,
                                       import_mode,
-                                      trans_w=trans_write,
-                                      trans_r=trans_read)
+                                      trans_update=trans_update,
+                                      trans_install=trans_install)
 
     def _import_in_config(self, path, src, dst, perm,
                           linktype, import_mode,
-                          trans_r=None, trans_w=None):
+                          trans_install=None,
+                          trans_update=None):
         """
         import path
         returns:
@@ -190,8 +192,8 @@ class Importer:
 
         # add file to config file
         retconf = self.conf.new_dotfile(src, dst, linktype, chmod=chmod,
-                                        trans_read=trans_r,
-                                        trans_write=trans_w)
+                                        trans_install=trans_install,
+                                        trans_update=trans_update)
         if not retconf:
             self.log.warn(f'\"{path}\" ignored during import')
             return 0
@@ -222,7 +224,7 @@ class Importer:
             self.log.dbg('will overwrite existing file')
         return True
 
-    def _import_to_dotpath(self, in_dotpath, in_fs, trans_write=None):
+    def _import_to_dotpath(self, in_dotpath, in_fs, trans_update=None):
         """
         prepare hierarchy for dotfile in dotpath and copy file
         """
@@ -237,8 +239,8 @@ class Importer:
             self.log.dry(f'would copy {in_fs} to {srcf}')
             return True
 
-        # apply trans_w
-        in_fs = self._apply_trans_w(in_fs, trans_write)
+        # apply trans_update
+        in_fs = self._apply_trans_update(in_fs, trans_update)
         if not in_fs:
             # transformation failed
             return False
@@ -290,7 +292,7 @@ class Importer:
             return True
         return False
 
-    def _apply_trans_w(self, path, trans):
+    def _apply_trans_update(self, path, trans):
         """
         apply transformation to path on filesystem)
         returns

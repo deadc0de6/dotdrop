@@ -298,10 +298,10 @@ profiles:
                 },
                 'a_log_ed': 'echo 2',
             },
-            'trans': {
+            'trans_install': {
                 't_log_ed': 'echo 3',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log_ed': 'echo 4',
             },
             'variables': {
@@ -335,10 +335,10 @@ profiles:
                 },
                 'a_log_ing': 'echo a',
             },
-            'trans': {
+            'trans_install': {
                 't_log_ing': 'echo b',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log_ing': 'echo c',
             },
             'variables': {
@@ -406,8 +406,8 @@ profiles:
         self.assert_is_subset(post_ed, post_ing)
 
         # test transactions
-        self.assert_is_subset(imported_cfg.trans_r, importing_cfg.trans_r)
-        self.assert_is_subset(imported_cfg.trans_w, importing_cfg.trans_w)
+        self.assert_is_subset(imported_cfg.trans_install, importing_cfg.trans_install)
+        self.assert_is_subset(imported_cfg.trans_update, importing_cfg.trans_update)
 
         # test variables
         imported_vars = {
@@ -504,10 +504,10 @@ profiles:
                 },
                 'a_log': 'echo 2',
             },
-            'trans': {
+            'trans_install': {
                 't_log': 'echo 3',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log': 'echo 4',
             },
             'variables': {
@@ -542,10 +542,10 @@ profiles:
                 },
                 'a_log': 'echo a',
             },
-            'trans': {
+            'trans_install': {
                 't_log': 'echo b',
             },
-            'trans_write': {
+            'trans_update': {
                 'tw_log': 'echo c',
             },
             'variables': {
@@ -605,12 +605,12 @@ profiles:
 
         # test transactions
         self.assertFalse(any(
-            imported_cfg.trans_r[key] == importing_cfg.trans_r[key]
-            for key in imported_cfg.trans_r
+            imported_cfg.trans_install[key] == importing_cfg.trans_install[key]
+            for key in imported_cfg.trans_install
         ))
         self.assertFalse(any(
-            imported_cfg.trans_w[key] == importing_cfg.trans_w[key]
-            for key in imported_cfg.trans_w
+            imported_cfg.trans_update[key] == importing_cfg.trans_update[key]
+            for key in imported_cfg.trans_update
         ))
 
         # test variables

@@ -1,13 +1,13 @@
 # Handle compressed directories
 
-This is an example of how to use transformations (`trans_read` and `trans_write`) to store
+This is an example of how to use transformations (`trans_install` and `trans_update`) to store
 compressed directories and deploy them with dotdrop.
 
 Start by defining the transformations:
 ```yaml
-trans_read:
+trans_install:
   uncompress: "mkdir -p {1} && tar -xf {0} -C {1}"
-trans_write:
+trans_update:
   compress: "tar -cf {1} -C {0} ."
 ```
 

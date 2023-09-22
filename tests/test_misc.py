@@ -127,7 +127,7 @@ class TestImporter(unittest.TestCase):
         path, _ = create_random_file(tmpdir)
 
         imp = Importer('profile', None, '', '', {})
-        self.assertEqual(imp._apply_trans_w(path, trans), None)
+        self.assertEqual(imp._apply_trans_update(path, trans), None)
 
 
 class TestActions(unittest.TestCase):

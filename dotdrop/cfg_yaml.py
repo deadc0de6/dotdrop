@@ -11,8 +11,8 @@ the upper layer:
 * self.dotfiles
 * self.profiles
 * self.actions
-* self.trans_r
-* self.trans_w
+* self.trans_install
+* self.trans_update
 * self.variables
 
 Additionally a few methods are exported.
@@ -50,9 +50,11 @@ class CfgYaml:
     key_dotfiles = 'dotfiles'
     key_profiles = 'profiles'
     key_actions = 'actions'
-    old_key_trans_r = 'trans'
-    key_trans_r = 'trans_read'
-    key_trans_w = 'trans_write'
+    old_key_trans = 'trans'
+    old_key_trans_r = 'trans_read'
+    old_key_trans_w = 'trans_write'
+    key_trans_install = 'trans_install'
+    key_trans_update = 'trans_update'
     key_variables = 'variables'
     key_dvariables = 'dynvariables'
     key_uvariables = 'uservariables'
@@ -146,8 +148,8 @@ class CfgYaml:
         self.dotfiles = {}
         self.profiles = {}
         self.actions = {}
-        self.trans_r = {}
-        self.trans_w = {}
+        self.trans_install = {}
+        self.trans_update = {}
         self.variables = {}
 
         if not os.path.exists(self._path):
@@ -248,10 +250,10 @@ class CfgYaml:
         self.dotfiles = self._parse_blk_dotfiles(self._yaml_dict)
         # parse the "actions" block
         self.actions = self._parse_blk_actions(self._yaml_dict)
-        # parse the "trans_r" block
-        self.trans_r = self._parse_blk_trans_r(self._yaml_dict)
-        # parse the "trans_w" block
-        self.trans_w = self._parse_blk_trans_w(self._yaml_dict)
+        # parse the "trans_install" block
+        self.trans_install = self._parse_blk_trans_install(self._yaml_dict)
+        # parse the "trans_update" block
+        self.trans_update = self._parse_blk_trans_update(self._yaml_dict)
 
         ##################################################
         # import elements
@@ -427,7 +429,7 @@ class CfgYaml:
         return True
 
     def add_dotfile(self, key, src, dst, link, chmod=None,
-                    trans_r_key=None, trans_w_key=None):
+                    trans_install_key=None, trans_update_key=None):
         """add a new dotfile"""
         if key in self.dotfiles.keys():
             return False
@@ -438,8 +440,8 @@ class CfgYaml:
             self._dbg(f'new dotfile link: {link}')
             if chmod:
                 self._dbg(f'new dotfile chmod: {chmod:o}')
-            self._dbg(f'new dotfile trans_r: {trans_r_key}')
-            self._dbg(f'new dotfile trans_w: {trans_w_key}')
+            self._dbg(f'new dotfile trans_install: {trans_install_key}')
+            self._dbg(f'new dotfile trans_update: {trans_update_key}')
 
         # create the dotfile dict
         df_dict = {
@@ -456,11 +458,11 @@ class CfgYaml:
         if chmod:
             df_dict[self.key_dotfile_chmod] = str(format(chmod, 'o'))
 
-        # trans_r/trans_w
-        if trans_r_key:
-            df_dict[self.key_trans_r] = str(trans_r_key)
-        if trans_w_key:
-            df_dict[self.key_trans_w] = str(trans_w_key)
+        # trans_install/trans_update
+        if trans_install_key:
+            df_dict[self.key_trans_install] = str(trans_install_key)
+        if trans_update_key:
+            df_dict[self.key_trans_update] = str(trans_update_key)
 
         if self._debug:
             self._dbg(f'dotfile dict: {df_dict}')
@@ -618,30 +620,25 @@ class CfgYaml:
             self._debug_dict('actions block', actions)
         return actions
 
-    def _parse_blk_trans_r(self, dic):
-        """parse the "trans_r" block"""
-        key = self.key_trans_r
-        if self.old_key_trans_r in dic:
-            msg = '\"trans\" is deprecated, please use \"trans_read\"'
-            self._log.warn(msg)
-            dic[self.key_trans_r] = dic[self.old_key_trans_r]
-            del dic[self.old_key_trans_r]
-        trans_r = self._get_entry(dic, key, mandatory=False)
-        if trans_r:
-            trans_r = trans_r.copy()
+    def _parse_blk_trans_install(self, dic):
+        """parse the "trans_install" block"""
+        trans_install = self._get_entry(dic, self.key_trans_install,
+                                        mandatory=False)
+        if trans_install:
+            trans_install = trans_install.copy()
         if self._debug:
-            self._debug_dict('trans_r block', trans_r)
-        return trans_r
+            self._debug_dict('trans_install block', trans_install)
+        return trans_install
 
-    def _parse_blk_trans_w(self, dic):
-        """parse the "trans_w" block"""
-        trans_w = self._get_entry(dic, self.key_trans_w,
-                                  mandatory=False)
-        if trans_w:
-            trans_w = trans_w.copy()
+    def _parse_blk_trans_update(self, dic):
+        """parse the "trans_update" block"""
+        trans_update = self._get_entry(dic, self.key_trans_update,
+                                       mandatory=False)
+        if trans_update:
+            trans_update = trans_update.copy()
         if self._debug:
-            self._debug_dict('trans_w block', trans_w)
-        return trans_w
+            self._debug_dict('trans_update block', trans_update)
+        return trans_update
 
     def _parse_blk_variables(self, dic):
         """parse the "variables" block"""
@@ -817,20 +814,16 @@ class CfgYaml:
         if not dotfiles:
             return dotfiles
         new = {}
+
         for k, val in dotfiles.items():
+            # fix depreacated trans
+            self._fix_deprecated_trans_in_dict(val)
+
             if self.key_dotfile_src not in val:
                 # add 'src' as key' if not present
                 val[self.key_dotfile_src] = k
                 new[k] = val
             else:
-                new[k] = val
-
-            if self.old_key_trans_r in val:
-                # fix deprecated trans key
-                msg = f'{k} \"trans\" is deprecated, please use \"trans_read\"'
-                self._log.warn(msg)
-                val[self.key_trans_r] = val[self.old_key_trans_r]
-                del val[self.old_key_trans_r]
                 new[k] = val
 
             if self.key_dotfile_link not in val:
@@ -1108,8 +1101,10 @@ class CfgYaml:
         self.profiles = self._merge_dict(self.profiles, sub.profiles,
                                          deep=True)
         self.actions = self._merge_dict(self.actions, sub.actions)
-        self.trans_r = self._merge_dict(self.trans_r, sub.trans_r)
-        self.trans_w = self._merge_dict(self.trans_w, sub.trans_w)
+        self.trans_install = self._merge_dict(self.trans_install,
+                                              sub.trans_install)
+        self.trans_update = self._merge_dict(self.trans_update,
+                                             sub.trans_update)
         self._clear_profile_vars(sub.variables)
 
         self.imported_configs.append(path)
@@ -1189,6 +1184,53 @@ class CfgYaml:
             return
         self._fix_deprecated_link_by_default(yamldict)
         self._fix_deprecated_dotfile_link(yamldict)
+        self._fix_deprecated_trans(yamldict)
+
+    def _fix_deprecated_trans_in_dict(self, yamldic):
+        # trans -> trans_install
+        old_key = self.old_key_trans
+        new_key = self.key_trans_install
+        if old_key in yamldic:
+            yamldic[old_key] = yamldic[new_key]
+            del yamldic[old_key]
+            msg = f'\"{old_key}\" is deprecated, '
+            msg += f', updated to {new_key}\"'
+            self._log.warn(msg)
+            self._dirty = True
+            self._dirty_deprecated = True
+
+        # trans_read -> trans_install
+        old_key = self.old_key_trans_r
+        new_key = self.key_trans_install
+        if old_key in yamldic:
+            yamldic[new_key] = yamldic[old_key]
+            del yamldic[old_key]
+            warn = f'deprecated \"{old_key}\"'
+            warn += f', updated to \"{new_key}\"'
+            self._log.warn(warn)
+            self._dirty = True
+            self._dirty_deprecated = True
+
+        # trans_write -> trans_update
+        old_key = self.old_key_trans_w
+        new_key = self.key_trans_update
+        if old_key in yamldic:
+            yamldic[new_key] = yamldic[old_key]
+            del yamldic[old_key]
+            warn = f'deprecated \"{old_key}\"'
+            warn += f', updated to \"{new_key}\"'
+            self._log.warn(warn)
+            self._dirty = True
+            self._dirty_deprecated = True
+
+    def _fix_deprecated_trans(self, yamldict):
+        """fix deprecated trans key"""
+        if self.key_settings not in yamldict:
+            return
+        if not yamldict[self.key_settings]:
+            return
+        config = yamldict[self.key_settings]
+        self._fix_deprecated_trans_in_dict(config)
 
     def _fix_deprecated_link_by_default(self, yamldict):
         """fix deprecated link_by_default"""
@@ -1786,8 +1828,8 @@ class CfgYaml:
         self._debug_dict('entry dotfiles', self.dotfiles)
         self._debug_dict('entry profiles', self.profiles)
         self._debug_dict('entry actions', self.actions)
-        self._debug_dict('entry trans_r', self.trans_r)
-        self._debug_dict('entry trans_w', self.trans_w)
+        self._debug_dict('entry trans_install', self.trans_install)
+        self._debug_dict('entry trans_update', self.trans_update)
         self._debug_dict('entry variables', self.variables)
 
     def _debug_dict(self, title, elems):

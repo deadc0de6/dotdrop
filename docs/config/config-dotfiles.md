@@ -14,11 +14,13 @@ Entry    | Description
 `ignoreempty` | If true, an empty template will not be deployed (defaults to the value of `ignoreempty`)
 `instignore` | List of patterns to ignore when installing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
 `template` | If false, disable templating for this dotfile (defaults to the value of `template_dotfile_default`)
-`trans_read` | Transformation key to apply when installing this dotfile (must be defined in the **trans_read** entry below; see [transformations](config-transformations.md))
-`trans_write` | Transformation key to apply when updating this dotfile (must be defined in the **trans_write** entry below; see [transformations](config-transformations.md))
+`trans_install` | Transformation key to apply when installing this dotfile (must be defined in the **trans_install** entry below; see [transformations](config-transformations.md))
+`trans_update` | Transformation key to apply when updating this dotfile (must be defined in the **trans_update** entry below; see [transformations](config-transformations.md))
 `upignore` | List of patterns to ignore when updating (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
 <s>link_children</s> | Replaced by `link: link_children`
-<s>trans</s> | Replaced by `trans_read`
+<s>trans</s> | Replaced by `trans_install`
+<s>trans_read</s> | Replaced by `trans_install`
+<s>trans_write</s> | Replaced by `trans_update`
 
 ```yaml
 <dotfile-key-name>:
@@ -37,8 +39,8 @@ Entry    | Description
     - <action-key>
   template: (true|false)
   chmod: '<file-permissions>'
-  trans_read: <transformation-key>
-  trans_write: <transformation-key>
+  trans_install: <transformation-key>
+  trans_update: <transformation-key>
 ```
 
 ## Dotfile actions

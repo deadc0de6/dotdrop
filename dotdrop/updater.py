@@ -122,7 +122,7 @@ class Updater:
             return True
 
         # apply write transformation if any
-        new_path = self._apply_trans_w(deployed_path, dotfile)
+        new_path = self._apply_trans_update(deployed_path, dotfile)
         if not new_path:
             return False
 
@@ -150,9 +150,9 @@ class Updater:
             removepath(new_path, logger=self.log)
         return ret
 
-    def _apply_trans_w(self, path, dotfile):
+    def _apply_trans_update(self, path, dotfile):
         """apply write transformation to dotfile"""
-        trans = dotfile.get_trans_w()
+        trans = dotfile.get_trans_update()
         if not trans:
             return path
         self.log.dbg(f'executing write transformation {trans}')

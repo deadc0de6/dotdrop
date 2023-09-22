@@ -69,23 +69,23 @@ class CfgAggregator:
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
     def new_dotfile(self, src, dst, link, chmod=None,
-                    trans_read=None, trans_write=None):
+                    trans_install=None, trans_update=None):
         """
         import a new dotfile
         @src: path in dotpath
         @dst: path in FS
         @link: LinkType
         @chmod: file permission
-        @trans_read: read transformation
-        @trans_write: write transformation
+        @trans_install: read transformation
+        @trans_update: write transformation
         """
         dst = self.path_to_dotfile_dst(dst)
         dotfile = self.get_dotfile_by_src_dst(src, dst)
         if not dotfile:
             # add the dotfile
             dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod,
-                                               trans_read=trans_read,
-                                               trans_write=trans_write)
+                                               trans_install=trans_install,
+                                               trans_update=trans_update)
 
         if not dotfile:
             return False
@@ -237,25 +237,25 @@ class CfgAggregator:
     ########################################################
 
     def _create_new_dotfile(self, src, dst, link, chmod=None,
-                            trans_read=None, trans_write=None):
+                            trans_install=None, trans_update=None):
         """create a new dotfile"""
         # get a new dotfile with a unique key
         key = self._get_new_dotfile_key(dst)
         self.log.dbg(f'new dotfile key: {key}')
         # add the dotfile
-        trans_r_key = trans_w_key = None
-        if trans_read:
-            trans_r_key = trans_read.key
-        if trans_write:
-            trans_w_key = trans_write.key
+        trans_install_key = trans_update_key = None
+        if trans_install:
+            trans_install_key = trans_install.key
+        if trans_update:
+            trans_update_key = trans_update.key
         if not self.cfgyaml.add_dotfile(key, src, dst, link,
                                         chmod=chmod,
-                                        trans_r_key=trans_r_key,
-                                        trans_w_key=trans_w_key):
+                                        trans_install_key=trans_install_key,
+                                        trans_update_key=trans_update_key):
             return None
         return Dotfile(key, dst, src,
-                       trans_r=trans_read,
-                       trans_w=trans_write)
+                       trans_install=trans_install,
+                       trans_update=trans_update)
 
     ########################################################
     # parsing
@@ -297,15 +297,15 @@ class CfgAggregator:
         self.actions = Action.parse_dict(self.cfgyaml.actions)
         debug_list('actions', self.actions, self.debug)
 
-        # trans_r
-        self.log.dbg('parsing trans_r')
-        self.trans_r = Transform.parse_dict(self.cfgyaml.trans_r)
-        debug_list('trans_r', self.trans_r, self.debug)
+        # trans_install
+        self.log.dbg('parsing trans_install')
+        self.trans_install = Transform.parse_dict(self.cfgyaml.trans_install)
+        debug_list('trans_install', self.trans_install, self.debug)
 
-        # trans_w
-        self.log.dbg('parsing trans_w')
-        self.trans_w = Transform.parse_dict(self.cfgyaml.trans_w)
-        debug_list('trans_w', self.trans_w, self.debug)
+        # trans_update
+        self.log.dbg('parsing trans_update')
+        self.trans_update = Transform.parse_dict(self.cfgyaml.trans_update)
+        debug_list('trans_update', self.trans_update, self.debug)
 
         # variables
         self.log.dbg('parsing variables')
@@ -334,14 +334,17 @@ class CfgAggregator:
         msg = f'default actions: {self.settings.default_actions}'
         self.log.dbg(msg)
 
-        # patch trans_w/trans_r in dotfiles
+        # patch trans_install in dotfiles
+        trans_inst_args = self._get_trans_update_args(self.get_trans_install)
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_r",
-                                 self._get_trans_w_args(self.get_trans_r),
+                                 CfgYaml.key_trans_install,
+                                 trans_inst_args,
                                  islist=False)
+        # patch trans_update in dotfiles
+        trans_update_args = self._get_trans_update_args(self.get_trans_update)
         self._patch_keys_to_objs(self.dotfiles,
-                                 "trans_w",
-                                 self._get_trans_w_args(self.get_trans_w),
+                                 CfgYaml.key_trans_update,
+                                 trans_update_args,
                                  islist=False)
 
         self.log.dbg('done parsing cfgyaml into cfg_aggregator')
@@ -542,7 +545,7 @@ class CfgAggregator:
             action = self._get_action(key)
         return action
 
-    def _get_trans_w_args(self, getter):
+    def _get_trans_update_args(self, getter):
         """return transformation by key with the arguments"""
         def getit(key):
             fields = shlex.split(key)
@@ -557,16 +560,16 @@ class CfgAggregator:
             return trans
         return getit
 
-    def get_trans_r(self, key):
-        """return the trans_r with this key"""
+    def get_trans_install(self, key):
+        """return the trans_install with this key"""
         try:
-            return next(x for x in self.trans_r if x.key == key)
+            return next(x for x in self.trans_install if x.key == key)
         except StopIteration:
             return None
 
-    def get_trans_w(self, key):
-        """return the trans_w with this key"""
+    def get_trans_update(self, key):
+        """return the trans_update with this key"""
         try:
-            return next(x for x in self.trans_w if x.key == key)
+            return next(x for x in self.trans_update if x.key == key)
         except StopIteration:
             return None
