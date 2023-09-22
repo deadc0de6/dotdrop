@@ -190,6 +190,7 @@ class Installer:
 
     def _apply_chmod_after_install(self, src, dst, ret, err,
                                    chmod=None,
+                                   is_sub=False,
                                    force_chmod=False,
                                    linktype=LinkTypes.NOLINK):
         """
@@ -200,11 +201,15 @@ class Installer:
         - error (not r, err)
         - aborted (not r, err)
         - special keyword "preserve"
+        is_sub is used to specify if the file/dir is
+        part of a dotfile directory
         """
         apply_chmod = linktype in [LinkTypes.NOLINK, LinkTypes.LINK_CHILDREN]
         apply_chmod = apply_chmod and os.path.exists(dst)
         apply_chmod = apply_chmod and (ret or (not ret and not err))
         apply_chmod = apply_chmod and chmod != CfgYaml.chmod_ignore
+        if is_sub:
+            chmod = None
         if not apply_chmod:
             self.log.dbg('no chmod applied')
             return
@@ -620,7 +625,7 @@ class Installer:
                     return res, err
 
                 self._apply_chmod_after_install(fpath, fdst, ret, err,
-                                                chmod=chmod)
+                                                chmod=chmod, is_sub=True)
 
                 if res:
                     # something got installed
