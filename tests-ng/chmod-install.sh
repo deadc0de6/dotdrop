@@ -61,42 +61,6 @@ clear_on_exit "${tmpd}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
-
-echo 'f777' > "${tmps}"/dotfiles/f777
-chmod 700 "${tmps}"/dotfiles/f777
-echo 'link' > "${tmps}"/dotfiles/link
-chmod 777 "${tmps}"/dotfiles/link
-mkdir -p "${tmps}"/dotfiles/dir
-echo "f1" > "${tmps}"/dotfiles/dir/f1
-
-echo "exists" > "${tmps}"/dotfiles/exists
-chmod 644 "${tmps}"/dotfiles/exists
-echo "exists" > "${tmpd}"/exists
-chmod 644 "${tmpd}"/exists
-
-echo "existslink" > "${tmps}"/dotfiles/existslink
-chmod 777 "${tmps}"/dotfiles/existslink
-chmod 644 "${tmpd}"/exists
-
-mkdir -p "${tmps}"/dotfiles/direxists
-echo "f1" > "${tmps}"/dotfiles/direxists/f1
-mkdir -p "${tmpd}"/direxists
-echo "f1" > "${tmpd}"/direxists/f1
-chmod 644 "${tmpd}"/direxists/f1
-chmod 744 "${tmpd}"/direxists
-
-mkdir -p "${tmps}"/dotfiles/linkchildren
-echo "f1" > "${tmps}"/dotfiles/linkchildren/f1
-mkdir -p "${tmps}"/dotfiles/linkchildren/d1
-echo "f2" > "${tmps}"/dotfiles/linkchildren/d1/f2
-
-echo '{{@@ profile @@}}' > "${tmps}"/dotfiles/symlinktemplate
-
-mkdir -p "${tmps}"/dotfiles/symlinktemplatedir
-echo "{{@@ profile @@}}" > "${tmps}"/dotfiles/symlinktemplatedir/t
-
-echo 'nomode' > "${tmps}"/dotfiles/nomode
-
 cat > "${cfg}" << _EOF
 config:
   backup: true
@@ -169,6 +133,42 @@ profiles:
     - f_nomode
 _EOF
 #cat ${cfg}
+
+# create the dotfiles
+echo 'f777' > "${tmps}"/dotfiles/f777
+chmod 700 "${tmps}"/dotfiles/f777
+echo 'link' > "${tmps}"/dotfiles/link
+chmod 777 "${tmps}"/dotfiles/link
+mkdir -p "${tmps}"/dotfiles/dir
+echo "f1" > "${tmps}"/dotfiles/dir/f1
+
+echo "exists" > "${tmps}"/dotfiles/exists
+chmod 644 "${tmps}"/dotfiles/exists
+echo "exists" > "${tmpd}"/exists
+chmod 644 "${tmpd}"/exists
+
+echo "existslink" > "${tmps}"/dotfiles/existslink
+chmod 777 "${tmps}"/dotfiles/existslink
+chmod 644 "${tmpd}"/exists
+
+mkdir -p "${tmps}"/dotfiles/direxists
+echo "f1" > "${tmps}"/dotfiles/direxists/f1
+mkdir -p "${tmpd}"/direxists
+echo "f1" > "${tmpd}"/direxists/f1
+chmod 644 "${tmpd}"/direxists/f1
+chmod 744 "${tmpd}"/direxists
+
+mkdir -p "${tmps}"/dotfiles/linkchildren
+echo "f1" > "${tmps}"/dotfiles/linkchildren/f1
+mkdir -p "${tmps}"/dotfiles/linkchildren/d1
+echo "f2" > "${tmps}"/dotfiles/linkchildren/d1/f2
+
+echo '{{@@ profile @@}}' > "${tmps}"/dotfiles/symlinktemplate
+
+mkdir -p "${tmps}"/dotfiles/symlinktemplatedir
+echo "{{@@ profile @@}}" > "${tmps}"/dotfiles/symlinktemplatedir/t
+
+echo 'nomode' > "${tmps}"/dotfiles/nomode
 
 # install
 echo "first install round"
