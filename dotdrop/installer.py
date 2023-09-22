@@ -672,6 +672,9 @@ class Installer:
             if self.dry:
                 self.log.dry(f'would remove {path}')
                 continue
+            if self.safe:
+                if not self.log.ask(f'remove unmanaged \"{path}\"'):
+                    return
             self.log.dbg(f'removing not managed: {path}')
             removepath(path, logger=self.log)
 
