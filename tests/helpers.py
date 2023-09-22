@@ -144,6 +144,7 @@ def _fake_args():
     args['--workdir-clear'] = False
     args['--transw'] = ''
     args['--transr'] = ''
+    args['--remove-existing'] = False
     # cmds
     args['profiles'] = False
     args['files'] = False
