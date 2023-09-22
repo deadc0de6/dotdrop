@@ -720,7 +720,8 @@ def _get_install_installer(opts, tmpdir=None):
                      totemp=tmpdir,
                      showdiff=opts.install_showdiff,
                      backup_suffix=opts.install_backup_suffix,
-                     diff_cmd=opts.diff_command)
+                     diff_cmd=opts.diff_command,
+                     remove_existing_in_dir=opts.install_remove_existing)
     return inst
 
 

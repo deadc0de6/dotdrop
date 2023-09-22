@@ -97,6 +97,7 @@ Some available options:
 * `-a`/`--force-actions`: Force the execution of actions even if the dotfiles are not installed (see [Fake dotfile and actions](config/config-actions.md#fake-dotfile-and-actions) as an alternative)
 * `-f`/`--force`: Do not ask for any confirmation
 * `-W`/`--workdir-clear`: Clear the `workdir` before installing dotfiles (see [the config entry](config/config-config.md) `clear_workdir`)
+* `-R`/`remove-existing`: Applies to directory dotfiles only (`nolink`) and will remove files not managed by dotdrop in the destination directory
 
 To ignore specific patterns during installation, see [the ignore patterns](config/config-file.md#ignore-patterns).
 

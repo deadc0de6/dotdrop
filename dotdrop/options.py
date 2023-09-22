@@ -58,19 +58,19 @@ USAGE = f"""
 {BANNER}
 
 Usage:
-  dotdrop install   [-VbtfndDaW] [-c <path>] [-p <profile>]
-                                 [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdfm]     [-c <path>] [-p <profile>] [-i <pattern>...]
-                                 [--transr=<key>] [--transw=<key>]
-                                 [-l <link>] [-s <path>] <path>...
-  dotdrop compare   [-LVbz]      [-c <path>] [-p <profile>]
-                                 [-w <nb>] [-C <file>...] [-i <pattern>...]
-  dotdrop update    [-VbfdkPz]   [-c <path>] [-p <profile>]
-                                 [-w <nb>] [-i <pattern>...] [<path>...]
-  dotdrop remove    [-Vbfdk]     [-c <path>] [-p <profile>] [<path>...]
-  dotdrop files     [-VbTG]      [-c <path>] [-p <profile>]
-  dotdrop detail    [-Vb]        [-c <path>] [-p <profile>] [<key>...]
-  dotdrop profiles  [-VbG]       [-c <path>]
+  dotdrop install   [-VbtfndDaWR] [-c <path>] [-p <profile>]
+                                  [-w <nb>] [<key>...]
+  dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>] [-i <pattern>...]
+                                  [--transr=<key>] [--transw=<key>]
+                                  [-l <link>] [-s <path>] <path>...
+  dotdrop compare   [-LVbz]       [-c <path>] [-p <profile>]
+                                  [-w <nb>] [-C <file>...] [-i <pattern>...]
+  dotdrop update    [-VbfdkPz]    [-c <path>] [-p <profile>]
+                                  [-w <nb>] [-i <pattern>...] [<path>...]
+  dotdrop remove    [-Vbfdk]      [-c <path>] [-p <profile>] [<path>...]
+  dotdrop files     [-VbTG]       [-c <path>] [-p <profile>]
+  dotdrop detail    [-Vb]         [-c <path>] [-p <profile>] [<key>...]
+  dotdrop profiles  [-VbG]        [-c <path>]
   dotdrop --help
   dotdrop --version
 
@@ -91,6 +91,7 @@ Options:
   -n --nodiff             Do not diff when installing.
   -p --profile=<profile>  Specify the profile to use [default: {PROFILE}].
   -P --show-patch         Provide a one-liner to manually patch template.
+  -R --remove-existing    Remove existing file on install directory.
   -s --as=<path>          Import as a different path from actual path.
   --transr=<key>          Associate trans_read key on import.
   --transw=<key>          Apply trans_write key on import.
@@ -297,6 +298,7 @@ class Options(AttrMonitor):
         self.install_force_chmod = self.force_chmod
         self.install_clear_workdir = self.args['--workdir-clear'] or \
             self.clear_workdir
+        self.install_remove_existing = self.args['--remove-existing']
 
     def _apply_args_compare(self):
         """compare specifics"""

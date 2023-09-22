@@ -28,7 +28,8 @@ class Installer:
     def __init__(self, base='.', create=True, backup=True,
                  dry=False, safe=False, workdir='~/.config/dotdrop',
                  debug=False, diff=True, totemp=None, showdiff=False,
-                 backup_suffix='.dotdropbak', diff_cmd=''):
+                 backup_suffix='.dotdropbak', diff_cmd='',
+                 remove_existing_in_dir=False):
         """
         @base: directory path where to search for templates
         @create: create directory hierarchy if missing when installing
@@ -42,6 +43,8 @@ class Installer:
         @showdiff: show the diff before overwriting (or asking for)
         @backup_suffix: suffix for dotfile backup file
         @diff_cmd: diff command to use
+        @remove_existing_in_dir: remove file in dir dotfiles
+                                 if not managed by dotdrop
         """
         self.create = create
         self.backup = backup
@@ -60,6 +63,7 @@ class Installer:
         self.backup_suffix = backup_suffix
         self.diff_cmd = diff_cmd
         self.action_executed = False
+        self.remove_existing_in_dir = remove_existing_in_dir
         # avoids printing file copied logs
         # when using install_to_tmp for comparing
         self.comparing = False
@@ -130,10 +134,12 @@ class Installer:
         if linktype == LinkTypes.NOLINK:
             # normal file
             if isdir:
-                ret, err = self._copy_dir(templater, src, dst,
-                                          actionexec=actionexec,
-                                          noempty=noempty, ignore=ignore,
-                                          is_template=is_template)
+                ret, err, ins = self._copy_dir(templater, src, dst,
+                                               actionexec=actionexec,
+                                               noempty=noempty, ignore=ignore,
+                                               is_template=is_template)
+                if self.remove_existing_in_dir and ins:
+                    self._remove_existing_in_dir(dst, ins)
             else:
                 ret, err = self._copy_file(templater, src, dst,
                                            actionexec=actionexec,
@@ -583,10 +589,15 @@ class Installer:
         - False, error_msg  : error
         - False, None       : ignored
         - False, 'aborted'    : user aborted
+
+        third arg returned is the list managed dotfiles
+        in the destination or an empty list if anything
+        fails
         """
         self.log.dbg(f'deploy dir {src}')
         # default to nothing installed and no error
-        ret = False, None
+        ret = False
+        dst_dotfiles = []
 
         # handle all files in dir
         for entry in os.listdir(src):
@@ -594,35 +605,75 @@ class Installer:
             self.log.dbg(f'deploy sub from {dst}: {entry}')
             if not os.path.isdir(fpath):
                 # is file
+                fdst = os.path.join(dst, entry)
+                dst_dotfiles.append(fdst)
                 res, err = self._copy_file(templater, fpath,
-                                           os.path.join(dst, entry),
+                                           fdst,
                                            actionexec=actionexec,
                                            noempty=noempty,
                                            ignore=ignore,
                                            is_template=is_template)
                 if not res and err:
                     # error occured
-                    return res, err
+                    return res, err, []
 
                 if res:
                     # something got installed
-                    ret = True, None
+
+                    ret = True
             else:
                 # is directory
-                res, err = self._copy_dir(templater, fpath,
-                                          os.path.join(dst, entry),
-                                          actionexec=actionexec,
-                                          noempty=noempty,
-                                          ignore=ignore,
-                                          is_template=is_template)
+                dpath = os.path.join(dst, entry)
+                dst_dotfiles.append(dpath)
+                res, err, subs = self._copy_dir(templater, fpath,
+                                                dpath,
+                                                actionexec=actionexec,
+                                                noempty=noempty,
+                                                ignore=ignore,
+                                                is_template=is_template)
+                dst_dotfiles.extend(subs)
                 if not res and err:
                     # error occured
-                    return res, err
+                    return res, err, []
 
                 if res:
                     # something got installed
-                    ret = True, None
-        return ret
+                    ret = True
+
+        return ret, None, dst_dotfiles
+
+    def _is_path_in(self, path, paths):
+        """return true if path is in paths"""
+        return any(samefile(path, p) for p in paths)
+
+    def _remove_existing_in_dir(self, directory, installed_files=None):
+        """
+        with --remove-existing this will remove
+        any file in managed directory which
+        are not handled by dotdrop
+        """
+        if not installed_files:
+            return
+        if not os.path.exists(directory) or not os.path.isdir(directory):
+            return
+        to_remove = []
+        for root, dirs, files in os.walk(directory):
+            for name in files:
+                path = os.path.join(root, name)
+                if self._is_path_in(path, installed_files):
+                    continue
+                to_remove.append(os.path.abspath(path))
+            for name in dirs:
+                path = os.path.join(root, name)
+                if self._is_path_in(path, installed_files):
+                    continue
+                to_remove.append(os.path.abspath(path))
+        for path in to_remove:
+            if self.dry:
+                self.log.dry(f'would remove {path}')
+                continue
+            self.log.dbg(f'removing not managed: {path}')
+            removepath(path, logger=self.log)
 
     @classmethod
     def _write_content_to_file(cls, content, src, dst):
