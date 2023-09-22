@@ -92,8 +92,8 @@ Options:
   -p --profile=<profile>  Specify the profile to use [default: {PROFILE}].
   -P --show-patch         Provide a one-liner to manually patch template.
   -s --as=<path>          Import as a different path from actual path.
-  --transr=<key>          Associate trans_read key on import.
-  --transw=<key>          Apply trans_write key on import.
+  --transr=<key>          Associate trans_install key on import.
+  --transw=<key>          Apply trans_update key on import.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
@@ -318,8 +318,8 @@ class Options(AttrMonitor):
         self.import_ignore.extend(self.impignore)
         self.import_ignore.append(f'*{self.install_backup_suffix}')
         self.import_ignore = uniq_list(self.import_ignore)
-        self.import_transw = self.args['--transw']
-        self.import_transr = self.args['--transr']
+        self.import_trans_install = self.args['--transr']
+        self.import_trans_update = self.args['--transw']
 
     def _apply_args_update(self):
         """update specifics"""

@@ -108,8 +108,10 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
                 failed += 1
                 print()
                 if stop_on_first_err:
-                    print(log_out)
-                    print(log_err)
+                    if log_out:
+                        print(log_out)
+                    if log_err:
+                        print(log_err)
                 print(f'test \"{name}\" failed ({ret}): {reason}')
                 if stop_on_first_err:
                     ex.shutdown(wait=False)

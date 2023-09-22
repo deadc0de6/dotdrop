@@ -120,9 +120,10 @@ def _dotfile_compare(opts, dotfile, tmp):
 
     # apply transformation
     tmpsrc = None
-    if dotfile.trans_r:
+    if dotfile.trans_install:
         LOG.dbg('applying transformation before comparing')
-        tmpsrc = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
+        tmpsrc = apply_install_trans(opts.dotpath, dotfile,
+                                     templ, debug=opts.debug)
         if not tmpsrc:
             # could not apply trans
             return False
@@ -238,8 +239,9 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         # nolink
         src = dotfile.src
         tmp = None
-        if dotfile.trans_r:
-            tmp = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
+        if dotfile.trans_install:
+            tmp = apply_install_trans(opts.dotpath, dotfile,
+                                      templ, debug=opts.debug)
             if not tmp:
                 return False, dotfile.key, None
             src = tmp
@@ -538,8 +540,8 @@ def cmd_importer(opts):
                                       import_as=opts.import_as,
                                       import_link=opts.import_link,
                                       import_mode=opts.import_mode,
-                                      import_transw=opts.import_transw,
-                                      import_transr=opts.import_transr)
+                                      import_trans_install=opts.import_transr,
+                                      import_trans_update=opts.import_transw)
         if tmpret < 0:
             ret = False
         elif tmpret > 0:
@@ -772,19 +774,20 @@ def _select(selections, dotfiles):
     return selected
 
 
-def apply_trans(dotpath, dotfile, templater, debug=False):
+def apply_install_trans(dotpath, dotfile, templater, debug=False):
     """
-    apply the read transformation to the dotfile
+    apply the install transformation to the dotfile
     return None if fails and new source if succeed
     """
     src = dotfile.src
     new_src = f'{src}.{TRANS_SUFFIX}'
-    trans = dotfile.trans_r
-    LOG.dbg(f'executing transformation: {trans}')
+    trans = dotfile.trans_install
+    LOG.dbg(f'executing install transformation: {trans}')
     srcpath = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
     if not trans.transform(srcpath, temp, templater=templater, debug=debug):
-        msg = f'transformation \"{trans.key}\" failed for {dotfile.key}'
+        msg = f'install transformation \"{trans.key}\"'
+        msg += f'failed for {dotfile.key}'
         LOG.err(msg)
         if new_src and os.path.exists(new_src):
             removepath(new_src, LOG)

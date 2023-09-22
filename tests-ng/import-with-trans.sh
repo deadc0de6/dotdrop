@@ -34,19 +34,21 @@ echo "dotfiles source (dotpath): ${tmps}"
 # the dotfile destination
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 echo "dotfiles destination: ${tmpd}"
+tmptmp=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
+clear_on_exit "${tmptmp}"
 
 # create the config file
 cfg="${tmps}/config.yaml"
 
 cat > "${cfg}" << _EOF
-trans_read:
+trans_install:
   base64: "cat {0} | base64 -d > {1}"
   decompress: "mkdir -p {1} && tar -xf {0} -C {1}"
   decrypt: "echo {{@@ profile @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   base64: "cat {0} | base64 > {1}"
   compress: "tar -cf {1} -C {0} ."
   encrypt: "echo {{@@ profile @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
@@ -90,16 +92,16 @@ cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -b -V --transw=encrypt --tra
 # check content in dotpath
 echo "checking content"
 file "${tmps}"/dotfiles/"${tmpd}"/abc | grep -i 'text'
-cat "${tmpd}"/abc | base64 > "${tmps}"/test-abc
-diff "${tmps}"/dotfiles/"${tmpd}"/abc "${tmps}"/test-abc
+cat "${tmpd}"/abc | base64 > "${tmptmp}"/test-abc
+diff "${tmps}"/dotfiles/"${tmpd}"/abc "${tmptmp}"/test-abc
 
 file "${tmps}"/dotfiles/"${tmpd}"/def | grep -i 'tar'
-tar -cf "${tmps}"/test-def -C "${tmpd}"/def .
-diff "${tmps}"/dotfiles/"${tmpd}"/def "${tmps}"/test-def
+tar -cf "${tmptmp}"/test-def -C "${tmpd}"/def .
+diff "${tmps}"/dotfiles/"${tmpd}"/def "${tmptmp}"/test-def
 
 file "${tmps}"/dotfiles/"${tmpd}"/ghi | grep -i 'gpg symmetrically encrypted data\|PGP symmetric key encrypted data'
-echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmps}"/test-ghi
-diff "${tmps}"/test-ghi "${tmpd}"/ghi
+echo p1 | gpg -q --batch --yes --passphrase-fd 0 --no-tty -d "${tmps}"/dotfiles/"${tmpd}"/ghi > "${tmptmp}"/test-ghi
+diff "${tmptmp}"/test-ghi "${tmpd}"/ghi
 
 # check is imported in config
 echo "checking imported in config"
@@ -108,33 +110,33 @@ cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^f_abc'
 cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^d_def'
 cd "${ddpath}" | ${bin} -p p1 -c "${cfg}" files | grep '^f_ghi'
 
-# check has trans_write and trans_read in config
-echo "checking trans_write is set in config"
+# check has trans_update and trans_install in config
+echo "checking trans_update is set in config"
 echo "--------------"
 cat "${cfg}"
 echo "--------------"
-cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_write: base64'
-cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_write: compress'
-cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_write: encrypt'
+cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_update: base64'
+cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_update: compress'
+cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_update: encrypt'
 
-cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_read: base64'
-cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_read: decompress'
-cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_read: decrypt'
+cat "${cfg}" | grep -A 4 'f_abc:' | grep 'trans_install: base64'
+cat "${cfg}" | grep -A 4 'd_def:' | grep 'trans_install: decompress'
+cat "${cfg}" | grep -A 4 'f_ghi:' | grep 'trans_install: decrypt'
 
 # install these
 echo "install and check"
-rm "${tmpd}"/abc
-rm -r "${tmpd}"/def
-rm "${tmpd}"/ghi
+rm -rf "${tmpd:?}"/*
 
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 -b -V
 
 # test exist
 echo "check exist"
-[ ! -e "${tmpd}"/abc ] && exit 1
-[ ! -d "${tmpd}"/def/a ] && exit 1
-[ ! -e "${tmpd}"/def/a/file ] && exit 1
-[ ! -e "${tmpd}"/ghi ] && exit 1
+cat "${cfg}"
+tree "${tmpd}"
+[ ! -e "${tmpd}"/abc ] && echo "${tmpd}/abc does not exist" && exit 1
+[ ! -d "${tmpd}"/def/a ] && echo "${tmpd}/def/a does not exist" && exit 1
+[ ! -e "${tmpd}"/def/a/file ] && echo "${tmpd}/def/a/file does not exist" && exit 1
+[ ! -e "${tmpd}"/ghi ] && echo "${tmpd}/ghi does not exist" && exit 1
 
 # test content
 echo "check content"

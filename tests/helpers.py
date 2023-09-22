@@ -246,7 +246,7 @@ def create_yaml_keyval(pairs, parent_dir=None, top_key=None):
 
 # pylint: disable=W0102
 def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
-                         trans={}, trans_write={}, variables={},
+                         trans_install={}, trans_update={}, variables={},
                          dynvariables={}):
     """Adds some juicy content to config files"""
     is_path = isinstance(config, str)
@@ -257,8 +257,8 @@ def populate_fake_config(config, dotfiles={}, profiles={}, actions={},
     config['dotfiles'] = dotfiles
     config['profiles'] = profiles
     config['actions'] = actions
-    config['trans_read'] = trans
-    config['trans_write'] = trans_write
+    config['trans_install'] = trans_install
+    config['trans_update'] = trans_update
     config['variables'] = variables
     config['dynvariables'] = dynvariables
 
