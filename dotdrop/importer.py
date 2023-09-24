@@ -75,8 +75,8 @@ class Importer:
     def import_path(self, path, import_as=None,
                     import_link=LinkTypes.NOLINK,
                     import_mode=False,
-                    import_trans_install="",
-                    import_trans_update=""):
+                    trans_install="",
+                    trans_update=""):
         """
         import a dotfile pointed by path
         returns:
@@ -93,10 +93,10 @@ class Importer:
         # check trans_update if any
         trans_install = None
         trans_update = None
-        if import_trans_install:
-            trans_install = self.conf.get_trans_install(import_trans_install)
-        if import_trans_update:
-            trans_update = self.conf.get_trans_update(import_trans_update)
+        if trans_install:
+            trans_install = self.conf.get_trans_install(trans_install)
+        if trans_update:
+            trans_update = self.conf.get_trans_update(trans_update)
 
         return self._import(path, import_as=import_as,
                             import_link=import_link,
