@@ -91,18 +91,18 @@ class Importer:
             return -1
 
         # check trans_update if any
-        trans_install = None
-        trans_update = None
+        tinstall = None
+        tupdate = None
         if trans_install:
-            trans_install = self.conf.get_trans_install(trans_install)
+            tinstall = self.conf.get_trans_install(trans_install)
         if trans_update:
-            trans_update = self.conf.get_trans_update(trans_update)
+            tupdate = self.conf.get_trans_update(trans_update)
 
         return self._import(path, import_as=import_as,
                             import_link=import_link,
                             import_mode=import_mode,
-                            trans_update=trans_update,
-                            trans_install=trans_install)
+                            trans_update=tupdate,
+                            trans_install=tinstall)
 
     def _import(self, path, import_as=None,
                 import_link=LinkTypes.NOLINK,
