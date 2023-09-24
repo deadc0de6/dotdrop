@@ -28,7 +28,7 @@ def fake_config(path, dotfiles, profile,
         file.write('actions:\n')
         for action in actions:
             file.write(f'  {action.key}: {action.action}\n')
-        file.write('trans:\n')
+        file.write('trans_install:\n')
         for trans in transs:
             file.write(f'  {trans.key}: {trans.action}\n')
         file.write('config:\n')
