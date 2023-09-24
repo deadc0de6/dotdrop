@@ -816,9 +816,6 @@ class CfgYaml:
         new = {}
 
         for k, val in dotfiles.items():
-            # fix depreacated trans
-            self._fix_deprecated_trans_in_dict(val)
-
             if self.key_dotfile_src not in val:
                 # add 'src' as key' if not present
                 val[self.key_dotfile_src] = k
@@ -1193,7 +1190,7 @@ class CfgYaml:
         if old_key in yamldic:
             yamldic[old_key] = yamldic[new_key]
             del yamldic[old_key]
-            msg = f'\"{old_key}\" is deprecated, '
+            msg = f'deprecated \"{old_key}\", '
             msg += f', updated to {new_key}\"'
             self._log.warn(msg)
             self._dirty = True
@@ -1225,12 +1222,13 @@ class CfgYaml:
 
     def _fix_deprecated_trans(self, yamldict):
         """fix deprecated trans key"""
-        if self.key_settings not in yamldict:
-            return
-        if not yamldict[self.key_settings]:
-            return
-        config = yamldict[self.key_settings]
-        self._fix_deprecated_trans_in_dict(config)
+        # top ones
+        self._fix_deprecated_trans_in_dict(yamldict)
+        # dotfiles ones
+        if self.key_dotfiles in yamldict and yamldict[self.key_dotfiles]:
+            config = yamldict[self.key_dotfiles]
+            for _, val in config.items():
+                self._fix_deprecated_trans_in_dict(val)
 
     def _fix_deprecated_link_by_default(self, yamldict):
         """fix deprecated link_by_default"""

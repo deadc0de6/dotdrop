@@ -95,13 +95,9 @@ class Dotfile(DictParser):
     def _adjust_yaml_keys(cls, value):
         """patch dict"""
         value['noempty'] = value.get(cls.key_noempty, False)
-        value['trans_install'] = value.get(cls.key_trans_install)
-        value['trans_update'] = value.get(cls.key_trans_update)
         value['template'] = value.get(cls.key_template, True)
         # remove old entries
         value.pop(cls.key_noempty, None)
-        value.pop(cls.key_trans_install, None)
-        value.pop(cls.key_trans_update, None)
         return value
 
     def __eq__(self, other):
