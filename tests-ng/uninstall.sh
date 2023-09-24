@@ -241,11 +241,11 @@ _EOF
   [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/y/subdir/subfile ] && echo "${PRE} d_y sub backup not restored" && exit 1
   [ -e "${tmpd}"/y/subdir/subfile.dotdropbak ] && echo "${PRE} d_y sub backup not removed" && exit 1
   [ ! -e "${tmpd}"/t ] && echo "${PRE} f_t not restored" && exit 1
-  [ -e "${tmpd}"/t.dotdropback ] && echo "${PRE} f_t backup not removed" && exit 1
+  [ -e "${tmpd}"/t.dotdropbak ] && echo "${PRE} f_t backup not removed" && exit 1
   [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t1 ] && echo "${PRE} d_z t1 not restore" && exit 1
-  [ -e "${tmpd}"/z/t1.dotdropback ] && echo "${PRE} d_z t1 backup not removed" && exit 1
+  [ -e "${tmpd}"/z/t1.dotdropbak ] && echo "${PRE} d_z t1 backup not removed" && exit 1
   [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/t2 ] && echo "${PRE} d_z t2 not restored" && exit 1
-  [ -e "${tmpd}"/z/t2.dotdropback ] && echo "${PRE} d_z t2 backup not removed" && exit 1
+  [ -e "${tmpd}"/z/t2.dotdropbak ] && echo "${PRE} d_z t2 backup not removed" && exit 1
   [ "${LINK_TYPE}" = "nolink" ] && [ ! -e "${tmpd}"/z/file ] && echo "${PRE} d_z file not restored" && exit 1
   [ -e "${tmpd}"/z/file.dotdropbak ] && echo "${PRE} d_z file backup not removed" && exit 1
   [ ! -e "${tmpd}"/trans ] && echo "${PRE} f_trans backup not restored" && exit 1
