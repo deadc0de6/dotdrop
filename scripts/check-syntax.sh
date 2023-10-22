@@ -50,7 +50,7 @@ echo "---------------------------------"
 echo "checking for bash strict mode"
 find tests-ng -iname '*.sh' | while read -r script; do
   #grep 'set +e' "${script}" 2>&1 >/dev/null && echo "set +e found in ${script}" && exit 1
-  grep 'set \-euo errtrace pipefail' "${script}" || (echo "set -euo errtrace pipefail not set in ${script}" && exit 1 )
+  grep 'set -euo errtrace pipefail' "${script}" >/dev/null 2>&1 || (echo "set -euo errtrace pipefail not set in ${script}" && exit 1 )
 done
 
 # PEP8 tests
