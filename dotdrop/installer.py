@@ -138,6 +138,12 @@ class Installer:
                                                actionexec=actionexec,
                                                noempty=noempty, ignore=ignore,
                                                is_template=is_template)
+                
+                ret, err = self._copy_dir(templater, src, dst,
+                                          actionexec=actionexec,
+                                          noempty=noempty, ignore=ignore,
+                                          is_template=is_template,
+                                          chmod=chmod)
                 if self.remove_existing_in_dir and ins:
                     self._remove_existing_in_dir(dst, ins)
             else:
@@ -186,40 +192,57 @@ class Installer:
         if self.dry:
             return self._log_install(ret, err)
 
-        # handle chmod
-        # - on success (r, not err)
-        # - no change (not r, not err)
-        # but not when
-        # - error (not r, err)
-        # - aborted (not r, err)
-        # - special keyword "preserve"
+        self._apply_chmod_after_install(src, dst, ret, err,
+                                        chmod=chmod,
+                                        force_chmod=force_chmod,
+                                        linktype=linktype)
+
+        return self._log_install(ret, err)
+
+    def _apply_chmod_after_install(self, src, dst, ret, err,
+                                   chmod=None,
+                                   is_sub=False,
+                                   force_chmod=False,
+                                   linktype=LinkTypes.NOLINK):
+        """
+        handle chmod after install
+        - on success (r, not err)
+        - no change (not r, not err)
+        but not when
+        - error (not r, err)
+        - aborted (not r, err)
+        - special keyword "preserve"
+        is_sub is used to specify if the file/dir is
+        part of a dotfile directory
+        """
         apply_chmod = linktype in [LinkTypes.NOLINK, LinkTypes.LINK_CHILDREN]
         apply_chmod = apply_chmod and os.path.exists(dst)
         apply_chmod = apply_chmod and (ret or (not ret and not err))
         apply_chmod = apply_chmod and chmod != CfgYaml.chmod_ignore
-        if apply_chmod:
-            if not chmod:
-                chmod = get_file_perm(src)
-            self.log.dbg(f'applying chmod {chmod:o} to {dst}')
-            dstperms = get_file_perm(dst)
-            if dstperms != chmod:
-                # apply mode
-                msg = f'chmod {dst} to {chmod:o}'
-                if not force_chmod and self.safe and not self.log.ask(msg):
-                    ret = False
-                    err = 'aborted'
-                else:
-                    if not self.comparing:
-                        self.log.sub(f'chmod {dst} to {chmod:o}')
-                    if chmodit(dst, chmod, debug=self.debug):
-                        ret = True
-                    else:
-                        ret = False
-                        err = 'chmod failed'
-        else:
+        if is_sub:
+            chmod = None
+        if not apply_chmod:
             self.log.dbg('no chmod applied')
-
-        return self._log_install(ret, err)
+            return
+        if not chmod:
+            chmod = get_file_perm(src)
+            self.log.dbg(f'dotfile in dotpath perm: {chmod:o}')
+        self.log.dbg(f'applying chmod {chmod:o} to {dst}')
+        dstperms = get_file_perm(dst)
+        if dstperms != chmod:
+            # apply mode
+            msg = f'chmod {dst} to {chmod:o}'
+            if not force_chmod and self.safe and not self.log.ask(msg):
+                ret = False
+                err = 'aborted'
+            else:
+                if not self.comparing:
+                    self.log.sub(f'chmod {dst} to {chmod:o}')
+                if chmodit(dst, chmod, debug=self.debug):
+                    ret = True
+                else:
+                    ret = False
+                    err = 'chmod failed'
 
     def install_to_temp(self, templater, tmpdir, src, dst,
                         is_template=True, chmod=None, ignore=None,
@@ -465,6 +488,8 @@ class Installer:
                 return False, 'aborted'
 
             # remove symlink
+            if self.backup and not os.path.isdir(dst):
+                self._backup(dst)
             overwrite = True
             try:
                 removepath(dst)
@@ -551,6 +576,7 @@ class Installer:
         content = None
         if is_template:
             # template the file
+            self.log.dbg(f'it is a template: {src}')
             saved = templater.add_tmp_vars(self._get_tmp_file_vars(src, dst))
             try:
                 content = templater.generate(src)
@@ -580,7 +606,8 @@ class Installer:
 
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
-                  ignore=None, is_template=True):
+                  ignore=None, is_template=True,
+                  chmod=None):
         """
         install src to dst when is a directory
 
@@ -616,6 +643,9 @@ class Installer:
                 if not res and err:
                     # error occured
                     return res, err, []
+
+                self._apply_chmod_after_install(fpath, fdst, ret, err,
+                                                chmod=chmod, is_sub=True)
 
                 if res:
                     # something got installed
@@ -720,6 +750,7 @@ class Installer:
 
         if os.path.lexists(dst):
             # file/symlink exists
+            self.log.dbg(f'file already exists on filesystem: {dst}')
             try:
                 os.stat(dst)
             except OSError as exc:
@@ -745,6 +776,8 @@ class Installer:
 
             if self.backup:
                 self._backup(dst)
+        else:
+            self.log.dbg(f'file does not exist on filesystem: {dst}')
 
         # create hierarchy
         base = os.path.dirname(dst)

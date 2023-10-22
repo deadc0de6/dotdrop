@@ -38,10 +38,12 @@ pyflakes --version
 # checking for TODO/FIXME
 echo "--------------------------------------"
 echo "checking for TODO/FIXME"
-grep -rv 'TODO\|FIXME' dotdrop/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' tests/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' tests-ng/ >/dev/null 2>&1
-grep -rv 'TODO\|FIXME' scripts/ >/dev/null 2>&1
+set +e
+grep -r 'TODO\|FIXME' dotdrop/ && exit 1
+grep -r 'TODO\|FIXME' tests/ && exit 1
+grep -r 'TODO\|FIXME' tests-ng/ && exit 1
+#grep -r 'TODO\|FIXME' scripts/ && exit 1
+set -e
 
 # checking for tests options
 echo "---------------------------------"
@@ -111,7 +113,7 @@ done
 # check other python scripts
 echo "-----------------------------------------"
 echo "checking other python scripts with pylint"
-find . -name "*.py" -not -path "./dotdrop/*" | while read -r script; do
+find . -name "*.py" -not -path "./dotdrop/*" -not -regex "\./\.?v?env/.*" | while read -r script; do
   echo "checking ${script}"
   pylint -sn \
     --disable=R0914 \

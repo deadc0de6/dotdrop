@@ -28,7 +28,7 @@ def fake_config(path, dotfiles, profile,
         file.write('actions:\n')
         for action in actions:
             file.write(f'  {action.key}: {action.action}\n')
-        file.write('trans:\n')
+        file.write('trans_install:\n')
         for trans in transs:
             file.write(f'  {trans.key}: {trans.action}\n')
         file.write('config:\n')
@@ -46,9 +46,9 @@ def fake_config(path, dotfiles, profile,
                 file.write('    actions:\n')
                 for action in dotfile.actions:
                     file.write(f'      - {action.key}\n')
-            if dotfile.trans_r:
-                for trans in dotfile.trans_r:
-                    file.write(f'    trans_read: {trans.key}\n')
+            if dotfile.trans_install:
+                for trans in dotfile.trans_install:
+                    file.write(f'    trans_install: {trans.key}\n')
         file.write('profiles:\n')
         file.write(f'  {profile}:\n')
         file.write('    dotfiles:\n')
@@ -174,7 +174,7 @@ exec bspwm
         fcontent9, _ = create_random_file(tmp, content=trans1)
         dst9 = os.path.join(dst, get_string(6))
         dotfile9 = Dotfile(get_string(6), dst9, os.path.basename(fcontent9),
-                           trans_r=[the_trans])
+                           trans_install=[the_trans])
 
         # to test template
         f10, _ = create_random_file(tmp, content='{{@@ header() @@}}')

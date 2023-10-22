@@ -235,6 +235,21 @@ dotdrop. It will:
 
 For more options, see the usage with `dotdrop --help`.
 
+## Uninstall dotfiles
+
+The `uninstall` command removes dotfiles installed by dotdrop
+```bash
+$ dotdrop uninstall
+```
+
+It will remove the installed dotfiles related to the provided key
+(or all dotfiles if not provided) of the selected profile.
+
+If a backup exists ([backup entry](config/config-config.md#backup-entry)),
+the file will be restored.
+
+For more options, see the usage with `dotdrop --help`.
+
 ## Concurrency
 
 The command line switch `-w`/`--workers`, if set to a value greater than one, enables the use

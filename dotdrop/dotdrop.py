@@ -16,6 +16,7 @@ from dotdrop.options import Options
 from dotdrop.logger import Logger
 from dotdrop.templategen import Templategen
 from dotdrop.installer import Installer
+from dotdrop.uninstaller import Uninstaller
 from dotdrop.updater import Updater
 from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
@@ -120,9 +121,10 @@ def _dotfile_compare(opts, dotfile, tmp):
 
     # apply transformation
     tmpsrc = None
-    if dotfile.trans_r:
+    if dotfile.trans_install:
         LOG.dbg('applying transformation before comparing')
-        tmpsrc = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
+        tmpsrc = apply_install_trans(opts.dotpath, dotfile,
+                                     templ, debug=opts.debug)
         if not tmpsrc:
             # could not apply trans
             return False
@@ -238,8 +240,9 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         # nolink
         src = dotfile.src
         tmp = None
-        if dotfile.trans_r:
-            tmp = apply_trans(opts.dotpath, dotfile, templ, debug=opts.debug)
+        if dotfile.trans_install:
+            tmp = apply_install_trans(opts.dotpath, dotfile,
+                                      templ, debug=opts.debug)
             if not tmp:
                 return False, dotfile.key, None
             src = tmp
@@ -538,8 +541,8 @@ def cmd_importer(opts):
                                       import_as=opts.import_as,
                                       import_link=opts.import_link,
                                       import_mode=opts.import_mode,
-                                      import_transw=opts.import_transw,
-                                      import_transr=opts.import_transr)
+                                      trans_install=opts.import_trans_install,
+                                      trans_update=opts.import_trans_update)
         if tmpret < 0:
             ret = False
         elif tmpret > 0:
@@ -616,6 +619,47 @@ def cmd_detail(opts):
     for dotfile in dotfiles:
         _detail(opts.dotpath, dotfile)
     LOG.log('')
+
+
+def cmd_uninstall(opts):
+    """uninstall"""
+    dotfiles = opts.dotfiles
+    keys = opts.uninstall_key
+
+    if keys:
+        # update only specific keys for this profile
+        dotfiles = []
+        for key in uniq_list(keys):
+            dotfile = opts.conf.get_dotfile(key)
+            if dotfile:
+                dotfiles.append(dotfile)
+
+    if not dotfiles:
+        msg = f'no dotfile to uninstall for this profile (\"{opts.profile}\")'
+        LOG.warn(msg)
+        return False
+
+    if opts.debug:
+        lfs = [k.key for k in dotfiles]
+        LOG.dbg(f'dotfiles registered for uninstall: {lfs}')
+
+    uninst = Uninstaller(base=opts.dotpath,
+                         workdir=opts.workdir,
+                         dry=opts.dry,
+                         safe=opts.safe,
+                         debug=opts.debug,
+                         backup_suffix=opts.install_backup_suffix)
+    uninstalled = 0
+    for dotf in dotfiles:
+        res, msg = uninst.uninstall(dotf.src,
+                                    dotf.dst,
+                                    dotf.link)
+        if not res:
+            LOG.err(msg)
+            continue
+        uninstalled += 1
+    LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
+    return True
 
 
 def cmd_remove(opts):
@@ -773,19 +817,20 @@ def _select(selections, dotfiles):
     return selected
 
 
-def apply_trans(dotpath, dotfile, templater, debug=False):
+def apply_install_trans(dotpath, dotfile, templater, debug=False):
     """
-    apply the read transformation to the dotfile
+    apply the install transformation to the dotfile
     return None if fails and new source if succeed
     """
     src = dotfile.src
     new_src = f'{src}.{TRANS_SUFFIX}'
-    trans = dotfile.trans_r
-    LOG.dbg(f'executing transformation: {trans}')
+    trans = dotfile.trans_install
+    LOG.dbg(f'executing install transformation: {trans}')
     srcpath = os.path.join(dotpath, src)
     temp = os.path.join(dotpath, new_src)
     if not trans.transform(srcpath, temp, templater=templater, debug=debug):
-        msg = f'transformation \"{trans.key}\" failed for {dotfile.key}'
+        msg = f'install transformation \"{trans.key}\"'
+        msg += f'failed for {dotfile.key}'
         LOG.err(msg)
         if new_src and os.path.exists(new_src):
             removepath(new_src, LOG)
@@ -853,6 +898,12 @@ def _exec_command(opts):
             command = 'remove'
             LOG.dbg(f'running cmd: {command}')
             cmd_remove(opts)
+
+        elif opts.cmd_uninstall:
+            # uninstall dotfile
+            command = 'uninstall'
+            LOG.dbg(f'running cmd: {command}')
+            cmd_uninstall(opts)
 
     except UndefinedException as exc:
         LOG.err(exc)

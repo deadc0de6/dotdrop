@@ -37,9 +37,9 @@ First you need to define the encryption/decryption methods, for example
 ```yaml
 variables:
   keyid: "11223344"
-trans_read:
+trans_install:
   _decrypt: "gpg -q --for-your-eyes-only--no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "gpg -q -r {{@@ keyid @@}} --armor --no-tty -o {1} -e {0}"
 ```
 
@@ -60,17 +60,17 @@ Using GPG keys:
 ```yaml
 variables:
   keyid: "11223344"
-trans_read:
+trans_install:
   _decrypt: "gpg -q --for-your-eyes-only--no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "gpg -q -r {{@@ keyid @@}} --armor --no-tty -o {1} -e {0}"
 ```
 
 Passphrase is stored in an environment variable:
 ```yaml
-trans_read:
+trans_install:
   _decrypt: "echo {{@@ env['THE_KEY'] @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "echo {{@@ env['THE_KEY'] @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
@@ -78,9 +78,9 @@ Passphrase is stored as a variable:
 ```yaml
 variables:
   gpg_password: "some password"
-trans_read:
+trans_install:
   _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
@@ -88,9 +88,9 @@ Passphrase is retrieved using a script:
 ```yaml
 dynvariables:
   gpg_password: "./get-password.sh"
-trans_read:
+trans_install:
   _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 
@@ -100,9 +100,9 @@ variables:
   gpg_password_file: "/tmp/the-password"
 dynvariables:
   gpg_password: "cat {{@@ gpg_password_file @@}}"
-trans_read:
+trans_install:
   _decrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --for-your-eyes-only --passphrase-fd 0 --no-tty -d {0} > {1}"
-trans_write:
+trans_update:
   _encrypt: "echo {{@@ gpg_password @@}} | gpg -q --batch --yes --passphrase-fd 0 --no-tty -o {1} -c {0}"
 ```
 

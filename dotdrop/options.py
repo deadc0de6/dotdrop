@@ -68,6 +68,7 @@ Usage:
   dotdrop update    [-VbfdkPz]    [-c <path>] [-p <profile>]
                                   [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]      [-c <path>] [-p <profile>] [<path>...]
+  dotdrop uninstall [-Vbfd]       [-c <path>] [-p <profile>] [<key>...]
   dotdrop files     [-VbTG]       [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]         [-c <path>] [-p <profile>] [<key>...]
   dotdrop profiles  [-VbG]        [-c <path>]
@@ -93,8 +94,8 @@ Options:
   -P --show-patch         Provide a one-liner to manually patch template.
   -R --remove-existing    Remove existing file on install directory.
   -s --as=<path>          Import as a different path from actual path.
-  --transr=<key>          Associate trans_read key on import.
-  --transw=<key>          Apply trans_write key on import.
+  --transr=<key>          Associate trans_install key on import.
+  --transw=<key>          Apply trans_update key on import.
   -t --temp               Install to a temporary directory for review.
   -T --template           Only template dotfiles.
   -V --verbose            Be verbose.
@@ -320,8 +321,8 @@ class Options(AttrMonitor):
         self.import_ignore.extend(self.impignore)
         self.import_ignore.append(f'*{self.install_backup_suffix}')
         self.import_ignore = uniq_list(self.import_ignore)
-        self.import_transw = self.args['--transw']
-        self.import_transr = self.args['--transr']
+        self.import_trans_install = self.args['--transr']
+        self.import_trans_update = self.args['--transw']
 
     def _apply_args_update(self):
         """update specifics"""
@@ -342,6 +343,10 @@ class Options(AttrMonitor):
         self.remove_path = self.args['<path>']
         self.remove_iskey = self.args['--key']
 
+    def _apply_args_uninstall(self):
+        """uninstall specifics"""
+        self.uninstall_key = self.args['<key>']
+
     def _apply_args_detail(self):
         """detail specifics"""
         self.detail_keys = self.args['<key>']
@@ -357,6 +362,7 @@ class Options(AttrMonitor):
         self.cmd_update = self.args['update']
         self.cmd_detail = self.args['detail']
         self.cmd_remove = self.args['remove']
+        self.cmd_uninstall = self.args['uninstall']
 
         # adapt attributes based on arguments
         self.safe = not self.args['--force']
@@ -404,6 +410,9 @@ class Options(AttrMonitor):
 
         # "remove" specifics
         self._apply_args_remove()
+
+        # "uninstall" specifics
+        self._apply_args_uninstall()
 
     def _fill_attr(self):
         """create attributes from conf"""
