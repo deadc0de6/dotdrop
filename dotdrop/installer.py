@@ -612,7 +612,7 @@ class Installer:
         - False, None       : ignored
         - False, 'aborted'    : user aborted
 
-        third arg returned is the list managed dotfiles
+        third arg returned is the list of managed dotfiles
         in the destination or an empty list if anything
         fails
         """
