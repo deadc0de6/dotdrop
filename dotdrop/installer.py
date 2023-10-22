@@ -137,13 +137,8 @@ class Installer:
                 ret, err, ins = self._copy_dir(templater, src, dst,
                                                actionexec=actionexec,
                                                noempty=noempty, ignore=ignore,
-                                               is_template=is_template)
-                
-                ret, err = self._copy_dir(templater, src, dst,
-                                          actionexec=actionexec,
-                                          noempty=noempty, ignore=ignore,
-                                          is_template=is_template,
-                                          chmod=chmod)
+                                               is_template=is_template,
+                                               chmod=chmod)
                 if self.remove_existing_in_dir and ins:
                     self._remove_existing_in_dir(dst, ins)
             else:
