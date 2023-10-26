@@ -33,10 +33,10 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 has_rights()
 {
   echo "testing ${1} is ${2}"
-  [ ! -e "$1" ] && echo "$(basename "$1") does not exist" && exit 1
+  [ ! -e "${1}" ] && echo "${1} does not exist" && exit 1
   local mode
-  mode=$(stat -L -c '%a' "$1")
-  [ "${mode}" != "$2" ] && echo "bad mode for $(basename "$1") (${mode} VS expected ${2})" && exit 1
+  mode=$(stat -L -c '%a' "${1}")
+  [ "${mode}" != "${2}" ] && echo "bad mode for $(basename "${1}") (${mode} VS expected ${2})" && exit 1
   true
 }
 
