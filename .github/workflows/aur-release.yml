@@ -7,7 +7,7 @@ jobs:
   aur_publish:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Prepare AUR package
       env:
         RELEASE_TAG: ${{ github.ref }}
