@@ -16,4 +16,4 @@ For more, check:
 * [The walkthrough example](https://github.com/deadc0de6/dotdrop#getting-started)
 * [How people are using dotdrop](misc/people-using-dotdrop.md)
 
-For more config files examples, [search GitHub](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code).
+For more config files examples, [search GitHub](https://github.com/search?q=path%3Aconfig.yaml+dotdrop&type=Code).

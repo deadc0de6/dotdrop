@@ -8,4 +8,4 @@ For more examples, see how people are using dotdrop:
 
 Dotfiles repositories using dotdrop on [GitHub](https://github.com/topics/dotdrop?o=desc&s=updated).
 
-Or search directly on [GitHub](https://github.com/search?q=filename%3Aconfig.yaml+dotdrop&type=Code) for config examples.
+Or search directly on [GitHub](https://github.com/search?q=path%3Aconfig.yaml+dotdrop&type=Code) for config examples.
