@@ -113,18 +113,21 @@ _EOF
 echo "dry install"
 cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V --dry
 
+echo "test tmpd:${tmpd}"
 cnt=$(find "${tmpd}" -depth 1 -type f | wc -l)
 ls -1 "${tmpd}"
 [ "${cnt}" != "0" ] && echo "dry install failed (1 -> ${cnt})" && exit 1
 
+echo "test tmpw:${tmpw}"
 cnt=$(find "${tmpw}" -depth 1 -type f | wc -l)
 ls -1 "${tmpw}"
 [ "${cnt}" != "0" ] && echo "dry install failed (2 -> ${cnt})" && exit 1
 
+echo "test tmpa:${tmpa}"
 cnt=$(find "${tmpa}" -depth 1 -type f | wc -l)
 ls -1 "${tmpa}"
 [ "${cnt}" != "0" ] && echo "dry install failed (3 -> ${cnt})" && exit 1
-
+echo "dry install ok"
 # -----------------------------
 # test import
 # -----------------------------
@@ -164,6 +167,7 @@ ls -1 "${tmps}"/dotfiles
 [ "${cnt}" != "0" ] && echo "dry import failed (1 -> ${cnt})" && exit 1
 
 diff "${cfg}" "${tmpa}"/config.yaml || (echo "dry import failed (2)" && exit 1)
+echo "dry import ok"
 
 # -----------------------------
 # test update
@@ -232,6 +236,7 @@ grep "modified" "${tmps}"/dotfiles/dirchildren/f1 && echo "dry update failed (4)
 grep "modified" "${tmps}"/dotfiles/dirchildren/f2 && echo "dry update failed (5)" && exit 1
 
 diff "${cfg}" "${tmpa}"/config.yaml || (echo "dry update failed (6)" && exit 1)
+echo "dry update ok"
 
 # -----------------------------
 # test remove
@@ -294,6 +299,7 @@ cd "${ddpath}" | ${bin} remove -c "${cfg}" -f -p p1 -V --dry "${tmpd}"/file "${t
 [ ! -e "${tmps}"/dotfiles/dirchildren/f2 ] && echo "dry remove failed (7)" && exit 1
 
 diff "${cfg}" "${tmpa}"/config.yaml || (echo "dry remove failed (8)" && exit 1)
+echo "dry remove ok"
 
 echo "OK"
 exit 0

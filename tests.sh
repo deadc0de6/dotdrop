@@ -19,6 +19,13 @@ echo "current dotdrop version ${dotdrop_version}"
 echo "=> python version:"
 python3 --version
 
+if [ -n "${GH_WORKFLOW}" ]; then
+  # in CI/CD
+  if [ -z "${TERM}" ]; then
+    export TERM="linux"
+  fi
+fi
+
 # test syntax
 echo "checking syntax..."
 "${cur}"/scripts/check-syntax.sh
