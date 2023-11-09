@@ -162,7 +162,7 @@ echo "content" > "${tmpd}"/dirchildren/f2
 echo "dry import"
 cd "${ddpath}" | ${bin} import -c "${cfg}" -f -p p1 -V --dry "${tmpd}"/file "${tmpd}"/link "${tmpd}"/dir "${tmpd}"/dirchildren
 
-cnt=$(find "${tmps}"/dotfiles -maxdepth 1 | wc -l)
+cnt=$(find "${tmps}"/dotfiles ! -path . -maxdepth 1 | wc -l)
 ls -1 "${tmps}"/dotfiles
 [ "${cnt}" != "0" ] && echo "dry import failed (1 -> ${cnt})" && exit 1
 
