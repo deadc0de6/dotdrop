@@ -19,7 +19,8 @@ echo "current dotdrop version ${dotdrop_version}"
 echo "=> python version:"
 python3 --version
 
-if [ -n "${GH_WORKFLOW}" ]; then
+in_cicd="${GH_WORKFLOW:-}"
+if [ -n "${in_cicd}" ]; then
   # in CI/CD
   if [ -z "${TERM}" ]; then
     export TERM="linux"
