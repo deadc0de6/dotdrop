@@ -114,18 +114,18 @@ echo "dry install"
 cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V --dry
 
 echo "test tmpd:${tmpd}"
-cnt=$(find "${tmpd}" -depth 1 -type f | wc -l)
 ls -1 "${tmpd}"
+cnt=$(find "${tmpd}" -maxdepth 1 -type f | wc -l)
 [ "${cnt}" != "0" ] && echo "dry install failed (1 -> ${cnt})" && exit 1
 
 echo "test tmpw:${tmpw}"
-cnt=$(find "${tmpw}" -depth 1 -type f | wc -l)
 ls -1 "${tmpw}"
+cnt=$(find "${tmpw}" -maxdepth 1 -type f | wc -l)
 [ "${cnt}" != "0" ] && echo "dry install failed (2 -> ${cnt})" && exit 1
 
 echo "test tmpa:${tmpa}"
-cnt=$(find "${tmpa}" -depth 1 -type f | wc -l)
 ls -1 "${tmpa}"
+cnt=$(find "${tmpa}" -maxdepth 1 -type f | wc -l)
 [ "${cnt}" != "0" ] && echo "dry install failed (3 -> ${cnt})" && exit 1
 echo "dry install ok"
 # -----------------------------
@@ -162,7 +162,7 @@ echo "content" > "${tmpd}"/dirchildren/f2
 echo "dry import"
 cd "${ddpath}" | ${bin} import -c "${cfg}" -f -p p1 -V --dry "${tmpd}"/file "${tmpd}"/link "${tmpd}"/dir "${tmpd}"/dirchildren
 
-cnt=$(find "${tmps}"/dotfiles -depth 1 | wc -l)
+cnt=$(find "${tmps}"/dotfiles -maxdepth 1 | wc -l)
 ls -1 "${tmps}"/dotfiles
 [ "${cnt}" != "0" ] && echo "dry import failed (1 -> ${cnt})" && exit 1
 
