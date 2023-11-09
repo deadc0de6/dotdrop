@@ -6,7 +6,7 @@
 #
 
 ## start-cookie
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 PPATH="{PYTHONPATH:-}"
@@ -120,15 +120,19 @@ profiles:
 _EOF
 #cat ${cfg}
 
-echo "update"
+echo "update1"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/exists
+echo "update2"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/existslink
+echo "update3"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/direxists
+echo "update4"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/linkchildren
+echo "update5"
 cd "${ddpath}" | ${bin} update -f -c "${cfg}" -p p1 -V "${tmpd}"/nomode
 
-count=$(cat "${cfg}" | grep chmod | grep -v 'chmod: preserve\|force_chmod' | wc -l)
-echo "${count}"
+count=$(grep chmod "${cfg}" | (grep -v 'preserve\|force_chmod' || :) | wc -l)
+echo "chmod changed: ${count}"
 [ "${count}" != "0" ] && echo "chmod altered" && exit 1
 
 echo "OK"

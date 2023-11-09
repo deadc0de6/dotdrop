@@ -7,7 +7,7 @@
 #
 
 # exit on first error
-#set -euo errtrace pipefail
+#set -eu -o errtrace -o pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
 

@@ -6,7 +6,7 @@
 #
 
 ## start-cookie
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 PPATH="{PYTHONPATH:-}"
@@ -80,7 +80,7 @@ done
 cat "${cfg}"
 
 # test no chmod
-cnt=$(cat "${cfg}" | grep chmod | wc -l)
+cnt=$(cat "${cfg}" | ( grep chmod || : ) | wc -l)
 [ "${cnt}" != "0" ] && echo "chmod wrongly inserted" && exit 1
 
 ######################

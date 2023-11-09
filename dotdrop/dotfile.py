@@ -141,23 +141,23 @@ class Dotfile(DictParser):
         some = self.get_pre_actions()
         if some:
             for act in some:
-                out += f'\n{2*indent}- {act}'
+                out += f'\n{2 * indent}- {act}'
 
         out += f'\n{indent}post-action:'
         some = self.get_post_actions()
         if some:
             for act in some:
-                out += f'\n{2*indent}- {act}'
+                out += f'\n{2 * indent}- {act}'
 
         out += f'\n{indent}trans_install:'
         some = self.get_trans_install()
         if some:
-            out += f'\n{2*indent}- {some}'
+            out += f'\n{2 * indent}- {some}'
 
         out += f'\n{indent}trans_update:'
         some = self.get_trans_update()
         if some:
-            out += f'\n{2*indent}- {some}'
+            out += f'\n{2 * indent}- {some}'
         return out
 
     def __repr__(self):

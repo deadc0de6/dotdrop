@@ -8,7 +8,7 @@
 #
 
 ## start-cookie
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 PPATH="{PYTHONPATH:-}"
@@ -194,7 +194,7 @@ cat "${cfg}"
 # list files
 cd "${ddpath}" | ${bin} detail -c "${cfg}" -p p1 -V
 
-cnt=$(cat "${cfg}" | grep chmod | wc -l)
+cnt=$(cat "${cfg}" | (grep chmod || :) | wc -l)
 [ "${cnt}" != "0" ] && echo "chmod inserted but not needed" && exit 1
 
 ## with config option chmod_on_import

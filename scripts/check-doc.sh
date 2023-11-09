@@ -3,7 +3,7 @@
 # Copyright (c) 2022, deadc0de6
 
 # stop on first error
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 
 ## test doc external links
 echo "------------------------"

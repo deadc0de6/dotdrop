@@ -5,7 +5,7 @@
 # test minversion
 
 ## start-cookie
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 cur=$(cd "$(dirname "${0}")" && pwd)
 ddpath="${cur}/../"
 PPATH="{PYTHONPATH:-}"

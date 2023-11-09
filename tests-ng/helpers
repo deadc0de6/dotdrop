@@ -6,7 +6,7 @@
 #
 # for i in *.sh; do ./$i >/dev/null 2>&1; find /tmp/ -maxdepth 1 -type f -iname 'tmp*' >> /tmp/$i.log; find /tmp/ -maxdepth 1 -type d -iname 'tmp.*-dotdrop-tests' >> /tmp/$i.log; find /tmp/ -maxdepth 1 -type d  -iname 'dotdrop-*' >> /tmp/$i.log; wc -l /tmp/$i.log; [ "`wc -l /tmp/$i.log | awk '{print $1}'`" -gt "0" ] && break; done
 
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 
 #declare -a to_be_cleared
 to_be_cleared=()

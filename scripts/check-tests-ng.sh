@@ -3,7 +3,7 @@
 # Copyright (c) 2023, deadc0de6
 
 # stop on first error
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 
 tmpworkdir="/tmp/dotdrop-tests-workdir"
 export DOTDROP_WORKDIR="${tmpworkdir}"

@@ -3,8 +3,7 @@
 # Copyright (c) 2017, deadc0de6
 
 # stop on first error
-#set -euo errtrace pipefailv
-set -euo errtrace pipefail
+set -eu -o errtrace -o pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
 
