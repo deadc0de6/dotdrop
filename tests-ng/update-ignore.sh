@@ -111,7 +111,7 @@ _EOF
 
 # update
 echo "[+] update"
-cd "${ddpath}" | ${bin} update -f -c "${cfg}" --profile=p1
+cd "${ddpath}" | ${bin} update -f --verbose -c "${cfg}" --profile=p1
 
 # check "a" files are correct
 grep_or_fail 'b' "${dt}/a/c/acfile"
