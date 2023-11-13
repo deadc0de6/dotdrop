@@ -40,28 +40,45 @@ tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 dt="${tmps}/dotfiles"
 mkdir -p "${dt}"
+clear_on_exit "${tmps}"
+clear_on_exit "${tmpd}"
 
-# dotfiles in dotdrop
+# "a" dotfiles in dotdrop
 mkdir -p "${dt}"/a/{b,c,x}
 echo 'a' > "${dt}"/a/b/abfile
 echo 'a' > "${dt}"/a/c/acfile
 echo 'a' > "${dt}"/a/x/xfile
 
-cp -r "${dt}"/a "${tmpd}"/
+# "dir" dotfiles in dotdrop
+mkdir -p "${dt}"/dir/{a,b,c}
+echo 'a' > "${dt}"/dir/a/a
+echo 'b' > "${dt}"/dir/b/b
+echo 'c' > "${dt}"/dir/c/c
 
+# create destinations
+cp -r "${dt}"/a "${tmpd}"/
+cp -r "${dt}"/dir "${tmpd}"/
+
+# update "a" dotdrop files
 mkdir -p "${dt}"/a/be-gone
 echo 'a' > "${dt}"/a/be-gone/file
 
-# filesystem files
+# update "a" filesystem files
 touch "${tmpd}"/a/newfile
 echo 'b' > "${tmpd}"/a/c/acfile
 mkdir -p "${tmpd}"/a/newdir/b
 touch "${tmpd}"/a/newdir/b/c
 mkdir -p "${tmpd}"/a/x
 echo "b" > "${tmpd}"/a/x/xfile
+echo "c" > "${tmpd}"/a/x/yfile
 
-clear_on_exit "${tmps}"
-clear_on_exit "${tmpd}"
+# update "dir" filesystem
+echo "new" > "${tmpd}"/dir/a/a
+mkdir -p "${dt}"/dir/a/be-gone
+touch "${tmpd}"/dir/newfile
+mkdir -p "${tmpd}"/dir/ignore
+echo "ignore-me" > "${tmpd}"/dir/ignore/ignore-me
+echo 'ignore-me' > "${tmpd}"/dir/ignore-file
 
 # create the config file
 cfg="${tmps}/config.yaml"
@@ -78,22 +95,38 @@ dotfiles:
     - "*/cfile"
     - "*/newfile"
     - "*/newdir"
-    - "*/x/**"
+    - "*/x/*"
+  d_dir:
+    dst: ${tmpd}/dir
+    src: dir
+    upignore:
+    - "*/ignore/*"
+    - "*/ignore-file"
 profiles:
   p1:
     dotfiles:
     - f_abc
+    - d_dir
 _EOF
 
 # update
 echo "[+] update"
-cd "${ddpath}" | ${bin} update -f -c "${cfg}" --verbose --profile=p1 --key f_abc
+cd "${ddpath}" | ${bin} update -f -c "${cfg}" --profile=p1
 
-# check files haven't been updated
+# check "a" files are correct
 grep_or_fail 'b' "${dt}/a/c/acfile"
 grep_or_fail 'a' "${dt}/a/x/xfile"
-[ -e "${dt}"/a/newfile ] && echo "should not have been updated" && exit 1
-[ -d "${dt}"/a/be-gone ] && echo "should have been removed" && exit 1
+[ -e "${dt}"/a/newfile ] && echo "'a' newfile should have been removed" && exit 1
+[ -d "${dt}"/a/be-gone ] && echo "'a' be-gone should have been removed" && exit 1
+[ -e "${dt}"/x/yfile ] && echo "'a' yfile should not have been added" && exit 1
+
+# check "dir" files are correct
+grep_or_fail 'new' "${dt}"/dir/a/a
+[ -d "${dt}"/dir/a/be-gone ] && echo "'dir' be-gone should have been removed" && exit 1
+[ ! -e "${tmpd}"/dir/newfile ] && echo "'dir' newfile should have been removed" && exit 1
+[ -d "${dt}"/dir/ignore ] && echo "'dir' ignore dir not ignored" && exit 1
+[ -f "${dt}"/dir/ignore/ignore-me ] && echo "'dir' ignore-me not ignored" && exit 1
+[ -f "${dt}"/dir/ignore-file ] && echo "'dir' ignore-file not ignored" && exit 1
 
 echo "OK"
 exit 0
