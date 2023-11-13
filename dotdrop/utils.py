@@ -303,15 +303,18 @@ def must_ignore(paths, ignores, debug=False):
 
 
 def _cp(src, dst, ignore_func=None, debug=False):
-    """the copy function for copytree"""
+    """
+    the copy function for copytree
+    returns the numb of files copied
+    """
     if ignore_func and ignore_func(src):
-        return
+        return 0
     if not os.path.isfile(src):
         # ignore special files
         if debug:
             LOG.dbg(f'ignore special file \"{src}\"',
                     force=True)
-        return
+        return 0
     dstdir = os.path.dirname(dst)
     if debug:
         LOG.dbg(f'mkdir \"{dstdir}\"',
@@ -320,7 +323,10 @@ def _cp(src, dst, ignore_func=None, debug=False):
     if debug:
         LOG.dbg(f'cp {src} {dst}',
                 force=True)
-    shutil.copy2(src, dst)
+    path = shutil.copy2(src, dst)
+    if os.path.exists(path):
+        return 1
+    return 0
 
 
 def copyfile(src, dst, debug=False):
@@ -332,9 +338,13 @@ def copyfile(src, dst, debug=False):
 
 
 def copytree_with_ign(src, dst, ignore_func=None, debug=False):
-    """copytree with support for ignore"""
+    """
+    copytree with support for ignore
+    returns the numb of files installed
+    """
     if debug:
         LOG.dbg(f'copytree \"{src}\" to \"{dst}\"', force=True)
+    copied_count = 0
     for entry in os.listdir(src):
         srcf = os.path.join(src, entry)
         dstf = os.path.join(dst, entry)
@@ -346,12 +356,13 @@ def copytree_with_ign(src, dst, ignore_func=None, debug=False):
                 LOG.dbg(f'mkdir \"{dstf}\"',
                         force=True)
             os.makedirs(dstf, exist_ok=True)
-            copytree_with_ign(srcf, dstf, ignore_func=ignore_func)
+            copied_count += copytree_with_ign(srcf, dstf, ignore_func=ignore_func)
         else:
             if debug:
                 LOG.dbg(f'copytree, copy file \"{src}\" to \"{dst}\"',
                         force=True)
-            _cp(srcf, dstf, ignore_func=ignore_func, debug=debug)
+            copied_count += _cp(srcf, dstf, ignore_func=ignore_func, debug=debug)
+    return copied_count
 
 
 def uniq_list(a_list):

@@ -287,16 +287,18 @@ class Updater:
                 self.log.dry(f'would cp -r {exist} {new}')
                 continue
             self.log.dbg(f'cp -r {exist} {new}')
+            cpied_cnt = 0
             try:
                 ign_func = self._ignore(ignores)
-                copytree_with_ign(exist, new,
-                                  ignore_func=ign_func,
-                                  debug=self.debug)
+                cpied_cnt= copytree_with_ign(exist, new,
+                                             ignore_func=ign_func,
+                                             debug=self.debug)
             except OSError as exc:
                 msg = f'error copying dir {exist}'
                 self.log.err(f'{msg}: {exc}')
                 continue
-            self.log.sub(f'\"{new}\" dir added')
+            if cpied_cnt:
+                self.log.sub(f'\"{new}\" dir added')
 
     def _ignore(self, ignores):
         def ignore_func(path):
