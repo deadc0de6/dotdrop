@@ -356,12 +356,17 @@ def copytree_with_ign(src, dst, ignore_func=None, debug=False):
                 LOG.dbg(f'mkdir \"{dstf}\"',
                         force=True)
             os.makedirs(dstf, exist_ok=True)
-            copied_count += copytree_with_ign(srcf, dstf, ignore_func=ignore_func)
+            copied_count += copytree_with_ign(srcf,
+                                              dstf,
+                                              ignore_func=ignore_func)
         else:
             if debug:
                 LOG.dbg(f'copytree, copy file \"{src}\" to \"{dst}\"',
                         force=True)
-            copied_count += _cp(srcf, dstf, ignore_func=ignore_func, debug=debug)
+            copied_count += _cp(srcf,
+                                dstf,
+                                ignore_func=ignore_func,
+                                debug=debug)
     return copied_count
 
 

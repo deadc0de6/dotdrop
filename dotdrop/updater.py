@@ -290,9 +290,9 @@ class Updater:
             cpied_cnt = 0
             try:
                 ign_func = self._ignore(ignores)
-                cpied_cnt= copytree_with_ign(exist, new,
-                                             ignore_func=ign_func,
-                                             debug=self.debug)
+                cpied_cnt = copytree_with_ign(exist, new,
+                                              ignore_func=ign_func,
+                                              debug=self.debug)
             except OSError as exc:
                 msg = f'error copying dir {exist}'
                 self.log.err(f'{msg}: {exc}')
