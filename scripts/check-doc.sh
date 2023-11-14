@@ -21,10 +21,15 @@ if ! which remark >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "------------------------"
-echo "checking internal links"
-find . -type f -iname '*.md' | while read -r line; do
-  remark -f -u validate-links "${line}"
-done
+in_cicd="${GH_WORKFLOW:-}"
+if [ -n "${in_cicd}" ]; then
+  echo "------------------------"
+  echo "checking internal links"
+  find . -type f -iname '*.md' | while read -r line; do
+    remark -f -u validate-links "${line}"
+  done
+else
+  echo "not checking internal links..."
+fi
 
 echo "documentation OK"
