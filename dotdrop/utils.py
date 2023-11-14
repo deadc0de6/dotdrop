@@ -333,8 +333,9 @@ def copyfile(src, dst, debug=False):
     """
     copy file from src to dst
     no dir expected!
+    returns True if file was copied
     """
-    _cp(src, dst, debug=debug)
+    return _cp(src, dst, debug=debug) == 1
 
 
 def copytree_with_ign(src, dst, ignore_func=None, debug=False):

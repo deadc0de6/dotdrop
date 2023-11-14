@@ -484,7 +484,8 @@ class Installer:
 
             # remove symlink
             if self.backup and not os.path.isdir(dst):
-                self._backup(dst)
+                if not self._backup(dst):
+                    return False, f'could not backup {dst}'
             overwrite = True
             try:
                 removepath(dst)
@@ -770,7 +771,8 @@ class Installer:
                 overwrite = True
 
             if self.backup:
-                self._backup(dst)
+                if not self._backup(dst):
+                    return False, f'could not backup {dst}'
         else:
             self.log.dbg(f'file does not exist on filesystem: {dst}')
 
@@ -869,16 +871,20 @@ class Installer:
     def _backup(self, path):
         """backup file pointed by path"""
         if self.dry:
-            return
+            return True
         dst = path.rstrip(os.sep) + self.backup_suffix
         self.log.log(f'backup {path} to {dst}')
         # os.rename(path, dst)
         # copy to preserve mode on chmod=preserve
         # since we expect dotfiles this shouldn't have
         # such a big impact but who knows.
-        copyfile(path, dst, debug=self.debug)
+        if not copyfile(path, dst, debug=self.debug):
+            return False
+        if not os.path.exists(dst):
+            return False
         stat = os.stat(path)
         os.chown(dst, stat.st_uid, stat.st_gid)
+        return True
 
     def _exec_pre_actions(self, actionexec):
         """execute action executor"""
