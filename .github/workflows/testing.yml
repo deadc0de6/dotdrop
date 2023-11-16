@@ -36,6 +36,7 @@ jobs:
     - name: Coveralls
       run: |
         pip install coveralls
+        coveralls --version
         coveralls --service=github
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
