@@ -34,7 +34,7 @@ jobs:
       env:
         DOTDROP_WORKERS: 4
     - name: Upload coverage reports to Codecov
-      uses:
+      uses: codecov/codecov-action@v3
       with:
         files: .coverage
       env:
