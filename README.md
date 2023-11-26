@@ -7,7 +7,7 @@
 
 [![Tests Status](https://github.com/deadc0de6/dotdrop/workflows/tests/badge.svg?branch=master)](https://github.com/deadc0de6/dotdrop/actions)
 [![Doc Status](https://readthedocs.org/projects/dotdrop/badge/?version=latest)](https://dotdrop.readthedocs.io/en/latest/?badge=latest)
-[![Coveralls](https://img.shields.io/coveralls/github/deadc0de6/dotdrop)](https://coveralls.io/github/deadc0de6/dotdrop?branch=master)
+[![codecov](https://codecov.io/github/deadc0de6/dotdrop/graph/badge.svg?token=SscGyrtgYL)](https://codecov.io/github/deadc0de6/dotdrop)
 ![CodeQL](https://github.com/deadc0de6/dotdrop/workflows/CodeQL/badge.svg)
 
 [![Python](https://img.shields.io/pypi/pyversions/dotdrop.svg)](https://pypi.python.org/pypi/dotdrop)

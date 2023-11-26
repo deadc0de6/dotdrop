@@ -41,6 +41,7 @@ echo "tests-ng..."
 
 # merge coverage
 coverage combine coverages/*
+coverage xml
 
 # test doc
 echo "checking documentation..."

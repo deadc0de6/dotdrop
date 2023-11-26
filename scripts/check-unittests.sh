@@ -12,4 +12,4 @@ if [ -n "${WORKERS}" ]; then
 fi
 
 mkdir -p coverages/
-coverage run -p --data-file coverages/coverage -m pytest tests -x
+coverage run -p --data-file coverages/coverage --source=dotdrop -m pytest tests -x
