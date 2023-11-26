@@ -33,9 +33,9 @@ jobs:
         ./tests.sh
       env:
         DOTDROP_WORKERS: 4
-    - name: Coveralls
-      run: |
-        pip install coveralls
-        coveralls --service=github --submit=coverage.xml
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: coverage.xml
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
