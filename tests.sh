@@ -6,6 +6,14 @@
 set -eu -o errtrace -o pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
+in_cicd="${GH_WORKFLOW:-}"
+
+# patch TERM var in ci/cd
+if [ -n "${in_cicd}" ]; then
+  if [ -z "${TERM}" ]; then
+    export TERM="linux"
+  fi
+fi
 
 # make sure both version.py and manpage dotdrop.1 are in sync
 dotdrop_version=$(grep version dotdrop/version.py | sed 's/^.*= .\(.*\).$/\1/g')
@@ -19,14 +27,6 @@ echo "current dotdrop version ${dotdrop_version}"
 echo "=> python version:"
 python3 --version
 
-in_cicd="${GH_WORKFLOW:-}"
-if [ -n "${in_cicd}" ]; then
-  # in CI/CD
-  if [ -z "${TERM}" ]; then
-    export TERM="linux"
-  fi
-fi
-
 # test syntax
 echo "checking syntax..."
 "${cur}"/scripts/check-syntax.sh
@@ -36,8 +36,19 @@ echo "unittest..."
 "${cur}"/scripts/check-unittests.sh
 
 # tests-ng
-echo "tests-ng..."
-"${cur}"/scripts/check-tests-ng.sh
+if [ -n "${in_cicd}" ]; then
+  # in CI/CD
+  export DOTDROP_WORKERS=1
+  echo "tests-ng with ${DOTDROP_WORKERS} worker(s)..."
+  "${cur}"/scripts/check-tests-ng.sh
+
+  export DOTDROP_WORKERS=4
+  echo "tests-ng with ${DOTDROP_WORKERS} worker(s)..."
+  "${cur}"/scripts/check-tests-ng.sh
+else
+  echo "tests-ng..."
+  "${cur}"/scripts/check-tests-ng.sh
+fi
 
 # merge coverage
 coverage combine coverages/*

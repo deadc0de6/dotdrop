@@ -13,8 +13,8 @@ workdir_tmp_exists="no"
 [ -d "${HOME}/.config/dotdrop/tmp" ] && workdir_tmp_exists="yes"
 
 # run bash tests
-GH_WORKFLOW=${GITHUB_WORKFLOW:-}
-if [ -z "${GH_WORKFLOW}" ]; then
+in_cicd=${GITHUB_WORKFLOW:-}
+if [ -z "${in_cicd}" ]; then
   ## local
   tests-ng/tests_launcher.py -s
 else

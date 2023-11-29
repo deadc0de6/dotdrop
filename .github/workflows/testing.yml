@@ -26,13 +26,6 @@ jobs:
     - name: Run with 1 worker
       run: |
         ./tests.sh
-      env:
-        DOTDROP_WORKERS: 1
-    - name: Run with 4 workers
-      run: |
-        ./tests.sh
-      env:
-        DOTDROP_WORKERS: 4
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
       with:
