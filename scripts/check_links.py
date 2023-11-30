@@ -31,6 +31,7 @@ VALID_RET = [
 ]
 IGNORES = [
     'badgen.net',
+    'coveralls.io',
 ]
 OK_WHEN_FORBIDDEN = [
     'linux.die.net'

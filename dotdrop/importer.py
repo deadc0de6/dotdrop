@@ -249,15 +249,19 @@ class Importer:
             if not os.path.isdir(in_fs):
                 # is a file
                 self.log.dbg(f'{in_fs} is file')
-                copyfile(in_fs, srcf, debug=self.debug)
+                if not copyfile(in_fs, srcf, debug=self.debug):
+                    self.log.err(f'importing \"{in_fs}\" failed')
+                    return False
             else:
                 # is a dir
                 if os.path.exists(srcf):
                     shutil.rmtree(srcf)
                 self.log.dbg(f'{in_fs} is dir')
-                copytree_with_ign(in_fs, srcf,
-                                  ignore_func=self._ignore,
-                                  debug=self.debug)
+                if not copytree_with_ign(in_fs, srcf,
+                                         ignore_func=self._ignore,
+                                         debug=self.debug):
+                    self.log.err(f'importing \"{in_fs}\" failed')
+                    return False
         except shutil.Error as exc:
             in_dotpath = exc.args[0][0][0]
             why = exc.args[0][0][2]
