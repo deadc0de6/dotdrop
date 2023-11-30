@@ -5,3 +5,5 @@ coverage:
         target: 90%
         threshold: 1%
     patch: off
+ignore:
+  - "dotdrop/__init__.py"
