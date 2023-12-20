@@ -57,6 +57,9 @@ dotfiles:
   f_sub:
     dst: ${tmpd}/sub
     src: sub
+  f_templ:
+    dst: ${tmpd}/templ
+    src: templ
 profiles:
   p0:
     include:
@@ -70,6 +73,11 @@ profiles:
   pup:
     include:
     - psubsub
+  plast:
+    dotfiles:
+    - f_templ
+    variables:
+      onevar: "has some"
 _EOF
 
 cat > "${cfg2}" << _EOF
@@ -95,6 +103,9 @@ profiles:
   psubsub:
     dotfiles:
     - f_sub
+  plast:
+    variables:
+      somevar: "value"
 _EOF
 
 # create the source
@@ -118,6 +129,8 @@ mkdir -p "${tmps}"/dotfiles-other/subdir/sub
 echo "subsub" > "${tmps}"/dotfiles-other/subdir/sub/asub
 echo "{{@@ _dotfile_abs_dst @@}}" >> "${tmps}"/dotfiles-other/subdir/sub/asub
 
+echo "{{@@ onevar @@}} {{@@ somevar @@}}" > "${tmps}"/dotfiles/templ
+
 # files comparison
 cd "${ddpath}" | ${bin} files -c "${cfg1}" -G -p p0 | grep '^f_def'
 cd "${ddpath}" | ${bin} files -c "${cfg1}" -G -p p1 | grep '^f_abc'
@@ -132,6 +145,15 @@ cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p2 -V
 
 [ ! -s "${tmpd}"/def ] && echo "def not installed" && exit 1
 [ ! -s "${tmpd}"/subdir/sub/asub ] && echo "asub not installed" && exit 1
+
+# test import profile variables
+cd "${ddpath}" | ${bin} install -c "${cfg1}" -p plast -V -f
+
+echo "test merge profile variables"
+ls -l "${tmpd}"/
+cat "${tmpd}"/templ
+[ ! -e "${tmpd}"/templ ] && echo "templ not installed" && exit 1
+grep "has some value" "${tmpd}"/templ
 
 # test with non-existing dotpath this time
 
