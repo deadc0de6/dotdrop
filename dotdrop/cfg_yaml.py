@@ -1711,8 +1711,9 @@ class CfgYaml:
                 final[k] += val
             else:
                 # don't know how to handle
-                err = 'unable to merge'
-                raise YamlException(err)
+                # err = 'unable to merge'
+                # raise YamlException(err)
+                final[k] = val
         return final
 
     @classmethod
