@@ -177,7 +177,8 @@ dynvariables:
 * uses `shutil.copytree` with a callback
   that will match each path against the ignore pattern
 * the pattern (and negative pattern) will be matched
-  against the path(s) that are being imported
+  against the path that is being imported
+  (and not against its destination in the dotpath)
 
 **install**
 

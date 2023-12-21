@@ -952,6 +952,7 @@ def main():
     ret, command = _exec_command(opts)
     cmd_time = time.time() - time0
 
+    opts.debug_command()
     LOG.dbg(f'done executing command \"{command}\"')
     LOG.dbg(f'options loaded in {options_time}')
     LOG.dbg(f'command executed in {cmd_time}')

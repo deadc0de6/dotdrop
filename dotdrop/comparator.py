@@ -123,8 +123,14 @@ class Comparator:
         # handle files only in deployed dir
         self.log.dbg(f'files only in deployed dir: {comp.left_only}')
         for i in comp.left_only:
+            abspath1 = os.path.join(local_path, i)
+            if os.path.isdir(abspath1):
+                abspath1 += os.path.sep
+            abspath2 = os.path.join(deployed_path, i)
+            if os.path.isdir(abspath2):
+                abspath2 += os.path.sep
             if self.ignore_missing_in_dotdrop or \
-               must_ignore([os.path.join(local_path, i)],
+               must_ignore([abspath1, abspath2],
                            ignore, debug=self.debug):
                 continue
             ret.append(f'=> \"{i}\" does not exist on destination\n')
@@ -132,7 +138,13 @@ class Comparator:
         # handle files only in dotpath dir
         self.log.dbg(f'files only in dotpath dir: {comp.right_only}')
         for i in comp.right_only:
-            if must_ignore([os.path.join(deployed_path, i)],
+            abspath1 = os.path.join(local_path, i)
+            if os.path.isdir(abspath1):
+                abspath1 += os.path.sep
+            abspath2 = os.path.join(deployed_path, i)
+            if os.path.isdir(abspath2):
+                abspath2 += os.path.sep
+            if must_ignore([abspath1, abspath2],
                            ignore, debug=self.debug):
                 continue
 

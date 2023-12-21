@@ -170,8 +170,8 @@ class Options(AttrMonitor):
         self.log.dbg('#################### DOTDROP ####################')
         self.log.dbg('#################################################')
         self.log.dbg(f'version: {VERSION}')
-        args = ' '.join(sys.argv)
-        self.log.dbg(f'command: {args}')
+        self.argv = ' '.join(sys.argv)
+        self.log.dbg(f'command: {self.argv}')
         self.log.dbg(f'config file: {self.confpath}')
 
         self._read_config()
@@ -184,6 +184,9 @@ class Options(AttrMonitor):
         self._debug_attr()
         # start monitoring for bad attribute
         self._set_attr_err = True
+
+    def debug_command(self):
+        self.log.dbg(f'command: {self.argv}')
 
     @classmethod
     def _get_config_from_env(cls, name):

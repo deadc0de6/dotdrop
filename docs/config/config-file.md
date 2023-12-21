@@ -191,7 +191,8 @@ It is possible to ignore specific patterns when using dotdrop.
     * Using dotfiles block [upignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
 
-The ignore pattern must follow Unix shell-style wildcards, like, for example `*/path/to/file`.
+The ignore pattern must follow Unix shell-style wildcards, like, for example `*/path/to/file` for files or
+`*/path/to/directory/*` for directories.
 Make sure to quote these when using wildcards in the config file.
 
 ```yaml
@@ -210,10 +211,10 @@ dotfiles:
     dst: ~/.vim
     src: vim
     upignore:
-    - '*/undo-dir'
-    - '*/plugged'
+    - '*/undo-dir/*'
+    - '*/plugged/*'
     instignore:
-    - '*/internal'
+    - '*/internal/*'
     cmpignore:
     - '*/ignore-me'
 ...
@@ -235,7 +236,7 @@ dotfiles:
     src: vim
     cmpignore:
       - '*'
-      - '!*/colors/**'
+      - '!*/colors/*'
 ```
 
 To completely ignore comparison of a specific dotfile:
@@ -255,7 +256,7 @@ dotfiles:
     src: config/some_directory
     dst: ~/.config/some_directory
     upignore:
-      - '*sub_directory_to_ignore'
+      - '*/sub_directory_to_ignore/*'
 ```
 
 To ignore a specific file `testfile` and directory `testdir` when importing:
@@ -273,7 +274,7 @@ dotfiles:
     src: zsh
     dst: ~/.config/zsh
     upignore:
-      - "plugins/*"
+      - "*/plugins/*"
       - "!plugins/custom_plugin.zsh"
 ```
 

@@ -261,7 +261,7 @@ class Updater:
         local_path = os.path.expanduser(local_path)
 
         # find the differences
-        diff = filecmp.dircmp(deployed_path, local_path, ignore=None)
+        diff = filecmp.dircmp(deployed_path, local_path)
         # handle directories diff
         ret = self._merge_dirs(diff, dotfile,
                                ignores)
@@ -278,6 +278,7 @@ class Updater:
             if not os.path.isdir(exist):
                 # ignore files for now
                 continue
+            exist += os.path.sep
             # match to dotdrop dotpath
             new = os.path.join(right, toadd)
             if ignore_missing_in_dotdrop and not os.path.exists(new):
@@ -316,6 +317,7 @@ class Updater:
             if not os.path.isdir(old):
                 # ignore files for now
                 continue
+            old += os.path.sep
             if self._must_ignore([old], ignores):
                 continue
             if self.dry:
@@ -347,7 +349,7 @@ class Updater:
                               ignores,
                               compare=False)
 
-    def _merge_dirs_copy_left_only(self, diff, left, right,
+    def _merge_files_copy_left_only(self, diff, left, right,
                                    ignore_missing_in_dotdrop,
                                    ignores):
         """copy files that don't exist in dotdrop"""
@@ -375,7 +377,7 @@ class Updater:
             self._mirror_file_perms(exist, new)
             self.log.sub(f'\"{new}\" added')
 
-    def _merge_dirs_remove_right_only_2(self, diff, right, ignores):
+    def _merge_files_remove_right_only(self, diff, right, ignores):
         """remove files that don't exist in deployed version"""
         self.log.dbg(f'_merge_dirs_remove_right_only_2: {diff.right_only}')
         for toremove in diff.right_only:
@@ -402,16 +404,18 @@ class Updater:
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             dotfile.ignore_missing_in_dotdrop
 
+        # directories
         self._merge_dirs_create_left_only(diff, left, right,
                                           ignore_missing_in_dotdrop,
                                           ignores)
         self._merge_dirs_remove_right_only(diff, left, right,
                                            ignore_missing_in_dotdrop,
                                            ignores)
-        self._merge_dirs_copy_left_only(diff, left, right,
+        # files
+        self._merge_files_copy_left_only(diff, left, right,
                                         ignore_missing_in_dotdrop,
                                         ignores)
-        self._merge_dirs_remove_right_only_2(diff, right, ignores)
+        self._merge_files_remove_right_only(diff, right, ignores)
 
         # compare rights
         for common in diff.common_files:
