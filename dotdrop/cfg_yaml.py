@@ -1709,11 +1709,13 @@ class CfgYaml:
                 if k not in final:
                     final[k] = []
                 final[k] += val
+            elif isinstance(val, str):
+                final[k] = val
             else:
                 # don't know how to handle
-                # err = 'unable to merge'
-                # raise YamlException(err)
-                final[k] = val
+                err = 'unable to merge'
+                raise YamlException(err)
+
         return final
 
     @classmethod
