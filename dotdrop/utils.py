@@ -228,6 +228,9 @@ def _match_ignore_pattern(path, pattern, debug=False):
     """
     returns true if path matches the pattern
     """
+    if debug:
+        msg = f'fnmatch \"{path}\" against {pattern}'
+        LOG.dbg(msg, force=True)
     ret = fnmatch.fnmatch(path, pattern)
     if debug:
         LOG.dbg(f'ignore \"{pattern}\" match: {path}',
@@ -350,6 +353,8 @@ def copytree_with_ign(src, dst, ignore_func=None, debug=False):
         srcf = os.path.join(src, entry)
         dstf = os.path.join(dst, entry)
         if ignore_func:
+            if os.path.isdir(srcf):
+                srcf += os.path.sep
             if ignore_func(srcf):
                 continue
         if os.path.isdir(srcf):
