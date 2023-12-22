@@ -26,15 +26,6 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 ################################################################
 # this is the test
 ################################################################
-# $1 pattern
-# $2 path
-grep_or_fail()
-{
-  if ! grep "${1}" "${2}" >/dev/null 2>&1; then
-    echo "${PRE} pattern \"${1}\" not found in ${2}"
-    exit 1
-  fi
-}
 
 # the dotfile source
 tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)

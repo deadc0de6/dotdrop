@@ -350,8 +350,8 @@ class Updater:
                               compare=False)
 
     def _merge_files_copy_left_only(self, diff, left, right,
-                                   ignore_missing_in_dotdrop,
-                                   ignores):
+                                    ignore_missing_in_dotdrop,
+                                    ignores):
         """copy files that don't exist in dotdrop"""
         self.log.dbg(f'_merge_dirs_copy_left_only: {diff.left_only}')
         for toadd in diff.left_only:
@@ -413,8 +413,8 @@ class Updater:
                                            ignores)
         # files
         self._merge_files_copy_left_only(diff, left, right,
-                                        ignore_missing_in_dotdrop,
-                                        ignores)
+                                         ignore_missing_in_dotdrop,
+                                         ignores)
         self._merge_files_remove_right_only(diff, right, ignores)
 
         # compare rights
