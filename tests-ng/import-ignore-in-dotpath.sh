@@ -52,7 +52,7 @@ config:
   create: true
   dotpath: dotfiles
   impignore:
-  - "ignoreme"
+  - "*/ignoreme/*"
 dotfiles:
 profiles:
 _EOF
