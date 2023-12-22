@@ -186,6 +186,7 @@ class Options(AttrMonitor):
         self._set_attr_err = True
 
     def debug_command(self):
+        """print the original command"""
         self.log.dbg(f'command: {self.argv}')
 
     @classmethod
