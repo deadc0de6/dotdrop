@@ -613,7 +613,7 @@ def cmd_detail(opts):
     dotfiles = opts.dotfiles
     if opts.detail_keys:
         # filtered dotfiles to install
-        uniq = uniq_list(opts.details_keys)
+        uniq = uniq_list(opts.detail_keys)
         dotfiles = [d for d in dotfiles if d.key in uniq]
     LOG.emph(f'dotfiles details for profile \"{opts.profile}\":\n')
     for dotfile in dotfiles:
