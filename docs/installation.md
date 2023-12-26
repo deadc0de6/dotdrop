@@ -4,6 +4,7 @@
 * [As a submodule in a virtualenv](#as-a-submodule-in-a-virtualenv)
 * [Submodule upgrade/downgrade](#submodule-upgradedowngrade)
 * [PyPI package](#pypi-package)
+- [pipx install](#pipx-install)
 * [Homebrew package](#homebrew-package)
 * [Debian unstable (sid)](#debian)
 * [Ubuntu lunar (23.04)](#ubuntu)
@@ -160,6 +161,38 @@ $ dotdrop --help
 
 Then follow the instructions under [PyPI package](#pypi-package).
 
+## pipx install
+
+[pipx](https://pipx.pypa.io/) allows to install a package in an isolated
+environment.
+
+It is packaged in all main Linux distributions, and macOS.
+
+### PyPI package with pipx
+
+To install the last PyPI package:
+```bash
+$ pipx install dotdrop
+```
+
+To upgrade an installed package to the last version.
+```bash
+$ pipx upgrade dotdrop
+```
+
+### From GitHub with pipx
+
+To install the from the master branch on GitHub
+
+```bash
+$ pipx install git+https://github.com/deadc0de6/dotdrop.git
+```
+
+You can choose a branch or commit
+```bash
+$ pipx install git+https://github.com/deadc0de6/dotdrop.git@2c462c3
+```
+
 ## Homebrew package
 
 [Homebrew package](https://formulae.brew.sh/formula/dotdrop)
@@ -171,16 +204,18 @@ $ brew install dotdrop
 
 ## Debian
 
-[Debian package](https://packages.debian.org/sid/dotdrop) in sid (unstable)
+dotdrop is a
+[Debian package](https://packages.debian.org/dotdrop) since bookworm (Debian 12), be
+warned that the Debian version is usually behind the last stable release.
 
 Install dotdrop
 ```bash
-sudo apt install dotdrop
+$ sudo apt install dotdrop
 ```
 
 ## Ubuntu
 
-[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop) in lunar (23.04)
+[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop) since lunar (23.04)
 
 Install dotdrop
 ```bash
@@ -200,7 +235,7 @@ Dotdrop is available as a snap package: <https://snapcraft.io/dotdrop>.
 
 Install it with:
 ```bash
-snap install dotdrop
+$ snap install dotdrop
 ```
 
 If you encounter warnings like `Warning: using regular magic file`,
