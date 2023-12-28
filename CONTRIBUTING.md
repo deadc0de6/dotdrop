@@ -161,6 +161,14 @@ dynvariables:
 
 ## Ignore pattern
 
+Officially only `*/file` and `*/dir/*` should be used for ignore pattern.
+However we still recursively process each path components to ensure
+that pattern like `*/dir` are matched (see `_match_ignore_pattern`
+in `utils.py`).
+
+We also append a separator to directory before checking
+for a match with the ignore patterns.
+
 **compare**
 
 * for files, match with ignore directly

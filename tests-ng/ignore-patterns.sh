@@ -57,11 +57,11 @@ dotfiles:
     src: mpv
     dst: ${tmpd}/mpv
     cmpignore:
-    - '*/watch_later/*'
+    - '*/watch_later'
     upignore:
-    - '*/watch_later/*'
+    - '*/watch_later'
     instignore:
-    - '*/watch_later/*'
+    - '*/watch_later'
 profiles:
   p1:
     dotfiles:
@@ -97,7 +97,7 @@ config:
   dotpath: dotfiles
   ignoreempty: true
   impignore:
-    - '*/watch_later/*'
+    - '*/watch_later'
 dotfiles:
 profiles:
 _EOF

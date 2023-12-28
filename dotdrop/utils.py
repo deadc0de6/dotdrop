@@ -227,15 +227,23 @@ def strip_home(path):
 def _match_ignore_pattern(path, pattern, debug=False):
     """
     returns true if path matches the pattern
+    we test the entire path but also
+    any parent directory recursively to
+    be able to match pattern like "*/dir"
     """
-    if debug:
-        msg = f'fnmatch \"{path}\" against {pattern}'
-        LOG.dbg(msg, force=True)
-    ret = fnmatch.fnmatch(path, pattern)
-    if debug:
-        LOG.dbg(f'ignore \"{pattern}\" match: {path}',
-                force=True)
-    return ret
+    subpath = path
+    while subpath != os.path.sep:
+        if debug:
+            msg = f'fnmatch \"{subpath}\" against {pattern}'
+            LOG.dbg(msg, force=True)
+        ret = fnmatch.fnmatch(subpath, pattern)
+        if debug:
+            LOG.dbg(f'ignore \"{pattern}\" match: {subpath}',
+                    force=True)
+        if ret:
+            return ret
+        subpath = os.path.dirname(subpath)
+    return False
 
 
 def _must_ignore(path, ignores, neg_ignores, debug=False):
