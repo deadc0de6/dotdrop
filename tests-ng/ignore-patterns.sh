@@ -163,7 +163,8 @@ clean_both
 create_in_dotpath
 create_in_dst
 echo newfile "${tmpd}/mpv/watch_later/newfile"
-rm -rf "${dotpath}/mpv/watch_later"
+[ ! -e "${dotpath}/mpv/watch_later" ] && echo "1 does not exist!" && exit 1
+rm -r "${dotpath}/mpv/watch_later"
 
 cd "${ddpath}" | ${bin} update -f -c "${cfg1}" -p p1 -V
 [ -d "${dotpath}/mpv/watch_later" ] && echo "update (cfg1) failed" && exit 1
@@ -173,7 +174,8 @@ clean_both
 create_in_dotpath
 create_in_dst
 echo newfile "${tmpd}/mpv/watch_later/newfile"
-rm -rf "${dotpath}/mpv/watch_later"
+[ ! -e "${dotpath}/mpv/watch_later" ] && echo "2 does not exist!" && exit 1
+rm -r "${dotpath}/mpv/watch_later"
 
 cd "${ddpath}" | ${bin} update -f -c "${cfg2}" -p p1 -V
 [ -d "${dotpath}/mpv/watch_later" ] && echo "update (cfg2) failed" && exit 1
@@ -203,28 +205,32 @@ clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${dotpath}/mpv/watch_later"
+[ ! -e "${dotpath}/mpv/watch_later" ] && echo "3 does not exist!" && exit 1
+rm -r "${dotpath}/mpv/watch_later"
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${tmpd}/mpv/watch_later"
+[ ! -e "${tmpd}/mpv/watch_later" ] && echo "4 does not exist!" && exit 1
+rm -r "${tmpd}/mpv/watch_later"
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${dotpath}/mpv/watch_later"
+[ ! -e "${dotpath}/mpv/watch_later" ] && echo "5 does not exist!" && exit 1
+rm -r "${dotpath}/mpv/watch_later"
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
 
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${tmpd}/mpv/watch_later"
+[ ! -e "${tmpd}/mpv/watch_later" ] && echo "6 does not exist!" && exit 1
+rm -r "${tmpd}/mpv/watch_later"
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
 
 ###################################################
