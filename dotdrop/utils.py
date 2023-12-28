@@ -237,10 +237,10 @@ def _match_ignore_pattern(path, pattern, debug=False):
             msg = f'fnmatch \"{subpath}\" against {pattern}'
             LOG.dbg(msg, force=True)
         ret = fnmatch.fnmatch(subpath, pattern)
-        if debug:
-            LOG.dbg(f'ignore \"{pattern}\" match: {subpath}',
-                    force=True)
         if ret:
+            if debug:
+                LOG.dbg(f'ignore \"{pattern}\" match: {subpath}',
+                        force=True)
             return ret
         subpath = os.path.dirname(subpath)
     return False
