@@ -250,6 +250,13 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
     """
     return true if path matches any ignore patterns
     """
+    if debug:
+        msg = f'path to check for ignore: {path}'
+        LOG.dbg(msg, force=True)
+        msg = f'ignore pattern: {ignores}'
+        LOG.dbg(msg, force=True)
+        msg = f'neg ignore pattern: {neg_ignores}'
+        LOG.dbg(msg, force=True)
     match_ignore_pattern = []
     # test for ignore pattern
     for pattern in ignores:
