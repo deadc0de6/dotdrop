@@ -120,7 +120,7 @@ class Comparator:
         ret = []
         comp = filecmp.dircmp(local_path, deployed_path)
 
-        # handle files only in deployed dir
+        # handle files and subdirs only in deployed dir
         self.log.dbg(f'files only in deployed dir: {comp.left_only}')
         for i in comp.left_only:
             abspath1 = os.path.join(local_path, i)
@@ -135,7 +135,7 @@ class Comparator:
                 continue
             ret.append(f'=> \"{i}\" does not exist on destination\n')
 
-        # handle files only in dotpath dir
+        # handle files and subdirs only in dotpath dir
         self.log.dbg(f'files only in dotpath dir: {comp.right_only}')
         for i in comp.right_only:
             abspath1 = os.path.join(local_path, i)
