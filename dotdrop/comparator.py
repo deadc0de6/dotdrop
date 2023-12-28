@@ -116,12 +116,12 @@ class Comparator:
 
     def _compare_dirs(self, local_path, deployed_path, ignore):
         """compare directories"""
-        self.log.dbg(f'compare {local_path} and {deployed_path}')
+        self.log.dbg(f'compare dirs {local_path} and {deployed_path}')
         ret = []
         comp = filecmp.dircmp(local_path, deployed_path)
 
         # handle files and subdirs only in deployed dir
-        self.log.dbg(f'files only in deployed dir: {comp.left_only}')
+        self.log.dbg(f'files/dirs only in deployed dir: {comp.left_only}')
         for i in comp.left_only:
             abspath1 = os.path.join(local_path, i)
             if os.path.isdir(abspath1):
@@ -136,7 +136,7 @@ class Comparator:
             ret.append(f'=> \"{i}\" does not exist on destination\n')
 
         # handle files and subdirs only in dotpath dir
-        self.log.dbg(f'files only in dotpath dir: {comp.right_only}')
+        self.log.dbg(f'files/dirs only in dotpath dir: {comp.right_only}')
         for i in comp.right_only:
             abspath1 = os.path.join(local_path, i)
             if os.path.isdir(abspath1):
