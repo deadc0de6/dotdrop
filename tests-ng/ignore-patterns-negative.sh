@@ -250,13 +250,16 @@ clean_both
 create_in_dst
 create_in_dotpath
 
+####
+# changed in dotpath
 rm "${dotpath}/mpv/watch_later/watch_later_file"
 # this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
 rm -r "${dotpath}/mpv/watch_later"
 set +e
-# this should fail
+# this should fail since it should shows that
+# the keepme* are not present
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V && echo "compare cfg1 1 should failed" && exit 1
 set -e
 
@@ -264,13 +267,16 @@ clean_both
 create_in_dst
 create_in_dotpath
 
+####
+# changed in dest
 rm "${tmpd}/mpv/watch_later/watch_later_file"
 # this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
 rm -r "${tmpd}/mpv/watch_later"
 set +e
-# this should fail
+# this should fail since it should shows that
+# the keepme* are not present
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V && echo "compare cfg1 2 should failed" && exit 1
 set -e
 
@@ -278,13 +284,16 @@ clean_both
 create_in_dst
 create_in_dotpath
 
+####
+# changed in dotpath
 rm "${dotpath}/mpv/watch_later/watch_later_file"
 # this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
 
 rm -r "${dotpath}/mpv/watch_later"
 set +e
-# this should fail
+# this should fail since it should shows that
+# the keepme* are not present
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V && echo "compare cfg2 1 should failed" && exit 1
 set -e
 
@@ -292,13 +301,16 @@ clean_both
 create_in_dst
 create_in_dotpath
 
+####
+# changed in dest
 rm "${tmpd}/mpv/watch_later/watch_later_file"
 # this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
 
 rm -r "${tmpd}/mpv/watch_later"
 set +e
-# this should fail
+# this should fail since it should shows that
+# the keepme* are not present
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V && echo "compare cfg2 2 should failed" && exit 1
 set -e
 
