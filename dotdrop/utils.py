@@ -233,16 +233,19 @@ def _match_ignore_pattern(path, pattern, debug=False):
     """
     subpath = path
     while subpath != os.path.sep:
-        if debug:
-            msg = f'fnmatch \"{subpath}\" against {pattern}'
-            LOG.dbg(msg, force=True)
+        #if debug:
+        #    msg = f'fnmatch \"{subpath}\" against {pattern}'
+        #    LOG.dbg(msg, force=True)
         ret = fnmatch.fnmatch(subpath, pattern)
         if ret:
             if debug:
-                LOG.dbg(f'ignore \"{pattern}\" match: {subpath}',
+                LOG.dbg(f'ignore \"{pattern}\" match: {subpath} from {path}',
                         force=True)
             return ret
         subpath = os.path.dirname(subpath)
+    # if debug:
+    #     LOG.dbg(f'NOT ignore \"{pattern}\" match: {path}',
+    #             force=True)
     return False
 
 
@@ -250,17 +253,17 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
     """
     return true if path matches any ignore patterns
     """
-    if debug:
-        msg = f'path to check for ignore: {path}'
-        LOG.dbg(msg, force=True)
-        msg = f'ignore pattern: {ignores}'
-        LOG.dbg(msg, force=True)
-        msg = f'neg ignore pattern: {neg_ignores}'
-        LOG.dbg(msg, force=True)
+    # if debug:
+    #     msg = f'path to check for ignore: {path}'
+    #     LOG.dbg(msg, force=True)
+    #     msg = f'ignore pattern: {ignores}'
+    #     LOG.dbg(msg, force=True)
+    #     msg = f'neg ignore pattern: {neg_ignores}'
+    #     LOG.dbg(msg, force=True)
     match_ignore_pattern = []
     # test for ignore pattern
     for pattern in ignores:
-        if _match_ignore_pattern(path, pattern):
+        if _match_ignore_pattern(path, pattern, debug=debug):
             match_ignore_pattern.append(path)
 
     # remove negative match
@@ -269,11 +272,15 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
         # remove '!'
         pattern = pattern[1:]
         neg_ignore_cnt += 1
-        if not _match_ignore_pattern(path, pattern):
+        if not _match_ignore_pattern(path, pattern, debug=debug):
             if debug:
-                msg = f'negative ignore \"{pattern}\" NO match: {path}'
+                msg = f'NO MATCH negative ignore \"{pattern}\" against {path}'
                 LOG.dbg(msg, force=True)
             continue
+        else:
+            if debug:
+                msg = f'MATCH negative ignore \"{pattern}\" against {path}'
+                LOG.dbg(msg, force=True)
         # remove from the list
         try:
             match_ignore_pattern.remove(path)
@@ -286,18 +293,20 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
             warn += 'previous ignore pattern.'
             LOG.warn(warn)
     if len(match_ignore_pattern) < 1:
+        # if debug:
+        #     LOG.dbg(f'NOT ignoring \"{path}\"', force=True)
         return False
     if os.path.isdir(path) and neg_ignore_cnt > 0:
         # this ensures whoever calls this function will
         # descend into the directory to explore the possiblity
         # of a file matching the non-ignore pattern
         if debug:
-            msg = 'ignore would have match but neg ignores'
+            msg = '[!!] ignore would have match but neg ignores'
             msg += f' present and is a dir: \"{path}\" -> not ignored!'
             LOG.dbg(msg, force=True)
         return False
-    if debug:
-        LOG.dbg(f'effectively ignoring \"{path}\"', force=True)
+    # if debug:
+    #     LOG.dbg(f'effectively ignoring \"{path}\"', force=True)
     return True
 
 
@@ -308,15 +317,17 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg(f'must ignore? \"{paths}\" against pattern(s): {ignores}',
+        LOG.dbg(f'IGNORE? \"{paths}\" against {ignores}',
                 force=True)
     nign, ign = categorize(
         lambda ign: ign.startswith('!'), ignores)
     for path in paths:
         if _must_ignore(path, ign, nign, debug=debug):
+            if debug:
+                LOG.dbg(f'IGNORING \"{paths}\"', force=True)
             return True
     if debug:
-        LOG.dbg(f'NOT ignoring \"{paths}\"', force=True)
+        LOG.dbg(f'NOT IGNORING \"{paths}\"', force=True)
     return False
 
 
