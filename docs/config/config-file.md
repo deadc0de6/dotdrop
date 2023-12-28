@@ -191,7 +191,7 @@ It is possible to ignore specific patterns when using dotdrop.
     * Using dotfiles block [upignore](config-dotfiles.md)
     * Using the command line switch `-i`/`--ignore`
 
-The ignore pattern must follow Unix shell-style wildcards, like, for example `*/path/to/file` for files or
+The ignore pattern must follow Unix shell-style wildcards, like for example `*/path/to/file` for files and
 `*/path/to/directory/*` for directories.
 Make sure to quote these when using wildcards in the config file.
 
