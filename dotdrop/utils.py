@@ -292,17 +292,24 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
             warn += 'that is being ignored by a '
             warn += 'previous ignore pattern.'
             LOG.warn(warn)
+    print(path)
+    print(match_ignore_pattern)
+    print(os.path.isdir(path))
+    print(neg_ignore_cnt)
     if len(match_ignore_pattern) < 1:
         # if debug:
         #     LOG.dbg(f'NOT ignoring \"{path}\"', force=True)
         return False
-    if os.path.isdir(path) and neg_ignore_cnt > 0:
+    if (
+        os.path.isdir(path) or not os.path.exists(path)
+    ) and neg_ignore_cnt > 0:
         # this ensures whoever calls this function will
         # descend into the directory to explore the possiblity
         # of a file matching the non-ignore pattern
         if debug:
             msg = '[!!] ignore would have match but neg ignores'
-            msg += f' present and is a dir: \"{path}\" -> not ignored!'
+            msg += ' present and is a dir or does not exist: '
+            msg += f'\"{path}\" -> not ignored!'
             LOG.dbg(msg, force=True)
         return False
     # if debug:
