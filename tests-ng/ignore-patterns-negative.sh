@@ -199,26 +199,26 @@ cd "${ddpath}" | ${bin} install -f -c "${cfg2}" -p p1 -V
 clean_both
 create_in_dotpath
 create_in_dst
-rm -rf "${dotpath}/mpv/watch_later"
+rm -r "${dotpath}/mpv/watch_later"
 
 cd "${ddpath}" | ${bin} update -f -c "${cfg1}" -p p1 -V
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "update (cfg1) 1 failed" && exit 1
-[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "update (cfg1) 2 failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "update (cfg1) 3 failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "update (cfg1) 4 failed" && exit 1
-[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "update (cfg1) 5 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepme" ] && echo "update (cfg1) 1 failed" && exit 1
+[ ! -d "${dotpath}/mpv/watch_later/keepmetoo" ] && echo "update (cfg1) 2 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "update (cfg1) 3 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "update (cfg1) 4 failed" && exit 1
+[ -e "${dotpath}/mpv/watch_later/watch_later_file" ] && echo "update (cfg1) 5 failed" && exit 1
 
 clean_both
 create_in_dotpath
 create_in_dst
-rm -rf "${dotpath}/mpv/watch_later"
+rm -r "${dotpath}/mpv/watch_later"
 
 cd "${ddpath}" | ${bin} update -f -c "${cfg2}" -p p1 -V
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "update (cfg2) 1 failed" && exit 1
-[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "update (cfg2) 2 failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "update (cfg2) 3 failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "update (cfg2) 4 failed" && exit 1
-[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "update (cfg2) 5 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepme" ] && echo "update (cfg2) 1 failed" && exit 1
+[ ! -d "${dotpath}/mpv/watch_later/keepmetoo" ] && echo "update (cfg2) 2 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "update (cfg2) 3 failed" && exit 1
+[ ! -e "${dotpath}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "update (cfg2) 4 failed" && exit 1
+[ -e "${dotpath}/mpv/watch_later/watch_later_file" ] && echo "update (cfg2) 5 failed" && exit 1
 
 ###################################################
 # test import
@@ -250,29 +250,57 @@ clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${dotpath}/mpv/watch_later"
+rm "${dotpath}/mpv/watch_later/watch_later_file"
+# this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
+rm -r "${dotpath}/mpv/watch_later"
+set +e
+# this should fail
+cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V && echo "compare cfg1 1 should failed" && exit 1
+set -e
+
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${tmpd}/mpv/watch_later"
+rm "${tmpd}/mpv/watch_later/watch_later_file"
+# this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V
 
+rm -r "${tmpd}/mpv/watch_later"
+set +e
+# this should fail
+cd "${ddpath}" | ${bin} compare -c "${cfg1}" -p p1 -V && echo "compare cfg1 2 should failed" && exit 1
+set -e
+
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${dotpath}/mpv/watch_later"
+rm "${dotpath}/mpv/watch_later/watch_later_file"
+# this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
+
+rm -r "${dotpath}/mpv/watch_later"
+set +e
+# this should fail
+cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V && echo "compare cfg2 1 should failed" && exit 1
+set -e
 
 clean_both
 create_in_dst
 create_in_dotpath
 
-rm -rf "${tmpd}/mpv/watch_later"
+rm "${tmpd}/mpv/watch_later/watch_later_file"
+# this should succeed (no diff)
 cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V
+
+rm -r "${tmpd}/mpv/watch_later"
+set +e
+# this should fail
+cd "${ddpath}" | ${bin} compare -c "${cfg2}" -p p1 -V && echo "compare cfg2 2 should failed" && exit 1
+set -e
 
 ###################################################
 
