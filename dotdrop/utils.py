@@ -239,7 +239,7 @@ def _match_ignore_pattern(path, pattern, debug=False):
         ret = fnmatch.fnmatch(subpath, pattern)
         if ret:
             if debug:
-                LOG.dbg(f'ignore \"{pattern}\" match: {subpath} from {path}',
+                LOG.dbg(f'ignore \"{pattern}\" match: {subpath} ({path})',
                         force=True)
             return ret
         subpath = os.path.dirname(subpath)
@@ -322,17 +322,17 @@ def must_ignore(paths, ignores, debug=False):
     if not ignores:
         return False
     if debug:
-        LOG.dbg(f'IGNORE? \"{paths}\" against {ignores}',
+        LOG.dbg(f'[IGN] IGNORE? \"{paths}\" against {ignores}',
                 force=True)
     nign, ign = categorize(
         lambda ign: ign.startswith('!'), ignores)
     for path in paths:
         if _must_ignore(path, ign, nign, debug=debug):
             if debug:
-                LOG.dbg(f'IGNORING \"{paths}\"', force=True)
+                LOG.dbg(f'[IGN] IGNORING \"{paths}\"', force=True)
             return True
     if debug:
-        LOG.dbg(f'NOT IGNORING \"{paths}\"', force=True)
+        LOG.dbg(f'[IGN] NOT IGNORING \"{paths}\"', force=True)
     return False
 
 
