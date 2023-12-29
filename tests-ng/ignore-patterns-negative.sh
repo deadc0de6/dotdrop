@@ -227,21 +227,21 @@ clean_both
 create_in_dst
 
 cd "${ddpath}" | ${bin} import -f -c "${cfg3}" -p p1 -V "${tmpd}/mpv"
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "import (cfg3) failed" && exit 1
-[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "import (cfg3) failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "import (cfg3) failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "import (cfg3) failed" && exit 1
-[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "import (cfg3) failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "import (cfg3) 1 failed" && exit 1
+[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "import (cfg3) 2 failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "import (cfg3) 3 failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "import (cfg3) 4 failed" && exit 1
+[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "import (cfg3) 5 failed" && exit 1
 
 clean_both
 create_in_dst
 
 cd "${ddpath}" | ${bin} import -f -c "${cfg4}" -p p1 -V "${tmpd}/mpv"
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "import (cfg4) failed" && exit 1
-[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "import (cfg4) failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "import (cfg4) failed" && exit 1
-[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "import (cfg4) failed" && exit 1
-[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "import (cfg4) failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepme" ] && echo "import (cfg4) 1 failed" && exit 1
+[ ! -d "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo" ] && echo "import (cfg4) 2  failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmetoo/keepmetoo" ] && echo "import (cfg4) 3 failed" && exit 1
+[ ! -e "${dotpath}/${tmpd}/mpv/watch_later/keepmeaswell/keepmeaswell" ] && echo "import (cfg4) 4 failed" && exit 1
+[ -e "${dotpath}/${tmpd}/mpv/watch_later/watch_later_file" ] && echo "import (cfg4) 5 failed" && exit 1
 
 ###################################################
 # test compare
