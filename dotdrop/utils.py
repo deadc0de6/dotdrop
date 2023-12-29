@@ -233,9 +233,9 @@ def _match_ignore_pattern(path, pattern, debug=False):
     """
     subpath = path
     while subpath != os.path.sep:
-        #if debug:
-        #    msg = f'fnmatch \"{subpath}\" against {pattern}'
-        #    LOG.dbg(msg, force=True)
+        # if debug:
+        #     msg = f'fnmatch \"{subpath}\" against {pattern}'
+        #     LOG.dbg(msg, force=True)
         ret = fnmatch.fnmatch(subpath, pattern)
         if ret:
             if debug:
@@ -277,10 +277,11 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
                 msg = f'NO MATCH negative ignore \"{pattern}\" against {path}'
                 LOG.dbg(msg, force=True)
             continue
-        else:
-            if debug:
-                msg = f'MATCH negative ignore \"{pattern}\" against {path}'
-                LOG.dbg(msg, force=True)
+
+        if debug:
+            msg = f'MATCH negative ignore \"{pattern}\" against {path}'
+            LOG.dbg(msg, force=True)
+
         # remove from the list
         try:
             match_ignore_pattern.remove(path)
@@ -292,10 +293,7 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
             warn += 'that is being ignored by a '
             warn += 'previous ignore pattern.'
             LOG.warn(warn)
-    print(path)
-    print(match_ignore_pattern)
-    print(os.path.isdir(path))
-    print(neg_ignore_cnt)
+
     if len(match_ignore_pattern) < 1:
         # if debug:
         #     LOG.dbg(f'NOT ignoring \"{path}\"', force=True)
