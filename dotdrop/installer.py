@@ -29,7 +29,7 @@ class Installer:
                  dry=False, safe=False, workdir='~/.config/dotdrop',
                  debug=False, diff=True, totemp=None, showdiff=False,
                  backup_suffix='.dotdropbak', diff_cmd='',
-                 remove_existing_in_dir=False):
+                 remove_existing_in_dir=False, force_chmod=False):
         """
         @base: directory path where to search for templates
         @create: create directory hierarchy if missing when installing
@@ -45,6 +45,7 @@ class Installer:
         @diff_cmd: diff command to use
         @remove_existing_in_dir: remove file in dir dotfiles
                                  if not managed by dotdrop
+        @force_chmod: apply chmod without confirmation
         """
         self.create = create
         self.backup = backup
@@ -64,6 +65,7 @@ class Installer:
         self.diff_cmd = diff_cmd
         self.action_executed = False
         self.remove_existing_in_dir = remove_existing_in_dir
+        self.force_chmod = force_chmod
         # avoids printing file copied logs
         # when using install_to_tmp for comparing
         self.comparing = False
@@ -77,7 +79,7 @@ class Installer:
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=None, is_template=True,
-                chmod=None, force_chmod=False):
+                chmod=None):
         """
         install src to dst
 
@@ -90,7 +92,6 @@ class Installer:
         @ignore: pattern to ignore when installing
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
-        @force_chmod: do not ask user to chmod
 
         return
         - True, None        : success
@@ -189,7 +190,6 @@ class Installer:
 
         self._apply_chmod_after_install(src, dst, ret, err,
                                         chmod=chmod,
-                                        force_chmod=force_chmod,
                                         linktype=linktype)
 
         return self._log_install(ret, err)
@@ -197,7 +197,6 @@ class Installer:
     def _apply_chmod_after_install(self, src, dst, ret, err,
                                    chmod=None,
                                    is_sub=False,
-                                   force_chmod=False,
                                    linktype=LinkTypes.NOLINK):
         """
         handle chmod after install
@@ -227,7 +226,7 @@ class Installer:
         if dstperms != chmod:
             # apply mode
             msg = f'chmod {dst} to {chmod:o}'
-            if not force_chmod and self.safe and not self.log.ask(msg):
+            if not self.force_chmod and self.safe and not self.log.ask(msg):
                 ret = False
                 err = 'aborted'
             else:
