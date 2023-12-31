@@ -101,7 +101,8 @@ def _dotfile_compare(opts, dotfile, tmp):
                      dry=opts.dry, base=opts.dotpath,
                      workdir=opts.workdir, debug=opts.debug,
                      backup_suffix=opts.install_backup_suffix,
-                     diff_cmd=opts.diff_command)
+                     diff_cmd=opts.diff_command,
+                     force_chmod=True)
     comp = Comparator(diff_cmd=opts.diff_command, debug=opts.debug,
                       ignore_missing_in_dotdrop=ignore_missing_in_dotdrop)
 
@@ -234,8 +235,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
                                 actionexec=pre_actions_exec,
                                 is_template=is_template,
                                 ignore=ignores,
-                                chmod=dotfile.chmod,
-                                force_chmod=opts.install_force_chmod)
+                                chmod=dotfile.chmod)
     else:
         # nolink
         src = dotfile.src
@@ -254,8 +254,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
                                 noempty=dotfile.noempty,
                                 ignore=ignores,
                                 is_template=is_template,
-                                chmod=dotfile.chmod,
-                                force_chmod=opts.install_force_chmod)
+                                chmod=dotfile.chmod)
         if tmp:
             tmp = os.path.join(opts.dotpath, tmp)
             if os.path.exists(tmp):
@@ -765,7 +764,8 @@ def _get_install_installer(opts, tmpdir=None):
                      showdiff=opts.install_showdiff,
                      backup_suffix=opts.install_backup_suffix,
                      diff_cmd=opts.diff_command,
-                     remove_existing_in_dir=opts.install_remove_existing)
+                     remove_existing_in_dir=opts.install_remove_existing,
+                     force_chmod=opts.install_force_chmod)
     return inst
 
 
