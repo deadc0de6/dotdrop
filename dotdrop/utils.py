@@ -473,7 +473,11 @@ def get_module_from_path(path):
     importlib.machinery.SOURCE_SUFFIXES.append('')
     # import module
     spec = importlib.util.spec_from_file_location(module_name, path)
+    if not spec:
+        return None
     mod = importlib.util.module_from_spec(spec)
+    if not mod:
+        return None
     spec.loader.exec_module(mod)
     return mod
 
@@ -507,8 +511,7 @@ def dependencies_met():
     name = 'docopt'
     err = f'missing python module \"{name}\"'
     try:
-        from docopt import docopt
-        assert docopt
+        from docopt import docopt  # noqa # pylint: disable=W0611
     except ImportError as exc:
         raise UnmetDependency(err) from exc
 
@@ -525,8 +528,7 @@ def dependencies_met():
     name = 'ruamel.yaml'
     err = f'missing python module \"{name}\"'
     try:
-        from ruamel.yaml import YAML
-        assert YAML
+        from ruamel.yaml import YAML  # noqa # pylint: disable=W0611
     except ImportError as exc:
         raise UnmetDependency(err) from exc
 

@@ -8,6 +8,7 @@ in dotdrop
 
 import subprocess
 import os
+from typing import List
 
 # local imports
 from dotdrop.dictparser import DictParser
@@ -17,7 +18,7 @@ from dotdrop.exceptions import UndefinedException
 class Cmd(DictParser):
     """A command to execute"""
 
-    args = []
+    args: List[str] = []
     eq_ignore = ('log',)
     descr = 'command'
 
@@ -32,13 +33,13 @@ class Cmd(DictParser):
         self.silent = key.startswith('_')
 
     def _get_action(self, templater, debug):
-        action = None
+        action = ''
         try:
             action = templater.generate_string(self.action)
         except UndefinedException as exc:
             err = f'undefined variable for {self.descr}: \"{exc}\"'
             self.log.warn(err)
-            return False
+            return action
         if debug:
             self.log.dbg(f'{self.descr}:')
             self.log.dbg(f'  - raw       \"{self.action}\"')
