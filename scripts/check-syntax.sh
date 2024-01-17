@@ -104,19 +104,19 @@ pylint \
   --disable=R0904 \
   dotdrop/
 
+# mypy
+echo "----------------------------"
+echo "checking dotdrop with mypy"
+mypy \
+  --strict \
+  --ignore-missing-imports \
+  --allow-redefinition \
+  dotdrop/
+
 # pytype
 echo "----------------------------"
 echo "checking dotdrop with pytype"
 pytype dotdrop/
-
-# mypy
-echo "----------------------------"
-echo "checking dotdrop with mypy"
-# --strict
-mypy \
-  --ignore-missing-imports \
-  --allow-redefinition \
-  dotdrop/
 
 # check shell scripts
 # SC2002: Useless cat

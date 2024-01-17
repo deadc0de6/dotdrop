@@ -8,11 +8,12 @@ in dotdrop
 
 import subprocess
 import os
-from typing import List
+from typing import List, Dict, TypeVar, Optional
 
 # local imports
 from dotdrop.dictparser import DictParser
 from dotdrop.exceptions import UndefinedException
+from dotdrop.templategen import Templategen
 
 
 class Cmd(DictParser):
@@ -22,7 +23,7 @@ class Cmd(DictParser):
     eq_ignore = ('log',)
     descr = 'command'
 
-    def __init__(self, key, action):
+    def __init__(self, key: str, action: str):
         """constructor
         @key: action key
         @action: action string
@@ -32,7 +33,7 @@ class Cmd(DictParser):
         self.action = action
         self.silent = key.startswith('_')
 
-    def _get_action(self, templater, debug):
+    def _get_action(self, templater: Templategen, debug: bool) -> str:
         action = ''
         try:
             action = templater.generate_string(self.action)
@@ -46,7 +47,7 @@ class Cmd(DictParser):
             self.log.dbg(f'  - templated \"{action}\"')
         return action
 
-    def _get_args(self, templater):
+    def _get_args(self, templater: Templategen) -> List[str]:
         args = []
         if not self.args:
             return args
@@ -60,7 +61,9 @@ class Cmd(DictParser):
                 return False
         return args
 
-    def execute(self, templater=None, debug=False):
+    def execute(self,
+                templater: Optional[Templategen] = None,
+                debug: bool = False) -> bool:
         """execute the command in the shell"""
         ret = 1
         action = self.action
@@ -101,11 +104,14 @@ class Cmd(DictParser):
         return ret == 0
 
     @classmethod
-    def _adjust_yaml_keys(cls, value):
+    def _adjust_yaml_keys(cls, value: str) -> Dict[str, str]:
         return {'action': value}
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'key:{self.key} -> \"{self.action}\"'
+
+
+ActionT = TypeVar('ActionT', bound='Action')
 
 
 class Action(Cmd):
@@ -115,7 +121,7 @@ class Action(Cmd):
     post = 'post'
     descr = 'action'
 
-    def __init__(self, key, kind, action):
+    def __init__(self, key: str, kind: str, action: str):
         """constructor
         @key: action key
         @kind: type of action (pre or post)
@@ -125,25 +131,28 @@ class Action(Cmd):
         self.kind = kind
         self.args = []
 
-    def copy(self, args):
+    def copy(self, args: List[str]):
         """return a copy of this object with arguments"""
         action = Action(self.key, self.kind, self.action)
         action.args = args
         return action
 
     @classmethod
-    def parse(cls, key, value):
+    def parse(cls, key: str, value: str) -> ActionT:
         """parse key value into object"""
         val = {}
         val['kind'], val['action'] = value
         return cls(key=key, **val)
 
-    def __str__(self):
+    def __str__(self) -> str:
         out = f'{self.key}: [{self.kind}] \"{self.action}\"'
         return out
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'action({self.__str__()})'
+
+
+TransformT = TypeVar('TransformT', bound='Transform')
 
 
 class Transform(Cmd):
@@ -151,7 +160,7 @@ class Transform(Cmd):
 
     descr = 'transformation'
 
-    def __init__(self, key, action):
+    def __init__(self, key: str, action: str):
         """constructor
         @key: action key
         @trans: action string
@@ -159,13 +168,15 @@ class Transform(Cmd):
         super().__init__(key, action)
         self.args = []
 
-    def copy(self, args):
+    def copy(self, args: List[str]) -> TransformT:
         """return a copy of this object with arguments"""
         trans = Transform(self.key, self.action)
         trans.args = args
         return trans
 
-    def transform(self, arg0, arg1, templater=None, debug=False):
+    def transform(self, arg0: str, arg1: str,
+                  templater: Optional[Templategen] = None,
+                  debug: bool = False) -> bool:
         """
         execute transformation with {0} and {1}
         where {0} is the file to transform
