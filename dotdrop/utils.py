@@ -19,14 +19,16 @@ import json
 import sys
 import requests
 from packaging import version
+from typing import Any, Callable, List, \
+    Optional, Tuple, TYPE_CHECKING
 
 # local import
 from dotdrop.logger import Logger
 from dotdrop.exceptions import UnmetDependency
 from dotdrop.version import __version__ as VERSION
-from dotdrop.options import Options
-from typing import Any, Callable, List, \
-    Optional, Tuple
+if TYPE_CHECKING:
+    from dotdrop.options import Options
+
 
 LOG = Logger()
 STAR = '*'
@@ -618,7 +620,7 @@ def chmod(path: str, mode: int, debug: bool=False) -> bool:
     return get_file_perm(path) == mode
 
 
-def adapt_workers(options: Options,
+def adapt_workers(options: "Options",
                   logger: Logger) -> None:
     """adapt number of workers if safe/dry"""
     if options.safe and options.workers > 1:
