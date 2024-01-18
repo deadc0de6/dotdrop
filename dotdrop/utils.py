@@ -24,12 +24,9 @@ from packaging import version
 from dotdrop.logger import Logger
 from dotdrop.exceptions import UnmetDependency
 from dotdrop.version import __version__ as VERSION
-from dotdrop.action import Action
-from dotdrop.dotfile import Dotfile
 from dotdrop.options import Options
-from dotdrop.profile import Profile
-from ruamel.yaml.comments import CommentedSeq
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, List, \
+    Optional, Tuple
 
 LOG = Logger()
 STAR = '*'
@@ -56,8 +53,8 @@ def run(cmd: List[str], debug: bool=False) -> Tuple[bool, str]:
                           stderr=subprocess.STDOUT) as proc:
         out, _ = proc.communicate()
         ret = proc.returncode
-    out = out.splitlines(keepends=True)
-    lines = ''.join([x.decode('utf-8', 'replace') for x in out])
+    outlines = out.splitlines(keepends=True)
+    lines = ''.join([x.decode('utf-8', 'replace') for x in outlines])
     return ret == 0, lines
 
 
@@ -349,7 +346,7 @@ def must_ignore(paths: List[str],
 
 def _cp(src: str,
         dst: str,
-        ignore_func: Optional[Callable]=None,
+        ignore_func: Optional[Callable[[str], bool]]=None,
         debug: bool=False) -> int:
     """
     the copy function for copytree
@@ -388,7 +385,7 @@ def copyfile(src: str, dst: str, debug: bool=False) -> bool:
 
 def copytree_with_ign(src: str,
                       dst: str,
-                      ignore_func: Optional[Callable]=None,
+                      ignore_func: Optional[Callable[[str], bool]]=None,
                       debug: bool=False) -> int:
     """
     copytree with support for ignore
@@ -426,7 +423,7 @@ def copytree_with_ign(src: str,
 
 def uniq_list(a_list: List[str]) -> List[str]:
     """unique elements of a list while preserving order"""
-    new = []
+    new: List[str] = []
     if not a_list:
         return new
     for elem in a_list:
@@ -472,7 +469,7 @@ def ignores_to_absolute(ignores: List[str],
     return new
 
 
-def get_module_functions(mod):
+def get_module_functions(mod):  # type: ignore
     """return a list of fonction from a module"""
     funcs = []
     for memb in inspect.getmembers(mod):
@@ -483,7 +480,7 @@ def get_module_functions(mod):
     return funcs
 
 
-def get_module_from_path(path: str):
+def get_module_from_path(path: str):  # type: ignore
     """get module from path"""
     if not path or not os.path.exists(path):
         return None
@@ -491,10 +488,10 @@ def get_module_from_path(path: str):
     # allow any type of files
     importlib.machinery.SOURCE_SUFFIXES.append('')
     # import module
-    spec = importlib.util.spec_from_file_location(module_name, path)
+    spec = importlib.util.spec_from_file_location(module_name, path)  # type: ignore
     if not spec:
         return None
-    mod = importlib.util.module_from_spec(spec)
+    mod = importlib.util.module_from_spec(spec)  # type: ignore
     if not mod:
         return None
     spec.loader.exec_module(mod)
@@ -519,7 +516,7 @@ def dependencies_met() -> None:
     name = 'python-magic'
     err = f'missing python module \"{name}\"'
     try:
-        import magic
+        import magic  # type: ignore
         assert magic
         if not hasattr(magic, 'from_file'):
             LOG.warn(err)
@@ -547,7 +544,7 @@ def dependencies_met() -> None:
     name = 'ruamel.yaml'
     err = f'missing python module \"{name}\"'
     try:
-        from ruamel.yaml import YAML  # noqa # pylint: disable=W0611
+        from ruamel.yaml import YAML  # type: ignore # noqa # pylint: disable=W061
     except ImportError as exc:
         raise UnmetDependency(err) from exc
 
@@ -565,7 +562,7 @@ def dependencies_met() -> None:
     name = 'tomli_w'
     err = f'missing python module \"{name}\"'
     try:
-        import tomli_w
+        import tomli_w  # type: ignore
         assert tomli_w
     except ImportError as exc:
         raise UnmetDependency(err) from exc
@@ -574,7 +571,7 @@ def dependencies_met() -> None:
     name = 'distro'
     err = f'missing python module \"{name}\"'
     try:
-        import distro
+        import distro  # type: ignore
         assert distro
     except ImportError as exc:
         raise UnmetDependency(err) from exc
@@ -632,15 +629,15 @@ def adapt_workers(options: Options,
         options.workers = 1
 
 
-def categorize(function: Callable, iterable: List[str]) -> List[str]:
+def categorize(function: Callable[[str],bool],
+               iterable: List[str]) -> Tuple[List[str], List[str]]:
     """
-    separate an iterable into elements for which
-    function(element) is true for each element and
-    for which function(element) is false for each
-    element
+    separate an iterable into two lists:
+    - elements for which function(element) is true for each element
+    - elements for which function(element) is false for each element
     """
-    return (tuple(filter(function, iterable)),
-            tuple(itertools.filterfalse(function, iterable)))
+    return list(filter(function, iterable)), \
+           list(itertools.filterfalse(function, iterable))
 
 
 def debug_list(title: str,
@@ -724,7 +721,7 @@ def is_bin_in_path(command: str) -> bool:
     """
     check binary from command is in path
     """
-    bpath = ""
+    bpath: Optional[str | None] = ""
     if not command:
         return False
     try:
