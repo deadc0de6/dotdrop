@@ -289,7 +289,7 @@ class Importer:
                 return True
         return False
 
-    def _ignore(self, path):
+    def _ignore(self, path: str):
         if must_ignore([path], self.ignore, debug=self.debug):
             self.log.dbg(f'ignoring import of {path}')
             self.log.warn(f'{path} ignored')
