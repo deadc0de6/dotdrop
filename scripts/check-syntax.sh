@@ -28,12 +28,26 @@ fi
 echo "=> pycodestyle version:"
 pycodestyle --version
 
-if ! which pyflakes >/dev/null 2>&1; then
-  echo "Install pyflakes"
+if ! which flake8 >/dev/null 2>&1; then
+  echo "Install flake8"
   exit 1
 fi
-echo "=> pyflakes version:"
-pyflakes --version
+echo "=> flake8 version:"
+flake8 --version
+
+if ! which pytype >/dev/null 2>&1; then
+  echo "Install pytype"
+  exit 1
+fi
+echo "=> pytype version:"
+pytype --version
+
+if ! which mypy >/dev/null 2>&1; then
+  echo "Install mypy"
+  exit 1
+fi
+echo "=> mypy version:"
+mypy --version
 
 # checking for TODO/FIXME
 echo "--------------------------------------"
@@ -62,10 +76,10 @@ echo "checking dotdrop with pycodestyle"
 pycodestyle --ignore=W503,W504 dotdrop/
 pycodestyle scripts/
 
-# pyflakes tests
+# flake8 tests
 echo "------------------------------"
-echo "checking dotdrop with pyflakes"
-pyflakes dotdrop/
+echo "checking dotdrop with flake8"
+flake8 dotdrop/
 
 # pylint
 echo "----------------------------"
@@ -89,6 +103,20 @@ pylint \
   --disable=R0911 \
   --disable=R0904 \
   dotdrop/
+
+# mypy
+echo "----------------------------"
+echo "checking dotdrop with mypy"
+mypy \
+  --strict \
+  --ignore-missing-imports \
+  --allow-redefinition \
+  dotdrop/
+
+# pytype
+echo "----------------------------"
+echo "checking dotdrop with pytype"
+pytype dotdrop/
 
 # check shell scripts
 # SC2002: Useless cat

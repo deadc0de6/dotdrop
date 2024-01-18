@@ -29,7 +29,7 @@ from ruamel.yaml import YAML as yaml
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib
+    import tomli as tomllib  # type: ignore
 import tomli_w
 
 # local imports
