@@ -23,7 +23,7 @@ class Cmd(DictParser):
     eq_ignore = ('log',)
     descr = 'command'
 
-    def __init__(self, key: str, action: str):
+    def __init__(self, key: str, action: str) -> None:
         """constructor
         @key: action key
         @action: action string
@@ -121,7 +121,7 @@ class Action(Cmd):
     post = 'post'
     descr = 'action'
 
-    def __init__(self, key: str, kind: str, action: str):
+    def __init__(self, key: str, kind: str, action: str) -> None:
         """constructor
         @key: action key
         @kind: type of action (pre or post)
@@ -131,7 +131,7 @@ class Action(Cmd):
         self.kind = kind
         self.args = []
 
-    def copy(self, args: List[str]):
+    def copy(self, args: List[str]) -> "Action":
         """return a copy of this object with arguments"""
         action = Action(self.key, self.kind, self.action)
         action.args = args
