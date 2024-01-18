@@ -21,6 +21,8 @@ from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list, debug_list, debug_dict
 from dotdrop.exceptions import YamlException, OptionsException
+from typing import Any, Dict, Optional, List
+
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -112,26 +114,26 @@ class AttrMonitor:
     _set_attr_err = False
 
 # pylint: disable=W0235
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
         """monitor attribute setting"""
         super().__setattr__(key, value)
 # pylint: enable=W0235
 
-    def _attr_set(self, attr):
+    def _attr_set(self, attr: str) -> None:
         """do something when unexistent attr is set"""
 
 
 class Options(AttrMonitor):
     """dotdrop options manager"""
 
-    def __init__(self, args=None):
+    def __init__(self, args: Optional[Dict[str,str]]=None) -> None:
         """constructor
         @args: argument dictionary (if None use sys)
         """
         # attributes gotten from self.conf.get_settings()
         self.banner = None
         self.showdiff = None
-        self.default_actions = []
+        self.default_actions: List[Action] = []
         self.instignore = None
         self.force_chmod = None
         self.cmpignore = None
@@ -159,6 +161,8 @@ class Options(AttrMonitor):
         # selected profile
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
+        if not self.confpath:
+            raise YamlException('no config file found')
         self.confpath = os.path.abspath(self.confpath)
         self.log.dbg(f'config abs path: {self.confpath}')
         if not self.confpath:
@@ -185,12 +189,12 @@ class Options(AttrMonitor):
         # start monitoring for bad attribute
         self._set_attr_err = True
 
-    def debug_command(self):
+    def debug_command(self) -> None:
         """print the original command"""
         self.log.dbg(f'command: {self.argv}')
 
     @classmethod
-    def _get_config_from_env(cls, name):
+    def _get_config_from_env(cls, name: str) -> str:
         # look in XDG_CONFIG_HOME
         if ENV_XDG in os.environ:
             cfg = os.path.expanduser(os.environ[ENV_XDG])
@@ -200,7 +204,7 @@ class Options(AttrMonitor):
         return ''
 
     @classmethod
-    def _get_config_from_fs(cls, name):
+    def _get_config_from_fs(cls, name: str) -> str:
         """get config from filesystem"""
         # look in ~/.config/dotdrop
         cfg = os.path.expanduser(HOMECFG)
@@ -220,12 +224,12 @@ class Options(AttrMonitor):
 
         return ''
 
-    def _get_config_path(self):
+    def _get_config_path(self) -> str:
         """get the config path"""
         # cli provided
         if self.args['--cfg']:
             self.log.dbg(f'config from --cfg {self.args["--cfg"]}')
-            return os.path.expanduser(self.args['--cfg'])
+            return str(os.path.expanduser(self.args['--cfg']))
 
         # environment variable provided
         if ENV_CONFIG in os.environ:
@@ -263,14 +267,14 @@ class Options(AttrMonitor):
             return path
 
         self.log.dbg('no config file found')
-        return None
+        return ''
 
-    def _header(self):
+    def _header(self) -> None:
         """display the header"""
         self.log.log(BANNER)
         self.log.log('')
 
-    def _read_config(self):
+    def _read_config(self) -> None:
         """read the config file"""
         self.conf = CfgAggregator(self.confpath,
                                   self.profile,
@@ -282,12 +286,12 @@ class Options(AttrMonitor):
         for k, val in settings.items():
             setattr(self, k, val)
 
-    def _apply_args_files(self):
+    def _apply_args_files(self) -> None:
         """files specifics"""
         self.files_templateonly = self.args['--template']
         self.files_grepable = self.args['--grepable']
 
-    def _apply_args_install(self):
+    def _apply_args_install(self) -> None:
         """install specifics"""
         self.install_force_action = self.args['--force-actions']
         self.install_temporary = self.args['--temp']
@@ -305,7 +309,7 @@ class Options(AttrMonitor):
             self.clear_workdir
         self.install_remove_existing = self.args['--remove-existing']
 
-    def _apply_args_compare(self):
+    def _apply_args_compare(self) -> None:
         """compare specifics"""
         self.compare_focus = self.args['--file']
         self.compare_ignore = self.args['--ignore']
@@ -313,10 +317,11 @@ class Options(AttrMonitor):
         self.compare_ignore.append(f'*{self.install_backup_suffix}')
         self.compare_ignore = uniq_list(self.compare_ignore)
         self.compare_fileonly = self.args['--file-only']
+        self.ignore_missing_in_dotdrop: bool = False
         self.ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             self.args['--ignore-missing']
 
-    def _apply_args_import(self):
+    def _apply_args_import(self) -> None:
         """import specifics"""
         self.import_path = self.args['<path>']
         self.import_as = self.args['--as']
@@ -328,7 +333,7 @@ class Options(AttrMonitor):
         self.import_trans_install = self.args['--transr']
         self.import_trans_update = self.args['--transw']
 
-    def _apply_args_update(self):
+    def _apply_args_update(self) -> None:
         """update specifics"""
         self.update_path = self.args['<path>']
         self.update_iskey = self.args['--key']
@@ -338,24 +343,24 @@ class Options(AttrMonitor):
         self.update_ignore = uniq_list(self.update_ignore)
         self.update_showpatch = self.args['--show-patch']
 
-    def _apply_args_profiles(self):
+    def _apply_args_profiles(self) -> None:
         """profiles specifics"""
         self.profiles_grepable = self.args['--grepable']
 
-    def _apply_args_remove(self):
+    def _apply_args_remove(self) -> None:
         """remove specifics"""
         self.remove_path = self.args['<path>']
         self.remove_iskey = self.args['--key']
 
-    def _apply_args_uninstall(self):
+    def _apply_args_uninstall(self) -> None:
         """uninstall specifics"""
         self.uninstall_key = self.args['<key>']
 
-    def _apply_args_detail(self):
+    def _apply_args_detail(self) -> None:
         """detail specifics"""
         self.detail_keys = self.args['<key>']
 
-    def _apply_args(self):
+    def _apply_args(self) -> None:
         """apply cli args as attribute"""
         # the commands
         self.cmd_profiles = self.args['profiles']
@@ -418,7 +423,7 @@ class Options(AttrMonitor):
         # "uninstall" specifics
         self._apply_args_uninstall()
 
-    def _fill_attr(self):
+    def _fill_attr(self) -> None:
         """create attributes from conf"""
         # defined variables
         self.variables = self.conf.get_variables()
@@ -427,7 +432,7 @@ class Options(AttrMonitor):
         # all defined profiles
         self.profiles = self.conf.get_profiles()
 
-    def _debug_attr(self):
+    def _debug_attr(self) -> None:
         """debug display all of this class attributes"""
         if not self.debug:
             return
@@ -445,6 +450,6 @@ class Options(AttrMonitor):
             else:
                 self.log.dbg(f'-> {att}: {val}')
 
-    def _attr_set(self, attr):
+    def _attr_set(self, attr: str) -> None:
         """error when some inexistent attr is set"""
         raise OptionsException(f'bad option: {attr}')
