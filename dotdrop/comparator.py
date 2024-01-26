@@ -10,6 +10,7 @@ import filecmp
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.ftree import FTreeDir
 from dotdrop.utils import must_ignore, uniq_list, diff, \
     get_file_perm
 
@@ -22,11 +23,23 @@ class Comparator:
         """constructor
         @diff_cmd: diff command to use
         @debug: enable debug
+        @ignore_missing_in_dotdrop: ignore missing files in dotdrop
         """
         self.diff_cmd = diff_cmd
         self.debug = debug
         self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
+
+    def compare2(self, local_path, deployed_path, ignore=None, mode=None):
+        """
+        diff local_path (dotdrop dotfile) and
+        deployed_path (destination file)
+        If mode is None, rights will be read from local_path
+        """
+        local_tree = FTreeDir(local_path, ignores=ignore, debug=self.debug)
+        deploy_tree = FTreeDir(deployed_path, ignores=ignore, debug=self.debug)
+        lonly, ronly, common = local_tree.compare(deploy_tree)
+        # TODO
 
     def compare(self, local_path, deployed_path, ignore=None, mode=None):
         """
