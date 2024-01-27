@@ -35,7 +35,7 @@ class FTreeDir:
             for file in files:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
-                               debug=self.debug):
+                               debug=self.debug, strict=True):
                     continue
                 self.entries.append(fpath)
             for dname in dirs:
@@ -44,7 +44,7 @@ class FTreeDir:
                     # ignore empty directory
                     continue
                 if must_ignore([dpath], ignores=self.ignores,
-                               debug=self.debug):
+                               debug=self.debug, strict=True):
                     continue
                 self.entries.append(dpath)
 
