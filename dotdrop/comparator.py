@@ -30,17 +30,6 @@ class Comparator:
         self.log = Logger(debug=self.debug)
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
 
-    def compare2(self, local_path, deployed_path, ignore=None, mode=None):
-        """
-        diff local_path (dotdrop dotfile) and
-        deployed_path (destination file)
-        If mode is None, rights will be read from local_path
-        """
-        local_tree = FTreeDir(local_path, ignores=ignore, debug=self.debug)
-        deploy_tree = FTreeDir(deployed_path, ignores=ignore, debug=self.debug)
-        lonly, ronly, common = local_tree.compare(deploy_tree)
-        # TODO
-
     def compare(self, local_path, deployed_path, ignore=None, mode=None):
         """
         diff local_path (dotdrop dotfile) and
@@ -125,7 +114,40 @@ class Comparator:
         if not os.path.isdir(deployed_path):
             return f'\"{deployed_path}\" is a file\n'
 
-        return self._compare_dirs(local_path, deployed_path, ignore)
+        # return self._compare_dirs(local_path, deployed_path, ignore)
+        return self._compare_dirs2(local_path, deployed_path, ignore)
+
+    def _compare_dirs2(self, local_path, deployed_path, ignore):
+        """compare directories"""
+        self.log.dbg(f'compare dirs {local_path} and {deployed_path}')
+        ret = []
+
+        local_tree = FTreeDir(local_path, ignores=ignore, debug=self.debug)
+        deploy_tree = FTreeDir(deployed_path, ignores=ignore, debug=self.debug)
+        lonly, ronly, common = local_tree.compare(deploy_tree)
+
+        if not self.ignore_missing_in_dotdrop:
+            for i in lonly:
+                ret.append(f'=> \"{i}\" does not exist on destination\n')
+        for i in ronly:
+            ret.append(f'=> \"{i}\" does not exist in dotdrop\n')
+
+        # test for content difference
+        # and mode difference
+        self.log.dbg(f'common files {common}')
+        for i in common:
+            source_file = os.path.join(local_path, i)
+            deployed_file = os.path.join(deployed_path, i)
+            diff = self._diff(source_file, deployed_file, header=True)
+            if diff:
+                ret.append(diff)
+                continue
+            ret = self._comp_mode(local_path, deployed_path)
+            if ret:
+                short = os.path.basename(source_file)
+                ret.append(f'=> different type: \"{short}\"\n')
+
+        return ''.join(ret)
 
     def _compare_dirs(self, local_path, deployed_path, ignore):
         """compare directories"""
