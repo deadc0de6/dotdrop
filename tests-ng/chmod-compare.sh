@@ -92,6 +92,7 @@ _EOF
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1
 
 # compare
+echo "compare after install..."
 cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1
 
 # import
@@ -109,6 +110,7 @@ chmod 700 "${fnormal}"
 chmod 700 "${flink}"
 
 set +e
+cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 -V
 out=$(cd "${ddpath}" | ${bin} compare -c "${cfg}" -p p1 2>&1)
 cnt=$(echo "${out}" | grep 'modes differ' | wc -l)
 set -e

@@ -66,8 +66,7 @@ cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose --ignore="${patt0}" --igno
 [ "$?" = "0" ] && exit 1
 cnt=$(cd "${ddpath}" | ${bin} compare -c "${cfg}" --ignore="${patt0}" --ignore=${patt1} | grep '^=> diff' | wc -l)
 set -e
-
-[ "${cnt}" != "2" ] && echo "bad number of diffs: ${cnt}/2" && exit 1
+[ "${cnt}" != "2" ] && echo "bad number of diffs (1): ${cnt}/2" && exit 1
 
 ########################################
 # Test ignores specified in config.yaml
@@ -101,7 +100,7 @@ cd "${ddpath}" | ${bin} compare -c "${cfg}" --verbose -C "${tmpd}"/.zsh --ignore
 cnt=$(cd "${ddpath}" | ${bin} compare -c "${cfg}" -C "${tmpd}"/.zsh --ignore="${patt0}" --ignore=${patt1} | grep 'does not exist in dotdrop$' | wc -l)
 set -e
 
-[ "${cnt}" != "1" ] && echo "bad number of diffs: ${cnt}/1" && exit 1
+[ "${cnt}" != "1" ] && echo "bad number of diffs (2): ${cnt}/1" && exit 1
 
 # expects one diff
 echo "[+] comparing .zsh with ignore in dotfile - expect 1 diff"
@@ -111,6 +110,6 @@ cd "${ddpath}" | ${bin} compare -c "${cfg2}" --verbose -C "${tmpd}"/.zsh
 cnt=$(cd "${ddpath}" | ${bin} compare -c "${cfg2}" -C "${tmpd}"/.zsh | grep 'does not exist in dotdrop$' | wc -l)
 set -e
 
-[ "${cnt}" != "1" ] && echo "bad number of diffs: ${cnt}/1" && exit 1
+[ "${cnt}" != "1" ] && echo "bad number of diffs (3): ${cnt}/1" && exit 1
 
 echo "OK"
