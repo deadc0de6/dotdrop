@@ -13,7 +13,9 @@ from dotdrop.utils import must_ignore
 
 
 class FTreeDir:
-    """directory tree for comparison"""
+    """
+    directory tree for comparison
+    """
 
     def __init__(self, path, ignores=None, debug=False):
         self.path = path
@@ -24,14 +26,27 @@ class FTreeDir:
             self._walk()
 
     def _walk(self):
-        for root, _, files in os.walk(self.path):
+        """
+        index directory
+        ignore empty directory
+        test for ignore pattern
+        """
+        for root, dirs, files in os.walk(self.path):
             for file in files:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
                                debug=self.debug):
                     continue
                 self.entries.append(fpath)
-        self.entries.sort()
+            for dname in dirs:
+                dpath = os.path.join(root, dname)
+                if len(os.listdir(dpath)) < 1:
+                    # ignore empty directory
+                    continue
+                if must_ignore([dpath], ignores=self.ignores,
+                               debug=self.debug):
+                    continue
+                self.entries.append(dpath)
 
     def compare(self, other):
         """
@@ -39,8 +54,11 @@ class FTreeDir:
         - left_only (only in self)
         - right_only (only in other)
         - in_both (in both)
+        the relative path are returned
         """
-        left_only = set(self.entries) - set(other.entries)
-        right_only = set(other.entries) - set(self.entries)
-        in_both = set(self.entries) & set(other.entries)
+        left = [os.path.relpath(entry, self.path) for entry in self.entries]
+        right = [os.path.relpath(entry, other.path) for entry in other.entries]
+        left_only = set(left) - set(right)
+        right_only = set(right) - set(left)
+        in_both = set(left) & set(right)
         return list(left_only), list(right_only), list(in_both)
