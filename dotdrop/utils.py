@@ -249,7 +249,8 @@ def _match_ignore_pattern(path, pattern, debug=False):
     return False
 
 
-def _must_ignore(path, ignores, neg_ignores, debug=False):
+def _must_ignore(path, ignores, neg_ignores,
+                 debug=False, strict=False):
     """
     return true if path matches any ignore patterns
     """
@@ -298,7 +299,7 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
         # if debug:
         #     LOG.dbg(f'NOT ignoring \"{path}\"', force=True)
         return False
-    if (
+    if not strict and (
         os.path.isdir(path) or not os.path.exists(path)
     ) and neg_ignore_cnt > 0:
         # this ensures whoever calls this function will
@@ -315,7 +316,8 @@ def _must_ignore(path, ignores, neg_ignores, debug=False):
     return True
 
 
-def must_ignore(paths, ignores, debug=False):
+def must_ignore(paths, ignores, debug=False,
+                strict=False):
     """
     return true if any paths in list matches any ignore patterns
     """
@@ -327,7 +329,8 @@ def must_ignore(paths, ignores, debug=False):
     nign, ign = categorize(
         lambda ign: ign.startswith('!'), ignores)
     for path in paths:
-        if _must_ignore(path, ign, nign, debug=debug):
+        if _must_ignore(path, ign, nign,
+                        debug=debug, strict=strict):
             if debug:
                 LOG.dbg(f'[IGN] IGNORING \"{paths}\"', force=True)
             return True
