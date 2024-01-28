@@ -31,7 +31,7 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        for root, dirs, files in os.walk(self.path):
+        for root, dirs, files in os.walk(self.path, followlinks=True):
             for file in files:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
@@ -43,6 +43,10 @@ class FTreeDir:
                 if len(os.listdir(dpath)) < 1:
                     # ignore empty directory
                     continue
+                # appending "/" allows to ensure pattern
+                # like "*/dir/*" will match the content of the directory
+                # but also the directory itself
+                dpath += os.path.sep
                 if must_ignore([dpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
                     continue
