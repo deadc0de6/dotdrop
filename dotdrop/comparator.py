@@ -134,7 +134,7 @@ class Comparator:
         if not os.path.isdir(deployed_path):
             return f'\"{deployed_path}\" is a file\n'
 
-        #return self._compare_dirs(local_path, deployed_path, ignore)
+        # return self._compare_dirs(local_path, deployed_path, ignore)
         return self._compare_dirs2(local_path, deployed_path, ignore)
 
     def _compare_dirs2(self, local_path, deployed_path, ignore):

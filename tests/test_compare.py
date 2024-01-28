@@ -129,7 +129,6 @@ class TestCompare(unittest.TestCase):
         expected = {df1: True, df2: True, df3: True, df4: True,
                     df5: True, df9: True}
         results = self.compare(opt, tmp, len(dfiles))
-        self.maxDiff = None
         self.assertEqual(results, expected)
 
         # modify file
