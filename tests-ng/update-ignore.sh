@@ -74,7 +74,7 @@ echo "c" > "${tmpd}"/a/x/yfile
 
 # update "dir" filesystem
 echo "new" > "${tmpd}"/dir/a/a
-mkdir -p "${dt}"/dir/a/be-gone
+touch "${dt}"/dir/a/be-gone
 touch "${tmpd}"/dir/newfile
 mkdir -p "${tmpd}"/dir/ignore
 echo "ignore-me" > "${tmpd}"/dir/ignore/ignore-me
@@ -117,12 +117,12 @@ cd "${ddpath}" | ${bin} update -f --verbose -c "${cfg}" --profile=p1
 grep_or_fail 'b' "${dt}/a/c/acfile"
 grep_or_fail 'a' "${dt}/a/x/xfile"
 [ -e "${dt}"/a/newfile ] && echo "'a' newfile should have been removed" && exit 1
-[ -d "${dt}"/a/be-gone ] && echo "'a' be-gone should have been removed" && exit 1
+[ -e "${dt}"/a/be-gone ] && echo "'file' be-gone should have been removed" && exit 1
 [ -e "${dt}"/x/yfile ] && echo "'a' yfile should not have been added" && exit 1
 
 # check "dir" files are correct
 grep_or_fail 'new' "${dt}"/dir/a/a
-[ -d "${dt}"/dir/a/be-gone ] && echo "'dir' be-gone should have been removed" && exit 1
+[ -e "${dt}"/dir/a/be-gone ] && echo "'file' be-gone should have been removed" && exit 1
 [ ! -e "${tmpd}"/dir/newfile ] && echo "'dir' newfile should have been removed" && exit 1
 [ -d "${dt}"/dir/ignore ] && echo "'dir' ignore dir not ignored" && exit 1
 [ -f "${dt}"/dir/ignore/ignore-me ] && echo "'dir' ignore-me not ignored" && exit 1

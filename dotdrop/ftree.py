@@ -10,6 +10,7 @@ import os
 
 # local imports
 from dotdrop.utils import must_ignore
+from dotdrop.logger import Logger
 
 
 class FTreeDir:
@@ -22,6 +23,7 @@ class FTreeDir:
         self.ignores = ignores
         self.debug = debug
         self.entries = []
+        self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
             self._walk()
 
@@ -37,10 +39,12 @@ class FTreeDir:
                 if must_ignore([fpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
                     continue
+                self.log.dbg(f'added file to list of {self.path}: {fpath}')
                 self.entries.append(fpath)
             for dname in dirs:
                 dpath = os.path.join(root, dname)
-                if len(os.listdir(dpath)) < 1:
+                subs = os.listdir(dpath)
+                if len(subs) < 1:
                     # ignore empty directory
                     continue
                 # appending "/" allows to ensure pattern
@@ -50,6 +54,7 @@ class FTreeDir:
                 if must_ignore([dpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
                     continue
+                self.log.dbg(f'added dir to list of {self.path}: {dpath}')
                 self.entries.append(dpath)
 
     def compare(self, other):
