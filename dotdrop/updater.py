@@ -11,10 +11,12 @@ import filecmp
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.ftree import FTreeDir
 from dotdrop.templategen import Templategen
 from dotdrop.utils import ignores_to_absolute, removepath, \
     get_unique_tmp_name, write_to_tmpfile, must_ignore, \
-    mirror_file_rights, get_file_perm, copytree_with_ign
+    mirror_file_rights, get_file_perm, copytree_with_ign, \
+    diff
 from dotdrop.exceptions import UndefinedException
 
 
@@ -137,6 +139,8 @@ class Updater:
         else:
             ret = self._handle_file(new_path, local_path,
                                     ignores)
+        if not ret:
+            return False
 
         # mirror rights
         if deployed_mode != local_mode:
@@ -144,6 +148,7 @@ class Updater:
             self.log.dbg(msg)
             if self.conf.update_dotfile(dotfile.key, deployed_mode):
                 ret = True
+            self._mirror_file_perms(deployed_path, local_path)
 
         # clean temporary files
         if new_path != deployed_path and os.path.exists(new_path):
@@ -244,8 +249,8 @@ class Updater:
                 self.log.dry(f'would cp {deployed_path} {local_path}')
             else:
                 self.log.dbg(f'cp {deployed_path} {local_path}')
-                shutil.copyfile(deployed_path, local_path)
-                self._mirror_file_perms(deployed_path, local_path)
+                shutil.copy2(deployed_path, local_path)
+                # self._mirror_file_perms(deployed_path, local_path)
                 self.log.sub(f'\"{local_path}\" updated')
         except IOError as exc:
             self.log.warn(f'{deployed_path} update failed, do manually: {exc}')
@@ -254,6 +259,86 @@ class Updater:
 
     def _handle_dir(self, deployed_path, local_path,
                     dotfile, ignores):
+        """sync path (local dir) and local_path (dotdrop dir path)"""
+        self.log.dbg(f'handle update for dir {deployed_path} to {local_path}')
+
+        # get absolute paths
+        deployed_path = os.path.expanduser(deployed_path)
+        local_path = os.path.expanduser(local_path)
+
+        local_tree = FTreeDir(local_path,
+                              ignores=ignores,
+                              debug=self.debug)
+        deploy_tree = FTreeDir(deployed_path,
+                               ignores=ignores,
+                               debug=self.debug)
+        lonly, ronly, common = local_tree.compare(deploy_tree)
+        print(f'lonly: {lonly}')
+        print(f'ronly: {ronly}')
+        print(f'common: {common}')
+
+        # those only in dotpath
+        for i in lonly:
+            path = os.path.join(local_path, i)
+            if self.dry:
+                self.log.dry(f'would rm -r {path}')
+                continue
+            self.log.dbg(f'rm -r {path}')
+            if not self._confirm_rm_r(path):
+                continue
+            removepath(path, logger=self.log)
+            self.log.sub(f'\"{path}\" removed')
+
+        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            dotfile.ignore_missing_in_dotdrop
+        if not ignore_missing_in_dotdrop:
+            for i in ronly:
+                # only in deployed dir
+                srcpath = os.path.join(deployed_path, i)
+                dstpath = os.path.join(local_path, i)
+                if self.dry:
+                    self.log.dry(f'would cp -r {srcpath} {dstpath}')
+                    continue
+                self.log.dbg(f'cp {srcpath} {dstpath}')
+                try:
+                    if not os.path.isdir(srcpath):
+                        # we do not care about directory since
+                        # those are handled by shutil automatically
+                        os.makedirs(os.path.dirname(dstpath), exist_ok=True)
+                        shutil.copy2(srcpath, dstpath)
+                    # self._mirror_file_perms(srcpath, dstpath)
+                except IOError as exc:
+                    msg = f'{srcpath} update failed, do manually: {exc}'
+                    self.log.warn(msg)
+                    return False
+                self.log.sub(f'\"{dstpath}\" updated')
+
+        for i in common:
+            srcpath = os.path.join(deployed_path, i)
+            dstpath = os.path.join(local_path, i)
+            if os.path.isdir(srcpath):
+                continue
+            out = diff(modified=dstpath, original=srcpath,
+                       debug=self.debug)
+            if not out:
+                continue
+            if self.dry:
+                self.log.dry(f'would update content of {dstpath} from {srcpath}')
+                continue
+            self.log.dbg(f'cp {srcpath} {dstpath}')
+            try:
+                shutil.copy2(srcpath, dstpath)
+                self._mirror_file_perms(srcpath, dstpath)
+            except IOError as exc:
+                msg = f'{srcpath} update failed, do manually: {exc}'
+                self.log.warn(msg)
+                return False
+            self.log.sub(f'\"{dstpath}\" content updated')
+
+        return True
+
+    def _handle_dir2(self, deployed_path, local_path,
+                     dotfile, ignores):
         """sync path (local dir) and local_path (dotdrop dir path)"""
         self.log.dbg(f'handle update for dir {deployed_path} to {local_path}')
         # paths must be absolute (no tildes)

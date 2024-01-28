@@ -6,12 +6,11 @@ handle the comparison of two dotfiles
 """
 
 import os
-import filecmp
 
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.ftree import FTreeDir
-from dotdrop.utils import must_ignore, uniq_list, diff, \
+from dotdrop.utils import must_ignore, diff, \
     get_file_perm
 
 
