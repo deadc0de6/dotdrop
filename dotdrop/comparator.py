@@ -134,7 +134,6 @@ class Comparator:
         if not os.path.isdir(deployed_path):
             return f'\"{deployed_path}\" is a file\n'
 
-        # return self._compare_dirs(local_path, deployed_path, ignore)
         return self._compare_dirs2(local_path, deployed_path, ignore)
 
     def _compare_dirs2(self, local_path, deployed_path, ignore):
@@ -164,83 +163,6 @@ class Comparator:
                                    ignore=None, mode=None,
                                    recurse=False)
             ret.extend(subret)
-
-        return ''.join(ret)
-
-    def _compare_dirs(self, local_path, deployed_path, ignore):
-        """compare directories"""
-        self.log.dbg(f'compare dirs {local_path} and {deployed_path}')
-        ret = []
-        comp = filecmp.dircmp(local_path, deployed_path)
-
-        # handle files and subdirs only in deployed dir
-        self.log.dbg(f'files/dirs only in deployed dir: {comp.left_only}')
-        for i in comp.left_only:
-            abspath1 = os.path.join(local_path, i)
-            if os.path.isdir(abspath1):
-                abspath1 += os.path.sep
-            abspath2 = os.path.join(deployed_path, i)
-            if os.path.isdir(abspath2):
-                abspath2 += os.path.sep
-            if self.ignore_missing_in_dotdrop or \
-               must_ignore([abspath1, abspath2],
-                           ignore, debug=self.debug):
-                continue
-            ret.append(f'=> \"{i}\" does not exist on destination\n')
-
-        # handle files and subdirs only in dotpath dir
-        self.log.dbg(f'files/dirs only in dotpath dir: {comp.right_only}')
-        for i in comp.right_only:
-            abspath1 = os.path.join(local_path, i)
-            if os.path.isdir(abspath1):
-                abspath1 += os.path.sep
-            abspath2 = os.path.join(deployed_path, i)
-            if os.path.isdir(abspath2):
-                abspath2 += os.path.sep
-            if must_ignore([abspath1, abspath2],
-                           ignore, debug=self.debug):
-                continue
-
-            if not self.ignore_missing_in_dotdrop:
-                ret.append(f'=> \"{i}\" does not exist in dotdrop\n')
-
-        # same local_path and deployed_path but different type
-        funny = comp.common_funny
-        self.log.dbg(f'files with different types: {funny}')
-        for i in funny:
-            source_file = os.path.join(local_path, i)
-            deployed_file = os.path.join(deployed_path, i)
-            if self.ignore_missing_in_dotdrop and \
-                    not os.path.exists(source_file):
-                continue
-            if must_ignore([source_file, deployed_file],
-                           ignore, debug=self.debug):
-                continue
-            short = os.path.basename(source_file)
-            # file vs dir
-            ret.append(f'=> different type: \"{short}\"\n')
-
-        # content is different
-        funny = comp.diff_files
-        funny.extend(comp.funny_files)
-        funny = uniq_list(funny)
-        self.log.dbg(f'files with different content: {funny}')
-        for i in funny:
-            source_file = os.path.join(local_path, i)
-            deployed_file = os.path.join(deployed_path, i)
-            if self.ignore_missing_in_dotdrop and \
-                    not os.path.exists(source_file):
-                continue
-            if must_ignore([source_file, deployed_file],
-                           ignore, debug=self.debug):
-                continue
-            ret.append(self._diff(source_file, deployed_file, header=True))
-
-        # recursively compare subdirs
-        for i in comp.common_dirs:
-            sublocal_path = os.path.join(local_path, i)
-            subdeployed_path = os.path.join(deployed_path, i)
-            ret.extend(self._comp_dir(sublocal_path, subdeployed_path, ignore))
 
         return ''.join(ret)
 
