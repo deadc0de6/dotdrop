@@ -9,7 +9,7 @@ filesystem tree for directories
 import os
 
 # local imports
-from dotdrop.utils import must_ignore
+from dotdrop.utils import must_ignore, dir_empty
 from dotdrop.logger import Logger
 
 
@@ -38,14 +38,15 @@ class FTreeDir:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
+                    self.log.dbg('ignoring file {fpath}')
                     continue
                 self.log.dbg(f'added file to list of {self.path}: {fpath}')
                 self.entries.append(fpath)
             for dname in dirs:
                 dpath = os.path.join(root, dname)
-                subs = os.listdir(dpath)
-                if len(subs) < 1:
+                if dir_empty(dpath):
                     # ignore empty directory
+                    self.log.dbg('ignoring empty dir {dpath}')
                     continue
                 # appending "/" allows to ensure pattern
                 # like "*/dir/*" will match the content of the directory
@@ -53,9 +54,14 @@ class FTreeDir:
                 dpath += os.path.sep
                 if must_ignore([dpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
+                    self.log.dbg('ignoring dir {dpath}')
                     continue
                 self.log.dbg(f'added dir to list of {self.path}: {dpath}')
                 self.entries.append(dpath)
+
+    def get_entries(self):
+        """return all entries"""
+        return self.entries
 
     def compare(self, other):
         """
