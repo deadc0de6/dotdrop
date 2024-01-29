@@ -28,12 +28,13 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 ################################################################
 
 # dotdrop directory
-basedir=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+basedir=$(mktemp -d --suffix='-dotdrop-dotpath' || mktemp -d)
+dotpath="${basedir}/dotfiles"
 echo "[+] dotdrop dir: ${basedir}"
-echo "[+] dotpath dir: ${basedir}/dotfiles"
+echo "[+] dotpath dir: ${dotpath}"
 
 # the dotfile to be imported
-tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+tmpd=$(mktemp -d --suffix='-dotdrop-fs' || mktemp -d)
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
@@ -47,7 +48,9 @@ echo 'unique' > "${tmpd}"/uniquefile
 mkdir "${tmpd}"/dir1
 touch "${tmpd}"/dir1/file_only_in_dir1
 mkdir -p "${tmpd}"/dir1/dir_only_in_dir1
+touch "${tmpd}/dir1/dir_only_in_dir1/x"
 mkdir -p "${tmpd}"/dir1/common_dir
+touch "${tmpd}/dir1/common_dir/y"
 echo 'this file is the same' > "${tmpd}"/dir1/common_file
 echo 'in dir1' > "${tmpd}"/dir1/not_the_same
 echo 'This is a file in dir1' > "${tmpd}"/dir1/file_in_dir1
@@ -61,12 +64,14 @@ echo 'first' > "${tmpd}"/dir1/sub/sub2/different
 mkdir "${tmpd}"/dir2
 touch "${tmpd}"/dir2/file_only_in_dir2
 mkdir -p "${tmpd}"/dir2/common_dir
+touch "${tmpd}/dir2/common_dir/z"
 echo 'this file is the same' > "${tmpd}"/dir2/common_file
 echo 'in dir2' > "${tmpd}"/dir2/not_the_same
 mkdir -p "${tmpd}"/dir2/file_in_dir1
 mkdir -p "${tmpd}"/dir2/sub/sub2
 echo 'modified' > "${tmpd}"/dir2/sub/sub2/different
 mkdir -p "${tmpd}"/dir2/new/new2
+touch "${tmpd}/dir2/new/new2/new"
 mkdir -p "${tmpd}"/dir2/sub1/sub2/sub3/
 touch "${tmpd}"/dir2/sub1/sub2/sub3/file
 #tree ${tmpd}/dir2
@@ -99,14 +104,17 @@ echo 'changed' > "${tmpd}"/uniquefile
 # update
 echo "[+] updating"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f --verbose "${tmpd}"/uniquefile "${tmpd}"/dir1
+grep 'changed' "${dotpath}/${tmpd}/uniquefile"
+[ ! -e "${dotpath}/${tmpd}/dir1/file_only_in_dir2" ] && echo "file_only_in_dir2 not found" && exit 1
+[ -f "${dotpath}/${tmpd}/dir1/file_in_dir1" ] && echo "directory \"file_in_dir1\" not removed" && exit 1
 
 # manually update
-rm "${basedir}"/dotfiles/"${tmpd}"/dir1/file_in_dir1
-mkdir -p "${basedir}"/dotfiles/"${tmpd}"/dir1/file_in_dir1
+mkdir -p "${dotpath}/${tmpd}/dir1/file_in_dir1"
 
 # ensure changes applied correctly
 echo "diff dir1"
-diff -r --suppress-common-lines "${tmpd}"/dir1 "${basedir}"/dotfiles/"${tmpd}"/dir1
+tree "${tmpd}"/dir1
+diff -r --suppress-common-lines "${tmpd}"/dir1 "${dotpath}/${tmpd}/dir1"
 echo "diff uniquefile"
 diff "${tmpd}"/uniquefile "${basedir}"/dotfiles/"${tmpd}"/uniquefile
 [ ! -e "${basedir}"/dotfiles/"${tmpd}"/dir1/sub1/sub2/sub3/file ] && echo "sub does not exist" && exit 1

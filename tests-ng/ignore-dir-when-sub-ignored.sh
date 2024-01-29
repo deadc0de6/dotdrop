@@ -29,12 +29,12 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 ################################################################
 
 # the dotfile source
-tmps=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+tmps=$(mktemp -d --suffix='-dotdrop-dotpath' || mktemp -d)
 dotpath="${tmps}"/dotfiles
 mkdir -p "${dotpath}"
 #echo "dotfile source: ${tmps}"
 # the dotfile destination
-tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+tmpd=$(mktemp -d --suffix='-dotdrop-fs' || mktemp -d)
 #echo "dotfile destination: ${tmpd}"
 
 clear_on_exit "${tmps}"
@@ -132,7 +132,6 @@ cd "${ddpath}" | ${bin} update -f -c "${cfg1}" -p p1 -V
 ###################################################
 # test import
 ###################################################
-exit 0 # TODO
 clean_both
 create_in_dst
 

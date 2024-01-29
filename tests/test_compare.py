@@ -30,7 +30,7 @@ class TestCompare(unittest.TestCase):
     def compare(self, opt, tmp, nbdotfiles):
         """compare"""
         dotfiles = opt.dotfiles
-        self.assertTrue(len(dotfiles) == nbdotfiles)
+        self.assertEqual(len(dotfiles), nbdotfiles)
         templ = Templategen(base=opt.dotpath, debug=True)
         inst = Installer(create=opt.create, backup=opt.backup,
                          dry=opt.dry, base=opt.dotpath, debug=opt.debug)
@@ -96,6 +96,7 @@ class TestCompare(unittest.TestCase):
         df5 = get_tempdir()
         self.assertTrue(os.path.exists(df5))
         self.addCleanup(clean, df5)
+        _, _ = create_random_file(df5)
 
         df6, _ = create_random_file(df5)
         self.assertTrue(os.path.exists(df6))
