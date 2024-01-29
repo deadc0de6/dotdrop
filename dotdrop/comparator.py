@@ -146,10 +146,16 @@ class Comparator:
 
         for i in lonly:
             path = os.path.join(local_path, i)
+            if os.path.isdir(path):
+                # ignore dir
+                continue
             ret.append(f'=> \"{path}\" does not exist on destination\n')
         if not self.ignore_missing_in_dotdrop:
             for i in ronly:
                 path = os.path.join(deployed_path, i)
+                if os.path.isdir(path):
+                    # ignore dir
+                    continue
                 ret.append(f'=> \"{path}\" does not exist in dotdrop\n')
 
         # test for content difference
