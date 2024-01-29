@@ -273,9 +273,6 @@ class Updater:
                                ignores=ignores,
                                debug=self.debug)
         lonly, ronly, common = local_tree.compare(deploy_tree)
-        print(f'lonly: {lonly}')
-        print(f'ronly: {ronly}')
-        print(f'common: {common}')
 
         # those only in dotpath
         for i in lonly:
@@ -302,8 +299,7 @@ class Updater:
                 self.log.dbg(f'cp {srcpath} {dstpath}')
                 try:
                     if not os.path.isdir(srcpath):
-                        # we do not care about directory since
-                        # those are handled by shutil automatically
+                        # we do not care about directory
                         os.makedirs(os.path.dirname(dstpath), exist_ok=True)
                         shutil.copy2(srcpath, dstpath)
                     # self._mirror_file_perms(srcpath, dstpath)
@@ -323,7 +319,8 @@ class Updater:
             if not out:
                 continue
             if self.dry:
-                self.log.dry(f'would update content of {dstpath} from {srcpath}')
+                msg = f'would update content of {dstpath} from {srcpath}'
+                self.log.dry(msg)
                 continue
             self.log.dbg(f'cp {srcpath} {dstpath}')
             try:
@@ -346,19 +343,19 @@ class Updater:
         local_path = os.path.expanduser(local_path)
 
         # find the differences
-        diff = filecmp.dircmp(deployed_path, local_path)
+        cmp = filecmp.dircmp(deployed_path, local_path)
         # handle directories diff
-        ret = self._merge_dirs(diff, dotfile,
+        ret = self._merge_dirs(cmp, dotfile,
                                ignores)
         self._mirror_file_perms(deployed_path, local_path)
         return ret
 
-    def _merge_dirs_create_left_only(self, diff, left, right,
+    def _merge_dirs_create_left_only(self, cmp, left, right,
                                      ignore_missing_in_dotdrop,
                                      ignores):
         """create dirs that don't exist in dotdrop"""
-        self.log.dbg(f'_merge_dirs_create_left_only: {diff.left_only}')
-        for toadd in diff.left_only:
+        self.log.dbg(f'_merge_dirs_create_left_only: {cmp.left_only}')
+        for toadd in cmp.left_only:
             exist = os.path.join(left, toadd)
             if not os.path.isdir(exist):
                 # ignore files for now
@@ -392,12 +389,12 @@ class Updater:
                                debug=self.debug)
         return ignore_func
 
-    def _merge_dirs_remove_right_only(self, diff, left, right,
+    def _merge_dirs_remove_right_only(self, cmp, left, right,
                                       ignore_missing_in_dotdrop,
                                       ignores):
         """remove dirs that don't exist in deployed version"""
-        self.log.dbg(f'_merge_dirs_remove_right_only: {diff.right_only}')
-        for toremove in diff.right_only:
+        self.log.dbg(f'_merge_dirs_remove_right_only: {cmp.right_only}')
+        for toremove in cmp.right_only:
             old = os.path.join(right, toremove)
             if not os.path.isdir(old):
                 # ignore files for now
@@ -416,10 +413,10 @@ class Updater:
 
         # handle files diff
         # sync files that exist in both but are different
-        self.log.dbg(f'_merge_dirs_remove_right_only: {diff.diff_files}')
-        fdiff = diff.diff_files
-        fdiff.extend(diff.funny_files)
-        fdiff.extend(diff.common_funny)
+        self.log.dbg(f'_merge_dirs_remove_right_only: {cmp.diff_files}')
+        fdiff = cmp.diff_files
+        fdiff.extend(cmp.funny_files)
+        fdiff.extend(cmp.common_funny)
         for file in fdiff:
             fleft = os.path.join(left, file)
             fright = os.path.join(right, file)
@@ -434,12 +431,12 @@ class Updater:
                               ignores,
                               compare=False)
 
-    def _merge_files_copy_left_only(self, diff, left, right,
+    def _merge_files_copy_left_only(self, cmp, left, right,
                                     ignore_missing_in_dotdrop,
                                     ignores):
         """copy files that don't exist in dotdrop"""
-        self.log.dbg(f'_merge_dirs_copy_left_only: {diff.left_only}')
-        for toadd in diff.left_only:
+        self.log.dbg(f'_merge_dirs_copy_left_only: {cmp.left_only}')
+        for toadd in cmp.left_only:
             exist = os.path.join(left, toadd)
             if os.path.isdir(exist):
                 # ignore dirs, done above
@@ -462,10 +459,10 @@ class Updater:
             self._mirror_file_perms(exist, new)
             self.log.sub(f'\"{new}\" added')
 
-    def _merge_files_remove_right_only(self, diff, right, ignores):
+    def _merge_files_remove_right_only(self, cmp, right, ignores):
         """remove files that don't exist in deployed version"""
-        self.log.dbg(f'_merge_dirs_remove_right_only_2: {diff.right_only}')
-        for toremove in diff.right_only:
+        self.log.dbg(f'_merge_dirs_remove_right_only_2: {cmp.right_only}')
+        for toremove in cmp.right_only:
             new = os.path.join(right, toremove)
             if not os.path.exists(new):
                 continue
@@ -481,36 +478,36 @@ class Updater:
             removepath(new, logger=self.log)
             self.log.sub(f'\"{new}\" removed')
 
-    def _merge_dirs(self, diff, dotfile, ignores):
+    def _merge_dirs(self, cmp, dotfile, ignores):
         """Synchronize directories recursively."""
-        left, right = diff.left, diff.right
+        left, right = cmp.left, cmp.right
         self.log.dbg(f'sync dir {left} to {right}')
 
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
             dotfile.ignore_missing_in_dotdrop
 
         # directories
-        self._merge_dirs_create_left_only(diff, left, right,
+        self._merge_dirs_create_left_only(cmp, left, right,
                                           ignore_missing_in_dotdrop,
                                           ignores)
-        self._merge_dirs_remove_right_only(diff, left, right,
+        self._merge_dirs_remove_right_only(cmp, left, right,
                                            ignore_missing_in_dotdrop,
                                            ignores)
         # files
-        self._merge_files_copy_left_only(diff, left, right,
+        self._merge_files_copy_left_only(cmp, left, right,
                                          ignore_missing_in_dotdrop,
                                          ignores)
-        self._merge_files_remove_right_only(diff, right, ignores)
+        self._merge_files_remove_right_only(cmp, right, ignores)
 
         # compare rights
-        for common in diff.common_files:
+        for common in cmp.common_files:
             leftf = os.path.join(left, common)
             rightf = os.path.join(right, common)
             if not self._same_rights(leftf, rightf):
                 self._mirror_file_perms(leftf, rightf)
 
         # Recursively decent into common subdirectories.
-        for subdir in diff.subdirs.values():
+        for subdir in cmp.subdirs.values():
             self._merge_dirs(subdir, dotfile,
                              ignores)
 
