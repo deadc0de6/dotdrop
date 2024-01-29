@@ -60,7 +60,7 @@ cd "${ddpath}" | ${bin} import -f -c "${cfg}" "${tmpf}"
 chmod +x "${tmpf}"
 
 # update
-echo "[+] updating"
+echo "[+] updating (1)"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f --verbose "${tmpf}"
 
 # test change applied
@@ -72,12 +72,16 @@ echo 'test' > "${tmpd}"/dir1/newfile
 chmod +x "${tmpd}"/dir1/newfile
 
 # update
-echo "[+] updating"
+echo "[+] updating (2)"
 cd "${ddpath}" | ${bin} update -c "${cfg}" -f --verbose "${tmpd}"
 
 # test change applied
-[ "$(stat -c '%a' "${tmpd}"/dir1/newfile)" != "$(stat -c '%a' "${basedir}"/dotfiles/"${tmpd}"/dir1/newfile)" ] && exit 1
-[ "$(stat -c '%a' "${tmpd}"/dir1/file2)" != "$(stat -c '%a' "${basedir}"/dotfiles/"${tmpd}"/dir1/file2)" ] && exit 1
+stat1=$(stat -c '%a' "${tmpd}"/dir1/newfile)
+stat2=$(stat -c '%a' "${basedir}"/dotfiles/"${tmpd}"/dir1/newfile)
+[ "${stat1}" != "${stat2}" ] && echo "diff permissions for newfile: ${stat1} VS ${stat2}" && exit 1
+stat1=$(stat -c '%a' "${tmpd}"/dir1/file2)
+stat2=$(stat -c '%a' "${basedir}"/dotfiles/"${tmpd}"/dir1/file2)
+[ "${stat1}" != "${stat2}" ] && echo "diff permissions for file2: ${stat1} VS ${stat2}" && exit 1
 
 echo "OK"
 exit 0
