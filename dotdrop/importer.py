@@ -10,10 +10,10 @@ import shutil
 
 # local imports
 from dotdrop.logger import Logger
+from dotdrop.ftree import FTreeDir
 from dotdrop.utils import strip_home, get_default_file_perms, \
     get_file_perm, get_umask, must_ignore, \
-    get_unique_tmp_name, removepath, copytree_with_ign, \
-    copyfile
+    get_unique_tmp_name, removepath
 from dotdrop.linktypes import LinkTypes
 from dotdrop.comparator import Comparator
 from dotdrop.templategen import Templategen
@@ -118,38 +118,39 @@ class Importer:
         """
 
         # normalize path
-        dst = path.rstrip(os.sep)
-        dst = os.path.abspath(dst)
+        infspath = path.rstrip(os.sep)
+        infspath = os.path.abspath(infspath)
 
         # test if must be ignored
-        if self._ignore(dst):
+        if self._ignore(infspath):
             return 0
 
         # ask confirmation for symlinks
         if self.safe:
-            realdst = os.path.realpath(dst)
-            if dst != realdst:
-                msg = f'\"{dst}\" is a symlink, dereference it and continue?'
+            realdst = os.path.realpath(infspath)
+            if infspath != realdst:
+                msg = f'\"{infspath}\" is a symlink, '
+                msg += 'dereference it and continue?'
                 if not self.log.ask(msg):
                     return 0
 
         # create src path
-        src = strip_home(dst)
+        indotpath = strip_home(infspath)
         if import_as:
             # handle import as
-            src = os.path.expanduser(import_as)
-            src = src.rstrip(os.sep)
-            src = os.path.abspath(src)
-            src = strip_home(src)
-            self.log.dbg(f'import src for {dst} as {src}')
+            indotpath = os.path.expanduser(import_as)
+            indotpath = indotpath.rstrip(os.sep)
+            indotpath = os.path.abspath(indotpath)
+            indotpath = strip_home(indotpath)
+            self.log.dbg(f'import src for {infspath} as {indotpath}')
         # with or without dot prefix
         strip = '.' + os.sep
         if self.keepdot:
             strip = os.sep
-        src = src.lstrip(strip)
+        indotpath = indotpath.lstrip(strip)
 
         # get the permission
-        perm = get_file_perm(dst)
+        perm = get_file_perm(infspath)
 
         # get the link attribute
         linktype = import_link
@@ -158,15 +159,18 @@ class Importer:
             self.log.err(f'importing \"{path}\" failed!')
             return -1
 
-        if self._already_exists(src, dst):
+        if self._already_exists(indotpath, infspath):
             return -1
 
-        self.log.dbg(f'import dotfile: src:{src} dst:{dst}')
-
-        if not self._import_to_dotpath(src, dst, trans_update=trans_update):
+        self.log.dbg(f'import dotfile: src:{indotpath} dst:{infspath}')
+        if not self._import_to_dotpath(indotpath,
+                                       infspath,
+                                       trans_update=trans_update):
+            self.log.dbg('import files failed')
             return -1
 
-        return self._import_in_config(path, src, dst, perm, linktype,
+        return self._import_in_config(path, indotpath,
+                                      infspath, perm, linktype,
                                       import_mode,
                                       trans_update=trans_update,
                                       trans_install=trans_install)
@@ -203,7 +207,7 @@ class Importer:
 
     def _check_existing_dotfile(self, src, dst):
         """
-        check if a dotfile in the dotpath
+        check if a dotfile file in the dotpath
         already exists for this src
         """
         if not os.path.exists(src):
@@ -226,48 +230,60 @@ class Importer:
 
     def _import_to_dotpath(self, in_dotpath, in_fs, trans_update=None):
         """
-        prepare hierarchy for dotfile in dotpath and copy file
+        copy files to dotpath
         """
-        srcf = os.path.join(self.dotpath, in_dotpath)
+        in_dotpath_abs = os.path.join(self.dotpath, in_dotpath)
 
         # check we are not overwritting
-        if not self._check_existing_dotfile(srcf, in_fs):
+        if not self._check_existing_dotfile(in_dotpath_abs, in_fs):
+            self.log.dbg(f'{in_dotpath_abs} exits already')
             return False
 
         # import the file
         if self.dry:
-            self.log.dry(f'would copy {in_fs} to {srcf}')
+            self.log.dry(f'would copy {in_fs} to {in_dotpath_abs}')
             return True
 
         # apply trans_update
         in_fs = self._apply_trans_update(in_fs, trans_update)
         if not in_fs:
             # transformation failed
+            self.log.dbg(f"trans failed: {in_fs}")
             return False
-        # copy the file to the dotpath
-        try:
-            if not os.path.isdir(in_fs):
-                # is a file
-                self.log.dbg(f'{in_fs} is file')
-                if not copyfile(in_fs, srcf, debug=self.debug):
-                    self.log.err(f'importing \"{in_fs}\" failed')
-                    return False
-            else:
-                # is a dir
-                if os.path.exists(srcf):
-                    shutil.rmtree(srcf)
-                self.log.dbg(f'{in_fs} is dir')
-                if not copytree_with_ign(in_fs, srcf,
-                                         ignore_func=self._ignore,
-                                         debug=self.debug):
-                    self.log.err(f'importing \"{in_fs}\" failed')
-                    return False
-        except shutil.Error as exc:
-            in_dotpath = exc.args[0][0][0]
-            why = exc.args[0][0][2]
-            self.log.err(f'importing \"{in_fs}\" failed: {why}')
 
-        return os.path.exists(srcf)
+
+        if not os.path.isdir(in_fs):
+            # handle file
+            self._import_file_to_dotpath(in_fs, in_dotpath_abs)
+
+        # handle dir and get a list of all files to import
+        fstree = FTreeDir(in_fs,
+                          ignores=self.ignore,
+                          debug=self.debug)
+
+        self.log.dbg(f'{len(fstree.get_entries())} files to import')
+        for entry in fstree.get_entries():
+            self.log.dbg("importing {entry}...")
+            src = os.path.join(in_fs, entry)
+            rel_src = os.path.relpath(entry, in_fs)
+            dst = os.path.join(in_dotpath_abs, rel_src)
+            if os.path.isdir(src):
+                # we do not care about directory
+                # these are created based on files
+                continue
+            self._import_file_to_dotpath(src, dst)
+
+        return os.path.exists(in_dotpath_abs)
+
+    def _import_file_to_dotpath(self, src, dst):
+        self.log.dbg(f'importing {src} to {dst}')
+        try:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copy2(src, dst)
+        except IOError as exc:
+            self.log.err(f'importing \"{src}\" failed: {exc}')
+            return False
+        return True
 
     def _already_exists(self, src, dst):
         """

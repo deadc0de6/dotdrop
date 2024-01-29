@@ -314,6 +314,9 @@ class Updater:
             dstpath = os.path.join(local_path, i)
             if os.path.isdir(srcpath):
                 continue
+            if not self._same_rights(dstpath, srcpath):
+                # update rights
+                self._mirror_file_perms(srcpath, dstpath)
             out = diff(modified=dstpath, original=srcpath,
                        debug=self.debug)
             if not out:
