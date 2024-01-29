@@ -22,7 +22,7 @@ from dotdrop.comparator import Comparator
 from dotdrop.importer import Importer
 from dotdrop.utils import get_tmpdir, removepath, \
     uniq_list, ignores_to_absolute, dependencies_met, \
-    adapt_workers, check_version, pivot_path
+    adapt_workers, check_version, pivot_path, dir_empty
 from dotdrop.linktypes import LinkTypes
 from dotdrop.exceptions import YamlException, \
     UndefinedException, UnmetDependency, \
@@ -726,7 +726,7 @@ def cmd_remove(opts):
             parent = os.path.dirname(dtpath)
             # remove any empty parent up to dotpath
             while parent != opts.dotpath:
-                if os.path.isdir(parent) and not os.listdir(parent):
+                if os.path.isdir(parent) and dir_empty(parent):
                     msg = f'Remove empty dir \"{parent}\"'
                     if opts.safe and not LOG.ask(msg):
                         break

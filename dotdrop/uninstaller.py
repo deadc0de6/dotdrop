@@ -7,7 +7,7 @@ handle the un-installation of dotfiles
 
 import os
 from dotdrop.logger import Logger
-from dotdrop.utils import removepath
+from dotdrop.utils import removepath, dir_empty
 
 
 class Uninstaller:
@@ -86,7 +86,7 @@ class Uninstaller:
                 if not subret:
                     ret = False
 
-        if not os.listdir(dirpath):
+        if dir_empty(dirpath):
             # empty
             self.log.dbg(f'remove empty dir {dirpath}')
             if self.dry:
