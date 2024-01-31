@@ -38,7 +38,7 @@ class FTreeDir:
                 fpath = os.path.join(root, file)
                 if must_ignore([fpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
-                    self.log.dbg('ignoring file {fpath}')
+                    self.log.dbg(f'ignoring file {fpath}')
                     continue
                 self.log.dbg(f'added file to list of {self.path}: {fpath}')
                 self.entries.append(fpath)
@@ -46,7 +46,7 @@ class FTreeDir:
                 dpath = os.path.join(root, dname)
                 if dir_empty(dpath):
                     # ignore empty directory
-                    self.log.dbg('ignoring empty dir {dpath}')
+                    self.log.dbg(f'ignoring empty dir {dpath}')
                     continue
                 # appending "/" allows to ensure pattern
                 # like "*/dir/*" will match the content of the directory
@@ -54,7 +54,7 @@ class FTreeDir:
                 dpath += os.path.sep
                 if must_ignore([dpath], ignores=self.ignores,
                                debug=self.debug, strict=True):
-                    self.log.dbg('ignoring dir {dpath}')
+                    self.log.dbg(f'ignoring dir {dpath}')
                     continue
                 self.log.dbg(f'added dir to list of {self.path}: {dpath}')
                 self.entries.append(dpath)

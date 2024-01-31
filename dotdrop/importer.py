@@ -251,7 +251,6 @@ class Importer:
             self.log.dbg(f"trans failed: {in_fs}")
             return False
 
-
         if not os.path.isdir(in_fs):
             # handle file
             self._import_file_to_dotpath(in_fs, in_dotpath_abs)
@@ -263,7 +262,7 @@ class Importer:
 
         self.log.dbg(f'{len(fstree.get_entries())} files to import')
         for entry in fstree.get_entries():
-            self.log.dbg("importing {entry}...")
+            self.log.dbg(f"importing {entry}...")
             src = os.path.join(in_fs, entry)
             rel_src = os.path.relpath(entry, in_fs)
             dst = os.path.join(in_dotpath_abs, rel_src)
