@@ -18,14 +18,20 @@ from dotdrop.profile import Profile
 from dotdrop.importer import Importer
 from dotdrop.linktypes import LinkTypes
 from dotdrop.action import Cmd, Transform
+from dotdrop.dotfile import Dotfile
+from dotdrop.installer import Installer
+from dotdrop.updater import Updater
+from dotdrop.uninstaller import Uninstaller
 from dotdrop.templategen import Templategen
 from dotdrop.exceptions import UndefinedException, \
     UnmetDependency
+from dotdrop.dotdrop import apply_install_trans
 from dotdrop.utils import removepath, samefile, \
     content_empty, _match_ignore_pattern, \
-    get_module_from_path, dependencies_met
+    get_module_from_path, dependencies_met, \
+    dir_empty
 from tests.helpers import create_random_file, \
-    get_tempdir, clean
+    get_tempdir, clean, edit_content
 
 
 class TestUtils(unittest.TestCase):
@@ -38,6 +44,16 @@ class TestUtils(unittest.TestCase):
             removepath('/abc')
         with self.assertRaises(OSError):
             removepath(os.path.expanduser('~'))
+
+    def test_dirempty(self):
+        """dir_empty"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+
+        self.assertTrue(dir_empty('/a/b/c/d/e'))
+        self.assertTrue(dir_empty(tmpdir))
+        path1, _ = create_random_file(tmpdir, content='left')
+        self.assertTrue(dir_empty(path1))
 
     def test_misc(self):
         """misc test"""
@@ -96,6 +112,101 @@ class TestUtils(unittest.TestCase):
             with patch('builtins.__import__',
                        side_effect=prepare_import_mock(['distro'])):
                 dependencies_met()
+
+
+class TestDotdropDotdrop(unittest.TestCase):
+    """test case"""
+
+    def test_apply_install_trans(self):
+        """ensure transformation fails if destination exists"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+
+        src, _ = create_random_file(tmpdir, content='left')
+        dst, _ = create_random_file(tmpdir, content='left')
+        new_src = f'{src}.trans'
+        edit_content(new_src, 'some_content')
+
+        trans = Transform('somekey', 'echo')
+        df = Dotfile('key', src, dst)
+        df.trans_install = trans
+        self.assertIsNone(apply_install_trans(
+            tmpdir,
+            df,
+            None,
+        ))
+
+
+class TestUpdater(unittest.TestCase):
+    """test case"""
+
+    def test_update_path(self):
+        """coverage for update_path"""
+        upd = Updater('path', {}, None, 'profile')
+        self.assertFalse(upd.update_path('/a/b/c/d'))
+
+
+class TestInstaller(unittest.TestCase):
+    """test case"""
+
+    def test_show_diff_before_write(self):
+        """coverage for _show_diff_before_write"""
+        inst = Installer()
+
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+
+        path1, _ = create_random_file(tmpdir, content='left')
+        path2, _ = create_random_file(tmpdir, content='right')
+        self.assertIsNotNone(inst._show_diff_before_write(
+            path1,
+            path2,
+            content=b'blah'
+        ))
+
+        path3, _ = create_random_file(tmpdir, content='left')
+        path4, _ = create_random_file(tmpdir, content='left')
+        self.assertEqual(inst._show_diff_before_write(
+            path3,
+            path4,
+        ), '')
+
+    def test_show_diff(self):
+        """coverage for _print_diff"""
+        inst = Installer()
+        self.assertIsNone(inst._print_diff(
+            "left",
+            "right",
+            "diff",
+        ))
+
+    def test_check_paths(self):
+        """coverage for _check_paths"""
+        inst = Installer()
+        r1, r2, r3, r4 = inst._check_paths(None, None)
+        self.assertIsNone(r1)
+        self.assertIsNone(r2)
+        self.assertFalse(r3)
+        self.assertIsNotNone(r4)
+
+
+class TestUninstaller(unittest.TestCase):
+    """test case"""
+
+    def test_uninstall(self):
+        """coverage for uninstall()"""
+        uninst = Uninstaller()
+        r1, r2 = uninst.uninstall(None, None, None)
+        self.assertTrue(r1)
+        self.assertIsNone(r2)
+
+        r1, r2 = uninst.uninstall('a/b/c', 'd/e/f', None)
+        self.assertFalse(r1)
+        self.assertIsNotNone(r2)
+
+        r1, r2 = uninst._remove_path('a/b/c')
+        self.assertTrue(r1)
+        self.assertIsNotNone(r2)
 
 
 class TestImporter(unittest.TestCase):
