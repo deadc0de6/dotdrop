@@ -7,6 +7,8 @@ build/
 tags
 env
 venv
+.pytest_cache
+.mypy_cache
 
 # coverage stuff
 .coverage
