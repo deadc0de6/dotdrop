@@ -626,7 +626,7 @@ def cmd_uninstall(opts):
     keys = opts.uninstall_key
 
     if keys:
-        # update only specific keys for this profile
+        # uninstall only specific keys for this profile
         dotfiles = []
         for key in uniq_list(keys):
             dotfile = opts.conf.get_dotfile(key)

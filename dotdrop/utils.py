@@ -694,9 +694,7 @@ def pivot_path(path, newdir, striphome=False, logger=None):
 
 def dir_empty(path):
     """return true if directory is empty"""
-    if not os.path.exists(path):
-        return True
-    if not os.path.isdir(path):
+    if not os.path.exists(path) or not os.path.isdir(path):
         return True
     return len(os.listdir(path)) < 1
 
