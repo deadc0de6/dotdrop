@@ -375,41 +375,6 @@ def copyfile(src, dst, debug=False):
     return _cp(src, dst, debug=debug) == 1
 
 
-def copytree_with_ign(src, dst, ignore_func=None, debug=False):
-    """
-    copytree with support for ignore
-    returns the numb of files installed
-    """
-    if debug:
-        LOG.dbg(f'copytree \"{src}\" to \"{dst}\"', force=True)
-    copied_count = 0
-    for entry in os.listdir(src):
-        srcf = os.path.join(src, entry)
-        dstf = os.path.join(dst, entry)
-        if ignore_func:
-            if os.path.isdir(srcf):
-                srcf += os.path.sep
-            if ignore_func(srcf):
-                continue
-        if os.path.isdir(srcf):
-            if debug:
-                LOG.dbg(f'mkdir \"{dstf}\"',
-                        force=True)
-            os.makedirs(dstf, exist_ok=True)
-            copied_count += copytree_with_ign(srcf,
-                                              dstf,
-                                              ignore_func=ignore_func)
-        else:
-            if debug:
-                LOG.dbg(f'copytree, copy file \"{src}\" to \"{dst}\"',
-                        force=True)
-            copied_count += _cp(srcf,
-                                dstf,
-                                ignore_func=ignore_func,
-                                debug=debug)
-    return copied_count
-
-
 def uniq_list(a_list):
     """unique elements of a list while preserving order"""
     new = []
