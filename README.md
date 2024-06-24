@@ -63,8 +63,6 @@ pip3 install -r dotdrop/requirements.txt --user
 ./dotdrop.sh --help
 ```
 
-A mirror of this repository is available on GitLab under <https://gitlab.com/deadc0de6/dotdrop>.
-
 ## Why dotdrop?
 
 There exist many tools to manage dotfiles; however, not
