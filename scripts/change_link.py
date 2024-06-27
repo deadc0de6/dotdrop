@@ -11,7 +11,7 @@ usage example:
 """
 
 import os
-import io
+import sys
 from docopt import docopt
 from ruamel.yaml import YAML as yaml
 
@@ -40,13 +40,11 @@ def change_link(path, value, ignores):
             continue
         val[ENTRY] = value
 
-    output = io.StringIO()
     data = yaml()
     data.default_flow_style = False
     data.indent = 2
     data.typ = 'rt'
-    data.dump(content, output)
-    print(output)
+    data.dump(content, sys.stdout)
 
 
 def main():
