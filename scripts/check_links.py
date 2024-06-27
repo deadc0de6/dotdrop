@@ -34,7 +34,8 @@ IGNORES = [
     'coveralls.io',
 ]
 OK_WHEN_FORBIDDEN = [
-    'linux.die.net'
+    'linux.die.net',
+    'ko-fi.com'
 ]
 IGNORE_GENERIC = []
 USER_AGENT = (
