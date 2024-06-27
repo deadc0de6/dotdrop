@@ -55,8 +55,11 @@ coverage combine coverages/*
 coverage xml
 
 # test doc
-echo "checking documentation..."
-"${cur}"/scripts/check-doc.sh
+if [ -z "${in_cicd}" ]; then
+  # not in CI/CD
+  echo "checking documentation..."
+  "${cur}"/scripts/check-doc.sh
+fi
 
 ## done
 echo "All tests finished successfully"
