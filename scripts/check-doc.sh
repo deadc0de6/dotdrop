@@ -12,17 +12,17 @@ find . -type f -iname '*.md' | while read -r line; do
   ./scripts/check_links.py "${line}"
 done
 
-## test the doc internal links
-## https://github.com/remarkjs/remark-validate-links
-## https://github.com/tcort/markdown-link-check
-## npm install -g remark-cli remark-validate-links
-if ! which remark >/dev/null 2>&1; then
-  echo "[WARNING] install \"remark\" to test the doc"
-  exit 1
-fi
-
-in_cicd="${GH_WORKFLOW:-}"
+in_cicd="${GITHUB_WORKFLOW:-}"
 if [ -n "${in_cicd}" ]; then
+  ## test the doc internal links when in CI/CD
+  ## https://github.com/remarkjs/remark-validate-links
+  ## https://github.com/tcort/markdown-link-check
+  ## npm install -g remark-cli remark-validate-links
+  if ! which remark >/dev/null 2>&1; then
+    echo "[WARNING] install \"remark\" to test the doc"
+    exit 1
+  fi
+
   echo "------------------------"
   echo "checking internal links"
   find . -type f -iname '*.md' | while read -r line; do

@@ -6,10 +6,10 @@
 set -eu -o errtrace -o pipefail
 
 cur=$(cd "$(dirname "${0}")" && pwd)
-in_cicd="${GH_WORKFLOW:-}"
+in_cicd="${GITHUB_WORKFLOW:-}"
 
-# patch TERM var in ci/cd
 if [ -n "${in_cicd}" ]; then
+  # patch TERM var in ci/cd
   if [ -z "${TERM}" ]; then
     export TERM="linux"
   fi
