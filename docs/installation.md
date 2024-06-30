@@ -7,7 +7,7 @@
 - [pipx install](#pipx-install)
 * [Homebrew package](#homebrew-package)
 * [Debian unstable (sid)](#debian)
-* [Ubuntu lunar (23.04)](#ubuntu)
+* [Ubuntu](#ubuntu)
 * [AUR packages](#aur-packages)
 * [Snap package](#snap-package)
 * [From source](#from-source)
@@ -215,7 +215,7 @@ $ sudo apt install dotdrop
 
 ## Ubuntu
 
-[Ubuntu package](https://packages.ubuntu.com/lunar/dotdrop) since lunar (23.04)
+[Ubuntu package](https://packages.ubuntu.com/search?keywords=dotdrop)
 
 Install dotdrop
 ```bash

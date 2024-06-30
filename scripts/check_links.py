@@ -32,6 +32,7 @@ VALID_RET = [
 IGNORES = [
     'badgen.net',
     'coveralls.io',
+    'packages.ubuntu.com',
 ]
 OK_WHEN_FORBIDDEN = [
     'linux.die.net',
