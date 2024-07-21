@@ -48,7 +48,7 @@ setup(
     keywords='dotfiles jinja2',
     packages=find_packages(exclude=['tests*']),
     install_requires=[
-        'docopt', 'Jinja2', 'ruamel.yaml',
+        'docopt-ng', 'Jinja2', 'ruamel.yaml',
         'python-magic', 'packaging', 'requests',
         'tomli; python_version < "3.11"',
         'tomli_w', 'distro'],
