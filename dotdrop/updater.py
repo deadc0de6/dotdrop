@@ -303,9 +303,10 @@ class Updater:
                         shutil.copy2(srcpath, dstpath)
                     # self._mirror_file_perms(srcpath, dstpath)
                 except IOError as exc:
-                    msg = f'{srcpath} update failed, do manually: {exc}'
+                    msg = f'{srcpath} update right only failed'
+                    msg += f', do manually: {exc}'
                     self.log.warn(msg)
-                    return False
+                    continue
                 self.log.sub(f'\"{dstpath}\" updated')
 
         for i in common:
@@ -329,9 +330,9 @@ class Updater:
                 shutil.copy2(srcpath, dstpath)
                 self._mirror_file_perms(srcpath, dstpath)
             except IOError as exc:
-                msg = f'{srcpath} update failed, do manually: {exc}'
+                msg = f'{srcpath} update common failed, do manually: {exc}'
                 self.log.warn(msg)
-                return False
+                continue
             self.log.sub(f'\"{dstpath}\" content updated')
 
         return True
