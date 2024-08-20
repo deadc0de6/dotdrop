@@ -57,6 +57,7 @@ noprofile="ALL"
 
 ##################################
 # import with profile from arg
+echo "import with profile from arg"
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p "${noprofile}" -V "${tmpd}"/file1
 cat "${cfg}"
 
@@ -71,11 +72,13 @@ nb=$(cat "${cfg}" | grep f_file1 | wc -l)
 cntpre=$(find "${tmps}"/dotfiles -type f | wc -l)
 
 # reimport
+echo "reimport"
 set +e
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p "${noprofile}" -V "${tmpd}"/file1
 set -e
 cat "${cfg}"
 
+echo "test reimport"
 cntpost=$(find "${tmps}"/dotfiles -type f | wc -l)
 [ "${cntpost}" != "${cntpre}" ] && echo "imported twice" && exit 1
 
@@ -84,6 +87,7 @@ nb=$(cat "${cfg}" | grep "dst: ${tmpd}/file1" | wc -l)
 
 ##################################
 # import with profile from env
+echo "import with profile from env"
 export DOTDROP_PROFILE="${noprofile}"
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" -V "${tmpd}"/file2
 cat "${cfg}"
@@ -91,7 +95,7 @@ cat "${cfg}"
 # ensure exists and is not link
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/file2 ] && echo "file not imported" && exit 1
 # ensure present in config
-cat "${cfg}" | grep "${tmpd}"/file2 >/dev/null 2>&1
+cat "${cfg}" | grep "${tmpd}"/file2 >/dev/null 2>&1 || (echo "file2 not present in config" && exit 1)
 
 nb=$(cat "${cfg}" | grep f_file2 | wc -l)
 [ "${nb}" != "1" ] && echo 'bad config' && exit 1

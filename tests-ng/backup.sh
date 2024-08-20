@@ -32,6 +32,8 @@ grep_or_fail()
 {
   if ! grep "${1}" "${2}" >/dev/null 2>&1; then
     echo "pattern \"${1}\" not found in ${2}"
+    echo "content:"
+    cat "${2}"
     exit 1
   fi
 }
@@ -143,6 +145,7 @@ clear_dotpath
 clear_fs
 create_dotpath
 create_fs
+echo "doing test \"${pre}\""
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
@@ -177,6 +180,7 @@ clear_dotpath
 clear_fs
 create_dotpath
 create_fs
+echo "doing test \"${pre}\""
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
@@ -199,6 +203,7 @@ clear_dotpath
 clear_fs
 create_dotpath
 create_fs
+echo "doing test \"${pre}\""
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
@@ -221,6 +226,7 @@ clear_dotpath
 clear_fs
 create_dotpath
 create_fs
+echo "doing test \"${pre}\""
 cd "${ddpath}" | ${bin} install -f -c "${cfg}" -p p1 --verbose
 
 # checks
