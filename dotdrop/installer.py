@@ -702,7 +702,7 @@ class Installer:
                     return
             self.log.dbg(f'removing unmanaged file \"{path}\"')
             if not removepath(path, logger=self.log):
-                self.log.warn('unable to remove {path}')
+                self.log.warn(f'unable to remove {path}')
 
     @classmethod
     def _write_content_to_file(cls, content, src, dst):
