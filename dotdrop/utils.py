@@ -153,26 +153,24 @@ def get_unique_tmp_name():
     return os.path.join(tmpdir, unique)
 
 
-def removepath(path, logger=None):
+def removepath(path, logger=None): # TODO
     """
     remove a file/directory/symlink
-    if logger is defined, OSError are catched
-    and printed to logger.warn instead of being forwarded
-    as OSError
+    raises OSError in case of error
+    unless logger is defined.
+
+    When logger is defined, a logger.warn
+    is printed and a boolean returned
     """
     if not path:
-        return
+        return True
     if not os.path.lexists(path):
-        err = f'File not found: {path}'
-        if logger:
-            logger.warn(err)
-            return
-        raise OSError(err)
+        return True
     if os.path.normpath(os.path.expanduser(path)) in NOREMOVE:
         err = f'Dotdrop refuses to remove {path}'
         if logger:
             logger.warn(err)
-            return
+            return False
         LOG.err(err)
         raise OSError(err)
     if logger:
@@ -189,8 +187,9 @@ def removepath(path, logger=None):
         err = str(exc)
         if logger:
             logger.warn(err)
-            return
+            return False
         raise OSError(err) from exc
+    return True
 
 
 def samefile(path1, path2):

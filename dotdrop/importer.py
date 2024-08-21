@@ -328,6 +328,7 @@ class Importer:
             msg = f'transformation \"{trans.key}\" failed for {path}'
             self.log.err(msg)
             if os.path.exists(tmp):
+                # ignore error
                 removepath(tmp, logger=self.log)
             return None
         return tmp

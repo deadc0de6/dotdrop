@@ -99,7 +99,7 @@ class Uninstaller:
     def _remove_path(self, path):
         """remove a file"""
         try:
-            removepath(path, self.log)
+            removepath(path)
         except OSError as exc:
             err = f'removing \"{path}\" failed: {exc}'
             return False, err
