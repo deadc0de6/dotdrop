@@ -153,7 +153,7 @@ def get_unique_tmp_name():
     return os.path.join(tmpdir, unique)
 
 
-def removepath(path, logger=None): # TODO
+def removepath(path, logger=None):
     """
     remove a file/directory/symlink
     raises OSError in case of error
