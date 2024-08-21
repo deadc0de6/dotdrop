@@ -169,11 +169,13 @@ def _dotfile_compare(opts, dotfile, tmp):
     if tmpsrc:
         tmpsrc = os.path.join(opts.dotpath, tmpsrc)
         if os.path.exists(tmpsrc):
-            removepath(tmpsrc, LOG)
+            # ignore error
+            removepath(tmpsrc, logger=LOG)
 
     # clean tmp template dotfile if any
     if insttmp and os.path.exists(insttmp):
-        removepath(insttmp, LOG)
+        # ignore error
+        removepath(insttmp, logger=LOG)
 
     if diff != '':
         # print diff results
@@ -258,7 +260,8 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         if tmp:
             tmp = os.path.join(opts.dotpath, tmp)
             if os.path.exists(tmp):
-                removepath(tmp, LOG)
+                # ignore error
+                removepath(tmp, logger=LOG)
 
     # check result of installation
     if ret:
@@ -322,6 +325,7 @@ def cmd_install(opts):
         for root, _, files in os.walk(opts.workdir):
             for file in files:
                 fpath = os.path.join(root, file)
+                # ignore error
                 removepath(fpath, logger=LOG)
 
     # execute profile pre-action
@@ -721,7 +725,7 @@ def cmd_remove(opts):
 
             # remove dotfile from dotpath
             dtpath = os.path.join(opts.dotpath, dotfile.src)
-            removepath(dtpath, LOG)
+            removepath(dtpath, logger=LOG)
             # remove empty directory
             parent = os.path.dirname(dtpath)
             # remove any empty parent up to dotpath
@@ -730,7 +734,8 @@ def cmd_remove(opts):
                     msg = f'Remove empty dir \"{parent}\"'
                     if opts.safe and not LOG.ask(msg):
                         break
-                    removepath(parent, LOG)
+                    if not removepath(parent, logger=LOG):
+                        LOG.warn(f'unable to remove {parent}')
                 parent = os.path.dirname(parent)
             removed.append(dotfile)
 
@@ -833,7 +838,8 @@ def apply_install_trans(dotpath, dotfile, templater, debug=False):
         msg += f'failed for {dotfile.key}'
         LOG.err(msg)
         if new_src and os.path.exists(new_src):
-            removepath(new_src, LOG)
+            # ignore error
+            removepath(new_src, logger=LOG)
         return None
     return new_src
 
@@ -873,7 +879,8 @@ def _exec_command(opts):
             tmp = get_tmpdir()
             ret = cmd_compare(opts, tmp)
             # clean tmp directory
-            removepath(tmp, LOG)
+            # ignore any error
+            removepath(tmp, logger=LOG)
 
         elif opts.cmd_import:
             # import dotfile(s)

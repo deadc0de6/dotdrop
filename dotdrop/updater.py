@@ -151,6 +151,7 @@ class Updater:
 
         # clean temporary files
         if new_path != deployed_path and os.path.exists(new_path):
+            # ignore error
             removepath(new_path, logger=self.log)
         return ret
 
@@ -167,6 +168,7 @@ class Updater:
         if not trans.transform(path, tmp, templater=self.templater,
                                debug=self.debug):
             if os.path.exists(tmp):
+                # ignore error
                 removepath(tmp, logger=self.log)
             err = f'transformation \"{trans.key}\" failed for {dotfile.key}'
             self.log.err(err)
@@ -259,6 +261,7 @@ class Updater:
     def _handle_dir(self, deployed_path, local_path,
                     dotfile, ignores):
         """sync path (local dir) and local_path (dotdrop dir path)"""
+        ret = True
         self.log.dbg(f'handle update for dir {deployed_path} to {local_path}')
 
         # get absolute paths
@@ -282,7 +285,11 @@ class Updater:
             self.log.dbg(f'rm -r {path}')
             if not self._confirm_rm_r(path):
                 continue
-            removepath(path, logger=self.log)
+            if not removepath(path, logger=self.log):
+                msg = f'unable to remove {path}, do manually'
+                self.log.warn(msg)
+                ret = False
+                continue
             self.log.sub(f'\"{path}\" removed')
 
         ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
@@ -306,6 +313,7 @@ class Updater:
                     msg = f'{srcpath} update right only failed'
                     msg += f', do manually: {exc}'
                     self.log.warn(msg)
+                    ret = False
                     continue
                 self.log.sub(f'\"{dstpath}\" updated')
 
@@ -332,10 +340,10 @@ class Updater:
             except IOError as exc:
                 msg = f'{srcpath} update common failed, do manually: {exc}'
                 self.log.warn(msg)
+                ret = False
                 continue
             self.log.sub(f'\"{dstpath}\" content updated')
-
-        return True
+        return ret
 
     def _overwrite(self, src, dst):
         """ask for overwritting"""

@@ -700,8 +700,9 @@ class Installer:
             if self.safe:
                 if not self.log.ask(f'remove unmanaged \"{path}\"'):
                     return
-            self.log.dbg(f'removing not managed: {path}')
-            removepath(path, logger=self.log)
+            self.log.dbg(f'removing unmanaged file \"{path}\"')
+            if not removepath(path, logger=self.log):
+                self.log.warn('unable to remove {path}')
 
     @classmethod
     def _write_content_to_file(cls, content, src, dst):
@@ -825,6 +826,7 @@ class Installer:
         if ret:
             self.log.dbg('content differ')
         if content:
+            # ignore error
             removepath(tmp)
         return ret
 
@@ -841,6 +843,7 @@ class Installer:
         diff = diffit(modified=src, original=dst,
                       diff_cmd=self.diff_cmd)
         if tmp:
+            # ignore error
             removepath(tmp, logger=self.log)
 
         if diff:
