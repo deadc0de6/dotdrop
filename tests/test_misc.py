@@ -40,8 +40,17 @@ class TestUtils(unittest.TestCase):
     def test_removepath(self):
         """test removepath"""
         removepath('')
-        with self.assertRaises(OSError):
-            removepath('/abc')
+
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        afile, _ = create_random_file(tmpdir, content='blah')
+
+        try:
+            removepath(afile)
+        except OSError:
+            self.fail('must not raise OSError')
+        if os.path.exists(afile):
+            self.fail(f'{afile} not deleted')
         with self.assertRaises(OSError):
             removepath(os.path.expanduser('~'))
 
