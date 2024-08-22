@@ -30,6 +30,10 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # $2 path
 grep_or_fail()
 {
+  if [ ! -e "${2}" ]; then
+    echo "file \"${2}\" does not exist"
+    exit 1
+  fi
   if ! grep "${1}" "${2}" >/dev/null 2>&1; then
     echo "pattern \"${1}\" not found in ${2}"
     echo "content:"
