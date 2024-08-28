@@ -9,13 +9,12 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Prepare AUR package
-      env:
-        RELEASE_TAG: ${{ github.ref }}
       run: |
         version=""
-        if [ -n "${RELEASE_TAG}" ]; then
-          version=$(echo "${RELEASE_TAG}" | sed 's#^.*v##g')
-        else
+        if [ hash git &>/dev/null ]; then
+          version=$(git describe --abbrev=0 --tags | sed 's/^v//g')
+        fi
+        if [ -z "${version}" ]; then
           version=$(cat dotdrop/version.py | grep version | sed 's/^.*= .\(.*\).$/\1/g')
         fi
         [ -z "${version}" ] && exit 1
