@@ -31,7 +31,6 @@ apps:
 parts:
   dotdrop:
     plugin:     python
-    python-version: python3
     source: ../../
     stage-packages:
       - file
