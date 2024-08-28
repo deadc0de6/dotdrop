@@ -12,7 +12,13 @@ jobs:
       env:
         RELEASE_TAG: ${{ github.ref }}
       run: |
-        version=$([ -n "${RELEASE_TAG}" ] && (echo "${RELEASE_TAG}" | sed 's#^.*v##g') || (cat dotdrop/version.py | grep version | sed 's/^.*= .\(.*\).$/\1/g'))
+        version=""
+        if [ -n "${RELEASE_TAG}" ]; then
+          version=$(echo "${RELEASE_TAG}" | sed 's#^.*v##g')
+        else
+          version=$(cat dotdrop/version.py | grep version | sed 's/^.*= .\(.*\).$/\1/g')
+        fi
+        [ -z "${version}" ] && exit 1
         sed -i "s/^pkgver=.*$/pkgver=${version}/g" packages/arch-dotdrop/PKGBUILD
         cat packages/arch-dotdrop/PKGBUILD
     - name: Publish to aur
