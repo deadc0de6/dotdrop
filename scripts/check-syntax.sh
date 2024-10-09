@@ -79,6 +79,7 @@ echo "checking dotdrop with pylint"
 # R0912: too-many-branches
 # R0911: too-many-return-statements
 # R0904: too-many-public-methods
+# R0917: too-many-positional-arguments
 pylint \
   --disable=R0902 \
   --disable=R0913 \
@@ -88,6 +89,7 @@ pylint \
   --disable=R0912 \
   --disable=R0911 \
   --disable=R0904 \
+  --disable=R0917 \
   dotdrop/
 
 # check shell scripts
