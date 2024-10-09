@@ -81,6 +81,7 @@ echo "checking dotdrop with pylint"
 # R0904: too-many-public-methods
 # R0917: too-many-positional-arguments
 pylint \
+  --disable=W0012 \
   --disable=R0902 \
   --disable=R0913 \
   --disable=R0903 \
@@ -119,6 +120,7 @@ echo "checking other python scripts with pylint"
 find . -name "*.py" -not -path "./dotdrop/*" -not -regex "\./\.?v?env/.*" | while read -r script; do
   echo "checking ${script}"
   pylint -sn \
+    --disable=W0012 \
     --disable=R0914 \
     --disable=R0915 \
     --disable=R0913 \
