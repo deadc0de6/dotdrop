@@ -38,6 +38,7 @@ nav:
     - 'Handle special chars': 'howto/special-chars.md'
     - 'Improve Git integration': 'howto/improve-git-integration.md'
     - 'Include files or templates in templates': 'howto/include-in-template.md'
+    - 'Manage dconf settings': 'howto/manage-dconf-settings.md'
     - 'Manage system dotfiles': 'howto/system-config-files.md'
     - 'Merge files on install': 'howto/merge-files-when-installing.md'
     - 'Prompt user for variables': 'howto/prompt-user-for-variables.md'
