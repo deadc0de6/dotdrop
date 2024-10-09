@@ -15,7 +15,7 @@ dconf_tilix:
       - dconf_load /com/gexperts/Tilix/
     trans_update: dconf_dump /com/gexperts/Tilix/
     link: nolink
-````
+```
 
 On `install`/`compare`, the [action](../config/config-actions.md) `dconf_load` will call `dconf` to load
 the configuration from the file stored in the *dotpath* under `config/tilix/tilix.dconf`.
