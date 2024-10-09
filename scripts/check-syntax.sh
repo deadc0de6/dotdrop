@@ -122,6 +122,7 @@ find . -name "*.py" -not -path "./dotdrop/*" -not -regex "\./\.?v?env/.*" | whil
     --disable=R0914 \
     --disable=R0915 \
     --disable=R0913 \
+    --disable=R0917 \
     "${script}"
 done
 
