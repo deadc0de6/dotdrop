@@ -9,6 +9,7 @@ import os
 import io
 import re
 import mmap
+import sys
 from jinja2 import Environment, FileSystemLoader, \
     ChoiceLoader, FunctionLoader, TemplateNotFound, \
     StrictUndefined
@@ -192,7 +193,13 @@ class Templategen:
             self.log.dbg('using \"magic\" for filetype identification')
         except ImportError:
             # fallback
-            _, filetype = utils.run(['file', '-L', '-b', '--mime-type', src],
+
+            # `file` on Windows doesn't support `-L`
+            follow_symlink = ['-L'] if sys.platform != 'win32' else []
+
+            _, filetype = utils.run(['file'] + follow_symlink + ['-b',
+                                                                 '--mime-type',
+                                                                 src],
                                     debug=self.debug)
             self.log.dbg('using \"file\" for filetype identification')
             filetype = filetype.strip()
