@@ -1340,7 +1340,7 @@ class CfgYaml:
     def _validate(self, yamldict):
         """validate entries"""
         if not yamldict:
-            return
+            raise YamlException('empty config file')
 
         # check top entries
         for entry in self.top_entries:
@@ -1352,15 +1352,15 @@ class CfgYaml:
         # check link_dotfile_default
         if self.key_settings not in yamldict:
             # no configs top entry
-            return
+            raise YamlException(f'no \"{self.key_settings}\" key found')
         if not yamldict[self.key_settings]:
             # configs empty
-            return
+            raise YamlException(f'empty \"{self.key_settings}\" key')
 
         # check settings values
         settings = yamldict[self.key_settings]
         if self.key_settings_link_dotfile_default not in settings:
-            return
+            raise YamlException(f'no \"{self.key_settings_link_dotfile_default}\" key found')
         val = settings[self.key_settings_link_dotfile_default]
         if val not in self.allowed_link_val:
             err = f'bad link value: {val}'
