@@ -21,7 +21,7 @@ from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list, debug_list, debug_dict
 from dotdrop.exceptions import YamlException, OptionsException
-from dotdrop.config import default_config
+from dotdrop.config import DEFAULT_CONFIG
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -153,7 +153,7 @@ class Options(AttrMonitor):
 
         if self.args['gencfg']:
             # print config and exit
-            print(default_config)
+            print(DEFAULT_CONFIG)
             sys.exit(0)
 
         if args:
