@@ -250,6 +250,13 @@ the file will be restored.
 
 For more options, see the usage with `dotdrop --help`.
 
+## Generate a default config
+
+The `gencfg` command will generate a default config in yaml
+```bash
+$ dotdrop gencfg > config.yaml
+```
+
 ## Concurrency
 
 The command line switch `-w`/`--workers`, if set to a value greater than one, enables the use

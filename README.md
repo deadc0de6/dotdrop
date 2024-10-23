@@ -98,8 +98,9 @@ Dotdrop is available on:
 # Getting started
 
 [Create a new repository](https://dotdrop.readthedocs.io/en/latest/getting-started/#repository-setup)
-to store your dotfiles with dotdrop. *Init* or *clone* that new repository and
-[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/).
+to store your dotfiles with dotdrop. *Init* or *clone* that new repository,
+[install dotdrop](https://dotdrop.readthedocs.io/en/latest/installation/) and
+generate a default config file [generate config file](https://dotdrop.readthedocs.io/en/latest/usage/#generate-a-default-config)
 
 Then import any dotfiles (files or directories) you want to manage with dotdrop.
 You can either use the default profile (which resolves to the *hostname* of the host

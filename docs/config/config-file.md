@@ -2,8 +2,8 @@
 
 ## Location
 
-The default config file used by dotdrop is
-[config.yaml](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml).
+The default config file used by dotdrop is `config.yaml`.
+A clean base config can be generated using `dotdrop gencfg`.
 
 Unless specified otherwise, dotdrop will look in the following places for its config file
 and use the first one found:

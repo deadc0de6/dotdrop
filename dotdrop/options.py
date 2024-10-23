@@ -21,6 +21,7 @@ from dotdrop.cfg_aggregator import CfgAggregator
 from dotdrop.action import Action
 from dotdrop.utils import uniq_list, debug_list, debug_dict
 from dotdrop.exceptions import YamlException, OptionsException
+from dotdrop.config import default_config
 
 ENV_PROFILE = 'DOTDROP_PROFILE'
 ENV_CONFIG = 'DOTDROP_CONFIG'
@@ -72,6 +73,7 @@ Usage:
   dotdrop files     [-VbTG]       [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]         [-c <path>] [-p <profile>] [<key>...]
   dotdrop profiles  [-VbG]        [-c <path>]
+  dotdrop gencfg
   dotdrop --help
   dotdrop --version
 
@@ -148,6 +150,12 @@ class Options(AttrMonitor):
         self.args = {}
         if not args:
             self.args = docopt(USAGE, version=VERSION)
+
+        if self.args['gencfg']:
+            # print config and exit
+            print(default_config)
+            sys.exit(0)
+
         if args:
             self.args = args.copy()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
