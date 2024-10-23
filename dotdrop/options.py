@@ -150,14 +150,14 @@ class Options(AttrMonitor):
         self.args = {}
         if not args:
             self.args = docopt(USAGE, version=VERSION)
+        if args:
+            self.args = args.copy()
 
         if self.args['gencfg']:
             # print config and exit
             print(DEFAULT_CONFIG)
             sys.exit(0)
 
-        if args:
-            self.args = args.copy()
         self.debug = self.args['--verbose'] or ENV_DEBUG in os.environ
         self.log = Logger(debug=self.debug)
         self.dry = self.args['--dry']
