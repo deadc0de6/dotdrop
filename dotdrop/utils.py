@@ -17,9 +17,9 @@ import itertools
 import shutil
 import json
 import sys
+from pathlib import PurePath
 import requests
 from packaging import version
-from pathlib import PurePath
 
 # local import
 from dotdrop.logger import Logger
@@ -232,7 +232,11 @@ def _match_ignore_pattern(path, pattern, debug=False):
     be able to match pattern like "*/dir"
     """
     subpath = path
-    while subpath != PurePath(path).anchor:
+
+    # Account for Windows paths
+    drive = PurePath(path).drive
+
+    while subpath.lstrip(drive) != os.path.sep:
         # if debug:
         #     msg = f'fnmatch \"{subpath}\" against {pattern}'
         #     LOG.dbg(msg, force=True)
