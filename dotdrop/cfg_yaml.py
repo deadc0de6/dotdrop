@@ -1359,15 +1359,13 @@ class CfgYaml:
 
         # check settings values
         settings = yamldict[self.key_settings]
-        if self.key_settings_link_dotfile_default not in settings:
-            msg = f'no \"{self.key_settings_link_dotfile_default}\" key found'
-            raise YamlException(msg)
-        val = settings[self.key_settings_link_dotfile_default]
-        if val not in self.allowed_link_val:
-            err = f'bad link value: {val}'
-            self._log.err(err)
-            self._log.err(f'allowed: {self.allowed_link_val}')
-            raise YamlException(f'config content error: {err}')
+        if self.key_settings_link_dotfile_default in settings:
+            val = settings[self.key_settings_link_dotfile_default]
+            if val not in self.allowed_link_val:
+                err = f'bad link value: {val}'
+                self._log.err(err)
+                self._log.err(f'allowed: {self.allowed_link_val}')
+                raise YamlException(f'config content error: {err}')
 
     @classmethod
     def _yaml_load(cls, path):
