@@ -5,7 +5,7 @@ Copyright (c) 2024, deadc0de6
 default config
 """
 
-default_config = """config:
+DEFAULT_CONFIG = """config:
   backup: true
   banner: true
   create: true
