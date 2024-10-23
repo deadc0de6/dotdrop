@@ -155,6 +155,7 @@ def _fake_args():
     args['update'] = False
     args['detail'] = False
     args['remove'] = False
+    args['gencfg'] = False
     return args
 
 
