@@ -225,6 +225,7 @@ class TestOptions(unittest.TestCase):
             '--dry': False,
             '--cfg': 'path',
             '--profile': 'profile',
+            'gencfg': False,
         }
         with self.assertRaises(YamlException):
             Options(args)

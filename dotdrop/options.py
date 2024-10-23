@@ -148,10 +148,10 @@ class Options(AttrMonitor):
 
         # args parsing
         self.args = {}
-        if not args:
-            self.args = docopt(USAGE, version=VERSION)
         if args:
             self.args = args.copy()
+        else:
+            self.args = docopt(USAGE, version=VERSION)
 
         if self.args['gencfg']:
             # print config and exit
