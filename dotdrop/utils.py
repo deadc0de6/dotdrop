@@ -654,7 +654,10 @@ def pivot_path(path, newdir, striphome=False, logger=None):
         logger.dbg(f'strip home: {striphome}')
     if striphome:
         path = strip_home(path)
-    sub = path.lstrip(os.sep)
+
+    # Account for Windows paths
+    sub = path.lstrip(PurePath(path).anchor)
+
     new = os.path.join(newdir, sub)
     if logger:
         logger.dbg(f'pivot \"{path}\" to \"{new}\"')
