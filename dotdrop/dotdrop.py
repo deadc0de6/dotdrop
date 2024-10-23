@@ -935,16 +935,16 @@ def main():
     try:
         opts = Options()
     except YamlException as exc:
-        LOG.err(f'error (yaml): {exc}')
+        LOG.err(f'yaml error: {exc}')
         return False
     except ConfigException as exc:
-        LOG.err(f'error (config): {exc}')
+        LOG.err(f'config error: {exc}')
         return False
     except UndefinedException as exc:
-        LOG.err(f'error (deps): {exc}')
+        LOG.err(f'dependencies error: {exc}')
         return False
     except OptionsException as exc:
-        LOG.err(f'error (options): {exc}')
+        LOG.err(f'options error: {exc}')
         return False
 
     if opts.debug:
