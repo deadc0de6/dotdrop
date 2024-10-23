@@ -1360,7 +1360,8 @@ class CfgYaml:
         # check settings values
         settings = yamldict[self.key_settings]
         if self.key_settings_link_dotfile_default not in settings:
-            raise YamlException(f'no \"{self.key_settings_link_dotfile_default}\" key found')
+            msg = f'no \"{self.key_settings_link_dotfile_default}\" key found'
+            raise YamlException(msg)
         val = settings[self.key_settings_link_dotfile_default]
         if val not in self.allowed_link_val:
             err = f'bad link value: {val}'
