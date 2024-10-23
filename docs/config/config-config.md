@@ -38,7 +38,6 @@ Entry    | Description | Default
 `workdir` | Path to the directory where templates are installed before being symlinked when using `link:absolute|relative|link_children` (absolute path or relative to the config file location) | `~/.config/dotdrop`
 <s>link_by_default</s> | When importing a dotfile, set `link` to this value by default | false
 
-
 ## import_variables entry
 
 It is possible to load variables/dynvariables from external files by providing their

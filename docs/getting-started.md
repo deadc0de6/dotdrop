@@ -15,12 +15,11 @@ $ cd my-dotfiles
 $ mkdir dotfiles
 ```
 
-Then add a config file. You can get a
-[minimal config file](https://github.com/deadc0de6/dotdrop/blob/master/config.yaml)
-from dotdrop's repository with:
+Then generate a base config file:
 ```bash
-$ wget https://raw.githubusercontent.com/deadc0de6/dotdrop/master/config.yaml
+$ dotdrop gencfg > config.yaml
 ```
+
 It is recommended to store your config file directly within your repository
 (*my-dotfiles* in the example above), but you could save it in different places if you wish;
 see [config location](config/config-file.md#location) for more.
