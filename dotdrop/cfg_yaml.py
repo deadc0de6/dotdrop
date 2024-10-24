@@ -115,7 +115,8 @@ class CfgYaml:
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
     def __init__(self, path, profile=None, addprofiles=None,
-                 reloading=False, debug=False, imported_configs=None):
+                 reloading=False, debug=False, imported_configs=None,
+                 fail_on_missing_keys=True):
         """
         config parser
         @path: config file path
@@ -168,7 +169,7 @@ class CfgYaml:
         # live patch deprecated entries
         self._fix_deprecated(self._yaml_dict)
         # validate content
-        self._validate(self._yaml_dict)
+        self._validate(self._yaml_dict, fail_on_missing_keys)
 
         ##################################################
         # parse the config and variables
@@ -1080,7 +1081,8 @@ class CfgYaml:
         sub = CfgYaml(path, profile=self._profile,
                       addprofiles=self._inc_profiles,
                       debug=self._debug,
-                      imported_configs=self.imported_configs)
+                      imported_configs=self.imported_configs,
+                      fail_on_missing_keys=False)
 
         # settings are ignored from external file
         # except for filter_file and func_file
@@ -1337,7 +1339,7 @@ class CfgYaml:
             self._dbg(f'format: {self._config_format}')
         return content
 
-    def _validate(self, yamldict):
+    def _validate(self, yamldict, fail_on_missing_key):
         """validate entries"""
         if not yamldict:
             raise YamlException('empty config file')
@@ -1353,7 +1355,7 @@ class CfgYaml:
         if self.key_settings not in yamldict:
             # no configs top entry
             raise YamlException(f'no \"{self.key_settings}\" key found')
-        if not yamldict[self.key_settings]:
+        if fail_on_missing_key and not yamldict[self.key_settings]:
             # configs empty
             raise YamlException(f'empty \"{self.key_settings}\" key')
 
