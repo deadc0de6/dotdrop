@@ -57,6 +57,14 @@ def fake_config(path, dotfiles, profile,
     return path
 
 
+def get_workdir():
+    """get the workdir"""
+    workdir = '~/.config/dotdrop'
+    workdir = os.path.expanduser(workdir)
+    workdir = os.path.normpath(workdir)
+    return workdir
+
+
 class TestInstall(unittest.TestCase):
     """test case"""
 
@@ -353,6 +361,11 @@ exec bspwm
 
     def test_link_children(self):
         """test the link children"""
+        # create workdir
+        work_dir = get_tempdir()
+        self.assertTrue(os.path.exists(work_dir))
+        self.addCleanup(clean, work_dir)
+
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
@@ -366,7 +379,7 @@ exec bspwm
         # create 3 random files in source
         srcs = [create_random_file(src_dir)[0] for _ in range(3)]
 
-        installer = Installer()
+        installer = Installer(workdir=work_dir)
         installer.install(templater=MagicMock(), src=src_dir,
                           dst=dst_dir, linktype=LinkTypes.LINK_CHILDREN,
                           actionexec=None)
@@ -479,6 +492,11 @@ exec bspwm
 
     def test_runs_templater(self):
         """test runs templater"""
+        # create workdir
+        work_dir = get_tempdir()
+        self.assertTrue(os.path.exists(work_dir))
+        self.addCleanup(clean, work_dir)
+
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))
@@ -493,7 +511,7 @@ exec bspwm
         srcs = [create_random_file(src_dir)[0] for _ in range(3)]
 
         # setup installer and mocks
-        installer = Installer()
+        installer = Installer(workdir=work_dir)
         templater = MagicMock()
         templater.generate.return_value = b'content'
 
