@@ -116,7 +116,7 @@ class CfgYaml:
 
     def __init__(self, path, profile=None, addprofiles=None,
                  reloading=False, debug=False, imported_configs=None,
-                 fail_on_missing_keys=True):
+                 fail_on_error=True):
         """
         config parser
         @path: config file path
@@ -169,7 +169,7 @@ class CfgYaml:
         # live patch deprecated entries
         self._fix_deprecated(self._yaml_dict)
         # validate content
-        self._validate(self._yaml_dict, fail_on_missing_keys)
+        self._validate(self._yaml_dict, fail_on_error)
 
         ##################################################
         # parse the config and variables
@@ -1082,7 +1082,7 @@ class CfgYaml:
                       addprofiles=self._inc_profiles,
                       debug=self._debug,
                       imported_configs=self.imported_configs,
-                      fail_on_missing_keys=False)
+                      fail_on_error=False)
 
         # settings are ignored from external file
         # except for filter_file and func_file
@@ -1339,10 +1339,12 @@ class CfgYaml:
             self._dbg(f'format: {self._config_format}')
         return content
 
-    def _validate(self, yamldict, fail_on_missing_key):
+    def _validate(self, yamldict, fail_on_error):
         """validate entries"""
         if not yamldict:
-            raise YamlException('empty config file')
+            if fail_on_error:
+                raise YamlException('empty config file')
+            return
 
         # check top entries
         for entry in self.top_entries:
@@ -1354,10 +1356,14 @@ class CfgYaml:
         # check link_dotfile_default
         if self.key_settings not in yamldict:
             # no configs top entry
-            raise YamlException(f'no \"{self.key_settings}\" key found')
-        if fail_on_missing_key and not yamldict[self.key_settings]:
+            if fail_on_error:
+                raise YamlException(f'no \"{self.key_settings}\" key found')
+            return
+        if not yamldict[self.key_settings]:
             # configs empty
-            raise YamlException(f'empty \"{self.key_settings}\" key')
+            if fail_on_error:
+                raise YamlException(f'empty \"{self.key_settings}\" key')
+            return
 
         # check settings values
         settings = yamldict[self.key_settings]
