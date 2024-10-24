@@ -167,12 +167,14 @@ class Options(AttrMonitor):
         # selected profile
         self.profile = self.args['--profile']
         self.confpath = self._get_config_path()
+        if not self.confpath:
+            raise YamlException('no config file found')
         self.confpath = os.path.abspath(self.confpath)
         self.log.dbg(f'config abs path: {self.confpath}')
         if not self.confpath:
             raise YamlException('no config file found')
         if not os.path.exists(self.confpath):
-            err = f'bad config file path: {self.confpath}'
+            err = f'config does not exist \"{self.confpath}\"'
             raise YamlException(err)
         self.log.dbg('#################################################')
         self.log.dbg('#################### DOTDROP ####################')

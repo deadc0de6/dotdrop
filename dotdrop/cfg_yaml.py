@@ -115,7 +115,8 @@ class CfgYaml:
     top_entries = [key_dotfiles, key_settings, key_profiles]
 
     def __init__(self, path, profile=None, addprofiles=None,
-                 reloading=False, debug=False, imported_configs=None):
+                 reloading=False, debug=False, imported_configs=None,
+                 fail_on_error=True):
         """
         config parser
         @path: config file path
@@ -168,7 +169,7 @@ class CfgYaml:
         # live patch deprecated entries
         self._fix_deprecated(self._yaml_dict)
         # validate content
-        self._validate(self._yaml_dict)
+        self._validate(self._yaml_dict, fail_on_error)
 
         ##################################################
         # parse the config and variables
@@ -1080,7 +1081,8 @@ class CfgYaml:
         sub = CfgYaml(path, profile=self._profile,
                       addprofiles=self._inc_profiles,
                       debug=self._debug,
-                      imported_configs=self.imported_configs)
+                      imported_configs=self.imported_configs,
+                      fail_on_error=False)
 
         # settings are ignored from external file
         # except for filter_file and func_file
@@ -1337,9 +1339,11 @@ class CfgYaml:
             self._dbg(f'format: {self._config_format}')
         return content
 
-    def _validate(self, yamldict):
+    def _validate(self, yamldict, fail_on_error):
         """validate entries"""
         if not yamldict:
+            if fail_on_error:
+                raise YamlException('empty config file')
             return
 
         # check top entries
@@ -1352,21 +1356,24 @@ class CfgYaml:
         # check link_dotfile_default
         if self.key_settings not in yamldict:
             # no configs top entry
+            if fail_on_error:
+                raise YamlException(f'no \"{self.key_settings}\" key found')
             return
         if not yamldict[self.key_settings]:
             # configs empty
+            if fail_on_error:
+                raise YamlException(f'empty \"{self.key_settings}\" key')
             return
 
         # check settings values
         settings = yamldict[self.key_settings]
-        if self.key_settings_link_dotfile_default not in settings:
-            return
-        val = settings[self.key_settings_link_dotfile_default]
-        if val not in self.allowed_link_val:
-            err = f'bad link value: {val}'
-            self._log.err(err)
-            self._log.err(f'allowed: {self.allowed_link_val}')
-            raise YamlException(f'config content error: {err}')
+        if self.key_settings_link_dotfile_default in settings:
+            val = settings[self.key_settings_link_dotfile_default]
+            if val not in self.allowed_link_val:
+                err = f'bad link value: {val}'
+                self._log.err(err)
+                self._log.err(f'allowed: {self.allowed_link_val}')
+                raise YamlException(f'config content error: {err}')
 
     @classmethod
     def _yaml_load(cls, path):
