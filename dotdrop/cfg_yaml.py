@@ -1096,14 +1096,14 @@ class CfgYaml:
         ]
 
         # merge top entries
-        self.dotfiles = self._merge_dict(self.dotfiles, sub.dotfiles)
-        self.profiles = self._merge_dict(self.profiles, sub.profiles,
+        self.dotfiles = self._merge_dict(sub.dotfiles, self.dotfiles)
+        self.profiles = self._merge_dict(sub.profiles, self.profiles,
                                          deep=True)
-        self.actions = self._merge_dict(self.actions, sub.actions)
-        self.trans_install = self._merge_dict(self.trans_install,
-                                              sub.trans_install)
-        self.trans_update = self._merge_dict(self.trans_update,
-                                             sub.trans_update)
+        self.actions = self._merge_dict(sub.actions, self.actions)
+        self.trans_install = self._merge_dict(sub.trans_install,
+                                              self.trans_install)
+        self.trans_update = self._merge_dict(sub.trans_update,
+                                             self.trans_update)
         self._clear_profile_vars(sub.variables)
 
         self.imported_configs.append(path)
@@ -1693,6 +1693,7 @@ class CfgYaml:
         """
         both dict must be the same form/type
         if deep is True, then merge recursively
+        high dict entries take precedence over low dict
         """
         if not high:
             high = {}
