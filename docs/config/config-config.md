@@ -187,6 +187,10 @@ import_configs:
 - other-config.yaml:optional
 ```
 
+In case of a name clash (same name in importing and imported configs),
+the importing config will take precedence except for the `variables` and `dynvariables`
+(see [variable](config-file.md#variables) and [CONTRIBUTING doc](/CONTRIBUTING.md)).
+
 ## default_actions entry
 
 Dotdrop allows to execute an action for any dotfile installation. These actions work as any other action (`pre` or `post`).

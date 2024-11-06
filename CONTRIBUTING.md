@@ -103,6 +103,10 @@ levels in not accurate anymore.
 * Profile `(dyn)variables` > profile's included `(dyn)variables`
 * Imported `variables`/`dynvariables` > `(dyn)variables`
 
+When `import_configs` importing config's elements except the `(dyn)variables`
+will take precedence in case of name clash
+(see <https://github.com/deadc0de6/dotdrop/issues/443>).
+
 ## Variable resolution
 
 How variables are resolved (through Jinja2's
