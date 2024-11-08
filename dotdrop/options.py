@@ -61,7 +61,8 @@ USAGE = f"""
 Usage:
   dotdrop install   [-VbtfndDaWR] [-c <path>] [-p <profile>]
                                   [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>] [-i <pattern>...]
+  dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>] 
+                                  [-i <pattern>...] [--dkey=<key>]
                                   [--transr=<key>] [--transw=<key>]
                                   [-l <link>] [-s <path>] <path>...
   dotdrop compare   [-LVbz]       [-c <path>] [-p <profile>]
@@ -88,6 +89,7 @@ Options:
   -G --grepable           Grepable output.
   -i --ignore=<pattern>   Pattern to ignore.
   -k --key                Treat <path> as a dotfile key.
+  -K --dkey=<key>         Set the dotfile key.
   -l --link=<link>        Link option (nolink|absolute|relative|link_children).
   -L --file-only          Do not show diff but only the files that differ.
   -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
@@ -337,6 +339,7 @@ class Options(AttrMonitor):
         self.import_ignore = uniq_list(self.import_ignore)
         self.import_trans_install = self.args['--transr']
         self.import_trans_update = self.args['--transw']
+        self.import_force_key = self.args['--dkey']
 
     def _apply_args_update(self):
         """update specifics"""

@@ -537,7 +537,8 @@ def cmd_importer(opts):
                         dry=opts.dry, safe=opts.safe,
                         debug=opts.debug,
                         keepdot=opts.keepdot,
-                        ignore=opts.import_ignore)
+                        ignore=opts.import_ignore,
+                        forcekey=opts.import_force_key)
 
     for path in paths:
         tmpret = importer.import_path(path,

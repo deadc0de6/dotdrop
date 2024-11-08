@@ -25,10 +25,10 @@ class Importer:
 
     def __init__(self, profile, conf, dotpath, diff_cmd,
                  variables, dry=False, safe=True, debug=False,
-                 keepdot=True, ignore=None):
+                 keepdot=True, ignore=None, forcekey=None):
         """constructor
         @profile: the selected profile
-        @conf: configuration manager
+        @conf: configuration manager (CfgAggregator)
         @dotpath: dotfiles dotpath
         @diff_cmd: diff command to use
         @variables: dictionary of variables for the templates
@@ -37,6 +37,8 @@ class Importer:
         @debug: enable debug
         @keepdot: keep dot prefix
         @ignore: patterns to ignore when importing
+        @forcekey: force the use of a specific dotfile key
+
         This may raise UndefinedException
         """
         self.profile = profile
@@ -51,6 +53,7 @@ class Importer:
         self.debug = debug
         self.keepdot = keepdot
         self.ignore = []
+        self.forcekey = forcekey
         self.log = Logger(debug=self.debug)
 
         # patch ignore patterns
@@ -197,7 +200,8 @@ class Importer:
         # add file to config file
         retconf = self.conf.new_dotfile(src, dst, linktype, chmod=chmod,
                                         trans_install=trans_install,
-                                        trans_update=trans_update)
+                                        trans_update=trans_update,
+                                        forcekey=self.forcekey)
         if not retconf:
             self.log.warn(f'\"{path}\" ignored during import')
             return 0
