@@ -145,6 +145,7 @@ def _fake_args():
     args['--transw'] = ''
     args['--transr'] = ''
     args['--remove-existing'] = False
+    args['--dkey'] = ''
     # cmds
     args['profiles'] = False
     args['files'] = False
