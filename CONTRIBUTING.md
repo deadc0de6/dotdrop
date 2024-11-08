@@ -209,7 +209,7 @@ for a match with the ignore patterns.
 
 Dotdrop is tested with the use of the [tests.sh](/tests.sh) script.
 
-* Test for PEP8 compliance with `pylint`, `pycodestyle` and `pyflakes` (see [check-syntax.sh](/scripts/test-syntax.sh))
+* Test for PEP8 compliance with `pylint`, `pycodestyle` and `pyflakes` (see [check-syntax.sh](/scripts/check-syntax.sh))
 * Test the documentation and links (see [check-doc.sh](/scripts/check-doc.sh))
 * Run the unittests in [tests directory](/tests) with pytest (see [check-unittest.sh](/scripts/check-unittests.sh))
 * Run the blackbox bash script tests in [tests-ng directory](/tests-ng) (see [check-tests-ng.sh](/scripts/check-tests-ng.sh))
