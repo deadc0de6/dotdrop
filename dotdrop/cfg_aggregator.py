@@ -8,8 +8,8 @@ handle higher level of the config file
 import os
 import shlex
 import platform
-import distro
 import re
+import distro
 
 
 # local imports
@@ -25,7 +25,7 @@ from dotdrop.exceptions import UndefinedException, YamlException, \
 
 
 TILD = '~'
-YAML_OK = '[^0-9a-zA-Z.\-_]+'
+YAML_OK = r'[^0-9a-zA-Z.\-_]+'
 YAML_REPL = '_'
 
 

@@ -61,7 +61,7 @@ USAGE = f"""
 Usage:
   dotdrop install   [-VbtfndDaWR] [-c <path>] [-p <profile>]
                                   [-w <nb>] [<key>...]
-  dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>] 
+  dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>]
                                   [-i <pattern>...] [--dkey=<key>]
                                   [--transr=<key>] [--transw=<key>]
                                   [-l <link>] [-s <path>] <path>...
