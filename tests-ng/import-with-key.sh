@@ -53,6 +53,7 @@ profiles:
 _EOF
 #cat ${cfg}
 
+####################################################################################
 # import
 dkey="myfile1"
 cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V --dkey "${dkey}" "${tmpd}"/file1
@@ -62,6 +63,7 @@ cat "${cfg}"
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/file1 ] && echo "not imported in dotpath" && exit 1
 cat "${cfg}" | grep "${dkey}:" &>/dev/null || ( echo "bad key 1" && exit 1 )
 
+####################################################################################
 # import 2 files
 echo "firstfile" > "${tmpd}"/firstfile
 echo "secondfile" > "${tmpd}"/secondfile
@@ -76,6 +78,7 @@ cat "${cfg}"
 cat "${cfg}" | grep "${dkey}:" &>/dev/null || ( echo "bad key 2a" && exit 1 )
 cat "${cfg}" | grep "${dkey}_1:" &>/dev/null || ( echo "bad key 2b" && exit 1 )
 
+####################################################################################
 # import 2 files with bad chars
 echo "file-1.1" > "${tmpd}"/file-1.1
 echo "file-2.2" > "${tmpd}"/file-2.2
@@ -91,6 +94,7 @@ cat "${cfg}"
 cat "${cfg}" | grep "${dkey_clean}:" &>/dev/null || ( echo "bad key 3a" && exit 1 )
 cat "${cfg}" | grep "${dkey_clean}_1:" &>/dev/null || ( echo "bad key 3b" && exit 1 )
 
+####################################################################################
 # re-import
 echo "lastfile" > "${tmpd}"/lastfile
 
@@ -102,6 +106,7 @@ cat "${cfg}"
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/lastfile ] && echo "not imported in dotpath" && exit 1
 cat "${cfg}" | grep "${dkey}_2:" &>/dev/null || ( echo "bad key 4" && exit 1 )
 
+####################################################################################
 # bad char
 echo "firstfile" > "${tmpd}"/badchar
 
@@ -113,6 +118,18 @@ cat "${cfg}"
 # test
 [ ! -e "${tmps}"/dotfiles/"${tmpd}"/badchar ] && echo "not imported in dotpath" && exit 1
 cat "${cfg}" | grep "${dkey_clean}:" &>/dev/null || ( echo "bad key 5" && exit 1 )
+
+####################################################################################
+# empty dkey arg
+echo "empty" > "${tmpd}"/empty
+
+dkey=""
+cd "${ddpath}" | ${bin} import -f -c "${cfg}" -p p1 -V --dkey "${dkey}" "${tmpd}"/empty
+cat "${cfg}"
+
+# test
+[ ! -e "${tmps}"/dotfiles/"${tmpd}"/empty ] && echo "not imported in dotpath" && exit 1
+cat "${cfg}" | grep "f_empty" &>/dev/null || ( echo "bad key 2a" && exit 1 )
 
 echo "OK"
 exit 0
