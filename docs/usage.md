@@ -40,8 +40,13 @@ $ dotdrop import ~/.xinitrc
 1 file(s) imported.
 ```
 
-You can control how the dotfile key is generated in the config file
-with the following [config entries](config/config-config.md):
+You can explicitely provide the key dotdrop should use for the dotfile entry
+in the config file with the `-K --dkey` cli switch. Note that the provided 
+string will be sanitized for yaml. Also if the key already exists, 
+it will be appended with `_<incremental_number>` to avoid duplicates.
+
+If the key is not provided, it will be automatically created based on the
+following [config entries](config/config-config.md):
 
 * `longkey`
     * `false` (default): take the shortest unique path

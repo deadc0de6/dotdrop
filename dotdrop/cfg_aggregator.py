@@ -9,6 +9,7 @@ import os
 import shlex
 import platform
 import distro
+import re
 
 
 # local imports
@@ -24,6 +25,8 @@ from dotdrop.exceptions import UndefinedException, YamlException, \
 
 
 TILD = '~'
+YAML_OK = '[^0-9a-zA-Z.\-_]+'
+YAML_REPL = '_'
 
 
 class CfgAggregator:
@@ -69,15 +72,18 @@ class CfgAggregator:
         return self.cfgyaml.del_dotfile_from_profile(dotfile.key, profile.key)
 
     def new_dotfile(self, src, dst, link, chmod=None,
-                    trans_install=None, trans_update=None):
+                    trans_install=None, trans_update=None,
+                    forcekey=None):
         """
         import a new dotfile
+
         @src: path in dotpath
         @dst: path in FS
         @link: LinkType
         @chmod: file permission
         @trans_install: read transformation
         @trans_update: write transformation
+        @forcekey: dotfile key
         """
         dst = self.path_to_dotfile_dst(dst)
         dotfile = self.get_dotfile_by_src_dst(src, dst)
@@ -85,7 +91,8 @@ class CfgAggregator:
             # add the dotfile
             dotfile = self._create_new_dotfile(src, dst, link, chmod=chmod,
                                                trans_install=trans_install,
-                                               trans_update=trans_update)
+                                               trans_update=trans_update,
+                                               forcekey=forcekey)
 
         if not dotfile:
             return False
@@ -237,10 +244,15 @@ class CfgAggregator:
     ########################################################
 
     def _create_new_dotfile(self, src, dst, link, chmod=None,
-                            trans_install=None, trans_update=None):
-        """create a new dotfile"""
+                            trans_install=None, trans_update=None,
+                            forcekey=None):
+        """
+        create a new dotfile
+        """
         # get a new dotfile with a unique key
-        key = self._get_new_dotfile_key(dst)
+        key = self._get_new_dotfile_key(dst, forcekey=forcekey)
+        if not key:
+            return None
         self.log.dbg(f'new dotfile key: {key}')
         # add the dotfile
         trans_install_key = trans_update_key = None
@@ -281,6 +293,9 @@ class CfgAggregator:
         self.settings = Settings.parse(None, self.cfgyaml.settings)
         self.key_prefix = self.settings.key_prefix
         self.key_separator = self.settings.key_separator
+
+        # clean key separator
+        self.key_separator = re.sub(YAML_OK, YAML_REPL, self.key_separator)
 
         # dotfiles
         self.log.dbg('parsing dotfiles')
@@ -427,10 +442,17 @@ class CfgAggregator:
     # dotfile key
     ########################################################
 
-    def _get_new_dotfile_key(self, dst):
+    def _get_new_dotfile_key(self, dst, forcekey=None):
         """return a new unique dotfile key"""
-        path = os.path.expanduser(dst)
         existing_keys = self.cfgyaml.get_all_dotfile_keys()
+
+        # use provided key
+        if forcekey:
+            key = self._norm_key_elem(forcekey)
+            return self._uniq_key(key, existing_keys)
+
+        # key creation
+        path = os.path.expanduser(dst)
         if self.settings.longkey:
             return self._get_long_key(path, existing_keys)
         return self._get_short_key(path, existing_keys)
@@ -440,6 +462,7 @@ class CfgAggregator:
         """normalize path element for sanity"""
         elem = elem.lstrip('.')
         elem = elem.replace(' ', '-')
+        elem = re.sub(YAML_OK, YAML_REPL, elem)
         return elem.lower()
 
     def _get_long_key(self, path, keys):
