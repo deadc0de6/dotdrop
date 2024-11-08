@@ -35,7 +35,7 @@ tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
 
 clear_on_exit "${tmps}"
 clear_on_exit "${tmpd}"
-clear_on_exit "${HOME}/.dotdrop-test"
+clear_on_exit "${HOME}/.dotdrop.test"
 
 # create the dotfile
 echo "original" > "${tmpd}"/testfile
