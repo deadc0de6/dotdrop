@@ -25,7 +25,7 @@ from dotdrop.exceptions import UndefinedException, YamlException, \
 
 
 TILD = '~'
-YAML_OK = r'[^0-9a-zA-Z.\-_]+'
+YAML_OK = r'[^0-9a-zA-Z.\-_+]+'
 YAML_REPL = '_'
 
 
