@@ -1,5 +1,5 @@
 Jinja2; python_version > '3.5'
-docopt; python_version > '3.5'
+docopt-ng; python_version > '3.5'
 ruamel.yaml; python_version > '3.5'
 python-magic; python_version > '3.5'
 packaging; python_version > '3.5'
