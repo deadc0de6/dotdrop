@@ -1,5 +1,3 @@
-# Maintainer: deadc0de6 <info@deadc0de.ch>
-
 _pkgname=dotdrop
 pkgname="${_pkgname}-git"
 pkgver=1.3.7.r13.g18b156e
