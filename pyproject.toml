@@ -1,0 +1,49 @@
+[build-system]
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'dotdrop'
+description = 'Save your dotfiles once, deploy them everywhere'
+readme = 'README.md'
+authors = [ {name = 'deadc0de6', email = 'deadc0de6@foo.bar'}, ]
+license = 'GPL-3.0'
+requires-python = ">=3"
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+]
+keywords = ['dotfiles', 'jinja2']
+dependencies = [
+    'Jinja2',
+    'distro',
+    'docopt-ng',
+    'packaging',
+    'python-magic',
+    'requests',
+    'ruamel.yaml',
+    'tomli; python_version < "3.11"',
+    'tomli_w',
+]
+dynamic = ['version']
+
+[project.urls]
+Documentation = 'https://dotdrop.readthedocs.io'
+Repository = 'https://github.com/deadc0de6/dotdrop'
+
+[project.optional-dependencies]
+dev = ['check-manifest']
+test = ['coverage', 'pytest', 'pytest-cov']
+
+[project.scripts]
+dotdrop = 'dotdrop:main'
+
+[tool.setuptools.dynamic]
+version = {attr = 'dotdrop.version.__version__'}
+
+[tool.setuptools.packages.find]
+include = ['dotdrop']
