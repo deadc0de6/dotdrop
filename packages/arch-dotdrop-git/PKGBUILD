@@ -7,8 +7,8 @@ arch=('any')
 url="https://github.com/deadc0de6/dotdrop"
 license=('GPL')
 groups=()
-depends=('python' 'python-setuptools' 'python-jinja' 'python-docopt-ng' 'python-ruamel-yaml' 'python-magic' 'python-requests' 'python-packaging' 'python-tomli-w' 'python-distro')
-makedepends=('git')
+depends=('python' 'python-jinja' 'python-docopt-ng' 'python-ruamel-yaml' 'python-magic' 'python-requests' 'python-packaging' 'python-tomli-w' 'python-distro')
+makedepends=('git' 'python-build' 'python-installer' 'python-setuptools')
 provides=(dotdrop)
 conflicts=(dotdrop)
 source=("git+https://github.com/deadc0de6/dotdrop.git")
@@ -19,9 +19,15 @@ pkgver() {
   git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
 }
 
+build() {
+  cd "${_pkgname}"
+  python -m build --wheel --no-isolation
+}
+
 package() {
   cd "${_pkgname}"
-  python setup.py install --root="${pkgdir}/" --optimize=1
+  python -m installer --destdir="${pkgdir}" dist/*.whl
+
   install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop-completion.bash "${pkgdir}/usr/share/bash-completion/completions/${_pkgname}"
   install -Dm644 ${srcdir}/${_pkgname}/completion/_dotdrop-completion.zsh "${pkgdir}/usr/share/zsh/site-functions/_${_pkgname}"
   install -Dm644 ${srcdir}/${_pkgname}/completion/dotdrop.fish "${pkgdir}/usr/share/fish/completions/${_pkgname}.fish"
