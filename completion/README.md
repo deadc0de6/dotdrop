@@ -1,6 +1,6 @@
 Here are completion files for `bash`, `zsh` and `fish`
 for the use of dotdrop through the bash script `dotdrop.sh`
-or through the Python script `dotdrop` (PyPI, snap, setup.py, etc.).
+or through the Python script `dotdrop` (PyPI, snap, etc.).
 
 `bash` and `zsh` scripts are generated using
 [infi.docopt_completion](https://github.com/Infinidat/infi.docopt_completion).
