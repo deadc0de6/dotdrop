@@ -41,7 +41,7 @@ venv="/tmp/dotdrop-venv"
 ${vbin} -p python3 ${venv}
 # shellcheck source=/dev/null
 source ${venv}/bin/activate
-python setup.py install
+pip install .
 cd /tmp
 docopt-completion dotdrop --manual-zsh
 mv ./_dotdrop "${dt_zsh}"
