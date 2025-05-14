@@ -17,13 +17,14 @@ class Dotfile(DictParser):
     key_trans_install = 'trans_install'
     key_trans_update = 'trans_update'
     key_template = 'template'
+    key_handle_dir_as_block = 'handle_dir_as_block'
 
     def __init__(self, key, dst, src,
                  actions=None, trans_install=None, trans_update=None,
                  link=LinkTypes.NOLINK, noempty=False,
                  cmpignore=None, upignore=None,
                  instignore=None, template=True, chmod=None,
-                 ignore_missing_in_dotdrop=False):
+                 ignore_missing_in_dotdrop=False, handle_dir_as_block=False):
         """
         constructor
         @key: dotfile key
@@ -39,6 +40,7 @@ class Dotfile(DictParser):
         @instignore: patterns to ignore when installing
         @template: template this dotfile
         @chmod: file permission
+        @handle_dir_as_block: handle directory as a single block
         """
         self.actions = actions or []
         self.dst = dst
@@ -54,6 +56,7 @@ class Dotfile(DictParser):
         self.template = template
         self.chmod = chmod
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
+        self.handle_dir_as_block = handle_dir_as_block
 
         if self.link != LinkTypes.NOLINK and \
                 (
@@ -96,6 +99,7 @@ class Dotfile(DictParser):
         """patch dict"""
         value['noempty'] = value.get(cls.key_noempty, False)
         value['template'] = value.get(cls.key_template, True)
+        value['handle_dir_as_block'] = value.get(cls.key_handle_dir_as_block, False)
         # remove old entries
         value.pop(cls.key_noempty, None)
         return value
@@ -121,6 +125,8 @@ class Dotfile(DictParser):
                 msg += f', chmod:{self.chmod:o}'
             else:
                 msg += f', chmod:\"{self.chmod}\"'
+        if self.handle_dir_as_block:
+            msg += f', handle_dir_as_block:{self.handle_dir_as_block}'
         return msg
 
     def prt(self):
@@ -136,6 +142,8 @@ class Dotfile(DictParser):
                 out += f'\n{indent}chmod: \"{self.chmod:o}\"'
             else:
                 out += f'\n{indent}chmod: \"{self.chmod}\"'
+        if self.handle_dir_as_block:
+            out += f'\n{indent}handle_dir_as_block: \"{self.handle_dir_as_block}\"'
 
         out += f'\n{indent}pre-action:'
         some = self.get_pre_actions()
