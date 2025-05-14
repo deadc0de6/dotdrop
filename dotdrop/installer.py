@@ -79,7 +79,7 @@ class Installer:
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=None, is_template=True,
-                chmod=None):
+                chmod=None, handle_dir_as_block=False):
         """
         install src to dst
 
@@ -92,6 +92,7 @@ class Installer:
         @ignore: pattern to ignore when installing
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
+        @handle_dir_as_block: if True, handle directories as a single block
 
         return
         - True, None        : success
@@ -139,7 +140,8 @@ class Installer:
                                                actionexec=actionexec,
                                                noempty=noempty, ignore=ignore,
                                                is_template=is_template,
-                                               chmod=chmod)
+                                               chmod=chmod,
+                                               handle_dir_as_block=handle_dir_as_block)
                 if self.remove_existing_in_dir and ins:
                     self._remove_existing_in_dir(dst, ins)
             else:
@@ -602,7 +604,7 @@ class Installer:
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
                   ignore=None, is_template=True,
-                  chmod=None):
+                  chmod=None, handle_dir_as_block=False):
         """
         install src to dst when is a directory
 
@@ -617,6 +619,68 @@ class Installer:
         fails
         """
         self.log.dbg(f'deploy dir {src}')
+        self.log.dbg(f'handle_dir_as_block: {handle_dir_as_block}')
+        
+        # Handle directory as a block if option is enabled
+        if handle_dir_as_block:
+            self.log.dbg(f'handling directory {src} as a block for installation')
+            dst_dotfiles = []
+            
+            # Ask user for confirmation if safe mode is on
+            if os.path.exists(dst):
+                msg = f'Overwrite entire directory \"{dst}\" with \"{src}\"?'
+                if self.safe and not self.log.ask(msg):
+                    return False, 'aborted', []
+                
+                # Remove existing directory completely
+                if self.dry:
+                    self.log.dry(f'would rm -r {dst}')
+                else:
+                    self.log.dbg(f'rm -r {dst}')
+                    if not removepath(dst, logger=self.log):
+                        msg = f'unable to remove {dst}, do manually'
+                        self.log.warn(msg)
+                        return False, msg, []
+            
+            # Create parent directory if needed
+            parent_dir = os.path.dirname(dst)
+            if not os.path.exists(parent_dir):
+                if self.dry:
+                    self.log.dry(f'would mkdir -p {parent_dir}')
+                else:
+                    if not self._create_dirs(parent_dir):
+                        err = f'error creating directory for {dst}'
+                        return False, err, []
+            
+            # Copy directory recursively
+            if self.dry:
+                self.log.dry(f'would cp -r {src} {dst}')
+                return True, None, [dst]
+            else:
+                try:
+                    # Execute pre actions
+                    ret, err = self._exec_pre_actions(actionexec)
+                    if not ret:
+                        return False, err, []
+                    
+                    # Copy the directory as a whole
+                    shutil.copytree(src, dst)
+                    
+                    # Record all files that were installed
+                    for root, _, files in os.walk(dst):
+                        for file in files:
+                            path = os.path.join(root, file)
+                            dst_dotfiles.append(path)
+                    
+                    if not self.comparing:
+                        self.log.sub(f'installed directory {src} to {dst} as a block')
+                    return True, None, dst_dotfiles
+                except (shutil.Error, OSError) as exc:
+                    err = f'{src} installation failed: {exc}'
+                    self.log.warn(err)
+                    return False, err, []
+            
+        # Regular directory installation (file by file)
         # default to nothing installed and no error
         ret = False
         dst_dotfiles = []
@@ -644,7 +708,6 @@ class Installer:
 
                 if res:
                     # something got installed
-
                     ret = True
             else:
                 # is directory

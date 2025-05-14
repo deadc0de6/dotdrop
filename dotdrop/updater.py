@@ -39,6 +39,7 @@ class Updater:
         @debug: enable debug
         @ignore: pattern to ignore when updating
         @showpatch: show patch if dotfile to update is a template
+        @ignore_missing_in_dotdrop: ignore missing files in dotdrop
         """
         self.dotpath = dotpath
         self.variables = variables
