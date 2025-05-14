@@ -18,7 +18,8 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None, debug=False, handle_dir_as_block=False):
+    def __init__(self, path, ignores=None,
+                 debug=False, handle_dir_as_block=False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
@@ -34,9 +35,11 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        # if directory should be handled as a block, just add the directory itself
+        # if directory should be handled as a block
+        # just add the directory itself
         if self.handle_dir_as_block:
-            self.log.dbg(f'handle as block: {self.path}')
+            self.log.dbg(
+                f'handle as block: {self.path}')
             self.entries.append(self.path)
             return
 

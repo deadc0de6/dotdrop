@@ -244,7 +244,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             is_template=is_template,
             ignore=ignores,
             chmod=dotfile.chmod,
-            handle_dir_as_block=asblock,
+            dir_as_block=asblock,
         )
     else:
         # nolink
@@ -271,7 +271,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             ignore=ignores,
             is_template=is_template,
             chmod=dotfile.chmod,
-            handle_dir_as_block=asblock,
+            dir_as_block=asblock,
         )
         if tmp:
             tmp = os.path.join(opts.dotpath, tmp)

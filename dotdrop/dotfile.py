@@ -99,7 +99,8 @@ class Dotfile(DictParser):
         """patch dict"""
         value['noempty'] = value.get(cls.key_noempty, False)
         value['template'] = value.get(cls.key_template, True)
-        value['handle_dir_as_block'] = value.get(cls.key_handle_dir_as_block, False)
+        value['handle_dir_as_block'] = value.get(
+            cls.key_handle_dir_as_block, False)
         # remove old entries
         value.pop(cls.key_noempty, None)
         return value
@@ -143,7 +144,8 @@ class Dotfile(DictParser):
             else:
                 out += f'\n{indent}chmod: \"{self.chmod}\"'
         if self.handle_dir_as_block:
-            out += f'\n{indent}handle_dir_as_block: \"{self.handle_dir_as_block}\"'
+            out += (f'\n{indent}handle_dir_as_block: '
+                    f'"{self.handle_dir_as_block}"')
 
         out += f'\n{indent}pre-action:'
         some = self.get_pre_actions()
