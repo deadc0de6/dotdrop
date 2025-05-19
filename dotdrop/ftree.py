@@ -19,11 +19,11 @@ class FTreeDir:
     """
 
     def __init__(self, path, ignores=None,
-                 debug=False, handle_dir_as_block=False):
+                 debug=False, dir_as_block=False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
-        self.handle_dir_as_block = handle_dir_as_block
+        self.dir_as_block = dir_as_block
         self.entries = []
         self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
@@ -37,7 +37,7 @@ class FTreeDir:
         """
         # if directory should be handled as a block
         # just add the directory itself
-        if self.handle_dir_as_block:
+        if self.dir_as_block:
             self.log.dbg(
                 f'handle as block: {self.path}')
             self.entries.append(self.path)

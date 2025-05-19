@@ -132,6 +132,7 @@ class Installer:
         isdir = os.path.isdir(src)
         self.log.dbg(f'install {src} to {dst}')
         self.log.dbg(f'\"{src}\" is a directory: {isdir}')
+        self.log.dbg(f'dir_as_block: {dir_as_block}')
 
         if linktype == LinkTypes.NOLINK:
             # normal file
@@ -619,7 +620,7 @@ class Installer:
         fails
         """
         self.log.dbg(f'deploy dir {src}')
-        self.log.dbg(f'handle_dir_as_block: {dir_as_block}')
+        self.log.dbg(f'dir_as_block: {dir_as_block}')
 
         # Handle directory as a block if option is enabled
         if dir_as_block:
@@ -657,30 +658,29 @@ class Installer:
             if self.dry:
                 self.log.dry(f'would cp -r {src} {dst}')
                 return True, None, [dst]
-            else:
-                try:
-                    # Execute pre actions
-                    ret, err = self._exec_pre_actions(actionexec)
-                    if not ret:
-                        return False, err, []
-
-                    # Copy the directory as a whole
-                    shutil.copytree(src, dst)
-
-                    # Record all files that were installed
-                    for root, _, files in os.walk(dst):
-                        for file in files:
-                            path = os.path.join(root, file)
-                            dst_dotfiles.append(path)
-
-                    if not self.comparing:
-                        self.log.sub(
-                            f'installed directory {src} to {dst} as a block')
-                    return True, None, dst_dotfiles
-                except (shutil.Error, OSError) as exc:
-                    err = f'{src} installation failed: {exc}'
-                    self.log.warn(err)
+            try:
+                # Execute pre actions
+                ret, err = self._exec_pre_actions(actionexec)
+                if not ret:
                     return False, err, []
+
+                # Copy the directory as a whole
+                shutil.copytree(src, dst)
+
+                # Record all files that were installed
+                for root, _, files in os.walk(dst):
+                    for file in files:
+                        path = os.path.join(root, file)
+                        dst_dotfiles.append(path)
+
+                if not self.comparing:
+                    self.log.sub(
+                        f'installed directory {src} to {dst} as a block')
+                return True, None, dst_dotfiles
+            except (shutil.Error, OSError) as exc:
+                err = f'{src} installation failed: {exc}'
+                self.log.warn(err)
+                return False, err, []
 
         # Regular directory installation (file by file)
         # default to nothing installed and no error
@@ -720,7 +720,8 @@ class Installer:
                                                 actionexec=actionexec,
                                                 noempty=noempty,
                                                 ignore=ignore,
-                                                is_template=is_template)
+                                                is_template=is_template,
+                                                dir_as_block=dir_as_block)
                 dst_dotfiles.extend(subs)
                 if not res and err:
                     # error occured
@@ -869,13 +870,12 @@ class Installer:
     ########################################################
     # helpers
     ########################################################
-
     @classmethod
     def _get_tmp_file_vars(cls, src, dst):
-        """Temporary file variables"""
-        # Correcting indentation and ensuring proper value assignment
-        x = 1  # Example fix for unexpected indent
-        return x
+        tmp = {}
+        tmp['_dotfile_sub_abs_src'] = src
+        tmp['_dotfile_sub_abs_dst'] = dst
+        return tmp
 
     def _is_different(self, src, dst, content=None):
         """
