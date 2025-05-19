@@ -79,7 +79,7 @@ class Installer:
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=None, is_template=True,
-                chmod=None, dir_as_block=False):
+                chmod=None, dir_as_block=None):
         """
         install src to dst
 
@@ -99,6 +99,7 @@ class Installer:
         - False, error_msg  : error
         - False, None       : ignored
         """
+        dir_as_block = dir_as_block or []
         if not src or not dst:
             # fake dotfile
             self.log.dbg('fake dotfile installed')
@@ -133,6 +134,21 @@ class Installer:
         self.log.dbg(f'install {src} to {dst}')
         self.log.dbg(f'\"{src}\" is a directory: {isdir}')
         self.log.dbg(f'dir_as_block: {dir_as_block}')
+
+        import fnmatch
+        treat_as_block = any(fnmatch.fnmatch(src, pattern) for pattern in dir_as_block)
+        self.log.dbg(f'dir_as_block patterns: {dir_as_block}, treat_as_block: {treat_as_block}')
+        if treat_as_block:
+            self.log.dbg(f'handling directory {src} as a block for installation')
+            ret, err, ins = self._copy_dir(templater, src, dst,
+                                           actionexec=actionexec,
+                                           noempty=noempty, ignore=ignore,
+                                           is_template=is_template,
+                                           chmod=chmod,
+                                           dir_as_block=True)
+            if self.remove_existing_in_dir and ins:
+                self._remove_existing_in_dir(dst, ins)
+            return self._log_install(ret, err)
 
         if linktype == LinkTypes.NOLINK:
             # normal file

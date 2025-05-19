@@ -18,12 +18,11 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None,
-                 debug=False, dir_as_block=False):
+    def __init__(self, path, ignores=None, debug=False, dir_as_block=None):
         self.path = path
         self.ignores = ignores
         self.debug = debug
-        self.dir_as_block = dir_as_block
+        self.dir_as_block = dir_as_block or []
         self.entries = []
         self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
@@ -35,13 +34,12 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        # if directory should be handled as a block
-        # just add the directory itself
-        if self.dir_as_block:
-            self.log.dbg(
-                f'handle as block: {self.path}')
-            self.entries.append(self.path)
-            return
+        import fnmatch
+        for pattern in self.dir_as_block:
+            if fnmatch.fnmatch(self.path, pattern):
+                self.log.dbg(f'dir_as_block match: {pattern} for {self.path}')
+                self.entries.append(self.path)
+                return
 
         for root, dirs, files in os.walk(self.path, followlinks=True):
             for file in files:
