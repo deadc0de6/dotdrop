@@ -5,9 +5,12 @@ Copyright (c) 2017, deadc0de6
 handle the installation of dotfiles
 """
 
+# pylint: disable=C0302
+
 import os
 import errno
 import shutil
+import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
@@ -135,17 +138,27 @@ class Installer:
         self.log.dbg(f'\"{src}\" is a directory: {isdir}')
         self.log.dbg(f'dir_as_block: {dir_as_block}')
 
-        import fnmatch
-        treat_as_block = any(fnmatch.fnmatch(src, pattern) for pattern in dir_as_block)
-        self.log.dbg(f'dir_as_block patterns: {dir_as_block}, treat_as_block: {treat_as_block}')
+        treat_as_block = any(
+            fnmatch.fnmatch(src, pattern)
+            for pattern in dir_as_block
+        )
+        self.log.dbg(
+            f'dir_as_block patterns: {dir_as_block}, '
+            f'treat_as_block: {treat_as_block}'
+        )
         if treat_as_block:
-            self.log.dbg(f'handling directory {src} as a block for installation')
-            ret, err, ins = self._copy_dir(templater, src, dst,
-                                           actionexec=actionexec,
-                                           noempty=noempty, ignore=ignore,
-                                           is_template=is_template,
-                                           chmod=chmod,
-                                           dir_as_block=True)
+            self.log.dbg(
+                f'handling directory {src} '
+                'as a block for installation'
+            )
+            ret, err, ins = self._copy_dir(
+                templater, src, dst,
+                actionexec=actionexec,
+                noempty=noempty, ignore=ignore,
+                is_template=is_template,
+                chmod=chmod,
+                dir_as_block=True
+            )
             if self.remove_existing_in_dir and ins:
                 self._remove_existing_in_dir(dst, ins)
             return self._log_install(ret, err)

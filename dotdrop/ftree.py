@@ -7,6 +7,7 @@ filesystem tree for directories
 
 
 import os
+import fnmatch
 
 # local imports
 from dotdrop.utils import must_ignore, dir_empty
@@ -34,7 +35,6 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        import fnmatch
         for pattern in self.dir_as_block:
             if fnmatch.fnmatch(self.path, pattern):
                 self.log.dbg(f'dir_as_block match: {pattern} for {self.path}')
