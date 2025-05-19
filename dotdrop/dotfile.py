@@ -24,7 +24,7 @@ class Dotfile(DictParser):
                  link=LinkTypes.NOLINK, noempty=False,
                  cmpignore=None, upignore=None,
                  instignore=None, template=True, chmod=None,
-                 ignore_missing_in_dotdrop=False, dir_as_block=False):
+                 ignore_missing_in_dotdrop=False, dir_as_block=None):
         """
         constructor
         @key: dotfile key
@@ -56,7 +56,7 @@ class Dotfile(DictParser):
         self.template = template
         self.chmod = chmod
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
-        self.dir_as_block = dir_as_block
+        self.dir_as_block = dir_as_block or []
 
         if self.link != LinkTypes.NOLINK and \
                 (
@@ -100,7 +100,7 @@ class Dotfile(DictParser):
         value['noempty'] = value.get(cls.key_noempty, False)
         value['template'] = value.get(cls.key_template, True)
         value['dir_as_block'] = value.get(
-            cls.key_dir_as_block, False)
+            cls.key_dir_as_block, [])
         # remove old entries
         value.pop(cls.key_noempty, None)
         return value
