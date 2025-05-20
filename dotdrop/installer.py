@@ -95,7 +95,7 @@ class Installer:
         @ignore: pattern to ignore when installing
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
-        @dir_as_block: if True, handle directories as a single block
+        @dir_as_block: handle directories matching pattern as a single block
 
         return
         - True, None        : success
