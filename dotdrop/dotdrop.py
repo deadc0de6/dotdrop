@@ -232,9 +232,6 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         LinkTypes.RELATIVE, LinkTypes.ABSOLUTE
     ):
         # nolink|relative|absolute|link_children
-        asblock = False
-        if hasattr(dotfile, 'dir_as_block'):
-            asblock = True
         ret, err = inst.install(
             templ,
             dotfile.src,
@@ -244,7 +241,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             is_template=is_template,
             ignore=ignores,
             chmod=dotfile.chmod,
-            dir_as_block=asblock,
+            dir_as_block=dotfile.dir_as_block,
         )
     else:
         # nolink
@@ -258,9 +255,6 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             src = tmp
         # make sure to re-evaluate if is template
         is_template = dotfile.template and Templategen.path_is_template(src)
-        asblock = False
-        if hasattr(dotfile, "dir_as_block"):
-            asblock = True
         ret, err = inst.install(
             templ,
             src,
@@ -271,7 +265,7 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             ignore=ignores,
             is_template=is_template,
             chmod=dotfile.chmod,
-            dir_as_block=asblock,
+            dir_as_block=dotfile.dir_as_block,
         )
         if tmp:
             tmp = os.path.join(opts.dotpath, tmp)

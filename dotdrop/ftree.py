@@ -7,7 +7,6 @@ filesystem tree for directories
 
 
 import os
-import fnmatch
 
 # local imports
 from dotdrop.utils import must_ignore, dir_empty
@@ -19,11 +18,11 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None, debug=False, dir_as_block=None):
+    def __init__(self, path, ignores=None,
+                 debug=False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
-        self.dir_as_block = dir_as_block or []
         self.entries = []
         self.log = Logger(debug=self.debug)
         if os.path.exists(path) and os.path.isdir(path):
@@ -35,12 +34,6 @@ class FTreeDir:
         ignore empty directory
         test for ignore pattern
         """
-        for pattern in self.dir_as_block:
-            if fnmatch.fnmatch(self.path, pattern):
-                self.log.dbg(f'dir_as_block match: {pattern} for {self.path}')
-                self.entries.append(self.path)
-                return
-
         for root, dirs, files in os.walk(self.path, followlinks=True):
             for file in files:
                 fpath = os.path.join(root, file)

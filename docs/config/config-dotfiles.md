@@ -236,8 +236,7 @@ dotfiles:
       - "*otherdir*"
 ```
 
-When this option is enabled:
-- During **install** operations, any directory matching a pattern in `dir_as_block` will be replaced as a whole, rather than updating individual files
-- This option has **no effect** on **compare** operations, which will always show file-by-file differences
-
-This option defaults to an empty list and can be set on any dotfile that represents a directory. It has no effect on dotfiles that are regular files.
+Note:
+- During **install** operations, any directory matching a pattern in `dir_as_block` will be replaced as a whole
+- This option has no effect on **compare** operations, which will always show file-by-file differences
+- This option has no effect on dotfiles that are regular files
