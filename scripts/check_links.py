@@ -34,6 +34,7 @@ IGNORES = [
     'badgen.net',
     'coveralls.io',
     'packages.ubuntu.com',
+    'www.gnu.org',
 ]
 OK_WHEN_FORBIDDEN = [
     'linux.die.net',
