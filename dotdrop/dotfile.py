@@ -40,7 +40,7 @@ class Dotfile(DictParser):
         @instignore: patterns to ignore when installing
         @template: template this dotfile
         @chmod: file permission
-        @dir_as_block: handle directory as a single block
+        @dir_as_block: handle directory matching patterns as a single block
         """
         self.actions = actions or []
         self.dst = dst
