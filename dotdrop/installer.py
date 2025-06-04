@@ -5,9 +5,12 @@ Copyright (c) 2017, deadc0de6
 handle the installation of dotfiles
 """
 
+# pylint: disable=C0302
+
 import os
 import errno
 import shutil
+import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
@@ -79,7 +82,7 @@ class Installer:
     def install(self, templater, src, dst, linktype,
                 actionexec=None, noempty=False,
                 ignore=None, is_template=True,
-                chmod=None):
+                chmod=None, dir_as_block=None):
         """
         install src to dst
 
@@ -92,12 +95,14 @@ class Installer:
         @ignore: pattern to ignore when installing
         @is_template: this dotfile is a template
         @chmod: rights to apply if any
+        @dir_as_block: handle directories matching pattern as a single block
 
         return
         - True, None        : success
         - False, error_msg  : error
         - False, None       : ignored
         """
+        dir_as_block = dir_as_block or []
         if not src or not dst:
             # fake dotfile
             self.log.dbg('fake dotfile installed')
@@ -131,6 +136,32 @@ class Installer:
         isdir = os.path.isdir(src)
         self.log.dbg(f'install {src} to {dst}')
         self.log.dbg(f'\"{src}\" is a directory: {isdir}')
+        self.log.dbg(f'dir_as_block: {dir_as_block}')
+
+        treat_as_block = any(
+            fnmatch.fnmatch(src, pattern)
+            for pattern in dir_as_block
+        )
+        self.log.dbg(
+            f'dir_as_block patterns: {dir_as_block}, '
+            f'treat_as_block: {treat_as_block}'
+        )
+        if treat_as_block:
+            self.log.dbg(
+                f'handling directory {src} '
+                'as a block for installation'
+            )
+            ret, err, ins = self._copy_dir(
+                templater, src, dst,
+                actionexec=actionexec,
+                noempty=noempty, ignore=ignore,
+                is_template=is_template,
+                chmod=chmod,
+                dir_as_block=True
+            )
+            if self.remove_existing_in_dir and ins:
+                self._remove_existing_in_dir(dst, ins)
+            return self._log_install(ret, err)
 
         if linktype == LinkTypes.NOLINK:
             # normal file
@@ -139,7 +170,8 @@ class Installer:
                                                actionexec=actionexec,
                                                noempty=noempty, ignore=ignore,
                                                is_template=is_template,
-                                               chmod=chmod)
+                                               chmod=chmod,
+                                               dir_as_block=dir_as_block)
                 if self.remove_existing_in_dir and ins:
                     self._remove_existing_in_dir(dst, ins)
             else:
@@ -602,7 +634,7 @@ class Installer:
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
                   ignore=None, is_template=True,
-                  chmod=None):
+                  chmod=None, dir_as_block=False):
         """
         install src to dst when is a directory
 
@@ -617,6 +649,69 @@ class Installer:
         fails
         """
         self.log.dbg(f'deploy dir {src}')
+        self.log.dbg(f'dir_as_block: {dir_as_block}')
+
+        # Handle directory as a block if option is enabled
+        if dir_as_block:
+            self.log.dbg(
+                f'handling directory {src} as a block for installation')
+            dst_dotfiles = []
+
+            # Ask user for confirmation if safe mode is on
+            if os.path.exists(dst):
+                msg = f'Overwrite entire directory "{dst}" with "{src}"?'
+                if self.safe and not self.log.ask(msg):
+                    return False, 'aborted', []
+
+                # Remove existing directory completely
+                if self.dry:
+                    self.log.dry(f'would rm -r {dst}')
+                else:
+                    self.log.dbg(f'rm -r {dst}')
+                    if not removepath(dst, logger=self.log):
+                        msg = f'unable to remove {dst}, do manually'
+                        self.log.warn(msg)
+                        return False, msg, []
+
+            # Create parent directory if needed
+            parent_dir = os.path.dirname(dst)
+            if not os.path.exists(parent_dir):
+                if self.dry:
+                    self.log.dry(f'would mkdir -p {parent_dir}')
+                else:
+                    if not self._create_dirs(parent_dir):
+                        err = f'error creating directory for {dst}'
+                        return False, err, []
+
+            # Copy directory recursively
+            if self.dry:
+                self.log.dry(f'would cp -r {src} {dst}')
+                return True, None, [dst]
+            try:
+                # Execute pre actions
+                ret, err = self._exec_pre_actions(actionexec)
+                if not ret:
+                    return False, err, []
+
+                # Copy the directory as a whole
+                shutil.copytree(src, dst)
+
+                # Record all files that were installed
+                for root, _, files in os.walk(dst):
+                    for file in files:
+                        path = os.path.join(root, file)
+                        dst_dotfiles.append(path)
+
+                if not self.comparing:
+                    self.log.sub(
+                        f'installed directory {src} to {dst} as a block')
+                return True, None, dst_dotfiles
+            except (shutil.Error, OSError) as exc:
+                err = f'{src} installation failed: {exc}'
+                self.log.warn(err)
+                return False, err, []
+
+        # Regular directory installation (file by file)
         # default to nothing installed and no error
         ret = False
         dst_dotfiles = []
@@ -644,7 +739,6 @@ class Installer:
 
                 if res:
                     # something got installed
-
                     ret = True
             else:
                 # is directory
@@ -655,7 +749,8 @@ class Installer:
                                                 actionexec=actionexec,
                                                 noempty=noempty,
                                                 ignore=ignore,
-                                                is_template=is_template)
+                                                is_template=is_template,
+                                                dir_as_block=dir_as_block)
                 dst_dotfiles.extend(subs)
                 if not res and err:
                     # error occured
@@ -804,7 +899,6 @@ class Installer:
     ########################################################
     # helpers
     ########################################################
-
     @classmethod
     def _get_tmp_file_vars(cls, src, dst):
         tmp = {}

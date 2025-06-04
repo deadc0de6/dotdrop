@@ -232,12 +232,17 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
         LinkTypes.RELATIVE, LinkTypes.ABSOLUTE
     ):
         # nolink|relative|absolute|link_children
-        ret, err = inst.install(templ, dotfile.src, dotfile.dst,
-                                dotfile.link,
-                                actionexec=pre_actions_exec,
-                                is_template=is_template,
-                                ignore=ignores,
-                                chmod=dotfile.chmod)
+        ret, err = inst.install(
+            templ,
+            dotfile.src,
+            dotfile.dst,
+            dotfile.link,
+            actionexec=pre_actions_exec,
+            is_template=is_template,
+            ignore=ignores,
+            chmod=dotfile.chmod,
+            dir_as_block=dotfile.dir_as_block,
+        )
     else:
         # nolink
         src = dotfile.src
@@ -250,13 +255,18 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
             src = tmp
         # make sure to re-evaluate if is template
         is_template = dotfile.template and Templategen.path_is_template(src)
-        ret, err = inst.install(templ, src, dotfile.dst,
-                                LinkTypes.NOLINK,
-                                actionexec=pre_actions_exec,
-                                noempty=dotfile.noempty,
-                                ignore=ignores,
-                                is_template=is_template,
-                                chmod=dotfile.chmod)
+        ret, err = inst.install(
+            templ,
+            src,
+            dotfile.dst,
+            LinkTypes.NOLINK,
+            actionexec=pre_actions_exec,
+            noempty=dotfile.noempty,
+            ignore=ignores,
+            is_template=is_template,
+            chmod=dotfile.chmod,
+            dir_as_block=dotfile.dir_as_block,
+        )
         if tmp:
             tmp = os.path.join(opts.dotpath, tmp)
             if os.path.exists(tmp):

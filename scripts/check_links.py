@@ -28,11 +28,13 @@ TIMEOUT = 10
 VALID_RET = [
     200,
     302,
+    429,
 ]
 IGNORES = [
     'badgen.net',
     'coveralls.io',
     'packages.ubuntu.com',
+    'www.gnu.org',
 ]
 OK_WHEN_FORBIDDEN = [
     'linux.die.net',

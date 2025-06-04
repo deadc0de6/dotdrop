@@ -18,7 +18,9 @@ class FTreeDir:
     directory tree for comparison
     """
 
-    def __init__(self, path, ignores=None, debug=False):
+    def __init__(self, path,
+                 ignores=None,
+                 debug=False):
         self.path = path
         self.ignores = ignores
         self.debug = debug
