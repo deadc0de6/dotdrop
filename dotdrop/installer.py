@@ -138,9 +138,11 @@ class Installer:
         self.log.dbg(f'\"{src}\" is a directory: {isdir}')
         self.log.dbg(f'dir_as_block: {dir_as_block}')
 
-        treat_as_block = any(
-            fnmatch.fnmatch(src, pattern)
-            for pattern in dir_as_block
+        treat_as_block = (
+            isdir and
+            linktype == LinkTypes.NOLINK and
+            any(fnmatch.fnmatch(src, pattern)
+                for pattern in dir_as_block)
         )
         self.log.dbg(
             f'dir_as_block patterns: {dir_as_block}, '
