@@ -10,7 +10,6 @@ handle the installation of dotfiles
 import os
 import errno
 import shutil
-import fnmatch
 
 # local imports
 from dotdrop.logger import Logger
@@ -141,8 +140,7 @@ class Installer:
         treat_as_block = (
             isdir and
             linktype == LinkTypes.NOLINK and
-            any(fnmatch.fnmatch(src, pattern)
-                for pattern in dir_as_block)
+            self._must_treat_dir_as_block(src, dir_as_block)
         )
         self.log.dbg(
             f'dir_as_block patterns: {dir_as_block}, '
@@ -227,6 +225,14 @@ class Installer:
                                         linktype=linktype)
 
         return self._log_install(ret, err)
+
+    def _must_treat_dir_as_block(self, path, patterns):
+        """returns true if directory path matches block patterns"""
+        if not patterns:
+            return False
+        return must_ignore([path], patterns,
+                           debug=self.debug,
+                           strict=True)
 
     def _apply_chmod_after_install(self, src, dst, ret, err,
                                    chmod=None,
