@@ -122,7 +122,6 @@ find . \
   -path "./.venv" -prune -o \
   -path "./venv" -prune -o \
   -path "./build" -prune -o \
-  -path "./dist" -prune -o \
   -name "*.py" -print | while read -r script; do
   echo "checking ${script}"
   pylint -sn \
