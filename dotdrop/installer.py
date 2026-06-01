@@ -157,7 +157,8 @@ class Installer:
                 noempty=noempty, ignore=ignore,
                 is_template=is_template,
                 chmod=chmod,
-                dir_as_block=True
+                dir_as_block=True,
+                dir_as_block_patterns=dir_as_block,
             )
             if self.remove_existing_in_dir and ins:
                 self._remove_existing_in_dir(dst, ins)
@@ -166,12 +167,18 @@ class Installer:
         if linktype == LinkTypes.NOLINK:
             # normal file
             if isdir:
-                ret, err, ins = self._copy_dir(templater, src, dst,
-                                               actionexec=actionexec,
-                                               noempty=noempty, ignore=ignore,
-                                               is_template=is_template,
-                                               chmod=chmod,
-                                               dir_as_block=dir_as_block)
+                ret, err, ins = self._copy_dir(
+                    templater,
+                    src,
+                    dst,
+                    actionexec=actionexec,
+                    noempty=noempty,
+                    ignore=ignore,
+                    is_template=is_template,
+                    chmod=chmod,
+                    dir_as_block=False,
+                    dir_as_block_patterns=dir_as_block,
+                )
                 if self.remove_existing_in_dir and ins:
                     self._remove_existing_in_dir(dst, ins)
             else:
@@ -644,7 +651,8 @@ class Installer:
     def _copy_dir(self, templater, src, dst,
                   actionexec=None, noempty=False,
                   ignore=None, is_template=True,
-                  chmod=None, dir_as_block=False):
+                  chmod=None, dir_as_block=False,
+                  dir_as_block_patterns=None):
         """
         install src to dst when is a directory
 
@@ -660,6 +668,9 @@ class Installer:
         """
         self.log.dbg(f'deploy dir {src}')
         self.log.dbg(f'dir_as_block: {dir_as_block}')
+        self.log.dbg(f'dir_as_block_patterns: {dir_as_block_patterns}')
+
+        dir_as_block_patterns = dir_as_block_patterns or []
 
         # Handle directory as a block if option is enabled
         if dir_as_block:
@@ -760,7 +771,11 @@ class Installer:
                                                 noempty=noempty,
                                                 ignore=ignore,
                                                 is_template=is_template,
-                                                dir_as_block=dir_as_block)
+                                                dir_as_block=self._must_treat_dir_as_block(
+                                                    fpath,
+                                                    dir_as_block_patterns,
+                                                ),
+                                                dir_as_block_patterns=dir_as_block_patterns)
                 dst_dotfiles.extend(subs)
                 if not res and err:
                     # error occured
