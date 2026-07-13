@@ -22,5 +22,5 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
-        python3 -m build --wheel --no-isolation
+        python3 -m build --no-isolation
         twine upload dist/*
