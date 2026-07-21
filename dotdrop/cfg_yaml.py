@@ -1603,7 +1603,7 @@ class CfgYaml:
     def _clear_profile_vars(self, dic):
         """
         remove profile variables from dic if found inplace
-        to avoid profile variables being overwriten
+        to avoid profile variables being overwritten
         """
         if not dic:
             return
