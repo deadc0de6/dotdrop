@@ -258,6 +258,21 @@ class Updater:
             return False
         return True
 
+    def _prune_nested_paths(self, entries):
+        """return only top-most paths to avoid redundant removals"""
+        pruned = []
+        kept = set()
+        normalized = [entry.rstrip(os.path.sep) for entry in entries]
+        for entry in sorted(normalized, key=lambda x: x.count(os.path.sep)):
+            if any(
+                entry == k or entry.startswith(k + os.path.sep)
+                for k in kept
+            ):
+                continue
+            kept.add(entry)
+            pruned.append(entry)
+        return pruned
+
     def _handle_dir(self, deployed_path, local_path,
                     dotfile, ignores):
         """sync path (local dir) and local_path (dotdrop dir path)"""
@@ -277,6 +292,7 @@ class Updater:
         lonly, ronly, common = local_tree.compare(deploy_tree)
 
         # those only in dotpath
+        lonly = self._prune_nested_paths(lonly)
         for i in lonly:
             path = os.path.join(local_path, i)
             if self.dry:
