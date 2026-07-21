@@ -12,6 +12,7 @@ import filecmp
 # local imports
 from dotdrop.logger import Logger
 from dotdrop.ftree import FTreeDir
+from dotdrop.linktypes import LinkTypes
 from dotdrop.templategen import Templategen
 from dotdrop.utils import ignores_to_absolute, removepath, \
     get_unique_tmp_name, write_to_tmpfile, must_ignore, \
@@ -261,6 +262,12 @@ class Updater:
     def _handle_dir(self, deployed_path, local_path,
                     dotfile, ignores):
         """sync path (local dir) and local_path (dotdrop dir path)"""
+        if dotfile.link == LinkTypes.LINK_CHILDREN:
+            return self._handle_link_children_dir(deployed_path,
+                                                  local_path,
+                                                  dotfile,
+                                                  ignores)
+
         ret = True
         self.log.dbg(f'handle update for dir {deployed_path} to {local_path}')
 
@@ -343,6 +350,124 @@ class Updater:
                 ret = False
                 continue
             self.log.sub(f'\"{dstpath}\" content updated')
+        return ret
+
+    def _handle_link_children_dir(self, deployed_path, local_path,
+                                  dotfile, ignores):
+        """sync link_children dotfile without traversing managed symlinks"""
+        ret = True
+        deployed_path = os.path.expanduser(deployed_path)
+        local_path = os.path.expanduser(local_path)
+
+        self.log.dbg('handling update for link_children dotfile')
+
+        local_children = set(os.listdir(local_path))
+        deployed_children = set(os.listdir(deployed_path))
+
+        local_only = local_children - deployed_children
+        deployed_only = deployed_children - local_children
+        common = local_children & deployed_children
+
+        for child in local_only:
+            path = os.path.join(local_path, child)
+            if self._must_ignore([path], ignores):
+                self.log.sub(f'\"{path}\" ignored')
+                continue
+            if self.dry:
+                self.log.dry(f'would rm -r {path}')
+                continue
+            self.log.dbg(f'rm -r {path}')
+            if not self._confirm_rm_r(path):
+                continue
+            if not removepath(path, logger=self.log):
+                self.log.warn(f'unable to remove {path}, do manually')
+                ret = False
+                continue
+            self.log.sub(f'\"{path}\" removed')
+
+        ignore_missing_in_dotdrop = self.ignore_missing_in_dotdrop or \
+            dotfile.ignore_missing_in_dotdrop
+        if not ignore_missing_in_dotdrop:
+            for child in deployed_only:
+                srcpath = os.path.join(deployed_path, child)
+                dstpath = os.path.join(local_path, child)
+                if self._must_ignore([srcpath, dstpath], ignores):
+                    self.log.sub(f'\"{dstpath}\" ignored')
+                    continue
+                if self.dry:
+                    if os.path.islink(srcpath):
+                        target = os.readlink(srcpath)
+                        self.log.dry(f'would ln -s {target} {dstpath}')
+                    else:
+                        self.log.dry(f'would cp -r {srcpath} {dstpath}')
+                    continue
+                self.log.dbg(f'cp {srcpath} {dstpath}')
+                try:
+                    os.makedirs(os.path.dirname(dstpath), exist_ok=True)
+                    if os.path.islink(srcpath):
+                        target = os.readlink(srcpath)
+                        os.symlink(target, dstpath)
+                    elif not os.path.isdir(srcpath):
+                        shutil.copy2(srcpath, dstpath)
+                except IOError as exc:
+                    msg = f'{srcpath} update right only failed'
+                    msg += f', do manually: {exc}'
+                    self.log.warn(msg)
+                    ret = False
+                    continue
+                self.log.sub(f'\"{dstpath}\" updated')
+
+        for child in common:
+            srcpath = os.path.join(deployed_path, child)
+            dstpath = os.path.join(local_path, child)
+
+            if self._must_ignore([srcpath, dstpath], ignores):
+                self.log.sub(f'\"{dstpath}\" ignored')
+                continue
+
+            if os.path.islink(srcpath):
+                # managed link_children symlink, no update required
+                if os.path.realpath(srcpath) == os.path.realpath(dstpath):
+                    continue
+                if self.dry:
+                    target = os.readlink(srcpath)
+                    self.log.dry(f'would replace {dstpath} with symlink {target}')
+                    continue
+                if not self._overwrite(srcpath, dstpath):
+                    continue
+                if not removepath(dstpath, logger=self.log):
+                    self.log.warn(f'unable to remove {dstpath}, do manually')
+                    ret = False
+                    continue
+                target = os.readlink(srcpath)
+                os.symlink(target, dstpath)
+                self.log.sub(f'\"{dstpath}\" updated')
+                continue
+
+            if os.path.isdir(srcpath):
+                continue
+
+            if not self._same_rights(dstpath, srcpath):
+                self._mirror_file_perms(srcpath, dstpath)
+            out = diff(modified=dstpath, original=srcpath,
+                       debug=self.debug)
+            if not out:
+                continue
+            if self.dry:
+                msg = f'would update content of {dstpath} from {srcpath}'
+                self.log.dry(msg)
+                continue
+            self.log.dbg(f'cp {srcpath} {dstpath}')
+            try:
+                shutil.copy2(srcpath, dstpath)
+                self._mirror_file_perms(srcpath, dstpath)
+            except IOError as exc:
+                msg = f'{srcpath} update common failed, do manually: {exc}'
+                self.log.warn(msg)
+                ret = False
+                continue
+            self.log.sub(f'\"{dstpath}\" content updated')
+
         return ret
 
     def _overwrite(self, src, dst):

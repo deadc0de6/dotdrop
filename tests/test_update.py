@@ -7,10 +7,13 @@ basic unittest for the update function
 
 import unittest
 import os
+from unittest.mock import patch
 
 from dotdrop.dotdrop import cmd_update
 from dotdrop.dotdrop import cmd_importer
+from dotdrop.dotdrop import cmd_install
 from dotdrop.action import Transform
+from dotdrop.linktypes import LinkTypes
 
 from tests.helpers import create_dir, get_string, get_tempdir, clean, \
     create_random_file, create_fake_config, load_options, edit_content
@@ -183,6 +186,55 @@ class TestUpdate(unittest.TestCase):
         with open(dotfilefile2, 'r', encoding='utf-8') as file:
             newcontent = file.read()
         self.assertTrue(newcontent == 'newcontentbykey')
+
+    def test_update_link_children_skips_managed_symlink_trees(self):
+        """Do not recurse managed symlink trees for link_children update."""
+        fold_config = os.path.join(os.path.expanduser('~'), '.config')
+        create_dir(fold_config)
+
+        srcdir = os.path.join(fold_config, get_string(5))
+        create_dir(srcdir)
+        self.addCleanup(clean, srcdir)
+
+        child_dir = os.path.join(srcdir, 'child')
+        create_dir(child_dir)
+        nested_file, _ = create_random_file(child_dir)
+        self.assertTrue(os.path.exists(nested_file))
+
+        root_file, _ = create_random_file(srcdir)
+        self.assertTrue(os.path.exists(root_file))
+
+        dotfilespath = get_tempdir()
+        self.assertTrue(os.path.exists(dotfilespath))
+        self.addCleanup(clean, dotfilespath)
+
+        profile = get_string(5)
+        confpath = create_fake_config(dotfilespath,
+                                      configname=self.CONFIG_NAME,
+                                      dotpath=self.CONFIG_DOTPATH,
+                                      backup=self.CONFIG_BACKUP,
+                                      create=self.CONFIG_CREATE)
+        self.assertTrue(os.path.exists(confpath))
+
+        opt = load_options(confpath, profile)
+        opt.import_path = [srcdir]
+        opt.import_link = LinkTypes.LINK_CHILDREN
+        self.assertTrue(cmd_importer(opt))
+
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        self.assertTrue(cmd_install(opt))
+
+        child_link = os.path.join(srcdir, 'child')
+        self.assertTrue(os.path.islink(child_link))
+
+        opt = load_options(confpath, profile)
+        opt.safe = False
+        opt.update_path = [srcdir]
+
+        with patch('dotdrop.updater.FTreeDir._walk',
+                   side_effect=AssertionError('FTreeDir walk should not run')):
+            self.assertTrue(cmd_update(opt))
 
 
 def main():
