@@ -431,7 +431,8 @@ class Updater:
                     continue
                 if self.dry:
                     target = os.readlink(srcpath)
-                    self.log.dry(f'would replace {dstpath} with symlink {target}')
+                    msg = f'would replace {dstpath} with symlink {target}'
+                    self.log.dry(msg)
                     continue
                 if not self._overwrite(srcpath, dstpath):
                     continue
