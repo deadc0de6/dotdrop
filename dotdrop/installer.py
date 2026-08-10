@@ -406,6 +406,8 @@ class Installer:
             self._create_dirs(dst)
 
         children = os.listdir(parent)
+        if self.remove_existing_in_dir:
+            self._remove_stale_link_children(parent, dst)
         srcs = [os.path.normpath(os.path.join(parent, child))
                 for child in children]
         dsts = [os.path.normpath(os.path.join(dst, child))
@@ -703,6 +705,44 @@ class Installer:
             self.log.dbg(f'removing unmanaged file \"{path}\"')
             if not removepath(path, logger=self.log):
                 self.log.warn(f'unable to remove {path}')
+
+    def _remove_stale_link_children(self, source, destination):
+        """remove stale links previously installed by link_children"""
+        if not os.path.isdir(destination):
+            return
+        managed_roots = [os.path.realpath(source),
+                         os.path.realpath(self.workdir)]
+        for child in os.listdir(destination):
+            if os.path.lexists(os.path.join(source, child)):
+                continue
+            path = os.path.join(destination, child)
+            if not self._is_managed_dangling_link(path, managed_roots):
+                continue
+
+            if self.dry:
+                self.log.dry(f'would remove stale link "{path}"')
+                continue
+            if self.safe and not self.log.ask(f'remove stale link "{path}"'):
+                return
+            if not removepath(path, logger=self.log):
+                self.log.warn(f'unable to remove {path}')
+                continue
+            self.log.sub(f'removed stale link "{path}"')
+
+    @staticmethod
+    def _is_managed_dangling_link(path, managed_roots):
+        """return true for a dangling link into a managed directory"""
+        if not os.path.islink(path) or os.path.exists(path):
+            return False
+        target = os.path.join(os.path.dirname(path), os.readlink(path))
+        target = os.path.realpath(target)
+        for root in managed_roots:
+            try:
+                if os.path.commonpath([target, root]) == root:
+                    return True
+            except ValueError:
+                continue
+        return False
 
     @classmethod
     def _write_content_to_file(cls, content, src, dst):

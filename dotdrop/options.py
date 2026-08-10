@@ -96,7 +96,7 @@ Options:
   -n --nodiff             Do not diff when installing.
   -p --profile=<profile>  Specify the profile to use [default: {PROFILE}].
   -P --show-patch         Provide a one-liner to manually patch template.
-  -R --remove-existing    Remove existing file on install directory.
+  -R --remove-existing    Remove stale entries from installed directories.
   -s --as=<path>          Import as a different path from actual path.
   --transr=<key>          Associate trans_install key on import.
   --transw=<key>          Apply trans_update key on import.
