@@ -6,7 +6,7 @@ basic unittest for the install function
 
 import os
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 import filecmp
 from tests.helpers import (clean, create_dir, create_fake_config,
                            create_random_file, get_string, get_tempdir,
@@ -388,6 +388,105 @@ exec bspwm
         for src in srcs:
             xyz = os.path.join(dst_dir, src)
             self.assertEqual(os.path.realpath(xyz), os.path.realpath(src))
+
+    def test_link_children_remove_existing(self):
+        """test pruning stale links created by link_children"""
+        source = get_tempdir()
+        destination = get_tempdir()
+        workdir = get_tempdir()
+        self.addCleanup(clean, source)
+        self.addCleanup(clean, destination)
+        self.addCleanup(clean, workdir)
+
+        source_file, _ = create_random_file(source)
+        declared_broken = os.path.join(source, 'declared-broken')
+        os.symlink('missing', declared_broken)
+
+        stale = {
+            'source-absolute': os.path.join(source, 'missing-absolute'),
+            'source-relative': os.path.relpath(
+                os.path.join(source, 'missing-relative'), destination),
+            'workdir-absolute': os.path.join(workdir, 'missing-absolute'),
+            'workdir-relative': os.path.relpath(
+                os.path.join(workdir, 'missing-relative'), destination),
+        }
+        stale_paths = []
+        for name, target in stale.items():
+            path = os.path.join(destination, name)
+            os.symlink(target, path)
+            stale_paths.append(path)
+
+        regular = os.path.join(destination, 'regular')
+        with open(regular, 'w', encoding='utf-8') as file:
+            file.write('preserve')
+        directory = os.path.join(destination, 'directory')
+        os.mkdir(directory)
+        nested = os.path.join(directory, 'nested-stale')
+        os.symlink(os.path.join(source, 'missing-nested'), nested)
+        live = os.path.join(destination, 'live')
+        os.symlink(source_file, live)
+        unrelated = os.path.join(destination, 'unrelated')
+        os.symlink(os.path.join(source + '-other', 'missing'), unrelated)
+        declared = os.path.join(destination, 'declared-broken')
+        os.symlink(declared_broken, declared)
+
+        installer = Installer(workdir=workdir,
+                              remove_existing_in_dir=True)
+        installer.log.sub = MagicMock()
+        installer.install(templater=MagicMock(), src=source,
+                          dst=destination,
+                          linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None, is_template=False)
+
+        for path in stale_paths:
+            self.assertFalse(os.path.lexists(path))
+        for path in [regular, directory, nested, live, unrelated, declared]:
+            self.assertTrue(os.path.lexists(path))
+        expected = [call(f'removed stale link "{path}"')
+                    for path in stale_paths]
+        installer.log.sub.assert_has_calls(expected, any_order=True)
+
+    def test_link_children_remove_existing_is_opt_in(self):
+        """test link_children pruning is disabled by default"""
+        source = get_tempdir()
+        destination = get_tempdir()
+        workdir = get_tempdir()
+        self.addCleanup(clean, source)
+        self.addCleanup(clean, destination)
+        self.addCleanup(clean, workdir)
+        stale = os.path.join(destination, 'stale')
+        os.symlink(os.path.join(source, 'missing'), stale)
+
+        installer = Installer(workdir=workdir)
+        installer.install(templater=MagicMock(), src=source,
+                          dst=destination,
+                          linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None, is_template=False)
+
+        self.assertTrue(os.path.lexists(stale))
+
+    def test_link_children_remove_existing_dry(self):
+        """test dry link_children pruning is reported but not applied"""
+        source = get_tempdir()
+        destination = get_tempdir()
+        workdir = get_tempdir()
+        self.addCleanup(clean, source)
+        self.addCleanup(clean, destination)
+        self.addCleanup(clean, workdir)
+        stale = os.path.join(destination, 'stale')
+        os.symlink(os.path.join(source, 'missing'), stale)
+
+        installer = Installer(workdir=workdir, dry=True,
+                              remove_existing_in_dir=True)
+        installer.log.dry = MagicMock()
+        installer.install(templater=MagicMock(), src=source,
+                          dst=destination,
+                          linktype=LinkTypes.LINK_CHILDREN,
+                          actionexec=None, is_template=False)
+
+        self.assertTrue(os.path.lexists(stale))
+        installer.log.dry.assert_called_once_with(
+            f'would remove stale link "{stale}"')
 
     def test_fails_without_src(self):
         """test fails without src"""
