@@ -345,6 +345,16 @@ class Updater:
             dstpath = os.path.join(local_path, i)
             if os.path.isdir(srcpath):
                 continue
+            if self._is_template(dstpath):
+                # dotfile is a template
+                self.log.dbg(f'{dstpath} is a template')
+                if self.showpatch:
+                    try:
+                        self._show_patch(srcpath, dstpath)
+                    except UndefinedException as exc:
+                        msg = f'unable to show patch for {srcpath}: {exc}'
+                        self.log.warn(msg)
+                continue
             if not self._same_rights(dstpath, srcpath):
                 # update rights
                 self._mirror_file_perms(srcpath, dstpath)
@@ -462,6 +472,17 @@ class Updater:
                 continue
 
             if os.path.isdir(srcpath):
+                continue
+
+            if self._is_template(dstpath):
+                # dotfile is a template
+                self.log.dbg(f'{dstpath} is a template')
+                if self.showpatch:
+                    try:
+                        self._show_patch(srcpath, dstpath)
+                    except UndefinedException as exc:
+                        msg = f'unable to show patch for {srcpath}: {exc}'
+                        self.log.warn(msg)
                 continue
 
             if not self._same_rights(dstpath, srcpath):
