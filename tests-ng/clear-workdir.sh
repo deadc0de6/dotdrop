@@ -33,11 +33,10 @@ mkdir -p "${basedir}"/dotfiles
 echo "[+] dotdrop dir: ${basedir}"
 echo "[+] dotpath dir: ${basedir}/dotfiles"
 tmpd=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
-if [ -z "${DOTDROP_WORKDIR}" ]; then
-  tmpw=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
-  export DOTDROP_WORKDIR="${tmpw}"
-  clear_on_exit "${tmpw}"
-fi
+# use a private workdir
+tmpw=$(mktemp -d --suffix='-dotdrop-tests' || mktemp -d)
+export DOTDROP_WORKDIR="${tmpw}"
+clear_on_exit "${tmpw}"
 
 clear_on_exit "${basedir}"
 clear_on_exit "${tmpd}"
