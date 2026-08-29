@@ -28,6 +28,7 @@ TIMEOUT = 10
 VALID_RET = [
     200,
     302,
+    429,
 ]
 IGNORES = [
     'badgen.net',
@@ -65,7 +66,7 @@ def get_links(path):
 def get_session():
     """get a session with retry"""
     session = requests.Session()
-    retry_on = [404, 429, 500, 502, 503, 504]
+    retry_on = [404, 500, 502, 503, 504]
     retry = Retry(total=RETRY_TOTAL,
                   connect=RETRY_CONNECT,
                   status=RETRY_CONNECT,
