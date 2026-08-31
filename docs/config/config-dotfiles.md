@@ -10,7 +10,7 @@ Entry    | Description
 `actions` | List of action keys that need to be defined in the **actions** entry below (See [actions](config-actions.md))
 `chmod` | Defines the file permissions in octal notation to apply during installation or the special keyword `preserve` (See [permissions](config-file.md#permissions))
 `cmpignore` | List of patterns to ignore when comparing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
-`dir_as_block` | List of glob patterns to match directories that should be handled as a single block during install operations (see [ignore patterns](config-file.md#ignore-patterns)).
+`dir_as_block` | List of glob patterns to match directories that should be handled as a single block during install operations (see [Handle directories as blocks](#handle-directories-as-blocks) and [ignore patterns](config-file.md#ignore-patterns))
 `ignore_missing_in_dotdrop` | Ignore missing files in dotdrop when comparing and importing (see [Ignore missing](config-file.md#ignore-missing))
 `ignoreempty` | If true, an empty template will not be deployed (defaults to the value of `ignoreempty`)
 `instignore` | List of patterns to ignore when installing (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns))
@@ -221,22 +221,40 @@ Make sure to quote the link value in the config file.
 
 ## Handle directories as blocks
 
-When managing dotfiles that are directories, dotdrop normally processes each file and subdirectory individually. This allows for precise control over the contents, showing individual file differences, and selectively updating files.
-However, in some cases, you may prefer to treat an entire directory as a single unit.
+When managing dotfiles that are directories, dotdrop normally processes each
+file and subdirectory individually. This allows for precise control over the
+contents, showing individual file differences and selectively updating files.
+However, in some cases, you may prefer to treat an entire directory as a single
+unit (for example, a directory of vendored plugins managed as Git submodules).
 
-For these scenarios, you can use the `dir_as_block` option on specific dotfiles:
+For these scenarios, use the `dir_as_block` option. It accepts a list of glob
+patterns evaluated against the source path (and its parent directories, using
+the same matching rules as [ignore patterns](config-file.md#ignore-patterns)).
+Any directory whose path matches a pattern is installed wholesale rather than
+file by file.
+
+A common use case is a dotfile that maps an entire config tree, where only some
+subdirectories should be treated as blocks while the rest stay file-by-file:
 
 ```yaml
 dotfiles:
-  d_config:
-    src: app
-    dst: ~/.config/app
+  d_nvim:
+    src: nvim
+    dst: ~/.config/nvim
+    instignore:
+      - "*/pack/plugins/opt/*"   # handled as blocks below
     dir_as_block:
-      - "*app"
-      - "*otherdir*"
+      - "*/pack/plugins/opt/*"   # replace each plugin dir as a whole
 ```
 
-Note:
-- During **install** operations, any directory matching a pattern in `dir_as_block` will be replaced as a whole
-- This option has no effect on **compare** operations, which will always show file-by-file differences
-- This option has no effect on dotfiles that are regular files
+Notes:
+- Only **install** operations honor `dir_as_block`. **Compare** and **update**
+  always work file by file.
+- It has no effect on dotfiles that are regular files, or on dotfiles using a
+  link mode (`link: absolute`, `relative`, or `link_children`).
+- When a directory is handled as a block, it is replaced as a whole: the
+  existing destination directory is removed and the source is copied over in
+  one pass. Per-file processing is skipped, so `instignore`, `chmod`,
+  `ignoreempty` and templating are **not** applied to directories handled as
+  blocks. Use patterns that exclude those directories (as in the example above)
+  to keep them under per-file control on the surrounding dotfile.

@@ -160,8 +160,6 @@ class Installer:
                 dir_as_block=True,
                 dir_as_block_patterns=dir_as_block,
             )
-            if self.remove_existing_in_dir and ins:
-                self._remove_existing_in_dir(dst, ins)
             return self._log_install(ret, err)
 
         if linktype == LinkTypes.NOLINK:
@@ -765,17 +763,16 @@ class Installer:
                 # is directory
                 dpath = os.path.join(dst, entry)
                 dst_dotfiles.append(dpath)
-                res, err, subs = self._copy_dir(templater, fpath,
-                                                dpath,
-                                                actionexec=actionexec,
-                                                noempty=noempty,
-                                                ignore=ignore,
-                                                is_template=is_template,
-                                                dir_as_block=self._must_treat_dir_as_block(
-                                                    fpath,
-                                                    dir_as_block_patterns,
-                                                ),
-                                                dir_as_block_patterns=dir_as_block_patterns)
+                sub_block = self._must_treat_dir_as_block(
+                    fpath, dir_as_block_patterns)
+                res, err, subs = self._copy_dir(
+                    templater, fpath, dpath,
+                    actionexec=actionexec,
+                    noempty=noempty,
+                    ignore=ignore,
+                    is_template=is_template,
+                    dir_as_block=sub_block,
+                    dir_as_block_patterns=dir_as_block_patterns)
                 dst_dotfiles.extend(subs)
                 if not res and err:
                     # error occured
