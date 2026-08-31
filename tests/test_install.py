@@ -554,6 +554,12 @@ exec bspwm
 
     def test_prompts_to_replace_dst(self):
         """test prompts to replace dst"""
+        # pin umask so the created destination directory matches the
+        # source directory's mode (0o755) and the "replace" prompt is
+        # the only prompt issued
+        saved_umask = os.umask(0o022)
+        self.addCleanup(os.umask, saved_umask)
+
         # create source dir
         src_dir = get_tempdir()
         self.assertTrue(os.path.exists(src_dir))

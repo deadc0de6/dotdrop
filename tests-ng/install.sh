@@ -27,6 +27,9 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # this is the test
 ################################################################
 
+# pin umask so created files/dirs match the expected modes
+umask 022
+
 get_file_mode()
 {
   u=$(umask)
