@@ -39,7 +39,8 @@ class TestCompare(unittest.TestCase):
         for dotfile in dotfiles:
             path = os.path.expanduser(dotfile.dst)
             ret, _, insttmp = inst.install_to_temp(templ, tmp, dotfile.src,
-                                                   dotfile.dst)
+                                                   dotfile.dst,
+                                                   chmod=dotfile.chmod)
             if not ret:
                 results[path] = False
                 continue

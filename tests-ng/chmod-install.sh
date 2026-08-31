@@ -28,6 +28,9 @@ echo -e "$(tput setaf 6)==> RUNNING $(basename "${BASH_SOURCE[0]}") <==$(tput sg
 # this is the test
 ################################################################
 
+# pin umask so created files/dirs match the expected modes
+umask 022
+
 # $1 path
 # $2 rights
 has_rights()
