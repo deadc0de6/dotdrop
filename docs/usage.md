@@ -22,6 +22,12 @@ Dotdrop allows to choose which profile to use
 with the `--profile` switch if you use something
 other than the default (the hostname).
 
+Profiles can be regrouped by [group](config/config-profiles.md#profile-group-entry)
+and decorated with a [description](config/config-profiles.md#profile-description-entry),
+in which case the `profiles` command displays them by group.
+[Hidden profiles](config/config-profiles.md#hidden-profiles)
+(name starting with an underscore) are not displayed.
+
 The default profile can also be changed by defining the
 `DOTDROP_PROFILE` environment variable.
 

@@ -2,6 +2,11 @@
 
 The mandatory `profiles` entry contains a YAML object with sub-objects defining
 each profile and its related dotfiles, variables, actions, and other configurations.
+
+A profile whose name starts with an underscore is a *hidden profile*:
+it is not displayed by the `profiles` command and cannot be installed
+directly without `--force` (See [hidden profiles](config-profiles.md#hidden-profiles)).
+
 The entries in the sub-objects are as follows:
 
 Entry    | Description
@@ -12,6 +17,8 @@ Entry    | Description
 `variables` | Profile-specific variables (See [Variables](config-file.md#variables))
 `dynvariables` | Profile-specific interpreted variables (See [Interpreted variables](config-dynvars.md))
 `actions` | List of action keys defined in the [actions](config-actions.md) entry (See [actions](config-actions.md))
+`description` | *Optional*, one-liner description of this profile, displayed by `dotdrop profiles` (See [Profile description entry](config-profiles.md#profile-description-entry))
+`group` | *Optional*, group this profile belongs to, `dotdrop profiles` regroups profiles by group (See [Profile group entry](config-profiles.md#profile-group-entry))
 
 ```yaml
 <some-profile-name-usually-the-hostname>:
@@ -33,6 +40,8 @@ Entry    | Description
   import:
   - <some-path>
   - ...
+  description: <some one-liner describing this profile>
+  group: <some group name>
 ```
 
 ## Profile include entry
@@ -153,3 +162,98 @@ profiles:
 A profile action can be either a `pre` or `post` action (see [actions](config-actions.md)).
 These are executed before any dotfile installation (for `pre`) and after all dotfile installations (for `post`)
 only if at least one dotfile has been installed.
+
+## Profile description entry
+
+A profile can optionally be given a one-liner description that will be
+displayed next to the profile by the `profiles` command.
+
+This is useful to document the purpose of a profile (for example a
+[meta profile](../howto/group-hosts.md)):
+
+```yaml
+profiles:
+  base:
+    description: base set of dotfiles shared by all hosts
+    dotfiles:
+    - f_gitconfig
+  home:
+    description: home workstation
+    include:
+    - base
+```
+
+Running `dotdrop profiles` gives:
+
+```
+Available profile(s):
+	-> base (1 dotfiles) - base set of dotfiles shared by all hosts
+	-> home (1 dotfiles) - home workstation
+```
+
+## Profile group entry
+
+A profile can be assigned to a group to make it easier to
+structure a large number of profiles, for example to clearly separate
+[meta profiles](../howto/group-hosts.md) from host profiles.
+
+The `profiles` command displays profiles regrouped by their group
+(groups are displayed in the order in which they are encountered):
+
+```yaml
+profiles:
+  zsh:
+    group: meta
+    dotfiles:
+    - f_zshrc
+  base:
+    group: meta
+    description: base set of dotfiles shared by all hosts
+    dotfiles:
+    - f_gitconfig
+  home:
+    group: hosts
+    include:
+    - base
+  office:
+    group: hosts
+    dotfiles:
+    - f_something
+```
+
+Running `dotdrop profiles` gives:
+
+```
+Available profile(s):
+group "meta":
+	-> zsh (1 dotfiles)
+	-> base (1 dotfiles) - base set of dotfiles shared by all hosts
+group "hosts":
+	-> home (1 dotfiles)
+	-> office (1 dotfiles)
+```
+
+The `group` entry is optional. Profiles without a `group` entry belong
+to the unnamed top group: they are displayed on top, without a group header.
+
+## Hidden profiles
+
+A profile whose name starts with an underscore is *hidden*:
+it is not displayed by the `profiles` command.
+This is handy for [meta profiles](../howto/group-hosts.md)
+that exist only to be included by other profiles.
+
+A hidden profile cannot be directly installed,
+`dotdrop install -p <profile>` will result in an error unless
+`--force` is used. However, hidden profiles can still be included
+by other profiles, which can then be installed normally:
+
+```yaml
+profiles:
+  _base:
+    dotfiles:
+    - f_gitconfig
+  home:
+    include:
+    - _base
+```

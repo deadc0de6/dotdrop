@@ -15,9 +15,12 @@ class Profile(DictParser):
     # profile keys
     key_include = 'include'
     key_import = 'import'
+    key_description = 'description'
+    key_group = 'group'
 
     def __init__(self, key, actions=None, dotfiles=None,
-                 variables=None, dynvariables=None):
+                 variables=None, dynvariables=None,
+                 description=None, group=None):
         """
         constructor
         @key: profile key
@@ -25,12 +28,21 @@ class Profile(DictParser):
         @dotfiles: list of dotfile keys
         @variables: list of variable keys
         @dynvariables: list of interpreted variable keys
+        @description: one-liner description of this profile
+        @group: group name this profile belongs to
         """
         self.key = key
         self.actions = actions or []
         self.dotfiles = dotfiles or []
         self.variables = variables or []
         self.dynvariables = dynvariables or []
+        self.description = description
+        self.group = group
+
+    @property
+    def hidden(self):
+        """profile is hidden when its key starts with an underscore"""
+        return self.key.startswith('_')
 
     def get_pre_actions(self):
         """return all 'pre' actions"""
