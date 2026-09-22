@@ -16,30 +16,43 @@ it variables. For example in the *meta profile* you would define variables like 
 that you could use in your templates with `{%@@ if distro == "debian" @@%}` to target all
 profiles that inherit from the same *meta profile*.
 
+Meta profiles can be clearly separated from host profiles
+using the [group](../config/config-profiles.md#profile-group-entry)
+entry and by naming meta profiles with a leading underscore
+([hidden profiles](../config/config-profiles.md#hidden-profiles)):
+meta profiles get a dedicated group and are hidden, so that
+`dotdrop profiles` only shows the host profiles (and `dotdrop install -p`
+on a meta profile results in an error unless `--force` is used).
+
 ```yaml
 profiles:
-  meta_base:
+  _meta_base:
+    group: meta
+    description: base dotfiles for all distros
     dotfiles:
     - f_zshrc
-    - f_zshrc
-  os_arch:
+  _os_arch:
+    group: meta
     variables:
       distro: arch
     include:
-    - meta-base
-  os_debian:
+    - _meta_base
+  _os_debian:
+    group: meta
     variables:
       distro: debian
     include:
-    - meta-base
+    - _meta_base
   home:
+    group: hosts
     include:
-    - os_arch
+    - _os_arch
     dotfiles:
     - f_vimrc
   office:
+    group: hosts
     include:
-    - os_debian
+    - _os_debian
     dotfiles:
     - f_something
 ```
