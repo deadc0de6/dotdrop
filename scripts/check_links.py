@@ -28,6 +28,7 @@ TIMEOUT = 10
 VALID_RET = [
     200,
     302,
+    429,
 ]
 IGNORES = [
     'badgen.net',
