@@ -10,9 +10,10 @@ basic unittest for misc stuff
 
 import os
 import sys
+import stat
 import unittest
 from io import StringIO
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from jinja2 import TemplateNotFound
 from dotdrop.profile import Profile
 from dotdrop.importer import Importer
@@ -29,7 +30,9 @@ from dotdrop.dotdrop import apply_install_trans
 from dotdrop.utils import removepath, samefile, \
     content_empty, _match_ignore_pattern, \
     get_module_from_path, dependencies_met, \
-    dir_empty
+    dir_empty, get_tmpdir, _cp, mirror_file_rights, \
+    adapt_workers, check_version, is_bin_in_path, \
+    ignores_to_absolute
 from tests.helpers import create_random_file, \
     get_tempdir, clean, edit_content
 
@@ -123,6 +126,150 @@ class TestUtils(unittest.TestCase):
                 dependencies_met()
 
 
+class TestUtilsExtra(unittest.TestCase):
+    """test case for additional utils coverage"""
+
+    def test_get_tmpdir_oserror(self):
+        """get_tmpdir falls back when DOTDROP_TMPDIR is invalid"""
+        # point DOTDROP_TMPDIR at a file (not a dir) -> OSError -> fallback
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        afile, _ = create_random_file(tmpdir, content='x')
+        with patch.dict(os.environ, {'DOTDROP_TMPDIR': afile}):
+            result = get_tmpdir()
+            self.assertTrue(os.path.isdir(result))
+
+    def test_removepath_noremove_with_logger(self):
+        """removepath on NOREMOVE path with logger returns False"""
+        logger = MagicMock()
+        self.assertFalse(removepath(os.path.expanduser('~'), logger=logger))
+
+    def test_removepath_unsupported_filetype(self):
+        """removepath on a special file (FIFO) raises/handled"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        fifo = os.path.join(tmpdir, 'myfifo')
+        os.mkfifo(fifo)
+        # without logger: OSError is re-raised from the unsupported branch
+        with self.assertRaises(OSError):
+            removepath(fifo)
+        # with logger: returns False and warns
+        logger = MagicMock()
+        self.assertFalse(removepath(fifo, logger=logger))
+
+    def test_cp_ignore_and_special(self):
+        """_cp ignore func and special file branches"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        src, _ = create_random_file(tmpdir, content='data')
+        dst = os.path.join(tmpdir, 'out', 'copied')
+
+        # ignore_func returns True -> 0 copied
+        self.assertEqual(_cp(src, dst, ignore_func=lambda _s: True), 0)
+
+        # non-file src (a directory) with debug -> 0 copied
+        sub = os.path.join(tmpdir, 'subdir')
+        os.mkdir(sub)
+        self.assertEqual(_cp(sub, os.path.join(tmpdir, 'x', 'y'), debug=True),
+                         0)
+
+    def test_cp_copy_fails(self):
+        """_cp returns 0 when resulting file does not exist"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        src, _ = create_random_file(tmpdir, content='data')
+        # patch shutil.copy2 to return a non-existing path
+        with patch('dotdrop.utils.shutil.copy2', return_value='/nope'):
+            self.assertEqual(_cp(src, os.path.join(tmpdir, 'out', 'c')), 0)
+
+    def test_ignores_to_absolute_negative_absolute(self):
+        """ignores_to_absolute with negative absolute pattern"""
+        result = ignores_to_absolute(['!/etc/passwd'], ['/home'])
+        self.assertEqual(result, ['!/etc/passwd'])
+
+    def test_mirror_file_rights_missing(self):
+        """mirror_file_rights with missing src/dst is a no-op"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        # neither exists -> returns None
+        self.assertIsNone(mirror_file_rights(
+            os.path.join(tmpdir, 'nope1'),
+            os.path.join(tmpdir, 'nope2')))
+
+    def test_adapt_workers(self):
+        """adapt_workers reduces workers when safe or dry"""
+        opts = MagicMock()
+        logger = MagicMock()
+        opts.safe = True
+        opts.dry = False
+        opts.workers = 4
+        adapt_workers(opts, logger)
+        self.assertEqual(opts.workers, 1)
+
+        opts.safe = False
+        opts.dry = True
+        opts.workers = 4
+        adapt_workers(opts, logger)
+        self.assertEqual(opts.workers, 1)
+
+        # no reduction when workers == 1
+        opts.dry = False
+        opts.workers = 1
+        adapt_workers(opts, logger)
+        self.assertEqual(opts.workers, 1)
+
+    def test_check_version_failures(self):
+        """check_version handles request failures gracefully"""
+        import requests as req
+        # request raises
+        with patch('dotdrop.utils.requests.get',
+                   side_effect=req.exceptions.RequestException):
+            self.assertIsNone(check_version())
+        # request returns None
+        with patch('dotdrop.utils.requests.get', return_value=None):
+            self.assertIsNone(check_version())
+        # status code != 200
+        resp = MagicMock()
+        resp.status_code = 404
+        with patch('dotdrop.utils.requests.get', return_value=resp):
+            self.assertIsNone(check_version())
+        # json decode error
+        import json
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.json.side_effect = json.decoder.JSONDecodeError('msg', 'doc', 0)
+        with patch('dotdrop.utils.requests.get', return_value=resp):
+            self.assertIsNone(check_version())
+        # value error
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.json.side_effect = ValueError
+        with patch('dotdrop.utils.requests.get', return_value=resp):
+            self.assertIsNone(check_version())
+        # new version available -> warning
+        resp = MagicMock()
+        resp.status_code = 200
+        resp.json.return_value = {'name': 'v999.999.999'}
+        with patch('dotdrop.utils.requests.get', return_value=resp), \
+                patch('dotdrop.utils.version.parse') as vparse:
+            vparse.side_effect = lambda v: v
+            check_version()
+
+    def test_is_bin_in_path(self):
+        """is_bin_in_path edge cases"""
+        self.assertFalse(is_bin_in_path(''))
+        self.assertFalse(is_bin_in_path(None))
+        # shutil.which returns None
+        with patch('dotdrop.utils.shutil.which', return_value=None):
+            self.assertFalse(is_bin_in_path('somebin'))
+        # shutil.which raises shutil.Error
+        with patch('dotdrop.utils.shutil.which',
+                   side_effect=__import__('shutil').Error):
+            self.assertFalse(is_bin_in_path('somebin'))
+        # normal case
+        self.assertTrue(is_bin_in_path('ls'))
+
+
 class TestDotdropDotdrop(unittest.TestCase):
     """test case"""
 
@@ -154,6 +301,24 @@ class TestUpdater(unittest.TestCase):
         """coverage for update_path"""
         upd = Updater('path', {}, None, 'profile')
         self.assertFalse(upd.update_path('/a/b/c/d'))
+
+    def test_overwrite_safe_aborted(self):
+        """_overwrite returns False when user says no in safe mode"""
+        upd = Updater('path', {}, None, 'profile', safe=True)
+        with patch('dotdrop.updater.Logger.ask', return_value=False):
+            self.assertFalse(upd._overwrite('src', 'dst'))
+        # not safe -> always True
+        upd.safe = False
+        self.assertTrue(upd._overwrite('src', 'dst'))
+
+    def test_confirm_rm_r_safe_aborted(self):
+        """_confirm_rm_r returns False when user says no in safe mode"""
+        upd = Updater('path', {}, None, 'profile', safe=True)
+        with patch('dotdrop.updater.Logger.ask', return_value=False):
+            self.assertFalse(upd._confirm_rm_r('/some/dir'))
+        # not safe -> always True
+        upd.safe = False
+        self.assertTrue(upd._confirm_rm_r('/some/dir'))
 
 
 class TestInstaller(unittest.TestCase):
@@ -293,7 +458,7 @@ class TestTemplateGen(unittest.TestCase):
         self.assertFalse(tmpl._is_template('/abc'))
         tmpl._debug_dict('a', 'b')
 
-    def test_lodaer(self):
+    def test_loader(self):
         """test loading template"""
         tmpl = Templategen()
         with self.assertRaises(TemplateNotFound):
@@ -327,6 +492,79 @@ class TestTemplateGen(unittest.TestCase):
 
         cont = tmpl._handle_file(path)
         self.assertEqual(content, cont)
+
+    def test_handle_bin_file_outside_base(self):
+        """test _handle_bin_file with src not starting with base"""
+        tmpl = Templategen()
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        content = b'binary-data'
+        path, _ = create_random_file(tmpdir, content=content, binary=True)
+        # call with a relative path so src does not start with base
+        rel = os.path.relpath(path, os.getcwd())
+        result = tmpl._handle_bin_file(rel)
+        self.assertEqual(result, content)
+
+    def test_handle_bad_encoded_text(self):
+        """test _handle_text_file with non-utf8 content"""
+        tmpl = Templategen()
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        # write invalid utf-8 bytes
+        path, _ = create_random_file(tmpdir, content=b'\xff\xfe\x00bad',
+                                     binary=True)
+        # _read_bad_encoded_text decodes with replace
+        data = Templategen._read_bad_encoded_text(path)
+        self.assertIsInstance(data, str)
+        # _handle_text_file falls back to bad-encoded path
+        result = tmpl._handle_text_file(path)
+        self.assertIsInstance(result, bytes)
+
+    def test_is_template_bad_encoded(self):
+        """test _is_template with non-utf8 file (UnicodeDecodeError)"""
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        path, _ = create_random_file(tmpdir, content=b'\xff\xfe\x00bad',
+                                     binary=True)
+        self.assertFalse(Templategen._is_template(path))
+
+    def test_path_is_template_debug_missing(self):
+        """test path_is_template with debug on missing path"""
+        Templategen.path_is_template('/no/such/path', debug=True)
+        self.assertFalse(Templategen.path_is_template('/no/such/path',
+                                                       debug=False))
+
+    def test_generate_dict_nested(self):
+        """test generate_dict with nested dict value"""
+        tmpl = Templategen()
+        nested = {'outer': {'inner': 'value'}}
+        result = tmpl.generate_dict(nested)
+        self.assertEqual(result, {'outer': {'inner': 'value'}})
+
+    def test_load_path_to_dic_invalid(self):
+        """test _load_path_to_dic with module that cannot be loaded"""
+        tmpl = Templategen()
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        # a non-python file -> get_module_from_path returns None
+        path, _ = create_random_file(tmpdir, content='not python')
+        # patch get_module_from_path to return None to hit the branch
+        with patch('dotdrop.templategen.utils.get_module_from_path',
+                   return_value=None):
+            self.assertIsNone(tmpl._load_path_to_dic(path, {}))
+
+    def test_get_filetype_relative_symlink(self):
+        """test _get_filetype with a relative symlink"""
+        tmpl = Templategen()
+        tmpdir = get_tempdir()
+        self.addCleanup(clean, tmpdir)
+        target, _ = create_random_file(tmpdir, content='text content')
+        link = os.path.join(tmpdir, 'alinks')
+        os.symlink(os.path.basename(target), link)
+        self.addCleanup(clean, link)
+        # should follow the relative symlink
+        ft = tmpl._get_filetype(link)
+        self.assertIsInstance(ft, str)
 
     def test_filetype(self):
         """test using file instead of magic"""

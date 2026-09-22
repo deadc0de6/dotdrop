@@ -21,6 +21,9 @@ htmlcov
 coverages/
 coverage.xml
 
+# test run logs
+*.log
+
 # IDE
 .idea/
 .vscode/
