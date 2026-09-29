@@ -8,12 +8,13 @@ basic unittest for misc stuff
 # pylint: disable=W0231
 # pylint: disable=W0212
 
+import json
 import os
 import sys
-import stat
 import unittest
 from io import StringIO
 from unittest.mock import patch, MagicMock
+import requests
 from jinja2 import TemplateNotFound
 from dotdrop.profile import Profile
 from dotdrop.importer import Importer
@@ -220,10 +221,9 @@ class TestUtilsExtra(unittest.TestCase):
 
     def test_check_version_failures(self):
         """check_version handles request failures gracefully"""
-        import requests as req
         # request raises
         with patch('dotdrop.utils.requests.get',
-                   side_effect=req.exceptions.RequestException):
+                   side_effect=requests.exceptions.RequestException):
             self.assertIsNone(check_version())
         # request returns None
         with patch('dotdrop.utils.requests.get', return_value=None):
@@ -234,7 +234,6 @@ class TestUtilsExtra(unittest.TestCase):
         with patch('dotdrop.utils.requests.get', return_value=resp):
             self.assertIsNone(check_version())
         # json decode error
-        import json
         resp = MagicMock()
         resp.status_code = 200
         resp.json.side_effect = json.decoder.JSONDecodeError('msg', 'doc', 0)
