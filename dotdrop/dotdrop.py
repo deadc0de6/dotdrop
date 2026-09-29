@@ -414,7 +414,6 @@ def _prompt_preview(opts, action):
     if not opts.safe:
         return True
     saved_dry = opts.dry
-    saved_safe = opts.safe
     opts.dry = True
     opts.safe = False
     if action == 'install':
@@ -429,17 +428,20 @@ def _prompt_preview(opts, action):
     proceed = LOG.ask(question)
     if not proceed:
         LOG.log(f'\n{action} aborted.')
-        opts.safe = saved_safe
         return False
     return True
 
 
 def cmd_install(opts):
     """install dotfiles for this profile"""
-    if not _prompt_preview(opts, 'install'):
-        return False
-    ok, _ = _cmd_install_exec(opts, summary=True)
-    return ok
+    saved_safe = opts.safe
+    try:
+        if not _prompt_preview(opts, 'install'):
+            return False
+        ok, _ = _cmd_install_exec(opts, summary=True)
+        return ok
+    finally:
+        opts.safe = saved_safe
 
 
 def _workdir_enum(opts):
@@ -756,10 +758,14 @@ def _cmd_uninstall_exec(opts, summary=True):
 
 def cmd_uninstall(opts):
     """uninstall"""
-    if not _prompt_preview(opts, 'uninstall'):
-        return False
-    ok, _ = _cmd_uninstall_exec(opts, summary=True)
-    return ok
+    saved_safe = opts.safe
+    try:
+        if not _prompt_preview(opts, 'uninstall'):
+            return False
+        ok, _ = _cmd_uninstall_exec(opts, summary=True)
+        return ok
+    finally:
+        opts.safe = saved_safe
 
 
 def cmd_remove(opts):

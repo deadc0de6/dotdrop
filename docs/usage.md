@@ -132,7 +132,7 @@ Apply these changes? [y/N] ? y
 
 When the preview is shown, no action is executed and no file is touched; once
 you answer `y`, the operation is applied without any further per-file
-confirmation. `--force` (or `safe: false`) disables the prompt entirely, and the
+confirmation. `--force` disables the prompt entirely, and the
 prompt is skipped when `-d`/`--dry` or `-t`/`--temp` is used.
 
 For more options, see the usage with `dotdrop --help`.
