@@ -114,6 +114,16 @@ To ignore specific patterns during installation, see [the ignore patterns](confi
 
 For more options, see the usage with `dotdrop --help`.
 
+### Dry run
+
+The `-d`/`--dry` switch makes `install` (and `uninstall`) only *simulate* the
+operation: no file is copied, linked, removed or restored, no action is
+executed and the config file is left untouched. Each action that *would* be
+performed is prefixed with `[DRY]` and the summary line reflects that nothing
+was actually committed (`N dotfile(s) would be installed.` /
+`N dotfile(s) would be uninstalled.`), and the `config file updated` message
+is suppressed.
+
 ## Compare dotfiles
 
 The `compare` command compares dotfiles at their destinations with the ones stored in your `dotpath`.
