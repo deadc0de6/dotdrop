@@ -5,6 +5,8 @@ Copyright (c) 2017, deadc0de6
 entry point
 """
 
+# pylint: disable=C0302
+
 import os
 import sys
 import time
@@ -304,6 +306,12 @@ def cmd_install(opts):
     dotfiles = opts.dotfiles
     prof = opts.conf.get_profile()
 
+    # hidden profiles (key prefixed with \"_\")
+    # cannot be directly installed
+    if prof and prof.hidden and opts.safe:
+        LOG.err(f'profile \"{opts.profile}\" is hidden, use --force')
+        return False
+
     adapt_workers(opts, LOG)
 
     pro_pre_actions = prof.get_pre_actions() if prof else []
@@ -572,16 +580,42 @@ def cmd_importer(opts):
     return ret
 
 
+def _profile_line(profile):
+    """return the count and description of a profile"""
+    line = f' ({len(profile.dotfiles)} dotfiles)'
+    if profile.description:
+        line += f' - {profile.description}'
+    return line
+
+
 def cmd_list_profiles(opts):
     """list all profiles"""
+    # hidden profiles (key prefixed with \"_\") are not displayed
+    profiles = [p for p in opts.profiles if not p.hidden]
     LOG.emph('Available profile(s):\n')
-    for profile in opts.profiles:
-        if opts.profiles_grepable:
+    if opts.profiles_grepable:
+        for profile in profiles:
             fmt = f'{profile.key}'
             LOG.raw(fmt)
-        else:
+    else:
+        # profiles without a group first, in config order
+        for profile in profiles:
+            if profile.group:
+                continue
             LOG.sub(profile.key, end='')
-            LOG.log(f' ({len(profile.dotfiles)} dotfiles)')
+            LOG.log(_profile_line(profile))
+        # then the remaining profiles grouped by group,
+        # in order of appearance
+        groups = []
+        for profile in profiles:
+            if profile.group and profile.group not in groups:
+                groups.append(profile.group)
+        for group in groups:
+            LOG.log(f'group \"{group}\":')
+            for profile in profiles:
+                if profile.group == group:
+                    LOG.sub(profile.key, end='')
+                    LOG.log(_profile_line(profile))
     LOG.log('')
 
 

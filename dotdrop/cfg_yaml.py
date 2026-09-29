@@ -82,6 +82,8 @@ class CfgYaml:
     key_profile_variables = 'variables'
     key_profile_dvariables = 'dynvariables'
     key_profile_actions = 'actions'
+    key_profile_description = 'description'
+    key_profile_group = 'group'
     key_all = 'ALL'
 
     # import entries
@@ -745,6 +747,27 @@ class CfgYaml:
                 new[k] = (self.action_post, val)
         return new
 
+    def _check_profile_string_entry(self, pro, entries, key):
+        """check a string profile entry, raises if invalid"""
+        if key not in entries or entries[key] is None:
+            return
+        val = entries[key]
+        if not isinstance(val, str):
+            err = f'bad value for \"{key}\" in profile \"{pro}\"'
+            err += ', must be a string'
+            self._log.err(err)
+            raise YamlException(f'config content error: {err}')
+
+    def _norm_profile_description(self, pro, entries):
+        """validate the profile description entry"""
+        self._check_profile_string_entry(
+            pro, entries, self.key_profile_description)
+
+    def _norm_profile_group(self, pro, entries):
+        """validate the profile group entry"""
+        self._check_profile_string_entry(
+            pro, entries, self.key_profile_group)
+
     def _norm_profiles(self, profiles):
         """normalize profiles entries"""
         if not profiles:
@@ -763,6 +786,9 @@ class CfgYaml:
             if not entries:
                 # no entries in profile dict
                 continue
+
+            self._norm_profile_description(pro, entries)
+            self._norm_profile_group(pro, entries)
 
             # add "dotfiles:" entry if not present in local object
             if self.key_profile_dotfiles not in entries or \
