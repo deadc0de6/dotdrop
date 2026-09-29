@@ -169,7 +169,7 @@ class CfgAggregator:
     def save(self):
         """save the config"""
         if self.dry:
-            return True
+            return False
         return self.cfgyaml.save()
 
     def dump(self):

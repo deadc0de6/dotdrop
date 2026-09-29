@@ -111,7 +111,22 @@ _EOF
 
 # install
 echo "dry install"
-cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V --dry
+cd "${ddpath}" | ${bin} install -c "${cfg}" -f -p p1 -V --dry > "${tmps}"/dry_install.out
+
+# dry output must NOT say "dotfile(s) installed." nor "config file updated"
+if grep -q 'dotfile(s) installed\.' "${tmps}"/dry_install.out; then
+  echo "dry install failed: misleading \"installed\" message found"
+  exit 1
+fi
+if grep -q 'config file updated' "${tmps}"/dry_install.out; then
+  echo "dry install failed: misleading \"config file updated\" message found"
+  exit 1
+fi
+# dry output must say "would be installed"
+if ! grep -q 'dotfile(s) would be installed\.' "${tmps}"/dry_install.out; then
+  echo "dry install failed: missing \"would be installed\" message"
+  exit 1
+fi
 
 echo "test tmpd:${tmpd}"
 ls -1 "${tmpd}"
@@ -124,10 +139,10 @@ cnt=$(find "${tmpw}" -maxdepth 1 -type f | wc -l)
 [ "${cnt}" != "0" ] && echo "dry install failed (2 -> ${cnt})" && exit 1
 
 echo "test tmpa:${tmpa}"
-ls -1 "${tmpa}"
 cnt=$(find "${tmpa}" -maxdepth 1 -type f | wc -l)
 [ "${cnt}" != "0" ] && echo "dry install failed (3 -> ${cnt})" && exit 1
 echo "dry install ok"
+
 # -----------------------------
 # test import
 # -----------------------------
@@ -300,6 +315,68 @@ cd "${ddpath}" | ${bin} remove -c "${cfg}" -f -p p1 -V --dry "${tmpd}"/file "${t
 
 diff "${cfg}" "${tmpa}"/config.yaml || (echo "dry remove failed (8)" && exit 1)
 echo "dry remove ok"
+
+# -----------------------------
+# test uninstall dry output
+# -----------------------------
+# cleaning
+rm -rf "${tmps:?}"/*
+mkdir -p "${tmps}"/dotfiles
+rm -rf "${tmpw:?}"/*
+rm -rf "${tmpd:?}"/*
+rm -rf "${tmpa:?}"/*
+
+echo 'content' > "${tmps}"/dotfiles/file
+mkdir -p "${tmps}"/dotfiles/dir
+echo "content" > "${tmps}"/dotfiles/dir/f1
+
+# create the destination so uninstall has something to do
+echo 'installed' > "${tmpd}"/file
+mkdir -p "${tmpd}"/dir
+echo "installed" > "${tmpd}"/dir/f1
+
+cat > "${cfg}" << _EOF
+config:
+  backup: false
+  create: true
+  dotpath: dotfiles
+  workdir: ${tmpw}
+dotfiles:
+  f_file:
+    src: file
+    dst: ${tmpd}/file
+  d_dir:
+    src: dir
+    dst: ${tmpd}/dir
+profiles:
+  p1:
+    dotfiles:
+    - f_file
+    - d_dir
+_EOF
+
+echo "dry uninstall"
+cd "${ddpath}" | ${bin} uninstall -c "${cfg}" -f -p p1 -V --dry > "${tmpa}"/dry_uninstall.out
+
+# dry output must NOT say "dotfile(s) uninstalled." nor "config file updated"
+if grep -q 'dotfile(s) uninstalled\.' "${tmpa}"/dry_uninstall.out; then
+  echo "dry uninstall failed: misleading \"uninstalled\" message found"
+  exit 1
+fi
+if grep -q 'config file updated' "${tmpa}"/dry_uninstall.out; then
+  echo "dry uninstall failed: misleading \"config file updated\" message found"
+  exit 1
+fi
+# dry output must say "would be uninstalled"
+if ! grep -q 'dotfile(s) would be uninstalled\.' "${tmpa}"/dry_uninstall.out; then
+  echo "dry uninstall failed: missing \"would be uninstalled\" message"
+  exit 1
+fi
+
+# nothing should have been removed
+[ ! -e "${tmpd}"/file ] && echo "dry uninstall failed: file was removed" && exit 1
+[ ! -e "${tmpd}"/dir/f1 ] && echo "dry uninstall failed: dir/f1 was removed" && exit 1
+echo "dry uninstall ok"
 
 echo "OK"
 exit 0
