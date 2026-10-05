@@ -107,8 +107,7 @@ def check_links(urls):
                                 timeout=TIMEOUT,
                                 allow_redirects=True,
                                 headers=HEADERS).status_code
-        # pylint: disable=W0703
-        except Exception:
+        except requests.exceptions.RequestException:
             ret = 404
         if ret == 403 and hostname in OK_WHEN_FORBIDDEN:
             msg = f'    [{GREEN}OK-although-{ret}{RESET}]'
@@ -147,8 +146,7 @@ def main():
     try:
         if not check_links(links):
             return False
-    # pylint: disable=W0703
-    except Exception as exc:
+    except requests.exceptions.RequestException as exc:
         print(f'error {exc}')
         return False
     return True
