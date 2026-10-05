@@ -396,7 +396,10 @@ def _cmd_install_exec(opts, summary=True):
     if summary:
         if opts.install_temporary:
             LOG.log(f'\ninstalled to tmp \"{tmpdir}\".')
-        LOG.log(f'\n{len(installed)} dotfile(s) installed.')
+        if opts.dry:
+            LOG.log(f'\n{len(installed)} dotfile(s) would be installed.')
+        else:
+            LOG.log(f'\n{len(installed)} dotfile(s) installed.')
     return True, len(installed)
 
 
@@ -751,8 +754,12 @@ def _cmd_uninstall_exec(opts, summary=True):
             LOG.err(msg)
             continue
         uninstalled += 1
+
     if summary:
-        LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
+        if opts.dry:
+            LOG.log(f'\n{uninstalled} dotfile(s) would be uninstalled.')
+        else:
+            LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
     return True, uninstalled
 
 

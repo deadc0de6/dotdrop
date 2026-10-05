@@ -93,8 +93,7 @@ def run_tests(max_jobs=None, stop_on_first_err=True, with_spinner=True):
         for test in futures.as_completed(wait_for.keys()):
             try:
                 ret, reason, name, (log_out, log_err) = test.result()
-            # pylint: disable=W0703
-            except Exception as exc:
+            except Exception as exc:  # pylint: disable=W0718
                 failed += 1
                 print()
                 print(f'test \"{wait_for[test]}\" failed (exception): {exc}')
