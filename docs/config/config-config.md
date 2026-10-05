@@ -32,6 +32,7 @@ Entry    | Description | Default
 `link_on_import` | Set a dotfile's `link` attribute to this value when importing. Possible values: *nolink*, *absolute*, *relative* [Symlinking dotfiles](config-file.md#symlinking-dotfiles)) | `nolink`
 `longkey` | Use long keys for dotfiles when importing (See [Import dotfiles](../usage.md#import-dotfiles)) | false
 `minversion` | (*for internal use, do not modify*) Provides the minimal dotdrop version to use | -
+`prompt` | On `install`/`uninstall`, show the changes that would be applied and ask for confirmation before committing them (see `--prompt`/`--no-prompt`) | false
 `showdiff` | On install, show a diff before asking to overwrite (See `--showdiff`) | false
 `template_dotfile_default` | Disable templating on all dotfiles when set to false | true
 `upignore` | List of patterns to ignore when updating, appled to all dotfiles (enclose in quotes when using wildcards; see [ignore patterns](config-file.md#ignore-patterns)) | -

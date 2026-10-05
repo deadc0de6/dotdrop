@@ -301,8 +301,8 @@ def _dotfile_install(opts, dotfile, tmpdir=None):
     return ret, dotfile.key, err
 
 
-def cmd_install(opts):
-    """install dotfiles for this profile"""
+def _cmd_install_exec(opts, summary=True):
+    """execute the install and return (success, nb_installed)"""
     dotfiles = opts.dotfiles
     prof = opts.conf.get_profile()
 
@@ -310,7 +310,7 @@ def cmd_install(opts):
     # cannot be directly installed
     if prof and prof.hidden and opts.safe:
         LOG.err(f'profile \"{opts.profile}\" is hidden, use --force')
-        return False
+        return False, 0
 
     adapt_workers(opts, LOG)
 
@@ -325,7 +325,7 @@ def cmd_install(opts):
     if not dotfiles:
         msg = f'no dotfile to install for this profile (\"{opts.profile}\")'
         LOG.warn(msg)
-        return False
+        return False, 0
 
     lfs = [k.key for k in dotfiles]
     LOG.dbg(f'dotfiles registered for install: {lfs}')
@@ -351,7 +351,7 @@ def cmd_install(opts):
     templ = _get_templater(opts)
     ret, _ = action_executor(opts, pro_pre_actions, [], templ, post=False)()
     if not ret:
-        return False
+        return False, 0
 
     # install each dotfile
     if opts.workers > 1:
@@ -388,18 +388,63 @@ def cmd_install(opts):
         ret, _ = action_executor(opts, pro_post_actions,
                                  [], templ, post=False)()
         if not ret:
-            return False
+            return False, 0
 
     insts = ','.join(installed)
     LOG.dbg(f'install done: installed \"{insts}\"')
 
-    if opts.install_temporary:
-        LOG.log(f'\ninstalled to tmp \"{tmpdir}\".')
+    if summary:
+        if opts.install_temporary:
+            LOG.log(f'\ninstalled to tmp \"{tmpdir}\".')
+        if opts.dry:
+            LOG.log(f'\n{len(installed)} dotfile(s) would be installed.')
+        else:
+            LOG.log(f'\n{len(installed)} dotfile(s) installed.')
+    return True, len(installed)
+
+
+def _prompt_preview(opts, action):
+    """show a dry-run preview and ask confirmation; return True to proceed"""
+    if not opts.prompt:
+        return True
+    # --dry already shows the preview and does nothing
     if opts.dry:
-        LOG.log(f'\n{len(installed)} dotfile(s) would be installed.')
+        return True
+    # --temp installs to a tmp dir for review, no point prompting
+    if opts.install_temporary and action == 'install':
+        return True
+    # only prompt when safe (force disables all confirmations)
+    if not opts.safe:
+        return True
+    saved_dry = opts.dry
+    opts.dry = True
+    opts.safe = False
+    if action == 'install':
+        LOG.emph('The following changes would be applied by install:')
+        _cmd_install_exec(opts, summary=False)
     else:
-        LOG.log(f'\n{len(installed)} dotfile(s) installed.')
+        LOG.emph('The following changes would be applied by uninstall:')
+        _cmd_uninstall_exec(opts, summary=False)
+    opts.dry = saved_dry
+    opts.safe = False  # apply without per-file confirmations
+    question = '\nApply these changes?'
+    proceed = LOG.ask(question)
+    if not proceed:
+        LOG.log(f'\n{action} aborted.')
+        return False
     return True
+
+
+def cmd_install(opts):
+    """install dotfiles for this profile"""
+    saved_safe = opts.safe
+    try:
+        if not _prompt_preview(opts, 'install'):
+            return False
+        ok, _ = _cmd_install_exec(opts, summary=True)
+        return ok
+    finally:
+        opts.safe = saved_safe
 
 
 def _workdir_enum(opts):
@@ -672,8 +717,8 @@ def cmd_detail(opts):
     LOG.log('')
 
 
-def cmd_uninstall(opts):
-    """uninstall"""
+def _cmd_uninstall_exec(opts, summary=True):
+    """execute the uninstall and return (success, nb_uninstalled)"""
     dotfiles = opts.dotfiles
     keys = opts.uninstall_key
 
@@ -688,7 +733,7 @@ def cmd_uninstall(opts):
     if not dotfiles:
         msg = f'no dotfile to uninstall for this profile (\"{opts.profile}\")'
         LOG.warn(msg)
-        return False
+        return False, 0
 
     if opts.debug:
         lfs = [k.key for k in dotfiles]
@@ -709,11 +754,25 @@ def cmd_uninstall(opts):
             LOG.err(msg)
             continue
         uninstalled += 1
-    if opts.dry:
-        LOG.log(f'\n{uninstalled} dotfile(s) would be uninstalled.')
-    else:
-        LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
-    return True
+
+    if summary:
+        if opts.dry:
+            LOG.log(f'\n{uninstalled} dotfile(s) would be uninstalled.')
+        else:
+            LOG.log(f'\n{uninstalled} dotfile(s) uninstalled.')
+    return True, uninstalled
+
+
+def cmd_uninstall(opts):
+    """uninstall"""
+    saved_safe = opts.safe
+    try:
+        if not _prompt_preview(opts, 'uninstall'):
+            return False
+        ok, _ = _cmd_uninstall_exec(opts, summary=True)
+        return ok
+    finally:
+        opts.safe = saved_safe
 
 
 def cmd_remove(opts):

@@ -52,6 +52,7 @@ class Settings(DictParser):
     key_compare_workdir = 'compare_workdir'
     key_key_prefix = 'key_prefix'
     key_key_separator = 'key_separator'
+    key_prompt = 'prompt'
 
     # import keys
     key_import_actions = 'import_actions'
@@ -77,7 +78,7 @@ class Settings(DictParser):
                  force_chmod=False, chmod_on_import=False,
                  check_version=False, clear_workdir=False,
                  compare_workdir=False, key_prefix=True,
-                 key_separator='_'):
+                 key_separator='_', prompt=False):
         self.backup = backup
         self.banner = banner
         self.create = create
@@ -112,6 +113,7 @@ class Settings(DictParser):
         self.compare_workdir = compare_workdir
         self.key_prefix = key_prefix
         self.key_separator = key_separator
+        self.prompt = prompt
 
         # check diff command
         if not is_bin_in_path(self.diff_command):
@@ -148,6 +150,7 @@ class Settings(DictParser):
             self.key_compare_workdir: self.compare_workdir,
             self.key_key_prefix: self.key_prefix,
             self.key_key_separator: self.key_separator,
+            self.key_prompt: self.prompt,
         }
         self._serialize_seq(self.key_default_actions, dic)
         self._serialize_seq(self.key_import_actions, dic)
