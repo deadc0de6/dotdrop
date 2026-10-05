@@ -59,7 +59,8 @@ USAGE = f"""
 {BANNER}
 
 Usage:
-  dotdrop install   [-VbtfndDaWR] [-c <path>] [-p <profile>]
+  dotdrop install   [-VbtfndDaWR] [--prompt] [--no-prompt]
+                                  [-c <path>] [-p <profile>]
                                   [-w <nb>] [<key>...]
   dotdrop import    [-Vbdfm]      [-c <path>] [-p <profile>]
                                   [-i <pattern>...] [--dkey=<key>]
@@ -70,7 +71,8 @@ Usage:
   dotdrop update    [-VbfdkPz]    [-c <path>] [-p <profile>]
                                   [-w <nb>] [-i <pattern>...] [<path>...]
   dotdrop remove    [-Vbfdk]      [-c <path>] [-p <profile>] [<path>...]
-  dotdrop uninstall [-Vbfd]       [-c <path>] [-p <profile>] [<key>...]
+  dotdrop uninstall [-Vbfd] [--prompt] [--no-prompt]
+                                  [-c <path>] [-p <profile>] [<key>...]
   dotdrop files     [-VbTG]       [-c <path>] [-p <profile>]
   dotdrop detail    [-Vb]         [-c <path>] [-p <profile>] [<key>...]
   dotdrop profiles  [-VbG]        [-c <path>]
@@ -95,6 +97,8 @@ Options:
   -m --preserve-mode      Insert a chmod entry in the dotfile with its mode.
   -n --nodiff             Do not diff when installing.
   -p --profile=<profile>  Specify the profile to use [default: {PROFILE}].
+  --prompt                Ask for confirmation before install/uninstall.
+  --no-prompt             Do not ask confirmation before install/uninstall.
   -P --show-patch         Provide a one-liner to manually patch template.
   -R --remove-existing    Remove stale entries from installed directories.
   -s --as=<path>          Import as a different path from actual path.
@@ -147,6 +151,7 @@ class Options(AttrMonitor):
         self.clear_workdir = None
         self.key_prefix = None
         self.key_separator = None
+        self.prompt = None
 
         # args parsing
         self.args = {}
@@ -383,6 +388,12 @@ class Options(AttrMonitor):
 
         # adapt attributes based on arguments
         self.safe = not self.args['--force']
+
+        # prompt: cli overrides config (only meaningful for install/uninstall)
+        if self.args['--no-prompt']:
+            self.prompt = False
+        elif self.args['--prompt']:
+            self.prompt = True
 
         try:
             if ENV_WORKERS in os.environ:

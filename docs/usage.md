@@ -112,6 +112,29 @@ Some available options:
 
 To ignore specific patterns during installation, see [the ignore patterns](config/config-file.md#ignore-patterns).
 
+### Prompt for confirmation
+
+Instead of running `dotdrop install` (or `uninstall`) twice — first with `-d`/`--dry`
+to review the changes and then for real — you can ask dotdrop to show the
+planned changes and wait for your confirmation before applying them. This is
+controlled by the `prompt` [config entry](config/config-config.md) and the
+`--prompt`/`--no-prompt` switches (the switches override the config):
+
+```bash
+# enable it through the config (prompt: true) or with the switch:
+$ dotdrop install --prompt
+The following changes would be applied by install:
+[DRY] would install ~/.vimrc
+Apply these changes? [y/N] ? y
+-> install ...
+1 dotfile(s) installed.
+```
+
+When the preview is shown, no action is executed and no file is touched; once
+you answer `y`, the operation is applied without any further per-file
+confirmation. `--force` disables the prompt entirely, and the
+prompt is skipped when `-d`/`--dry` or `-t`/`--temp` is used.
+
 For more options, see the usage with `dotdrop --help`.
 
 ## Compare dotfiles
@@ -258,6 +281,9 @@ It will remove the installed dotfiles related to the provided key
 
 If a backup exists ([backup entry](config/config-config.md#backup-entry)),
 the file will be restored.
+
+The `--prompt`/`--no-prompt` switches and the `prompt` [config entry](config/config-config.md)
+also apply to `uninstall` (see [Prompt for confirmation](#prompt-for-confirmation)).
 
 For more options, see the usage with `dotdrop --help`.
 
