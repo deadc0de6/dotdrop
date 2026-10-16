@@ -54,7 +54,7 @@ pip3 install --user -r dotdrop/requirements.txt
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell with the config file path; for example:
 ```
-alias dotdrop=<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
+alias dotdrop='<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
 ```
 
 ## As a submodule in a virtualenv
@@ -271,9 +271,11 @@ For macOS users, make sure to install the below packages through [Homebrew](http
 
 * [libmagic](https://formulae.brew.sh/formula/libmagic) (for python-magic)
 
-For WSL (Windows Subsystem for Linux), make sure to install `python-magic-bin`:
+For WSL (Windows Subsystem for Linux), use `python-magic` from the Python
+requirements and install `libmagic` through your Linux distribution's package manager.
+For example, on Ubuntu:
 ```bash
-pip install python-magic-bin
+sudo apt install libmagic1
 ```
 
 ## Shell completion
