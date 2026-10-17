@@ -54,7 +54,7 @@ pip3 install --user -r dotdrop/requirements.txt
 To ease the use of dotdrop, it is recommended to add an alias to it in your
 shell with the config file path; for example:
 ```
-alias dotdrop='<absolute-path-to-dotdrop.sh> --cfg=<path-to-your-config.yaml>'
+alias dotdrop='"<absolute-path-to-dotdrop.sh>" --cfg="<path-to-your-config.yaml>"'
 ```
 
 ## As a submodule in a virtualenv
