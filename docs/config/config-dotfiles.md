@@ -184,12 +184,12 @@ profiles:
     dotfiles:
     - f_ssh_config
     variables:
-    - ssh_config_file: "ssh_config.perso"
+      ssh_config_file: "ssh_config.perso"
   work:
     dotfiles:
     - f_ssh_config
     variables:
-    - ssh_config_file: "ssh_config.work"
+      ssh_config_file: "ssh_config.work"
 ```
 
 ## Dynamic dotfile link value

@@ -166,7 +166,7 @@ dotfiles:
 profiles:
   other-host:
     dotfiles:
-    - f_gchi
+    - f_ghci
 ```
 
 `actions.yaml`
