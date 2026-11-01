@@ -173,5 +173,27 @@ echo "${out}" | grep -q '2 dotfile(s) uninstalled.' \
 [ -e "${tmpd}"/x ] && echo "x should be removed" && exit 1
 [ -e "${tmpd}"/y ] && echo "y should be removed" && exit 1
 
+# ------------------------------------------------
+# 9. prompt:true + no changes -> no prompt
+# ------------------------------------------------
+echo "[+] prompt:true, no changes (no prompt)"
+# install everything without prompting
+${bin} -c "${basedir}/config.yaml" -p p1 --no-prompt install >/dev/null 2>&1
+out=$(${bin} -c "${basedir}/config.yaml" -p p1 --prompt install 2>&1 || true)
+echo "${out}" | grep -q 'Apply these changes?' \
+  && echo "should NOT prompt when no changes" && exit 1
+echo "${out}" | grep -q 'No changes to apply.' \
+  || (echo "'No changes to apply.' missing" && exit 1)
+
+# ------------------------------------------------
+# 10. prompt:true + unknown profile -> warn, no prompt
+# ------------------------------------------------
+echo "[+] prompt:true, unknown profile"
+out=$(printf "y\n" | ${bin} -c "${basedir}/config.yaml" -p nonexist --prompt install 2>&1 || true)
+echo "${out}" | grep -q 'unknown profile "nonexist"' \
+  || (echo "unknown profile warning missing" && exit 1)
+echo "${out}" | grep -q 'Apply these changes?' \
+  && echo "should NOT prompt for unknown profile" && exit 1
+
 echo "OK"
 exit 0

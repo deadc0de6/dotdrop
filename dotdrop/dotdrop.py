@@ -8,9 +8,11 @@ entry point
 # pylint: disable=C0302
 
 import os
+import io
 import sys
 import time
 import fnmatch
+import contextlib
 from concurrent import futures
 
 # local imports
@@ -323,8 +325,11 @@ def _cmd_install_exec(opts, summary=True):
         dotfiles = [d for d in dotfiles if d.key in uniq]
 
     if not dotfiles:
-        msg = f'no dotfile to install for this profile (\"{opts.profile}\")'
-        LOG.warn(msg)
+        if opts.profile and not opts.conf.get_profile(opts.profile):
+            LOG.warn(f'unknown profile "{opts.profile}"')
+        else:
+            msg = f'no dotfile to install for this profile ("{opts.profile}")'
+            LOG.warn(msg)
         return False, 0
 
     lfs = [k.key for k in dotfiles]
@@ -421,12 +426,22 @@ def _prompt_preview(opts, action):
     opts.safe = False
     if action == 'install':
         LOG.emph('The following changes would be applied by install:')
-        _cmd_install_exec(opts, summary=False)
     else:
         LOG.emph('The following changes would be applied by uninstall:')
-        _cmd_uninstall_exec(opts, summary=False)
+    Logger.raw('')
+    capture = io.StringIO()
+    with contextlib.redirect_stdout(capture):
+        if action == 'install':
+            _cmd_install_exec(opts, summary=False)
+        else:
+            _cmd_uninstall_exec(opts, summary=False)
     opts.dry = saved_dry
     opts.safe = False  # apply without per-file confirmations
+    preview = capture.getvalue()
+    Logger.raw(preview, end='')
+    if preview.count('[DRY]') == 0:
+        LOG.log('\nNo changes to apply.')
+        return False
     question = '\nApply these changes?'
     proceed = LOG.ask(question)
     if not proceed:
@@ -731,8 +746,11 @@ def _cmd_uninstall_exec(opts, summary=True):
                 dotfiles.append(dotfile)
 
     if not dotfiles:
-        msg = f'no dotfile to uninstall for this profile (\"{opts.profile}\")'
-        LOG.warn(msg)
+        if opts.profile and not opts.conf.get_profile(opts.profile):
+            LOG.warn(f'unknown profile "{opts.profile}"')
+        else:
+            msg = f'no dotfile to uninstall for this profile ("{opts.profile}")'
+            LOG.warn(msg)
         return False, 0
 
     if opts.debug:
