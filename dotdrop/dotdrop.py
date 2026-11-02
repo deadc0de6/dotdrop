@@ -749,7 +749,8 @@ def _cmd_uninstall_exec(opts, summary=True):
         if opts.profile and not opts.conf.get_profile(opts.profile):
             LOG.warn(f'unknown profile "{opts.profile}"')
         else:
-            msg = f'no dotfile to uninstall for this profile ("{opts.profile}")'
+            msg = 'no dotfile to uninstall '
+            msg += f'for this profile ("{opts.profile}")'
             LOG.warn(msg)
         return False, 0
 
