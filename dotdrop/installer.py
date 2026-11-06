@@ -895,9 +895,6 @@ class Installer:
         - False, 'aborted'    : user aborted
         """
         overwrite = not self.safe
-        if self.dry:
-            self.log.dry(f'would install {dst}')
-            return True, None
 
         if os.path.lexists(dst):
             # file/symlink exists
@@ -915,13 +912,17 @@ class Installer:
                     self.log.dbg(f'{dst} is the same')
                     return False, None
 
+            if self.dry:
+                self.log.dry(f'would install {dst}')
+                return True, None
+
             if self.safe:
                 self.log.dbg(f'change detected for {dst}')
                 if self.showdiff:
                     # get diff
                     self._show_diff_before_write(src, dst,
                                                  content=content)
-                if not self.log.ask(f'Overwrite \"{dst}\"'):
+                if not self.log.ask(f'Overwrite "{dst}"'):
                     return False, 'aborted'
                 overwrite = True
 
@@ -930,6 +931,9 @@ class Installer:
                     return False, f'could not backup {dst}'
         else:
             self.log.dbg(f'file does not exist on filesystem: {dst}')
+            if self.dry:
+                self.log.dry(f'would install {dst}')
+                return True, None
 
         # create hierarchy
         base = os.path.dirname(dst)
