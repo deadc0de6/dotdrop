@@ -404,6 +404,9 @@ class Options(AttrMonitor):
         except ValueError:
             self.log.err('bad option for --workers')
             sys.exit(USAGE)
+        if workers < 1:
+            self.log.err('bad option for --workers')
+            sys.exit(USAGE)
 
         # import link default value
         self.import_link = self.link_on_import
