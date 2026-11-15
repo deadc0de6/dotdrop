@@ -164,6 +164,8 @@ _EOF
 
   # tests
   [ ! -d "${basedir}"/dotfiles ] && echo "${PRE} dotpath removed" && exit 1
+  [ ! -e "${basedir}"/dotfiles/y/file ] && echo "${PRE} d_y file removed from dotpath" && exit 1
+  [ ! -e "${basedir}"/dotfiles/y/subdir/subfile ] && echo "${PRE} d_y subfile removed from dotpath" && exit 1
   [ -e "${tmpd}"/x ] && echo "${PRE} f_x not uninstalled" && exit 1
   [ -d "${tmpd}"/y ] && echo "${PRE} d_y dir not uninstalled" && exit 1
   [ -e "${tmpd}"/y/file ] && echo "${PRE} d_y file not uninstalled" && exit 1

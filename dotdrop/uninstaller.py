@@ -77,7 +77,7 @@ class Uninstaller:
         self.log.dbg(f'recursively uninstall {dirpath}')
         for sub in os.listdir(dirpath):
             subpath = os.path.join(dirpath, sub)
-            if os.path.isdir(subpath):
+            if os.path.isdir(subpath) and not os.path.islink(subpath):
                 self.log.dbg(f'under {dirpath} uninstall dir {subpath}')
                 self._descend(subpath)
             else:
@@ -117,7 +117,8 @@ class Uninstaller:
             return self._replace(path, backup)
         self.log.dbg(f'no backup file for {path}')
 
-        if os.path.isdir(path):
+        # remove a link to a directory as a link, its target is in the dotpath
+        if os.path.isdir(path) and not os.path.islink(path):
             self.log.dbg(f'{path} is a directory')
             return self._descend(path)
 
