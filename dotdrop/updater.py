@@ -29,7 +29,7 @@ class Updater:
     def __init__(self, dotpath, variables, conf,
                  profile_key, dry=False, safe=True,
                  debug=False, ignore=None, showpatch=False,
-                 ignore_missing_in_dotdrop=False):
+                 ignore_missing_in_dotdrop=False, install_ignore=None):
         """constructor
         @dotpath: path where dotfiles are stored
         @variables: dictionary of variables for the templates
@@ -40,6 +40,7 @@ class Updater:
         @debug: enable debug
         @ignore: pattern to ignore when updating
         @showpatch: show patch if dotfile to update is a template
+        @install_ignore: pattern ignored when installing
         """
         self.dotpath = dotpath
         self.variables = variables
@@ -49,6 +50,7 @@ class Updater:
         self.safe = safe
         self.debug = debug
         self.ignore = ignore or []
+        self.install_ignore = install_ignore or []
         self.showpatch = showpatch
         self.ignore_missing_in_dotdrop = ignore_missing_in_dotdrop
         self.templater = Templategen(variables=self.variables,
@@ -300,8 +302,12 @@ class Updater:
 
         # those only in dotpath
         lonly = self._prune_nested_paths(lonly)
+        instignores = self._install_ignores(dotfile)
         for i in lonly:
             path = os.path.join(local_path, i)
+            if self._must_ignore([path], instignores):
+                # never installed, so not deleted by the user either
+                continue
             if self.dry:
                 self.log.dry(f'would rm -r {path}')
                 continue
@@ -394,10 +400,14 @@ class Updater:
         deployed_only = deployed_children - local_children
         common = local_children & deployed_children
 
+        instignores = self._install_ignores(dotfile)
         for child in local_only:
             path = os.path.join(local_path, child)
             if self._must_ignore([path], ignores):
                 self.log.sub(f'\"{path}\" ignored')
+                continue
+            if self._must_ignore([path], instignores):
+                # never installed, so not deleted by the user either
                 continue
             if self.dry:
                 self.log.dry(f'would rm -r {path}')
@@ -521,6 +531,12 @@ class Updater:
         if self.safe and not self.log.ask(msg):
             return False
         return True
+
+    def _install_ignores(self, dotfile):
+        """patterns of the files install leaves out for this dotfile"""
+        ignores = list(set(self.install_ignore + dotfile.instignore))
+        return ignores_to_absolute(ignores, [dotfile.dst, dotfile.src],
+                                   debug=self.debug)
 
     def _must_ignore(self, paths, ignores):
         if must_ignore(paths, ignores, debug=self.debug):
