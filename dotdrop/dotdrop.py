@@ -87,7 +87,8 @@ def _dotfile_update(opts, path, key=False):
                       dry=opts.dry, safe=opts.safe, debug=opts.debug,
                       ignore=opts.update_ignore,
                       showpatch=opts.update_showpatch,
-                      ignore_missing_in_dotdrop=opts.ignore_missing_in_dotdrop)
+                      ignore_missing_in_dotdrop=opts.ignore_missing_in_dotdrop,
+                      install_ignore=opts.install_ignore)
     if key:
         return updater.update_key(path)
     return updater.update_path(path)
