@@ -66,23 +66,29 @@ class Uninstaller:
 
         msg = f'uninstalling \"{path}\" (link: {linktype})'
         self.log.dbg(msg)
-        ret, msg = self._remove(path)
+        srcpath = os.path.normpath(os.path.join(self.base,
+                                                os.path.expanduser(src)))
+        ret, msg = self._remove(path, srcpath)
         if ret:
             if not self.dry:
                 self.log.sub(f'uninstall {dst}')
         return ret, msg
 
-    def _descend(self, dirpath):
+    def _descend(self, dirpath, srcpath):
         ret = True
         self.log.dbg(f'recursively uninstall {dirpath}')
         for sub in os.listdir(dirpath):
             subpath = os.path.join(dirpath, sub)
+            subsrc = os.path.join(srcpath, sub)
+            if not os.path.lexists(subsrc):
+                self.log.dbg(f'{subpath} not in dotpath, keeping it')
+                continue
             if os.path.isdir(subpath) and not os.path.islink(subpath):
                 self.log.dbg(f'under {dirpath} uninstall dir {subpath}')
-                self._descend(subpath)
+                self._descend(subpath, subsrc)
             else:
                 self.log.dbg(f'under {dirpath} uninstall file {subpath}')
-                subret, _ = self._remove(subpath)
+                subret, _ = self._remove(subpath, subsrc)
                 if not subret:
                     ret = False
 
@@ -105,8 +111,8 @@ class Uninstaller:
             return False, err
         return True, ''
 
-    def _remove(self, path):
-        """remove path"""
+    def _remove(self, path, srcpath):
+        """remove path, srcpath is its source in the dotpath"""
         self.log.dbg(f'handling uninstall of {path}')
         if path.endswith(self.backup_suffix):
             self.log.dbg(f'skip {path} ignored')
@@ -120,7 +126,7 @@ class Uninstaller:
         # remove a link to a directory as a link, its target is in the dotpath
         if os.path.isdir(path) and not os.path.islink(path):
             self.log.dbg(f'{path} is a directory')
-            return self._descend(path)
+            return self._descend(path, srcpath)
 
         if self.dry:
             self.log.dry(f'would \"rm {path}\"')
