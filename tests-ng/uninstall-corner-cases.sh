@@ -106,12 +106,20 @@ echo "trans:${pro_templ}" > "${tmps_dotpath}"/trans
 # create files to have backup kicks in
 content="content-in-fs"
 echo "${content}" > "${tmpd}"/x
+# a file dotdrop does not manage, inside a directory dotfile
+mkdir -p "${tmpd}"/y
+echo "${content}" > "${tmpd}"/y/unmanaged
 
 # install
 cd "${ddpath}" && ${bin} install -c "${cfg}" -f -p p1 | grep '^5 dotfile(s) installed.$'
 
 # uninstall dry
 cd "${ddpath}" && ${bin} uninstall --dry -c "${cfg}" -f -p p1
+
+# uninstall keeps files dotdrop did not install
+cd "${ddpath}" && ${bin} uninstall -c "${cfg}" -f -p p1
+[ ! -e "${tmpd}"/y/unmanaged ] && echo "unmanaged file removed" && exit 1
+[ -e "${tmpd}"/y/file ] && echo "d_y file not uninstalled" && exit 1
 
 echo "OK"
 exit 0
